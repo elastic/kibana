@@ -122,7 +122,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     const app = kibanaApps.find(({ id }) => id === appId);
 
     return app ? (
-      <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
+      <EuiFlexItem
+        className="kbnOverviewApps__item"
+        key={appId}
+        data-test-subj={`kbnOverviewAppCard-${appId}`}
+      >
         <EuiCard
           description={app?.subtitle || ''}
           href={addBasePath(app.path)}

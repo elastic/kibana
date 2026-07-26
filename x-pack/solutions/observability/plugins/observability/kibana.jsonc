@@ -56,7 +56,10 @@
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "cps",
+      "ingestHub",
+      "significant_events"
     ],
     "requiredBundles": [
       "aiops",
@@ -67,8 +70,8 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
+      "significant_events",
       "stackAlerts",
-      "spaces",
       "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]

@@ -1,0 +1,19 @@
+## Source stream (indicator context)
+
+Indicators below were discovered from stream `{{{streamName}}}`. This line is **task input** only (where the data originated). Your primary goal is cross-stream, service- and infrastructure-oriented wiki pages; add or update a **streams/{{{streamName}}}** page only when the indicators justify stream-specific documentation (e.g. a `streams-{{{streamName}}}-overview`-style page), not a generic "architecture" page for one stream.
+
+## Raw Knowledge Indicators
+
+{{{indicators}}}
+
+## Existing wiki pages
+
+{{{existingPages}}}
+
+## Task
+
+Analyze the indicators above. Read existing pages that might need updating. Then write or update wiki pages that capture a concise understanding of the system.
+
+Prioritize **services**, **infrastructure**, and **operations**. Use **architecture** only for genuinely holistic content. For stream-specific summaries, use category **streams/{{{streamName}}}** and an appropriate page name — do not use **architecture** as shorthand for a single-stream overview.
+
+Cross-reference related pages by ID.

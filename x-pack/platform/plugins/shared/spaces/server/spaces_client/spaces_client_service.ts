@@ -14,6 +14,7 @@ import type {
   KibanaRequest,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type { CPSServerStart } from '@kbn/cps/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import type { ISpacesClient } from './spaces_client';
@@ -100,7 +101,11 @@ export class SpacesClientService {
     };
   }
 
-  public start(coreStart: CoreStart, features: FeaturesPluginStart): SpacesClientServiceStart {
+  public start(
+    coreStart: CoreStart,
+    features: FeaturesPluginStart,
+    cps: CPSServerStart | undefined
+  ): SpacesClientServiceStart {
     const nonGlobalTypes = coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
@@ -124,7 +129,8 @@ export class SpacesClientService {
           this.repositoryFactory!(request, coreStart.savedObjects),
           nonGlobalTypeNames,
           this.buildFlavour,
-          features
+          features,
+          cps?.createNpreClient(request)
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

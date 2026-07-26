@@ -7,24 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
+/**
+ * TODO: Once this tour is removed, update the test to no longer dismiss it.
+ * See {@link ThreatMatchRuleCreatePage.dismissCpsTourIfPresent}.
+ */
 const TOUR_STORAGE_KEY = 'cps:projectPicker:tourShown';
 
-export const useProjectPickerTour = () => {
-  const [isTourOpen, setIsTourOpen] = useState(false);
+const hasSeenTour = (): boolean => {
+  try {
+    return localStorage.getItem(TOUR_STORAGE_KEY) !== null;
+  } catch {
+    return true;
+  }
+};
 
-  useEffect(() => {
-    const tourShown = localStorage.getItem(TOUR_STORAGE_KEY);
-    if (!tourShown) {
-      setIsTourOpen(true);
+export const useProjectPickerTour = () => {
+  const [isTourOpen, setIsTourOpen] = useState(() => !hasSeenTour());
+
+  const closeTour = useCallback(() => {
+    setIsTourOpen(false);
+    try {
+      localStorage.setItem(TOUR_STORAGE_KEY, 'true');
+    } catch {
+      // localStorage may be unavailable in restricted environments
     }
   }, []);
-
-  const closeTour = () => {
-    setIsTourOpen(false);
-    localStorage.setItem(TOUR_STORAGE_KEY, 'true');
-  };
 
   return { isTourOpen, closeTour };
 };

@@ -6,7 +6,13 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { z } from '@kbn/zod/v4';
 import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type {
+  UnifiedAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
+  UnifiedValueAttachmentPayload,
+} from '../../common/types/domain/attachment/v2';
 
 export type PersistableStateAttachmentState = Pick<
   PersistableStateAttachmentPayload,
@@ -14,12 +20,18 @@ export type PersistableStateAttachmentState = Pick<
 >;
 
 export interface PersistableStateAttachmentType
-  extends Omit<PersistableState<PersistableStateAttachmentState>, 'migrations'> {
+  extends Omit<
+    PersistableState<PersistableStateAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
   id: string;
 }
 
 export interface PersistableStateAttachmentTypeSetup
-  extends Omit<PersistableStateDefinition<PersistableStateAttachmentState>, 'migrations'> {
+  extends Omit<
+    PersistableStateDefinition<PersistableStateAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
   id: string;
 }
 
@@ -32,6 +44,39 @@ export interface ExternalReferenceAttachmentType {
   schemaValidator?: (data: unknown) => void;
 }
 
+/**
+ * Unified attachment state for server-side persistence
+ * Can be either reference-based (has attachmentId) or value-based (has data)
+ */
+export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'metadata'> &
+  (
+    | Pick<UnifiedReferenceAttachmentPayload, 'attachmentId'>
+    | Pick<UnifiedValueAttachmentPayload, 'data'>
+  );
+
+export interface UnifiedAttachmentType
+  extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
+  /**
+   * Schema exposed to workflow authors. When unset, workflow steps fall back to
+   * `schema` if it is a Zod object; when `false`, the type is excluded.
+   */
+  workflowSchema?: z.ZodObject | false;
+}
+
+export interface UnifiedAttachmentTypeSetup
+  extends Omit<
+    PersistableStateDefinition<UnifiedAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
+  workflowSchema?: z.ZodObject | false;
+}
+
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
@@ -39,4 +84,5 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;
+  registerUnified: (unifiedAttachmentType: UnifiedAttachmentTypeSetup) => void;
 }

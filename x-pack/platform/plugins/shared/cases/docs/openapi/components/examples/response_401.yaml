@@ -1,0 +1,7 @@
+summary: Authorization information is missing or invalid.
+value:
+  {
+    "error": "Unauthorized",
+    "message": "Unable to authenticate with the provided credentials.",
+    "statusCode": 401
+  }

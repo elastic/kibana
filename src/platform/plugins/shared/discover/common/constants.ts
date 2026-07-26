@@ -26,6 +26,9 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
 // local storage key for the ES|QL to Dataviews transition modal
 export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
+// local storage key for the query mode when starting a new discover session
+export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 /**
  * The id value used to indicate that a link should open in a new Discover tab.
  * It will be used in the `_tab` URL param to indicate that a new tab should be created.
@@ -38,6 +41,7 @@ export const NEW_TAB_ID = 'new' as const;
  */
 export const APP_STATE_URL_KEY = '_a';
 export const GLOBAL_STATE_URL_KEY = '_g';
+export const PROFILE_STATE_URL_KEY = '_p';
 export const TAB_STATE_URL_KEY = '_tab'; // `_t` is already used by Kibana for time, so we use `_tab` here
 
 /**
@@ -45,3 +49,16 @@ export const TAB_STATE_URL_KEY = '_tab'; // `_t` is already used by Kibana for t
  */
 export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';
 export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experience';
+
+/**
+ * When enabled, Discover search embeddable uses transformIn/transformOut to convert between
+ * API format (DiscoverSessionEmbeddableState) and stored format (StoredSearchEmbeddableState).
+ * When disabled, panel state is stored and loaded as-is (pre-transform behavior).
+ */
+export const EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY = 'discover.embeddableTransforms';
+
+/**
+ * Discover session HTTP API
+ */
+export const DISCOVER_SESSION_API_BASE_PATH = '/api/discover_sessions';
+export const DISCOVER_SESSION_API_VERSION = '1';

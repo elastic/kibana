@@ -6,15 +6,9 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import axios from 'axios';
 import { flattenSchema, upsertRuntimeFields } from './build_ebt_data_view';
 
-jest.mock('axios', () => ({
-  __esModule: true,
-  default: {
-    put: jest.fn(),
-  },
-}));
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 describe('upsertRuntimeFields', () => {
   const url = 'http://fake_url';
@@ -26,7 +20,7 @@ describe('upsertRuntimeFields', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    (axios.put as jest.Mock).mockResolvedValue({});
+    mockedFetch.mockResolvedValue(new Response(null, { status: 200 }));
   });
 
   test('sends one PUT per string field with correct payload and headers', async () => {
@@ -38,26 +32,30 @@ describe('upsertRuntimeFields', () => {
 
     await upsertRuntimeFields(fields, url, headers);
 
-    expect(axios.put).toHaveBeenCalledTimes(3);
+    expect(mockedFetch).toHaveBeenCalledTimes(3);
 
-    const calls = (axios.put as jest.Mock).mock.calls.map(([callUrl, payload, opts]) => ({
-      callUrl,
-      name: payload.name,
-      type: payload.runtimeField?.type,
-      opts,
-    }));
+    const calls = mockedFetch.mock.calls.map(([callUrl, opts]) => {
+      const payload = JSON.parse(opts?.body as string);
+      return {
+        callUrl,
+        method: opts?.method,
+        name: payload.name,
+        type: payload.runtimeField?.type,
+        headers: opts?.headers,
+      };
+    });
 
     const names = new Set(calls.map((c) => c.name));
     const types = new Set(calls.map((c) => c.type));
     const urls = new Set(calls.map((c) => c.callUrl));
-    const allHeadersOk = calls.every(
-      (c) => JSON.stringify(c.opts?.headers) === JSON.stringify(headers)
-    );
+    const allHeadersOk = calls.every((c) => JSON.stringify(c.headers) === JSON.stringify(headers));
+    const allMethodsOk = calls.every((c) => c.method === 'PUT');
 
     expect(names).toEqual(new Set(['properties.a', 'properties.nested.b', 'properties.deep.x.y']));
     expect(types).toEqual(new Set(['keyword', 'long', 'date']));
     expect(urls).toEqual(new Set([url]));
     expect(allHeadersOk).toBe(true);
+    expect(allMethodsOk).toBe(true);
   });
 
   test('ignores non-string field values', async () => {
@@ -70,15 +68,16 @@ describe('upsertRuntimeFields', () => {
 
     await upsertRuntimeFields(fields as any, url, headers);
 
-    expect(axios.put).toHaveBeenCalledTimes(1);
-    const [callUrl, payload, opts] = (axios.put as jest.Mock).mock.calls[0];
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
+    const [callUrl, opts] = mockedFetch.mock.calls[0];
 
     expect(callUrl).toBe(url);
-    expect(payload).toEqual({
+    expect(opts?.method).toBe('PUT');
+    expect(JSON.parse(opts?.body as string)).toEqual({
       name: 'properties.ok',
       runtimeField: { type: 'ip' },
     });
-    expect(opts).toEqual({ headers });
+    expect(opts?.headers).toEqual(headers);
   });
 
   test('handles dotted field names correctly', async () => {
@@ -88,7 +87,8 @@ describe('upsertRuntimeFields', () => {
 
     await upsertRuntimeFields(fields, url, headers);
 
-    const [, payload] = (axios.put as jest.Mock).mock.calls[0];
+    const [, opts] = mockedFetch.mock.calls[0];
+    const payload = JSON.parse(opts?.body as string);
     expect(payload.name).toBe('properties.one.two.three');
     expect(payload.runtimeField.type).toBe('double');
   });

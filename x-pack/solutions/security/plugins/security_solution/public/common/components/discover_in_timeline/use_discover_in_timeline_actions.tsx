@@ -10,7 +10,7 @@ import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isEqualWith } from 'lodash';
 import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { TimeRange } from '@kbn/es-query';
@@ -122,21 +122,31 @@ export const useDiscoverInTimelineActions = (
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          const discoverDispatch = discoverStateContainer.current?.internalState.dispatch;
-          const injectCurrentTab = discoverStateContainer.current?.injectCurrentTab;
-          const internalStateActions = discoverStateContainer.current?.internalStateActions;
+          const currentContainer = discoverStateContainer.current;
 
-          discoverDispatch(injectCurrentTab(internalStateActions.stopSyncing)());
-          discoverDispatch(injectCurrentTab(internalStateActions.initializeAndSync)());
+          if (
+            !currentContainer?.internalState?.dispatch ||
+            !currentContainer?.injectCurrentTab ||
+            !currentContainer?.internalActions
+          ) {
+            return;
+          }
+
+          const discoverDispatch = currentContainer.internalState.dispatch;
+          const injectCurrentTab = currentContainer.injectCurrentTab;
+          const internalActions = currentContainer.internalActions;
+
+          discoverDispatch(injectCurrentTab(internalActions.stopSyncing)());
+          discoverDispatch(injectCurrentTab(internalActions.initializeAndSync)());
 
           await discoverDispatch(
-            injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+            injectCurrentTab(internalActions.updateAppStateAndReplaceUrl)({
               appState: savedSearchState?.appState ?? {},
             })
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
           discoverDispatch(
-            injectCurrentTab(internalStateActions.updateGlobalState)({
+            injectCurrentTab(internalActions.updateGlobalState)({
               globalState: {
                 timeRange: savedSearch.timeRange ?? defaultDiscoverTimeRange,
               },
@@ -147,16 +157,20 @@ export const useDiscoverInTimelineActions = (
         }
       } else {
         const defaultState = defaultDiscoverAppState();
+        const currentProfileState =
+          discoverStateContainer.current?.getCurrentTab().profileState ?? {};
+
         discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current.injectCurrentTab(
-            discoverStateContainer.current.internalStateActions.resetAppState
+            discoverStateContainer.current.internalActions.initializeTabState
           )({
-            appState: defaultState,
+            initialAppState: defaultState,
+            initialProfileState: currentProfileState,
           })
         );
         await discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current?.injectCurrentTab(
-            discoverStateContainer.current?.internalStateActions.updateAppStateAndReplaceUrl
+            discoverStateContainer.current?.internalActions.updateAppStateAndReplaceUrl
           )({
             appState: {},
           })
@@ -164,7 +178,7 @@ export const useDiscoverInTimelineActions = (
         setDiscoverAppState(defaultState);
         const discoverState = discoverStateContainer.current;
         discoverState?.internalState.dispatch(
-          discoverState.injectCurrentTab(discoverState.internalStateActions.updateGlobalState)({
+          discoverState.injectCurrentTab(discoverState.internalActions.updateGlobalState)({
             globalState: {
               timeRange: defaultDiscoverTimeRange,
             },
@@ -248,7 +262,6 @@ export const useDiscoverInTimelineActions = (
             })
           );
           const response = await persistSavedSearch(savedSearch, {
-            onTitleDuplicate: () => {},
             copyOnSave: !savedSearchId,
           });
 

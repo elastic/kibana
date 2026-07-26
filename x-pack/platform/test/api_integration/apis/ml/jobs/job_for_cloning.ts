@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Datafeed, Job } from '@kbn/ml-plugin/common';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';

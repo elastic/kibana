@@ -119,13 +119,13 @@ export const getProviderActions = ({
       },
       {
         className: EXCLUDE_CLASS_NAME,
-        icon: `${isExcluded ? 'plusInCircle' : 'minusInCircle'}`,
+        icon: `${isExcluded ? 'plusCircle' : 'minusCircle'}`,
         name: isExcluded ? i18n.INCLUDE_DATA_PROVIDER : i18n.EXCLUDE_DATA_PROVIDER,
         onClick: toggleExcluded,
       },
       {
         className: ENABLE_CLASS_NAME,
-        icon: `${isEnabled ? 'eyeClosed' : 'eye'}`,
+        icon: `${isEnabled ? 'eyeSlash' : 'eye'}`,
         name: isEnabled ? i18n.TEMPORARILY_DISABLE_DATA_PROVIDER : i18n.RE_ENABLE_DATA_PROVIDER,
         onClick: toggleEnabled,
       },
@@ -139,7 +139,7 @@ export const getProviderActions = ({
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
             disabled: operator === IS_ONE_OF_OPERATOR,
-            icon: 'visText',
+            icon: 'text',
             name:
               type === DataProviderTypeEnum.template
                 ? i18n.CONVERT_TO_FIELD

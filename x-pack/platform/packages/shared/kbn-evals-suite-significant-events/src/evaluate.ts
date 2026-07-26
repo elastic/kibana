@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { evaluate as evalsBase } from '@kbn/evals';
+import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
+import { toolingLogToLogger } from '@kbn/kibana-api-cli';
+import { getFlags } from '@kbn/dev-cli-runner';
+import type { SignificantEventsSpecificEvaluationWorkerFixtures } from './types';
+
+const base = withPhoenixExecutor(evalsBase);
+
+export const evaluate = base.extend<{}, SignificantEventsSpecificEvaluationWorkerFixtures>({
+  logger: [
+    async ({ log }, use) => {
+      const logger = toolingLogToLogger({
+        flags: getFlags(process.argv),
+        log,
+      });
+
+      await use(logger);
+    },
+    {
+      scope: 'worker',
+    },
+  ],
+});

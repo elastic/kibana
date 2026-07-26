@@ -19,7 +19,7 @@ describe('LeftPanel', () => {
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
         isRiskScoreExist
-        service={{ name: 'test service', email: [] }}
+        identityFields={{ 'service.name': 'test service' }}
         scopeId={'scopeId'}
       />,
       {
@@ -27,7 +27,7 @@ describe('LeftPanel', () => {
       }
     );
 
-    const tabElement = queryByText('Risk contributions');
+    const tabElement = queryByText('Risk score');
 
     expect(tabElement).toBeInTheDocument();
   });
@@ -39,7 +39,7 @@ describe('LeftPanel', () => {
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
         isRiskScoreExist={false}
-        service={{ name: 'test service', email: [] }}
+        identityFields={{ 'service.name': 'test service' }}
         scopeId={'scopeId'}
       />,
       {

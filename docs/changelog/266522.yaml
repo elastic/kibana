@@ -1,0 +1,9 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266522
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Dashboards and visualizations
+title: Make search box case-insensitive

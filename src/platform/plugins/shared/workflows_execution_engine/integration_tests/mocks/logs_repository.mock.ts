@@ -32,7 +32,7 @@ export class LogsRepositoryMock implements Required<LogsRepository> {
     const logs = Array.from(this.logs.values()).slice(0, limit);
     return Promise.resolve({
       total: logs.length,
-      logs: logs as any[],
+      logs,
     });
   }
 
@@ -42,7 +42,7 @@ export class LogsRepositoryMock implements Required<LogsRepository> {
     });
     return Promise.resolve({
       total: logs.length,
-      logs: logs as any[],
+      logs,
     });
   }
 }

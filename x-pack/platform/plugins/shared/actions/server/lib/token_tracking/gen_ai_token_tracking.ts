@@ -116,18 +116,19 @@ export const getGenAiTokenTracking = async ({
     actionTypeId === '.gemini'
   ) {
     try {
-      const { totalTokenCount, promptTokenCount, candidatesTokenCount } =
-        await parseGeminiStreamForUsageMetadata({
-          responseStream: result.data.pipe(new PassThrough()),
-          logger,
-        });
+      const usageMetadata = await parseGeminiStreamForUsageMetadata({
+        responseStream: result.data.pipe(new PassThrough()),
+        logger,
+      });
 
-      return {
-        total_tokens: totalTokenCount,
-        prompt_tokens: promptTokenCount,
-        completion_tokens: candidatesTokenCount,
-        telemetry_metadata: telemetryMetadata,
-      };
+      if (usageMetadata) {
+        return {
+          total_tokens: usageMetadata.totalTokenCount,
+          prompt_tokens: usageMetadata.promptTokenCount,
+          completion_tokens: usageMetadata.candidatesTokenCount,
+          telemetry_metadata: telemetryMetadata,
+        };
+      }
     } catch (e) {
       logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
       logger.error(e);

@@ -10,35 +10,51 @@
 import React from 'react';
 import { EuiPanel, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
-import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
+import { createSidebarStore, type SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 export const textInputAppId = 'sidebarExampleText';
 
-export const getTextInputParamsSchema = () =>
-  z.object({
+/** Store for text input sidebar app */
+export const textInputStore = createSidebarStore({
+  schema: z.object({
     userName: z.string().default(''),
-  });
+  }),
+  actions: (set, get, { close }) => ({
+    setUserName: (userName: string) => set({ userName }),
+    clear: () => set({ userName: '' }),
+    /** Demonstrates sidebar context - clear state and close */
+    clearAndClose: () => {
+      set({ userName: '' });
+      close();
+    },
+  }),
+});
 
-export type TextInputSidebarParams = z.infer<ReturnType<typeof getTextInputParamsSchema>>;
+export type TextInputState = typeof textInputStore.types.state;
+export type TextInputActions = typeof textInputStore.types.actions;
+
+/** Typed hook for the text input sidebar app */
+export const useTextInputSidebarApp = () =>
+  useSidebarApp<TextInputState, TextInputActions>(textInputAppId);
 
 /**
- * Text input app that receives params and setParams as props.
- * Params are persisted to localStorage automatically.
+ * Text input app that receives state and actions as props.
+ * State is persisted to localStorage automatically.
  */
 export function TextInputApp({
-  params,
-  setParams,
+  state,
+  actions,
   onClose,
-}: SidebarComponentProps<TextInputSidebarParams>) {
-  const { userName } = params;
+}: SidebarComponentProps<TextInputState, TextInputActions>) {
+  const { userName } = state;
 
   return (
     <>
       <SidebarHeader title="Text Input Example" onClose={onClose} />
       <SidebarBody>
         <EuiText size="s" color="subdued">
-          <p>Simple text input with params persistence.</p>
+          <p>Simple text input with state persistence.</p>
         </EuiText>
 
         <EuiSpacer size="l" />
@@ -47,7 +63,7 @@ export function TextInputApp({
           <EuiFieldText
             placeholder="Enter your name"
             value={userName || ''}
-            onChange={(e) => setParams({ userName: e.target.value })}
+            onChange={(e) => actions.setUserName(e.target.value)}
           />
         </EuiFormRow>
 
@@ -55,7 +71,7 @@ export function TextInputApp({
 
         <EuiPanel color="subdued" paddingSize="s">
           <EuiText size="xs">
-            <pre>{JSON.stringify(params, null, 2)}</pre>
+            <pre>{JSON.stringify(state, null, 2)}</pre>
           </EuiText>
         </EuiPanel>
       </SidebarBody>

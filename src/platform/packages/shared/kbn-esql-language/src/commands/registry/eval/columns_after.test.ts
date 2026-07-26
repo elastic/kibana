@@ -8,7 +8,7 @@
  */
 
 import { additionalFieldsMock } from '../../../__tests__/language/helpers';
-import { Parser, synth } from '../../../..';
+import { Parser, synth } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 
@@ -25,7 +25,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -46,7 +46,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -82,7 +82,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -112,7 +112,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -139,7 +139,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual(baseColumns);
@@ -152,7 +152,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([

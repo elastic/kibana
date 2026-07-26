@@ -22,9 +22,9 @@
     "@kbn/config-schema",
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
-    "@kbn/try-in-console",
     "@kbn/search-navigation",
     "@kbn/cloud-plugin",
+    "@kbn/shared-components",
     "@kbn/serverless",
     "@kbn/analytics",
     "@kbn/config-schema",
@@ -34,8 +34,16 @@
     "@kbn/react-query",
     "@kbn/doc-links",
     "@kbn/cloud",
-    "@kbn/deeplinks-search",
-    "@kbn/scout-search"
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
+    "@kbn/scout-search",
+    "@kbn/search-agent",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/agent-builder-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/agent-builder-common"
   ],
   "exclude": [
     "target/**/*"

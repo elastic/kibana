@@ -20,6 +20,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickLinkText(text: string) {
@@ -146,6 +147,26 @@ export class SettingsPageObject extends FtrService {
 
   async navigateTo() {
     await this.common.navigateToApp('settings');
+  }
+
+  async navigateToDataViewById(id: string) {
+    await this.common.navigateToApp(`management/kibana/dataViews/dataView/${id}`);
+    await this.testSubjects.existOrFail('editIndexPattern');
+  }
+
+  async navigateToDataViews() {
+    await this.common.navigateToApp('management/kibana/dataViews');
+    await this.testSubjects.existOrFail('createDataViewButton');
+  }
+
+  async navigateToSavedObjects() {
+    await this.common.navigateToApp('management/kibana/objects');
+    await this.testSubjects.existOrFail('importObjects');
+  }
+
+  async navigateToAdvancedSettings() {
+    await this.common.navigateToApp('management/kibana/settings');
+    await this.testSubjects.existOrFail('settingsSearchBar');
   }
 
   async getIndexPatternField() {
@@ -539,7 +560,9 @@ export class SettingsPageObject extends FtrService {
       const flyOut = await this.testSubjects.exists('createAnyway');
       if (flyOut) {
         await this.testSubjects.click('createAnyway');
-      } else {
+      } else if (!(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // On a retry the flyout may already be open; re-clicking the list-page
+        // button here would be intercepted by the flyout's success callout.
         await this.clickAddNewIndexPatternButton();
       }
 
@@ -577,7 +600,7 @@ export class SettingsPageObject extends FtrService {
         }
       );
 
-      await (await this.getSaveIndexPatternButton()).click();
+      await (await this.getSaveDataViewButtonActive()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -668,9 +691,16 @@ export class SettingsPageObject extends FtrService {
 
   async getIndexPatternIdFromUrl() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const indexPatternId = currentUrl.match(/.*\/(.*)/)![1];
+    // The edit data view page syncs its app state into a hash fragment
+    // (e.g. `/dataView/<id>#/?_a=(tab:indexedFields)`), so we must extract the
+    // id from the `/dataView/<id>` path segment and stop at any `/`, `?` or `#`.
+    const indexPatternId = currentUrl.match(/\/dataView\/([^/?#]+)/)?.[1];
 
     this.log.debug('index pattern ID: ', indexPatternId);
+
+    if (!indexPatternId) {
+      throw new Error(`Unable to extract data view id from URL: ${currentUrl}`);
+    }
 
     return indexPatternId;
   }
@@ -720,6 +750,7 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
+      await this.toasts.dismissAllWithChecks();
       await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
@@ -977,6 +1008,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('toggling tow = ' + rowTestSubj);
     const row = await this.testSubjects.find(rowTestSubj);
     const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.scrollIntoViewIfNecessary();
     await rowToggle.click();
     return row;
   }
@@ -1106,7 +1138,9 @@ export class SettingsPageObject extends FtrService {
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
 
-    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    });
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');

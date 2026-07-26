@@ -58,6 +58,13 @@ export const ML_TYPE_TITLE = i18n.translate(
   }
 );
 
+export const ML_CPS_SUPPORT_COMING_SOON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlCpsSupportComingSoon',
+  {
+    defaultMessage: 'CPS support coming soon',
+  }
+);
+
 export const ML_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDescription',
   {

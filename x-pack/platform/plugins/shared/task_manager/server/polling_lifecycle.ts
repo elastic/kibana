@@ -12,7 +12,8 @@ import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart } from '@kbn/core/server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -40,12 +41,13 @@ import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import type { TaskRunner } from './task_running';
 import { TaskManagerRunner } from './task_running';
 import type { TaskStore } from './task_store';
+import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';
@@ -61,6 +63,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -69,7 +72,6 @@ export interface ITaskEventEmitter<T> {
 }
 
 export interface TaskPollingLifecycleOpts {
-  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
@@ -80,6 +82,9 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
+  apiKeyStrategy: ApiKeyStrategy;
+  eventLogger: TaskEventLogger;
+  enrichFakeRequest?: FakeRequestEnricher;
 }
 
 export type TaskLifecycleEvent =
@@ -100,12 +105,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
-  private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
   private started = false;
+  private stopped = false;
 
   public pool: TaskPool;
 
@@ -120,7 +125,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private currentPollInterval: number;
+  private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
+  private enrichFakeRequest?: FakeRequestEnricher;
+
+  private eventLogger: TaskEventLogger;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -128,7 +137,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
    * mechanism.
    */
   constructor({
-    basePathService,
     logger,
     middleware,
     config,
@@ -140,8 +148,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     usageCounter,
     taskPartitioner,
     startingCapacity,
+    apiKeyStrategy,
+    eventLogger,
+    enrichFakeRequest,
   }: TaskPollingLifecycleOpts) {
-    this.basePathService = basePathService;
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
@@ -149,8 +159,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.apiKeyStrategy = apiKeyStrategy;
+    this.enrichFakeRequest = enrichFakeRequest;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
+    this.eventLogger = eventLogger;
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
@@ -235,10 +248,34 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.started) {
-        this.poller.start();
+        // set synchronously so repeat availability emissions (e.g. ES
+        // reconnects) can never trigger a second reconciliation or poller start
         this.started = true;
+        // fire-and-forget: reconcileAndStartPolling never rejects (it handles
+        // its own errors) and starts the poller when it settles
+        void this.reconcileAndStartPolling();
       }
     });
+  }
+
+  /**
+   * Before the first poll, reset tasks this node still owns from a previous run
+   * (e.g. after a crash) so they don't wait out their retryAt timeout.
+   * Best-effort: the poller starts regardless of the outcome, and the retryAt
+   * timeout remains the safety net.
+   */
+  private async reconcileAndStartPolling() {
+    try {
+      await resetInFlightTasksOwnedByThisNode({ logger: this.logger, taskStore: this.store });
+    } catch (e) {
+      this.logger.error(
+        `Failed to reconcile in-flight tasks on startup, starting the poller anyway: ${e.message}`
+      );
+    } finally {
+      if (!this.stopped) {
+        this.poller.start();
+      }
+    }
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -246,6 +283,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   }
 
   public stop() {
+    this.stopped = true;
     this.poller.stop();
   }
 
@@ -259,7 +297,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
-      basePathService: this.basePathService,
       logger: this.logger,
       instance,
       store: this.bufferedStore,
@@ -274,6 +311,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
+      apiKeyStrategy: this.apiKeyStrategy,
+      eventLogger: this.eventLogger,
+      enrichFakeRequest: this.enrichFakeRequest,
     });
   };
 

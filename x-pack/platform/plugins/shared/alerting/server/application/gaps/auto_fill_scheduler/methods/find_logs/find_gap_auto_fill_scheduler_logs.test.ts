@@ -27,6 +27,7 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../auth
 import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
 import { GapAutoFillSchedulerAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { FindGapAutoFillSchedulerLogsParams } from './types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -108,6 +109,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -125,6 +127,8 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     });
 
     unsecuredSavedObjectsClient.get.mockResolvedValue(schedulerSO);
@@ -154,18 +158,18 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       'gap-1'
     );
 
-    // Authorization is checked for each rule type
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(
-      schedulerSO.attributes.ruleTypes!.length
-    );
-    for (const ruleType of schedulerSO.attributes.ruleTypes ?? []) {
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation: ReadOperations.FindGapAutoFillSchedulerLogs,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+
+    const ruleTypeIdConsumersPairs = schedulerSO.attributes.ruleTypes.map((ruleType) => ({
+      ruleTypeId: ruleType.type,
+      consumers: [ruleType.consumer],
+    }));
+
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs,
+      operation: ReadOperations.FindGapAutoFillSchedulerLogs,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
 
     // Event log client is called with correct params
     expect(getEventLogClient).toHaveBeenCalledTimes(1);
@@ -252,7 +256,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
     });
 
     test('should audit and throw when authorization fails', async () => {
-      (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+      (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 

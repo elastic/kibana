@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { Parser } from '@elastic/esql';
 
 import type {
   SuggestionRequest,
@@ -18,10 +21,11 @@ import type {
   TableChangeType,
 } from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
-import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
+import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+import { getDefaultPalette } from './default_palette';
+import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const COLUMN_SORT_ORDER = {
   document: 0,
@@ -39,6 +43,29 @@ const COLUMN_SORT_ORDER = {
 };
 
 /**
+ * For TS/PromQL ES|QL queries, prefers 'line' when the x-axis uses a date column (time series),
+ * Otherwise returns undefined so the default series type is used.
+ */
+function getPreferredSeriesTypeForTimeSeriesQuery(
+  query: SuggestionRequest['query'],
+  xValue?: TableSuggestionColumn
+): SeriesType | undefined {
+  if (!query?.esql) return undefined;
+  try {
+    const { root } = Parser.parse(query.esql);
+    const isPromqlOrTs = root.commands.find(({ name }) => name === 'promql' || name === 'ts');
+    if (!isPromqlOrTs) return undefined;
+    // Prefer line when x-axis is a date (time series) or when x-axis is missing (same context, consistent type)
+    if (xValue?.operation.dataType === 'date') {
+      return 'line';
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Generate suggestions for the xy chart.
  *
  * @param opts
@@ -52,9 +79,13 @@ export function getSuggestions({
   isFromContext,
   allowMixed,
   datasourceId,
-}: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
+  query,
+}: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
+  // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
+  // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
+  const isTextBased = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
   const incompleteTable =
-    !table.isMultiRow ||
+    (!isTextBased && !table.isMultiRow) ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
     table.columns.some((col) => !Object.hasOwn(COLUMN_SORT_ORDER, col.operation.dataType));
@@ -78,7 +109,8 @@ export function getSuggestions({
     subVisualizationId as SeriesType | undefined,
     mainPalette,
     allowMixed,
-    datasourceId
+    datasourceId,
+    query
   );
 
   if (Array.isArray(suggestions)) {
@@ -91,12 +123,16 @@ export function getSuggestions({
 function getSuggestionForColumns(
   table: TableSuggestion,
   keptLayerIds: string[],
-  currentState?: XYState,
+  currentState?: XYVisualizationState,
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean,
-  datasourceId?: string
-): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
+  datasourceId?: string,
+  query?: SuggestionRequest['query']
+):
+  | VisualizationSuggestion<XYVisualizationState>
+  | Array<VisualizationSuggestion<XYVisualizationState>>
+  | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
     layerId: table.layerId,
@@ -107,9 +143,11 @@ function getSuggestionForColumns(
     requestedSeriesType: seriesType,
     mainPalette,
     allowMixed,
+    datasourceId,
+    query,
   };
 
-  const isEsql = datasourceId === 'textBased';
+  const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
   // we have 2 different suggestion: with DSL we can split by only when we have a max of 2 buckets (one for the X and the other for the breakdown)
   // in ESQL we instead suggest split by with more then 1 buckets always.
   const whenToSuggestSplitBy = isEsql
@@ -137,7 +175,11 @@ function getSuggestionForColumns(
   }
 }
 
-function getBucketMappings(table: TableSuggestion, isEsql: boolean, currentState?: XYState) {
+function getBucketMappings(
+  table: TableSuggestion,
+  isEsql: boolean,
+  currentState?: XYVisualizationState
+) {
   const currentLayer =
     currentState &&
     getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
@@ -206,22 +248,30 @@ function getSuggestionsForLayer({
   requestedSeriesType,
   mainPalette,
   allowMixed,
+  datasourceId,
+  query,
 }: {
   layerId: string;
   changeType: TableChangeType;
   xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
   splitByColumns?: TableSuggestionColumn[];
-  currentState?: XYState;
+  currentState?: XYVisualizationState;
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
-}): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
+  datasourceId?: string;
+  query?: SuggestionRequest['query'];
+}):
+  | VisualizationSuggestion<XYVisualizationState>
+  | Array<VisualizationSuggestion<XYVisualizationState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
-    requestedSeriesType || getSeriesType(currentState, layerId, xValue);
+    requestedSeriesType ||
+    getPreferredSeriesTypeForTimeSeriesQuery(query, xValue) ||
+    getSeriesType(currentState, layerId, xValue);
 
   const splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -240,22 +290,31 @@ function getSuggestionsForLayer({
     allowMixed,
   };
 
+  if (
+    changeType === 'initial' &&
+    xValue?.operation.dataType === 'date' &&
+    datasourceId === LENS_DATASOURCE_ID.FORM_BASED
+  ) {
+    return buildSuggestion({ ...options, seriesType: 'line' });
+  }
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
-    // Chart switcher needs to include every chart type
+    // For TS/PromQL time series, prefer line as the visible default; otherwise bar_stacked
+    const preferredForSwitcher =
+      getPreferredSeriesTypeForTimeSeriesQuery(query, xValue) ?? 'bar_stacked';
     return visualizationSubtypes
       .map((visType) => {
         return {
           ...buildSuggestion({
             ...options,
             seriesType: visType.id as SeriesType,
-            // explicitly hide everything besides stacked bars, use default hiding logic for stacked bars
-            hide: visType.id === 'bar_stacked' ? undefined : true,
+            // explicitly hide everything besides the preferred type (line for TS/PromQL, bar_stacked otherwise)
+            hide: visType.id === preferredForSwitcher ? undefined : true,
           }),
           title: visType.label,
         };
       })
-      .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
+      .sort((a, b) => (a.state.preferredSeriesType === preferredForSwitcher ? -1 : 1));
   }
 
   const isSameState = currentState && changeType === 'unchanged';
@@ -264,7 +323,7 @@ function getSuggestionsForLayer({
   }
 
   // Suggestions are either changing the data, or changing the way the data is used
-  const sameStateSuggestions: Array<VisualizationSuggestion<XYState>> = [];
+  const sameStateSuggestions: Array<VisualizationSuggestion<XYVisualizationState>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
   if (seriesType.includes('bar') && (!xValue || xValue.operation.scale === 'ordinal')) {
@@ -436,15 +495,21 @@ function altSeriesType(oldSeriesType: SeriesType) {
 }
 
 function getSeriesType(
-  currentState: XYState | undefined,
+  currentState: XYVisualizationState | undefined,
   layerId: string,
   xValue?: TableSuggestionColumn
 ): SeriesType {
   const oldLayer = getExistingLayer(currentState, layerId);
   const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
 
+  const firstSeriesTypeInDataLayer = currentState
+    ? getDataLayers(currentState.layers)[0]?.seriesType
+    : undefined;
   const closestSeriesType =
-    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultSeriesType;
+    oldLayerSeriesType ||
+    firstSeriesTypeInDataLayer ||
+    (currentState && currentState.preferredSeriesType) ||
+    defaultSeriesType;
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
@@ -506,7 +571,7 @@ function buildSuggestion({
   mainPalette,
   allowMixed,
 }: {
-  currentState: XYState | undefined;
+  currentState: XYVisualizationState | undefined;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
@@ -546,14 +611,13 @@ function buildSuggestion({
         : undefined,
     layerType: LayerTypes.DATA,
     colorMapping: !mainPalette
-      ? getColorMappingDefaults()
+      ? getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(seriesType) })
       : mainPalette?.type === 'colorMapping'
       ? mainPalette.value
       : undefined,
   };
 
-  const hasDateHistogramDomain =
-    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+  const hasDateHistogramDomain = isDateHistogramOperation(xValue?.operation);
 
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
@@ -577,7 +641,7 @@ function buildSuggestion({
         )
     : [];
 
-  const state: XYState = {
+  const state: XYVisualizationState = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
@@ -594,7 +658,8 @@ function buildSuggestion({
     yLeftScale: currentState?.yLeftScale,
     yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
-      x: true,
+      // Default X axis title to "None" for date histogram to reduce redundant information
+      x: !hasDateHistogramDomain,
       yLeft: true,
       yRight: true,
     },
@@ -655,6 +720,6 @@ function getScore(
   return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }
 
-function getExistingLayer(currentState: XYState | undefined, layerId: string) {
+function getExistingLayer(currentState: XYVisualizationState | undefined, layerId: string) {
   return currentState && currentState.layers.find((layer) => layer.layerId === layerId);
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { get, isEmpty } from 'lodash/fp';
 import type { Query } from '@kbn/es-query';
 import {
@@ -123,7 +123,7 @@ export const selectKqlFilterQueryExpression = createSelector(
  * Selector that returns the title of a timeline.
  * If the timeline has been saved, it will return the saved title.
  * If timeline is in template mode, it will return the default 'Untitled template' value;
- * If none of the above, it will return the default 'Untitled timeline' value.
+ * If none of the above, it will return the default 'Untitled Timeline' value.
  */
 export const selectTitleByTimelineById = createSelector(
   selectTimelineTitle,

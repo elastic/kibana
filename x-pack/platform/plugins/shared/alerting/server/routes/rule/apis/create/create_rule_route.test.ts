@@ -21,6 +21,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../../../../plugin';
+import { ApiKeyType } from '../../../../task_runner/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -45,7 +46,14 @@ describe('createRuleRoute', () => {
       removalDelay: '1h',
     },
     enableFrameworkAlerts: true,
+    alertsService: {
+      totalFieldsLimit: 2800,
+    },
     cancelAlertsOnRuleTimeout: true,
+    ruleChangeTracking: {
+      enabled: false,
+      scope: ['security'] as string[],
+    },
     rules: {
       minimumScheduleInterval: {
         value: '1m',
@@ -60,6 +68,7 @@ describe('createRuleRoute', () => {
           max: 1000,
         },
       },
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: {
       enabled: true,
@@ -68,7 +77,7 @@ describe('createRuleRoute', () => {
     maintenanceWindow: {
       enabled: true,
     },
-  };
+  } as const;
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
@@ -167,7 +176,10 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         alerts_filter: {
-          query: action.alertsFilter?.query!,
+          query: {
+            kql: action.alertsFilter?.query!.kql,
+            filters: action.alertsFilter?.query!.filters ?? [],
+          },
           timeframe: action.alertsFilter!.timeframe!,
         },
         connector_type_id: 'test',
@@ -854,7 +866,7 @@ describe('createRuleRoute', () => {
       expect(routeRes.body.actions).toEqual([
         {
           alerts_filter: {
-            query: { dsl: '{"must": {"term": { "name": "test" }}}', filters: [], kql: 'name:test' },
+            query: { filters: [], kql: 'name:test' },
             timeframe: { days: [1], hours: { end: '17:00', start: '08:00' }, timezone: 'UTC' },
           },
           connector_type_id: 'test',

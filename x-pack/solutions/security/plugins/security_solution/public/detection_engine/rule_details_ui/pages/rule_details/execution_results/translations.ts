@@ -1,0 +1,398 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const TABLE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.tableTitle',
+  {
+    defaultMessage: 'Execution log',
+  }
+);
+
+export const TABLE_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.tableSubtitle',
+  {
+    defaultMessage: 'A log of rule execution results',
+  }
+);
+
+export const STATUS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.status',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const STATUS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.statusTooltip',
+  {
+    defaultMessage: 'Overall status of execution.',
+  }
+);
+
+export const RUN_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.runType',
+  {
+    defaultMessage: 'Run type',
+  }
+);
+
+export const RUN_TYPE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.runTypeTooltip',
+  {
+    defaultMessage: 'Whether this was a standard scheduled execution or a manual backfill run.',
+  }
+);
+
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.timestamp',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
+
+export const TIMESTAMP_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.timestampTooltip',
+  {
+    defaultMessage: 'Datetime rule execution initiated.',
+  }
+);
+
+export const DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.duration',
+  {
+    defaultMessage: 'Execution duration',
+  }
+);
+
+export const DURATION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.durationTooltip',
+  {
+    defaultMessage: 'The length of time it took for the rule to run.',
+  }
+);
+
+export const ALERTS_CREATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreated',
+  {
+    defaultMessage: 'Alerts created',
+  }
+);
+
+export const ALERTS_CREATED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreatedTooltip',
+  {
+    defaultMessage:
+      'Number of alerts eventually indexed in Elasticsearch after de-duplication and suppression.',
+  }
+);
+
+export const MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.message',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
+export const MESSAGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.messageTooltip',
+  {
+    defaultMessage: 'Relevant message from execution outcome.',
+  }
+);
+
+export const ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const ACTION_FILTER_BY_EXECUTION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionFilterByExecutionId',
+  {
+    defaultMessage: 'Filter alerts by rule execution ID',
+  }
+);
+
+export const ACTION_FILTER_BY_EXECUTION_ID_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionFilterByExecutionIdDisabled',
+  {
+    defaultMessage: 'No alerts were created during this run',
+  }
+);
+
+export const ACTION_VIEW_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionViewDetails',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const FLYOUT_TITLE = (executionId: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTitle',
+    {
+      defaultMessage: 'Execution ID: {executionId}',
+      values: { executionId },
+    }
+  );
+
+export const FLYOUT_COPY_EXECUTION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutCopyExecutionId',
+  {
+    defaultMessage: 'Copy full execution ID',
+  }
+);
+
+export const FLYOUT_HEADER_STATUS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutHeaderStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const FLYOUT_HEADER_RUN_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutHeaderRunType',
+  {
+    defaultMessage: 'Run type',
+  }
+);
+
+export const FLYOUT_SOURCE_EVENT_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutSourceEventTimeRange',
+  {
+    defaultMessage: 'Source event time range',
+  }
+);
+
+export const FLYOUT_GAP_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutGapDuration',
+  {
+    defaultMessage: 'Gap duration',
+  }
+);
+
+export const FLYOUT_INDEX_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutIndexDuration',
+  {
+    defaultMessage: 'Indexing',
+  }
+);
+
+export const FLYOUT_SEARCH_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutSearchDuration',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
+export const FLYOUT_SCHEDULING_DELAY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutSchedulingDelay',
+  {
+    defaultMessage: 'Scheduling delay',
+  }
+);
+
+export const FLYOUT_MATCHED_INDICES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutMatchedIndices',
+  {
+    defaultMessage: 'Matched indices',
+  }
+);
+
+export const FLYOUT_CANDIDATE_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutCandidateAlerts',
+  {
+    defaultMessage: 'Candidate alerts',
+  }
+);
+
+export const FLYOUT_FROZEN_INDICES_QUERIED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutFrozenIndicesQueried',
+  {
+    defaultMessage: 'Frozen indices queried',
+  }
+);
+
+export const FLYOUT_ACCORDION_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionMessage',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
+export const FLYOUT_ACCORDION_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionAlerts',
+  {
+    defaultMessage: 'Alerts',
+  }
+);
+
+export const FLYOUT_TOOLTIP_ALERTS_CREATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipAlertsCreated',
+  {
+    defaultMessage:
+      'Number of alerts eventually indexed in Elasticsearch after de-duplication and suppression.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_CANDIDATE_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipCandidateAlerts',
+  {
+    defaultMessage: 'Number of detected alerts before applying de-duplication and suppression.',
+  }
+);
+
+export const FLYOUT_ALERTS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAlertsLabel',
+  {
+    defaultMessage: 'Alerts',
+  }
+);
+
+export const FLYOUT_ACCORDION_DURATION_BREAKDOWN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionDurationBreakdown',
+  {
+    defaultMessage: 'Execution duration breakdown',
+  }
+);
+
+export const FLYOUT_TOOLTIP_SEARCH_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipSearchDuration',
+  {
+    defaultMessage: 'Time spent on Elasticsearch search requests in total during rule execution.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_INDEXING_TOTAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipIndexingTotal',
+  {
+    defaultMessage: 'Time spent on indexing detected alerts.',
+  }
+);
+
+export const FLYOUT_ACCORDION_TIMING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionTiming',
+  {
+    defaultMessage: 'Timing',
+  }
+);
+
+export const FLYOUT_TOOLTIP_GAP_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipGapDuration',
+  {
+    defaultMessage:
+      'Duration of gap in rule execution. Adjust rule look-back or see documentation for mitigating gaps.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_SCHEDULING_DELAY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipSchedulingDelay',
+  {
+    defaultMessage: 'The length of time from rule scheduled till rule executed.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_EXECUTION_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipExecutionDuration',
+  {
+    defaultMessage: 'The length of time it took for the rule to run.',
+  }
+);
+
+export const FLYOUT_ACCORDION_SOURCE_EVENT_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionSourceEventTimeRange',
+  {
+    defaultMessage: 'Source event time range',
+  }
+);
+
+export const FLYOUT_TOOLTIP_FROM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipFrom',
+  {
+    defaultMessage: 'Start of the source event time range queried by this execution.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_TO = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipTo',
+  {
+    defaultMessage: 'End of the source event time range queried by this execution.',
+  }
+);
+
+export const FLYOUT_FROM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutFrom',
+  {
+    defaultMessage: 'From',
+  }
+);
+
+export const FLYOUT_TO = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTo',
+  {
+    defaultMessage: 'To',
+  }
+);
+
+export const FLYOUT_ACCORDION_INDICES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionIndices',
+  {
+    defaultMessage: 'Indices',
+  }
+);
+
+export const FLYOUT_TOOLTIP_MATCHED_INDICES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipMatchedIndices',
+  {
+    defaultMessage: `Number of indices matching rule's index patterns`,
+  }
+);
+
+export const FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipFrozenIndicesQueried',
+  {
+    defaultMessage: 'Number of frozen-tier indices included in the search.',
+  }
+);
+
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionSearchFiltersUpdatedTitle',
+  {
+    defaultMessage: 'Global search filters have been updated',
+  }
+);
+
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionSearchFiltersUpdatedDescription',
+  {
+    defaultMessage: 'Search filters have been updated to show alerts from selected rule execution',
+  }
+);
+
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionSearchFiltersUpdatedRestoreButtonTitle',
+  {
+    defaultMessage: 'Restore previous filters',
+  }
+);
+
+export const ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionFieldNotFoundErrorTitle',
+  {
+    defaultMessage: 'Unable to filter alerts',
+  }
+);
+
+export const ACTIONS_FIELD_NOT_FOUND_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.actionFieldNotFoundErrorDescription',
+  {
+    defaultMessage: "Cannot find field 'kibana.alert.rule.execution.uuid' in alerts index.",
+  }
+);

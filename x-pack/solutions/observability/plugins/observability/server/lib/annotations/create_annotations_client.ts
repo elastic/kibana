@@ -11,7 +11,6 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { formatAnnotation } from './format_annotations';
 import { checkAnnotationsPermissions } from './permissions';
-import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import type {
   Annotation,
   CreateAnnotationParams,
@@ -20,8 +19,24 @@ import type {
   GetByIdAnnotationParams,
 } from '../../../common/annotations';
 import { DEFAULT_ANNOTATION_INDEX } from '../../../common/annotations';
-import { createOrUpdateIndex } from '../../utils/create_or_update_index';
-import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
+import {
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+} from '../../../common/utils/unwrap_es_response';
+
+function getEsErrorType(error: unknown): string | undefined {
+  if (error instanceof WrappedElasticsearchClientError) {
+    return (error.originalError as any)?.body?.error?.type;
+  }
+  return (error as any)?.meta?.body?.error?.type ?? (error as any)?.body?.error?.type;
+}
+
+function throwIfSecurityException(error: unknown, message: string): never {
+  if (getEsErrorType(error) === 'security_exception') {
+    throw Boom.forbidden(message);
+  }
+  throw error;
+}
 
 export function createAnnotationsClient(params: {
   index: string;
@@ -29,18 +44,10 @@ export function createAnnotationsClient(params: {
   logger: Logger;
   license?: ILicense;
 }) {
-  const { index, esClient, logger, license } = params;
+  const { index, esClient, license } = params;
 
   const readIndex =
     index === DEFAULT_ANNOTATION_INDEX ? index : `${index},${DEFAULT_ANNOTATION_INDEX}`;
-
-  const initIndex = () =>
-    createOrUpdateIndex({
-      index,
-      client: esClient,
-      logger,
-      mappings: ANNOTATION_MAPPINGS,
-    });
 
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
     return ((...args) => {
@@ -51,25 +58,54 @@ export function createAnnotationsClient(params: {
     }) as T;
   }
 
-  const updateMappings = async () => {
-    // get index mapping
-    const currentMappings = await esClient.indices.getMapping({
-      index,
-    });
-    const mappings = currentMappings?.[index].mappings;
-
-    if (mappings?.properties?.slo) {
-      return;
-    }
-
-    // update index mapping
-    await initIndex();
-  };
-
   const validateAnnotation = (annotation: CreateAnnotationParams | Annotation) => {
     // make sure to check one of message of annotation.title is present
     if (!annotation.message && !annotation.annotation.title) {
       throw Boom.badRequest('Annotation must have a message or a annotation.title');
+    }
+  };
+
+  const indexAnnotation = async (
+    doc: CreateAnnotationParams,
+    eventMeta: Record<string, string>,
+    docId?: string
+  ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
+    validateAnnotation(doc);
+
+    const annotation = {
+      ...doc,
+      annotation: {
+        ...doc.annotation,
+        title: doc.annotation.title || doc.message,
+      },
+      event: { ...doc.event, ...eventMeta },
+    };
+
+    try {
+      const body = await unwrapEsResponse(
+        esClient.index(
+          {
+            index,
+            ...(docId && { id: docId }),
+            body: annotation,
+            refresh: 'wait_for',
+          },
+          { meta: true }
+        )
+      );
+
+      return {
+        _id: body._id,
+        _index: body._index,
+        _source: annotation as unknown as Annotation,
+      };
+    } catch (error) {
+      return throwIfSecurityException(
+        error,
+        'You do not have the required permissions to create annotations. ' +
+          'The annotations index may not exist and your role lacks the create_index privilege. ' +
+          'Contact your administrator.'
+      );
     }
   };
 
@@ -79,102 +115,15 @@ export function createAnnotationsClient(params: {
       async (
         createParams: CreateAnnotationParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
-        validateAnnotation(createParams);
-        const indexExists = await unwrapEsResponse(
-          esClient.indices.exists(
-            {
-              index,
-            },
-            { meta: true }
-          )
-        );
-
-        if (!indexExists) {
-          await initIndex();
-        } else {
-          await updateMappings();
-        }
-
-        const annotation = {
-          ...createParams,
-          event: {
-            ...createParams.event,
-            created: new Date().toISOString(),
-          },
-        };
-        if (!annotation.annotation.title) {
-          // TODO: handle this when we integrate with the APM UI
-          annotation.annotation.title = annotation.message;
-        }
-
-        const body = await unwrapEsResponse(
-          esClient.index(
-            {
-              index,
-              body: annotation,
-              refresh: 'wait_for',
-            },
-            { meta: true }
-          )
-        );
-
-        const document = (
-          await esClient.get<Annotation>(
-            {
-              index,
-              id: body._id,
-            },
-            { meta: true }
-          )
-        ).body as { _id: string; _index: string; _source: Annotation };
-        return {
-          _id: document._id,
-          _index: document._index,
-          _source: formatAnnotation(document._source),
-        };
+        return indexAnnotation(createParams, { created: new Date().toISOString() });
       }
     ),
     update: ensureGoldLicense(
       async (
         updateParams: Annotation
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
-        validateAnnotation(updateParams);
-        await updateMappings();
         const { id, ...rest } = updateParams;
-
-        const annotation = {
-          ...rest,
-          event: {
-            ...rest.event,
-            updated: new Date().toISOString(),
-          },
-        };
-        if (!annotation.annotation.title) {
-          // TODO: handle this when we integrate with the APM UI
-          annotation.annotation.title = annotation.message;
-        }
-
-        const body = await unwrapEsResponse(
-          esClient.index(
-            {
-              index,
-              id,
-              body: annotation,
-              refresh: 'wait_for',
-            },
-            { meta: true }
-          )
-        );
-
-        return (
-          await esClient.get<Annotation>(
-            {
-              index,
-              id: body._id,
-            },
-            { meta: true }
-          )
-        ).body as { _id: string; _index: string; _source: Annotation };
+        return indexAnnotation(rest, { updated: new Date().toISOString() }, id);
       }
     ),
     getById: ensureGoldLicense(async (getByIdParams: GetByIdAnnotationParams) => {
@@ -302,16 +251,24 @@ export function createAnnotationsClient(params: {
     delete: ensureGoldLicense(async (deleteParams: DeleteAnnotationParams) => {
       const { id } = deleteParams;
 
-      return await esClient.deleteByQuery({
-        index: readIndex,
-        ignore_unavailable: true,
-        query: {
-          term: {
-            _id: id,
+      try {
+        return await esClient.deleteByQuery({
+          index: readIndex,
+          ignore_unavailable: true,
+          query: {
+            term: {
+              _id: id,
+            },
           },
-        },
-        refresh: true,
-      });
+          refresh: true,
+        });
+      } catch (error) {
+        return throwIfSecurityException(
+          error,
+          'You do not have the required permissions to delete annotations. ' +
+            'Contact your administrator.'
+        );
+      }
     }),
     permissions: async () => {
       const permissions = await checkAnnotationsPermissions({ index, esClient });

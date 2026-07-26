@@ -16,8 +16,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
-  EuiFlexGrid,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type {
   LanguageDefinition,
@@ -29,18 +27,14 @@ import {
   getConsoleRequest,
   EisCloudConnectPromoCallout,
   EisUpdateCallout,
+  useCloudConnectStatus,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { type Index } from '../../../../../../../common';
-import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
-import { StatusDetails } from './status_details';
-import { DataStreamDetails } from './data_stream_details';
-import { StorageDetails } from './storage_details';
-import { AliasesDetails } from './aliases_details';
-import { SizeDocCountDetails } from './size_doc_count_details';
 
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
@@ -49,28 +43,26 @@ import { useMappingsStateListener } from '../../../../../components/mappings_edi
 import { parseMappings } from '../../../../../shared/parse_mappings';
 import { useUserPrivileges } from '../../../../../services/api';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { IndexDocuments } from '../index_documents/index_documents';
+import { QuickStats } from '../quick_stats/quick_stats';
 
 interface Props {
   indexDetails: Index;
+  sampleDocuments: SearchHit[];
+  isDocumentsLoading: boolean;
+  documentsError: unknown;
 }
 
-export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetails }) => {
-  const {
-    name,
-    status,
-    health,
-    documents,
-    documents_deleted: documentsDeleted,
-    primary,
-    replica,
-    aliases,
-    data_stream: dataStream,
-    size,
-    primary_size: primarySize,
-  } = indexDetails;
+export const DetailsPageOverview: React.FunctionComponent<Props> = ({
+  indexDetails,
+  sampleDocuments,
+  isDocumentsLoading,
+  documentsError,
+}) => {
+  const { name } = indexDetails;
   const {
     core,
-    plugins: { cloud, share },
+    plugins: { cloud, cloudConnect, share },
     services: { extensionsService },
   } = useAppContext();
   const state = useMappingsState();
@@ -85,19 +77,22 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
-  const sizeFormatted = formatBytes(size);
-  const primarySizeFormatted = formatBytes(primarySize);
-
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
     apiKey: 'your_api_key',
     indexName: name,
   };
 
-  const isLarge = useIsWithinBreakpoints(['xl']);
+  const {
+    isLoading: isCloudConnectStatusLoading,
+    isCloudConnected,
+    isCloudConnectedWithEisEnabled,
+  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
+      (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
+    false;
 
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),
@@ -114,15 +109,17 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   return (
     <>
-      <EisCloudConnectPromoCallout
-        promoId="indexDetailsOverview"
-        isSelfManaged={!cloud?.isCloudEnabled}
-        direction="row"
-        navigateToApp={() =>
-          core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-        }
-        addSpacer="bottom"
-      />
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsOverview"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="bottom"
+        />
+      )}
       {hasElserOnMlNodeSemanticText && (
         <EisUpdateCallout
           ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
@@ -144,27 +141,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
         />
       )}
 
-      <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails
-          size={sizeFormatted}
-          primarySize={primarySizeFormatted}
-          primary={primary}
-          replica={replica}
-        />
-
-        <StatusDetails
-          documents={documents}
-          documentsDeleted={documentsDeleted!}
-          status={status}
-          health={health}
-        />
-
-        <SizeDocCountDetails size={sizeFormatted} documents={documents} />
-
-        <AliasesDetails aliases={aliases} />
-
-        {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
-      </EuiFlexGrid>
+      <QuickStats indexDetails={indexDetails} />
 
       <EuiSpacer />
 
@@ -224,6 +201,12 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
             />
           </EuiFlexItem>
+          <IndexDocuments
+            documents={sampleDocuments}
+            isLoading={isDocumentsLoading}
+            error={documentsError}
+            mappings={mappingsData ?? undefined}
+          />
         </EuiFlexGroup>
       )}
     </>

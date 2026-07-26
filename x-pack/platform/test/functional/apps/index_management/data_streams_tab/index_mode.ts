@@ -131,7 +131,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('modify data streams index mode', () => {
+    describe('modify data streams index mode', function () {
+      // FIPS mode sets defaultRoles to superuser which causes trial-licensed UI elements to
+      // appear and intercept clicks that expect the index_management_user role restrictions
+      this.tags('skipFIPS');
       const TEST_DS_NAME = 'test-ds';
       const setIndexModeTemplate = async (settings: object) => {
         await es.indices.putIndexTemplate({

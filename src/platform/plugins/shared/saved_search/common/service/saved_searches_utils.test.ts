@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_searches_utils';
-
+import {
+  fromDiscoverSessionAttributesToSavedSearch,
+  toSavedSearchAttributes,
+} from './saved_searches_utils';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-
-import type { SavedSearch, SavedSearchAttributes } from '../types';
-import type { DiscoverSessionTab } from '../../server';
+import type { SavedSearch } from '../types';
+import type { DiscoverSessionAttributes, DiscoverSessionTab } from '../../server';
 
 describe('saved_searches_utils', () => {
-  describe('fromSavedSearchAttributes', () => {
+  describe('fromDiscoverSessionAttributesToSavedSearch', () => {
     test('should convert attributes into SavedSearch', () => {
       const tabs: DiscoverSessionTab[] = [
         {
@@ -27,6 +28,7 @@ describe('saved_searches_utils', () => {
             columns: ['a', 'b'],
             grid: {},
             hideChart: true,
+            hideTable: false,
             isTextBasedQuery: false,
             usesAdHocDataView: false,
             rowsPerPage: 250,
@@ -36,32 +38,18 @@ describe('saved_searches_utils', () => {
           },
         },
       ];
-      const attributes: SavedSearchAttributes = {
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+      const attributes: DiscoverSessionAttributes = {
         title: 'saved search',
-        sort: [],
-        columns: ['a', 'b'],
         description: 'foo',
-        grid: {},
-        hideChart: true,
-        isTextBasedQuery: false,
-        usesAdHocDataView: false,
-        rowsPerPage: 250,
-        sampleSize: 1000,
-        breakdownField: 'extension.keyword',
-        chartInterval: 'm',
-        controlGroupJson: undefined,
         tabs,
       };
 
       expect(
-        fromSavedSearchAttributes(
+        fromDiscoverSessionAttributesToSavedSearch(
           'id',
           attributes,
           ['tags-1', 'tags-2'],
-          [],
           createSearchSourceMock(),
-          {},
           false
         )
       ).toMatchInlineSnapshot(`
@@ -79,10 +67,11 @@ describe('saved_searches_utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
+          "hideTable": false,
           "id": "id",
           "isTextBasedQuery": false,
           "managed": false,
-          "references": Array [],
+          "references": undefined,
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": 250,
@@ -111,7 +100,7 @@ describe('saved_searches_utils', () => {
             "requestStartHandlers": Array [],
             "shouldOverwriteDataViewType": false,
           },
-          "sharingSavedObjectProps": Object {},
+          "sharingSavedObjectProps": undefined,
           "sort": Array [],
           "tabs": Array [
             Object {
@@ -124,6 +113,7 @@ describe('saved_searches_utils', () => {
                 ],
                 "grid": Object {},
                 "hideChart": true,
+                "hideTable": false,
                 "isTextBasedQuery": false,
                 "kibanaSavedObjectMeta": Object {
                   "searchSourceJSON": "{}",
@@ -179,6 +169,7 @@ describe('saved_searches_utils', () => {
         description: 'description',
         grid: {},
         hideChart: true,
+        hideTable: false,
         isTextBasedQuery: true,
         usesAdHocDataView: false,
         timeRestore: false,
@@ -194,6 +185,7 @@ describe('saved_searches_utils', () => {
               columns: ['c', 'd'],
               grid: {},
               hideChart: true,
+              hideTable: false,
               isTextBasedQuery: true,
               usesAdHocDataView: false,
               timeRestore: false,

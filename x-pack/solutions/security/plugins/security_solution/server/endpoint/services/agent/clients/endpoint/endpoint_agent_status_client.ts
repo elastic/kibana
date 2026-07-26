@@ -10,7 +10,6 @@ import { type AgentStatusRecords, HostStatus } from '../../../../../../common/en
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { getPendingActionsSummary } from '../../../actions';
-import { AgentStatusClientError } from '../errors';
 
 export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
@@ -54,15 +53,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
         return acc;
       }, {});
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds.join()}], failed with: ${
-          err.message
-        }`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }

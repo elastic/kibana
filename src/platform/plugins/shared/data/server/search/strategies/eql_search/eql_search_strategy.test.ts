@@ -98,6 +98,7 @@ describe('EQL search strategy', () => {
           ignore_unavailable: true,
           index: 'logstash-*',
           keep_alive: '60000ms',
+          keep_on_completion: false,
           max_concurrent_shard_requests: undefined,
           wait_for_completion_timeout: '100ms',
         });
@@ -113,7 +114,7 @@ describe('EQL search strategy', () => {
         expect(requestParams).toEqual({
           id: 'my-search-id',
           keep_alive: '60000ms',
-          wait_for_completion_timeout: '100ms',
+          wait_for_completion_timeout: '2000ms',
         });
       });
 

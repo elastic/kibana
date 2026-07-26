@@ -9,7 +9,7 @@ import type { Ref } from 'react';
 import React from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { selectAgentPolicies } from '../../../state/agent_policies';
@@ -109,7 +109,8 @@ export const LOCATION_NAME_LABEL = i18n.translate(
 const LOCATION_HELP_TEXT = i18n.translate(
   'xpack.synthetics.privateLocation.locationSpacesHelpText',
   {
-    defaultMessage: 'Select the spaces where this location will be available.',
+    defaultMessage:
+      'Available spaces are filtered based on the selected agent policy. You can select from the spaces that the agent policy has access to. If no space is selected, the private location will automatically use all spaces that the agent policy has access to.',
   }
 );
 

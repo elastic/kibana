@@ -89,7 +89,7 @@ type FilterMetaRestResponse = {
   type?: string;
   key?: string;
   params?: FilterMetaParamsRestResponse;
-  value?: string;
+  value?: string | RangeFilterParamsRestResponse | PhraseFilterValue[];
 };
 
 type FilterStateStoreRestResponse = 'appState' | 'globalState';

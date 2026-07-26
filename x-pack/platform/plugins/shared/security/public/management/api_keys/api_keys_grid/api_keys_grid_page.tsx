@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { Criteria, EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -28,7 +29,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
+import { ApiKeysTable, categorizeAggregations } from './api_keys_table';
 import type { QueryFilters } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import { Breadcrumb } from '../../../components/breadcrumb';
@@ -37,25 +38,25 @@ import { useAuthentication } from '../../../components/use_current_user';
 
 interface ApiKeysTableState {
   query: Query;
-  from: number;
   size: number;
   sort: QueryApiKeySortOptions;
   filters: QueryFilters;
+  searchAfter?: estypes.SortResults;
 }
 
 type KueryNode = any;
 
-const DEFAULT_TABLE_STATE = {
+const DEFAULT_TABLE_STATE: ApiKeysTableState = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
     field: 'creation' as const,
     direction: 'desc' as const,
   },
-  from: 0,
   size: 25,
   filters: {
     type: 'rest' as const,
   },
+  searchAfter: undefined,
 };
 
 const PLUS_SIGN_REGEX = /[+]/g;
@@ -70,6 +71,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const readOnly = !useCapabilities('api_keys').save;
 
   const [tableState, setTableState] = useState<ApiKeysTableState>(DEFAULT_TABLE_STATE);
+  const [searchAfterHistory, setSearchAfterHistory] = useState<
+    Array<estypes.SortResults | undefined>
+  >([]);
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
@@ -122,15 +126,44 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const resetQueryOnError = () => {
     setTableState(DEFAULT_TABLE_STATE);
+    setSearchAfterHistory([]);
     queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
   };
 
-  const onTableChange = ({ page, sort }: Criteria<CategorizedApiKey>) => {
+  const onTableChange = ({ sort }: Criteria<CategorizedApiKey>) => {
+    // When sort changes, reset pagination cursors
+    if (
+      sort &&
+      (sort.field !== tableState.sort.field || sort.direction !== tableState.sort.direction)
+    ) {
+      const newState = {
+        ...tableState,
+        sort,
+        searchAfter: undefined,
+      };
+      setTableState(newState);
+      setSearchAfterHistory([]);
+      queryApiKeysAndAggregations(newState);
+    }
+  };
+
+  const onNextPage = (nextSearchAfter: estypes.SortResults) => {
+    setSearchAfterHistory((prev) => [...prev, tableState.searchAfter]);
     const newState = {
       ...tableState,
-      from: page?.index! * page?.size!,
-      size: page?.size!,
-      sort: sort ?? tableState.sort,
+      searchAfter: nextSearchAfter,
+    };
+    setTableState(newState);
+    queryApiKeysAndAggregations(newState);
+  };
+
+  const onPreviousPage = () => {
+    const newHistory = [...searchAfterHistory];
+    const previousCursor = newHistory.pop();
+    setSearchAfterHistory(newHistory);
+    const newState = {
+      ...tableState,
+      searchAfter: previousCursor,
     };
     setTableState(newState);
     queryApiKeysAndAggregations(newState);
@@ -141,8 +174,10 @@ export const APIKeysGridPage: FunctionComponent = () => {
       const newState = {
         ...tableState,
         query: args.query,
+        searchAfter: undefined, // Reset pagination when query changes
       };
       setTableState(newState);
+      setSearchAfterHistory([]);
       queryApiKeysAndAggregations(newState);
     }
   };
@@ -154,14 +189,43 @@ export const APIKeysGridPage: FunctionComponent = () => {
         ...tableState.filters,
         ...filters,
       },
+      searchAfter: undefined, // Reset pagination when filters change
     };
     setTableState(newState);
+    setSearchAfterHistory([]);
     queryApiKeysAndAggregations(newState);
   };
 
   useEffect(() => {
     queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The table defaults to the personal (`rest`) view. If the user has no personal keys but does have
+  // keys of other types (e.g. only cross-cluster keys), the default view would be empty. In that
+  // case, switch once to the first available type so the user's keys are visible on load.
+  const hasAutoSelectedTypeRef = useRef(false);
+  useEffect(() => {
+    if (hasAutoSelectedTypeRef.current || !state.value) {
+      return;
+    }
+
+    const [result] = state.value;
+    const queryFailed = 'queryError' in result && result.queryError;
+    const loadedApiKeys = 'apiKeys' in result ? result.apiKeys : undefined;
+
+    if (queryFailed || tableState.filters.type !== 'rest' || loadedApiKeys?.length) {
+      return;
+    }
+
+    const { typeFilters } = categorizeAggregations(result.aggregations);
+    if (typeFilters.length === 0 || typeFilters.includes('rest')) {
+      return;
+    }
+
+    hasAutoSelectedTypeRef.current = true;
+    const nextType = typeFilters.includes('cross_cluster') ? 'cross_cluster' : typeFilters[0];
+    onFilterChange({ type: nextType });
+  }, [state.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.value) {
     if (state.loading) {
@@ -187,32 +251,41 @@ export const APIKeysGridPage: FunctionComponent = () => {
     );
   }
 
-  const [
-    {
-      aggregations,
-      canManageApiKeys,
-      apiKeys,
-      canManageOwnApiKeys,
-      canManageCrossClusterApiKeys,
-      aggregationTotal: totalKeys,
-      total: filteredItemTotal,
-      queryError,
-    },
-    currentUser,
-  ] = state.value;
+  const [queryResult, currentUser] = state.value;
 
-  const categorizedApiKeys = !queryError
-    ? apiKeys.map((apiKey) => apiKey as CategorizedApiKey)
-    : [];
+  const {
+    aggregations,
+    canManageApiKeys,
+    canManageOwnApiKeys,
+    canManageCrossClusterApiKeys,
+    aggregationTotal: totalKeys,
+  } = queryResult;
 
-  const displayedItemCount = Math.min(filteredItemTotal, totalKeys, MAX_PAGINATED_ITEMS);
+  // Check if the query result is an error or success
+  // Using 'in' operator for type-safe property access
+  const hasQueryError = 'queryError' in queryResult && queryResult.queryError;
+  const queryError = hasQueryError ? queryResult.queryError : undefined;
 
-  const pagination = {
-    pageIndex: tableState.from / tableState.size,
-    pageSize: tableState.size,
-    totalItemCount: displayedItemCount,
-    pageSizeOptions: [25, 50, 100],
-  };
+  // Extract success-only properties when there's no query error
+  // Cast to access properties that only exist on success result
+  const successResult = !hasQueryError
+    ? (queryResult as {
+        apiKeys: CategorizedApiKey[];
+        total: number;
+        searchAfter?: estypes.SortResults;
+      })
+    : undefined;
+
+  const apiKeys = successResult?.apiKeys ?? [];
+  const filteredItemTotal = successResult?.total ?? 0;
+  const responseSearchAfter = successResult?.searchAfter;
+
+  // Determine if there's a next page:
+  // - We have a searchAfter cursor (for pagination)
+  // - AND the current page returned the full page size (indicating there might be more)
+  const hasMoreResults = apiKeys.length === tableState.size && !!responseSearchAfter;
+
+  const categorizedApiKeys = apiKeys;
 
   return (
     <>
@@ -224,10 +297,19 @@ export const APIKeysGridPage: FunctionComponent = () => {
           href="/create"
         >
           <ApiKeyFlyout
-            onSuccess={(createApiKeyResponse) => {
+            onSuccess={(createApiKeyResponse, type) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              queryApiKeysAndAggregations(tableState);
+              // Switch the table to the view matching the created key's type (and reset pagination)
+              // so the newly created key is immediately visible, regardless of the active filter.
+              const nextState = {
+                ...tableState,
+                filters: { ...tableState.filters, type: type as QueryFilters['type'] },
+                searchAfter: undefined,
+              };
+              setTableState(nextState);
+              setSearchAfterHistory([]);
+              queryApiKeysAndAggregations(nextState);
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
@@ -250,7 +332,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
+            // Re-query using the current table state so the user's active filter (e.g.
+            // cross-cluster) is preserved after an update, instead of resetting to the default view.
+            queryApiKeysAndAggregations(tableState);
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
@@ -265,7 +349,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
             fill
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             data-test-subj="apiKeysCreatePromptButton"
           >
             <FormattedMessage
@@ -295,7 +379,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                     <EuiButton
                       {...reactRouterNavigate(history, '/create')}
                       fill
-                      iconType="plusInCircleFilled"
+                      iconType="plusCircle"
                       data-test-subj="apiKeysCreateTableButton"
                     >
                       <FormattedMessage
@@ -357,7 +441,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   readOnly={readOnly}
                   loading={state.loading}
                   totalItemCount={filteredItemTotal}
-                  pagination={pagination}
                   onTableChange={onTableChange}
                   onSearchChange={onSearchChange}
                   onFilterChange={onFilterChange}
@@ -365,6 +448,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   sortingOptions={tableState.sort}
                   queryErrors={queryError}
                   resetQuery={resetQueryOnError}
+                  hasNextPage={hasMoreResults}
+                  hasPreviousPage={searchAfterHistory.length > 0}
+                  onNextPage={() => responseSearchAfter && onNextPage(responseSearchAfter)}
+                  onPreviousPage={onPreviousPage}
+                  onRefresh={() => queryApiKeysAndAggregations(tableState)}
                 />
               )}
             </InvalidateProvider>

@@ -77,11 +77,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   ];
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = createTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = createTestSuiteFactory(context);
   const createTests = (overwrite: boolean, spaceId: string) => {
     const testCases = createTestCases(overwrite, spaceId);
     return createTestDefinitions(testCases, false, overwrite, { spaceId });

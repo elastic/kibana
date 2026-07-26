@@ -67,7 +67,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
   const actions = (
     <EuiButton
       href={addDataHref}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       fill={true}
       data-test-subj="createDataViewButton"
     >

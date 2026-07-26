@@ -16,9 +16,11 @@ export function useFetchErrorToast() {
   } = useKibana();
 
   return useCallback(
-    (error: Error) => {
+    (error: unknown) => {
       let requestUrl: string | undefined;
       if (
+        error &&
+        typeof error === 'object' &&
         'request' in error &&
         typeof error.request === 'object' &&
         !!error.request &&

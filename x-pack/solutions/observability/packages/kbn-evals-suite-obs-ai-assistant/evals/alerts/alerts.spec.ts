@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/synthtrace-client';
@@ -20,7 +21,7 @@ import { evaluate } from '../../src/evaluate';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
+evaluate.describe('Alerts', { tag: tags.serverless.observability.complete }, () => {
   const ruleIds: string[] = [];
 
   evaluate.beforeAll(async ({ kbnClient, apmSynthtraceEsClient, log }) => {

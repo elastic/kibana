@@ -1,0 +1,175 @@
+openapi: 3.0.0
+info:
+  title: Ingest Evaluation Scores API endpoint
+  version: '1'
+paths:
+  /internal/evals/scores:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: IngestScores
+      description: Ingest a batch of evaluation scores
+      summary: Ingest evaluation scores
+      tags:
+        - Evals API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                experiment_id:
+                  type: string
+                  maxLength: 1024
+                experiment_name:
+                  type: string
+                  maxLength: 256
+                task_model:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                evaluator_model:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                metadata:
+                  type: object
+                  properties:
+                    execution_id:
+                      type: string
+                      maxLength: 1024
+                    suite_id:
+                      type: string
+                      maxLength: 256
+                    total_repetitions:
+                      type: integer
+                    hostname:
+                      type: string
+                      maxLength: 256
+                    git:
+                      type: object
+                      properties:
+                        branch:
+                          type: string
+                          maxLength: 256
+                          nullable: true
+                        commit_sha:
+                          type: string
+                          maxLength: 256
+                          nullable: true
+                    ci:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
+                  required:
+                    - total_repetitions
+                    - hostname
+                scores:
+                  type: array
+                  maxItems: 1000
+                  items:
+                    type: object
+                    properties:
+                      example:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            maxLength: 1024
+                          index:
+                            type: integer
+                          input:
+                            type: object
+                            additionalProperties: true
+                          dataset:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                maxLength: 1024
+                              name:
+                                type: string
+                                maxLength: 256
+                            required:
+                              - id
+                              - name
+                        required:
+                          - id
+                          - index
+                          - dataset
+                      task:
+                        type: object
+                        properties:
+                          trace_id:
+                            type: string
+                            maxLength: 256
+                          repetition_index:
+                            type: integer
+                          output:
+                            type: object
+                            additionalProperties: true
+                        required:
+                          - repetition_index
+                      evaluator:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            maxLength: 256
+                          score:
+                            type: number
+                            nullable: true
+                          label:
+                            type: string
+                            maxLength: 256
+                            nullable: true
+                          explanation:
+                            type: string
+                            maxLength: 4096
+                            nullable: true
+                          metadata:
+                            type: object
+                            additionalProperties: true
+                          trace_id:
+                            type: string
+                            maxLength: 256
+                            nullable: true
+                        required:
+                          - name
+                    required:
+                      - example
+                      - task
+                      - evaluator
+              required:
+                - experiment_id
+                - task_model
+                - evaluator_model
+                - metadata
+                - scores
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingested:
+                    type: integer
+                  conflicted:
+                    type: integer
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        status:
+                          type: integer
+                        reason:
+                          type: string
+                          maxLength: 1024
+                      required:
+                        - index
+                        - status
+                        - reason
+                required:
+                  - ingested
+                  - conflicted
+                  - failed

@@ -8,10 +8,10 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 import type { DataSourceContext, RootContext } from '..';
 import type { ContextWithProfileId } from '../profile_service';
-import { type DataTableRecordWithContext } from '../profiles_manager';
+import { type DataTableRecordWithContext, type ScopedProfilesManager } from '../profiles_manager';
 import { recordHasContext } from '../profiles_manager/record_has_context';
 import { FetchStatus } from '../../application/types';
 import type { DataDocuments$ } from '../../application/main/state_management/discover_data_state_container';
@@ -30,46 +30,59 @@ export interface ContextsAdapter {
   openDocDetails: (record: DataTableRecord) => void;
 }
 
+/**
+ * Pure factory for the inspector Contexts adapter. Used by {@link useActiveContexts} and by
+ * callers that cannot use hooks (e.g. tab menu onClick). Must receive the same
+ * `scopedProfilesManager` and `dataDocuments$` as the active tab.
+ */
+export const createContextsAdapter = ({
+  scopedProfilesManager,
+  dataDocuments$,
+}: {
+  scopedProfilesManager: ScopedProfilesManager;
+  dataDocuments$: DataDocuments$;
+}) => {
+  return ({
+    onOpenDocDetails,
+  }: {
+    onOpenDocDetails: (record: DataTableRecord) => void;
+  }): ContextsAdapter => {
+    const { dataSourceContext, rootContext } = scopedProfilesManager.getContexts();
+
+    return {
+      getRootContext: () => rootContext,
+      getDataSourceContext: () => dataSourceContext,
+      getDocumentContexts: () => {
+        const data = dataDocuments$.getValue();
+        if (data.fetchStatus !== FetchStatus.COMPLETE) {
+          return {};
+        }
+
+        const documents = data.result ?? [];
+        const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
+
+        for (const record of documents) {
+          if (!recordHasContext(record)) continue;
+
+          const contextProfileId = record.context.profileId;
+          if (!documentContexts[contextProfileId]) {
+            documentContexts[contextProfileId] = [];
+          }
+          documentContexts[contextProfileId].push(record);
+        }
+
+        return documentContexts;
+      },
+      openDocDetails: onOpenDocDetails,
+    };
+  };
+};
+
 export function useActiveContexts({ dataDocuments$ }: { dataDocuments$: DataDocuments$ }) {
   const { scopedProfilesManager } = useScopedServices();
 
-  const getContextsAdapter = useCallback(
-    ({
-      onOpenDocDetails,
-    }: {
-      onOpenDocDetails: (record: DataTableRecord) => void;
-    }): ContextsAdapter => {
-      const { dataSourceContext, rootContext } = scopedProfilesManager.getContexts();
-
-      return {
-        getRootContext: () => rootContext,
-        getDataSourceContext: () => dataSourceContext,
-        getDocumentContexts: () => {
-          const data = dataDocuments$.getValue();
-          if (data.fetchStatus !== FetchStatus.COMPLETE) {
-            return {};
-          }
-
-          const documents = data.result ?? [];
-          const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
-
-          for (const record of documents) {
-            if (!recordHasContext(record)) continue;
-
-            const contextProfileId = record.context.profileId;
-            if (!documentContexts[contextProfileId]) {
-              documentContexts[contextProfileId] = [];
-            }
-            documentContexts[contextProfileId].push(record);
-          }
-
-          return documentContexts;
-        },
-        openDocDetails: onOpenDocDetails,
-      };
-    },
+  return useMemo(
+    () => createContextsAdapter({ scopedProfilesManager, dataDocuments$ }),
     [scopedProfilesManager, dataDocuments$]
   );
-
-  return getContextsAdapter;
 }

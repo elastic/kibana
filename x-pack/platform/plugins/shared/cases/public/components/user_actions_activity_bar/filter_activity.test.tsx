@@ -59,12 +59,12 @@ describe('FilterActivity ', () => {
       />
     );
 
-    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('17');
+    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('16');
     expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toHaveTextContent(
       '2'
     );
     expect(screen.getByTestId('user-actions-filter-activity-button-history')).toHaveTextContent(
-      '5'
+      '9'
     );
   });
 

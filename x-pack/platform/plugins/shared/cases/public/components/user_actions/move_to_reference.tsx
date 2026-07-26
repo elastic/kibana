@@ -29,7 +29,7 @@ const UserActionMoveToReferenceComponent = ({
         aria-label={i18n.MOVE_TO_ORIGINAL_COMMENT}
         data-test-subj={`move-to-link-${id}`}
         onClick={handleMoveToLink}
-        iconType="arrowUp"
+        iconType="chevronSingleUp"
       />
     </EuiToolTip>
   );

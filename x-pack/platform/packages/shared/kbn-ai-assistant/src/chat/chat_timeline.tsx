@@ -20,12 +20,9 @@ import {
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
-import type { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
-import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
 
@@ -148,10 +145,6 @@ export function ChatTimeline({
   onActionClick,
   chatState,
 }: ChatTimelineProps) {
-  const {
-    services: { uiSettings },
-  } = useKibana();
-
   const { euiTheme } = useEuiTheme();
 
   const stickyCalloutContainerClassName = css`
@@ -163,18 +156,6 @@ export function ChatTimeline({
       display: none;
     }
   `;
-
-  const { anonymizationEnabled } = useMemo(() => {
-    const settings = uiSettings?.get<AnonymizationSettings | undefined>(aiAnonymizationSettings);
-
-    if (!settings) {
-      return { anonymizationEnabled: false };
-    }
-
-    return {
-      anonymizationEnabled: settings.rules.some((rule) => rule.enabled),
-    };
-  }, [uiSettings]);
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
@@ -196,7 +177,7 @@ export function ChatTimeline({
       const { content, deanonymizations } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (anonymizationEnabled && content && deanonymizations) {
+      if (content && deanonymizations) {
         item.anonymizedHighlightedContent = highlightContent(content, deanonymizations);
       }
 
@@ -224,7 +205,6 @@ export function ChatTimeline({
     isConversationOwnedByCurrentUser,
     isArchived,
     onActionClick,
-    anonymizationEnabled,
   ]);
 
   return (

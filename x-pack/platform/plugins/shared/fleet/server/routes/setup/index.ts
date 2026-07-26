@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -55,6 +57,8 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Initiate Fleet setup`,
+      description:
+        'Initialize Fleet and create the necessary Elasticsearch resources for Fleet to operate. Safe to call multiple times (idempotent). Returns the initialization status and any non-fatal errors encountered during setup.',
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -62,6 +66,9 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_fleet_setup.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -134,7 +141,9 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Initiate agent setup`,
+      summary: `Initiate Fleet setup`,
+      description:
+        'Initialize Fleet. This endpoint is used by Elastic Agents to trigger Fleet setup. Safe to call multiple times; subsequent calls are idempotent.',
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -142,6 +151,9 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_agents_setup.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -179,6 +191,8 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get agent setup info`,
+      description:
+        'Get the current Fleet setup status, including whether Fleet is ready to enroll agents and which requirements or optional features are missing.',
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -186,6 +200,9 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agents_setup.yaml'),
+        },
         validate: {
           request: {},
           response: {

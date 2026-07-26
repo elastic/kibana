@@ -10,3 +10,7 @@ import type { TransformListRow } from './transform_list';
 export const isManagedTransform = (transform: Partial<TransformListRow>) => {
   return transform.config?._meta?.managed;
 };
+
+export const isDeletionProtectedTransform = (transform: Partial<TransformListRow>) => {
+  return transform.config?._meta?.deletion_protected;
+};

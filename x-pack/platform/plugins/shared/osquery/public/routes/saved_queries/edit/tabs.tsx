@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
+import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -13,11 +14,12 @@ import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 import type { AddToTimelineHandler } from '../../../types';
 
-const euiTabbedContentCss = {
+const euiTabbedContentCss = ({ euiTheme }: UseEuiTheme) => ({
   'div.euiTabs': {
     paddingLeft: '8px',
+    background: euiTheme.colors.body,
   },
-};
+});
 
 interface ResultTabsProps {
   actionId: string;
@@ -29,6 +31,8 @@ interface ResultTabsProps {
   liveQueryActionId?: string;
   error?: string;
   addToTimeline?: AddToTimelineHandler;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -41,6 +45,8 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   liveQueryActionId,
   error,
   addToTimeline,
+  scheduleId,
+  executionCount,
 }) => {
   const tabs = useMemo(
     () => [
@@ -58,6 +64,8 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             liveQueryActionId={liveQueryActionId}
             error={error}
             addToTimeline={addToTimeline}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
           />
         ),
       },
@@ -72,6 +80,8 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             agentIds={agentIds}
             expirationDate={endDate}
             error={error}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
           />
         ),
         append: failedAgentsCount ? (
@@ -91,19 +101,23 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       error,
       failedAgentsCount,
       addToTimeline,
+      scheduleId,
+      executionCount,
     ]
   );
 
   return (
-    <EuiTabbedContent
-      css={euiTabbedContentCss}
-      // TODO: extend the EuiTabbedContent component to support EuiTabs props
-      // bottomBorder={false}
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      expand={false}
-    />
+    <EuiPanel hasShadow={false} paddingSize="none">
+      <EuiTabbedContent
+        css={euiTabbedContentCss}
+        // TODO: extend the EuiTabbedContent component to support EuiTabs props
+        // bottomBorder={false}
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        autoFocus="selected"
+        expand={false}
+      />
+    </EuiPanel>
   );
 };
 

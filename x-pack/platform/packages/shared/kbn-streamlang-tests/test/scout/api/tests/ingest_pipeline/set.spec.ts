@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Set Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should set a field using a value', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-set-value';
@@ -27,13 +29,13 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
+      expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.status).toBe('active');
     });
 
     // Template syntax validation tests - these should now REJECT Mustache templates
@@ -74,9 +76,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Should throw validation error for Mustache templates
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
 
@@ -93,13 +95,13 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'should-be-copied' }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'should-be-copied');
+      expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.status).toBe('should-be-copied');
     });
 
     apiTest('should not override an existing field when override is false', async ({ testBed }) => {
@@ -116,13 +118,13 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { status: 'active' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
+      expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.status).toBe('active');
     });
 
     apiTest('should override an existing field when override is true', async ({ testBed }) => {
@@ -139,13 +141,13 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { status: 'active' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
+      expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.status).toBe('inactive');
     });
 
     apiTest('should throw error if value and copy_from are missing', async () => {
@@ -158,18 +160,8 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
-              path: ['steps', 0, 'value', 'copy_from'],
-            },
-          ],
-          null,
-          2
-        )
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
 
@@ -185,18 +177,8 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
-              path: ['steps', 0, 'value', 'copy_from'],
-            },
-          ],
-          null,
-          2
-        )
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
   }

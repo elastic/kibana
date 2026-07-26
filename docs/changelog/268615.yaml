@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268615
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Discover and ES|QL
+title: "Add automatic data analysis suggestions in Discover"
+description: "Automatically suggests relevant analysis patterns and visualizations based on your data structure and content, helping you discover insights faster."

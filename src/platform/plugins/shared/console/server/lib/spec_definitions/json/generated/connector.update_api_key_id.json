@@ -13,6 +13,7 @@
       "_connector/{connector_id}/_api_key_id"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-api-key-id",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-connector-update-api-key-id",
     "availability": {
       "stack": true,
       "serverless": true

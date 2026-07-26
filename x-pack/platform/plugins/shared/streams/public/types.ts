@@ -9,6 +9,7 @@ import type { Plugin as PluginClass } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EsqlPluginSetup } from '@kbn/esql/public';
 import type { StreamsRepositoryClient } from './api';
 import type { StreamsPublicConfig } from '../common/config';
 import type { EnableStreamsResponse, DisableStreamsResponse } from '../server/lib/streams/client';
@@ -18,7 +19,9 @@ export interface StreamsNavigationStatus {
 }
 
 export interface WiredStreamsStatus {
-  enabled: boolean | 'conflict' | 'unknown';
+  logs: boolean | 'conflict' | 'unknown';
+  'logs.otel': boolean | 'conflict' | 'unknown';
+  'logs.ecs': boolean | 'conflict' | 'unknown';
   can_manage: boolean;
 }
 
@@ -41,6 +44,7 @@ export interface StreamsPluginStart {
 
 export interface StreamsPluginSetupDependencies {
   cloud?: CloudSetup;
+  esql?: EsqlPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {

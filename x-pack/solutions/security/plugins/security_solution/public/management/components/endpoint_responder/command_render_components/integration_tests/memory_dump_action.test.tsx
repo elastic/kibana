@@ -207,5 +207,25 @@ describe('Memory dump response action', () => {
         'Argument --entityId must have a value'
       );
     });
+
+    it('should show correct help content when kernel memory dump is not supported', async () => {
+      capabilities = capabilities.filter((value) => value !== 'memdump_kernel');
+      await render();
+      await enterConsoleCommand(renderResult, user, `memory-dump --help`);
+
+      expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
+        '--kernel - Generates a kernel memory dump (NOTE: not currently supported for this host type)'
+      );
+    });
+
+    it('should show correct help content when process memory dump is not supported', async () => {
+      capabilities = capabilities.filter((value) => value !== 'memdump_process');
+      await render();
+      await enterConsoleCommand(renderResult, user, `memory-dump --help`);
+
+      expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
+        '--process - Generates memory dump for a process (NOTE: not currently supported for this host type)'
+      );
+    });
   });
 });

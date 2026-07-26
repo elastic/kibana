@@ -6,7 +6,7 @@
  */
 
 import { matchPath } from 'react-router-dom';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { ILicense } from '@kbn/licensing-types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import type { PolicyDetailsState } from '../../../types';
@@ -183,6 +183,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        ransomware: mac.ransomware,
         behavior_protection: mac.behavior_protection,
         memory_protection: mac.memory_protection,
         device_control: mac.device_control,

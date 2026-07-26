@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aad-fixtures-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aad-fixtures-plugin'
+  title: '@kbn/aad-fixtures-plugin'
   description: Moon project for @kbn/aad-fixtures-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/aad
+  sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/aad
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

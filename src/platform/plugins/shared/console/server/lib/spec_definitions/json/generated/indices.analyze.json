@@ -16,6 +16,7 @@
       "{index}/_analyze"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-analyze",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-analyze",
     "availability": {
       "stack": true,
       "serverless": true

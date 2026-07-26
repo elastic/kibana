@@ -266,7 +266,7 @@ export default function (providerContext: FtrProviderContext) {
           last_checkin:
             status === 'inactive'
               ? moment().subtract(2, 'hours')
-              : moment().subtract(5, 'minute').toISOString(),
+              : moment().subtract(6, 'minute').toISOString(),
           tags: ['tag1'],
           status,
         },
@@ -747,10 +747,16 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should have correctly deleted unused secrets after update', async () => {
-        const searchRes = await getSecrets();
-        expect(searchRes.hits.hits.length).to.eql(5); // should have created 2 and deleted 2 docs
+        // Secret deletion is async — retry until the expected count is reached
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          searchRes = await getSecrets();
+          if (searchRes.hits.hits.length === 5) break;
+        }
+        expect(searchRes!.hits.hits.length).to.eql(5); // should have created 2 and deleted 2 docs
 
-        const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        const secretValuesById = searchRes!.hits.hits.reduce((acc: any, secret: any) => {
           acc[secret._id] = secret._source.value;
           return acc;
         }, {});
@@ -911,13 +917,15 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        // sleep to allow for secrets to be deleted
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Secret deletion is async — retry until the expected count is reached
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const searchRes = await getSecrets();
+          // should have deleted new_package_secret_val_2 and new_package_multi_secret_val_3/4
+          if (searchRes.hits.hits.length === 5) return;
+        }
 
-        const searchRes = await getSecrets();
-
-        // should have deleted new_package_secret_val_2 and new_package_multi_secret_val_3/4
-        expect(searchRes.hits.hits.length).to.eql(5);
+        throw new Error('Secrets not deleted to expected count of 5');
       });
     });
 
@@ -964,9 +972,14 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('fleet server version requirements', () => {
       afterEach(async () => {
-        await cleanupAgents();
-        await cleanupPolicies();
-        await cleanupSecrets();
+        await pRetry(
+          async () => {
+            await cleanupAgents();
+            await cleanupPolicies();
+            await cleanupSecrets();
+          },
+          { retries: 3 }
+        );
       });
       it('should not store secrets if fleet server does not meet minimum version', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
@@ -1144,6 +1157,46 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           upgradedPolicy.inputs[0].streams[0].vars.stream_var_non_secret.value.isSecretRef
         ).to.eql(true);
+      });
+
+      it('should clean up secrets no longer referenced after package upgrade removes a var', async () => {
+        // `package_var_multi_secret` only exists in package version 1.0.0. Upgrading to 1.1.0
+        // drops it from the package spec, so the package policy update triggered by the upgrade
+        // goes through packagePolicyService.bulkUpdate -> deleteSecretsIfNotReferenced ->
+        // findPackagePoliciesUsingSecrets, which queries by the two now-orphaned secret ids.
+        const agentPolicy = await createAgentPolicy();
+
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_4', '8.12.0');
+        await callFleetSetup();
+
+        const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
+        const oldPackageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value
+          .ids as string[];
+
+        await supertest
+          .post('/api/fleet/epm/packages/secrets/1.1.0')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packagePolicyIds: [packagePolicyWithSecrets.id],
+          })
+          .expect(200);
+
+        // Secret deletion is async — retry until the orphaned secrets are gone.
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          searchRes = await getSecrets(oldPackageVarMultiIds);
+          if (searchRes.hits.hits.length === 0) break;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        expect(searchRes!.hits.hits.length).to.eql(0);
       });
 
       it('should store secrets if additional fleet server does not meet minimum version, but is unenrolled', async () => {

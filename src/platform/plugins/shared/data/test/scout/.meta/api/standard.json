@@ -1,0 +1,339 @@
+{
+  "sha1": "fc9fbd00fc82ca0f7355491d44f285f8d1007a12",
+  "tests": [
+    {
+      "id": "99d18e3579dd960-646aa7dac1121c1",
+      "title": "ese search - delete async search (SNAPSHOT only) should delete an in-progress search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete_async.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "99d18e3579dd960-bf3bc58168b51ac",
+      "title": "ese search - delete async search (SNAPSHOT only) should delete a completed search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete_async.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7e6443f1ffd45e-5cdeb8757e712f3",
+      "title": "ese search - delete should return 404 when no search id provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7e6443f1ffd45e-ec4910d16e018a7",
+      "title": "ese search - delete should return 400 when trying to delete a bad id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "d31b6baf5ea7a72-e563cb6fd7a2342",
+      "title": "ese search - post async (SNAPSHOT only) should return 200 with search id and partial response if wait_for_completion_timeout is not long enough",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "d31b6baf5ea7a72-038dbaad7a8f7f4",
+      "title": "ese search - post async (SNAPSHOT only) should retrieve results from completed search with search id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "d31b6baf5ea7a72-a2fbe43cb945c01",
+      "title": "ese search - post async (SNAPSHOT only) should retrieve results from in-progress search with search id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "778cbd6da09bf07-a87afaa49e2b3b2",
+      "title": "ese search - cancel async search (stateful, SNAPSHOT only) should cancel an async search without server crash",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_cancel.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "ce88cbaac053fab-145d818beee8974",
+      "title": "ese search - privileges (stateful only) should return 403 for lack of privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_privileges.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "78789d10935637b-503b50fc9d7e893",
+      "title": "ese search - post sync and validation should return 200 with final response without search id if wait_for_completion_timeout is long enough",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "78789d10935637b-3ee26e076fedc5f",
+      "title": "ese search - post sync and validation should fail without kbn-xsrf header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "78789d10935637b-bd9c25dc1869b82",
+      "title": "ese search - post sync and validation should return 400 if invalid id is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "78789d10935637b-33253c32dd2f513",
+      "title": "ese search - post sync and validation should return 404 if unknown id is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "78789d10935637b-032cd728f64c4bf",
+      "title": "ese search - post sync and validation should return 400 with a bad body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "782ff057296ab50-863ac5bf7516fec",
+      "title": "ese search - rollup (stateful only) should return 400 if rollup search is called without index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "782ff057296ab50-69f4049a9dcc104",
+      "title": "ese search - rollup (stateful only) should return 400 if rollup search is with non-existent index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "782ff057296ab50-90771cf9678ef96",
+      "title": "ese search - rollup (stateful only) should execute a rollup search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
+        "line": 63,
+        "column": 10
+      }
+    }
+  ]
+}

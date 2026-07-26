@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
+export const SEARCH_ROUTE_PATH = '/internal/embeddable/get_saved_objects';

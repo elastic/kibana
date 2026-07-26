@@ -23,7 +23,6 @@ export {
   /** @deprecated Use useGraphPopoverState instead */
   useGraphPopoverState as useGraphPopover,
 } from './popovers/primitives/use_graph_popover_state';
-export { groupedItemClick$, emitGroupedItemClick } from './graph_grouped_node_preview_panel/events';
 export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,
@@ -41,7 +40,3 @@ export {
   isEntityNodeEnriched,
   getSingleDocumentData,
 } from './utils';
-export { Callout, type CalloutProps } from './callout/callout';
-export { getCalloutConfig } from './callout/callout.config';
-export { useGraphCallout } from '../hooks/use_graph_callout';
-export { type CalloutVariant, type CalloutConfig } from './callout/callout.translations';

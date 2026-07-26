@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import { format } from 'url';
-import { pickBy } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
+
+const getAccess = (pathname: string): 'public' | 'internal' => {
+  return pathname === '/internal' || pathname.startsWith('/internal/') ? 'internal' : 'public';
+};
+
+const getErrorTargetUrl = (error: unknown): string | undefined => {
+  if (error instanceof Error && 'request' in error) {
+    return (error as Error & { request?: Request }).request?.url;
+  }
+};
 
 export function registerKibanaFunction({
   functions,
@@ -51,76 +57,35 @@ export function registerKibanaFunction({
     },
     async ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request, logger } = resources;
-      const requestUrl = request.rewrittenUrl || request.url;
       const core = await resources.plugins.core.start();
-
-      function getParsedPublicBaseUrl() {
-        const { publicBaseUrl } = core.http.basePath;
-        if (!publicBaseUrl) {
-          const errorMessage = `Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml`;
-          logger.error(errorMessage);
-          throw new Error(errorMessage);
-        }
-        const parsedBaseUrl = new URL(publicBaseUrl);
-        return parsedBaseUrl;
-      }
-
-      function getPathnameWithSpaceId() {
-        const { serverBasePath } = core.http.basePath;
-        const { spaceId } = getSpaceIdFromPath(requestUrl.pathname, serverBasePath);
-        const pathnameWithSpaceId = addSpaceIdToPath(serverBasePath, spaceId, pathname);
-        return pathnameWithSpaceId;
-      }
-
-      const parsedPublicBaseUrl = getParsedPublicBaseUrl();
-      const nextUrl = {
-        host: parsedPublicBaseUrl.host,
-        protocol: parsedPublicBaseUrl.protocol,
-        pathname: getPathnameWithSpaceId(),
-        query: query ? (query as Record<string, string>) : undefined,
-      };
-
-      logger.info(
-        `Calling Kibana API by forwarding request from "${requestUrl}" to: "${method} ${format(
-          nextUrl
-        )}"`
-      );
-
-      const copiedHeaderNames = [
-        'accept-encoding',
-        'accept-language',
-        'accept',
-        'authorization',
-        'content-type',
-        'cookie',
-        'kbn-build-number',
-        'kbn-version',
-        'origin',
-        'referer',
-        'user-agent',
-        'x-elastic-internal-origin',
-        'x-elastic-product-origin',
-        'x-kbn-context',
-      ];
-
-      const headers = pickBy(request.headers, (value, key) => {
-        return (
-          copiedHeaderNames.includes(key.toLowerCase()) || key.toLowerCase().startsWith('sec-')
-        );
-      });
+      const fetchOptions = {
+        method,
+        query: query as HttpSelfFetchQuery | undefined,
+        body,
+        signal,
+        forwardRequestHeaders: true,
+        access: getAccess(pathname),
+        asResponse: true,
+      } as const;
 
       try {
-        const response = await axios({
-          method,
-          headers,
-          url: format(nextUrl),
-          data: body ? JSON.stringify(body) : undefined,
-          signal,
-        });
-        return { content: response.data };
-      } catch (e) {
-        logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
-        throw e;
+        const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
+
+        logger.info(
+          `Called Kibana API by forwarding request from "${
+            request.rewrittenUrl ?? request.url
+          }" to: "${method} ${response.request.url}"`
+        );
+
+        return { content: response.body };
+      } catch (error) {
+        const targetUrl = getErrorTargetUrl(error) ?? pathname;
+        logger.error(
+          `Error calling Kibana API by forwarding request from "${
+            request.rewrittenUrl ?? request.url
+          }" to: "${method} ${targetUrl}". Failed with ${error}`
+        );
+        throw error;
       }
     }
   );

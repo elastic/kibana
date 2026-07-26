@@ -6,8 +6,8 @@
  */
 
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { createActorContext } from '@xstate5/react';
-import { assign, setup } from 'xstate5';
+import { createActorContext } from '@xstate/react';
+import { assign, setup } from 'xstate';
 import type { LogsOverviewFeatureFlags } from '../../types';
 import type {
   LogsSourceConfiguration,

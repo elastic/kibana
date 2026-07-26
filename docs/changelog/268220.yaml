@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/268220
+issues:
+- https://github.com/elastic/kibana/issues/268172
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Dashboards and visualizations
+title: Fix null title handling in dashboard panels

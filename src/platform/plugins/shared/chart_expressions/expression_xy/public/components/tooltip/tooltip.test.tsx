@@ -96,7 +96,7 @@ describe('Tooltip', () => {
       splitSeriesAccessors: {
         [splitAccessors[0] as string]: {
           format: { id: 'date' },
-          formatter: { convert: (value) => `formatted-date-${value}` } as FieldFormat,
+          formatter: { convertToText: (value) => `formatted-date-${value}` } as FieldFormat,
         },
       },
       splitRowAccessors: { [splitRowAccessor]: { id: 'number' } },
@@ -106,7 +106,7 @@ describe('Tooltip', () => {
 
   const formatFactory: FormatFactory = (format) =>
     ({
-      convert: (value) => `formatted-${format?.id}-${value}`,
+      convertToText: (value) => `formatted-${format?.id}-${value}`,
     } as FieldFormat);
 
   it('should render plain tooltip', () => {

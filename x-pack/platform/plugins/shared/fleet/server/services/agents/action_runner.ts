@@ -16,7 +16,7 @@ import moment from 'moment';
 import type { Agent } from '../../types';
 import { appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
@@ -213,7 +213,7 @@ export abstract class ActionRunner {
 
   async processAgentsInBatches(): Promise<{ actionId: string }> {
     const start = Date.now();
-    const pitId = this.retryParams.pitId;
+    let pitId = this.retryParams.pitId;
 
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
@@ -221,11 +221,7 @@ export abstract class ActionRunner {
 
     const getAgents = async () => {
       const namespaceFilter = await agentsKueryNamespaceFilter(this.actionParams.spaceId);
-
-      const kuery = [
-        ...(namespaceFilter ? [namespaceFilter] : []),
-        ...(this.actionParams.kuery ? [this.actionParams.kuery] : []),
-      ].join(' AND ');
+      const kuery = buildFilterWithNamespace(namespaceFilter, this.actionParams.kuery);
 
       return getAgentsByKuery(this.esClient, this.soClient, {
         kuery,
@@ -239,6 +235,10 @@ export abstract class ActionRunner {
     };
 
     const res = await getAgents();
+    if (res.pit) {
+      pitId = res.pit;
+      this.retryParams.pitId = pitId;
+    }
 
     let currentAgents = res.agents;
     if (currentAgents.length === 0) {
@@ -255,6 +255,10 @@ export abstract class ActionRunner {
       const lastAgent = currentAgents[currentAgents.length - 1];
       this.retryParams.searchAfter = lastAgent.sort!;
       const nextPage = await getAgents();
+      if (nextPage.pit) {
+        pitId = nextPage.pit;
+        this.retryParams.pitId = pitId;
+      }
       currentAgents = nextPage.agents;
       if (currentAgents.length === 0) {
         appContextService

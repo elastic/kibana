@@ -73,7 +73,7 @@ export function StepFieldTrend({
         appendTitle={
           <EuiButton
             data-test-subj="syntheticsStepFieldTrendButton"
-            iconType={'visArea'}
+            iconType={'chartArea'}
             href={href}
             target="_blank"
             size="s"

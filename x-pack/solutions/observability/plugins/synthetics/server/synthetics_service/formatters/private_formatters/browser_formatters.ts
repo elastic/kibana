@@ -43,7 +43,10 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
+  // Private browser monitors encode SOURCE_INLINE in formatSyntheticsPolicy and set
+  // source.inline.encoding=base64. Keep this null so the generic string formatter
+  // does not JSON-stringify the script before that private-location encoding step.
+  [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,

@@ -124,6 +124,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
         body: schema.object({
           searchQuery: schema.string({
             defaultValue: '',
+            maxLength: 10000,
           }),
           trackTotalHits: schema.boolean({ defaultValue: false }),
         }),

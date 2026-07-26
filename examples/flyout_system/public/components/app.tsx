@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { EuiCode, EuiPageTemplate, EuiText, type EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageTemplate, type EuiPageTemplateProps } from '@elastic/eui';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { OverlayStart } from '@kbn/core/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 
 import { FlyoutWithComponent } from './_flyout_with_component';
 import { FlyoutWithOverlays } from './_flyout_with_overlays';
+import { NonSessionFlyouts } from './_non_session_flyouts';
 
 interface AppDeps {
   basename: string;
@@ -31,6 +32,9 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const restrictWidth: EuiPageTemplateProps['restrictWidth'] = false;
   const bottomBorder: EuiPageTemplateProps['bottomBorder'] = 'extended';
 
+  // all flyouts share the same history group using a shared `historyKey` object
+  const historyKey = useMemo(() => Symbol('flyout-history-group'), []);
+
   return (
     <EuiPageTemplate
       panelled={panelled}
@@ -42,36 +46,15 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
 
       <EuiPageTemplate.Section grow={false} alignment="top">
-        <FlyoutWithComponent />
+        <FlyoutWithComponent historyKey={historyKey} />
       </EuiPageTemplate.Section>
 
       <EuiPageTemplate.Section grow={false} alignment="top">
-        <FlyoutWithOverlays overlays={overlays} rendering={rendering} />
+        <FlyoutWithOverlays historyKey={historyKey} overlays={overlays} />
       </EuiPageTemplate.Section>
 
-      <EuiPageTemplate.Section grow={true} alignment="top">
-        <EuiText>
-          <p>
-            The following filler text is used to test the scroll lock behavior of flyouts that have{' '}
-            <EuiCode>{'ownFocus="true"'}</EuiCode>.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque aliquam odio
-            et faucibus. Nulla rhoncus feugiat eros quis consectetur. Morbi neque ex, condimentum
-            dapibus congue et, vulputate ut ligula. Vestibulum sit amet urna turpis. Mauris euismod
-            elit et nisi ultrices, ut faucibus orci tincidunt. Duis a quam nec dui luctus dignissim.
-            Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
-            egestas. Integer convallis erat vel felis facilisis, at convallis erat elementum.
-          </p>
-          <p>
-            Aenean ac eleifend lacus, in mollis lectus. Vivamus sodales, augue in facilisis commodo,
-            odio augue ornare metus, ut fringilla augue justo vel mi. Morbi vitae diam augue.
-            Aliquam vel mauris a nibh auctor commodo. Praesent et nisi eu justo eleifend convallis.
-            Quisque suscipit maximus vestibulum. Phasellus congue mollis orci, sit amet luctus augue
-            fringilla vel. Curabitur vitae orci nec massa volutpat posuere in sed felis.
-            Pellentesque sollicitudin fringilla purus, eu pretium massa euismod eu.
-          </p>
-        </EuiText>
+      <EuiPageTemplate.Section grow={false} alignment="top">
+        <NonSessionFlyouts overlays={overlays} rendering={rendering} />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

@@ -75,6 +75,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 >;
 
 interface RunOpts<
@@ -187,6 +188,7 @@ export class RuleTypeRunner<
       revision,
       snoozeSchedule,
       alertDelay,
+      lastEnabledAt,
     } = rule;
 
     const { alertTypeState: ruleTypeState = {}, previousStartedAt } = state;
@@ -253,10 +255,13 @@ export class RuleTypeRunner<
             return maintenanceWindowsPromise;
           };
 
+          const cpsData = context.isServerless ? await executorServices.getCpsData() : undefined;
+
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
               ruleType.executor({
                 executionId,
+                cpsData,
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
@@ -321,6 +326,7 @@ export class RuleTypeRunner<
                   muteAll,
                   snoozeSchedule,
                   alertDelay,
+                  ...(lastEnabledAt ? { lastEnabledAt } : {}),
                 },
                 logger: context.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,

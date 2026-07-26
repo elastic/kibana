@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { StreamlangDSL } from '@kbn/streamlang';
+import type { ProcessorMetrics } from '@kbn/streams-schema';
 import type { SuccessfulPipelineSimulateDocumentResult } from './simulation_handler';
-import { computeSimulationDocDiff } from './simulation_handler';
+import {
+  collectConditionBlockIds,
+  computeSimulationDocDiff,
+  extractProcessorMetrics,
+  getDocumentStatus,
+} from './simulation_handler';
 
 /**
  * Creates a mock processor result for testing
@@ -27,7 +34,16 @@ const createMockProcessorResult = (
   },
 });
 
+const createMockSkippedProcessorResult = (
+  tag: string
+): SuccessfulPipelineSimulateDocumentResult['processor_results'][number] => ({
+  tag,
+  status: 'skipped' as const,
+});
+
 describe('computeSimulationDocDiff', () => {
+  const conditionProcessorTags = new Set<string>();
+
   describe('detected_fields filtering', () => {
     it('should NOT include a field that is created then deleted in detected_fields', () => {
       // Scenario: Processor 1 adds 'temp_field', Processor 2 removes it
@@ -39,7 +55,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // temp_field should NOT be in detected_fields (not in final output)
       expect(result.detected_fields.map((f) => f.name)).not.toContain('temp_field');
@@ -73,7 +95,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // detected_fields should be EMPTY - no new fields in final output vs input
       expect(result.detected_fields).toHaveLength(0);
@@ -99,7 +127,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // new_field should be in detected_fields (exists in final output)
       expect(result.detected_fields.map((f) => f.name)).toContain('new_field');
@@ -120,7 +154,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // to_be_deleted should NOT be in detected_fields (not in final output)
       expect(result.detected_fields.map((f) => f.name)).not.toContain('to_be_deleted');
@@ -138,7 +178,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // new_field should be in detected_fields (exists in final output)
       expect(result.detected_fields.map((f) => f.name)).toContain('new_field');
@@ -172,7 +218,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // Only 'kept' and 'new_in_p2' should be in detected_fields
       const detectedFieldNames = result.detected_fields.map((f) => f.name);
@@ -201,7 +253,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // Both new fields should be detected
       const detectedFieldNames = result.detected_fields.map((f) => f.name);
@@ -216,7 +274,13 @@ describe('computeSimulationDocDiff', () => {
         processor_results: [],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       expect(result.detected_fields).toHaveLength(0);
       expect(result.intermediate_field_changes).toHaveLength(0);
@@ -238,7 +302,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // processor1 should have field_a attributed to it
       expect(result.intermediate_field_changes).toContainEqual({
@@ -262,7 +332,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, ['reserved_field']);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: ['reserved_field'],
+        conditionProcessorTags,
+      });
 
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toMatchObject({
@@ -277,7 +353,13 @@ describe('computeSimulationDocDiff', () => {
         processor_results: [createMockProcessorResult('processor1', { normal_field: 'modified' })],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, ['reserved_field']);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: ['reserved_field'],
+        conditionProcessorTags,
+      });
 
       expect(result.errors).toHaveLength(0);
     });
@@ -297,7 +379,13 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // parent.temp should NOT be in detected_fields
       expect(result.detected_fields.map((f) => f.name)).not.toContain('parent.temp');
@@ -317,10 +405,178 @@ describe('computeSimulationDocDiff', () => {
         ],
       };
 
-      const result = computeSimulationDocDiff(base, docResult, true, []);
+      const result = computeSimulationDocDiff({
+        base,
+        docResult,
+        isWiredStream: true,
+        forbiddenFields: [],
+        conditionProcessorTags,
+      });
 
       // parent.permanent should be in detected_fields
       expect(result.detected_fields.map((f) => f.name)).toContain('parent.permanent');
     });
+  });
+});
+
+describe('collectConditionBlockIds', () => {
+  it('includes :else ids only when the else branch is non-empty', () => {
+    const withElse: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'c1',
+          condition: {
+            field: 'x',
+            eq: 'y',
+            steps: [],
+            else: [
+              {
+                customIdentifier: 'p-else',
+                action: 'set',
+                to: 't',
+                value: 'v',
+              },
+            ],
+          },
+        },
+      ],
+    };
+    expect(collectConditionBlockIds(withElse)).toEqual(new Set(['c1', 'c1:else']));
+
+    const emptyElse: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'c1',
+          condition: {
+            field: 'x',
+            eq: 'y',
+            steps: [],
+            else: [],
+          },
+        },
+      ],
+    };
+    expect(collectConditionBlockIds(emptyElse)).toEqual(new Set(['c1']));
+  });
+});
+
+describe('getDocumentStatus', () => {
+  const noIngestErrors: [] = [];
+
+  it('returns parsed when simulation only ran condition no-op processors (no user processors)', () => {
+    const conditionTags = new Set(['cond-1']);
+    const doc: SuccessfulPipelineSimulateDocumentResult = {
+      processor_results: [
+        createMockProcessorResult('cond-1', { foo: 'bar' }),
+        createMockProcessorResult('cond-1:noop-cleanup', { foo: 'bar' }),
+      ],
+    };
+
+    expect(getDocumentStatus(doc, noIngestErrors, conditionTags)).toBe('parsed');
+  });
+
+  it('returns parsed when if- and else-branch no-op pairs are the only processors', () => {
+    const conditionTags = new Set(['cond-1', 'cond-1:else']);
+    const doc: SuccessfulPipelineSimulateDocumentResult = {
+      processor_results: [
+        createMockProcessorResult('cond-1', { a: 1 }),
+        createMockProcessorResult('cond-1:noop-cleanup', { a: 1 }),
+        createMockProcessorResult('cond-1:else', { a: 1 }),
+        createMockProcessorResult('cond-1:else:noop-cleanup', { a: 1 }),
+      ],
+    };
+
+    expect(getDocumentStatus(doc, noIngestErrors, conditionTags)).toBe('parsed');
+  });
+
+  it('returns parsed when the if-branch processor runs and else-branch processors are skipped', () => {
+    const conditionTags = new Set(['cond-1', 'cond-1:else']);
+    const doc: SuccessfulPipelineSimulateDocumentResult = {
+      processor_results: [
+        createMockProcessorResult('cond-1', { x: 1 }),
+        createMockProcessorResult('cond-1:noop-cleanup', { x: 1 }),
+        createMockProcessorResult('proc-if', { x: 1, out: 'if' }),
+        createMockSkippedProcessorResult('cond-1:else'),
+        createMockSkippedProcessorResult('cond-1:else:noop-cleanup'),
+        createMockSkippedProcessorResult('proc-else'),
+      ],
+    };
+
+    expect(getDocumentStatus(doc, noIngestErrors, conditionTags)).toBe('parsed');
+  });
+
+  it('returns parsed when the if-branch processor is skipped and the else-branch processor succeeds', () => {
+    const conditionTags = new Set(['cond-1', 'cond-1:else']);
+    const doc: SuccessfulPipelineSimulateDocumentResult = {
+      processor_results: [
+        createMockSkippedProcessorResult('cond-1'),
+        createMockSkippedProcessorResult('cond-1:noop-cleanup'),
+        createMockSkippedProcessorResult('proc-if'),
+        createMockProcessorResult('cond-1:else', { x: 1 }),
+        createMockProcessorResult('cond-1:else:noop-cleanup', { x: 1 }),
+        createMockProcessorResult('proc-else', { x: 1, out: 'else' }),
+      ],
+    };
+
+    expect(getDocumentStatus(doc, noIngestErrors, conditionTags)).toBe('parsed');
+  });
+
+  it('returns skipped when every non–condition-noop processor is skipped', () => {
+    const conditionTags = new Set(['cond-1']);
+    const doc: SuccessfulPipelineSimulateDocumentResult = {
+      processor_results: [
+        createMockSkippedProcessorResult('cond-1'),
+        createMockProcessorResult('cond-1:noop-cleanup', {}),
+        createMockSkippedProcessorResult('proc-only'),
+      ],
+    };
+
+    expect(getDocumentStatus(doc, noIngestErrors, conditionTags)).toBe('skipped');
+  });
+});
+
+describe('extractProcessorMetrics', () => {
+  it('computes parsed_rate as 1 - skipped_rate - failed_rate (three-decimal rounding)', () => {
+    const sampleSize = 10;
+    const processorsMap: Record<string, ProcessorMetrics> = {
+      p1: {
+        detected_fields: [],
+        errors: [],
+        failed_rate: 2,
+        skipped_rate: 3,
+        parsed_rate: 1,
+        dropped_rate: 1,
+      },
+    };
+
+    const result = extractProcessorMetrics({
+      processorsMap,
+      sampleSize,
+    });
+
+    expect(result.p1?.skipped_rate).toBe(0.3);
+    expect(result.p1?.failed_rate).toBe(0.2);
+    expect(result.p1?.dropped_rate).toBe(0.1);
+    expect(result.p1?.parsed_rate).toBe(0.5);
+    expect(0.3 + 0.2 + 0.5).toBe(1);
+  });
+
+  it('yields parsed_rate 1 when a processor never fails or skips across all docs', () => {
+    const processorsMap: Record<string, ProcessorMetrics> = {
+      p1: {
+        detected_fields: [],
+        errors: [],
+        failed_rate: 0,
+        skipped_rate: 0,
+        parsed_rate: 1,
+        dropped_rate: 0,
+      },
+    };
+
+    const result = extractProcessorMetrics({ processorsMap, sampleSize: 5 });
+
+    expect(result.p1?.parsed_rate).toBe(1);
+    expect(result.p1?.skipped_rate).toBe(0);
+    expect(result.p1?.failed_rate).toBe(0);
   });
 });

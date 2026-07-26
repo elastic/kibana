@@ -12,7 +12,6 @@ import type { CounterRateIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiCounterRateOperation, LensApiMetricOperation } from '../../schema/metric_ops';
 
 describe('Counter Rate Transforms', () => {
-  const testRef = { id: 'maxId', field: 'bytes' };
   const columnRef: LensApiMetricOperation = {
     operation: 'max',
     field: 'bytes',
@@ -33,10 +32,10 @@ describe('Counter Rate Transforms', () => {
         isBucketed: false,
         dataType: 'number',
         params: {},
-        references: [testRef.id],
+        references: [],
       };
 
-      expect(fromCounterRateAPItoLensState(input, testRef)).toEqual(expected);
+      expect(fromCounterRateAPItoLensState(input)).toEqual(expected);
     });
 
     it('should handle format configuration', () => {
@@ -49,7 +48,7 @@ describe('Counter Rate Transforms', () => {
         },
       };
 
-      const result = fromCounterRateAPItoLensState(input, testRef);
+      const result = fromCounterRateAPItoLensState(input);
       expect(result.params?.format).toEqual({
         id: 'bytes',
         params: {
@@ -65,13 +64,15 @@ describe('Counter Rate Transforms', () => {
         label: 'Byte Rate',
       };
 
-      const result = fromCounterRateAPItoLensState(input, testRef);
+      const result = fromCounterRateAPItoLensState(input);
       expect(result.label).toBe('Byte Rate');
       expect(result.customLabel).toBe(true);
     });
   });
 
   describe('fromCounterRateLensStateToAPI', () => {
+    const testRef = { id: 'maxId', field: 'bytes' };
+
     it('should transform basic counter rate configuration', () => {
       const input: CounterRateIndexPatternColumn = {
         operationType: 'counter_rate',

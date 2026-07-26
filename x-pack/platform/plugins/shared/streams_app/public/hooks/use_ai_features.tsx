@@ -14,7 +14,6 @@ import {
 import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
 import { useKibana } from './use_kibana';
 import { useGenAIConnectors, type UseGenAIConnectorsResult } from './use_genai_connectors';
-import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 
 export interface AIFeatures {
   loading: boolean;
@@ -29,7 +28,7 @@ export interface AIFeatures {
 export function useAIFeatures(): AIFeatures | null {
   const {
     dependencies: {
-      start: { licensing, streams },
+      start: { licensing },
     },
     core,
   } = useKibana();
@@ -37,8 +36,8 @@ export function useAIFeatures(): AIFeatures | null {
   const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
 
   const genAiConnectors = useGenAIConnectors({
-    streamsRepositoryClient: streams.streamsRepositoryClient,
-    uiSettings: core.uiSettings,
+    http: core.http,
+    settings: core.settings,
   });
   const license = useObservable(licensing.license$);
   const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
@@ -61,8 +60,6 @@ export function useAIFeatures(): AIFeatures | null {
     };
   }
 
-  const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
-
   // Check for actions.show permission (read access is sufficient for listing connectors)
   const hasActionsPermission = core.application.capabilities.actions?.show || false;
 
@@ -74,9 +71,10 @@ export function useAIFeatures(): AIFeatures | null {
   const couldBeEnabled = Boolean(
     license?.hasAtLeast('enterprise') && core.application.capabilities.actions?.show
   );
-  const isManagedAIConnector = elasticManagedLlmConnector
-    ? elasticManagedLlmConnector.id === genAiConnectors.selectedConnector
-    : false;
+  const selectedConnector = (genAiConnectors.connectors || []).find(
+    (connector) => connector.connectorId === genAiConnectors.selectedConnector
+  );
+  const isManagedAIConnector = selectedConnector?.isEis || false;
 
   return {
     loading: false,

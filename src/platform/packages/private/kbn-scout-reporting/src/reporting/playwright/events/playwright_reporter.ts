@@ -20,7 +20,13 @@ import type {
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  SCOUT_UNIFIED_CONFIG_PATH_REGEX,
+  ScoutTestRunConfigCategory,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -30,7 +36,6 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
 import {
   ScoutEventsReport,
   ScoutReportEventAction,
@@ -76,11 +81,14 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
+
+    const testTarget = ScoutTestTarget.tryFromEnv();
+
     this.baseTestRunInfo = {
       id: this.runId,
       target: {
-        type: SCOUT_TARGET_TYPE,
-        mode: SCOUT_TARGET_MODE,
+        type: testTarget?.location || 'unknown',
+        mode: testTarget?.tagWithoutLocation || 'unknown',
       },
     };
     this.codeOwnersEntries = getCodeOwnersEntries();
@@ -107,16 +115,23 @@ export class ScoutPlaywrightReporter implements Reporter {
     };
   }
 
-  private getScoutConfigCategory(configPath: string): ScoutTestRunConfigCategory {
-    // Matches scout/{api|ui} or scout_<custom>/{api|ui} and captures api|ui
-    const pattern = /scout(?:_[^/]+)?\/(api|ui)\//;
-    const match = configPath.match(pattern);
-    if (match) {
-      return match[1] === 'api'
+  private getScoutConfigInfo(absoluteConfigPath: string): {
+    category: ScoutTestRunConfigCategory;
+    namespace: string | undefined;
+  } {
+    const relativePath = path.relative(REPO_ROOT, absoluteConfigPath);
+    const groups = SCOUT_UNIFIED_CONFIG_PATH_REGEX.exec(relativePath)?.groups;
+
+    if (!groups) {
+      return { category: ScoutTestRunConfigCategory.UNKNOWN, namespace: undefined };
+    }
+
+    const category =
+      groups.testCategory === 'api'
         ? ScoutTestRunConfigCategory.API_TEST
         : ScoutTestRunConfigCategory.UI_TEST;
-    }
-    return ScoutTestRunConfigCategory.UNKNOWN;
+
+    return { category, namespace: groups.namespace };
   }
 
   private getSuitePropsFromTest(test: TestCase): ScoutReportEvent['suite'] {
@@ -152,6 +167,12 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (result) {
       testProps.status = result.status;
       testProps.duration = result.duration;
+      const consoleErrors = result.attachments
+        .find((a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        ?.body?.toString('utf-8');
+      if (consoleErrors) {
+        testProps.console_errors = consoleErrors;
+      }
     }
 
     return testProps;
@@ -175,9 +196,11 @@ export class ScoutPlaywrightReporter implements Reporter {
     let configInfo: ScoutTestRunInfo['config'];
 
     if (config.configFile !== undefined) {
+      const { category, namespace } = this.getScoutConfigInfo(config.configFile);
       configInfo = {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
-        category: this.getScoutConfigCategory(config.configFile),
+        category,
+        ...(namespace !== undefined && { namespace }),
       };
     }
 

@@ -8,6 +8,8 @@
 export const EVENT_GRAPH_VISUALIZATION_API = '/internal/cloud_security_posture/graph' as const;
 
 export const RELATED_ENTITY = 'related.entity' as const;
+export const RELATED_USER = 'related.user' as const;
+export const RELATED_HOST = 'related.hosts' as const;
 export const EVENT_ACTION = 'event.action' as const;
 export const EVENT_ID = 'event.id' as const;
 

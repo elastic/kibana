@@ -6,9 +6,9 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { IndicesMetadataPlugin } from './plugin';
 
 export { config } from './config';
 export async function plugin(context: PluginInitializerContext) {
+  const { IndicesMetadataPlugin } = await import('./plugin');
   return new IndicesMetadataPlugin(context);
 }

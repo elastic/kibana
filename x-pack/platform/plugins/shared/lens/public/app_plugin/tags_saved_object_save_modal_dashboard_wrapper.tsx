@@ -9,11 +9,9 @@ import type { FC } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { DistributiveOmit } from '@elastic/eui';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;
@@ -22,7 +20,7 @@ export type DashboardSaveProps = OnSaveProps & {
   newTags?: string[];
 };
 
-export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
+export type TagEnhancedSavedObjectSaveModalDashboardProps = DistributiveOmit<
   SaveModalDashboardProps,
   'onSave'
 > & {
@@ -31,8 +29,6 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
   onSave: (props: DashboardSaveProps) => Promise<void>;
   getOriginatingPath?: (dashboardId: string) => string;
 };
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const TagEnhancedSavedObjectSaveModalDashboard: FC<
   TagEnhancedSavedObjectSaveModalDashboardProps

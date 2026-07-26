@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { inspect } from '../model/inspect';
@@ -18,6 +18,7 @@ export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
   timerange,
   inspect,
   factoryQueryType: z.literal(UsersQueries.observedDetails),
+  entityStoreV2: z.boolean().optional(),
 });
 
 export type ObservedUserDetailsRequestOptionsInput = z.input<typeof observedUserDetailsSchema>;

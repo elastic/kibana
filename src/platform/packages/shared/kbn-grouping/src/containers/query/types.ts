@@ -49,6 +49,7 @@ export interface GroupingQueryArgs {
   };
   multiValueFieldsToFlatten?: string[];
   countByKeyForMultiValueFields?: string;
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export interface MainAggregation extends NamedAggregation {
@@ -66,7 +67,7 @@ export interface GroupingRuntimeField extends MappingRuntimeField {
 
 type GroupingMappingRuntimeFields = Record<'groupByField', GroupingRuntimeField>;
 
-export interface GroupingQuery extends estypes.QueryDslQueryContainer {
+export type GroupingQuery = estypes.QueryDslQueryContainer & {
   aggs: MainAggregation;
   query: {
     bool: {
@@ -76,4 +77,4 @@ export interface GroupingQuery extends estypes.QueryDslQueryContainer {
   runtime_mappings: MappingRuntimeFields & GroupingMappingRuntimeFields;
   size: number;
   _source: boolean;
-}
+};

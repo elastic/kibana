@@ -8,8 +8,11 @@
 import React, { useMemo, memo, type ComponentProps, useContext } from 'react';
 import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, getOr } from 'lodash/fp';
+import type { Alert } from '@kbn/alerting-types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -32,8 +35,7 @@ export type RenderCellValueProps = Pick<
   | 'rowIndex'
   | 'tableId'
   | 'tableType'
-  | 'legacyAlert'
-  | 'ecsAlert'
+  | 'alert'
   | 'rowRenderers'
   | 'isDetails'
   | 'isExpandable'
@@ -53,8 +55,7 @@ export const CellValue = memo(function RenderCellValue({
   tableId,
   tableType,
   header,
-  legacyAlert,
-  ecsAlert,
+  alert,
   linkValues,
   rowRenderers,
   isDetails,
@@ -83,6 +84,22 @@ export const CellValue = memo(function RenderCellValue({
   }
 
   const { browserFields, browserFieldsByName, columnHeaders } = cellValueContext;
+
+  // Derive legacyAlert (flat {field, value[]} array) from alert
+  const legacyAlert = useMemo<TimelineNonEcsData[]>(() => {
+    if (!alert) return [];
+    return Object.entries(alert).map(([field, value]) => ({
+      field,
+      value: (Array.isArray(value) ? value : [value]) as string[],
+    }));
+  }, [alert]);
+
+  // Derive ecsAlert (nested object) from alert
+  const ecsAlert = useMemo<Ecs>(() => {
+    if (!alert) return {} as Ecs;
+    return expandDottedObject(alert as Alert) as Ecs;
+  }, [alert]);
+
   /**
    * There is difference between how `triggers actions` fetched data v/s
    * how security solution fetches data via timelineSearchStrategy
@@ -111,7 +128,7 @@ export const CellValue = memo(function RenderCellValue({
     // We check both ecsAlert and data for the suppression count because it could be in either one,
     // depending on where RenderCellValue is being used - when used in cases, data is populated,
     // whereas in the regular security alerts table it's in ecsAlert
-    const ecsSuppressionCount = ecsAlert?.kibana?.alert.suppression?.docs_count?.[0];
+    const ecsSuppressionCount = ecsAlert?.kibana?.alert?.suppression?.docs_count?.[0];
     const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, legacyAlert)
       ?.value?.[0] as number | undefined;
     return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;

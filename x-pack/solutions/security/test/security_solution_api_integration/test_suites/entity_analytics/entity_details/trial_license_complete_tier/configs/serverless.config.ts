@@ -17,8 +17,9 @@ export default createTestConfig({
     ])}`,
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-      'entityDetailsHighlightsEnabled',
+      'disable:entityAnalyticsEntityStoreV2',
     ])}`,
+    '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
   ],
   testFiles: [require.resolve('..')],
   junit: {

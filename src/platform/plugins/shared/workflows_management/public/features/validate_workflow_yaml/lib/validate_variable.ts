@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
+import { getDetailedTypeDescription } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath } from '../../../../common/lib/zod';
-import { getDetailedTypeDescription } from '../../../../common/lib/zod/zod_type_description';
 import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';

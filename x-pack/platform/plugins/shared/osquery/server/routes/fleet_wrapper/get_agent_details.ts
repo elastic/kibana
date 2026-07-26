@@ -6,8 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import pLimit from 'p-limit';
 import type { RelatedEntityFromSearchResults } from '.';
 import {
@@ -136,7 +136,9 @@ export async function extractRelatedEntities({
     })
   );
 
-  const foundEntityIds = foundEntities.map(({ entity: foundEntity }) => stringify(foundEntity));
+  const foundEntityIds = foundEntities.map(({ entity: foundEntity }) =>
+    stableStringify(foundEntity)
+  );
 
   const relatedEntities = allEvents
     .flat()
@@ -150,7 +152,7 @@ export async function extractRelatedEntities({
       });
     })
     .filter((item) => {
-      return foundEntityIds.includes(stringify(item.entity));
+      return foundEntityIds.includes(stableStringify(item.entity));
     });
 
   return {

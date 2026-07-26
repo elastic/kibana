@@ -27,8 +27,8 @@ import {
   groupedTargetMockData,
 } from '../mock/use_fetch_graph_data.mock';
 
-const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
+  scopeId: 'storybook-graph-investigation',
   initialState: {
     dataView: mockDataView,
     originEventIds: [
@@ -42,8 +42,8 @@ const defaultProps: GraphInvestigationProps = {
       },
     ],
     timeRange: {
-      from: `${hourAgo.toISOString()}||-15m`,
-      to: `${hourAgo.toISOString()}||+15m`,
+      from: 'now-75m',
+      to: 'now-45m',
     },
   },
   onInvestigateInTimeline: action('onInvestigateInTimeline'),
@@ -122,7 +122,7 @@ const meta = {
     supportNodePreviewPopover: {
       control: { type: 'boolean' },
       description:
-        'Enable or disable the support for node preview popover (When disabled `Show event details` list item is not shown)',
+        'Enable or disable the support for node preview popover (controls event and network preview popovers)',
     },
   },
   args: {

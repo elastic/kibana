@@ -15,7 +15,7 @@ export function EmptyDataPrompt() {
       <EuiSpacer />
       <EuiEmptyPrompt
         color="subdued"
-        iconType="search"
+        iconType="magnify"
         titleSize="xs"
         title={
           <h2>

@@ -1,3 +1,5 @@
+name: Label and backport on merge
+
 on:
   pull_request_target:
     types:

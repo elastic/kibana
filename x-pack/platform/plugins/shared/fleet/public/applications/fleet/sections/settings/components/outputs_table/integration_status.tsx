@@ -22,6 +22,7 @@ import {
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
 
@@ -240,7 +241,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 <EuiButton
                   color="warning"
                   href={docLinks.links.fleet.remoteESOoutputTroubleshooting}
-                  iconType="popout"
+                  iconType="external"
                   target="blank"
                 >
                   <FormattedMessage
@@ -293,10 +294,23 @@ export const IntegrationStatus: React.FunctionComponent<{
                       }
                       type={
                         customAsset.sync_status === SyncStatus.FAILED
-                          ? 'errorFilled'
+                          ? 'errorFill'
                           : customAsset.sync_status === SyncStatus.WARNING
                           ? 'warning'
-                          : 'checkInCircleFilled'
+                          : 'checkCircleFill'
+                      }
+                      aria-label={
+                        customAsset.sync_status === SyncStatus.FAILED
+                          ? i18n.translate('xpack.fleet.integrationSyncStatus.failedIconLabel', {
+                              defaultMessage: 'Sync failed',
+                            })
+                          : customAsset.sync_status === SyncStatus.WARNING
+                          ? i18n.translate('xpack.fleet.integrationSyncStatus.warningIconLabel', {
+                              defaultMessage: 'Sync warning',
+                            })
+                          : i18n.translate('xpack.fleet.integrationSyncStatus.syncedIconLabel', {
+                              defaultMessage: 'Synced',
+                            })
                       }
                     />
                   )

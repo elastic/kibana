@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -14,11 +15,12 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type {
   AppMenuConfig,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
+  AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -26,13 +28,13 @@ import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { useDashboardAddItems } from './add_menu/use_dashboard_add_items';
+import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -53,9 +55,8 @@ export const useDashboardMenuItems = ({
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
+  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
-      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
@@ -158,23 +159,43 @@ export const useDashboardMenuItems = ({
     }
   }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
 
-  const addMenuItems = useDashboardAddItems({ dashboardApi });
+  const openAddPanelFlyout = useCallback(
+    (params?: AppMenuRunActionParams) => {
+      openLazyFlyout({
+        core: coreServices,
+        parentApi: dashboardApi,
+        returnFocus: params?.returnFocus,
+        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+          const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
 
-  const exportItems = useDashboardExportItems({
-    dashboardApi,
-    objectId: lastSavedId,
-    isDirty: Boolean(hasUnsavedChanges),
-    dashboardTitle,
-  });
+          return (
+            <AddPanelFlyout
+              dashboardApi={dashboardApi}
+              ariaLabelledBy={ariaLabelledBy}
+              returnFocus={params?.returnFocus}
+            />
+          );
+        },
+        flyoutProps: {
+          'data-test-subj': 'dashboardAddPanel',
+        },
+      });
+    },
+    [dashboardApi]
+  );
+
+  const shareOptions = useShareOptions();
+
+  const exportItems = useDashboardExportItems(shareOptions);
+
+  const hasExportMenuItems = exportItems.length > 0;
 
   /**
    * Show the Dashboard app's share menu
    */
   const showShare = useCallback(() => {
     ShowShareModal({
-      dashboardTitle,
-      savedObjectId: lastSavedId,
-      isDirty: Boolean(hasUnsavedChanges),
+      shareOptions,
       canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
       accessControl,
       createdBy: dashboardApi.createdBy,
@@ -184,9 +205,7 @@ export const useDashboardMenuItems = ({
       changeAccessMode: dashboardApi.changeAccessMode,
     });
   }, [
-    dashboardTitle,
     hasUnsavedChanges,
-    lastSavedId,
     isInEditAccessMode,
     canManageAccessControl,
     accessControl,
@@ -195,6 +214,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
+    shareOptions,
   ]);
 
   const getEditTooltip = useCallback(() => {
@@ -220,7 +240,7 @@ export const useDashboardMenuItems = ({
       label: topNavStrings.resetChanges.label,
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
-      iconType: 'editorUndo',
+      iconType: 'undo',
       disableButton:
         isResetting ||
         !hasUnsavedChanges ||
@@ -245,20 +265,47 @@ export const useDashboardMenuItems = ({
    */
 
   const menuItems = useMemo(() => {
+    const exportMenuItem: AppMenuItemType =
+      exportItems.length === 1
+        ? {
+            order: viewMode === 'edit' ? 4 : 2,
+            label: topNavStrings.export.label,
+            id: 'export',
+            iconType: 'exportAction',
+            testId: 'exportTopNavButton',
+            disableButton: disableTopNav,
+            run: (params) => exportItems[0].run?.(params),
+          }
+        : {
+            order: viewMode === 'edit' ? 4 : 2,
+            label: topNavStrings.export.label,
+            id: 'export',
+            iconType: 'exportAction',
+            testId: 'exportTopNavButton',
+            disableButton: disableTopNav,
+            items: exportItems,
+            popoverWidth: 160,
+            popoverTestId: 'exportPopoverPanel',
+          };
+
     return {
       // Regular menu items
-      fullScreen: {
-        order: 1,
-        label: topNavStrings.fullScreen.label,
-        id: 'full-screen',
-        testId: 'dashboardFullScreenMode',
-        iconType: 'fullScreen',
-        run: () => dashboardApi.setFullScreenMode(true),
+      share: {
+        order: viewMode === 'edit' ? 3 : 1,
+        label: topNavStrings.share.label,
+        tooltipContent: getShareTooltip(),
+        tooltipTitle: topNavStrings.share.tooltipTitle,
+        id: 'share',
+        iconType: 'share',
+        testId: 'shareTopNavButton',
         disableButton: disableTopNav,
+        run: () => showShare(),
       } as AppMenuItemType,
 
+      export: exportMenuItem,
+
       duplicate: {
-        order: 2,
+        order: 3,
         disableButton: disableTopNav,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
@@ -267,19 +314,8 @@ export const useDashboardMenuItems = ({
         label: topNavStrings.viewModeInteractiveSave.label,
       } as AppMenuItemType,
 
-      switchToViewMode: {
-        order: 1,
-        iconType: 'exit', // use 'logOut' when added to EUI
-        label: topNavStrings.switchToViewMode.label,
-        id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId || isResetting,
-        isLoading: isResetting,
-        testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
-      } as AppMenuItemType,
-
       backgroundSearch: {
-        order: 6,
+        order: viewMode === 'edit' ? 6 : 5,
         label: topNavStrings.backgroundSearch.label,
         id: 'backgroundSearch',
         iconType: 'backgroundTask',
@@ -291,28 +327,36 @@ export const useDashboardMenuItems = ({
           }),
       } as AppMenuItemType,
 
-      share: {
-        order: 4,
-        label: topNavStrings.share.label,
-        tooltipContent: getShareTooltip(),
-        tooltipTitle: topNavStrings.share.tooltipTitle,
-        id: 'share',
-        iconType: 'share',
-        testId: 'shareTopNavButton',
+      fullScreen: {
+        order: 6,
+        label: topNavStrings.fullScreen.label,
+        id: 'full-screen',
+        testId: 'dashboardFullScreenMode',
+        iconType: 'fullScreen',
+        run: () => dashboardApi.setFullScreenMode(true),
         disableButton: disableTopNav,
-        run: () => showShare(),
       } as AppMenuItemType,
 
-      export: {
-        order: 3,
-        label: topNavStrings.export.label,
-        id: 'export',
-        iconType: 'exportAction',
-        testId: 'exportTopNavButton',
+      switchToViewMode: {
+        order: 1,
+        iconType: 'logOut', // use 'logOut' when added to EUI
+        label: topNavStrings.switchToViewMode.label,
+        id: 'cancel',
+        disableButton: disableTopNav || !lastSavedId || isResetting,
+        isLoading: isResetting,
+        testId: 'dashboardViewOnlyMode',
+        run: () => resetChanges(true),
+      } as AppMenuItemType,
+
+      add: {
+        label: topNavStrings.add.label,
+        id: 'add',
+        iconType: 'plus',
+        testId: 'dashboardAddTopNavButton',
+        htmlId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
-        items: exportItems,
-        popoverWidth: 160,
-        popoverTestId: 'exportPopoverPanel',
+        run: openAddPanelFlyout,
+        order: 2,
       } as AppMenuItemType,
 
       settings: {
@@ -323,23 +367,10 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
         htmlId: 'dashboardSettingsButton',
-        run: () => openSettingsFlyout(dashboardApi),
+        run: (params) => openSettingsFlyout(dashboardApi, params?.returnFocus),
       } as AppMenuItemType,
 
       // Action items
-      add: {
-        label: topNavStrings.add.label,
-        id: 'add',
-        iconType: 'plusInCircle',
-        color: 'success',
-        testId: 'dashboardAddTopNavButton',
-        htmlId: 'dashboardAddTopNavButton',
-        disableButton: disableTopNav,
-        minWidth: false,
-        popoverWidth: 200,
-        items: addMenuItems,
-      } as AppMenuSecondaryActionItem,
-
       edit: {
         label: topNavStrings.edit.label,
         id: 'edit',
@@ -379,10 +410,8 @@ export const useDashboardMenuItems = ({
           ],
           isMainButtonLoading: isSaveInProgress,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
-          secondaryButtonIcon: 'arrowDown',
-          secondaryButtonFill: true,
           isSecondaryButtonDisabled: isSaveInProgress,
-          notifcationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
+          notificationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
           showNotificationIndicator: hasUnsavedChanges,
         },
       } as AppMenuPrimaryActionItem,
@@ -414,20 +443,16 @@ export const useDashboardMenuItems = ({
     appId,
     isQuickSaveButtonDisabled,
     hasUnsavedChanges,
-    addMenuItems,
+    openAddPanelFlyout,
     resetChangesMenuItem,
     exportItems,
+    viewMode,
   ]);
 
   /**
    * Build ordered menus for view and edit mode.
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
-
-  const hasExportIntegration = useMemo(() => {
-    if (!shareService) return false;
-    return shareService.availableIntegrations('dashboard', 'export').length > 0;
-  }, []);
 
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
@@ -438,13 +463,12 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    // Only show the export button if the current user meets the requirements for at least one registered export integration
-    if (shareService && hasExportIntegration) {
-      items.push(menuItems.export);
-    }
-
     if (shareService) {
       items.push(menuItems.share);
+      if (hasExportMenuItems) {
+        // only render the export button if we have integrations
+        items.push(menuItems.export);
+      }
     }
 
     if (showResetChange) {
@@ -477,24 +501,27 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.labs,
     resetChangesMenuItem,
-    hasExportIntegration,
     dashboardApi.isManaged,
     showResetChange,
     isLabsEnabled,
+    hasExportMenuItems,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
-
-    // Only show the export button if the current user meets the requirements for at least one registered export integration
-    if (shareService && hasExportIntegration) {
-      items.push(menuItems.export);
-    }
+    const items: AppMenuItemType[] = [
+      menuItems.add,
+      menuItems.switchToViewMode,
+      menuItems.settings,
+    ];
 
     if (shareService) {
       items.push(menuItems.share);
+      if (hasExportMenuItems) {
+        // only render the export button if we have integrations
+        items.push(menuItems.export);
+      }
     }
 
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
@@ -507,7 +534,6 @@ export const useDashboardMenuItems = ({
 
     const editModeConfig: AppMenuConfig = {
       items,
-      secondaryActionItem: menuItems.add,
       primaryActionItem: menuItems.save,
     };
 
@@ -518,10 +544,10 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.settings,
     menuItems.backgroundSearch,
-    menuItems.add,
     menuItems.save,
     menuItems.labs,
-    hasExportIntegration,
+    menuItems.add,
+    hasExportMenuItems,
     isLabsEnabled,
   ]);
 

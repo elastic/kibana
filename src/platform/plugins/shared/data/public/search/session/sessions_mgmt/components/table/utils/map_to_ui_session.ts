@@ -7,22 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { SearchSessionsFindResponse } from '../../../../../../../common';
 import type { ACTION, LocatorsStart, SearchSessionSavedObject, UISession } from '../../../types';
 import { getActions } from './get_actions';
-
-function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
-  try {
-    const locator = locators.get(locatorId);
-    return locator?.getRedirectUrl(state);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('Could not create URL from restoreState');
-    // eslint-disable-next-line no-console
-    console.error(err);
-  }
-}
+import { getRedirectUrlFromState, getRestoreUrl } from '../../../../get_session_redirect_url';
 
 // Helper: factory for a function to map server objects to UI objects
 export const mapToUISession = ({
@@ -58,11 +46,8 @@ export const mapToUISession = ({
   // TODO: initialState should be saved without the searchSessionID
   if (initialState) delete initialState.searchSessionId;
   // derive the URL and add it in
-  const reloadUrl = getUrlFromState(locators, locatorId, initialState);
-  const restoreUrl = getUrlFromState(locators, locatorId, {
-    ...restoreState,
-    tab: { id: 'new', label: name },
-  });
+  const reloadUrl = getRedirectUrlFromState({ locators, locatorId, state: initialState });
+  const restoreUrl = getRestoreUrl({ locators, locatorId, restoreState, sessionName: name });
 
   return {
     id: savedObject.id,

@@ -73,7 +73,7 @@ export const bulkDeleteFileAttachments = async (
         fileService
       ),
       attachmentService.bulkDelete({
-        attachmentIds: fileAttachments.map((so) => so.id),
+        savedObjectIds: fileAttachments.map((so) => so.id),
         refresh: false,
       }),
     ]);

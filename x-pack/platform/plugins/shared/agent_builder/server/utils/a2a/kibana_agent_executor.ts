@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
 import type { Part, TextPart } from '@a2a-js/sdk';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { isRoundCompleteEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -29,7 +29,8 @@ export class KibanaAgentExecutor implements AgentExecutor {
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
     private kibanaRequest: KibanaRequest,
-    private agentId: string
+    private agentId: string,
+    private blocking: boolean = true
   ) {}
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
@@ -43,25 +44,44 @@ export class KibanaAgentExecutor implements AgentExecutor {
         .map((part: TextPart) => part.text)
         .join(' ');
 
-      const { chat } = this.getInternalServices();
+      const { execution } = this.getInternalServices();
 
       const a2aConversationId = generateA2AConversationId(contextId);
 
-      const chatEvents$ = chat.converse({
-        agentId: this.agentId,
-        nextInput: { message: userText },
+      const { events$ } = await execution.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request: this.kibanaRequest,
-        conversationId: a2aConversationId,
-        capabilities: { visualizations: false },
-        autoCreateConversationWithId: true,
+        useTaskManager: !this.blocking,
+        executionId: this.blocking ? undefined : taskId,
+        // Persisted so KibanaTaskStore can echo the same contextId back on `tasks/get` polls.
+        metadata: { a2aContextId: contextId },
+        params: {
+          agentId: this.agentId,
+          nextInput: { message: userText },
+          conversationId: a2aConversationId,
+          capabilities: { visualizations: false },
+          autoCreateConversationWithId: true,
+        },
       });
 
-      // Process chat response
-      const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+      if (!this.blocking) {
+        eventBus.publish({
+          id: taskId,
+          contextId,
+          kind: 'task',
+          status: { state: 'working', timestamp: new Date().toISOString() },
+        });
+        eventBus.finished();
+        this.logger.debug(`A2A: Task ${taskId} scheduled`);
+        return;
+      }
+
+      // Process execution response
+      const events = await firstValueFrom(events$.pipe(toArray()));
       const roundCompleteEvent = events.find(isRoundCompleteEvent);
 
       if (!roundCompleteEvent) {
-        throw new Error('No complete response received from chat service');
+        throw new Error('No complete response received from execution service');
       }
 
       const responseText = roundCompleteEvent.data.round.response.message;

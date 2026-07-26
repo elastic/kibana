@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - RemoveByPrefix Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should remove a field', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-remove-by-prefix-basic';
@@ -26,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
       await testBed.ingest(indexName, docs, processors);
@@ -34,8 +36,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('temp_field');
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(source?.temp_field).toBeUndefined();
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest('should remove a field and all nested fields (subobjects)', async ({ testBed }) => {
@@ -50,7 +52,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -70,13 +72,13 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('host');
-      expect(source).not.toHaveProperty('host.name');
-      expect(source).not.toHaveProperty('host.ip');
-      expect(source).not.toHaveProperty('host.os');
-      expect(source).not.toHaveProperty('host.os.platform');
-      expect(source).not.toHaveProperty('host.os.version');
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(source?.host).toBeUndefined();
+      expect(source?.['host.name']).toBeUndefined();
+      expect(source?.['host.ip']).toBeUndefined();
+      expect(source?.['host.os']).toBeUndefined();
+      expect(source?.['host.os.platform']).toBeUndefined();
+      expect(source?.['host.os.version']).toBeUndefined();
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest('should remove flattened fields with prefix', async ({ testBed }) => {
@@ -91,7 +93,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       // Create docs with flattened field structure
       const docs = [
@@ -107,11 +109,11 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('labels');
-      expect(source).not.toHaveProperty('labels.env');
-      expect(source).not.toHaveProperty('labels.team');
-      expect(source).not.toHaveProperty('labels.version');
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(source?.labels).toBeUndefined();
+      expect(source?.['labels.env']).toBeUndefined();
+      expect(source?.['labels.team']).toBeUndefined();
+      expect(source?.['labels.version']).toBeUndefined();
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest(
@@ -128,7 +130,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -144,12 +146,12 @@ apiTest.describe(
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         // Parent field and all nested fields removed
-        expect(source).not.toHaveProperty('metadata.user');
-        expect(source).not.toHaveProperty('metadata.user.id');
-        expect(source).not.toHaveProperty('metadata.user.name');
+        expect(source?.['metadata.user']).toBeUndefined();
+        expect(source?.['metadata.user.id']).toBeUndefined();
+        expect(source?.['metadata.user.name']).toBeUndefined();
         // Other metadata fields kept (as dotted notation - accessed with bracket notation)
         expect(source['metadata.timestamp']).toBe('2025-01-01');
-        expect(source).toHaveProperty('message', 'keep-this');
+        expect(source?.message).toBe('keep-this');
       }
     );
 
@@ -165,7 +167,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -183,15 +185,15 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      const source = asDoc(ingestedDocs[0]);
       // Parent field and all nested fields removed
-      expect(source).not.toHaveProperty('metadata.user');
-      expect(source).not.toHaveProperty('metadata.user.id');
-      expect(source).not.toHaveProperty('metadata.user.name');
+      expect(source?.['metadata.user']).toBeUndefined();
+      expect(source?.['metadata.user.id']).toBeUndefined();
+      expect(source?.['metadata.user.name']).toBeUndefined();
       // Other metadata fields kept (as nested object)
-      expect(source).toHaveProperty('metadata');
-      expect(source.metadata).toHaveProperty('timestamp', '2025-01-01');
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(source?.metadata).toBeDefined();
+      expect(asDoc(source?.metadata)?.timestamp).toBe('2025-01-01');
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest('should remove flattened fields within a nested subobject', async ({ testBed }) => {
@@ -206,7 +208,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -224,15 +226,15 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
+      const source = asDoc(ingestedDocs[0]);
       // All foo.bar* fields removed from attributes
-      expect(source.attributes).not.toHaveProperty('foo.bar');
-      expect(source.attributes).not.toHaveProperty('foo.bar.xyz');
-      expect(source.attributes).not.toHaveProperty('foo.bar.xyz2');
-      expect(source.attributes).not.toHaveProperty('foo.bar.xyz2.234');
+      expect(asDoc(source?.attributes)?.['foo.bar']).toBeUndefined();
+      expect(asDoc(source?.attributes)?.['foo.bar.xyz']).toBeUndefined();
+      expect(asDoc(source?.attributes)?.['foo.bar.xyz2']).toBeUndefined();
+      expect(asDoc(source?.attributes)?.['foo.bar.xyz2.234']).toBeUndefined();
       // Other fields kept
-      expect(source.attributes['foo.baz']).toBe(789);
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(asDoc(source?.attributes)?.['foo.baz']).toBe(789);
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest(
@@ -249,7 +251,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -269,15 +271,17 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
-        const source = ingestedDocs[0];
+        const source = asDoc(ingestedDocs[0]);
+        const resource = asDoc(source?.resource);
+        const resourceAttrs = asDoc(resource?.attributes);
         // All foo.bar* fields removed from resource.attributes
-        expect(source.resource.attributes).not.toHaveProperty('foo.bar');
-        expect(source.resource.attributes).not.toHaveProperty('foo.bar.xyz');
-        expect(source.resource.attributes).not.toHaveProperty('foo.bar.xyz2');
-        expect(source.resource.attributes).not.toHaveProperty('foo.bar.xyz2.234');
+        expect(resourceAttrs?.['foo.bar']).toBeUndefined();
+        expect(resourceAttrs?.['foo.bar.xyz']).toBeUndefined();
+        expect(resourceAttrs?.['foo.bar.xyz2']).toBeUndefined();
+        expect(resourceAttrs?.['foo.bar.xyz2.234']).toBeUndefined();
         // Other fields kept
-        expect(source.resource.attributes['foo.baz']).toBe(789);
-        expect(source).toHaveProperty('message', 'keep-this');
+        expect(resourceAttrs?.['foo.baz']).toBe(789);
+        expect(source?.message).toBe('keep-this');
       }
     );
 
@@ -301,9 +305,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

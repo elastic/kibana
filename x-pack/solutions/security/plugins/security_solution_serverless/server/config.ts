@@ -21,7 +21,7 @@ import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/meteri
 const tlsConfig = schema.object({
   certificate: schema.string(),
   key: schema.string(),
-  ca: schema.string(),
+  ca: schema.maybe(schema.string()),
 });
 export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
 
@@ -54,6 +54,7 @@ export const serverConfigSchema = schema.object({
    */
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usageApi: usageApiConfig,
 });
 const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);

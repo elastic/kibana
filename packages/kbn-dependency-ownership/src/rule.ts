@@ -28,7 +28,7 @@ export function ruleFilter(rule: RenovatePackageRule) {
     'undici', // These updates are always handled manually, and only with Node.js upgrades
   ];
   // Rules that use custom managers are not supported by this tool, and are ignored.
-  const rulesWithCustomManagers = ['chainguard', 'chainguard-fips'];
+  const rulesWithCustomManagers = ['chainguard', 'chainguard-fips', 'gh-aw'];
 
   return (
     // Only include rules that are enabled or explicitly allowed to be disabled
@@ -50,6 +50,7 @@ export function packageFilter(pkg: string) {
     // The EUI team owns the EUI packages, and are not covered by renovate
     pkg !== '@elastic/eui' &&
     pkg !== '@elastic/eui-theme-borealis' &&
+    pkg !== '@elastic/eui-test-helpers' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'
   );

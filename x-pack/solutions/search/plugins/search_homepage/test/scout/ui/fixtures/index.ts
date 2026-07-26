@@ -10,8 +10,10 @@ import type {
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from '@kbn/scout-search';
-import { test as base, createLazyPageObject } from '@kbn/scout-search';
+import { test as base, spaceTest as spaceBase, createLazyPageObject } from '@kbn/scout-search';
 import { Homepage } from './page_objects/homepage';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
@@ -19,6 +21,12 @@ export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
     homepage: Homepage;
   };
   browserAuth: BrowserAuthFixture;
+}
+
+export interface ExtendedScoutParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: ScoutParallelTestFixtures['pageObjects'] & {
+    homepage: Homepage;
+  };
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
@@ -31,6 +39,28 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
       page: ExtendedScoutTestFixtures['page'];
     },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      homepage: createLazyPageObject(Homepage, page),
+    };
+    await use(extendedPageObjects);
+  },
+});
+
+export const spaceTest = spaceBase.extend<
+  ExtendedScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtendedScoutParallelTestFixtures['pageObjects'];
+      page: ExtendedScoutParallelTestFixtures['page'];
+    },
+    use: (pageObjects: ExtendedScoutParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,

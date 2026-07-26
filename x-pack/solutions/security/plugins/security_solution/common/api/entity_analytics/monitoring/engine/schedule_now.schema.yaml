@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: ScheduleMonitoringEngine
       summary: Schedule the Privilege Monitoring Engine
+      description: Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
 
       responses:
         "200":
@@ -22,6 +23,11 @@ paths:
                   success:
                     type: boolean
                     description: Indicates the scheduling was successful
+              examples:
+                ScheduleMonitoringEngineResponse:
+                  summary: Engine scheduled successfully
+                  value:
+                    success: true
         "409":
           description: Conflict - Monitoring engine is already running
           content:
@@ -32,3 +38,8 @@ paths:
                   message:
                     type: string
                     description: Error message indicating the engine is already running
+              examples:
+                ScheduleMonitoringEngineConflict:
+                  summary: Engine is already running
+                  value:
+                    message: "Monitoring engine is already running"

@@ -18,9 +18,12 @@ import {
 import { clearKnowledgeBase, getKnowledgeBaseEntriesFromApi } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const config = getService('config');
   const log = getService('log');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
+  const isServerless = config.get('serverless');
 
   describe('tool: summarize', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
@@ -75,7 +78,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(isPublic).to.eql(false);
       expect(text).to.eql('Hello world');
       expect(type).to.eql('contextual');
-      expect(user?.name).to.eql('elastic_editor');
+      // In serverless, usernames of Cloud users are purely numeric.
+      expect(user?.name).to.eql(isServerless ? '2180895557' : 'elastic_editor');
       expect(title).to.eql('My Title');
       expect(res.body.entries).to.have.length(1);
     });

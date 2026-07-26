@@ -1,0 +1,369 @@
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+entries:
+- file:
+    name: 267342.yaml
+    checksum: e5d24a80609c9fc3a9c4682aa913f16805710a4d
+  type: bug-fix
+  title: Fix entity details not rendered properly on preview mode from Agent Builder
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  prs:
+  - https://github.com/elastic/kibana/pull/267342
+  issues:
+  - https://github.com/elastic/kibana/issues/265943
+- file:
+    name: 268326.yaml
+    checksum: 7a0abba643d382792b8808caac00d60309846706
+  type: enhancement
+  title: Show "Go to dashboard" button in save success toast
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Adds a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268326
+  issues:
+  - https://github.com/elastic/kibana/issues/259129
+- file:
+    name: 268150.yaml
+    checksum: d568718db178aaa85f13112db5e3178da02d1089
+  type: bug-fix
+  title: Fix and document exception handling for parsing KQL
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/268150
+  issues:
+  - https://github.com/elastic/kibana/issues/255222
+- file:
+    name: 266315.yaml
+    checksum: 0ed0c13c847b37ae7245df246b3b06ce56c940b8
+  type: bug-fix
+  title: Fix SLO count display for newly created SLOs in overview
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Fix the SLO Overview status tiles so they count newly created SLOs (and any SLO whose summary transform has not yet produced a real document) consistently with the per-row status badge.
+  prs:
+  - https://github.com/elastic/kibana/pull/266315
+  issues:
+  - https://github.com/elastic/kibana/issues/266313
+- file:
+    name: 268167.yaml
+    checksum: 667424a04d5b8d1b2baaffe74513604ca7ac8b8c
+  type: bug-fix
+  title: Prevent data view creation in the file upload tool without sufficient privileges
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/268167
+- file:
+    name: 268425.yaml
+    checksum: 566577c9311a17c9fd0f2714d4f7f970bda418e4
+  type: bug-fix
+  title: Fix the Visualization API to correctly show default datatable colored badges
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268425
+  issues:
+  - https://github.com/elastic/kibana/issues/266269
+- file:
+    name: 268615.yaml
+    checksum: 32b8fd46c0b5303b74e67f8d3ebdec35f234d265
+  type: enhancement
+  title: Add automatic data analysis suggestions in Discover
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Automatically suggests relevant analysis patterns and visualizations based on your data structure and content, helping you discover insights faster.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/268615
+- file:
+    name: 268224.yaml
+    checksum: 128cdf916c0da6b8eccd7e6cd5bdc80f91c7a131
+  type: bug-fix
+  title: Use `event.ingested` instead of `@timestamp` for incoming Fleet data checks
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Fixes a bug where the agent enrollment "Confirm incoming data" step would time out for integrations ingesting backdated data, even though data was being received correctly.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/268224
+  issues:
+  - https://github.com/elastic/kibana/issues/241683
+- file:
+    name: 257675.yaml
+    checksum: bfa7816bdaa0ea6bbef81bb81471a41dacc4fb20
+  type: feature
+  title: Add HubSpot CRM connector
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Adds a HubSpot connector that enables searching and retrieving contacts, companies, deals, tickets, and engagements from HubSpot CRM, with support for bearer token and OAuth 2.0 authentication.
+  prs:
+  - https://github.com/elastic/kibana/pull/257675
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/13172'
+- file:
+    name: 268069.yaml
+    checksum: e6fff97bb97c2e1c4b2929fa8bf18ca05041c3d0
+  type: enhancement
+  title: Add Elastic Cloud identifiers to connector user agent
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Adds a `User-Agent` header fragment for outbound connector requests to identify Elastic Cloud project/deployment providence. This can help IT teams monitor 3rd-party connections that originate from their Elastic Cloud infrastructure. Resulting `User-Agent` headers should follow a pattern of `axios/x.y.z elastic (deployment:abc)` or `axios/x.y.z elastic (project:abc)`
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/268069
+- file:
+    name: 261927.yaml
+    checksum: 8245001df0823095fdc7aadf3210455b6a0b04a1
+  type: feature
+  title: Improve dashboard migration accuracy with data sampling
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Enhances the dashboard migration process by sampling actual data records to produce more accurate visualizations and configurations in the migrated dashboards.
+  prs:
+  - https://github.com/elastic/kibana/pull/261927
+- file:
+    name: 268965.yaml
+    checksum: 287a378af04599445b833ef43145e88525913e11
+  type: enhancement
+  title: Improve dashboard panel validation and compatibility
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Adds schema registration for dashboard embeddables to improve panel validation and ensure compatibility across Kibana versions.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268965
+  issues:
+  - https://github.com/elastic/kibana/issues/222215
+- file:
+    name: 267517.yaml
+    checksum: 290ad2890efac3b2857c0a57bc0fd0fe3c433fdd
+  type: deprecation
+  title: Remove HTML converter/bridge from field formatters plugin and clean up
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  impact: Field formatters now return React elements instead of HTML strings, eliminating the use of dangerouslySetInnerHTML and removing a class of potential XSS vulnerabilities.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/267517
+  issues:
+  - https://github.com/elastic/kibana/issues/259295
+- file:
+    name: 266111.yaml
+    checksum: ac38de34b5b86b2942c5a6c46f20eb8327268b36
+  type: bug-fix
+  title: Fix "View in AI Assistant" button availability when AI Assistant is disabled
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  prs:
+  - https://github.com/elastic/kibana/pull/266111
+- file:
+    name: 266445.yaml
+    checksum: a4692cddf901983dc6c95a62475e052e0c0a5bf1
+  type: bug-fix
+  title: Fix license management navigation link in Security
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  prs:
+  - https://github.com/elastic/kibana/pull/266445
+- file:
+    name: 265116.yaml
+    checksum: 2e0189b89a70e5cff8fed8dcee9f7e524385c479
+  type: bug-fix
+  title: Improve integration package installation reliability
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Enables automatic fallback to compatible package versions when the preferred version is unavailable, reducing installation failures.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/265116
+- file:
+    name: 266700.yaml
+    checksum: 0e880bb9c7974930dd4924a8a041e0d6a7796ace
+  type: enhancement
+  title: Enable access control mode configuration in dashboard API
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Allows setting `access_control.access_mode` when updating dashboards via PUT requests, providing more flexible dashboard sharing options.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/266700
+  issues:
+  - https://github.com/elastic/kibana/issues/267835
+- file:
+    name: 268840.yaml
+    checksum: 41357fce4fc0e4fec113606af282256bf14bd4f2
+  type: bug-fix
+  title: Fix error parsing for ES|QL conflict types
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/268840
+- file:
+    name: 256857.yaml
+    checksum: b1cdde0ce010b664a1d74dcf78b6ad19220af04a
+  type: feature
+  title: Add AI-powered code completion in ES|QL editor
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Provides intelligent code suggestions and auto-completion for ES|QL queries in Discover, helping users write queries faster and with fewer syntax errors.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/256857
+- file:
+    name: 268440.yaml
+    checksum: 21fac40281e5a1fb828a0a21e694ee842e881f00
+  type: bug-fix
+  title: Add conversation filtering for AI Assistant events
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Enables filtering of AI Assistant events by conversation ID through an enhanced public events API.
+  prs:
+  - https://github.com/elastic/kibana/pull/268440
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/14381'
+- file:
+    name: 268719.yaml
+    checksum: 11692d8857e2749c8da5bff2c947179b75148bf4
+  type: bug-fix
+  title: Fix connector template ownership resolution in alerts
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/268719
+- file:
+    name: 266697.yaml
+    checksum: 8c7ff8668f5d252107b6cda3cc5e196956f7789f
+  type: bug-fix
+  title: Change grouping in the Feature Registry
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Consolidate the Security AI Assistant inference endpoint configuration under the Security group on the "Inference Endpoints" page. Remove a duplicate AI Assistant section and hide the AI-Assistant-for-Security entry when the classic chat experience is not selected.
+  prs:
+  - https://github.com/elastic/kibana/pull/266697
+  issues:
+  - https://github.com/elastic/kibana/issues/266430
+- file:
+    name: 268168.yaml
+    checksum: b942cda237096905b07dec4cf15f0775723140b6
+  type: bug-fix
+  title: Fix gauge min/max/goal available operations
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Updates gauge chart `min`, `max`, and `goal` schemas to reject reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`). These pipeline aggregations require a date histogram, which the gauge chart does not support. The accepted operations are now limited to field-based aggregations, static values, and formulas.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268168
+  issues:
+  - https://github.com/elastic/kibana/issues/248467
+- file:
+    name: 268282.yaml
+    checksum: 432145957c232ee4eb37fdc5bc37ff713477b3a4
+  type: bug-fix
+  title: Fix knowledge indicator details flyout layout in dark mode
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  prs:
+  - https://github.com/elastic/kibana/pull/268282
+- file:
+    name: 266766.yaml
+    checksum: a9be328d71d1340ed173ea4dab3f3de3053a44b3
+  type: feature
+  title: Add Outlook connector
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Adds an Outlook connector for searching and browsing email in Microsoft Outlook via the Microsoft Graph API, available in Agent Builder and workflows.
+  prs:
+  - https://github.com/elastic/kibana/pull/266766
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/13171'
+- file:
+    name: 266418.yaml
+    checksum: c5714992433219ff36d0b218ccf193b8a73ea8a0
+  type: bug-fix
+  title: Fix variable substitution in the Console
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Fixed an issue where Console variables were not substituted correctly inside partial string values in request bodies.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/266418
+  issues:
+  - https://github.com/elastic/kibana/issues/149555
+- file:
+    name: 268515.yaml
+    checksum: fe83d2e1d25f09019e9786b988a5d326df85b3a7
+  type: bug-fix
+  title: Fix significant events UI visibility to require enterprise license
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  prs:
+  - https://github.com/elastic/kibana/pull/268515
+- file:
+    name: 267906.yaml
+    checksum: dc0db00b9bf69deee3116170c7914846be4fa87b
+  type: enhancement
+  title: Update Agent Builder announcement modal revert flow
+  products:
+  - product: cloud-serverless
+    target: 2026-05-14
+  description: Updates the Agent Builder announcement modal so that the revert button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to "GenAI Settings".
+  prs:
+  - https://github.com/elastic/kibana/pull/267906
+  issues:
+  - https://github.com/elastic/kibana/issues/267670

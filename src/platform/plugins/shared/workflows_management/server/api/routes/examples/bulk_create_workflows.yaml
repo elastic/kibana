@@ -1,0 +1,50 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkCreateWorkflowsRequestExample:
+          description: 'Example request for creating multiple workflows at once'
+          value:
+            workflows:
+              - yaml: "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+              - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                yaml: "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n"
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          bulkCreateWorkflowsResponseExample:
+            description: 'Example response after creating multiple workflows'
+            value:
+              created:
+                - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  name: Example definition
+                - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                  name: Second workflow
+              total: 2
+              failures: []
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows?overwrite=false" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "workflows": [
+            { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" },
+            { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
+          ]
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows?overwrite=false
+      {
+        "workflows": [
+          { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" },
+          { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
+        ]
+      }

@@ -1,0 +1,29 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getCloudConnectorsExample:
+            description: 'List of Fleet cloud connectors'
+            value:
+              items:
+                - id: 'cloud-connector-id-1'
+                  name: 'My AWS connector'
+                  cloudProvider: 'aws'
+                  accountType: 'single-account'
+                  vars: {}
+                  packagePolicyCount: 2
+                  created_at: '2024-01-15T10:00:00.000Z'
+                  updated_at: '2024-01-15T10:00:00.000Z'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

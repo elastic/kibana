@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -34,13 +34,18 @@ import type {
   VisualizationState,
   DocumentToExpressionReturnType,
   LensDocument,
+  TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
 import { buildExpression } from './expression_helpers';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import {
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  ensureESQLTimeFieldOnAdHocDataViews,
+} from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
@@ -235,6 +240,7 @@ export async function initializeSources(
     references,
     initialContext,
     adHocDataViews,
+    http,
   }: {
     dataViews: DataViewsContract;
     eventAnnotationService: EventAnnotationServiceType;
@@ -247,6 +253,7 @@ export async function initializeSources(
     references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    http?: HttpStart;
   },
   options?: InitializationOptions
 ) {
@@ -254,6 +261,17 @@ export async function initializeSources(
     eventAnnotationService,
     references
   );
+
+  // Regenerate ESQL ad-hoc DataViews once at editor initialization.
+  // This replaces potentially stale persisted specs with fresh ones derived
+  // from the actual ES|QL queries, including time field detection via http.
+  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: dataViews,
+    http,
+  });
 
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
     {
@@ -264,7 +282,7 @@ export async function initializeSources(
       storage,
       defaultIndexPatternId,
       references,
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
     options
@@ -369,6 +387,7 @@ export async function persistedStateToExpression(
     nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
     forceDSL?: boolean;
+    http?: HttpStart;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -405,6 +424,19 @@ export async function persistedStateToExpression(
       { isLoading: false, state },
     ])
   );
+
+  // Ensure ESQL ad-hoc DataViews have the correct time field before
+  // initializing DataViews — same as in initializeSources for the editor path.
+  const textBasedState = datasourceStatesFromSO.textBased?.state as
+    | TextBasedPersistedState
+    | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: services.dataViews,
+    http: services.http,
+  });
+
   const { indexPatterns, indexPatternRefs } = await initializeDataViews(
     {
       datasourceMap,
@@ -413,7 +445,7 @@ export async function persistedStateToExpression(
       dataViews: services.dataViews,
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
     { isFullEditor: false }

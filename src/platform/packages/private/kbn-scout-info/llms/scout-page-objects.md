@@ -13,11 +13,11 @@ Page objects can be used to interact with common UI components and application-s
 All page objects are available via the `pageObjects` fixture, but only the ones that are actually used in a test will be initialized.
 
 ```ts
-test.describe('My test suite', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('My test suite', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ pageObjects }) => {
     // Navigate to the Discover screen.
     // The `pageObjects.discover` page object is provided by the core test package.
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   test('sample test', async ({ pageObjects }) => {

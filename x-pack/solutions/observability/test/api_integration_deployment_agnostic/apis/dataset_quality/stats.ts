@@ -261,6 +261,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('query schema accepts types and datasetQuery together', () => {
+      let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
+        supertestDatasetQualityMonitorWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+      });
+
+      it('accepts both types and datasetQuery in a single request', async () => {
+        const resp = await supertestDatasetQualityMonitorWithCookieCredentials
+          .get('/internal/dataset_quality/data_streams/stats')
+          .query({
+            types: rison.encodeArray(['logs']),
+            datasetQuery: 'synth',
+          });
+
+        expect(resp.status).to.be(200);
+      });
+    });
+
     describe('multiple dataStream types are requested', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
       let roleAuthc: RoleCredentials;

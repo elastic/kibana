@@ -15,12 +15,13 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiFieldText,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -160,7 +161,7 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup css={styles.item} justifyContent="center" gutterSize="none">
                           <EuiFlexItem grow={false}>
                             <div {...provided.dragHandleProps} css={styles.grabIcon}>
-                              <EuiIcon type="grab" />
+                              <EuiIcon type="dragVertical" aria-hidden={true} />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>
@@ -196,17 +197,22 @@ function DragAndDropTextListComponent({
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             {value.length > 1 ? (
-                              <EuiButtonIcon
-                                aria-label={i18nTexts.removeItemButtonAriaLabel}
-                                css={styles.removeButton}
-                                iconType="minusInCircle"
-                                color="danger"
-                                onClick={() => onRemove(item.id)}
-                                size="s"
-                              />
+                              <EuiToolTip
+                                content={i18nTexts.removeItemButtonAriaLabel}
+                                disableScreenReaderOutput
+                              >
+                                <EuiButtonIcon
+                                  aria-label={i18nTexts.removeItemButtonAriaLabel}
+                                  css={styles.removeButton}
+                                  iconType="minusCircle"
+                                  color="danger"
+                                  onClick={() => onRemove(item.id)}
+                                  size="s"
+                                />
+                              </EuiToolTip>
                             ) : (
                               // Render a no-op placeholder button
-                              <EuiIcon css={styles.removeButton} type="empty" />
+                              <EuiIcon css={styles.removeButton} type="empty" aria-hidden={true} />
                             )}
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -217,7 +223,7 @@ function DragAndDropTextListComponent({
               })}
             </EuiDroppable>
           </EuiDragDropContext>
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
+          <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

@@ -13,6 +13,7 @@ import { addLog } from '../../utils/add_log';
 import { SolutionType } from '../profiles/root_profile';
 import { createContextAwarenessMocks } from '../__mocks__';
 import type { ComposableProfile } from '../composable_profile';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 
 jest.mock('../../utils/add_log');
 
@@ -20,6 +21,17 @@ let mocks = createContextAwarenessMocks();
 
 const toAppliedProfile = (profile: ComposableProfile<{}, {}>) =>
   Object.keys(profile).reduce((acc, key) => ({ ...acc, [key]: expect.any(Function) }), {});
+
+const createScopedProfilesManager = () =>
+  mocks.profilesManagerMock.createScopedProfilesManager({
+    scopedEbtManager: mocks.scopedEbtManagerMock,
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+  });
+
+const esqlProfileParams = {
+  dataSource: createEsqlDataSource(),
+  query: { esql: 'from *' as const },
+};
 
 describe('ProfilesManager', () => {
   beforeEach(() => {
@@ -30,27 +42,27 @@ describe('ProfilesManager', () => {
   });
 
   it('should return default profiles', () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([{}, {}, {}]);
   });
 
   it('should resolve root profile', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
   });
 
   it('should resolve data source profile', async () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
+    const scopedProfilesManager = createScopedProfilesManager();
+    const result = await scopedProfilesManager.resolveDataSourceProfile({});
+
+    expect(result).toEqual({
+      didProfileChange: true,
+      isFirstResolution: true,
     });
-    await scopedProfilesManager.resolveDataSourceProfile({});
+
     const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([
       {},
@@ -59,10 +71,22 @@ describe('ProfilesManager', () => {
     ]);
   });
 
-  it('should resolve document profile', async () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
+  it('should report a profile change on the first data source resolution even when it resolves to the default context', async () => {
+    jest
+      .spyOn(mocks.dataSourceProfileProviderMock, 'resolve')
+      .mockResolvedValueOnce({ isMatch: false });
+
+    const scopedProfilesManager = createScopedProfilesManager();
+    const result = await scopedProfilesManager.resolveDataSourceProfile({});
+
+    expect(result).toEqual({
+      didProfileChange: true,
+      isFirstResolution: true,
     });
+  });
+
+  it('should resolve document profile', async () => {
+    const scopedProfilesManager = createScopedProfilesManager();
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
@@ -72,9 +96,7 @@ describe('ProfilesManager', () => {
 
   it('should resolve multiple profiles', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     await scopedProfilesManager.resolveDataSourceProfile({});
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
@@ -108,9 +130,7 @@ describe('ProfilesManager', () => {
   });
 
   it('should expose profiles as an observable', async () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
@@ -153,34 +173,27 @@ describe('ProfilesManager', () => {
   });
 
   it('should not resolve data source profile again if params have not changed', async () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
-    await scopedProfilesManager.resolveDataSourceProfile({
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from *' },
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile(esqlProfileParams);
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
-    await scopedProfilesManager.resolveDataSourceProfile({
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from *' },
-    });
+
+    const result = await scopedProfilesManager.resolveDataSourceProfile(esqlProfileParams);
+
+    expect(result).toEqual({ didProfileChange: false, isFirstResolution: false });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
   });
 
   it('should resolve data source profile again if params have changed', async () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
-    await scopedProfilesManager.resolveDataSourceProfile({
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from *' },
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile(esqlProfileParams);
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
-    await scopedProfilesManager.resolveDataSourceProfile({
+
+    const result = await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
+
+    expect(result).toEqual({ didProfileChange: false, isFirstResolution: false });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(2);
   });
 
@@ -188,6 +201,7 @@ describe('ProfilesManager', () => {
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'solutionNavId' });
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     let profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
@@ -203,13 +217,8 @@ describe('ProfilesManager', () => {
   });
 
   it('should log an error and fall back to the default profile if data source profile resolution fails', async () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
-    await scopedProfilesManager.resolveDataSourceProfile({
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from *' },
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile(esqlProfileParams);
     let profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([
       {},
@@ -231,9 +240,7 @@ describe('ProfilesManager', () => {
   });
 
   it('should log an error and fall back to the default profile if document profile resolution fails', () => {
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
@@ -273,9 +280,7 @@ describe('ProfilesManager', () => {
     });
     expect(resolveSpy).toHaveReturnedTimes(1);
     expect(resolveSpy).toHaveLastReturnedWith(deferredResult);
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     const resolvedDeferredResult2$ = new Subject();
     const deferredResult2 = firstValueFrom(resolvedDeferredResult2$).then(() => newContext);
@@ -314,9 +319,7 @@ describe('ProfilesManager', () => {
     const resolvedDeferredResult$ = new Subject();
     const deferredResult = firstValueFrom(resolvedDeferredResult$).then(() => context);
     resolveSpy.mockResolvedValueOnce(deferredResult);
-    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
-      scopedEbtManager: mocks.scopedEbtManagerMock,
-    });
+    const scopedProfilesManager = createScopedProfilesManager();
     const promise1 = scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },

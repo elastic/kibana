@@ -21,3 +21,8 @@ export const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptQradar',
   { defaultMessage: 'Select or drag and drop the exported XML file' }
 );
+
+export const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SENTINEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptSentinel',
+  { defaultMessage: 'Select or drag and drop the exported JSON file' }
+);

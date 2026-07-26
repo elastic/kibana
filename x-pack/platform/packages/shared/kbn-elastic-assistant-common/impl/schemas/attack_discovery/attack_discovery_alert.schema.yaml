@@ -105,3 +105,6 @@ components:
           description: The optional array of tags assigned the attack
           items:
             type: string
+        index:
+          description: The concrete Elasticsearch index where this attack discovery is stored
+          type: string

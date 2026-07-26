@@ -8,11 +8,48 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { dataControlSchema } from './control_schema';
+import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
+import { dataControlEsqlVariantProps, dataControlFieldVariantProps } from './control_schema';
 
-export const rangeValueSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
-
-export const rangeSliderControlSchema = dataControlSchema.extends({
-  value: schema.maybe(rangeValueSchema),
-  step: schema.maybe(schema.number()),
+export const rangeValueSchema = schema.arrayOf(schema.string(), {
+  minSize: 2,
+  maxSize: 2,
+  meta: {
+    description:
+      'The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.',
+  },
 });
+
+const rangeSliderExtras = {
+  value: schema.maybe(rangeValueSchema),
+  step: schema.number({
+    defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,
+    min: 0,
+    meta: {
+      description: 'The step size between selectable range values.',
+    },
+  }),
+};
+
+export const rangeSliderControlSchema = schema.discriminatedUnion('values_source', [
+  schema.object(
+    { ...dataControlEsqlVariantProps, ...rangeSliderExtras },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-range-slider-control-schema-esql',
+        title: 'EsqlRangeSliderControl',
+        description: "A range slider control whose values come from an ES|QL query's results.",
+      },
+    }
+  ),
+  schema.object(
+    { ...dataControlFieldVariantProps, ...rangeSliderExtras },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-range-slider-control-schema-field',
+        title: 'FieldRangeSliderControl',
+        description: 'A range slider control whose values come from a numeric data view field.',
+      },
+    }
+  ),
+]);

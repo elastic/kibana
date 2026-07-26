@@ -27,7 +27,8 @@
       "usageCollection",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esUiShared"
     ]
   }
 }

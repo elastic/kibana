@@ -29,7 +29,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
-  describe('migrations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238817
+  describe.skip('migrations', () => {
     // tests upgrading a 7.10.0 saved object to the latest version
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {

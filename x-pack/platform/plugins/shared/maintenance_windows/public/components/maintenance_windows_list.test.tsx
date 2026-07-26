@@ -11,7 +11,7 @@ import { fireEvent, waitFor, screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
-import type { MaintenanceWindow } from '../../common';
+import type { MaintenanceWindowUI } from '../../common';
 import { MaintenanceWindowStatus } from '../../common';
 
 jest.mock('../utils/kibana_react', () => {
@@ -26,7 +26,7 @@ jest.mock('../utils/kibana_react', () => {
 describe('MaintenanceWindowsList', () => {
   const date = moment('2023-04-21').toISOString();
   const endDate = moment('2023-04-21').add(1, 'month').toISOString();
-  const items: MaintenanceWindow[] = [
+  const items: MaintenanceWindowUI[] = [
     {
       id: '1',
       title: 'Host maintenance',

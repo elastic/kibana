@@ -8,13 +8,13 @@
  */
 
 import { diffStrings } from '@kbn/dev-utils';
-import jsonStable from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
-  const expectedJson = jsonStable(expected, {
+  const expectedJson = stableStringify(expected, {
     space: '  ',
   });
-  const actualJson = jsonStable(actual, {
+  const actualJson = stableStringify(actual, {
     space: '  ',
   });
 

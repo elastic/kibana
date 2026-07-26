@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid, EuiPanel } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { PrivilegedUsersTile } from './privileged_users_tile';
@@ -16,9 +16,9 @@ import { GrantedRightsTile } from './granted_rights_tile';
 import { AccountSwitchesTile } from './account_switches_tile';
 import { AuthenticationsTile } from './authentications_tile';
 
-export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
+export const KeyInsightsPanel: React.FC<{ spaceId: string; dataViewSpec: DataViewSpec }> = ({
   spaceId,
-  sourcerDataView,
+  dataViewSpec,
 }) => {
   return (
     <EuiFlexGrid columns={3} data-test-subj="key-insights-panel">
@@ -32,13 +32,13 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
         <AnomaliesDetectedTile spaceId={spaceId} />
       </EuiPanel>
       <EuiPanel hasBorder>
-        <GrantedRightsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
+        <GrantedRightsTile spaceId={spaceId} dataViewSpec={dataViewSpec} />
       </EuiPanel>
       <EuiPanel hasBorder>
-        <AccountSwitchesTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
+        <AccountSwitchesTile spaceId={spaceId} dataViewSpec={dataViewSpec} />
       </EuiPanel>
       <EuiPanel hasBorder>
-        <AuthenticationsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
+        <AuthenticationsTile spaceId={spaceId} dataViewSpec={dataViewSpec} />
       </EuiPanel>
     </EuiFlexGrid>
   );

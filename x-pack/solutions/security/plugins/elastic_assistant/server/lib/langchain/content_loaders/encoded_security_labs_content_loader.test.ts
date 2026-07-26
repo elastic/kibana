@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
 import path, { resolve } from 'path';
 import globby from 'globby';

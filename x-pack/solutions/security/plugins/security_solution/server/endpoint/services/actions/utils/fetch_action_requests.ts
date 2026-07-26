@@ -13,7 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
 import { REF_DATA_KEYS } from '../../../lib/reference_data';

@@ -26,6 +26,9 @@ paths:
         - name: namespace_type
           in: query
           required: false
+          description: |
+            When `single`, the list is resolved in the current Kibana space. When `agnostic`, the list is a global
+            (space-agnostic) container. Required for looking up the correct list when `list_id` is not unique.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: single

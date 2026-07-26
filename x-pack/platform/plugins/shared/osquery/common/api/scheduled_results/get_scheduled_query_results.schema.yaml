@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Get Scheduled Query Results Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    GetScheduledQueryResultsResponse:
+      type: object
+      description: 'The response for getting scheduled query results.'
+      properties:
+        data:
+          type: object
+          description: 'The query results data wrapper.'
+          properties:
+            edges:
+              description: 'The paginated list of query result rows.'
+              type: array
+              items:
+                type: object
+            total:
+              description: 'The total number of result rows.'
+              type: integer
+            inspect:
+              description: 'Debug/inspection data for the search query.'
+              type: object
+      example:
+        data:
+          total: 2
+          edges:
+            - _id: 'row-001'
+              fields:
+                host.uptime:
+                  - '12345'
+            - _id: 'row-002'
+              fields:
+                host.uptime:
+                  - '67890'

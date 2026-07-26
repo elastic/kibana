@@ -21,8 +21,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'entityDetailsHighlightsEnabled',
+          'disable:entityAnalyticsEntityStoreV2',
         ])}`,
+        '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
       ],
     },
 
@@ -33,6 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     mochaOpts: {
       ...functionalConfig.get('mochaOpts'),
       timeout: 360000 * 2,
+      hookTimeout: 360000 * 2,
     },
   };
 }

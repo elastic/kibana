@@ -17,7 +17,7 @@ describe('options list fetch all suggestions query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
-        allowExpensiveQueries: true,
+
         fieldSpec: {
           type: 'number',
         } as unknown as FieldSpec,
@@ -52,7 +52,7 @@ describe('options list fetch all suggestions query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
-        allowExpensiveQueries: true,
+
         fieldSpec: {
           type: 'string',
           subType: { nested: { path: 'path.to.nested' } },
@@ -93,7 +93,7 @@ describe('options list fetch all suggestions query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
-        allowExpensiveQueries: true,
+
         fieldSpec: {
           type: 'number',
         } as unknown as FieldSpec,
@@ -146,7 +146,7 @@ describe('options list fetch all suggestions query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'cancelled',
-        allowExpensiveQueries: true,
+
         fieldSpec: {
           type: 'boolean',
         } as unknown as FieldSpec,
@@ -197,7 +197,7 @@ describe('options list fetch all suggestions query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: '@timestamp',
-        allowExpensiveQueries: true,
+
         fieldSpec: {
           type: 'date',
         } as unknown as FieldSpec,

@@ -60,6 +60,7 @@ export interface EditorFramePlugins {
   timefilter: TimefilterContract;
   nowProvider: DataPublicPluginStart['nowProvider'];
   eventAnnotationService: EventAnnotationServiceType;
+  http?: CoreStart['http'];
 }
 
 async function collectAsyncDefinitions<T extends { id: string; alias?: string[] }>(

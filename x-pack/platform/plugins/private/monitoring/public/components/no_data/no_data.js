@@ -54,7 +54,14 @@ export function NoData(props) {
   const [useInternalCollection, setUseInternalCollection] = useState(false);
   const isCloudEnabled = props.isCloudEnabled;
   const { services } = useKibana();
-  const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
+
+  const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
+  const hideAnnouncements = !services.notifications.tours.isEnabled();
+  const shouldShowAutoOpsPromotion =
+    !Legacy.shims.isAirGapped &&
+    !cloudConnectStatus.isLoading &&
+    !cloudConnectStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e) => {
     e.preventDefault();
@@ -131,10 +138,9 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
-          {Legacy.shims.hasEnterpriseLicense && (
+          {shouldShowAutoOpsPromotion && (
             <>
               <AutoOpsPromotionCallout
-                learnMoreLink={learnMoreLink}
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}
@@ -186,10 +192,9 @@ export function NoData(props) {
         </h1>
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
-        {Legacy.shims.hasEnterpriseLicense && (
+        {shouldShowAutoOpsPromotion && (
           <>
             <AutoOpsPromotionCallout
-              learnMoreLink={learnMoreLink}
               cloudConnectUrl={cloudConnectUrl}
               onConnectClick={handleConnectClick}
               hasCloudConnectPermission={hasCloudConnectPermission}

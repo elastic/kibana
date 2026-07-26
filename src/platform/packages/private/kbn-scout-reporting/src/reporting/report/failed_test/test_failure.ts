@@ -27,6 +27,7 @@ export interface TestFailure {
     stack_trace?: string;
   };
   stdout?: string;
+  consoleErrors?: string;
   attachments: Array<{
     name: string;
     path?: string;

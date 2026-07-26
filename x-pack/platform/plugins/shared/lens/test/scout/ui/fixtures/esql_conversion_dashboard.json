@@ -1,69 +1,147 @@
 {
-    "attributes": {
-        "allowHidden": false,
-        "fieldAttrs": "{}",
-        "fieldFormatMap": "{}",
-        "fields": "[]",
-        "name": "logstash-*",
-        "runtimeFieldMap": "{}",
-        "sourceFilters": "[]",
-        "timeFieldName": "@timestamp",
-        "title": "logstash-*"
-    },
-    "coreMigrationVersion": "8.8.0",
-    "created_at": "2026-01-23T15:58:55.175Z",
-    "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
-    "id": "7d4752fe-05bd-4472-9bcb-fb347412f558",
-    "managed": false,
-    "references": [],
-    "type": "index-pattern",
-    "typeMigrationVersion": "8.0.0",
-    "updated_at": "2026-01-23T15:58:55.175Z",
-    "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
-    "version": "WzI4LDFd"
+  "attributes": {
+    "allowHidden": false,
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "logstash-*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-02-05T09:05:54.260Z",
+  "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "id": "7d4752fe-05bd-4472-9bcb-fb347412f558",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2026-02-05T09:05:54.260Z",
+  "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "version": "WzExLDFd"
 }
 
 {
-    "accessControl": {
-        "accessMode": "default",
-        "owner": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0"
-    },
-    "attributes": {
-        "controlGroupInput": {
-            "panelsJSON": "{}"
+  "attributes": {
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "4b71915c-4bb9-487f-8dc9-f5cb25019c75": {
+              "columnOrder": [
+                "1d3c60cf-5601-4a01-aefe-00fe2e1945d7"
+              ],
+              "columns": {
+                "1d3c60cf-5601-4a01-aefe-00fe2e1945d7": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Average of bytes",
+                  "operationType": "average",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "sourceField": "bytes"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
         },
-        "description": "",
-        "kibanaSavedObjectMeta": {
-            "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+        "indexpattern": {
+          "layers": {}
         },
-        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
-        "panelsJSON": "[{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsMetric\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"7d4752fe-05bd-4472-9bcb-fb347412f558\",\"name\":\"indexpattern-datasource-layer-956270fb-67f2-4b48-a24d-333a205a1993\"}],\"state\":{\"visualization\":{\"layerId\":\"956270fb-67f2-4b48-a24d-333a205a1993\",\"layerType\":\"data\",\"metricAccessor\":\"940aaabc-f1f5-4a45-8d44-0dfeee27ee7a\",\"maxAccessor\":\"14999fb7-ede6-49d8-9ebd-eba41ae6e780\",\"showBar\":true,\"secondaryTrend\":{\"type\":\"none\"},\"secondaryLabelPosition\":\"before\"},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"956270fb-67f2-4b48-a24d-333a205a1993\":{\"columns\":{\"940aaabc-f1f5-4a45-8d44-0dfeee27ee7a\":{\"label\":\"Average of bytes\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"bytes\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":true}},\"14999fb7-ede6-49d8-9ebd-eba41ae6e780\":{\"label\":\"Static value: 10000\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"10000\",\"emptyAsNull\":true},\"references\":[]}},\"columnOrder\":[\"940aaabc-f1f5-4a45-8d44-0dfeee27ee7a\",\"14999fb7-ede6-49d8-9ebd-eba41ae6e780\"],\"incompleteColumns\":{},\"sampling\":1}}},\"indexpattern\":{\"layers\":{}},\"textBased\":{\"layers\":{}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"fb4626b8-d8ce-42d3-913a-081af94cfb51\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"fb4626b8-d8ce-42d3-913a-081af94cfb51\"}}]",
-        "timeRestore": false,
-        "title": "ES|QL Conversion Dashboard"
-    },
-    "coreMigrationVersion": "8.8.0",
-    "created_at": "2026-01-23T16:04:55.656Z",
-    "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
-    "id": "3cda479c-8797-4492-99f4-2259e1377f85",
-    "managed": false,
-    "references": [
-        {
-            "id": "7d4752fe-05bd-4472-9bcb-fb347412f558",
-            "name": "fb4626b8-d8ce-42d3-913a-081af94cfb51:indexpattern-datasource-layer-956270fb-67f2-4b48-a24d-333a205a1993",
-            "type": "index-pattern"
+        "textBased": {
+          "layers": {}
         }
-    ],
-    "type": "dashboard",
-    "typeMigrationVersion": "10.3.0",
-    "updated_at": "2026-01-23T16:04:55.656Z",
-    "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
-    "version": "WzM0LDFd"
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "layerId": "4b71915c-4bb9-487f-8dc9-f5cb25019c75",
+        "layerType": "data",
+        "metricAccessor": "1d3c60cf-5601-4a01-aefe-00fe2e1945d7",
+        "secondaryLabelPosition": "before",
+        "secondaryTrend": {
+          "type": "none"
+        }
+      }
+    },
+    "title": "Average of bytes (saved)",
+    "version": 2,
+    "visualizationType": "lnsMetric"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-02-05T09:08:41.130Z",
+  "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "id": "aaef74a6-0d49-4dd7-91d0-49db9d5dd517",
+  "managed": false,
+  "references": [
+    {
+      "id": "7d4752fe-05bd-4472-9bcb-fb347412f558",
+      "name": "indexpattern-datasource-layer-4b71915c-4bb9-487f-8dc9-f5cb25019c75",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "10.1.0",
+  "updated_at": "2026-02-05T09:08:41.130Z",
+  "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "version": "WzE4LDFd"
 }
 
 {
-    "excludedObjects": [],
-    "excludedObjectsCount": 0,
-    "exportedCount": 2,
-    "missingRefCount": 0,
-    "missingReferences": []
+  "accessControl": {
+    "accessMode": "default",
+    "owner": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0"
+  },
+  "attributes": {
+    "controlGroupInput": {
+      "panelsJSON": "{}"
+    },
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"lens\",\"embeddableConfig\":{\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsMetric\",\"type\":\"lens\",\"references\":[{\"id\":\"7d4752fe-05bd-4472-9bcb-fb347412f558\",\"name\":\"indexpattern-datasource-layer-956270fb-67f2-4b48-a24d-333a205a1993\",\"type\":\"index-pattern\"}],\"state\":{\"visualization\":{\"layerId\":\"956270fb-67f2-4b48-a24d-333a205a1993\",\"layerType\":\"data\",\"metricAccessor\":\"940aaabc-f1f5-4a45-8d44-0dfeee27ee7a\",\"maxAccessor\":\"14999fb7-ede6-49d8-9ebd-eba41ae6e780\",\"showBar\":true,\"secondaryTrend\":{\"type\":\"none\"},\"secondaryLabelPosition\":\"before\"},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"956270fb-67f2-4b48-a24d-333a205a1993\":{\"columns\":{\"940aaabc-f1f5-4a45-8d44-0dfeee27ee7a\":{\"label\":\"Average of bytes\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"bytes\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":true}},\"14999fb7-ede6-49d8-9ebd-eba41ae6e780\":{\"label\":\"Static value: 10000\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"10000\",\"emptyAsNull\":true},\"references\":[]}},\"columnOrder\":[\"940aaabc-f1f5-4a45-8d44-0dfeee27ee7a\",\"14999fb7-ede6-49d8-9ebd-eba41ae6e780\"],\"incompleteColumns\":{},\"sampling\":1}}},\"indexpattern\":{\"layers\":{}},\"textBased\":{\"layers\":{}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":2}},\"panelIndex\":\"fb4626b8-d8ce-42d3-913a-081af94cfb51\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"fb4626b8-d8ce-42d3-913a-081af94cfb51\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"title\":\"Average of bytes (saved)\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}},\"panelIndex\":\"3aef33a1-bcbc-4cd7-b2d9-fa678b2fefa5\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"3aef33a1-bcbc-4cd7-b2d9-fa678b2fefa5\"}}]",
+    "timeRestore": false,
+    "title": "ES|QL Conversion Dashboard"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-02-05T09:05:54.260Z",
+  "created_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "id": "3cda479c-8797-4492-99f4-2259e1377f85",
+  "managed": false,
+  "references": [
+    {
+      "id": "7d4752fe-05bd-4472-9bcb-fb347412f558",
+      "name": "fb4626b8-d8ce-42d3-913a-081af94cfb51:indexpattern-datasource-layer-956270fb-67f2-4b48-a24d-333a205a1993",
+      "type": "index-pattern"
+    },
+    {
+      "id": "aaef74a6-0d49-4dd7-91d0-49db9d5dd517",
+      "name": "3aef33a1-bcbc-4cd7-b2d9-fa678b2fefa5:savedObjectRef",
+      "type": "lens"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-02-05T09:08:52.368Z",
+  "updated_by": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0",
+  "version": "WzE5LDFd"
+}
+
+{
+  "excludedObjects": [],
+  "excludedObjectsCount": 0,
+  "exportedCount": 3,
+  "missingRefCount": 0,
+  "missingReferences": []
 }

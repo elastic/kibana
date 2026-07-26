@@ -64,7 +64,7 @@ export const StepDuration = ({
     <EuiButtonEmpty
       data-test-subj="syntheticsStepDurationButton"
       onMouseEnter={() => setDurationPopoverOpenIndex(step.synthetics.step?.index ?? null)}
-      iconType={compactView ? undefined : 'visArea'}
+      iconType={compactView ? undefined : 'chartArea'}
     >
       {stepDurationText}
     </EuiButtonEmpty>
@@ -72,6 +72,9 @@ export const StepDuration = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.uptime.stepDuration.popoverAriaLabel', {
+        defaultMessage: 'Step duration trend',
+      })}
       onClick={(evt: MouseEvent<HTMLDivElement>) => evt.stopPropagation()}
       isOpen={durationPopoverOpenIndex === step.synthetics.step?.index}
       button={button}

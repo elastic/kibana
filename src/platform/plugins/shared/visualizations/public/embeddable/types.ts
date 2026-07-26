@@ -17,16 +17,18 @@ import type {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
+  PublishesWritableTitle,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { VisParams } from '@kbn/visualizations-common';
-import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisSavedObject } from '../types';
@@ -44,7 +46,7 @@ export type ExtraSavedObjectProperties = Pick<
 
 export type VisualizeRuntimeState = SerializedTitles &
   SerializedTimeRange &
-  DrilldownsState & {
+  SerializedDrilldowns & {
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;
@@ -57,10 +59,12 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 };
 
 export type VisualizeApi = Partial<HasEditCapabilities> &
+  PublishesWritableTitle &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
   PublishesProjectRoutingOverrides &
+  PublishesEsqlUsage &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

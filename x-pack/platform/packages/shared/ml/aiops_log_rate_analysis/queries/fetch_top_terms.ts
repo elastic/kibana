@@ -41,7 +41,7 @@ export const getTopTermRequest = (
   let filter: estypes.QueryDslQueryContainer[] = [];
 
   if (query.bool && Array.isArray(query.bool.filter)) {
-    filter = query.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
+    filter = query.bool.filter.filter((d) => Object.keys(d || {})[0] !== 'range');
 
     query.bool.filter = [
       ...filter,

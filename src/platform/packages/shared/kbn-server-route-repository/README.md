@@ -132,7 +132,7 @@ The client translates the endpoint and the options (including request parameters
 When creating your routes, you can provide either a `zod` schema or an `io-ts` codec to be used when validating incoming requests.
 
 ```javascript
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 const myRoute = createMyPluginServerRoute({
   endpoint: 'POST /internal/my_plugin/route/{my_path_param}',

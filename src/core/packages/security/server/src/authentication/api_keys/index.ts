@@ -22,6 +22,8 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
@@ -30,12 +32,17 @@ export type {
 } from './api_keys';
 export type { NativeAPIKeysWithContextType } from './api_keys_context';
 export { isCreateRestAPIKeyParams } from './api_keys';
+export { extractApiKeyIdFromAuthzHeader, decodeApiKeyId } from './utils';
 
 export type {
   UiamAPIKeysType,
   UiamAPIKeysWithContextType,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
 } from './uiam';
 
 export interface APIKeysType extends NativeAPIKeysType {

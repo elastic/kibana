@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import { evaluate } from '../../src/evaluate';
 import { generateAIAssistantApmScenario } from '../../src/data_generators/apm';
@@ -16,7 +17,7 @@ import { apmErrorCountAIAssistant } from '../../src/alert_templates/apm';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
+evaluate.describe('APM functionality', { tag: tags.serverless.observability.complete }, () => {
   const ruleIds: string[] = [];
 
   evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, log }) => {

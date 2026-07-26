@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-api-keys-components'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-api-keys-components'
+  title: '@kbn/search-api-keys-components'
   description: Moon project for @kbn/search-api-keys-components
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/search/packages/kbn-search-api-keys-components
+  sourceRoot: x-pack/solutions/search/packages/kbn-search-api-keys-components
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -37,16 +36,6 @@ fileGroups:
     - src/**/*
     - index.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

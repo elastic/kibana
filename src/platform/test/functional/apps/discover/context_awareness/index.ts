@@ -9,10 +9,9 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { timePicker } = getPageObjects(['timePicker']);
 
   const from = '2024-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
@@ -22,6 +21,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );
@@ -30,18 +32,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       });
     });
 
-    after(async () => {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
-      );
-      await kibanaServer.importExport.unload(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
-      );
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-    });
-
     loadTestFile(require.resolve('./_framework'));
     loadTestFile(require.resolve('./_telemetry'));
+    loadTestFile(require.resolve('./_profile_state'));
     loadTestFile(require.resolve('./extensions/_get_row_indicator_provider'));
     loadTestFile(require.resolve('./extensions/_get_row_additional_leading_controls'));
     loadTestFile(require.resolve('./extensions/_get_doc_viewer'));
@@ -49,8 +42,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./extensions/_get_default_app_state'));
     loadTestFile(require.resolve('./extensions/_get_additional_cell_actions'));
     loadTestFile(require.resolve('./extensions/_get_app_menu'));
-    loadTestFile(require.resolve('./extensions/_get_render_app_wrapper'));
     loadTestFile(require.resolve('./extensions/_get_default_ad_hoc_data_views'));
+    loadTestFile(require.resolve('./extensions/_get_default_esql_query'));
     loadTestFile(require.resolve('./extensions/_get_pagination_config'));
     loadTestFile(require.resolve('./extensions/_get_recommended_fields'));
   });

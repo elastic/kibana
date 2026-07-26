@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import {
   ALERT_REASON,
+  ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
   TAGS,
   ALERT_URL,
@@ -18,6 +19,7 @@ import type { RuleAlertData } from '../../types';
 
 const allowedFrameworkFields = new Set<string>([
   ALERT_REASON,
+  ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
   TAGS,
   ALERT_URL,

@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { PublishesSavedSearch } from '@kbn/discover-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch } from '@kbn/discover-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { LicenseCheckState } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -94,7 +94,7 @@ describe('GetCsvReportPanelAction', () => {
 
     context = {
       embeddable: {
-        type: 'search',
+        type: SEARCH_EMBEDDABLE_TYPE,
         savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
         getInspectorAdapters: () => null,
         getInput: () => ({
@@ -172,6 +172,59 @@ describe('GetCsvReportPanelAction', () => {
       title: 'embeddable title',
       version: '7.15.0',
     });
+  });
+
+  it('includes esqlVariables from parent api in ES|QL CSV job params', async () => {
+    const esqlMockSearchSource = {
+      createCopy: () => esqlMockSearchSource,
+      removeField: jest.fn(),
+      setField: jest.fn(),
+      getField: jest.fn((name: string) => {
+        if (name === 'query') return { esql: 'FROM test | WHERE crew.id == ?crew_id' };
+        return undefined;
+      }),
+      getSerializedFields: jest.fn().mockReturnValue({
+        query: { esql: 'FROM test | WHERE crew.id == ?crew_id' },
+        parent: { filter: [] },
+      }),
+    } as unknown as SearchSource;
+
+    context = {
+      embeddable: {
+        ...(context.embeddable as object),
+        savedSearch$: new BehaviorSubject({
+          searchSource: esqlMockSearchSource,
+          columns: [],
+        } as unknown as SavedSearch),
+        parentApi: {
+          viewMode$: new BehaviorSubject('view'),
+          esqlVariables$: new BehaviorSubject([{ key: 'crew_id', value: '123', type: 'values' }]),
+        },
+      },
+    } as EmbeddableApiContext;
+
+    const panel = new ReportingCsvPanelAction({
+      core,
+      apiClient,
+      startServices$: mockStartServices$,
+      csvConfig,
+    });
+
+    await Rx.firstValueFrom(mockStartServices$);
+    await panel.execute(context);
+
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith(
+      'csv_v2',
+      expect.objectContaining({
+        locatorParams: expect.arrayContaining([
+          expect.objectContaining({
+            params: expect.objectContaining({
+              esqlVariables: [{ key: 'crew_id', value: '123', type: 'values' }],
+            }),
+          }),
+        ]),
+      })
+    );
   });
 
   it('allows csv generation for valid licenses', async () => {

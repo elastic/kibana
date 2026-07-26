@@ -417,6 +417,33 @@ describe('SlackParamsFields', () => {
       });
     });
 
+    it('renders action variables in Text mode', async () => {
+      const messageVariables = [
+        {
+          name: 'alert.id',
+          description: 'The alert ID',
+        },
+      ];
+
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={{}}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+          messageVariables={messageVariables}
+        />
+      );
+
+      const addVariableButton = screen.getByTestId('webApiTextAddVariableButton');
+      expect(addVariableButton).toBeInTheDocument();
+      expect(addVariableButton).not.toBeDisabled();
+
+      await userEvent.click(addVariableButton);
+      expect(await screen.findByTestId('variableMenuButton-alert.id')).toBeInTheDocument();
+    });
+
     it('cannot set channels not in the allow list', async () => {
       appMockRenderer.render(
         <SlackParamsFields

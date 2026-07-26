@@ -10,6 +10,7 @@ import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/t
 import {
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import {
@@ -31,7 +32,11 @@ export const getTinesConnectorType = (): SubActionConnectorType<TinesConfig, Tin
     secrets: TinesSecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-  supportedFeatureIds: [SecurityConnectorFeatureId, WorkflowsConnectorFeatureId],
+  supportedFeatureIds: [
+    SecurityConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
+    AgentBuilderConnectorFeatureId,
+  ],
   minimumLicenseRequired: 'gold' as const,
   renderParameterTemplates,
 });

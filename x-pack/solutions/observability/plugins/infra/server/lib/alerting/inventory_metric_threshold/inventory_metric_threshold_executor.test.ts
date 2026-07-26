@@ -300,6 +300,33 @@ describe('The inventory threshold alert type', () => {
       ]);
     });
 
+    test('when tags are a string in the source, the string is treated as a single tag', async () => {
+      setEvaluationResults({
+        'host-01': {
+          ...baseCriterion,
+          metric: 'count',
+          timeSize: 1,
+          timeUnit: 'm',
+          threshold: [0.75],
+          comparator: COMPARATORS.GREATER_THAN,
+          shouldFire: true,
+          shouldWarn: false,
+          currentValue: 1.0,
+          isNoData: false,
+          isError: false,
+          context: {
+            tags: 'host-01_tag1',
+          },
+        },
+      });
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      expect(mostRecentAction(instanceIdA).tags).toStrictEqual([
+        'host-01_tag1',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+    });
+
     test('when tags are NOT present in the source, rule tags are added in alert context', async () => {
       setEvaluationResults({
         'host-01': {

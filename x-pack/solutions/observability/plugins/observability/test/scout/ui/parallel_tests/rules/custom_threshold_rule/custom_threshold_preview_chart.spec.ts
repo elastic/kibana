@@ -4,51 +4,63 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
+import { CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS } from '../../../fixtures/constants';
 
-test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
-  const previewChartDataTestSubj = 'thresholdRulePreviewChart';
+test.describe(
+  'Custom threshold preview chart',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.rulesPage.goto();
+      await pageObjects.rulesPage.openRuleTypeModal();
+      await pageObjects.rulesPage.clickCustomThresholdRuleType();
+    });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    test('should render the empty chart only once at bootstrap', async ({ page }) => {
+      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
+      await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
+    });
 
-    await pageObjects.rulesPage.goto();
-
-    await pageObjects.rulesPage.createRuleButton.click();
-    await pageObjects.rulesPage.observabilityCategory.click();
-    await pageObjects.rulesPage.customThresholdRuleTypeCard.click();
-  });
-
-  test('should render the empty chart only once at bootstrap', async ({ page }) => {
-    const previewChart = page.testSubj.locator(previewChartDataTestSubj);
-    await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
-  });
-
-  test('should handle the error message correctly', async ({ page }) => {
-    await expect(async () => {
+    test('should show an error message when the equation is invalid', async ({ page }) => {
+      const customEquation = page.testSubj.locator('customEquation');
       const customEquationField = page.testSubj.locator(
         'thresholdRuleCustomEquationEditorFieldText'
       );
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
 
-      // Introduce an error in the equation
-      await page.testSubj.click('customEquation');
-      await customEquationField.click();
+      await customEquation.click();
       await customEquationField.fill('A +');
       await page.testSubj.click('o11yClosablePopoverTitleButton');
 
-      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-      await expect(lensFailure).toBeVisible();
-      await expect(lensFailure).toContainText('An error occurred while rendering the chart');
+      await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+    });
 
-      // Fix the introduced error
-      await page.testSubj.click('customEquation');
-      await customEquationField.click();
+    test('should render chart correctly after fixing an invalid equation', async ({ page }) => {
+      const customEquation = page.testSubj.locator('customEquation');
+      const customEquationField = page.testSubj.locator(
+        'thresholdRuleCustomEquationEditorFieldText'
+      );
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
+      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
+
+      // Introduce an invalid equation to trigger the error state
+      await customEquation.click();
+      await customEquationField.fill('A +');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
+      await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+
+      // Fix the equation back to a valid value
+      await customEquation.click();
       await customEquationField.fill('A');
       await page.testSubj.click('o11yClosablePopoverTitleButton');
 
-      // Wait for the chart to re-render after fixing the equation
-      await expect(lensFailure).toBeHidden();
-    }).toPass({ timeout: 15_000, intervals: [1000] });
-  });
-});
+      // Chart should recover: error gone, chart container visible
+      await expect(lensFailure).toBeHidden({ timeout: 20_000 });
+      await expect(previewChart).toBeVisible({ timeout: 20_000 });
+    });
+  }
+);

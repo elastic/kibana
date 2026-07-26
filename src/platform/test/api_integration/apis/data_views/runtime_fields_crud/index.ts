@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('runtime_fields_crud', () => {
-    loadTestFile(require.resolve('./create_runtime_field'));
     loadTestFile(require.resolve('./get_runtime_field'));
     loadTestFile(require.resolve('./delete_runtime_field'));
     loadTestFile(require.resolve('./put_runtime_field'));

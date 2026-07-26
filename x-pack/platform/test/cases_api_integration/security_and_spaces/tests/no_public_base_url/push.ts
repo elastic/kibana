@@ -117,18 +117,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const allWorkNotes: string[] = allCommentRequests.map((request) => request.work_notes);
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
-          'Released host host-name with comment: comment text\n\nAdded by elastic.',
           'Elastic Alerts attached to the case: 3',
         ];
 
         /**
          * For each of these comments a request is made:
-         * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
-         * total alerts attach to a case. All other type of comments should be filtered. Specifically,
-         * postCommentAlertReq, postCommentAlertMultipleIdsReq, postExternalReferenceESReq, and persistableStateAttachment
+         * postCommentUserReq and a comment with the total alerts attached to a case.
+         * All other type of comments should be filtered.
          */
-        expect(allCommentRequests.length).be(4);
+        expect(allCommentRequests.length).be(2);
 
         // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
         // there specific order in the results

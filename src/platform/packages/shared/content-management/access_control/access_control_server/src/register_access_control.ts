@@ -24,7 +24,7 @@ export const registerAccessControl = async ({
       validate: {
         request: {
           params: schema.object({
-            contentTypeId: schema.string(),
+            contentTypeId: schema.string({ minLength: 1, maxLength: 256 }),
           }),
         },
         response: {
@@ -89,9 +89,10 @@ export const registerAccessControl = async ({
           body: schema.object({
             objects: schema.arrayOf(
               schema.object({
-                type: schema.string(),
-                id: schema.string(),
-              })
+                type: schema.string({ minLength: 1, maxLength: 256 }),
+                id: schema.string({ minLength: 1, maxLength: 256 }),
+              }),
+              { maxSize: 100 }
             ),
             accessMode: schema.oneOf([
               schema.literal('write_restricted'),
@@ -103,13 +104,17 @@ export const registerAccessControl = async ({
           200: {
             body: () =>
               schema.object({
+                // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
                 results: schema.arrayOf(
                   schema.object({
+                    // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
                     type: schema.string(),
+                    // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
                     id: schema.string(),
                     success: schema.boolean(),
                     error: schema.maybe(
                       schema.object({
+                        // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
                         message: schema.string(),
                         statusCode: schema.number(),
                       })

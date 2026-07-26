@@ -221,7 +221,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     return (
       <div data-test-subj="mlAnalyticsJobList">
         <EuiSpacer size="m" />
-        <AnalyticsEmptyPrompt showDocsLink iconSize="s" />
+        <AnalyticsEmptyPrompt showDocsLink />
       </div>
     );
   }
@@ -239,13 +239,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     onChange: handleSearchOnChange,
     box: {
       incremental: true,
+      'data-test-subj': 'mlAnalyticsSearchBox',
     },
     filters,
   };
 
   return (
     <SpaceManagementContextWrapper>
-      <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsJobList">
         {modals}
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />

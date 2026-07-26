@@ -76,7 +76,15 @@ export function useDockerRegistry() {
 
   let dockerProcess: ChildProcess | undefined;
   async function startDockerRegistryServer() {
-    const args = ['run', '--rm', '-p', `${packageRegistryPort}:8080`, DOCKER_IMAGE];
+    const args = [
+      'run',
+      '--rm',
+      '-p',
+      `${packageRegistryPort}:8080`,
+      '-e',
+      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+      DOCKER_IMAGE,
+    ];
 
     dockerProcess = execa('docker', args, {
       stdio: ['ignore', 'pipe', 'pipe'],

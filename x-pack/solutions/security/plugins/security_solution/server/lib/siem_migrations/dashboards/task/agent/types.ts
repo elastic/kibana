@@ -9,6 +9,7 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { MigrationComments } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../common/siem_migrations/parsers/types';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
@@ -17,7 +18,7 @@ import type { EsqlKnowledgeBase } from '../../../common/task/util/esql_knowledge
 import type { ChatModel } from '../../../common/task/util/actions_client_chat';
 import type { migrateDashboardConfigSchema, migrateDashboardState } from './state';
 import type { DashboardMigrationTelemetryClient } from '../dashboard_migrations_telemetry_client';
-import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../../common/task/util/enrich_lookup_resources';
 
 export type MigrateDashboardState = typeof migrateDashboardState.State;
 export type MigrateDashboardConfigSchema = (typeof migrateDashboardConfigSchema)['State'];
@@ -42,6 +43,7 @@ export interface MigrateDashboardGraphParams {
   inference: InferenceServerStart;
   request: KibanaRequest;
   connectorId: string;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface ParsedOriginalDashboard {
@@ -75,7 +77,7 @@ export interface TranslatePanelNodeParams {
   parsed_panel: ParsedPanel;
   description: string;
   dashboard_description: string;
-  resources: MigrationResources;
+  resources: EnrichedMigrationResources;
   index: number;
 }
 

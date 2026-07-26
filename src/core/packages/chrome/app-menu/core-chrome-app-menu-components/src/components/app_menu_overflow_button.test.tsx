@@ -11,11 +11,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
+import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 describe('AppMenuOverflowButton', () => {
   const defaultItems = [
     { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'search', order: 2 },
+    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'magnify', order: 2 },
   ];
 
   const defaultProps = {
@@ -32,14 +33,14 @@ describe('AppMenuOverflowButton', () => {
   it('should render the overflow button', () => {
     render(<AppMenuOverflowButton {...defaultProps} />);
 
-    expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
   });
 
   it('should call onPopoverToggle when clicked', async () => {
     const user = userEvent.setup();
     render(<AppMenuOverflowButton {...defaultProps} />);
 
-    await user.click(screen.getByTestId('app-menu-overflow-button'));
+    await user.click(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
 
     expect(defaultProps.onPopoverToggle).toHaveBeenCalledTimes(1);
   });

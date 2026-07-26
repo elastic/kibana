@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   packAssetSavedObjectModelVersion1,
   packSavedObjectModelVersion1,
+  packSavedObjectModelVersion2,
+  packSavedObjectModelVersion3,
+  packSavedObjectModelVersion4,
   savedQueryModelVersion1,
+  savedQueryModelVersion2,
 } from './saved_object_model_versions';
 import {
   savedQuerySavedObjectType,
@@ -57,6 +61,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     created_by: {
       type: 'text',
     },
+    created_by_profile_uid: {
+      type: 'keyword',
+    },
     platform: {
       type: 'keyword',
     },
@@ -68,6 +75,9 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     updated_by: {
       type: 'text',
+    },
+    updated_by_profile_uid: {
+      type: 'keyword',
     },
     interval: {
       type: 'keyword',
@@ -90,6 +100,7 @@ export const savedQueryType: SavedObjectsType = {
   mappings: savedQuerySavedObjectMappings,
   modelVersions: {
     1: savedQueryModelVersion1,
+    2: savedQueryModelVersion2,
   },
   management: {
     importableAndExportable: true,
@@ -128,10 +139,16 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     created_by: {
       type: 'keyword',
     },
+    created_by_profile_uid: {
+      type: 'keyword',
+    },
     updated_at: {
       type: 'date',
     },
     updated_by: {
+      type: 'keyword',
+    },
+    updated_by_profile_uid: {
       type: 'keyword',
     },
     enabled: {
@@ -143,6 +160,17 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     version: {
       type: 'long',
+    },
+    schedule_type: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    interval: {
+      type: 'integer',
+    },
+    rrule_schedule: {
+      dynamic: false,
+      properties: {},
     },
     queries: {
       dynamic: false,
@@ -178,10 +206,16 @@ export const packType: SavedObjectsType = {
   name: packSavedObjectType,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
+  // 'multiple-isolated' technically allows a pack to be shared to multiple spaces via the
+  // Saved Objects management UI, but the Osquery UI never exposes that feature. In practice
+  // every pack lives in exactly one space, so namespaces[0] is always the correct space.
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
   modelVersions: {
     1: packSavedObjectModelVersion1,
+    2: packSavedObjectModelVersion2,
+    3: packSavedObjectModelVersion3,
+    4: packSavedObjectModelVersion4,
   },
   management: {
     defaultSearchField: 'name',
@@ -189,7 +223,10 @@ export const packType: SavedObjectsType = {
     getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
     getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
-      path: `/app/osquery/packs/${savedObject.id}`,
+      // The read-only Pack details page was removed; link straight to the Edit
+      // page (read-only for readPacks-only users) instead of relying on the
+      // legacy `/packs/:id` -> `/packs/:id/edit` client-side redirect.
+      path: `/app/osquery/packs/${savedObject.id}/edit`,
       uiCapabilitiesPath: 'osquery.read',
     }),
     onExport: (context, objects) =>

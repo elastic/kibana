@@ -106,7 +106,7 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType, loading }: P
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-expanded={isOpen}
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={onClick}
               data-test-subj="toggleTimelineButton"
             >

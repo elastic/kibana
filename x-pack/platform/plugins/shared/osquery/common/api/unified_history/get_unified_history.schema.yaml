@@ -1,0 +1,238 @@
+openapi: 3.0.0
+info:
+  title: Get Unified History Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    SourceFilter:
+      description: 'The type of history source to include.'
+      type: string
+      enum: [live, rule, scheduled]
+
+    UnifiedHistorySource:
+      description: 'The display label for the history source.'
+      type: string
+      enum: [Live, Scheduled, Rule]
+
+    GetUnifiedHistoryRequestQuery:
+      type: object
+      properties:
+        pageSize:
+          description: 'The number of results to return per page.'
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        nextPage:
+          description: 'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
+          type: string
+        kuery:
+          description: 'A search string to filter history entries by pack name, query text, or query ID.'
+          type: string
+        userIds:
+          description: 'Comma-separated list of user IDs to filter live query history.'
+          example: 'elastic,admin'
+          type: string
+        sourceFilters:
+          description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+          example: 'live,scheduled'
+          type: string
+        startDate:
+          description: 'The start of the time range filter (ISO 8601).'
+          example: '2024-01-01T00:00:00Z'
+          type: string
+        endDate:
+          description: 'The end of the time range filter (ISO 8601).'
+          example: '2024-12-31T23:59:59Z'
+          type: string
+
+    UnifiedHistoryRowBase:
+      type: object
+      required:
+        - id
+        - timestamp
+        - queryText
+        - agentCount
+      properties:
+        id:
+          description: 'Unique identifier for the history row.'
+          type: string
+        timestamp:
+          description: 'The timestamp of the query execution.'
+          type: string
+        queryText:
+          description: 'The SQL query that was executed.'
+          type: string
+        queryName:
+          description: 'The name of the query, if available.'
+          type: string
+        packName:
+          description: 'The name of the pack containing the query.'
+          type: string
+        packId:
+          description: 'The ID of the pack containing the query.'
+          type: string
+        spaceId:
+          description: 'The Kibana space ID where the query was executed.'
+          type: string
+        agentCount:
+          description: 'The number of agents targeted by the query.'
+          type: integer
+        successCount:
+          description: 'The number of successful agent responses.'
+          type: integer
+          nullable: true
+        errorCount:
+          description: 'The number of agent responses with errors.'
+          type: integer
+          nullable: true
+        totalRows:
+          description: 'The total number of result rows returned across all agents.'
+          type: integer
+          nullable: true
+
+    LiveHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/UnifiedHistoryRowBase'
+        - type: object
+          required:
+            - sourceType
+            - source
+          properties:
+            sourceType:
+              description: 'Identifies this as a live query history row.'
+              type: string
+              enum: [live]
+            source:
+              description: 'Whether this was a manually run live query or triggered by a rule.'
+              type: string
+              enum: [Live, Rule]
+            actionId:
+              description: 'The Fleet action ID for the live query.'
+              type: string
+            userId:
+              description: 'The ID of the user who ran the query.'
+              type: string
+            userProfileUid:
+              description: 'The user profile UID of the user who ran the query.'
+              type: string
+            queriesWithResults:
+              description: 'The number of sub-queries that returned results.'
+              type: integer
+            queriesTotal:
+              description: 'The total number of sub-queries in the live action.'
+              type: integer
+            ecsMapping:
+              description: 'ECS mapping configuration used for the query.'
+              type: object
+              additionalProperties: true
+            savedQueryId:
+              description: 'The saved query ID, if the live query was based on a saved query.'
+              type: string
+            timeout:
+              description: 'The query timeout in seconds.'
+              type: integer
+            agentIds:
+              description: 'List of targeted agent IDs.'
+              type: array
+              items:
+                type: string
+            agentAll:
+              description: 'Whether the query targeted all agents.'
+              type: boolean
+            agentPlatforms:
+              description: 'List of targeted agent platforms.'
+              type: array
+              items:
+                type: string
+            agentPolicyIds:
+              description: 'List of targeted agent policy IDs.'
+              type: array
+              items:
+                type: string
+
+    ScheduledHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/UnifiedHistoryRowBase'
+        - type: object
+          required:
+            - sourceType
+            - source
+          properties:
+            sourceType:
+              description: 'Identifies this as a scheduled query history row.'
+              type: string
+              enum: [scheduled]
+            source:
+              description: 'Indicates this is a scheduled query execution.'
+              type: string
+              enum: [Scheduled]
+            scheduleId:
+              description: 'The schedule ID for the scheduled query.'
+              type: string
+            executionCount:
+              description: 'The execution count for this scheduled query run.'
+              type: integer
+            plannedTime:
+              description: 'The planned execution time for the scheduled query.'
+              type: string
+
+    UnifiedHistoryRow:
+      discriminator:
+        propertyName: sourceType
+        mapping:
+          live: '#/components/schemas/LiveHistoryRow'
+          scheduled: '#/components/schemas/ScheduledHistoryRow'
+      oneOf:
+        - $ref: '#/components/schemas/LiveHistoryRow'
+        - $ref: '#/components/schemas/ScheduledHistoryRow'
+
+    GetUnifiedHistoryResponse:
+      type: object
+      required:
+        - data
+        - hasMore
+      properties:
+        data:
+          description: 'The list of unified history rows for the current page.'
+          type: array
+          items:
+            $ref: '#/components/schemas/UnifiedHistoryRow'
+        nextPage:
+          description: 'A base64-encoded cursor to fetch the next page. Absent when there are no more results.'
+          type: string
+        hasMore:
+          description: 'Whether there are more results beyond the current page.'
+          type: boolean
+      example:
+        data:
+          - id: '3c42c847-eb30-4452-80e0-728584042334'
+            sourceType: 'live'
+            source: 'Live'
+            timestamp: '2024-07-26T09:59:32.220Z'
+            queryText: 'select * from uptime;'
+            queryName: 'uptime_query'
+            agentCount: 5
+            successCount: 5
+            errorCount: 0
+            totalRows: 42
+            actionId: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+            userId: 'elastic'
+          - id: 'pack_my_pack_uptime_3'
+            sourceType: 'scheduled'
+            source: 'Scheduled'
+            timestamp: '2024-07-26T09:00:00.000Z'
+            plannedTime: '2024-07-26T09:00:00.000Z'
+            queryText: 'select * from uptime;'
+            queryName: 'uptime'
+            packName: 'My Pack'
+            packId: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+            agentCount: 10
+            successCount: 9
+            errorCount: 1
+            totalRows: 100
+            scheduleId: 'pack_my_pack_uptime'
+            executionCount: 3
+        nextPage: 'eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...'
+        hasMore: true

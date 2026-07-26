@@ -77,6 +77,7 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
+  headerVisibility?: boolean;
   hideFilteringOnComputedColumns?: boolean;
 }
 
@@ -107,6 +108,7 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
+  headerVisibility,
   hideFilteringOnComputedColumns,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
@@ -299,6 +301,7 @@ export function TableGrid({
       className="kbnDocViewer__fieldsGrid"
       css={styles.fieldsGrid}
       columns={gridColumns}
+      headerVisibility={headerVisibility}
       toolbarVisibility={false}
       rowCount={rows.length}
       renderCellValue={customRenderCellValue ? customRenderCellValue : renderCellValue}
@@ -319,6 +322,22 @@ const componentStyles = {
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
+      },
+
+      '&.euiDataGrid--noHeader': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__content': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__virtualized': {
+        overflow: 'visible !important',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGridRow:first-of-type .euiDataGridRowCell': {
+        borderBlockStart: 'none',
       },
 
       '&.euiDataGrid--headerUnderline .euiDataGridHeader': {

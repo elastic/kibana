@@ -75,7 +75,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       };
 
       // value from data since we aren't using encrypted client
-      const { value } = existingParam.attributes;
+      const { value, key: existingKey } = existingParam.attributes;
       const {
         id: responseId,
         attributes: { key, tags, description },
@@ -86,9 +86,13 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         newParam
       )) as SavedObject<SyntheticsParams>;
 
+      // Include both old and new key if the key was renamed
+      const modifiedParamKeys = existingKey !== key ? [existingKey, key] : [key];
+
       await asyncGlobalParamsPropagation({
         server,
         paramsSpacesToSync: existingParam.namespaces || [spaceId],
+        modifiedParamKeys,
       });
 
       return { id: responseId, key, tags, description, namespaces, value };

@@ -15,6 +15,7 @@ import { deleteAllPrebuiltRuleAssets, performUpgradePrebuiltRules } from '../../
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const deps = {
     es,
@@ -134,6 +135,14 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               ],
             });
+            const [{ body: upgradedRuleA }, { body: upgradedRuleB }] = await Promise.all([
+              detectionsApi.readRule({
+                query: { rule_id: 'rule_1' },
+              }),
+              detectionsApi.readRule({
+                query: { rule_id: 'rule_2' },
+              }),
+            ]);
 
             expect(response.summary).toMatchObject({
               total: 2,
@@ -143,6 +152,19 @@ export default ({ getService }: FtrProviderContext): void => {
             });
             expect(response.results.updated).toHaveLength(2);
             expect(response.results.updated).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  rule_id: 'rule_1',
+                  version: 2,
+                }),
+                expect.objectContaining({
+                  rule_id: 'rule_2',
+                  version: 2,
+                }),
+              ])
+            );
+
+            expect([upgradedRuleA, upgradedRuleB]).toEqual(
               expect.arrayContaining([
                 expect.objectContaining({
                   rule_id: 'rule_1',
@@ -309,6 +331,14 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               ],
             });
+            const [{ body: upgradedRuleA }, { body: upgradedRuleB }] = await Promise.all([
+              detectionsApi.readRule({
+                query: { rule_id: 'rule_1' },
+              }),
+              detectionsApi.readRule({
+                query: { rule_id: 'rule_2' },
+              }),
+            ]);
 
             expect(response.summary).toMatchObject({
               total: 2,
@@ -318,6 +348,19 @@ export default ({ getService }: FtrProviderContext): void => {
             });
             expect(response.results.updated).toHaveLength(2);
             expect(response.results.updated).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  rule_id: 'rule_1',
+                  version: 2,
+                }),
+                expect.objectContaining({
+                  rule_id: 'rule_2',
+                  version: 2,
+                }),
+              ])
+            );
+
+            expect([upgradedRuleA, upgradedRuleB]).toEqual(
               expect.arrayContaining([
                 expect.objectContaining({
                   rule_id: 'rule_1',
@@ -422,6 +465,9 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           });
+          const { body: upgradedRule } = await detectionsApi.readRule({
+            query: { rule_id: 'rule_1' },
+          });
 
           expect(response.summary).toMatchObject({
             total: 1,
@@ -433,9 +479,16 @@ export default ({ getService }: FtrProviderContext): void => {
             expect.objectContaining({
               rule_id: 'rule_1',
               version: 2,
-              tags: expectedTags,
             }),
           ]);
+
+          expect(upgradedRule).toEqual(
+            expect.objectContaining({
+              rule_id: 'rule_1',
+              version: 2,
+              tags: expectedTags,
+            })
+          );
         });
       }
 

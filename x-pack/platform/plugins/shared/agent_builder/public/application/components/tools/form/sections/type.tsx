@@ -74,7 +74,7 @@ export const TypeSection = ({ mode }: TypeProps) => {
       description={i18nMessages.configuration.documentation.description}
       documentation={{
         title: i18nMessages.configuration.documentation.documentationLink,
-        href: docLinksService.tools,
+        href: docLinksService.agentBuilderTools,
       }}
     >
       <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>

@@ -24,22 +24,22 @@ interface Asset {
   }>;
 }
 const integrationWithML = 'lmd';
-const destinationIndex = 'ml-rdp-lmd';
+const destinationIndex = 'ml-rdp-lmd_ea';
 const assets: Asset[] = [
   {
     type: 'index_template',
-    expected: ['logs-lmd.pivot_transform-template'],
+    expected: ['logs-lmd.pivot_transform_ea-template'],
     links: [
       {
-        text: 'logs-lmd.pivot_transform-template',
+        text: 'logs-lmd.pivot_transform_ea-template',
         expectedEsApi:
-          '/api/index_management/index_templates/logs-lmd.pivot_transform-template?legacy=false',
+          '/api/index_management/index_templates/logs-lmd.pivot_transform_ea-template?legacy=false',
         expectedResponseStatus: 200,
         expectedBody: (resp) => {
           const body = resp.body;
           expect(body.composedOf).to.deep.equal([
-            'logs-lmd.pivot_transform-template@package',
-            'logs-lmd.pivot_transform-template@custom',
+            'logs-lmd.pivot_transform_ea-template@package',
+            'logs-lmd.pivot_transform_ea-template@custom',
           ]);
           expect(body.indexPatterns).to.deep.equal([destinationIndex]);
         },
@@ -49,20 +49,20 @@ const assets: Asset[] = [
   {
     type: 'component_template',
     expected: [
-      'logs-lmd.pivot_transform-template@custom',
-      'logs-lmd.pivot_transform-template@package',
+      'logs-lmd.pivot_transform_ea-template@custom',
+      'logs-lmd.pivot_transform_ea-template@package',
     ],
     links: [
       {
-        text: 'logs-lmd.pivot_transform-template@package',
+        text: 'logs-lmd.pivot_transform_ea-template@package',
         expectedEsApi:
-          '/api/index_management/component_templates/logs-lmd.pivot_transform-template%40package',
+          '/api/index_management/component_templates/logs-lmd.pivot_transform_ea-template%40package',
         expectedResponseStatus: 200,
       },
       {
-        text: 'logs-lmd.pivot_transform-template@custom',
+        text: 'logs-lmd.pivot_transform_ea-template@custom',
         expectedEsApi:
-          '/api/index_management/component_templates/logs-lmd.pivot_transform-template%40custom',
+          '/api/index_management/component_templates/logs-lmd.pivot_transform_ea-template%40custom',
         // @custom should be defined by user if needed
         // therefore should not exist when package is first installed
         // but it should be defined in the index template
@@ -72,7 +72,7 @@ const assets: Asset[] = [
   },
   {
     type: 'transform',
-    expected: ['logs-lmd.pivot_transform'],
+    expected: ['logs-lmd.pivot_transform_ea'],
   },
   {
     type: 'ml-module',

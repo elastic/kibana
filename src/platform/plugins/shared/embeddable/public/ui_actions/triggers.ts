@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-import type { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
 import type { BooleanRelation } from '@kbn/es-query';
-import { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../common';
 
 export type ValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
@@ -64,80 +62,6 @@ export type ChartActionContext =
   | MultiValueClickContext
   | RangeSelectContext
   | RowClickContext;
-
-export const contextMenuTrigger: Trigger = {
-  id: CONTEXT_MENU_TRIGGER,
-  title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
-    defaultMessage: 'Context menu',
-  }),
-  description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
-    defaultMessage: "A new action will be added to the panel's context menu",
-  }),
-};
-
-export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const panelBadgeTrigger: Trigger = {
-  id: PANEL_BADGE_TRIGGER,
-  title: i18n.translate('embeddableApi.panelBadgeTrigger.title', {
-    defaultMessage: 'Panel badges',
-  }),
-  description: i18n.translate('embeddableApi.panelBadgeTrigger.description', {
-    defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
-  }),
-};
-
-export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
-export const panelNotificationTrigger: Trigger = {
-  id: PANEL_NOTIFICATION_TRIGGER,
-  title: i18n.translate('embeddableApi.panelNotificationTrigger.title', {
-    defaultMessage: 'Panel notifications',
-  }),
-  description: i18n.translate('embeddableApi.panelNotificationTrigger.description', {
-    defaultMessage: 'Actions appear in top-right corner of a panel.',
-  }),
-};
-
-export const selectRangeTrigger: Trigger = {
-  id: SELECT_RANGE_TRIGGER,
-  title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
-    defaultMessage: 'Range selection',
-  }),
-  description: i18n.translate('embeddableApi.selectRangeTrigger.description', {
-    defaultMessage: 'A range of values on the visualization',
-  }),
-};
-
-export const valueClickTrigger: Trigger = {
-  id: VALUE_CLICK_TRIGGER,
-  title: i18n.translate('embeddableApi.valueClickTrigger.title', {
-    defaultMessage: 'Single click',
-  }),
-  description: i18n.translate('embeddableApi.valueClickTrigger.description', {
-    defaultMessage: 'A data point click on the visualization',
-  }),
-};
-
-export const MULTI_VALUE_CLICK_TRIGGER = 'MULTI_VALUE_CLICK_TRIGGER';
-export const multiValueClickTrigger: Trigger = {
-  id: MULTI_VALUE_CLICK_TRIGGER,
-  title: i18n.translate('embeddableApi.multiValueClickTrigger.title', {
-    defaultMessage: 'Multi click',
-  }),
-  description: i18n.translate('embeddableApi.multiValueClickTrigger.description', {
-    defaultMessage: 'Selecting multiple values of a single dimension on the visualization',
-  }),
-};
-
-export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
-export const cellValueTrigger: Trigger = {
-  id: CELL_VALUE_TRIGGER,
-  title: i18n.translate('embeddableApi.cellValueTrigger.title', {
-    defaultMessage: 'Cell value',
-  }),
-  description: i18n.translate('embeddableApi.cellValueTrigger.description', {
-    defaultMessage: 'Actions appear in the cell value options on the visualization',
-  }),
-};
 
 export const isValueClickTriggerContext = (
   context: ChartActionContext

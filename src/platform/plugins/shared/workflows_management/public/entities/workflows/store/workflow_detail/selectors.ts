@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 import type { RootState } from '../types';
 
 // Selectors
@@ -29,6 +29,8 @@ export const selectHasChanges = createSelector(
   (detail) => detail.yamlString !== detail.workflow?.yaml
 );
 
+export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
+
 export const selectYamlDocument = createSelector(
   selectYamlComputed,
   (computed) => computed?.yamlDocument
@@ -49,12 +51,33 @@ export const selectWorkflowDefinition = createSelector(
   (computed) => computed?.workflowDefinition
 );
 
-// Only checks if the current workflow yaml can be parses, does check the schema, only the yaml syntax
-export const selectIsYamlSyntaxValid = createSelector(selectYamlComputed, (computed): boolean =>
-  Boolean(computed?.workflowDefinition)
+export const selectGraphBuildError = createSelector(
+  selectYamlComputed,
+  (computed) => computed?.graphBuildError
+);
+
+// Only checks if the current workflow yaml can be parsed, does not check the schema, only the yaml syntax
+export const selectIsYamlSyntaxValid = createSelector(selectYamlDocument, (yamlDoc): boolean =>
+  Boolean(yamlDoc && yamlDoc.errors.length === 0)
+);
+
+// Checks whether validation errors (from strict schema + custom validations) are present
+export const selectHasYamlSchemaValidationErrors = createSelector(
+  selectDetail,
+  (detail): boolean => detail.hasYamlSchemaValidationErrors
+);
+
+export const selectAiAssisted = createSelector(
+  selectDetail,
+  (detail): boolean => detail.aiAssisted
 );
 
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
+
+export const selectFocusedTriggerId = createSelector(
+  selectDetail,
+  (detail) => detail.focusedTriggerId
+);
 
 export const selectHighlightedStepId = createSelector(
   selectDetail,
@@ -66,12 +89,28 @@ export const selectIsTestModalOpen = createSelector(
   (detail) => detail.isTestModalOpen
 );
 
+export const selectReplayExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.executionId ?? null
+);
+
+export const selectReplayStepExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.stepExecutionId ?? null
+);
+
+export const selectTestStepModalOpenStepId = createSelector(
+  selectDetail,
+  (detail) => detail.testStepModalOpenStepId ?? undefined
+);
+
 export const selectIsSavingYaml = createSelector(
   selectDetail,
   (detail) => detail.loading.isSavingYaml
 );
 
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
+export const selectWorkflows = createSelector(selectDetail, (detail) => detail.workflows);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
@@ -138,6 +177,17 @@ export const selectEditorFocusedStepInfo = createSelector(
   selectEditorWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
+);
+
+export const selectEditorFocusedTriggerInfo = createSelector(
+  selectFocusedTriggerId,
+  selectEditorWorkflowLookup,
+  (focusedTriggerId, workflowLookup) => {
+    if (!focusedTriggerId || !workflowLookup) return undefined;
+    const { triggersLineStart, triggersLineEnd } = workflowLookup;
+    if (triggersLineStart == null || triggersLineEnd == null) return undefined;
+    return { lineStart: triggersLineStart, lineEnd: triggersLineEnd };
+  }
 );
 
 export const selectEditorWorkflowGraph = createSelector(

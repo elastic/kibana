@@ -19,7 +19,8 @@ import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
-describe('<ControlGeneralView />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/214268
+describe.skip('<ControlGeneralView />', () => {
   const onChange = jest.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.

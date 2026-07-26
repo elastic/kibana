@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Get Tracing Projects API endpoint
+  version: '1'
+paths:
+  /internal/evals/tracing/projects:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetTracingProjects
+      description: List tracing projects aggregated from root spans in traces-* indices
+      summary: List tracing projects
+      tags:
+        - Evals API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Start of time range (ISO 8601)
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+          description: End of time range (ISO 8601)
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter projects by name (case-insensitive substring match)
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TracingProject'
+                  total:
+                    type: integer
+                required:
+                  - projects
+                  - total
+
+components:
+  schemas:
+    TracingProject:
+      type: object
+      properties:
+        name:
+          type: string
+        trace_count:
+          type: integer
+        error_rate:
+          type: number
+        p50_latency_ms:
+          type: number
+        p99_latency_ms:
+          type: number
+        total_tokens:
+          type: integer
+        last_trace_time:
+          type: string
+      required:
+        - name
+        - trace_count
+        - last_trace_time

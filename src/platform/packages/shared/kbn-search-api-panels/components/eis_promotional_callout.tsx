@@ -81,7 +81,7 @@ export const EisPromotionalCallout = ({
             data-telemetry-id={`${dataId}-viewEisDocs-link`}
             target="_blank"
             iconSide="right"
-            iconType="popout"
+            iconType="external"
           >
             {EIS_CALLOUT_DOCUMENTATION_BTN}
           </EuiButton>

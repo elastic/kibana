@@ -1,0 +1,369 @@
+{
+  "sha1": "b01680ff0b86d52432cc18170510af3de8dc01ce",
+  "tests": [
+    {
+      "id": "38aee60406c9b4f-72ff5454f3d999b",
+      "title": "Automatic Import — accessibility — create data stream flyout has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_data_stream_flyout.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "38aee60406c9b4f-aead6c66b03a69e",
+      "title": "Automatic Import — accessibility — create data stream flyout has no detectable a11y violations with index source selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_data_stream_flyout.spec.ts",
+        "line": 83,
+        "column": 9
+      }
+    },
+    {
+      "id": "9b334bf5625696a-6ebdb8c37a2b353",
+      "title": "Automatic Import — accessibility — create integration page has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "9b334bf5625696a-dcfd1aa2a228e00",
+      "title": "Automatic Import — accessibility — create integration page has no detectable a11y violations with connector selector open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "f0ee5e18e8938df-982454ef82ccb2f",
+      "title": "Automatic Import — accessibility — edit pipeline flyout has no detectable a11y violations on table tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_edit_pipeline_flyout.spec.ts",
+        "line": 114,
+        "column": 9
+      }
+    },
+    {
+      "id": "f0ee5e18e8938df-23f70e05861b7d6",
+      "title": "Automatic Import — accessibility — edit pipeline flyout has no detectable a11y violations on ingest pipeline tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_edit_pipeline_flyout.spec.ts",
+        "line": 121,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-498afad4eb02b17",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form shows the connector selector button when connectors are available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-2e88748e780fbd3",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form does not show the Add new connector button when connectors exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-36054075bbaabbe",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form shows Add new connector button when no AI connectors are available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-2516336563ee82d",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form opens the connector setup flyout when Add new connector is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 88,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-086e482ecaa65ea",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form renders the title and description input fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 106,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-7c49076f136ebd7",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form allows entering an integration title and description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 113,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-9587c05885f2741",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form Done button is disabled when no data streams have been added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 128,
+        "column": 9
+      }
+    },
+    {
+      "id": "91779db3dc0c555-fff207d0cbdd6c3",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form Cancel button is visible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 134,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-a78690ef4eea619",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout opens the create data stream flyout when Add data stream is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-94c1b2feaccda48",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout closes the flyout when the cancel button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 82,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-59c0db1a422424d",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button is disabled when the form is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 87,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-ed2f0c69b52c0ad",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout shows the file upload card as the default log source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-3e0c6e087a99420",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout enables the index selector when the Select index card is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-48165fe4f8a2d54",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout disables the index selector when toggling back to the upload card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-ec45aa2469635dc",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button is enabled when all required fields are filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-c744259da309dc3",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button stays disabled when integration title has only one character",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 151,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-aa3659440780795",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button stays disabled when data stream title is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 183,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-e810a49812f51a5",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button stays disabled when data stream title has only one character",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 205,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-d54a5743469b289",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs calls the upload and create APIs then navigates to the edit page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 232,
+        "column": 9
+      }
+    },
+    {
+      "id": "dcd0cf5828764e1-1e37d1408388195",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout index selector shows available indices and allows selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
+        "line": 284,
+        "column": 9
+      }
+    }
+  ]
+}

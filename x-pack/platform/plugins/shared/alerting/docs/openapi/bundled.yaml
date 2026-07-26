@@ -94,6 +94,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                healthUnauthorizedResponse:
+                  $ref: '#/components/examples/401_health_response'
   /api/alerting/rule_types:
     get:
       summary: Get the rule types
@@ -353,6 +356,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                ruleTypesUnauthorizedResponse:
+                  $ref: '#/components/examples/401_rule_types_response'
 components:
   examples:
     get_health_response:
@@ -370,6 +376,18 @@ components:
           read_health:
             status: ok
             timestamp: '2023-01-13T01:28:00.280Z'
+    401_health_response:
+      summary: Unauthorized response for the get alerting health API.
+      value:
+        statusCode: 401
+        error: Unauthorized
+        message: '[security_exception] missing authentication credentials for REST request'
+    401_rule_types_response:
+      summary: Unauthorized response for the get rule types API.
+      value:
+        statusCode: 401
+        error: Unauthorized
+        message: '[security_exception] missing authentication credentials for REST request'
     get_rule_types_response:
       summary: Retrieve rule types associated with Kibana machine learning features
       value:

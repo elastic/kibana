@@ -11,11 +11,24 @@ import { TestProviders } from '../../../../../common/mock';
 import { KpiViewSelect } from './kpi_view_select';
 import { KpiViewSelection } from './helpers';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+
+jest.mock('../../../../../common/lib/kibana');
+
 describe('<KpiViewSelect />', () => {
   const mockSetKpiViewSelection = jest.fn();
+  const reportEventMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
   });
 
   it('renders the view selector with all tabs', () => {
@@ -62,6 +75,9 @@ describe('<KpiViewSelect />', () => {
     fireEvent.click(screen.getByTestId('kpi-view-select-count'));
 
     expect(mockSetKpiViewSelection).toHaveBeenCalledWith(KpiViewSelection.Count);
+    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.KPIViewChanged, {
+      view: KpiViewSelection.Count,
+    });
   });
 
   it('calls setKpiViewSelection with treemap when treemap tab is clicked', () => {
@@ -77,5 +93,8 @@ describe('<KpiViewSelect />', () => {
     fireEvent.click(screen.getByTestId('kpi-view-select-treemap'));
 
     expect(mockSetKpiViewSelection).toHaveBeenCalledWith(KpiViewSelection.Treemap);
+    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.KPIViewChanged, {
+      view: KpiViewSelection.Treemap,
+    });
   });
 });

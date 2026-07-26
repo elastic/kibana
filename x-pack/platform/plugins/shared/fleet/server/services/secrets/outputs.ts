@@ -16,59 +16,25 @@ import type {
 import type { NewOutput } from '../../../common';
 import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
-import { appContextService } from '../app_context';
-import { settingsService } from '..';
-import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 
-import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
+import {
+  deleteSOSecrets,
+  extractAndWriteSOSecrets,
+  extractAndUpdateSOSecrets,
+  isSecretStorageEnabledForFeature,
+} from './common';
 
 export async function isOutputSecretStorageEnabled(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<boolean> {
-  const logger = appContextService.getLogger();
-
-  // if serverless then output secrets will always be supported
-  const isFleetServerStandalone =
-    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
-
-  if (isFleetServerStandalone) {
-    logger.trace('Output secrets storage is enabled as fleet server is standalone');
-    return true;
-  }
-
-  // now check the flag in settings to see if the fleet server requirement has already been met
-  // once the requirement has been met, output secrets are always on
-  const settings = await settingsService.getSettingsOrUndefined(soClient);
-
-  if (settings && settings.output_secret_storage_requirements_met) {
-    logger.debug('Output secrets storage requirements already met, turned on in settings');
-    return true;
-  }
-
-  // otherwise check if we have the minimum fleet server version and enable secrets if so
-  if (
-    await checkFleetServerVersionsForSecretsStorage(
-      esClient,
-      soClient,
-      OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
-    )
-  ) {
-    logger.debug('Enabling output secrets storage as minimum fleet server version has been met');
-    try {
-      await settingsService.saveSettings(soClient, {
-        output_secret_storage_requirements_met: true,
-      });
-    } catch (err) {
-      // we can suppress this error as it will be retried on the next function call
-      logger.warn(`Failed to save settings after enabling output secrets storage: ${err.message}`);
-    }
-
-    return true;
-  }
-
-  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
-  return false;
+  return isSecretStorageEnabledForFeature({
+    esClient,
+    soClient,
+    featureName: 'Output secrets',
+    minimumFleetServerVersion: OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey: 'output_secret_storage_requirements_met',
+  });
 }
 
 export async function extractAndWriteOutputSecrets(opts: {

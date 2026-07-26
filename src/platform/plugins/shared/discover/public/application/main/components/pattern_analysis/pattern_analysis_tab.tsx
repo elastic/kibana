@@ -7,20 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, type FC } from 'react';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
+import React, { memo, type FC, useState, useEffect, useMemo } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
+import { searchSourceComparator, useCurrentTabSelector } from '../../state_management/redux';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { createSearchSource } from '../../state_management/utils/create_search_source';
 
 export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'filters'>> = memo(
   (props) => {
-    const savedSearch = useSavedSearch();
+    const services = useDiscoverServices();
+    const appState = useCurrentTabSelector((state) => state.appState);
+    const globalState = useCurrentTabSelector((state) => state.globalState);
+
+    const [searchSource, setSearchSource] = useState(() => {
+      return createSearchSource({
+        dataView: props.dataView,
+        appState,
+        globalState,
+        services,
+      });
+    });
+    const searchSourceRef = useLatest(searchSource);
+
+    useEffect(() => {
+      const newSearchSource = createSearchSource({
+        dataView: props.dataView,
+        appState,
+        globalState,
+        services,
+      });
+      if (
+        !searchSourceComparator(
+          searchSourceRef.current.getSerializedFields(),
+          newSearchSource.getSerializedFields()
+        )
+      ) {
+        setSearchSource(newSearchSource);
+      }
+    }, [appState, globalState, props.dataView, services, searchSourceRef]);
+
+    const savedSearch = useMemo(() => ({ searchSource }), [searchSource]);
 
     return (
       <PatternAnalysisTable
         dataView={props.dataView}
         switchToDocumentView={props.switchToDocumentView}
         savedSearch={savedSearch}
-        stateContainer={props.stateContainer}
         trackUiMetric={props.trackUiMetric}
         renderViewModeToggle={props.renderViewModeToggle}
       />

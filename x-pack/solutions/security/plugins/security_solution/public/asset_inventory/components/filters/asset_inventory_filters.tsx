@@ -32,19 +32,19 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.type', {
       defaultMessage: 'Type',
     }),
-    fieldName: ASSET_FIELDS.ENTITY_TYPE,
+    field_name: ASSET_FIELDS.ENTITY_TYPE,
   },
   {
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.name', {
       defaultMessage: 'Name',
     }),
-    fieldName: ASSET_FIELDS.ENTITY_NAME,
+    field_name: ASSET_FIELDS.ENTITY_NAME,
   },
   {
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.id', {
       defaultMessage: 'ID',
     }),
-    fieldName: ASSET_FIELDS.ENTITY_ID,
+    field_name: ASSET_FIELDS.ENTITY_ID,
   },
 ];
 

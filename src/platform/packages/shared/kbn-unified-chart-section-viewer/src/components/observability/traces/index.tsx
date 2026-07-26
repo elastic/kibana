@@ -8,14 +8,18 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
+import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { extractUsedMetadataFields } from '../../../utils';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -26,11 +30,14 @@ function TraceMetricsGrid({
   onBrushEnd,
   onFilter,
   actions,
+  profileId,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  breakdownField,
+  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
-  const { query, dataView } = fetchParams;
+  const { query, dataView, columns, isESQLQuery } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -46,11 +53,48 @@ function TraceMetricsGrid({
     return [...esqlQuery.filters, ...kqlFilters];
   }, [esqlQuery.filters, kqlFilters]);
 
+  const usedMetadataFields = useMemo(() => {
+    return extractUsedMetadataFields({
+      metadataFields: esqlQuery.metadataFields,
+      filters,
+    });
+  }, [esqlQuery.metadataFields, filters]);
+
+  const breakdownDataViewField = useMemo(
+    () => (breakdownField && dataView ? dataView.getFieldByName(breakdownField) : undefined),
+    [breakdownField, dataView]
+  );
+
+  const handleBreakdownFieldChange = useCallback(
+    (field: DataViewField | undefined) => {
+      onBreakdownFieldChange?.(field?.name);
+    },
+    [onBreakdownFieldChange]
+  );
+
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
+      leftSide: dataView ? (
+        <UnifiedBreakdownFieldSelector
+          dataView={dataView}
+          breakdown={{ field: breakdownDataViewField }}
+          onBreakdownFieldChange={handleBreakdownFieldChange}
+          esqlColumns={isESQLQuery ? columns : undefined}
+          recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
+          fieldsMetadata={services.fieldsMetadata}
+        />
+      ) : undefined,
     }),
-    [renderToggleActions]
+    [
+      renderToggleActions,
+      dataView,
+      breakdownDataViewField,
+      handleBreakdownFieldChange,
+      columns,
+      isESQLQuery,
+      services.fieldsMetadata,
+    ]
   );
 
   const indexPattern = dataView?.getIndexPattern();
@@ -70,12 +114,15 @@ function TraceMetricsGrid({
         value={{
           indexes: indexPattern,
           filters,
+          metadataFields: usedMetadataFields,
           services,
           onBrushEnd,
           onFilter,
           fetchParams,
           discoverFetch$,
           actions,
+          profileId,
+          breakdownField: breakdownDataViewField?.name,
         }}
       >
         <EuiPanel

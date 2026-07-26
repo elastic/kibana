@@ -6,6 +6,7 @@
  */
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -15,7 +16,6 @@ import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugi
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -55,7 +55,8 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SLORouteRepository } from '../server/routes/utils/get_slo_server_route_repository';
 import type { SLOPlugin } from './plugin';
 
 export type SLORepositoryClient = RouteRepositoryClient<SLORouteRepository, DefaultClientOptions>;
@@ -89,8 +90,8 @@ export interface SLOPublicPluginsStart {
   discover?: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldFormats: FieldFormatsStart;
+  inspector: InspectorPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observability: ObservabilityPublicStart;
@@ -108,6 +109,7 @@ export interface SLOPublicPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   apmSourcesAccess: ApmSourceAccessPluginStart;
   contentManagement: ContentManagementPublicStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;

@@ -56,8 +56,9 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
             className={`tagAssignFlyout__selectionIcon status-${overriddenStatus}`}
             type={statusIcon}
             data-test-subj="assign-result-status"
+            aria-hidden={true}
           />
-          <EuiIcon type={result.icon ?? 'empty'} title={result.type} />
+          <EuiIcon type={result.icon ?? 'empty'} title={result.type} aria-label={result.type} />
         </>
       ),
       append: <ResultActionLabel action={assignmentAction} />,
@@ -68,7 +69,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
     <EuiSelectable<ResultInternals>
       css={styles}
       height="full"
-      data-test-subj="assignFlyoutResultList"
+      data-test-subj={isLoading ? 'assignFlyoutResultList-loading' : 'assignFlyoutResultList'}
       aria-label="Saved objects which can be assigned to this tag"
       options={options}
       allowExclusions={false}

@@ -53,7 +53,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
 
   if (retriesExceeded) {
     return (
-      <EuiCallOut announceOnMount title={FAILED_TO_SCHEDULE} color="danger" iconType="alert" />
+      <EuiCallOut announceOnMount title={FAILED_TO_SCHEDULE} color="danger" iconType="warning" />
     );
   }
 

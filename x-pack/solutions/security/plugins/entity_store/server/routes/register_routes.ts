@@ -5,13 +5,65 @@
  * 2.0.
  */
 
-import { registerInstall, registerStop, registerForceLogExtraction } from './apis';
+import {
+  registerInstall,
+  registerUninstall,
+  registerStop,
+  registerStart,
+  registerStatus,
+  registerForceLogExtraction,
+  registerStartMaintainer,
+  registerStopMaintainer,
+  registerGetMaintainers,
+  registerInitMaintainers,
+  registerRunMaintainer,
+  registerForceRemoteExtractToUpdates,
+  registerForceHistorySnapshot,
+  registerCRUDCreate,
+  registerCRUDUpdate,
+  registerCRUDBulkUpdate,
+  registerCRUDGet,
+  registerCRUDDelete,
+  registerResolutionLink,
+  registerResolutionUnlink,
+  registerResolutionGroup,
+  registerResolutionRulesList,
+  registerResolutionRulesEnable,
+  registerResolutionRulesDisable,
+  registerUpdate,
+  registerCheckPrivileges,
+  registerGetPreferences,
+  registerUpdatePreferences,
+} from './apis';
 import type { EntityStorePluginRouter } from '../types';
-import { registerUninstall } from './apis/uninstall';
 
 export function registerRoutes(router: EntityStorePluginRouter) {
   registerInstall(router);
   registerStop(router);
+  registerStatus(router);
   registerUninstall(router);
   registerForceLogExtraction(router);
+  registerForceRemoteExtractToUpdates(router);
+  registerForceHistorySnapshot(router);
+  registerCheckPrivileges(router);
+  registerGetPreferences(router);
+  registerUpdatePreferences(router);
+  registerCRUDCreate(router);
+  registerCRUDUpdate(router);
+  registerCRUDBulkUpdate(router);
+  registerCRUDGet(router);
+  registerCRUDDelete(router);
+  registerStart(router);
+  registerUpdate(router);
+  registerResolutionLink(router);
+  registerResolutionUnlink(router);
+  registerResolutionGroup(router);
+  registerResolutionRulesList(router);
+  registerResolutionRulesEnable(router);
+  registerResolutionRulesDisable(router);
+  registerStartMaintainer(router);
+  registerStopMaintainer(router);
+  registerGetMaintainers(router);
+  registerInitMaintainers(router);
+  registerRunMaintainer(router);
 }

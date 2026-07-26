@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-objects-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-objects-example-plugin'
+  title: '@kbn/saved-objects-example-plugin'
   description: Moon project for @kbn/saved-objects-example-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: examples/saved_objects
+  sourceRoot: examples/saved_objects
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-server'

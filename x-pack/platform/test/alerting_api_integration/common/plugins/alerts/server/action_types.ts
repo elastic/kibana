@@ -6,13 +6,14 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ActionType } from '@kbn/actions-plugin/server';
 import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   getTestSubActionConnector,
   getTestSubActionConnectorWithoutSubActions,
 } from './sub_action_connector';
+import { getOAuthExecutorActionType } from './oauth_executor_connector';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -94,6 +95,23 @@ export function defineActionTypes(
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
   actions.registerType(getHookedActionType());
+
+  const oauthTestConnector: ActionType = {
+    id: 'test.oauth-connector',
+    name: 'Test: OAuth Connector',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: z.any() },
+      secrets: { schema: z.any() },
+      params: { schema: z.any() },
+    },
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+  };
+  actions.registerType(oauthTestConnector);
+  actions.registerType(getOAuthExecutorActionType(actions));
 
   /**
    * System actions

@@ -50,7 +50,7 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
   const button = (
     <EuiHeaderLink
       color="primary"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
       data-test-subj="apmAlertAndRulesHeaderLink"
@@ -143,6 +143,7 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downRight"
+        aria-label={alertLabel}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>

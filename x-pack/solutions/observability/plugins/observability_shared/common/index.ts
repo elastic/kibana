@@ -168,7 +168,6 @@ export {
 } from './field_names/synthetics';
 
 export { type Color, colorTransformer } from './color_palette';
-export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse, type InspectResponse } from './utils/get_inspect_response';
 export {
   type DataTier,
@@ -183,6 +182,9 @@ export type {
   ServiceOverviewParams,
   ServiceOverviewLocator,
   TransactionDetailsByNameLocator,
+  ServiceTransactionsLocator,
+  ServiceAlertsLocator,
+  ServiceAlertsLocatorParams,
   AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorParams,
   AssetDetailsLocator,
@@ -208,6 +210,10 @@ export {
   SERVICE_OVERVIEW_LOCATOR_ID,
   DependencyOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
+  ServiceTransactionsLocatorDefinition,
+  SERVICE_TRANSACTIONS_LOCATOR_ID,
+  ServiceAlertsLocatorDefinition,
+  SERVICE_ALERTS_LOCATOR_ID,
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,

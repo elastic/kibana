@@ -7,40 +7,89 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, EuiComboBox, htmlIdGenerator } from '@elastic/eui';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  CUSTOM_PALETTE,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getOriginalId } from '@kbn/transpose-utils';
 import type { KbnPalettes } from '@kbn/palettes';
-import type {
-  VisualizationDimensionEditorProps,
-  DatatableVisualizationState,
+import {
+  COLUMN_CELL_DECORATION_MODE,
+  type ColumnCellDecorationMode,
+  type VisualizationDimensionEditorProps,
+  type DatatableVisualizationState,
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
-import {
-  defaultPaletteParams,
-  findMinMaxByColumnId,
-  getAccessorType,
-} from '../../../shared_components';
+import { getAccessorType } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
-import { getColumnAlignment } from '../utils';
+import {
+  getColumnAlignment,
+  getSupportedColumnAlignment,
+  getDataBoundsForAccessor,
+  getColorByValuePalette,
+  getDefaultProgressPalette,
+  getDefaultFillConfig,
+  isPaletteFillMode,
+} from '../utils';
+import {
+  CELL_DECORATION_CAPABILITIES,
+  getAlignmentLabel,
+  getCellDecorationCapabilities,
+  getCellDecorationLabel,
+  getUnsupportedAlignmentReason,
+  isAlignmentSupported,
+  type CellAlignment,
+  type ColumnKind,
+} from '../cell_decoration';
+import { ProgressBarControls } from './progress_bar_controls';
 import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
+
+/** Decoration modes in editor display order. */
+const COLOR_MODE_ORDER: readonly ColumnCellDecorationMode[] = [
+  COLUMN_CELL_DECORATION_MODE.NONE,
+  COLUMN_CELL_DECORATION_MODE.CELL,
+  COLUMN_CELL_DECORATION_MODE.BADGE,
+  COLUMN_CELL_DECORATION_MODE.TEXT,
+  COLUMN_CELL_DECORATION_MODE.PROGRESS,
+];
+
+/**
+ * Builds the "Cell decoration" picker options for a column, gated by the
+ * column's kind. Each option's label/test id come from the capability registry,
+ * so copy and availability stay in one place.
+ */
+function getColorModeOptions(
+  columnKind: ColumnKind | undefined
+): Array<EuiComboBoxOptionOption<ColumnType['colorMode']>> {
+  return COLOR_MODE_ORDER.filter((mode) => {
+    const { supportedColumnKinds } = CELL_DECORATION_CAPABILITIES[mode];
+    if (supportedColumnKinds.length === 0) return true; // e.g. `none`
+    return columnKind != null && supportedColumnKinds.includes(columnKind);
+  }).map((mode) => ({
+    id: `${idPrefix}${mode}`,
+    value: mode,
+    label: getCellDecorationLabel(mode),
+    'data-test-subj': `lnsDatatable_dynamicColoring_groups_${mode}`,
+  }));
+}
+
+/** Text alignment controls in editor display order, labels sourced from the registry. */
+const ALIGNMENT_OPTIONS: ReadonlyArray<{ alignment: CellAlignment; label: string }> = (
+  ['left', 'center', 'right'] as const
+).map((alignment) => ({ alignment, label: getAlignmentLabel(alignment) }));
 
 function updateColumn(
   state: DatatableVisualizationState,
@@ -66,21 +115,39 @@ export type TableDimensionEditorProps =
 
 export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const { frame, accessor, isInlineEditing, isDarkMode, formatFactory } = props;
-  const column = props.state.columns.find(({ columnId }) => accessor === columnId);
+  const flushState = useCallback(
+    (nextState: DatatableVisualizationState) => {
+      props.setState(nextState);
+    },
+    [props]
+  );
   const { inputValue: localState, handleInputChange: setLocalState } =
     useDebouncedValue<DatatableVisualizationState>({
       value: props.state,
-      onChange: props.setState,
+      onChange: flushState,
     });
+  const column = localState.columns.find(({ columnId }) => accessor === columnId);
 
   const updateColumnState = useCallback(
-    (columnId: string, newColumn: Partial<ColumnType>) => {
-      setLocalState({
+    (
+      columnId: string,
+      newColumn: Partial<ColumnType>,
+      options: {
+        flush?: boolean;
+      } = {}
+    ) => {
+      const nextState = {
         ...localState,
         columns: updateColumn(localState, columnId, newColumn),
-      });
+      };
+
+      setLocalState(nextState);
+
+      if (options.flush) {
+        flushState(nextState);
+      }
     },
-    [setLocalState, localState]
+    [setLocalState, localState, flushState]
   );
 
   if (!column) return null;
@@ -93,38 +160,62 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const allowCustomMatch = canCreateCustomMatch(columnMeta);
   const datasource = frame.datasourceLayers?.[localState.layerId];
 
-  const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+  const { isNumeric, isCategory: isBucketable } = getAccessorType(
+    datasource,
+    accessor,
+    columnMeta?.type
+  );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
+  const currentColorMode = column?.colorMode || COLUMN_CELL_DECORATION_MODE.NONE;
+  const hasDynamicColoring = currentColorMode !== COLUMN_CELL_DECORATION_MODE.NONE;
+  const isProgressMode = currentColorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS;
+
+  // A terms-colored bucket is treated as bucketed; everything else offered here is numeric.
+  const columnKind: ColumnKind = showColorByTerms ? 'bucketed' : 'numeric';
   const currentAlignment = getColumnAlignment(column, isNumeric);
-  const currentColorMode = column?.colorMode || 'none';
-  const hasDynamicColoring = currentColorMode !== 'none';
+  const effectiveAlignment = getSupportedColumnAlignment(column, isNumeric);
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
-  const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
-  const columnsToCheck = hasTransposedColumn
-    ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
-      []
-    : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-  const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
+  const colorModeOptions = getColorModeOptions(showDynamicColoringFeature ? columnKind : undefined);
 
-  const activePalette: PaletteOutput<CustomPaletteParams> = {
-    type: 'palette',
-    name: showColorByTerms ? 'default' : defaultPaletteParams.name,
-    ...column?.palette,
-    params: { ...column?.palette?.params },
-  };
-  // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  const selectedDynamicColorModeOption =
+    colorModeOptions.find((option) => option.value === currentColorMode) ?? colorModeOptions[0];
 
-  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
-    activePalette.params.stops = applyPaletteParams(
-      props.paletteService,
-      activePalette,
-      currentMinMax
-    );
+  const currentMinMax =
+    getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
+  const progressBarAppendLabel =
+    columnMeta?.params?.id && typeof formatter.type.title === 'string'
+      ? formatter.type.title
+      : undefined;
+
+  let activePalette: PaletteOutput<CustomPaletteParams>;
+  const shouldUseDefaultProgressPalette =
+    currentColorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS &&
+    column?.fillStyle != null &&
+    isPaletteFillMode(column.fillStyle.fillMode) &&
+    !column.palette;
+
+  if (showColorByTerms) {
+    // Terms coloring uses the existing palette or the 'default' categorical palette
+    activePalette = {
+      type: 'palette',
+      name: column?.palette?.name ?? 'default',
+    };
+  } else {
+    // Progress bars with a palette fill but no persisted palette should show the
+    // same default palette the renderer uses, instead of the generic numeric fallback.
+    activePalette = shouldUseDefaultProgressPalette
+      ? getDefaultProgressPalette()
+      : getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
   }
+
+  // Check if a legacy palette is used for terms coloring instead of a color mapping
+  const isLegacyTermsMode =
+    showColorByTerms &&
+    !column.colorMapping &&
+    Boolean(column.palette) &&
+    !column.palette?.params?.stops?.length;
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
@@ -142,30 +233,17 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           })}
           data-test-subj="lnsDatatable_alignment_groups"
           buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}left`,
-              label: i18n.translate('xpack.lens.table.alignment.left', {
-                defaultMessage: 'Left',
-              }),
-              'data-test-subj': 'lnsDatatable_alignment_groups_left',
-            },
-            {
-              id: `${idPrefix}center`,
-              label: i18n.translate('xpack.lens.table.alignment.center', {
-                defaultMessage: 'Center',
-              }),
-              'data-test-subj': 'lnsDatatable_alignment_groups_center',
-            },
-            {
-              id: `${idPrefix}right`,
-              label: i18n.translate('xpack.lens.table.alignment.right', {
-                defaultMessage: 'Right',
-              }),
-              'data-test-subj': 'lnsDatatable_alignment_groups_right',
-            },
-          ]}
-          idSelected={`${idPrefix}${currentAlignment}`}
+          options={ALIGNMENT_OPTIONS.map(({ alignment, label }) => {
+            const unsupportedReason = getUnsupportedAlignmentReason(currentColorMode, alignment);
+            return {
+              id: `${idPrefix}${alignment}`,
+              label,
+              isDisabled: Boolean(unsupportedReason),
+              toolTipContent: unsupportedReason,
+              'data-test-subj': `lnsDatatable_alignment_groups_${alignment}`,
+            };
+          })}
+          idSelected={`${idPrefix}${effectiveAlignment}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as ColumnType['alignment'];
             updateColumnState(accessor, { alignment: newMode });
@@ -178,66 +256,68 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             display="columnCompressed"
             fullWidth
             label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-              defaultMessage: 'Color by value',
+              defaultMessage: 'Cell decoration',
             })}
           >
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-                defaultMessage: 'Color by value',
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              aria-label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
+                defaultMessage: 'Cell decoration',
               })}
               data-test-subj="lnsDatatable_dynamicColoring_groups"
-              buttonSize="compressed"
-              options={[
-                {
-                  id: `${idPrefix}none`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
-                    defaultMessage: 'None',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
-                },
-                {
-                  id: `${idPrefix}cell`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
-                    defaultMessage: 'Cell',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
-                },
-                {
-                  id: `${idPrefix}text`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
-                    defaultMessage: 'Text',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
-                },
-              ]}
-              idSelected={`${idPrefix}${currentColorMode}`}
-              onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as ColumnType['colorMode'];
+              singleSelection={{ asPlainText: true }}
+              options={colorModeOptions}
+              selectedOptions={[selectedDynamicColorModeOption]}
+              onChange={(choices) => {
+                const newMode = choices[0]?.value;
+                if (!newMode) {
+                  return;
+                }
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };
 
-                if (newMode !== 'none') {
-                  if (!column?.colorMapping && showColorByTerms) {
-                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-                  }
-
-                  // also set palette for now
-                  if (!column?.palette) {
-                    params.palette = {
-                      ...activePalette,
-                      params: {
-                        ...activePalette.params,
-                        // that's ok, at first open we're going to throw them away and recompute
-                        stops: displayStops,
-                      },
-                    };
+                if (newMode !== COLUMN_CELL_DECORATION_MODE.NONE) {
+                  if (showColorByTerms) {
+                    if (!column?.colorMapping) {
+                      params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                    }
+                  } else {
+                    if (!column?.palette) {
+                      params.palette =
+                        newMode === COLUMN_CELL_DECORATION_MODE.PROGRESS
+                          ? getDefaultProgressPalette()
+                          : activePalette;
+                    }
                   }
                 }
 
+                const nextDecoration = getCellDecorationCapabilities(newMode);
+
+                if (newMode === COLUMN_CELL_DECORATION_MODE.PROGRESS) {
+                  // Seed the fill config for new layers only; persisted configs
+                  // are left untouched.
+                  if (!column?.fillStyle) {
+                    params.fillStyle = getDefaultFillConfig(newMode);
+                  }
+                } else if (currentColorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS) {
+                  // Leaving progress mode: drop progress-only configuration.
+                  params.fillStyle = undefined;
+                }
+
+                // Coerce to the decoration's preferred alignment when the current
+                // one is unsupported (e.g. center under a progress bar).
+                if (
+                  !isAlignmentSupported(newMode, currentAlignment) &&
+                  nextDecoration.defaultAlignment
+                ) {
+                  params.alignment = nextDecoration.defaultAlignment;
+                }
+
                 // clear up when switching to no coloring
-                if (newMode === 'none') {
+                if (newMode === COLUMN_CELL_DECORATION_MODE.NONE) {
                   params.palette = undefined;
                   params.colorMapping = undefined;
                 }
@@ -247,18 +327,39 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           </EuiFormRow>
 
           {hasDynamicColoring &&
-            (showColorByTerms ? (
+            (isProgressMode ? (
+              <ProgressBarControls
+                column={column}
+                fillStyle={
+                  column.fillStyle ?? getDefaultFillConfig(COLUMN_CELL_DECORATION_MODE.PROGRESS)
+                }
+                dataBounds={currentMinMax}
+                palette={activePalette}
+                paletteService={props.paletteService}
+                panelRef={props.panelRef}
+                appendLabel={progressBarAppendLabel}
+                isInlineEditing={isInlineEditing}
+                onUpdate={(newColumn) => updateColumnState(accessor, newColumn, { flush: true })}
+              />
+            ) : showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
-                colorMapping={column.colorMapping}
-                palette={activePalette}
+                colorMapping={
+                  isLegacyTermsMode
+                    ? undefined
+                    : column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG
+                }
+                palette={isLegacyTermsMode ? activePalette : undefined}
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
                   updateColumnState(accessor, { palette, colorMapping: undefined });
                 }}
                 setColorMapping={(colorMapping) => {
-                  updateColumnState(accessor, { colorMapping });
+                  updateColumnState(accessor, {
+                    colorMapping,
+                    ...(colorMapping != null ? { palette: undefined } : {}),
+                  });
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
@@ -297,22 +398,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             data-test-subj="lns-table-column-hidden"
             checked={Boolean(column?.hidden)}
             disabled={!column.hidden && visibleColumnsCount <= 1}
-            onChange={() => {
-              const newState = {
-                ...localState,
-                columns: localState.columns.map((currentColumn) => {
-                  if (currentColumn.columnId === accessor) {
-                    return {
-                      ...currentColumn,
-                      hidden: !column.hidden,
-                    };
-                  } else {
-                    return currentColumn;
-                  }
-                }),
-              };
-              setLocalState(newState);
-            }}
+            onChange={() => updateColumnState(accessor, { hidden: !column.hidden })}
           />
         </EuiFormRow>
       )}
@@ -333,22 +419,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             data-test-subj="lns-table-column-one-click-filter"
             checked={Boolean(column?.oneClickFilter)}
             disabled={column.hidden}
-            onChange={() => {
-              const newState = {
-                ...localState,
-                columns: localState.columns.map((currentColumn) => {
-                  if (currentColumn.columnId === accessor) {
-                    return {
-                      ...currentColumn,
-                      oneClickFilter: !column.oneClickFilter,
-                    };
-                  } else {
-                    return currentColumn;
-                  }
-                }),
-              };
-              setLocalState(newState);
-            }}
+            onChange={() => updateColumnState(accessor, { oneClickFilter: !column.oneClickFilter })}
           />
         </EuiFormRow>
       )}

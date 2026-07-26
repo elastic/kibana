@@ -35,7 +35,7 @@ const colorModeOptions: Array<Value<ColorMode>> = [
   {
     id: 'system',
     label: systemLabel,
-    icon: 'desktop',
+    icon: 'display',
   },
   {
     id: 'light',
@@ -148,7 +148,7 @@ const ContrastModeGroup: FC<{
         {
           id: 'system',
           label: systemLabel,
-          icon: 'desktop',
+          icon: 'display',
         },
         {
           id: 'standard',
@@ -165,7 +165,7 @@ const ContrastModeGroup: FC<{
           label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalContrastModeHigh', {
             defaultMessage: 'High',
           }),
-          icon: 'contrastHigh',
+          icon: 'contrastFill',
         },
       ]}
       selectedValue={contrastMode}
@@ -194,7 +194,8 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
     onChange,
   } = useAppearance({
     uiSettingsClient,
-    defaultColorMode: isServerless ? 'system' : 'space_default',
+    // Default new users (no persisted preference) to "System" so the UI follows their OS appearance.
+    defaultColorMode: 'system',
     defaultContrastMode: 'standard',
   });
 

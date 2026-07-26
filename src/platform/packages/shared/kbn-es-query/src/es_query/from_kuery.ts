@@ -55,6 +55,6 @@ function buildQuery(
       should: [],
       must_not: [],
     },
-    kueryQuery.bool
+    kueryQuery?.bool
   );
 }

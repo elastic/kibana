@@ -200,7 +200,7 @@ export const useXtermPlayer = ({
     const term = new Terminal({
       theme: {
         selectionBackground: colors.warning,
-        selectionForeground: colors.ink,
+        selectionForeground: colors.textInk,
         yellow: colors.warning,
       },
       fontFamily: font.familyCode,

@@ -27,3 +27,4 @@ export { performResolve } from './resolve';
 export { performUpdateObjectsSpaces } from './update_objects_spaces';
 export { performCollectMultiNamespaceReferences } from './collect_multinamespaces_references';
 export { performSearch } from './search';
+export { performEsql } from './esql';

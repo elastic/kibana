@@ -40,8 +40,28 @@ export class AuthenticationService {
     getStartServices,
     http,
   }: SetupParams): AuthenticationServiceSetup {
-    const getCurrentUser = async () =>
-      (await http.get('/internal/security/me', { asSystemRequest: true })) as AuthenticatedUser;
+    // The shape returned by `/internal/security/me` is effectively immutable for
+    // the lifetime of a page: any change to the authenticated identity (login,
+    // logout, session expiry, account switch) triggers a full page reload via
+    // the unauthorized response interceptor, which discards this closure with
+    // the rest of the JS context. Several consumers (analytics, the nav
+    // control, cloud links, account management, etc.) all request the current
+    // user independently during bootstrap; without coordination they each
+    // issue their own HTTP call. Cache the promise so concurrent callers share
+    // a single in-flight request and later callers reuse the resolved value.
+    // On rejection we drop the cache so subsequent callers can retry.
+    let cachedCurrentUser: Promise<AuthenticatedUser> | undefined;
+    const getCurrentUser = (): Promise<AuthenticatedUser> => {
+      if (!cachedCurrentUser) {
+        cachedCurrentUser = (
+          http.get('/internal/security/me', { asSystemRequest: true }) as Promise<AuthenticatedUser>
+        ).catch((error) => {
+          cachedCurrentUser = undefined;
+          throw error;
+        });
+      }
+      return cachedCurrentUser;
+    };
 
     const areAPIKeysEnabled = async () =>
       ((await http.get('/internal/security/api_key/_enabled')) as { apiKeysEnabled: boolean })
@@ -56,6 +76,8 @@ export class AuthenticationService {
     resetSessionApp.create({ application, getStartServices, http });
     unauthenticatedApp.create({ application, getStartServices, http });
 
-    return { getCurrentUser, areAPIKeysEnabled };
+    const isUIAMEnabled = () => config.uiam?.enabled === true;
+
+    return { getCurrentUser, areAPIKeysEnabled, isUIAMEnabled };
   }
 }

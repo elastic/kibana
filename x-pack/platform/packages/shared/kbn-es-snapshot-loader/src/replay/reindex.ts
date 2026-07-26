@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName, getErrorMessage } from '../utils';
+import { TIMESTAMP_REINDEX_SCRIPT } from './pipeline';
 
 export interface DestinationInfo {
   destIndex: string;
@@ -39,6 +40,8 @@ export async function reindexThroughPipeline({
   destIndex,
   isDataStream,
   pipelineName,
+  maxTimestamp,
+  useInlineScript = false,
   requestTimeoutMs = DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
 }: {
   esClient: Client;
@@ -47,9 +50,15 @@ export async function reindexThroughPipeline({
   destIndex: string;
   isDataStream: boolean;
   pipelineName: string;
+  maxTimestamp?: string;
+  useInlineScript?: boolean;
   requestTimeoutMs?: number;
 }): Promise<ReindexJobResult> {
-  log.debug(`Reindexing to ${destIndex}`);
+  if (useInlineScript && !maxTimestamp) {
+    throw new Error(`maxTimestamp is required when using inline script for ${destIndex}`);
+  }
+
+  log.debug(`Reindexing to ${destIndex}${useInlineScript ? ' (inline script)' : ''}`);
 
   try {
     const response: ReindexResponse = await esClient.reindex(
@@ -58,9 +67,16 @@ export async function reindexThroughPipeline({
         source: { index: sourceIndex },
         dest: {
           index: destIndex,
-          pipeline: pipelineName,
+          ...(!useInlineScript && { pipeline: pipelineName }),
           op_type: isDataStream ? 'create' : 'index',
         },
+        ...(useInlineScript && {
+          script: {
+            lang: 'painless',
+            source: TIMESTAMP_REINDEX_SCRIPT,
+            params: { max_timestamp: maxTimestamp },
+          },
+        }),
       },
       { requestTimeout: requestTimeoutMs }
     );
@@ -109,6 +125,8 @@ export async function reindexAllIndices({
   originalIndices,
   concurrency,
   pipelineName,
+  maxTimestamp,
+  shouldUseInlineScript,
 }: {
   esClient: Client;
   log: ToolingLog;
@@ -116,6 +134,8 @@ export async function reindexAllIndices({
   originalIndices: string[];
   concurrency?: number;
   pipelineName: string;
+  maxTimestamp?: string;
+  shouldUseInlineScript?: (destIndex: string) => boolean;
 }): Promise<string[]> {
   const successfullyReindexed: string[] = [];
 
@@ -139,7 +159,15 @@ export async function reindexAllIndices({
     await Promise.all(
       batch.map(async (job) => {
         try {
-          await reindexThroughPipeline({ esClient, log, pipelineName, ...job });
+          const useInlineScript = shouldUseInlineScript?.(job.destIndex) ?? false;
+          await reindexThroughPipeline({
+            esClient,
+            log,
+            pipelineName,
+            useInlineScript,
+            maxTimestamp,
+            ...job,
+          });
           successfullyReindexed.push(job.destIndex);
         } catch (error) {
           log.error(`Failed to reindex ${job.destIndex}: ${getErrorMessage(error)}`);

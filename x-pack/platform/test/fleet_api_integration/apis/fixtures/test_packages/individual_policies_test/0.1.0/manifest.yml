@@ -1,0 +1,27 @@
+format_version: 1.0.0
+name: individual_policies_test
+title: Individual Policies Test
+description: Test package for individual_policies behavior with multiple policy templates
+version: 0.1.0
+categories: []
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+policy_templates_behavior: individual_policies
+policy_templates:
+  - name: template_a
+    title: Template A
+    description: First policy template
+    inputs:
+      - type: logfile
+        title: Template A Logs
+        description: Collect logs for template A
+  - name: template_b
+    title: Template B
+    description: Second policy template
+    inputs:
+      - type: httpjson
+        title: Template B API
+        description: Collect data for template B

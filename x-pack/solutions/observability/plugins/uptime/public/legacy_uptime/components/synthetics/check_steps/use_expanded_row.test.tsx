@@ -104,7 +104,7 @@ describe('useExpandedROw', () => {
             data-test-subj={TEST_ID + index}
             onClick={() => toggleExpand({ journeyStep })}
             aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
           />
         ))}
       </Route>

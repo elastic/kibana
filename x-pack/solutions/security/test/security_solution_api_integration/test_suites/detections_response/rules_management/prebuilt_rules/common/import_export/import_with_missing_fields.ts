@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [
           {
             error: {
-              message: 'rule_id: Required',
+              message: 'rule_id: Invalid input: expected string, received undefined',
             },
           },
         ],

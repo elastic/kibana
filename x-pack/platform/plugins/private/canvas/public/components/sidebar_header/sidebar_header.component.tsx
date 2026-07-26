@@ -113,7 +113,7 @@ export const SidebarHeader: FunctionComponent<Props> = ({
             >
               <EuiButtonIcon
                 color="text"
-                iconType="arrowUp"
+                iconType="chevronSingleUp"
                 onClick={bringForward}
                 aria-label={strings.getBringForwardAriaLabel()}
               />
@@ -131,7 +131,7 @@ export const SidebarHeader: FunctionComponent<Props> = ({
             >
               <EuiButtonIcon
                 color="text"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={sendBackward}
                 aria-label={strings.getSendBackwardAriaLabel()}
               />

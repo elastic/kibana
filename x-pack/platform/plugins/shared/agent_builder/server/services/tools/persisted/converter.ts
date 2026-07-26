@@ -7,7 +7,7 @@
 
 import type { ToolType } from '@kbn/agent-builder-common';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolTypeDefinition } from '../tool_types';
 import type { ToolTypeConversionContext } from '../tool_types/definitions';
 import type { ToolPersistedDefinition } from './client';
@@ -44,6 +44,7 @@ export const convertPersistedDefinition = <
     tags,
     configuration: convertedConfiguration,
     readonly: false,
+    experimental: false,
     confirmation: {
       askUser: 'never',
     },

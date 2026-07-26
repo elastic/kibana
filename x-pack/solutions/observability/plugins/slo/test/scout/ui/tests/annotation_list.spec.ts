@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('Annotations List', { tag: ['@ess'] }, () => {
+test.describe('Annotations List', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.annotations.goto();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import {
   profilingCo2PerKWH,
@@ -13,7 +14,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { test } from '../../fixtures';
 
-test.describe('Settings page', { tag: ['@ess'] }, () => {
+test.describe('Settings page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });

@@ -55,6 +55,9 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/get/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/enable';
+import { bulkDeleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/bulk_delete';
+import { bulkDisableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/bulk_disable';
+import { bulkEnableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/bulk_enable';
 import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 import { suggestUsersRoute } from './users/suggest';
 import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
@@ -107,6 +110,15 @@ const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedules
 
 jest.mock('./attack_discovery/schedules/public/post/enable');
 const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as jest.Mock;
+jest.mock('./attack_discovery/schedules/public/post/bulk_delete');
+const bulkDeleteAttackDiscoverySchedulesRouteMock =
+  bulkDeleteAttackDiscoverySchedulesRoute as jest.Mock;
+jest.mock('./attack_discovery/schedules/public/post/bulk_disable');
+const bulkDisableAttackDiscoverySchedulesRouteMock =
+  bulkDisableAttackDiscoverySchedulesRoute as jest.Mock;
+jest.mock('./attack_discovery/schedules/public/post/bulk_enable');
+const bulkEnableAttackDiscoverySchedulesRouteMock =
+  bulkEnableAttackDiscoverySchedulesRoute as jest.Mock;
 jest.mock('./users/suggest');
 const suggestUsersRouteMock = suggestUsersRoute as jest.Mock;
 jest.mock('./test_internal/create_attack_discovery_alerts_route');
@@ -239,6 +251,18 @@ describe('registerRoutes', () => {
 
   it('should call `enableAttackDiscoverySchedulesRouteMock`', () => {
     expect(enableAttackDiscoverySchedulesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `bulkDeleteAttackDiscoverySchedulesRouteMock`', () => {
+    expect(bulkDeleteAttackDiscoverySchedulesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `bulkDisableAttackDiscoverySchedulesRouteMock`', () => {
+    expect(bulkDisableAttackDiscoverySchedulesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `bulkEnableAttackDiscoverySchedulesRouteMock`', () => {
+    expect(bulkEnableAttackDiscoverySchedulesRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `createConversationRouteMock`', () => {

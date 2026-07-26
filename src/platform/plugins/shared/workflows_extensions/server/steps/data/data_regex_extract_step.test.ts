@@ -31,6 +31,7 @@ describe('dataRegexExtractStepDefinition', () => {
       renderInputTemplate: jest.fn((val) => val),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn(),
+      callKibanaApi: jest.fn(),
     },
     logger: {
       debug: jest.fn(),
@@ -40,7 +41,7 @@ describe('dataRegexExtractStepDefinition', () => {
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
-    stepType: 'data.regex_extract',
+    stepType: 'data.regexExtract',
   });
 
   describe('named capture groups', () => {

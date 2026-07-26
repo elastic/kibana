@@ -21,10 +21,10 @@ import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_aft
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { FAILED_CREATE_QUERY_MAX_CLAUSE, MANY_NESTED_CLAUSES_ERR } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
+import { createSearchAfterReturnType } from '../../utils/utils';
 
 export const createEventSignal = async ({
   sharedParams,
-  currentResult,
   currentEventList,
   eventsTelemetry,
   filters,
@@ -72,8 +72,9 @@ export const createEventSignal = async ({
       exc.message.includes(MANY_NESTED_CLAUSES_ERR) ||
       exc.message.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
     ) {
-      currentResult.errors.push(exc.message);
-      return currentResult;
+      const result = createSearchAfterReturnType();
+      result.errors.push(exc.message);
+      return result;
     } else {
       throw exc;
     }
@@ -81,7 +82,7 @@ export const createEventSignal = async ({
 
   const ids = Array.from(signalIdToMatchedQueriesMap.keys());
   if (ids.length === 0) {
-    return currentResult;
+    return createSearchAfterReturnType();
   }
   const indexFilter = {
     query: {
@@ -106,7 +107,7 @@ export const createEventSignal = async ({
     loadFields: true,
   });
 
-  ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
+  ruleExecutionLogger.debug(`Matched events found: ${ids?.length}`);
 
   const enrichment = threatEnrichmentFactory({
     signalIdToMatchedQueriesMap,
@@ -138,12 +139,12 @@ export const createEventSignal = async ({
   } else {
     createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
   }
-  ruleExecutionLogger.debug(
-    `${
+  ruleExecutionLogger.trace(
+    `Match checks completed\n${
       currentEventList.length
-    } items have completed match checks and the total times to search were ${
+    } items have completed match checks. Search times (ms): ${
       createResult.searchAfterTimes.length !== 0 ? createResult.searchAfterTimes : '(unknown) '
-    }ms`
+    }.`
   );
   return createResult;
 };

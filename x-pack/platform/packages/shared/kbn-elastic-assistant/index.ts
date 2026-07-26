@@ -11,7 +11,11 @@
 // happens in the root of your app. Optionally provide a custom title for the assistant:
 
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
-export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
+export {
+  AssistantProvider,
+  useAssistantContext,
+  useMaybeAssistantContext,
+} from './impl/assistant_context';
 
 // Step 2.1: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:
@@ -114,7 +118,6 @@ export {
 } from './impl/assistant_context/constants';
 
 export type { AIConnector } from './impl/connectorland/connector_selector';
-export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
   /** for rendering results in a code block */

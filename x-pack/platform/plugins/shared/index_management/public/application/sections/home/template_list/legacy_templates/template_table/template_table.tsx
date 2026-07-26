@@ -242,7 +242,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createLegacyTemplateButton"
         key="createTemplateButton"
         {...reactRouterNavigate(history, {

@@ -66,22 +66,22 @@ const StepStatus: React.FunctionComponent<{ status: STATUS; idx: number }> = ({ 
     inProgress: <EuiLoadingSpinner size="m" css={statusStyles.info} />,
     complete: (
       <span css={statusStyles.success}>
-        <EuiIcon type="check" size="s" />
+        <EuiIcon type="check" size="s" aria-hidden={true} />
       </span>
     ),
     paused: (
       <span css={statusStyles.warning}>
-        <EuiIcon type="pause" size="s" />
+        <EuiIcon type="pause" size="s" aria-hidden={true} />
       </span>
     ),
     cancelled: (
       <span css={statusStyles.warning}>
-        <EuiIcon type="cross" size="s" />
+        <EuiIcon type="cross" size="s" aria-hidden={true} />
       </span>
     ),
     failed: (
       <span css={statusStyles.danger}>
-        <EuiIcon type="cross" size="s" />
+        <EuiIcon type="cross" size="s" aria-hidden={true} />
       </span>
     ),
   };

@@ -43,6 +43,9 @@ export const getCompareFrameAction =
 
     return (
       <EuiPopover
+        aria-label={i18n.translate('xpack.profiling.compareFrame.popoverAriaLabel', {
+          defaultMessage: 'Corresponding frame',
+        })}
         button={
           <Component
             onClick={() => {
@@ -101,6 +104,12 @@ export const getCompareFrameAction =
                   render: (_, value) => `${value.totalCPUPerc.toFixed(2)}%`,
                 },
               ]}
+              tableCaption={i18n.translate(
+                'xpack.profiling.diffTopNFunctions.compareFrameMetricsCaption',
+                {
+                  defaultMessage: 'Frame metrics',
+                }
+              )}
             />
           </div>
         ) : (

@@ -25,8 +25,8 @@ import type { Observable } from 'rxjs';
 import { combineLatest, map } from 'rxjs';
 import { debounce, intersectionBy } from 'lodash';
 import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { DataViewEditor } from './data_view_editor';
 
@@ -394,7 +394,7 @@ export function DataDriftIndexPatternsEditor({
                     color="primary"
                     disabled={hasError}
                     onClick={createDataViewAndRedirectToDataDriftPage.bind(null, true)}
-                    iconType="visTagCloud"
+                    iconType="chartTagCloud"
                     data-test-subj="analyzeDataDriftWithoutSavingButton"
                     aria-label={i18n.translate(
                       'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel',
@@ -416,7 +416,7 @@ export function DataDriftIndexPatternsEditor({
                   disabled={hasError}
                   fill
                   onClick={createDataViewAndRedirectToDataDriftPage.bind(null, false)}
-                  iconType="visTagCloud"
+                  iconType="chartTagCloud"
                   data-test-subj="analyzeDataDriftButton"
                   aria-label={i18n.translate(
                     'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',

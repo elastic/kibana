@@ -389,6 +389,79 @@ export class AlertingAuthorization {
     };
   }
 
+  /**
+   * Like `ensureAuthorized` but without a consumer. Checks authorization by ruleTypeId only,
+   * succeeding if the user is authorized under any registered consumer.
+   */
+  public async ensureAuthorizedByRuleType({
+    ruleTypeId,
+    operation,
+    entity,
+    consumerRequiredPrivilege,
+  }: {
+    ruleTypeId: string;
+    operation: ReadOperations | WriteOperations;
+    entity: AlertingAuthorizationEntity;
+    consumerRequiredPrivilege: keyof HasPrivileges;
+  }): Promise<void> {
+    if (!this.authorization || !this.shouldCheckAuthorization()) {
+      return;
+    }
+
+    const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
+      operations: [operation],
+      authorizationEntity: entity,
+    });
+
+    const authorizedConsumers = authorizedRuleTypes.get(ruleTypeId)?.authorizedConsumers ?? {};
+    const isAuthorized = Object.values(authorizedConsumers).some(
+      (consumer) => consumer[consumerRequiredPrivilege]
+    );
+
+    if (!isAuthorized) {
+      throw Boom.forbidden(`Unauthorized to ${operation} "${ruleTypeId}" ${entity}`);
+    }
+  }
+
+  /**
+   * Like `getAuthorizationFilter` but without consumers. Returns a filter scoped to authorized
+   * rule types and an `ensureRuleTypeIsAuthorized` callback for post-query validation.
+   */
+  public async getByRuleTypeAuthorizationFilter(params: GetAuthorizationFilterParams) {
+    if (this.authorization && this.shouldCheckAuthorization()) {
+      const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        operations: [params.operation],
+        authorizationEntity: params.authorizationEntity,
+      });
+
+      if (!authorizedRuleTypes.size) {
+        throw Boom.forbidden(
+          `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types`
+        );
+      }
+
+      return {
+        filter: asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          params.filterOpts,
+          this.spaceId
+        ) as JsonObject,
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => {
+          if (!authorizedRuleTypes.has(ruleTypeId) || authType !== params.authorizationEntity) {
+            throw Boom.forbidden(
+              getUnauthorizedMessage([{ ruleTypeId, consumers: [] }], params.operation, authType)
+            );
+          }
+        },
+      };
+    }
+
+    return {
+      filter: asFiltersBySpaceId(params.filterOpts, this.spaceId) as JsonObject,
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => {},
+    };
+  }
+
   public async getAuthorizedRuleTypes(
     params: GetAuthorizedRuleTypesParams
   ): Promise<AuthorizedRuleTypes> {

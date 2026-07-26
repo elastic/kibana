@@ -245,10 +245,7 @@ describe('ManualInstructions', () => {
       fleetServerHost: 'https://testhost',
       agentVersion: '9.0.0',
       fleetProxy: {
-        id: 'id1',
-        name: 'test-proxy',
         url: 'http://test-proxy',
-        is_preconfigured: false,
         proxy_headers: { test1: 'header' },
       },
     });

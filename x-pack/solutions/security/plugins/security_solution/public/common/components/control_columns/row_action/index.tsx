@@ -8,8 +8,17 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
+import {
+  casesCellActionRenderer,
+  cellActionRenderer,
+} from '../../../../flyout_v2/shared/components/cell_actions';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -20,16 +29,18 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
+import { DocumentEventTypes, FLYOUT_ORIGIN, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { getDocumentHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem;
   disabled: boolean;
+  esHitRecord?: EsHitRecord;
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
@@ -51,6 +62,7 @@ const RowActionComponent = ({
   controlColumn,
   data,
   disabled,
+  esHitRecord,
   index,
   isEventViewer,
   loadingEventIds,
@@ -68,8 +80,16 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
+  const hit: DataTableRecord | undefined = useMemo(
+    () => esHitRecord && buildDataTableRecord(esHitRecord),
+    [esHitRecord]
+  );
+
   const { telemetry } = useKibana().services;
+
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openDocumentFlyoutFromIndex, openNotes } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -92,45 +112,75 @@ const RowActionComponent = ({
   } = useUserPrivileges();
   const showNotes = canReadNotes;
 
+  const handleAlertUpdated = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
+    if (enableNewFlyout && hit) {
+      openDocumentFlyoutFromIndex({
+        documentId: eventId,
+        indexName: indexName ?? undefined,
+        renderCellActions:
+          tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
+        onAlertUpdated: handleAlertUpdated,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+        title: getDocumentHistoryTitle(hit),
+      });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: tableId,
-      panel: 'right',
-    });
-  }, [eventId, indexName, tableId, openFlyout, telemetry]);
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: tableId,
+        panel: 'right',
+      });
+    }
+  }, [
+    enableNewFlyout,
+    hit,
+    openDocumentFlyoutFromIndex,
+    eventId,
+    indexName,
+    handleAlertUpdated,
+    openFlyout,
+    tableId,
+    telemetry,
+  ]);
 
   const toggleShowNotes = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
+    if (enableNewFlyout && hit) {
+      openNotes({ hit, origin: FLYOUT_ORIGIN.ALERTS_TABLE });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
-      },
-      left: {
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: LeftPanelNotesTab,
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-    });
+      });
+    }
     telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
     });
@@ -138,7 +188,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'left',
     });
-  }, [eventId, indexName, openFlyout, tableId, telemetry]);
+  }, [enableNewFlyout, hit, openNotes, openFlyout, eventId, indexName, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 
@@ -159,6 +209,7 @@ const RowActionComponent = ({
           disableTimelineAction={!canReadTimelines}
           ecsData={ecsData}
           eventId={eventId}
+          hit={hit}
           index={index}
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}

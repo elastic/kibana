@@ -52,7 +52,6 @@ export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
 export * from './utils';
 
-export * from './trigger_actions/open_in_discover_helpers';
 export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';
 export { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
 export { getAddLensPanelAction } from './trigger_actions/add_lens_panel_action';
@@ -63,3 +62,5 @@ export { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 
 export { deserializeState } from './react_embeddable/helper';
 export * from './react_embeddable/lens_embeddable';
+export { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+export { getDiscoverDrilldown } from './drilldowns/get_discover_drilldown';

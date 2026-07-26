@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { useKibana } from '../application/hooks/use_kibana';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversationList } from '../application/hooks/use_conversation_list';
-import { useSendMessage } from '../application/context/send_message/send_message_context';
+import { useIsAnyConversationStreaming } from '../application/hooks/use_is_any_conversation_streaming';
 import { useHasConnectorsAllPrivileges } from '../application/hooks/use_has_connectors_all_privileges';
 import { storageKeys } from '../application/storage_keys';
 
@@ -33,14 +33,14 @@ export const EmbeddableWelcomeMessage = () => {
     setShowCallOut(false);
   };
 
-  const { isResponseLoading } = useSendMessage();
+  const isAnyStreaming = useIsAnyConversationStreaming();
 
   // Dismiss the welcome message automatically when a message has been sent
   useEffect(() => {
-    if (isResponseLoading) {
+    if (isAnyStreaming) {
       onDismiss();
     }
-  }, [isResponseLoading]);
+  }, [isAnyStreaming]);
 
   const { conversations = [], isLoading } = useConversationList();
   const hasNoConversations = isLoading === false && conversations.length === 0;

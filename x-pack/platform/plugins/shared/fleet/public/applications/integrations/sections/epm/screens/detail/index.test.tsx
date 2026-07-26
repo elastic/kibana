@@ -21,6 +21,7 @@ import type {
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type { KibanaAssetType } from '../../../../../../../common/types/models';
+import { KibanaSavedObjectType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -32,6 +33,7 @@ import type { MockedFleetStartServices, TestRenderer } from '../../../../../../m
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
 import type { DetailViewPanelName } from '.';
 import { Detail } from '.';
@@ -85,16 +87,166 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and Alerting tab visibility', () => {
+    it('should show Alerting tab when package has alerting type assets', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const itemWithAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            ...baseResponse.item.assets?.kibana,
+            alerting_rule_template: [
+              {
+                pkgkey: 'nginx-0.3.7',
+                service: 'kibana',
+                type: 'alerting_rule_template',
+                file: 'nginx-inactivity.json',
+              },
+            ],
+          },
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: { ...itemWithAlertingAssets, type: 'input' as const } as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+    });
+
+    it('should not show Alerting tab when package has no alerting type assets and inactivity alerting is off', async () => {
+      ExperimentalFeaturesService.init({
+        ...allowedExperimentalValues,
+        enableIntegrationInactivityAlerting: false,
+      });
+
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithoutAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithoutAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(renderResult.queryByTestId('tab-alerting')).toBeNull();
+
+      // Reset to default
+      ExperimentalFeaturesService.init(allowedExperimentalValues);
+    });
+
+    it('should show Alerting tab for installed integration packages when inactivity alerting is enabled', async () => {
+      ExperimentalFeaturesService.init({
+        ...allowedExperimentalValues,
+        enableIntegrationInactivityAlerting: true,
+      });
+
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithoutAlertingAssets = {
+        ...baseResponse.item,
+        type: 'integration' as const,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithoutAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+
+      // Reset to default
+      ExperimentalFeaturesService.init(allowedExperimentalValues);
+    });
+
+    it('should show Alerting tab for pre-installed packages with alerting assets in installationInfo', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithInstalledAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+        installationInfo: {
+          install_source: 'bundled' as const,
+          installed_kibana: [
+            {
+              id: 'nginx-inactivity-rule',
+              type: KibanaSavedObjectType.alertingRuleTemplate,
+            },
+          ],
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithInstalledAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
+    });
+  });
+
   function mockGAAndPrereleaseVersions(pkgVersion: string) {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
 
+    const isViewingPrerelease = pkgVersion.includes('-');
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };
         gaPackage.item.version = '1.0.0';
+        gaPackage.item.latestVersion = '1.0.0';
         return gaPackage;
+      }
+      if (query?.prerelease === true) {
+        // The prerelease query uses a specific version; latestVersion reflects newest prerelease.
+        const pkg = { item: { ...unInstalledPackage.item } };
+        pkg.item.latestVersion = isViewingPrerelease ? pkgVersion : '1.0.0';
+        return pkg;
       }
       return unInstalledPackage;
     });
@@ -131,6 +283,54 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package is not installed while viewing an old pinned version with prerelease enabled', () => {
+    // Reproduces the bug from https://github.com/elastic/ingest-dev/issues/7934:
+    // URL is pinned to an old version (0.3.7) after uninstall; GA=1.0.0 and prerelease=1.0.0-beta exist.
+    // Before the fix, showVersionSelect was false (version ≠ latestGA or latestPrerelease) → no dropdown.
+    // After the fix, notInstalled status also reveals the dropdown.
+    beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: true, id: '' },
+      });
+
+      // URL is pinned to 0.3.7 (old). GA=1.0.0, prerelease=1.0.0-beta. Package is not installed.
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const notInstalledOldVersion = {
+        ...baseResponse.item,
+        status: 'not_installed' as const,
+        version: '0.3.7',
+        latestVersion: '1.0.0',
+      };
+
+      mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
+        if (query?.prerelease === false) {
+          // GA query (version=0.3.7, prerelease=false): latestVersion = latest GA
+          return { item: { ...notInstalledOldVersion, version: '0.3.7', latestVersion: '1.0.0' } };
+        }
+        if (query?.prerelease === true) {
+          // Prerelease query (version=0.3.7, prerelease=true): latestVersion = latest prerelease
+          return {
+            item: { ...notInstalledOldVersion, version: '0.3.7', latestVersion: '1.0.0-beta' },
+          };
+        }
+        // main query (version=0.3.7, prerelease=true from settings)
+        return { item: notInstalledOldVersion };
+      });
+
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    }, TESTS_TIMEOUT);
+
+    it('should display the version selector even when viewing an old pinned version after uninstall', async () => {
+      const versionSelect = renderResult.queryByTestId('versionSelect');
+      expect(versionSelect).toBeInTheDocument();
+      expect(renderResult.queryByTestId('versionText')).not.toBeInTheDocument();
+    });
+  });
+
   describe('and the package is not installed and prerelease disabled', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0');
@@ -153,8 +353,10 @@ describe('When on integration detail', () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
-    it('should display version text and no callout if prerelease setting disabled', async () => {
-      expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
+    it('should display static version text and no callout if prerelease setting disabled and only one version available', async () => {
+      // Only one version available (no newer GA, no prerelease) → selector collapses to static text.
+      expect(renderResult.queryByTestId('versionSelect')).toBeNull();
+      expect(renderResult.queryByTestId('versionText')).toBeInTheDocument();
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
   });
@@ -876,7 +1078,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
-        return mockedApiInterface.responseProvider.epmGetInfo('nginx');
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx', '0.3.7', options.query);
       }
       if (path === epmRouteService.getInfoPath(`nginx`)) {
         markApiCallAsHandled();

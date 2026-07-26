@@ -18,17 +18,36 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  getDefaultSort,
+} from '@kbn/discover-utils';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
+  type InternalStateThunkAction,
   type TabActionPayload,
+  transitionedFromEsqlToDataView,
+  transitionedFromDataViewToEsql,
 } from '../internal_state';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+  type ProfileStateDefaultsHandling,
+  type ProfileStateMutationOptions,
+} from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
-import { selectTabRuntimeState } from '../runtime_state';
+import {
+  selectDataSourceProfileId,
+  selectCurrentProfileUrlState,
+  selectCurrentProfileUrlStateDefinition,
+  selectTabRuntimeState,
+} from '../runtime_state';
 import type {
   DiscoverAppState,
   DiscoverInternalState,
@@ -38,7 +57,18 @@ import type {
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
-type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
+export interface RawAppStatePayload {
+  appState: DiscoverAppState;
+  /**
+   * Marks app state changes that come from URL syncing or other internal updates
+   * instead of direct user actions. These updates skip profile state snapshot
+   * syncing so they do not overwrite restorable profile state. This should
+   * rarely be needed outside of URL syncing and specific edge cases.
+   */
+  isSystemTriggered?: boolean;
+}
+
+type AppStatePayload = TabActionPayload<RawAppStatePayload>;
 
 const mergeAppState = (
   currentState: DiscoverInternalState,
@@ -49,6 +79,20 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
+  function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
+    dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+  };
+
+export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+  [TabActionPayload<{ appState?: DiscoverAppState }>]
+> = (payload) =>
+  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
+    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+  };
+
 /**
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
@@ -57,9 +101,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
-      dispatch(
-        internalStateSlice.actions.setAppState({ tabId: payload.tabId, appState: mergedAppState })
-      );
+      dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
   };
 
@@ -78,6 +120,15 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
     }
 
     const { mergedAppState } = mergeAppState(currentState, payload);
+
+    if (!payload.isSystemTriggered) {
+      dispatch(
+        syncProfileStateSnapshot({
+          tabId: payload.tabId,
+          appState: mergedAppState,
+        })
+      );
+    }
 
     await urlStateStorage.set(APP_STATE_URL_KEY, mergedAppState, { replace: true });
   };
@@ -113,6 +164,30 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
     }
   };
 
+/**
+ * Partially update the tab global state, merging with existing state and replacing URL history
+ */
+export const updateGlobalStateAndReplaceUrl: InternalStateThunkActionCreator<
+  [GlobalStatePayload],
+  Promise<void>
+> = (payload) =>
+  async function updateGlobalStateAndReplaceUrlThunkFn(dispatch, getState, { urlStateStorage }) {
+    const currentState = getState();
+
+    if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
+      return dispatch(updateGlobalState(payload));
+    }
+
+    const { mergedGlobalState } = mergeGlobalState(currentState, payload);
+    const globalUrlState: GlobalQueryStateFromUrl = {
+      time: mergedGlobalState.timeRange,
+      refreshInterval: mergedGlobalState.refreshInterval,
+      filters: mergedGlobalState.filters,
+    };
+
+    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, globalUrlState, { replace: true });
+  };
+
 type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
 
 const mergeAttributes = (
@@ -144,28 +219,133 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
     }
   };
 
-/**
- * Partially update the tab global state, merging with existing state and replacing URL history
- */
-export const updateGlobalStateAndReplaceUrl: InternalStateThunkActionCreator<
-  [GlobalStatePayload],
-  Promise<void>
-> = (payload) =>
-  async function updateGlobalStateAndReplaceUrlThunkFn(dispatch, getState, { urlStateStorage }) {
-    const currentState = getState();
+type ProfileStatePayload<TState extends object> = TabActionPayload<{
+  profileStateDefinition: ProfileStateDefinition<TState>;
+  profileState: TState;
+  historyMethod?: ProfileStateMutationOptions['historyMethod'];
+}>;
 
-    if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
-      return dispatch(updateGlobalState(payload));
+const ALL_PROFILE_STATE_TYPES = new Set([
+  ProfileStateType.Ui,
+  ProfileStateType.Url,
+  ProfileStateType.Persistent,
+]);
+const NON_URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Ui, ProfileStateType.Persistent]);
+const URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Url]);
+
+/**
+ * Updates tab profile state for provided definition, and optionally pushes to URL history
+ */
+export const setProfileState = <TState extends object>(
+  payload: ProfileStatePayload<TState>
+): InternalStateThunkAction =>
+  function setProfileStateThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, services, urlStateStorage }
+  ) {
+    const {
+      tabId,
+      profileStateDefinition,
+      profileState: nextProfileState,
+      historyMethod,
+    } = payload;
+    const { key, defaultState } = profileStateDefinition;
+    const currentState = getState();
+    const currentTab = selectTab(currentState, tabId);
+
+    // Adapter writes can race with tab closure, so ignore them if the tab is closed
+    if (!currentTab) {
+      return;
     }
 
-    const { mergedGlobalState } = mergeGlobalState(currentState, payload);
-    const globalUrlState: GlobalQueryStateFromUrl = {
-      time: mergedGlobalState.timeRange,
-      refreshInterval: mergedGlobalState.refreshInterval,
-      filters: mergedGlobalState.filters,
+    // Consumers work with effective state, while Redux stores only explicit (non-default) overrides
+    const currentExplicitProfileState = currentTab.profileState[key];
+    const currentProfileState = currentExplicitProfileState
+      ? { ...defaultState, ...currentExplicitProfileState }
+      : defaultState;
+
+    if (isEqual(currentProfileState, nextProfileState)) {
+      return;
+    }
+
+    const filterProfileState = ({
+      profileState,
+      stateTypes,
+      defaultsHandling,
+    }: {
+      profileState: object | undefined;
+      stateTypes: Set<ProfileStateType>;
+      defaultsHandling?: ProfileStateDefaultsHandling;
+    }) => {
+      return services.profileStateRegistry.filterFieldsByType({
+        profileState,
+        stateKey: key,
+        stateTypes,
+        defaultsHandling,
+      });
     };
 
-    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, globalUrlState, { replace: true });
+    const dispatchProfileState = (profileState: object | undefined) => {
+      dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
+    };
+
+    const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
+      runtimeStateManager,
+      tabId
+    );
+
+    // Normalize once to the canonical Redux shape before splitting by field lifetime
+    const nextExplicitProfileState = filterProfileState({
+      profileState: nextProfileState,
+      stateTypes: ALL_PROFILE_STATE_TYPES,
+      defaultsHandling: 'strip',
+    });
+
+    // Only active-profile replace updates need URL coordination; other updates can write straight
+    // to Redux and let the usual sync paths handle URL persistence
+    if (
+      historyMethod !== 'replace' ||
+      currentState.tabs.unsafeCurrentId !== tabId ||
+      profileUrlStateDefinition?.key !== key
+    ) {
+      return dispatchProfileState(nextExplicitProfileState);
+    }
+
+    const nextNonUrlProfileState = filterProfileState({
+      profileState: nextExplicitProfileState,
+      stateTypes: NON_URL_PROFILE_STATE_TYPES,
+    });
+    const nextUrlProfileState = filterProfileState({
+      profileState: nextExplicitProfileState,
+      stateTypes: URL_PROFILE_STATE_TYPES,
+    });
+    const currentUrlProfileState = filterProfileState({
+      profileState: currentExplicitProfileState,
+      stateTypes: URL_PROFILE_STATE_TYPES,
+      defaultsHandling: 'strip',
+    });
+
+    // Replace-mode updates keep old URL fields in Redux until the URL storage flush syncs the
+    // replacement value back, so synchronous state observers can briefly see new non-URL fields
+    // paired with old URL fields
+    dispatchProfileState({ ...nextNonUrlProfileState, ...currentUrlProfileState });
+
+    if (!isEqual(currentUrlProfileState, nextUrlProfileState)) {
+      // Expand defaults only at the URL boundary so the replacement URL is self-contained without
+      // changing Redux's explicit-only representation
+      const expandedUrlProfileState = filterProfileState({
+        profileState: nextExplicitProfileState,
+        stateTypes: URL_PROFILE_STATE_TYPES,
+        defaultsHandling: 'expand',
+      });
+      const profileStateForUrl = expandedUrlProfileState
+        ? { [key]: expandedUrlProfileState }
+        : undefined;
+
+      void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });
+      urlStateStorage.kbnUrlControls.flush();
+    }
   };
 
 /**
@@ -175,10 +355,34 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
   [TabActionPayload],
   Promise<void>
 > = ({ tabId }) =>
-  async function pushCurrentTabStateToUrlThunkFn(dispatch) {
+  async function pushCurrentTabStateToUrlThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, services, urlStateStorage }
+  ) {
     await Promise.all([
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
+      (async () => {
+        const scopedProfilesManager = selectTabRuntimeState(
+          runtimeStateManager,
+          tabId
+        ).scopedProfilesManager$.getValue();
+
+        // Keep any hydrated profile URL state until we know which profile owns it
+        if (!scopedProfilesManager.hasResolvedDataSourceProfile()) {
+          return;
+        }
+
+        const profileStateForUrl = selectCurrentProfileUrlState({
+          runtimeStateManager,
+          tabId,
+          profileStateMap: selectTab(getState(), tabId).profileState,
+          profileStateRegistry: services.profileStateRegistry,
+        });
+
+        return urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });
+      })(),
     ]);
   };
 
@@ -187,9 +391,24 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
  * Clean ups the ES|QL query and moves to the dataview mode
  */
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataViewId: string }>]
-> = ({ tabId, dataViewId }) =>
-  function transitionFromESQLToDataViewThunkFn(dispatch) {
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
+    // Mark all profile state fields to reset when transitioning to data view mode
+    dispatch(
+      internalStateSlice.actions.setProfileStateFieldsToReset({
+        tabId,
+        fieldsToReset: 'all',
+      })
+    );
+
+    const sort = getDefaultSort(
+      dataView,
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+      false
+    );
+
     dispatch(
       updateAppState({
         tabId,
@@ -199,25 +418,17 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
             query: '',
           },
           columns: [],
+          sort,
           dataSource: {
             type: DataSourceType.DataView,
-            dataViewId,
+            dataViewId: dataView.id ?? '',
           },
         },
       })
     );
+
+    dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
-
-const clearTimeFieldFromSort = (
-  sort: DiscoverAppState['sort'],
-  timeFieldName: string | undefined
-) => {
-  if (!Array.isArray(sort) || !timeFieldName) return sort;
-
-  const filteredSort = sort.filter(([field]) => field !== timeFieldName);
-
-  return filteredSort;
-};
 
 /**
  * Triggered when transitioning from ESQL to Dataview
@@ -227,12 +438,22 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    // Mark all profile state fields to reset when transitioning to ES|QL mode
+    dispatch(
+      internalStateSlice.actions.setProfileStateFieldsToReset({
+        tabId,
+        fieldsToReset: 'all',
+      })
+    );
+
     const currentState = getState();
-    const appState = selectTab(currentState, tabId).appState;
-    const { query, sort } = appState;
+    const tabState = selectTab(currentState, tabId);
+    const { appState } = tabState;
+    const { query } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
-    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
+
+    const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
+    const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
 
     dispatch(
       updateAppState({
@@ -244,13 +465,15 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
             type: DataSourceType.Esql,
           },
           columns: [],
-          sort: clearedSort,
+          sort: undefined,
         },
       })
     );
 
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+
+    dispatch(transitionedFromDataViewToEsql({ tabId }));
   };
 
 /**
@@ -294,7 +517,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     getState,
     { searchSessionManager, runtimeStateManager, services }
   ) {
-    const { scopedEbtManager$, stateContainer$ } = selectTabRuntimeState(
+    const { scopedEbtManager$, dataStateContainer$ } = selectTabRuntimeState(
       runtimeStateManager,
       tabId
     );
@@ -315,7 +538,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('onQuerySubmit triggers data fetching');
-      stateContainer$.getValue()?.dataState.fetch();
+      dataStateContainer$.getValue()?.fetch();
     }
   };
 
@@ -328,8 +551,8 @@ export const fetchData: InternalStateThunkActionCreator<
 > = ({ tabId, initial }) =>
   function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
     addLog('fetchData', { initial });
-    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = dataStateContainer$.getValue();
     if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer?.fetch();
     }

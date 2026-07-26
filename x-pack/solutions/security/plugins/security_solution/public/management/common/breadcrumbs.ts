@@ -8,21 +8,21 @@
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { AdministrationSubTab } from '../types';
 import {
+  ENDPOINT_EXCEPTIONS_TAB,
   ENDPOINTS_TAB,
   EVENT_FILTERS_TAB,
   POLICIES_TAB,
-  ENDPOINT_EXCEPTIONS_TAB,
   TRUSTED_APPS_TAB,
   TRUSTED_DEVICES_TAB,
 } from './translations';
 import type { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import {
-  HOST_ISOLATION_EXCEPTIONS,
   BLOCKLIST,
-  RESPONSE_ACTIONS_HISTORY,
-  SCRIPTS_LIBRARY,
-  PROTECTION_UPDATES,
+  HOST_ISOLATION_EXCEPTIONS,
   NOTES,
+  PROTECTION_UPDATES,
+  RESPONSE_ACTIONS_HISTORY,
+  SCRIPT_LIBRARY,
 } from '../../app/translations';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
@@ -35,7 +35,7 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.hostIsolationExceptions]: HOST_ISOLATION_EXCEPTIONS,
   [AdministrationSubTab.blocklist]: BLOCKLIST,
   [AdministrationSubTab.responseActionsHistory]: RESPONSE_ACTIONS_HISTORY,
-  [AdministrationSubTab.scriptsLibrary]: SCRIPTS_LIBRARY,
+  [AdministrationSubTab.scriptLibrary]: SCRIPT_LIBRARY,
   [AdministrationSubTab.protectionUpdates]: PROTECTION_UPDATES,
   [AdministrationSubTab.notes]: NOTES,
 };

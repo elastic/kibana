@@ -7,10 +7,19 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ResourceTypes, getSecurityLabsIndexName } from '@kbn/product-doc-common';
+import {
+  ResourceTypes,
+  getSecurityLabsIndexName,
+  getOpenApiSpecIndexName,
+} from '@kbn/product-doc-common';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getIndicesForResourceTypes, mapResult } from './utils';
-import { performSearch, performSecurityLabsSearch } from './perform_search';
+import {
+  performSearch,
+  performSecurityLabsSearch,
+  performOpenapiSpecSearch,
+  type OpenapiSpecAttributes,
+} from './perform_search';
 import type { DocSearchOptions, DocSearchResponse } from './types';
 
 const SECURITY_LABS_BASE_URL = 'https://www.elastic.co/security-labs/';
@@ -27,6 +36,17 @@ const isSecurityLabsHit = (
   return Boolean(hit._source && typeof hit._source === 'object' && 'title' in hit._source);
 };
 
+const isOpenapiSpecHit = (
+  hit: SearchHit<unknown>
+): hit is SearchHit<OpenapiSpecAttributes> & { _source: OpenapiSpecAttributes } => {
+  return Boolean(
+    hit._source &&
+      typeof hit._source === 'object' &&
+      'operationId' in hit._source &&
+      'endpoint' in hit._source
+  );
+};
+
 const mapSecurityLabsResult = (docHit: SearchHit<SecurityLabsAttributes>) => {
   const source = docHit._source!;
   const content = source.content;
@@ -35,6 +55,27 @@ const mapSecurityLabsResult = (docHit: SearchHit<SecurityLabsAttributes>) => {
     content: typeof content === 'string' ? content : content?.text ?? '',
     url: `${SECURITY_LABS_BASE_URL}${source.slug}`,
     productName: 'security' as const,
+    highlights:
+      (docHit.highlight as Record<string, string[] | undefined> | undefined)?.content ?? [],
+  };
+};
+
+const mapOpenapiSpecResult = (docHit: SearchHit<OpenapiSpecAttributes>) => {
+  const source = docHit._source!;
+  return {
+    title: source.operationId as string,
+    content: JSON.stringify({
+      operationId: source.operationId,
+      description: source.description,
+      summary: source.summary,
+      parameters: source.parameters,
+      method: source.method,
+      path: source.path,
+      responses: source.responses,
+      endpoint: source.endpoint,
+    }),
+    url: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/${source.operationId}`,
+    productName: 'elasticsearch' as const,
     highlights:
       (docHit.highlight as Record<string, string[] | undefined> | undefined)?.content ?? [],
   };
@@ -89,6 +130,22 @@ export class SearchService {
       );
     }
 
+    if (resourceTypes.includes(ResourceTypes.openapiSpec)) {
+      const openApiSpecIndex = getOpenApiSpecIndexName(inferenceId);
+      this.log.debug(
+        `performing search - query=[${query}] at index=[${openApiSpecIndex}] resourceType=[${ResourceTypes.openapiSpec}]`
+      );
+      results.push(
+        ...(await performOpenapiSpecSearch({
+          searchQuery: query,
+          size: max,
+          highlights,
+          index: openApiSpecIndex,
+          client: this.esClient,
+        }))
+      );
+    }
+
     const sorted = results
       .slice()
       .sort((a, b) => (b._score ?? 0) - (a._score ?? 0))
@@ -96,6 +153,9 @@ export class SearchService {
 
     return {
       results: sorted.map((hit) => {
+        if (isOpenapiSpecHit(hit)) {
+          return mapOpenapiSpecResult(hit);
+        }
         if (isSecurityLabsHit(hit)) {
           return mapSecurityLabsResult(hit);
         }

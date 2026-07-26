@@ -70,8 +70,10 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1
 
+export KBN_DISALLOW_CODE_GEN_FROM_STRINGS=true
+
 export ELASTIC_APM_ENVIRONMENT=ci
-export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
+export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.01
 export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=false
 
 if is_pr; then
@@ -93,10 +95,10 @@ if is_pr; then
     export IS_SECURITY_AI_PROMPT_TEST=true
   fi
 
-  # These can be removed once we're not supporting Jenkins and Buildkite at the same time
-  # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
-  export ghprbGhRepository="elastic/kibana"
-  export ghprbActualCommit="$BUILDKITE_COMMIT"
+  if is_pr_with_label "ci:ingest-test-logs"; then
+    export CI_STATS_INGEST_TEST_LOGS=true
+  fi
+  
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
   set_git_merge_base
@@ -142,7 +144,7 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 # tells the gh command what our default repo is
 export GH_REPO=github.com/elastic/kibana
 
-if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] || is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"; then
+if should_enable_fips; then
   ES_SECURITY_ENABLED=true
   export ES_SECURITY_ENABLED
   # used by FIPS agents to link FIPS OpenSSL modules

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/json-schemas'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/json-schemas'
+  title: '@kbn/json-schemas'
   description: Moon project for @kbn/json-schemas
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/ml/json_schemas
+  sourceRoot: x-pack/platform/packages/private/ml/json_schemas
 dependsOn:
   - '@kbn/dev-cli-runner'
 tags:
@@ -31,16 +30,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.json'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

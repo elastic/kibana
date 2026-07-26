@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger, ElasticsearchClient } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AttackDiscoveryMissingPrivileges } from '@kbn/elastic-assistant-common';
 import {
@@ -18,12 +18,15 @@ import type {
   SecurityHasPrivilegesResponse,
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 
 import { getScheduledIndexPattern } from '../../../lib/attack_discovery/persistence/get_scheduled_index_pattern';
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { performChecks } from '../../helpers';
+import { getMissingWorkflowsPrivileges } from './get_missing_workflows_privileges';
 
 const REQUIRED_INDEX_PRIVILEGES: SecurityIndexPrivilege[] = [
   'read',
@@ -53,7 +56,7 @@ export const getMissingIndexPrivilegesInternalRoute = (
       path: ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
@@ -111,20 +114,33 @@ export const getMissingIndexPrivilegesInternalRoute = (
 
           const privileges = await readIndexPrivileges(esClient, [indexPattern, adhocIndexPattern]);
 
-          const missingPrivileges = [];
-          const missingIndexPrivileges = getMissingIndexPrivileges(indexPattern, privileges);
-          if (missingIndexPrivileges) {
-            missingPrivileges.push(missingIndexPrivileges);
-          }
-          const missingAdhocIndexPrivileges = getMissingIndexPrivileges(
-            adhocIndexPattern,
-            privileges
-          );
-          if (missingAdhocIndexPrivileges) {
-            missingPrivileges.push(missingAdhocIndexPrivileges);
-          }
+          const missingIndexPrivileges = [
+            getMissingIndexPrivileges(indexPattern, privileges),
+            getMissingIndexPrivileges(adhocIndexPattern, privileges),
+          ].filter((missing): missing is AttackDiscoveryMissingPrivileges => missing != null);
 
-          return response.ok({ body: missingPrivileges });
+          // Attack Discovery 2.0 additionally requires the workflows privileges
+          // enforced by the least-privilege route matrix. Only evaluate them when
+          // the workflows feature flag is ON (they are not required otherwise).
+          const workflowsEnabled = await core.featureFlags.getBooleanValue(
+            ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
+            true
+          );
+
+          const missingFeaturePrivileges = workflowsEnabled
+            ? await getMissingWorkflowsPrivileges({
+                authz: assistantContext.security.authz,
+                request,
+                spaceId,
+              })
+            : [];
+
+          return response.ok({
+            body: {
+              feature_privileges: missingFeaturePrivileges,
+              index_privileges: missingIndexPrivileges,
+            },
+          });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

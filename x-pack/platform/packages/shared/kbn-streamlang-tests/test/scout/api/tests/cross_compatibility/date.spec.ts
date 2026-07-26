@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Date Processor', () => {
   // *** Compatible Cases ***
   apiTest(
     'should parse a date with a single format',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -26,8 +28,8 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest('ingest-date-single-format', docs, processors);
@@ -36,15 +38,17 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       await testBed.ingest('esql-date-single-format', docs);
       const esqlResult = await esql.queryOnIndex('esql-date-single-format', query);
 
-      expect(ingestResult[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
-      expect(esqlResult.documentsOrdered[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
+      expect(asDoc(ingestResult[0])?.['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
+      expect(asDoc(esqlResult.documentsOrdered[0])?.['@timestamp']).toBe(
+        '2025-01-01T12:34:56.789Z'
+      );
     }
   );
 
   // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
   apiTest(
     'should parse a date with multiple formats',
-    { tag: ['@ess'] },
+    { tag: tags.stateful.classic },
     async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -57,8 +61,8 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
         { event: { created: '01/01/2025:12:34:56' } },
@@ -70,16 +74,20 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       await testBed.ingest('esql-date-multiple-formats', docs);
       const esqlResult = await esql.queryOnIndex('esql-date-multiple-formats', query);
 
-      expect(ingestResult[0].event.created_date).toBe('2025-01-01T12:34:56.000Z');
-      expect(ingestResult[1].event.created_date).toBe('2025-01-02T12:34:56.789Z');
-      expect(esqlResult.documentsOrdered[0]['event.created_date']).toBe('2025-01-01T12:34:56.000Z');
-      expect(esqlResult.documentsOrdered[1]['event.created_date']).toBe('2025-01-02T12:34:56.789Z');
+      expect(asDoc(asDoc(ingestResult[0])?.event)?.created_date).toBe('2025-01-01T12:34:56.000Z');
+      expect(asDoc(asDoc(ingestResult[1])?.event)?.created_date).toBe('2025-01-02T12:34:56.789Z');
+      expect(asDoc(esqlResult.documentsOrdered[0])?.['event.created_date']).toBe(
+        '2025-01-01T12:34:56.000Z'
+      );
+      expect(asDoc(esqlResult.documentsOrdered[1])?.['event.created_date']).toBe(
+        '2025-01-02T12:34:56.789Z'
+      );
     }
   );
 
   apiTest(
     'should use a different output format',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -92,8 +100,8 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest('ingest-date-output-format', docs, processors);
@@ -122,7 +130,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
   ].forEach(({ templateType, from, to }) => {
     apiTest(
       `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
-      { tag: ['@ess', '@svlOblt'] },
+      { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
       async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -137,10 +145,10 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         };
 
         // Both transpilers should throw validation errors for Mustache templates
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
-        expect(() => transpileEsql(streamlangDSL)).toThrow(
+        await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
       }
@@ -150,7 +158,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
   // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
   apiTest(
     'should parse the first matching among a list of input formats',
-    { tag: ['@ess'] },
+    { tag: tags.stateful.classic },
     async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -163,8 +171,8 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       // Test documents with different formats that should match different patterns in the list
       const docs = [
@@ -198,7 +206,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
   // rather it highlights the nuanced behavioral differences in certain edge cases among transpilers.
   apiTest(
     'should add error in ingest, but ES|QL ignores the document when parsing fails',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -210,8 +218,8 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '01-01-2025' } }];
       const { errors } = await testBed.ingest('ingest-date-fail', docs, processors);
@@ -230,7 +238,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
 
   apiTest(
     'should parse a date with locale and timezone',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -245,8 +253,8 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { date: '08 avril 1999' } }];
       await testBed.ingest('ingest-date-timezone-locale-format', docs, processors);

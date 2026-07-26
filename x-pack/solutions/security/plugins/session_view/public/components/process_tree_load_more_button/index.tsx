@@ -31,7 +31,7 @@ export const ProcessTreeLoadMoreButton = ({
     <div css={styles.wrapper}>
       <EuiButtonEmpty
         size="xs"
-        iconType={forward ? 'arrowDown' : 'arrowUp'}
+        iconType={forward ? 'chevronSingleDown' : 'chevronSingleUp'}
         onClick={onClick}
         isLoading={isFetching}
       >

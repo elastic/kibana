@@ -23,11 +23,12 @@ import type {
   PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
-import { isZod } from '@kbn/zod';
+import { isZod } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Request } from '@hapi/hapi';
 import type { Mutable } from 'utility-types';
+import { onceCacheOnSuccess } from '@kbn/std';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';
@@ -62,6 +63,7 @@ interface Dependencies {
   handler: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
   log: Logger;
   method: RouteMethod;
+  isDev: boolean;
 }
 
 export function buildRoute({
@@ -70,9 +72,24 @@ export function buildRoute({
   route,
   router,
   method,
+  isDev,
 }: Dependencies): InternalRouterRoute {
   route = prepareRouteConfigValidation(route);
-  const routeSchemas = routeSchemasFromRouteConfig(route, method);
+  // In development, build schemas eagerly at registration time so config errors
+  // surface immediately at plugin.setup(). In production, defer to first request
+  // to avoid loading all schemas into memory upfront.
+  let getRouteSchemas: () => RouteValidator<unknown, unknown, unknown> | undefined;
+  if (isDev) {
+    // Eager path — build immediately, throw at registration if invalid
+    const routeSchemas = routeSchemasFromRouteConfig(route, method);
+    getRouteSchemas = () => routeSchemas;
+  } else {
+    // Deferred path (production) — schema construction on first request.
+    // Use onceCacheOnSuccess to ensure a broken schema retries on every request
+    // rather than silently bypassing validation after the first failure.
+    getRouteSchemas = onceCacheOnSuccess(() => routeSchemasFromRouteConfig(route, method));
+  }
+
   return {
     handler: async (req) => {
       return await handle(req, {
@@ -81,13 +98,14 @@ export function buildRoute({
         method,
         route,
         router,
-        routeSchemas,
+        isDev,
+        routeSchemas: getRouteSchemas(),
       });
     },
     method,
     path: getRouteFullPath(router.routerPath, route.path),
     options: validOptions(method, route),
-    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
+    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>),
     validationSchemas: route.validate,
     isVersioned: false,
   };

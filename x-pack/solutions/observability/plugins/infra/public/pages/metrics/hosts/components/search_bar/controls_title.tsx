@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFormLabel, EuiText, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME } from '@kbn/metrics-data-access-plugin/common';
-import { Popover } from '../common/popover';
+import { Popover } from '../../../../../components/popover';
 
 const helpMessages: Record<string, React.ReactNode> = {
   [SERVICE_NAME]: (

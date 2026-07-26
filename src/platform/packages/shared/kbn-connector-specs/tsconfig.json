@@ -7,6 +7,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
     ]
   },
   "include": [
@@ -22,5 +23,6 @@
     "@kbn/licensing-types",
     "@kbn/actions-utils",
     "@kbn/i18n",
+    "@kbn/mcp-client",
   ]
 }

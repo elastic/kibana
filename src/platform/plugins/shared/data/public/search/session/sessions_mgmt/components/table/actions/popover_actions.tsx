@@ -28,6 +28,7 @@ interface PopoverActionItemsProps {
   onActionComplete: OnActionComplete;
   core: CoreStart;
   allowedActions?: UISession['actions'];
+  isWithinFlyout?: boolean;
 }
 
 export const PopoverActionsMenu = ({
@@ -36,6 +37,7 @@ export const PopoverActionsMenu = ({
   session,
   core,
   allowedActions,
+  isWithinFlyout = false,
 }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -58,7 +60,7 @@ export const PopoverActionsMenu = ({
           defaultMessage: 'More actions',
         })}
         color="text"
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         onClick={onPopoverClick}
       />
     </EuiToolTip>
@@ -71,9 +73,9 @@ export const PopoverActionsMenu = ({
     }) || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(api, actionType, session, core);
+    const actionDef = getAction(api, actionType, session, core, isWithinFlyout);
     if (actionDef) {
-      const { label, iconType, onClick } = actionDef;
+      const { label, icon, onClick } = actionDef;
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
@@ -86,7 +88,7 @@ export const PopoverActionsMenu = ({
         {
           key: `action-${actionType}`,
           name: label,
-          icon: iconType,
+          icon,
           'data-test-subj': `sessionManagementPopoverAction-${actionType}`,
           onClick: async () => {
             closePopover();
@@ -109,6 +111,9 @@ export const PopoverActionsMenu = ({
       closePopover={closePopover}
       anchorPosition="downLeft"
       panelPaddingSize={'s'}
+      aria-label={i18n.translate('data.mgmt.searchSessions.popoverActions.ariaLabel', {
+        defaultMessage: 'Background Search actions',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

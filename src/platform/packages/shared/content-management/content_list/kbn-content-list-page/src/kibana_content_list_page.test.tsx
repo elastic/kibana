@@ -1,0 +1,190 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { EuiButton } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaContentListPage } from './kibana_content_list_page';
+
+jest.mock('@kbn/shared-ux-page-kibana-template', () => {
+  const actual = jest.requireActual('@kbn/shared-ux-page-kibana-template');
+  // Wrap the real `KibanaPageTemplate` in a jest.fn so callers can assert
+  // forwarded props (`restrictWidth`, etc.) without losing the real
+  // sub-component slots (`Header`, `Section`).
+  const KibanaPageTemplateMock = jest.fn(actual.KibanaPageTemplate);
+  // Preserve the compound API EUI exposes via `Object.assign` in the
+  // upstream module.
+  Object.assign(KibanaPageTemplateMock, actual.KibanaPageTemplate);
+  return { ...actual, KibanaPageTemplate: KibanaPageTemplateMock };
+});
+
+const KibanaPageTemplateMock = KibanaPageTemplate as unknown as jest.Mock;
+
+beforeEach(() => {
+  KibanaPageTemplateMock.mockClear();
+});
+
+describe('KibanaContentListPage', () => {
+  it('renders children verbatim inside the page template', () => {
+    render(
+      <KibanaContentListPage>
+        <div data-test-subj="page-body">body</div>
+      </KibanaContentListPage>
+    );
+
+    expect(screen.getByTestId('kibana-content-list-page')).toBeInTheDocument();
+    expect(screen.getByTestId('page-body')).toBeInTheDocument();
+  });
+
+  it('applies a custom `data-test-subj` to the page root', () => {
+    render(
+      <KibanaContentListPage data-test-subj="maps-page">
+        <div />
+      </KibanaContentListPage>
+    );
+
+    expect(screen.getByTestId('maps-page')).toBeInTheDocument();
+  });
+
+  describe('restrictWidth', () => {
+    it('defaults to `false` so listing pages run full-width', () => {
+      render(
+        <KibanaContentListPage>
+          <div />
+        </KibanaContentListPage>
+      );
+
+      expect(KibanaPageTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ restrictWidth: false }),
+        expect.anything()
+      );
+    });
+
+    it('forwards an explicit `restrictWidth` to `KibanaPageTemplate`', () => {
+      render(
+        <KibanaContentListPage restrictWidth={1024}>
+          <div />
+        </KibanaContentListPage>
+      );
+
+      expect(KibanaPageTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ restrictWidth: 1024 }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('KibanaContentListPage.Header', () => {
+    it('renders title, description, and actions', () => {
+      render(
+        <KibanaContentListPage>
+          <KibanaContentListPage.Header
+            title="Maps"
+            description="Browse and manage maps."
+            actions={<EuiButton>Create map</EuiButton>}
+          />
+        </KibanaContentListPage>
+      );
+
+      expect(screen.getByTestId('kibana-content-list-page-title')).toHaveTextContent('Maps');
+      expect(screen.getByTestId('kibana-content-list-page-description')).toHaveTextContent(
+        'Browse and manage maps.'
+      );
+      expect(screen.getByRole('button', { name: 'Create map' })).toBeInTheDocument();
+    });
+
+    it('renders each entry in an `actions` array as a distinct button', () => {
+      render(
+        <KibanaContentListPage>
+          <KibanaContentListPage.Header
+            title="Maps"
+            actions={[
+              <EuiButton key="create">Create map</EuiButton>,
+              <EuiButton key="import">Import</EuiButton>,
+            ]}
+          />
+        </KibanaContentListPage>
+      );
+
+      expect(screen.getByRole('button', { name: 'Create map' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Import' })).toBeInTheDocument();
+    });
+
+    it('throws when rendered outside a `KibanaContentListPage`', () => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      expect(() => render(<KibanaContentListPage.Header title="Maps" />)).toThrow(
+        /must be rendered inside `<KibanaContentListPage>`/
+      );
+      errorSpy.mockRestore();
+    });
+  });
+
+  describe('KibanaContentListPage.Section', () => {
+    it('wraps content in a section labelled by the page heading', () => {
+      render(
+        <KibanaContentListPage>
+          <KibanaContentListPage.Header title="Maps" />
+          <KibanaContentListPage.Section>
+            <div data-test-subj="section-child">child</div>
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
+      );
+
+      const section = screen.getByTestId('kibana-content-list-page-section');
+      expect(section).toContainElement(screen.getByTestId('section-child'));
+
+      // The heading id is generated by useId() and is unique per instance, so
+      // assert presence and cross-reference rather than a hard-coded string.
+      const headingId = section.getAttribute('aria-labelledby');
+      expect(headingId).toBeTruthy();
+      expect(document.getElementById(headingId!)).toHaveTextContent('Maps');
+    });
+
+    it('honors a custom `aria-labelledby` and `data-test-subj`', () => {
+      render(
+        <KibanaContentListPage>
+          <KibanaContentListPage.Section
+            aria-labelledby="custom-heading"
+            data-test-subj="toolbar-section"
+          >
+            <h2 id="custom-heading">Filters</h2>
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
+      );
+
+      const section = screen.getByTestId('toolbar-section');
+      expect(section).toHaveAttribute('aria-labelledby', 'custom-heading');
+    });
+
+    it('threads the page `data-test-subj` override into the default section subject', () => {
+      render(
+        <KibanaContentListPage data-test-subj="maps-page">
+          <KibanaContentListPage.Section>
+            <div />
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
+      );
+
+      expect(screen.getByTestId('maps-page-section')).toBeInTheDocument();
+    });
+
+    it('throws when rendered outside a `KibanaContentListPage`', () => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      expect(() =>
+        render(
+          <KibanaContentListPage.Section>
+            <div />
+          </KibanaContentListPage.Section>
+        )
+      ).toThrow(/must be rendered inside `<KibanaContentListPage>`/);
+      errorSpy.mockRestore();
+    });
+  });
+});

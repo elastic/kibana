@@ -24,7 +24,9 @@ describe(`assertTelemetryPayload`, () => {
     expect(() =>
       // @ts-expect-error: root doesn't match expected types
       assertTelemetryPayload({ root: {}, plugins: { properties: {} } }, { version: 'some-version' })
-    ).toThrow('[version]: definition for this key is missing. Received `"some-version"`');
+    ).toThrow(
+      '[version]: Additional properties are not allowed (\'version\' was unexpected). Received `"some-version"`'
+    );
   });
   test('stats has nested-fields not defined in the schema => fail', () => {
     expect(() =>
@@ -34,7 +36,7 @@ describe(`assertTelemetryPayload`, () => {
         { an_array: [{ docs: { missing: 1 } }] }
       )
     ).toThrow(
-      '[an_array]: definition for this key is missing. Received `[{"docs":{"missing":1}}]`'
+      '[an_array]: Additional properties are not allowed (\'an_array\' was unexpected). Received `[{"docs":{"missing":1}}]`'
     );
     expect(() =>
       assertTelemetryPayload(
@@ -53,7 +55,9 @@ describe(`assertTelemetryPayload`, () => {
         },
         { an_array: [{ docs: { missing: 1 } }] }
       )
-    ).toThrow('[an_array.0.docs]: definition for this key is missing. Received `{"missing":1}`');
+    ).toThrow(
+      '[an_array.0.docs]: Additional properties are not allowed (\'docs\' was unexpected). Received `{"missing":1}`'
+    );
     expect(() =>
       assertTelemetryPayload(
         {
@@ -75,7 +79,9 @@ describe(`assertTelemetryPayload`, () => {
         },
         { an_array: [{ docs: { missing: 1 } }] }
       )
-    ).toThrow('[an_array.0.docs.missing]: definition for this key is missing. Received `1`');
+    ).toThrow(
+      "[an_array.0.docs.missing]: Additional properties are not allowed ('missing' was unexpected). Received `1`"
+    );
   });
   test('stats has nested-fields defined in the schema, but with wrong type => fail', () => {
     expect(() =>

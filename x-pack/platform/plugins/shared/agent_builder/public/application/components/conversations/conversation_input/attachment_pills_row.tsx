@@ -8,12 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
+import { AttachmentGroupPill } from './attachment_group_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface AttachmentPillsRowProps {
-  attachments: AttachmentInput[] | Attachment[];
+  attachments: ConversationAttachment[];
   removable?: boolean;
   justifyContent?: EuiFlexGroupProps['justifyContent'];
 }
@@ -45,14 +47,34 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       aria-label={labels.attachments}
       data-test-subj="agentBuilderAttachmentPillsRow"
     >
-      {attachments.map((attachment, index) => (
-        <EuiFlexItem key={attachment.id ?? `${attachment.type}-${index}`} grow={false}>
-          <AttachmentPill
-            attachment={attachment as Attachment}
-            onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
-          />
-        </EuiFlexItem>
-      ))}
+      {attachments.map((attachment, index) => {
+        if (isAttachmentGroup(attachment)) {
+          return (
+            <EuiFlexItem key={attachment.id} grow={false}>
+              <AttachmentGroupPill
+                group={attachment}
+                onRemove={removable ? () => removeAttachment?.(index) : undefined}
+              />
+            </EuiFlexItem>
+          );
+        }
+
+        const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
+        return (
+          <EuiFlexItem key={attachmentId} grow={false}>
+            <AttachmentPill
+              attachment={{
+                id: attachmentId,
+                type: attachment.type,
+                data: (attachment.data ?? {}) as Record<string, unknown>,
+                hidden: attachment.hidden,
+                origin: attachment.origin,
+              }}
+              onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
+            />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

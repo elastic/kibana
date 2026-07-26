@@ -14,6 +14,7 @@ export * from './src/alerts_as_data_rbac';
 export * from './src/alerts_as_data_severity';
 export * from './src/alerts_as_data_status';
 export * from './src/alerts_as_data_cases';
+export * from './src/rule_locator_params';
 export * from './src/routes/stack_rule_paths';
 export * from './src/rule_types';
 export * from './src/rule_constants';

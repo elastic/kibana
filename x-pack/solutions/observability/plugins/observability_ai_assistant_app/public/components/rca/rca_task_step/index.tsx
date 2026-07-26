@@ -22,10 +22,10 @@ export function RootCauseAnalysisTaskStepItem({
 
   if (status === 'failure') {
     color = 'danger';
-    iconType = 'alert';
+    iconType = 'warning';
   } else if (status === 'completed') {
     color = 'success';
-    iconType = 'checkInCircleFilled';
+    iconType = 'checkCircleFill';
   } else {
     color = 'primary';
     loading = true;

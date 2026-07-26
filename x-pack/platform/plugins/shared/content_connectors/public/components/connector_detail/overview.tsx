@@ -135,6 +135,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             </EuiText>
             <EuiSpacer />
             <EuiButtonTo
+              data-test-subj="contentConnectorsConnectorOverviewAttachIndexButton"
               color="warning"
               fill
               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {

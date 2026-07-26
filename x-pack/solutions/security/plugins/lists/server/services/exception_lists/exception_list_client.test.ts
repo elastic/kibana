@@ -339,6 +339,18 @@ describe('exception_list_client', () => {
         },
       ],
       [
+        'bulkDeleteExceptionListItems',
+        (): ReturnType<ExceptionListClient['bulkDeleteExceptionListItems']> => {
+          return exceptionListClient.bulkDeleteExceptionListItems({
+            ids: ['1', '2', '3'],
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
         'getEndpointListItem',
         (): ReturnType<ExceptionListClient['getEndpointListItem']> => {
           return exceptionListClient.getEndpointListItem({

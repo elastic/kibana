@@ -16,6 +16,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowInsights } from './components/insights/workflow_insights';
+import { WorkflowInsightsAB } from './components/insights/workflow_insights_ab';
 import { isPolicyOutOfDate } from '../../utils';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
@@ -23,6 +24,7 @@ import { useEndpointSelector } from '../hooks';
 import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
@@ -45,6 +47,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
     // Access control
     const { canReadWorkflowInsights } = useUserPrivileges().endpointPrivileges;
+    const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('automaticTroubleshootingSkill');
 
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
@@ -187,7 +190,12 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     }, [hostInfo, policyInfo, missingPolicies, policyStatus, policyStatusClickHandler]);
     return (
       <div>
-        {canReadWorkflowInsights && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
+        {canReadWorkflowInsights &&
+          (isAgentBuilderEnabled ? (
+            <WorkflowInsightsAB endpointId={hostInfo.metadata.agent.id} />
+          ) : (
+            <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />
+          ))}
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed

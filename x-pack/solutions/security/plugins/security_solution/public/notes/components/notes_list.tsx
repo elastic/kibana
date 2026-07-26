@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
@@ -70,7 +70,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                   <OpenFlyoutButtonIcon
                     eventId={note.eventId}
                     timelineId={note.timelineId}
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                   />
                 )}
                 {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (

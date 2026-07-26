@@ -34,6 +34,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
+  // Note: `/api/infra/metadata` (InfraMetadataRequestRT in
+  // x-pack/solutions/observability/plugins/infra/common/http_api/metadata_api.ts) does
+  // NOT accept a `schema` field in its request body — schema is resolved
+  // server-side from the source configuration. The bodies below intentionally
+  // omit `schema`; this is the explicit, documented behavior and not a missed
+  // audit. See issue #264011.
   describe('API /api/infra/metadata', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 

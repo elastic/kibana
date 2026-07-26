@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-const authSchema = z
-  .object({
-    username: z
-      .string()
-      .min(1, { message: i18n.BASIC_AUTH_USERNAME_REQUIRED_MESSAGE })
-      .meta({ label: i18n.BASIC_AUTH_USERNAME_LABEL }),
-    password: z
-      .string()
-      .min(1, { message: i18n.BASIC_AUTH_PASSWORD_REQUIRED_MESSAGE })
-      .meta({ sensitive: true, label: i18n.BASIC_AUTH_PASSWORD_LABEL }),
-  })
-  .meta({ label: i18n.BASIC_AUTH_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      username: z
+        .string()
+        .min(1, { message: i18n.BASIC_AUTH_USERNAME_REQUIRED_MESSAGE })
+        .meta({ label: i18n.BASIC_AUTH_USERNAME_LABEL }),
+      password: z
+        .string()
+        .min(1, { message: i18n.BASIC_AUTH_PASSWORD_REQUIRED_MESSAGE })
+        .meta({ sensitive: true, label: i18n.BASIC_AUTH_PASSWORD_LABEL }),
+    })
+    .meta({ label: i18n.BASIC_AUTH_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

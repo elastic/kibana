@@ -8,6 +8,9 @@
 export const DASHBOARDS_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Dashboards"]';
 
+export const DETECTIONS_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Detections"]';
+
 export const ALERTS_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Alerts"]';
 
@@ -24,6 +27,9 @@ export const EXPLORE_PAGE =
 
 export const THREAT_INTELLIGENCE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Intelligence"]';
+
+export const LAUNCHPAD_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Launchpad"]';
 
 export const MANAGE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Manage"]';

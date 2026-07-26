@@ -6563,12 +6563,40 @@ describe('#authorizeChangeAccessControl', () => {
       )
     ).rejects.toThrow();
 
-    expect(addAuditEventSpy).toHaveBeenCalledWith(
+    const expectedError = new Error(
+      'Access denied: Unable to perform manage access control for types visualization. ' +
+        'The "update" privilege is required to change access control of objects owned by the current user. ' +
+        'Unable to manage access control for objects dashboard:1: ' +
+        'the "manage_access_control" privilege is required to change access control of objects owned by another user.'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(2);
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_OWNER,
-        error: expect.any(Error),
-        unauthorizedTypes: ['dashboard', 'visualization'],
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
         unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[0].type,
+          id: objectsWithExistingNamespaces[0].id,
+        }),
+      })
+    );
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_OWNER,
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[1].type,
+          id: objectsWithExistingNamespaces[1].id,
+        }),
       })
     );
   });
@@ -6770,15 +6798,42 @@ describe('#authorizeChangeAccessControl', () => {
       )
     ).rejects.toThrow();
 
-    expect(addAuditEventSpy).toHaveBeenCalledWith(
+    const expectedError = new Error(
+      'Access denied: Unable to perform manage access control for types visualization. ' +
+        'The "update" privilege is required to change access control of objects owned by the current user. ' +
+        'Unable to manage access control for objects dashboard:1: ' +
+        'the "manage_access_control" privilege is required to change access control of objects owned by another user.'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(2);
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
-        error: expect.any(Error),
-        unauthorizedTypes: expect.arrayContaining(['dashboard']),
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
         unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[0].type,
+          id: objectsWithExistingNamespaces[0].id,
+        }),
       })
     );
-    expect(auditHelperSpy).not.toHaveBeenCalled();
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[1].type,
+          id: objectsWithExistingNamespaces[1].id,
+        }),
+      })
+    );
   });
 
   test('audits failure event with multiple types when changeOwnership is unauthorized', async () => {
@@ -6817,15 +6872,55 @@ describe('#authorizeChangeAccessControl', () => {
       )
     ).rejects.toThrow();
 
-    expect(addAuditEventSpy).toHaveBeenCalledWith(
+    const expectedError = new Error(
+      'Access denied: Unable to perform manage access control for types map, visualization. ' +
+        'The "update" privilege is required to change access control of objects owned by the current user. ' +
+        'Unable to manage access control for objects dashboard:1: ' +
+        'the "manage_access_control" privilege is required to change access control of objects owned by another user.'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(3);
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_OWNER,
-        error: expect.any(Error),
-        unauthorizedTypes: expect.arrayContaining(['dashboard']),
+        error: expectedError,
+        unauthorizedTypes: ['map', 'visualization'],
         unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objects[0].type,
+          id: objects[0].id,
+        }),
       })
     );
-    expect(auditHelperSpy).not.toHaveBeenCalled();
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_OWNER,
+        error: expectedError,
+        unauthorizedTypes: ['map', 'visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objects[1].type,
+          id: objects[1].id,
+        }),
+      })
+    );
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_OWNER,
+        error: expectedError,
+        unauthorizedTypes: ['map', 'visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objects[2].type,
+          id: objects[2].id,
+        }),
+      })
+    );
   });
 
   test('audits failure event when partially authorized but not in current space', async () => {
@@ -6870,15 +6965,71 @@ describe('#authorizeChangeAccessControl', () => {
       )
     ).rejects.toThrow();
 
-    expect(addAuditEventSpy).toHaveBeenCalledWith(
+    const expectedError = new Error(
+      'Access denied: Unable to perform manage access control for types visualization. ' +
+        'The "update" privilege is required to change access control of objects owned by the current user. ' +
+        'Unable to manage access control for objects dashboard:1: ' +
+        'the "manage_access_control" privilege is required to change access control of objects owned by another user.'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(auditHelperSpy).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_OWNER,
-        error: expect.any(Error),
-        unauthorizedTypes: ['dashboard', 'visualization'],
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
         unauthorizedSpaces: [namespace],
+        objects: [
+          {
+            accessControl: {
+              accessMode: 'write_restricted',
+              owner: 'fake_owner_id',
+            },
+            existingNamespaces: [],
+            id: '1',
+            type: 'dashboard',
+          },
+          {
+            accessControl: {
+              accessMode: 'write_restricted',
+              owner: 'fake_owner_id',
+            },
+            existingNamespaces: [],
+            id: '2',
+            type: 'visualization',
+          },
+        ],
       })
     );
-    expect(auditHelperSpy).not.toHaveBeenCalled();
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(2);
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_OWNER,
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[0].type,
+          id: objectsWithExistingNamespaces[0].id,
+        }),
+      })
+    );
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_OWNER,
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[1].type,
+          id: objectsWithExistingNamespaces[1].id,
+        }),
+      })
+    );
   });
 
   test('audits failure event when partially authorized but not in current space for changeAccessMode', async () => {
@@ -6922,15 +7073,71 @@ describe('#authorizeChangeAccessControl', () => {
       )
     ).rejects.toThrow();
 
-    expect(addAuditEventSpy).toHaveBeenCalledWith(
+    const expectedError = new Error(
+      'Access denied: Unable to perform manage access control for types visualization. ' +
+        'The "update" privilege is required to change access control of objects owned by the current user. ' +
+        'Unable to manage access control for objects dashboard:1: ' +
+        'the "manage_access_control" privilege is required to change access control of objects owned by another user.'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(auditHelperSpy).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
-        action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
-        error: expect.any(Error),
-        unauthorizedTypes: expect.arrayContaining(['visualization']),
-        unauthorizedSpaces: [namespace],
+        action: 'saved_object_update_objects_access_mode',
+        error: expectedError,
+        objects: [
+          {
+            accessControl: {
+              accessMode: 'write_restricted',
+              owner: 'fake_owner_id',
+            },
+            existingNamespaces: [],
+            id: '1',
+            type: 'dashboard',
+          },
+          {
+            accessControl: {
+              accessMode: 'write_restricted',
+              owner: 'fake_owner_id',
+            },
+            existingNamespaces: [],
+            id: '2',
+            type: 'visualization',
+          },
+        ],
+        unauthorizedSpaces: ['x'],
+        unauthorizedTypes: ['visualization'],
       })
     );
-    expect(auditHelperSpy).not.toHaveBeenCalled();
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(2);
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[0].type,
+          id: objectsWithExistingNamespaces[0].id,
+        }),
+      })
+    );
+    expect(addAuditEventSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
+        error: expectedError,
+        unauthorizedTypes: ['visualization'],
+        unauthorizedSpaces: [namespace],
+        savedObject: expect.objectContaining({
+          type: objectsWithExistingNamespaces[1].type,
+          id: objectsWithExistingNamespaces[1].id,
+        }),
+      })
+    );
   });
 
   test('does not audit success when operation fails', async () => {
@@ -6959,7 +7166,7 @@ describe('#authorizeChangeAccessControl', () => {
       )
     ).rejects.toThrow();
 
-    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
-    expect(auditHelperSpy).not.toHaveBeenCalled();
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(objectsWithExistingNamespaces.length);
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
   });
 });

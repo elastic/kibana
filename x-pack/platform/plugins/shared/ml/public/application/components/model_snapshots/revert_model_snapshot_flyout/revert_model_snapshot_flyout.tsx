@@ -34,10 +34,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type {
-  ModelSnapshot,
-  CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import { useMlApi, useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
 import { mlResultsServiceProvider } from '../../../services/results_service';
@@ -223,8 +221,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                     .reverse()}
                   valueOfSelected={currentSnapshot.snapshot_id}
                   onChange={onSnapshotChange}
-                  itemLayoutAlign="top"
-                  hasDividers
                 />
               </EuiFormRow>
               <EuiHorizontalRule margin="m" />

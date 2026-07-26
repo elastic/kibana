@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const singleMetricESQLDatatableAttributes: LensAttributes = {
   title: 'Single metric datatable',
@@ -66,7 +67,7 @@ export const singleMetricESQLDatatableAttributes: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -165,7 +166,7 @@ export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -317,7 +318,7 @@ export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const fullConfigESQLDatatableAttributes: LensAttributes = {
@@ -532,7 +533,7 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttributes = {
@@ -683,5 +684,5 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };

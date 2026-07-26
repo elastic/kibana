@@ -96,4 +96,13 @@ describe('convertPersistedDefinition', () => {
       spaceId: mockedContext.spaceId,
     });
   });
+
+  it('always sets experimental to false', () => {
+    const internal = convertPersistedDefinition({
+      tool: mockedTool,
+      definition: mockedDefinition,
+      context: mockedContext,
+    });
+    expect(internal.experimental).toBe(false);
+  });
 });

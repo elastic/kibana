@@ -1,0 +1,38 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postBulkGetAssetsRequestExample:
+          description: 'Retrieve multiple assets by their IDs and types'
+          value:
+            assetIds:
+              - id: 'dashboard-id-1'
+                type: 'dashboard'
+              - id: 'index-pattern-id-1'
+                type: 'index_pattern'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postBulkGetAssetsExample:
+            description: 'Requested assets'
+            value:
+              items:
+                - id: 'dashboard-id-1'
+                  type: 'dashboard'
+                  appLink: '/app/dashboards#/view/dashboard-id-1'
+                  attributes:
+                    title: 'My Dashboard'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

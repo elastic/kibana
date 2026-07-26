@@ -14,7 +14,7 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 jest.mock('@kbn/elastic-assistant-plugin/server/routes/helpers');
 describe('SecurityLabsTool', () => {

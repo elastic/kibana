@@ -17,7 +17,7 @@ export const injectLensReferences = (
 ): LensSerializedState => {
   const clonedState = cloneDeep(state);
 
-  if (clonedState.savedObjectId || !clonedState.attributes) {
+  if (clonedState.ref_id || !clonedState.attributes) {
     return clonedState;
   }
 

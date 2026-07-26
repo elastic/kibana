@@ -46,7 +46,7 @@ export function SvlComponentTemplatesApi({ getService }: FtrProviderContext) {
     roleAuthc: RoleCredentials
   ) =>
     await supertestWithoutAuth
-      .get(`${API_BASE_PATH}/component_templates/${name}`)
+      .put(`${API_BASE_PATH}/component_templates/${name}`)
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({

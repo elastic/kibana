@@ -56,28 +56,88 @@ export const processFieldCapsResponse = (
   return { indices, fields };
 };
 
+export const processFieldCapsResponsePerIndex = (
+  fieldCapsRes: FieldCapsResponse
+): Record<string, MappingField[]> => {
+  const allIndices = Array.isArray(fieldCapsRes.indices)
+    ? (fieldCapsRes.indices as string[])
+    : [fieldCapsRes.indices as string];
+
+  const result: Record<string, MappingField[]> = {};
+  for (const idx of allIndices) {
+    result[idx] = [];
+  }
+
+  for (const [path, entry] of Object.entries(fieldCapsRes.fields)) {
+    for (const [typeName, capability] of Object.entries(entry)) {
+      if (typeName.startsWith('_')) {
+        continue;
+      }
+
+      const meta = extractMeta(capability);
+      const field: MappingField = {
+        path,
+        type: capability.type,
+        meta,
+        searchable: capability.searchable,
+      };
+      applyTsdbMarkers(field, capability);
+
+      const targetIndices =
+        capability.indices == null
+          ? allIndices
+          : Array.isArray(capability.indices)
+          ? (capability.indices as string[])
+          : [capability.indices as string];
+
+      for (const idx of targetIndices) {
+        result[idx]?.push(field);
+      }
+    }
+  }
+
+  return result;
+};
+
+const extractMeta = (fieldCaps: FieldCapsFieldCapability): Record<string, string> => {
+  if (!fieldCaps.meta) {
+    return {};
+  }
+  return Object.entries(fieldCaps.meta).reduce((acc, [key, value]) => {
+    acc[key] = Array.isArray(value) ? value.join(',') : `${value}`;
+    return acc;
+  }, {} as Record<string, string>);
+};
+
 const processField = (
   path: string,
   entry: Record<string, FieldCapsFieldCapability>
 ): MappingField => {
-  // filtered by caller
   if (Object.keys(entry).length > 1 || Object.keys(entry).length === 0) {
     throw new Error(`Trying to process field with conflicting types: ${path}`);
   }
 
   const fieldCaps = Object.values(entry)[0];
+  const meta = extractMeta(fieldCaps);
 
-  let meta: Record<string, string> = {};
-  if (fieldCaps.meta) {
-    meta = Object.entries(fieldCaps.meta).reduce((acc, [key, value]) => {
-      acc[key] = Array.isArray(value) ? value.join(',') : `${value}`;
-      return acc;
-    }, {} as Record<string, string>);
-  }
-
-  return {
+  const field: MappingField = {
     path,
     type: fieldCaps.type,
     meta,
+    searchable: fieldCaps.searchable,
   };
+  applyTsdbMarkers(field, fieldCaps);
+  return field;
+};
+
+/**
+ * Copies TSDB markers from a field_caps capability onto a MappingField.
+ */
+const applyTsdbMarkers = (field: MappingField, fieldCaps: FieldCapsFieldCapability): void => {
+  if (fieldCaps.time_series_dimension === true) {
+    field.tsDimension = true;
+  }
+  if (typeof fieldCaps.time_series_metric === 'string') {
+    field.tsMetric = fieldCaps.time_series_metric;
+  }
 };

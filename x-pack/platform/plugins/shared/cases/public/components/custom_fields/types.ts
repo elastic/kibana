@@ -26,6 +26,11 @@ export interface CustomFieldType<T extends CaseUICustomField> {
     onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
+    /**
+     * `classic` — pencil + view mode (legacy case view).
+     * `inline` — always-visible input with confirm/cancel (redesign case view).
+     */
+    editVariant?: 'classic' | 'inline';
   }>;
   Create: React.FC<{
     customFieldConfiguration: CasesConfigurationUICustomField;
@@ -41,11 +46,8 @@ export interface CustomFieldFactoryFilterOption {
   value: boolean | null;
 }
 
-export type CustomFieldEuiTableColumn = Pick<
-  EuiTableComputedColumnType<CaseUI>,
-  'name' | 'width' | 'data-test-subj'
-> & {
-  render: (customField: CaseCustomField) => React.ReactNode;
+export type CustomFieldEuiTableColumn = Omit<EuiTableComputedColumnType<CaseUI>, 'render'> & {
+  render: EuiTableComputedColumnType<CaseCustomField>['render'];
 };
 
 export type CustomFieldFactory<T extends CaseUICustomField> = () => {

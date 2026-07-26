@@ -15,6 +15,7 @@ import type {
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const singleMetricDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
@@ -70,7 +71,7 @@ export const singleMetricDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -196,7 +197,7 @@ export const singleMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -386,7 +387,7 @@ export const multiMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -552,6 +553,7 @@ export const fullConfigDatatableAttributes: LensAttributes = {
       headerRowHeight: 'auto',
       headerRowHeightLines: 'auto',
       rowHeightLines: 3,
+      showRowNumbers: true,
       paging: {
         size: 10,
         enabled: true,
@@ -697,7 +699,7 @@ export const fullConfigDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -854,7 +856,7 @@ export const sortedByTransposedMetricColumnDatatableAttributes: LensAttributes =
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -1011,12 +1013,201 @@ export const sortedByRowDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       name: 'indexpattern-datasource-layer-a08718f8-c67e-42d1-bbe3-ee1e6a457983',
+    },
+  ],
+};
+
+export const defaultColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      showRowNumbers: true,
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+          colorMode: 'cell',
+          palette: {
+            type: 'palette',
+            name: 'positive',
+            params: {
+              stops: [
+                {
+                  color: '#d4efe6',
+                  stop: 20,
+                },
+                {
+                  color: '#b1e4d1',
+                  stop: 40,
+                },
+                {
+                  color: '#8cd9bb',
+                  stop: 60,
+                },
+                {
+                  color: '#62cea6',
+                  stop: 80,
+                },
+                {
+                  color: '#24c292',
+                  stop: 100,
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              '756ec9bf-a53b-4b87-b9d4-02b8ae209460': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['756ec9bf-a53b-4b87-b9d4-02b8ae209460'],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'testing color by value palette',
+  version: LENS_ITEM_LATEST_VERSION,
+  visualizationType: 'lnsDatatable',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};
+
+export const selectorColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      showRowNumbers: true,
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+          colorMode: 'cell',
+          palette: {
+            type: 'palette',
+            name: 'temperature',
+            params: {
+              stops: [
+                {
+                  color: '#61a2ff',
+                  stop: 0,
+                },
+                {
+                  color: '#c8deff',
+                  stop: 20,
+                },
+                {
+                  color: '#f6f9fc',
+                  stop: 40,
+                },
+                {
+                  color: '#ffccc6',
+                  stop: 60,
+                },
+                {
+                  color: '#f6726a',
+                  stop: 80,
+                },
+              ],
+              name: 'temperature',
+              continuity: 'above',
+              reverse: false,
+              rangeMin: 0,
+              rangeMax: null,
+            },
+          },
+        },
+      ],
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              '756ec9bf-a53b-4b87-b9d4-02b8ae209460': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['756ec9bf-a53b-4b87-b9d4-02b8ae209460'],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'testing color by value palette',
+  version: LENS_ITEM_LATEST_VERSION,
+  visualizationType: 'lnsDatatable',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
     },
   ],
 };

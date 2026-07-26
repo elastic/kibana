@@ -15,6 +15,7 @@
       "_ml/trained_models/{model_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-put-trained-model",
     "availability": {
       "stack": true,
       "serverless": true

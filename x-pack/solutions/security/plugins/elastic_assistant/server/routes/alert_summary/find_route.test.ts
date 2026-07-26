@@ -120,7 +120,7 @@ describe('Find user prompts route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `sort_field: Invalid enum value. Expected 'created_at' | 'updated_at', received 'name1'`
+        'sort_field: Invalid option: expected one of "created_at"|"updated_at"'
       );
     });
 

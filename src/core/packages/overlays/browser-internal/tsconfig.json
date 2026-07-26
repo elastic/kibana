@@ -6,13 +6,12 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    "../../../../../typings/emotion.d.ts"
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/i18n-react",

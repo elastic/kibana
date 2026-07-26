@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFieldTextWrapper } from '@kbn/scout';
+import { EuiFieldTextWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () => {
+test.describe('Index template wizard - Preview template', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ esClient, log }) => {
     try {
       await esClient.indices.deleteIndexTemplate({ name: 'a-star' });
@@ -26,7 +26,7 @@ test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () 
 
     await test.step('open wizard and fill logistics', async () => {
       await page.testSubj.locator('createTemplateButton').click();
-      await expect(page.testSubj.locator('pageTitle')).toHaveText('Create template');
+      await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Create template');
       await expect(page.testSubj.locator('stepTitle')).toHaveText('Logistics');
 
       const nameField = new EuiFieldTextWrapper(page, { dataTestSubj: 'nameField' });

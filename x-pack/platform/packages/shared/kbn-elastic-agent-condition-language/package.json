@@ -1,0 +1,10 @@
+{
+  "name": "@kbn/elastic-agent-condition-language",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "build:parser": "node ./scripts/build_parser.js"
+  },
+  "sideEffects": false
+}

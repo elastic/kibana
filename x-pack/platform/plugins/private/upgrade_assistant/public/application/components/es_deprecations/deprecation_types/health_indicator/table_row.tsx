@@ -70,7 +70,7 @@ export const HealthIndicatorTableRow: React.FunctionComponent<Props> = ({
               deprecation={deprecation}
               actionsTableCell={
                 <EuiLink onClick={() => setShowFlyout(true)} data-test-subj="deprecation-default">
-                  <EuiIcon type="gear" />
+                  <EuiIcon type="gear" aria-hidden={true} />
                 </EuiLink>
               }
             />

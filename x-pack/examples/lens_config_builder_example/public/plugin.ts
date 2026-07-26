@@ -40,7 +40,6 @@ export class LensConfigBuilderExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/lens_config_builder_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

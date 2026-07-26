@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe('Agent Explorer', { tag: ['@ess'] }, () => {
+test.describe('Agent Explorer', { tag: tags.stateful.classic }, () => {
   test('Viewer should be able to view the agent list', async ({
     page,
     pageObjects: { agentExplorerPage },

@@ -34,6 +34,12 @@ const SolutionOptions: Record<
       />
     ),
   },
+  vectordb: {
+    iconType: 'logoVectorDB',
+    label: (
+      <FormattedMessage id="xpack.spaces.spaceSolutionBadge.vectordb" defaultMessage="VectorDB" />
+    ),
+  },
   security: {
     iconType: 'logoSecurity',
     label: (

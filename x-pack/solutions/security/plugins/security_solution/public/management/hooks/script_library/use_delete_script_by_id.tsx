@@ -7,22 +7,21 @@
 
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import type { DeleteScriptRequestParams } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
 
-interface ErrorType {
-  statusCode: number;
-  message: string;
-}
-
 export const useDeleteEndpointScript = (
-  options: UseMutationOptions<void, IHttpFetchError<ErrorType>, DeleteScriptRequestParams> = {}
-): UseMutationResult<void, IHttpFetchError<ErrorType>, DeleteScriptRequestParams> => {
+  options: UseMutationOptions<
+    void,
+    IHttpFetchError<ResponseErrorBody>,
+    DeleteScriptRequestParams
+  > = {}
+): UseMutationResult<void, IHttpFetchError<ResponseErrorBody>, DeleteScriptRequestParams> => {
   const http = useHttp();
-  return useMutation<void, IHttpFetchError<ErrorType>, DeleteScriptRequestParams>({
+  return useMutation<void, IHttpFetchError<ResponseErrorBody>, DeleteScriptRequestParams>({
     ...options,
     mutationKey: ['delete-script-by-id'],
     mutationFn: ({ script_id }) => {

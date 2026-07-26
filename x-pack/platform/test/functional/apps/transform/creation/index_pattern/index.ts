@@ -17,22 +17,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await transform.securityCommon.createTransformRoles();
       await transform.securityCommon.createTransformUsers();
-    });
-
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await transform.securityUI.logout();
-
-      await transform.securityCommon.cleanTransformUsers();
-      await transform.securityCommon.cleanTransformRoles();
-
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
-
-      await transform.testResources.resetKibanaTimeZone();
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./continuous_transform'));
+    loadTestFile(require.resolve('./wizard_max_page_search_size_reset'));
   });
 }

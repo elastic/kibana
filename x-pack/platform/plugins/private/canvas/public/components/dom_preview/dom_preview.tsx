@@ -6,7 +6,6 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 
 interface HeightProps {
@@ -21,12 +20,6 @@ interface WidthProps {
 }
 
 export class DomPreview extends PureComponent<HeightProps | WidthProps> {
-  static propTypes = {
-    elementId: PropTypes.string.isRequired,
-    height: PropTypes.number,
-    width: PropTypes.number,
-  };
-
   _container: HTMLDivElement | null = null;
   _content: HTMLDivElement | null = null;
   _observer: MutationObserver | null = null;

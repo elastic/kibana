@@ -130,6 +130,174 @@ describe('Card utils', () => {
         isUpdateAvailable: true,
       });
     });
+
+    it('should set isDeprecated to false when item is not deprecated', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          name: 'test',
+          title: 'Test Package',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        isDeprecated: false,
+        deprecationInfo: undefined,
+      });
+    });
+
+    it('should extract deprecation info when item is deprecated', () => {
+      const deprecationInfo = {
+        description: 'This integration is deprecated',
+      };
+
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          name: 'test',
+          title: 'Test Package',
+          version: '1.0.0',
+          type: 'integration',
+          deprecated: deprecationInfo,
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        isDeprecated: true,
+        deprecationInfo,
+      });
+    });
+
+    it('should extract full deprecation info including since and replaced_by', () => {
+      const deprecationInfo = {
+        description: 'This integration is deprecated, use new-package instead',
+        since: '8.0.0',
+        replaced_by: {
+          package: 'new-package',
+          policyTemplate: 'default',
+        },
+      };
+
+      const cardItem = mapToCard({
+        item: {
+          id: 'old-package',
+          name: 'old-package',
+          title: 'Old Package',
+          version: '1.0.0',
+          type: 'integration',
+          deprecated: deprecationInfo,
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        isDeprecated: true,
+        deprecationInfo: {
+          description: 'This integration is deprecated, use new-package instead',
+          since: '8.0.0',
+          replaced_by: {
+            package: 'new-package',
+            policyTemplate: 'default',
+          },
+        },
+      });
+    });
+
+    it('should set isDeprecated to true when item title contains "deprecated"', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'old-package',
+          name: 'old-package',
+          title: 'Old Package (Deprecated)',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({ isDeprecated: true });
+    });
+
+    it('should set isDeprecated to true when item description contains "deprecated"', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'old-package',
+          name: 'old-package',
+          title: 'Old Package',
+          description: 'This integration is deprecated, use new-package instead',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({ isDeprecated: true });
+    });
+
+    it('should set isDeprecated to true when item name contains "deprecated"', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'deprecated-package',
+          name: 'deprecated-package',
+          title: 'Old Package',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({ isDeprecated: true });
+    });
+
+    it('should derive signalTypes from data_streams for integration packages', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'nginx',
+          name: 'nginx',
+          version: '1.0.0',
+          type: 'integration',
+          data_streams: [{ type: 'logs' }, { type: 'metrics' }, { type: 'logs' }],
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem.signalTypes).toEqual(['logs', 'metrics']);
+    });
+
+    it('should match all signal types for input packages', () => {
+      // The EPR search response strips the policy template type/dynamic_signal_types,
+      // so input packages match every signal filter regardless of template fields.
+      const cardItem = mapToCard({
+        item: {
+          id: 'nginx_otel_input',
+          name: 'nginx_otel_input',
+          version: '1.0.0',
+          type: 'input',
+          policy_templates: [
+            {
+              name: 'nginxreceiver',
+              title: 'NGINX OpenTelemetry Input',
+              description: 'Collect NGINX metrics using OpenTelemetry Collector',
+            },
+          ],
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem.signalTypes).toEqual(['logs', 'metrics', 'traces']);
+    });
   });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {

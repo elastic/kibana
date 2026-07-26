@@ -259,11 +259,16 @@ export const DataGrid: FC<Props> = memo(
                   textToCopy={props.copyToClipboard}
                 >
                   {(copy: () => void) => (
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copyClipboard"
-                      aria-label={props.copyToClipboardDescription}
-                    />
+                    <EuiToolTip
+                      content={props.copyToClipboardDescription}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        onClick={copy}
+                        iconType="copy"
+                        aria-label={props.copyToClipboardDescription}
+                      />
+                    </EuiToolTip>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -340,7 +345,7 @@ export const DataGrid: FC<Props> = memo(
                                 }`}
                                 data-test-subj={`${dataTestSubj}HistogramButton`}
                                 size="xs"
-                                iconType="visBarVertical"
+                                iconType="chartBarVertical"
                                 color="text"
                                 onClick={toggleChartVisibility}
                                 disabled={chartsVisible === undefined}

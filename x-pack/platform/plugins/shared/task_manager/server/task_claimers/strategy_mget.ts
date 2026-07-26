@@ -15,6 +15,7 @@
 
 import type { Logger } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
@@ -47,6 +48,7 @@ import {
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
+import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 
@@ -69,19 +71,29 @@ const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
+  return withActiveSpan(
+    'mark-task-as-claimed',
+    {
+      attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
+    async () => {
+      const apmTrans = apm.startTransaction(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
 
-  try {
-    const result = await claimAvailableTasks(opts);
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+      try {
+        const result = await claimAvailableTasks(opts);
+        apmTrans.end('success');
+        return result;
+      } catch (err) {
+        apmTrans.end('failure');
+        throw err;
+      }
+    }
+  );
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
@@ -153,7 +165,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
-    const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
+    const taskCost = getTaskCost(task, definitions);
     if (capacityAccumulator + taskCost <= initialCapacity) {
       tasksToRun.push(task);
       capacityAccumulator += taskCost;

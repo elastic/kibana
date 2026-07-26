@@ -8,7 +8,6 @@
     "**/*.tsx",
     "src/**/*",
     "__mocks__/**/*.ts",
-    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -46,5 +45,6 @@
     "@kbn/restorable-state",
     "@kbn/react-hooks",
     "@kbn/css-utils",
+    "@kbn/code-editor-mock",
   ]
 }

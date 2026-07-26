@@ -11,7 +11,7 @@ export const tagCloud: ElementFactory = () => ({
   displayName: 'Tag Cloud',
   type: 'chart',
   help: 'Tagcloud visualization',
-  icon: 'visTagCloud',
+  icon: 'chartTagCloud',
   expression: `kibana
 | selectFilter
 | demodata

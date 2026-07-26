@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/aiops-server-schemas",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

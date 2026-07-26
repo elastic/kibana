@@ -97,7 +97,7 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
   return (
     <PageTemplate {...templateProps} isEmptyState>
       <EuiEmptyPrompt
-        iconType={'visLine'}
+        iconType={'chartLine'}
         title={<h2>{title}</h2>}
         body={
           <EuiText>

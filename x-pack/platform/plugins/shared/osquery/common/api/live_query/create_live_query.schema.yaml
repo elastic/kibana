@@ -63,8 +63,91 @@ components:
           nullable: true
 
     CreateLiveQueryResponse:
+      description: 'The response for creating a live query.'
       type: object
-      properties: { }
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - action_id
+          properties:
+            action_id:
+              description: 'The ID of the action.'
+              type: string
+            '@timestamp':
+              description: 'The timestamp when the action was created.'
+              type: string
+              format: date-time
+            expiration:
+              description: 'The expiration date of the action.'
+              type: string
+              format: date-time
+            type:
+              description: 'The action type.'
+              type: string
+            input_type:
+              description: 'The input type.'
+              type: string
+            agent_ids:
+              description: 'The agent IDs targeted by the action.'
+              type: array
+              items:
+                type: string
+            agent_all:
+              description: 'Whether the query targets all agents.'
+              type: boolean
+            agent_platforms:
+              description: 'The agent platforms targeted.'
+              type: array
+              items:
+                type: string
+            agent_policy_ids:
+              description: 'The agent policy IDs targeted.'
+              type: array
+              items:
+                type: string
+            agents:
+              description: 'The resolved list of agent IDs.'
+              type: array
+              items:
+                type: string
+            user_id:
+              description: 'The user who created the action.'
+              type: string
+            pack_id:
+              description: 'The pack ID if the query was run from a pack.'
+              type: string
+            metadata:
+              description: 'Custom metadata associated with the action.'
+              type: object
+            queries:
+              description: 'The queries in this action.'
+              type: array
+              items:
+                type: object
+                properties:
+                  action_id:
+                    type: string
+                  id:
+                    type: string
+                  query:
+                    type: string
+                  timeout:
+                    type: integer
+                  ecs_mapping:
+                    $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+                  agents:
+                    type: array
+                    items:
+                      type: string
+                  saved_query_id:
+                    type: string
+                  version:
+                    type: string
+                  platform:
+                    type: string
       example:
         data:
            action_id: '3c42c847-eb30-4452-80e0-728584042334'
@@ -93,4 +176,3 @@ components:
                    field: 'total_seconds'
                agents:
                  - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
-

@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const realPath = jest.requireActual('path');
-
-jest.doMock('path', () => ({
-  ...realPath,
-  dirname(filePath: string) {
-    return '/test/kibanaRoot';
-  },
-}));
+const realFs = jest.requireActual('fs');
 
 export const mockPackage = {
-  raw: {},
+  raw: {} as any,
 };
 
-jest.doMock('load-json-file', () => ({
-  sync: () => mockPackage.raw,
+jest.doMock('fs', () => ({
+  ...realFs,
+  readFileSync: (filePath: string, options?: unknown) => {
+    if (filePath === '/test/kibanaRoot/package.json') {
+      return JSON.stringify(mockPackage.raw);
+    }
+    return realFs.readFileSync(filePath, options);
+  },
 }));

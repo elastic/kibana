@@ -23,7 +23,9 @@ import { ExecutionContextContainer, getParentContextFrom } from './execution_con
  * @internal
  */
 export interface IExecutionContext {
-  getParentContextFrom(headers: Record<string, string>): KibanaExecutionContext | undefined;
+  getParentContextFrom(
+    headers: Record<string, string | string[] | undefined>
+  ): KibanaExecutionContext | undefined;
 
   setRequestId(requestId: string): void;
 
@@ -165,11 +167,20 @@ export class ExecutionContextService
     if (!this.enabled) return {};
     const executionContext = this.contextStore.getStore()?.toJSON();
 
+    // meta labels are only propagated server-side for APM transaction tracing
+    const metaLabels = executionContext?.meta
+      ? Object.entries(executionContext.meta).reduce((acc, [key, value]) => {
+          acc[`kibana_meta_${key}`] = value;
+          return acc;
+        }, {} as Record<string, string | number | boolean | undefined>)
+      : {};
+
     return omitBy(
       {
         name: executionContext?.name,
         id: executionContext?.id,
         page: executionContext?.page,
+        ...metaLabels,
       },
       isUndefined
     );

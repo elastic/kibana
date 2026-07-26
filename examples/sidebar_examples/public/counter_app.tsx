@@ -17,11 +17,15 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
-import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
+import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 export const counterAppId = 'sidebarExampleCounter';
+
+/** Typed hook for the counter sidebar app (stateless) */
+export const useCounterSidebarApp = () => useSidebarApp(counterAppId);
 
 /**
  * Counter app that uses internal React state.
@@ -42,12 +46,9 @@ export function CounterApp({ onClose }: SidebarComponentProps) {
         title="Counter Example"
         onClose={onClose}
         actions={
-          <EuiButtonIcon
-            iconType="refresh"
-            aria-label="Reset counter"
-            onClick={reset}
-            title="Reset counter"
-          />
+          <EuiToolTip content="Reset counter" disableScreenReaderOutput>
+            <EuiButtonIcon iconType="refresh" aria-label="Reset counter" onClick={reset} />
+          </EuiToolTip>
         }
       />
       <SidebarBody>

@@ -7,6 +7,7 @@
 
 import type { RouteOptions } from '../../..';
 import type {
+  CreateRuleActionV1,
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
@@ -74,7 +75,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const createRuleData = req.body as CreateRuleRequestBodyV1<RuleParamsV1>;
           const params: CreateRuleRequestParamsV1 = req.params;
 
           countUsageOfPredefinedIds({
@@ -99,8 +100,10 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
             });
 
-            const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
-            const systemActions = allActions.filter((action) =>
+            const actions = allActions.filter(
+              (action: CreateRuleActionV1) => !actionsClient.isSystemAction(action.id)
+            );
+            const systemActions = allActions.filter((action: CreateRuleActionV1) =>
               actionsClient.isSystemAction(action.id)
             );
 

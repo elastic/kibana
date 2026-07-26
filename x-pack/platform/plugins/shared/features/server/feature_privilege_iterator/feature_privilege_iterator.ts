@@ -143,6 +143,10 @@ function mergeWithSubFeatures(
           ...(mergedConfig.alerting?.rule?.manual_run ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.manual_run ?? []),
         ]),
+        manage_rule_settings: mergeAlertingEntries([
+          ...(mergedConfig.alerting?.rule?.manage_rule_settings ?? []),
+          ...(subFeaturePrivilege.alerting?.rule?.manage_rule_settings ?? []),
+        ]),
         read: mergeAlertingEntries([
           ...(mergedConfig.alerting?.rule?.read ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.read ?? []),
@@ -192,7 +196,23 @@ function mergeWithSubFeatures(
         mergedConfig.cases?.assign ?? [],
         subFeaturePrivilege.cases?.assign ?? []
       ),
+      ...(mergedConfig.cases?.manageTemplates !== undefined ||
+      subFeaturePrivilege.cases?.manageTemplates !== undefined
+        ? {
+            manageTemplates: mergeArrays(
+              mergedConfig.cases?.manageTemplates ?? [],
+              subFeaturePrivilege.cases?.manageTemplates ?? []
+            ),
+          }
+        : {}),
     };
+
+    // `alerts.read` is a boolean flag, so a sub-feature privilege included in the primary
+    // privilege grants alerts read access to it without ever revoking access the primary
+    // privilege already grants on its own.
+    if (subFeaturePrivilege.alerts?.read) {
+      mergedConfig.alerts = { ...mergedConfig.alerts, read: true };
+    }
   }
   return mergedConfig;
 }

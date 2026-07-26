@@ -25,6 +25,7 @@ describe('buildActionResultsQuery', () => {
     it('should build query with minimal required parameters using agent actions results index', () => {
       const options: ActionResultsRequestOptions = {
         actionId: 'action-123',
+        spaceId: 'default',
         pagination: {
           activePage: 0,
           querySize: 50,
@@ -42,7 +43,7 @@ describe('buildActionResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index: '.fleet-actions-results*',
+        index: ['.fleet-actions-results*'],
         ignore_unavailable: true,
         aggs: {
           aggs: {
@@ -53,8 +54,16 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-123',
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            { term: { space_id: 'default' } },
+                            { bool: { must_not: { exists: { field: 'space_id' } } } },
+                          ],
                         },
                       },
                     ],
@@ -84,8 +93,8 @@ describe('buildActionResultsQuery', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'action_id: action-123',
+                term: {
+                  action_id: 'action-123',
                 },
               },
             ],
@@ -108,6 +117,7 @@ describe('buildActionResultsQuery', () => {
     it('should build query using component template index when componentTemplateExists is true', () => {
       const options: ActionResultsRequestOptions = {
         actionId: 'action-456',
+        spaceId: 'default',
         pagination: {
           activePage: 0,
           querySize: 100,
@@ -123,12 +133,13 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('.logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['.logs-osquery_manager.action.responses*']);
     });
 
     it('should build query using new data stream when useNewDataStream is true', () => {
       const options: ActionResultsRequestOptions = {
         actionId: 'action-789',
+        spaceId: 'default',
         pagination: {
           activePage: 0,
           querySize: 200,
@@ -144,12 +155,13 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('logs-osquery_manager.action.responses*');
+      expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
     });
 
     it('should build query with kuery filter', () => {
       const options: ActionResultsRequestOptions = {
         actionId: 'action-kuery',
+        spaceId: 'default',
         kuery: 'agent.name: "test-agent" AND error.message: *timeout*',
         pagination: {
           activePage: 0,
@@ -170,12 +182,40 @@ describe('buildActionResultsQuery', () => {
         bool: {
           filter: [
             {
+              term: {
+                action_id: 'action-kuery',
+              },
+            },
+            {
               query_string: {
-                query:
-                  'action_id: action-kuery AND agent.name: "test-agent" AND error.message: *timeout*',
+                query: 'agent.name: "test-agent" AND error.message: *timeout*',
               },
             },
           ],
+        },
+      });
+    });
+
+    it('builds a term filter for actionId', () => {
+      const result = buildActionResultsQuery({
+        actionId: 'action id',
+        spaceId: 'default',
+        pagination: {
+          activePage: 0,
+          querySize: 25,
+          cursorStart: 0,
+        },
+        sort: {
+          field: 'started_at',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: true,
+        useNewDataStream: false,
+      });
+
+      expect(result.query).toEqual({
+        bool: {
+          filter: [{ term: { action_id: 'action id' } }],
         },
       });
     });
@@ -186,6 +226,7 @@ describe('buildActionResultsQuery', () => {
 
       const options: ActionResultsRequestOptions = {
         actionId: 'action-time-range',
+        spaceId: 'default',
         startDate,
         pagination: {
           activePage: 0,
@@ -214,8 +255,8 @@ describe('buildActionResultsQuery', () => {
               },
             },
             {
-              query_string: {
-                query: 'action_id: action-time-range',
+              term: {
+                action_id: 'action-time-range',
               },
             },
           ],
@@ -226,6 +267,7 @@ describe('buildActionResultsQuery', () => {
     it('should build query with integration namespaces', () => {
       const options: ActionResultsRequestOptions = {
         actionId: 'action-namespaced',
+        spaceId: 'default',
         pagination: {
           activePage: 0,
           querySize: 15,
@@ -242,9 +284,10 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(
-        '.logs-osquery_manager.action.responses-production,.logs-osquery_manager.action.responses-development'
-      );
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses-production',
+        '.logs-osquery_manager.action.responses-development',
+      ]);
     });
 
     it('should build query with all options combined', () => {
@@ -253,6 +296,7 @@ describe('buildActionResultsQuery', () => {
 
       const options: ActionResultsRequestOptions = {
         actionId: 'action-comprehensive',
+        spaceId: 'default',
         kuery: 'error.type: "timeout" OR status: "failed"',
         startDate,
         pagination: {
@@ -273,8 +317,10 @@ describe('buildActionResultsQuery', () => {
 
       expect(result).toEqual({
         allow_no_indices: true,
-        index:
-          'logs-osquery_manager.action.responses-staging,logs-osquery_manager.action.responses-qa',
+        index: [
+          'logs-osquery_manager.action.responses-staging',
+          'logs-osquery_manager.action.responses-qa',
+        ],
         ignore_unavailable: true,
         aggs: {
           aggs: {
@@ -285,8 +331,16 @@ describe('buildActionResultsQuery', () => {
                   bool: {
                     must: [
                       {
-                        match: {
+                        term: {
                           action_id: 'action-comprehensive',
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            { term: { space_id: 'default' } },
+                            { bool: { must_not: { exists: { field: 'space_id' } } } },
+                          ],
                         },
                       },
                     ],
@@ -324,9 +378,13 @@ describe('buildActionResultsQuery', () => {
                 },
               },
               {
+                term: {
+                  action_id: 'action-comprehensive',
+                },
+              },
+              {
                 query_string: {
-                  query:
-                    'action_id: action-comprehensive AND error.type: "timeout" OR status: "failed"',
+                  query: 'error.type: "timeout" OR status: "failed"',
                 },
               },
             ],
@@ -396,6 +454,7 @@ describe('buildActionResultsQuery', () => {
       ({ activePage, querySize, expectedFrom, expectedSize }) => {
         const options: ActionResultsRequestOptions = {
           actionId: 'test-pagination',
+          spaceId: 'default',
           pagination: { activePage, querySize, cursorStart: 0 },
           sort: {
             field: '@timestamp',
@@ -415,6 +474,7 @@ describe('buildActionResultsQuery', () => {
     it('should maintain aggregations regardless of pagination', () => {
       const optionsPage1: ActionResultsRequestOptions = {
         actionId: 'test-aggs',
+        spaceId: 'default',
         pagination: { activePage: 0, querySize: 50, cursorStart: 0 },
         sort: {
           field: '@timestamp',
@@ -438,6 +498,103 @@ describe('buildActionResultsQuery', () => {
     });
   });
 
+  describe('CCS support', () => {
+    const basePagination = { activePage: 0, querySize: 10, cursorStart: 0 };
+    const baseSort = { field: 'started_at' as const, direction: Direction.desc };
+
+    it('should include remote cluster patterns when ccsEnabled is true and using legacy index', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        spaceId: 'default',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: false,
+        useNewDataStream: false,
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toEqual(['.fleet-actions-results*', '*:.fleet-actions-results*']);
+    });
+
+    it('should include remote cluster patterns when ccsEnabled is true and using component template index', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        spaceId: 'default',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: true,
+        useNewDataStream: false,
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses*',
+        '*:.logs-osquery_manager.action.responses*',
+      ]);
+    });
+
+    it('should include remote cluster patterns when ccsEnabled is true and using new data stream', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        spaceId: 'default',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: false,
+        useNewDataStream: true,
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toEqual([
+        'logs-osquery_manager.action.responses*',
+        '*:logs-osquery_manager.action.responses*',
+      ]);
+    });
+
+    it('should include remote cluster patterns for each namespace when ccsEnabled is true', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        spaceId: 'default',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: true,
+        useNewDataStream: false,
+        integrationNamespaces: ['default', 'ns1'],
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toEqual([
+        '.logs-osquery_manager.action.responses-default',
+        '.logs-osquery_manager.action.responses-ns1',
+        '*:.logs-osquery_manager.action.responses-default',
+        '*:.logs-osquery_manager.action.responses-ns1',
+      ]);
+    });
+
+    it('should not modify index when ccsEnabled is false', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-no-ccs',
+        spaceId: 'default',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: false,
+        useNewDataStream: true,
+        ccsEnabled: false,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
+    });
+  });
+
   describe('index selection logic', () => {
     it.each([
       {
@@ -455,6 +612,7 @@ describe('buildActionResultsQuery', () => {
     ])('should $description', ({ componentTemplateExists, useNewDataStream, expectedIndex }) => {
       const options: ActionResultsRequestOptions = {
         actionId: 'action-index-test',
+        spaceId: 'default',
         pagination: {
           activePage: 0,
           querySize: 10,
@@ -470,7 +628,45 @@ describe('buildActionResultsQuery', () => {
 
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe(expectedIndex);
+      expect(result.index).toEqual([expectedIndex]);
+    });
+  });
+
+  describe('space_id scoping', () => {
+    const baseOptions: ActionResultsRequestOptions = {
+      actionId: 'action-123',
+      spaceId: 'default',
+      pagination: { activePage: 0, querySize: 50, cursorStart: 0 },
+      sort: { field: 'started_at', direction: Direction.desc },
+      componentTemplateExists: false,
+      useNewDataStream: false,
+    };
+
+    const getAggFilterMust = (result: any) =>
+      result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
+
+    it('scopes the aggregation by space_id', () => {
+      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      expect(JSON.stringify(getAggFilterMust(result))).toContain('space_id');
+    });
+
+    it('scopes the aggregation to default space OR missing space_id when spaceId is "default"', () => {
+      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'default' });
+      const defaultClause = {
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      };
+      // The aggregation filter is space-scoped so counts match the hits.
+      expect(getAggFilterMust(result)).toContainEqual(defaultClause);
+    });
+
+    it('scopes the aggregation to the space exactly in a named space', () => {
+      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
     });
   });
 });

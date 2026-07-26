@@ -7,12 +7,12 @@
 
 import type { PrebuildRuleVersionsMap } from '../../data/rule_migrations_data_prebuilt_rules_client';
 import type { RuleSemanticSearchResult } from '../../types';
-import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
+import type { RuleMigrationsRetrieverDeps } from './rule_migrations_retriever';
 
 export class PrebuiltRulesRetriever {
   private rulesMap?: PrebuildRuleVersionsMap;
 
-  constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
+  constructor(private readonly clients: RuleMigrationsRetrieverDeps) {}
 
   public async populateIndex() {
     if (!this.rulesMap) {

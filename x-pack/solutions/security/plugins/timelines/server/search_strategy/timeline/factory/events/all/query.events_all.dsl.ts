@@ -7,6 +7,7 @@
 
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type {
   SortItem,
   TimelineEventsAllOptions,
@@ -16,8 +17,11 @@ import type { TimerangeFilter, TimerangeInput } from '../../../../../../common/s
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getPreferredEsType } from './helpers';
 
+const DEFAULT_DATE_FIELD = '@timestamp';
+
 export const buildTimelineEventsAllQuery = ({
   authFilter,
+  dateRangeField,
   defaultIndex,
   fields,
   filterQuery,
@@ -27,6 +31,7 @@ export const buildTimelineEventsAllQuery = ({
   timerange,
 }: Omit<TimelineEventsAllOptions, 'fieldRequested'>) => {
   const { activePage, querySize } = pagination;
+  const dateField = dateRangeField ?? DEFAULT_DATE_FIELD;
   const filterClause = [...createQueryFilterClauses(filterQuery)];
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
@@ -35,7 +40,7 @@ export const buildTimelineEventsAllQuery = ({
         ? [
             {
               range: {
-                '@timestamp': {
+                [dateField]: {
                   gte: from,
                   lte: to,
                   format: 'strict_date_optional_time',
@@ -76,7 +81,7 @@ export const buildTimelineEventsAllQuery = ({
         filter,
       },
     },
-    runtime_mappings: runtimeMappings,
+    runtime_mappings: runtimeMappings as MappingRuntimeFields | undefined,
     from: activePage * querySize,
     size: querySize,
     track_total_hits: true,
@@ -86,7 +91,7 @@ export const buildTimelineEventsAllQuery = ({
       'kibana.alert.*',
       ...fields,
       {
-        field: '@timestamp',
+        field: dateField,
         format: 'strict_date_optional_time',
       },
     ],

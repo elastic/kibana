@@ -44,7 +44,7 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
           ? 'unifiedDataTableCopyRowsAsMarkdown'
           : 'unifiedDataTableCopyRowsAsText'
       }
-      icon="copyClipboard"
+      icon="copy"
       disabled={isProcessing}
       onClick={async () => {
         setIsProcessing(true);

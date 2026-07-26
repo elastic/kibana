@@ -21,7 +21,7 @@ export const registerInternalBulkDeleteRoute = (router: TagsPluginRouter) => {
       },
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string()),
+          ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
         }),
       },
     },

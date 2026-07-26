@@ -14,7 +14,7 @@ import { lensVisTypeAlias } from '../vis_type_alias';
 export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
   return {
     id: 'addLensPanelAction',
-    getIconType: () => lensVisTypeAlias.icon,
+    getIconType: () => 'visBarVertical',
     order: lensVisTypeAlias.order,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {

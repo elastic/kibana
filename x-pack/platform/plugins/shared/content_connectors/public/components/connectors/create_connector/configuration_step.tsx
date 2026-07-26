@@ -49,7 +49,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   const { connector, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic({ http }));
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic({ http }));
   const { setFormDirty } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const [isFormEditing, setIsFormEditing] = useState<boolean>(false);
   const { status } = useValues(ConnectorConfigurationApiLogic);

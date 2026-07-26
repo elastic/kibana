@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup, NavigateToUrlOptions } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { Actions } from '../api_logic/create_api_logic';
 import { createApiLogic } from '../api_logic/create_api_logic';
 
@@ -33,7 +33,6 @@ export interface AddConnectorApiLogicResponse {
   id: string;
   indexName: string;
   uiFlags?: Record<string, boolean>;
-  navigateToUrl?: (url: string, options?: NavigateToUrlOptions) => Promise<void>;
 }
 
 export const addConnector = async ({

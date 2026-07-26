@@ -114,6 +114,10 @@ export const policyFactory = ({
         blocklist: true,
         on_write_scan: true,
       },
+      ransomware: {
+        mode: ProtectionModes.off,
+        supported: true,
+      },
       device_control: {
         enabled: true,
         usb_storage: DeviceControlAccessLevel.deny_all,
@@ -129,6 +133,10 @@ export const policyFactory = ({
       },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
           message: '',
           enabled: true,
         },
@@ -325,6 +333,10 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     mac: {
       ...policy.mac,
+      ransomware: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       behavior_protection: {
         mode: ProtectionModes.off,
         reputation_service: false,
@@ -343,6 +355,10 @@ export const policyFactoryWithoutPaidFeatures = (
         malware: {
           message: '',
           enabled: true, // disabling/configuring malware popup is a paid feature
+        },
+        ransomware: {
+          message: '',
+          enabled: false,
         },
         memory_protection: {
           message: '',
@@ -413,6 +429,10 @@ export const policyFactoryWithSupportedFeatures = (
     },
     mac: {
       ...policy.mac,
+      ransomware: {
+        ...policy.mac.ransomware,
+        supported: true,
+      },
       behavior_protection: {
         ...policy.windows.behavior_protection,
         supported: true,

@@ -7,9 +7,15 @@
 
 import { isEmpty, isPlainObject, isUndefined } from 'lodash';
 
-export const deepCompactObject = <Value extends Record<string, any>>(obj: Value): Value =>
+export const deepCompactObject = <Value extends Record<string, unknown>>(obj: Value): Value =>
   Object.fromEntries(
     Object.entries(obj)
-      .map(([key, value]) => [key, isPlainObject(value) ? deepCompactObject(value) : value])
+      .map(
+        ([key, value]) =>
+          [
+            key,
+            isPlainObject(value) ? deepCompactObject(value as Record<string, unknown>) : value,
+          ] as const
+      )
       .filter(([, value]) => !isUndefined(value) && !(isPlainObject(value) && isEmpty(value)))
-  );
+  ) as Value;

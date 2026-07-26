@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: PrivmonBulkUploadUsersCSV
       summary: Upsert multiple monitored users via CSV upload
+      description: Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       requestBody:
         content:
           multipart/form-data:
@@ -22,6 +23,11 @@ paths:
                   description: The CSV file to upload.
               required:
                 - file
+            examples:
+              PrivmonBulkUploadUsersCSVRequest:
+                summary: CSV file with privileged users
+                value:
+                  file: "username,is_privileged\njohn.doe,true\njane.smith,true\n"
       responses:
         "200":
           description: Bulk upload successful
@@ -29,16 +35,6 @@ paths:
             application/json:
               schema:
                 type: object
-                example:
-                  errors:
-                    - message: "Invalid monitored field"
-                      username: "john.doe"
-                      index: 1
-                  stats:
-                    successfulOperations: 1
-                    uploaded: 1
-                    failedOperations: 1
-                    totalOperations: 2
                 properties:
                   errors:
                     type: array
@@ -49,6 +45,19 @@ paths:
                 required:
                   - errors
                   - stats
+              examples:
+                PrivmonBulkUploadUsersCSVResponse:
+                  summary: Bulk upload response with mixed results
+                  value:
+                    errors:
+                      - message: "Invalid monitored field"
+                        username: "john.doe"
+                        index: 1
+                    stats:
+                      successfulOperations: 1
+                      uploaded: 2
+                      failedOperations: 1
+                      totalOperations: 2
         "413":
           description: File too large
 

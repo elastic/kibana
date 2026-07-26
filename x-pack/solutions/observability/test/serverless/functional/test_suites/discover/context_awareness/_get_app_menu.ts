@@ -48,9 +48,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      const openAppMenuOverflow = async () => {
+        await retry.try(async () => {
+          await testSubjects.moveMouseTo('kbnQueryBar');
+          const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
+          await appMenuOverflowButton.click();
+        });
+      };
+
       it('should display a "Add data" link to navigate to the onboarding page', async () => {
-        const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
-        await appMenuOverflowButton.click();
+        await openAppMenuOverflow();
 
         const link = await testSubjects.find('discoverAppMenuDatasetQualityLink');
         await link.click();
@@ -62,34 +69,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display a "Create custom threshold rule" action under the Alerts menu to create an o11y alert', async () => {
-        const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
-        await appMenuOverflowButton.click();
+        await openAppMenuOverflow();
 
         const alertsButton = await testSubjects.find('discoverAlertsButton');
         await alertsButton.click();
 
-        const createRuleButton = await testSubjects.find('discoverAppMenuCustomThresholdRule');
-        await createRuleButton.click();
-
-        const ruleTitleElement = await testSubjects.find('ruleDefinitionHeaderRuleTypeName');
-
         await retry.try(async () => {
+          const createRuleButton = await testSubjects.find('discoverAppMenuCustomThresholdRule');
+          await createRuleButton.click();
+
+          const ruleTitleElement = await testSubjects.find('ruleDefinitionHeaderRuleTypeName');
           expect(await ruleTitleElement.getVisibleText()).to.equal('Custom threshold');
         });
       });
 
       it('should display a "Create SLO" action under the Alerts menu to create an o11y alert', async () => {
-        const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
-        await appMenuOverflowButton.click();
+        await openAppMenuOverflow();
 
         const alertsButton = await testSubjects.find('discoverAlertsButton');
         await alertsButton.click();
 
-        const createSLOButton = await testSubjects.find('discoverAppMenuCreateSlo');
-        await createSLOButton.click();
+        await retry.try(async () => {
+          const createSLOButton = await testSubjects.find('discoverAppMenuCreateSlo');
+          await createSLOButton.click();
 
-        const sloTitleElement = await testSubjects.find('addSLOFlyoutTitle');
-        expect(await sloTitleElement.getVisibleText()).to.equal('Create SLO');
+          const sloTitleElement = await testSubjects.find('addSLOFlyoutTitle');
+          expect(await sloTitleElement.getVisibleText()).to.equal('Create SLO');
+        });
       });
     });
 

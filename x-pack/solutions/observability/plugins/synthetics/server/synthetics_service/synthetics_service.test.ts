@@ -79,6 +79,9 @@ describe('SyntheticsService', () => {
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
     },
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     config: {
       service: {
         username: 'dev',

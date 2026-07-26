@@ -6,6 +6,13 @@ paths:
   /internal/elastic_assistant/capabilities:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/internal/elastic_assistant/capabilities' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: GetCapabilities
       description: Get Elastic Assistant capabilities for the requesting plugin
@@ -14,7 +21,7 @@ paths:
         - Capabilities API
       responses:
         '200':
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -27,8 +34,14 @@ paths:
                 required:
                   - assistantModelEvaluation
                   - defendInsightsPolicyResponseFailure
+              examples:
+                GetCapabilitiesResponse200Example:
+                  summary: A successful response listing available Elastic Assistant capabilities.
+                  value:
+                    assistantModelEvaluation: true
+                    defendInsightsPolicyResponseFailure: false
         '400':
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -40,3 +53,10 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                GetCapabilitiesResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: Invalid request.

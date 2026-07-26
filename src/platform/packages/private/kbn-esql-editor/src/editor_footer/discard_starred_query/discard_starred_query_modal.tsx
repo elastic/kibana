@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiHorizontalRule,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 export interface DiscardStarredQueryModalProps {
@@ -34,15 +35,17 @@ export default function DiscardStarredQueryModal({ onClose }: DiscardStarredQuer
   const onTransitionModalDismiss = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setDismissModalChecked(e.target.checked);
   }, []);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiModal
       onClose={() => onClose()}
       style={{ width: 700 }}
       data-test-subj="discard-starred-query-modal"
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('esqlEditor.discardStarredQueryModal.title', {
             defaultMessage: 'Discard starred query',
           })}

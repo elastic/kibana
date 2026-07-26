@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_RULE_MIGRATION_QRADAR_RULES_PATH } from '../../../../../../../common/siem_migrations/constants';
 import {
   CreateQRadarRuleMigrationRulesRequestBody,
@@ -55,6 +55,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const { experimentalFeatures } = ctx.securitySolution.getConfig();
 
             // Parse QRadar XML
             const parser = new QradarRulesXmlParser(xml);
@@ -125,7 +126,9 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
 
             // Identify reference sets from rule data and create resource records without content
             // This allows tracking missing resources that need to be uploaded
-            const resourceIdentifier = new RuleResourceIdentifier('qradar');
+            const resourceIdentifier = new RuleResourceIdentifier('qradar', {
+              experimentalFeatures,
+            });
             const extractedResources = await resourceIdentifier.fromOriginals(
               rulesToBeCreated.map((r) => r.original_rule)
             );

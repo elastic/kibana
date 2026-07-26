@@ -8,11 +8,19 @@
 import {
   TemplateSchema,
   ParsedTemplateSchema,
-  ParsedTemplateFieldSchema,
+  ParsedTemplateDefinitionSchema,
   CreateTemplateInputSchema,
   UpdateTemplateInputSchema,
   PatchTemplateInputSchema,
 } from './v1';
+import {
+  MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  MAX_TEMPLATE_TAG_LENGTH,
+  MAX_TAGS_PER_TEMPLATE,
+  MAX_TITLE_LENGTH,
+} from '../../../constants';
+import { FieldSchema, isRefField } from './fields';
 
 describe('TemplateSchema', () => {
   const validTemplate = {
@@ -22,6 +30,7 @@ describe('TemplateSchema', () => {
     definition: 'fields:\n  - name: test_field\n    type: keyword',
     templateVersion: 1,
     deletedAt: null,
+    author: 'test-user',
   };
 
   it('validates a valid template', () => {
@@ -61,6 +70,28 @@ describe('TemplateSchema', () => {
     if (!result.success) {
       expect(result.error.issues.length).toBeGreaterThan(0);
     }
+  });
+
+  it('rejects template with an empty name', () => {
+    const invalidTemplate = {
+      ...validTemplate,
+      name: '',
+    };
+
+    const result = TemplateSchema.safeParse(invalidTemplate);
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects template with a name longer than allowed', () => {
+    const invalidTemplate = {
+      ...validTemplate,
+      name: 'a'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1),
+    };
+
+    const result = TemplateSchema.safeParse(invalidTemplate);
+
+    expect(result.success).toBe(false);
   });
 
   it('rejects template with invalid templateVersion type', () => {
@@ -117,20 +148,16 @@ describe('TemplateSchema', () => {
   });
 });
 
-describe('ParsedTemplateFieldSchema', () => {
+describe('FieldSchema', () => {
   const validField = {
-    control: 'text-input',
+    control: 'INPUT_TEXT',
     name: 'test_field',
     label: 'Test Field',
     type: 'keyword' as const,
-    metadata: {
-      required: true,
-      default: 'default value',
-    },
   };
 
   it('validates a valid field', () => {
-    const result = ParsedTemplateFieldSchema.safeParse(validField);
+    const result = FieldSchema.safeParse(validField);
 
     expect(result.success).toBe(true);
     if (result.success) {
@@ -140,16 +167,15 @@ describe('ParsedTemplateFieldSchema', () => {
 
   it('accepts field without optional label', () => {
     const fieldWithoutLabel = {
-      control: 'text-input',
+      control: 'INPUT_TEXT',
       name: 'test_field',
       type: 'keyword' as const,
-      metadata: {},
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(fieldWithoutLabel);
+    const result = FieldSchema.safeParse(fieldWithoutLabel);
 
     expect(result.success).toBe(true);
-    if (result.success) {
+    if (result.success && !isRefField(result.data)) {
       expect(result.data.label).toBeUndefined();
     }
   });
@@ -160,15 +186,19 @@ describe('ParsedTemplateFieldSchema', () => {
       type: 'text', // should be 'keyword'
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(invalidField);
+    const result = FieldSchema.safeParse(invalidField);
 
     expect(result.success).toBe(false);
   });
 
   it('accepts metadata with any structure', () => {
     const fieldWithComplexMetadata = {
-      ...validField,
+      control: 'SELECT_BASIC',
+      name: 'test_field',
+      label: 'Test Field',
+      type: 'keyword' as const,
       metadata: {
+        options: ['a', 'b'],
         nested: {
           deeply: {
             value: 123,
@@ -179,7 +209,7 @@ describe('ParsedTemplateFieldSchema', () => {
       },
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(fieldWithComplexMetadata);
+    const result = FieldSchema.safeParse(fieldWithComplexMetadata);
 
     expect(result.success).toBe(true);
   });
@@ -191,15 +221,15 @@ describe('ParsedTemplateSchema', () => {
     name: 'Test Template',
     owner: 'securitySolution',
     definition: {
+      name: 'template-definition-name',
       fields: [
         {
-          control: 'text-input',
+          control: 'INPUT_TEXT',
           name: 'field1',
           type: 'keyword' as const,
-          metadata: {},
         },
         {
-          control: 'select',
+          control: 'SELECT_BASIC',
           name: 'field2',
           label: 'Field 2',
           type: 'keyword' as const,
@@ -207,8 +237,11 @@ describe('ParsedTemplateSchema', () => {
         },
       ],
     },
+    definitionString:
+      'name: template-definition-name\nfields:\n  - control: INPUT_TEXT\n    name: field1\n    type: keyword',
     templateVersion: 2,
     deletedAt: null,
+    author: 'test-user',
     isLatest: true,
     latestVersion: 2,
   };
@@ -226,6 +259,7 @@ describe('ParsedTemplateSchema', () => {
     const templateWithNoFields = {
       ...validParsedTemplate,
       definition: {
+        name: 'template-definition-name',
         fields: [],
       },
     };
@@ -258,16 +292,17 @@ describe('ParsedTemplateSchema', () => {
     const templateWithInvalidField = {
       ...validParsedTemplate,
       definition: {
+        name: 'template-definition-name',
         fields: [
           {
-            control: 'text-input',
+            control: 'INPUT_TEXT',
             name: 'valid_field',
             type: 'keyword' as const,
             metadata: {},
           },
           {
             // missing required properties
-            control: 'select',
+            control: 'SELECT_BASIC',
           },
         ],
       },
@@ -277,11 +312,239 @@ describe('ParsedTemplateSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('rejects parsed template with duplicate field names', () => {
+    const templateWithDuplicateFields = {
+      ...validParsedTemplate,
+      definition: {
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'duplicate_field',
+            type: 'keyword' as const,
+            metadata: {},
+          },
+          {
+            control: 'SELECT_BASIC',
+            name: 'duplicate_field',
+            label: 'Duplicate Field',
+            type: 'keyword' as const,
+            metadata: { options: ['a', 'b'] },
+          },
+        ],
+      },
+    };
+
+    const result = ParsedTemplateSchema.safeParse(templateWithDuplicateFields);
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('ParsedTemplateDefinitionSchema', () => {
+  const baseDefinition = {
+    name: 'template-definition-name',
+    fields: [],
+  };
+
+  it('validates a definition without connector or settings (both optional)', () => {
+    const result = ParsedTemplateDefinitionSchema.safeParse(baseDefinition);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('allows a definition without a case-default name (name is optional)', () => {
+    const result = ParsedTemplateDefinitionSchema.safeParse({ fields: [] });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an empty case-default name when one is provided', () => {
+    const result = ParsedTemplateDefinitionSchema.safeParse({ name: '', fields: [] });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('allows a null case-default name (a cleared `name:` in the YAML)', () => {
+    // Typing `name:` with no value in the editor parses to `{ name: null }`. This must behave like
+    // the other cleared case defaults (description/severity/category) and not fail validation.
+    const result = ParsedTemplateDefinitionSchema.safeParse({ name: null, fields: [] });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a case-default name longer than the max case title length', () => {
+    const result = ParsedTemplateDefinitionSchema.safeParse({
+      name: 'a'.repeat(MAX_TITLE_LENGTH + 1),
+      fields: [],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('does not expose a separate top-level `title` (single case-title field)', () => {
+    const result = ParsedTemplateDefinitionSchema.safeParse({
+      ...baseDefinition,
+      title: 'should be stripped',
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect('title' in result.data).toBe(false);
+    }
+  });
+
+  describe('connector', () => {
+    it('validates a Jira connector with its dynamic fields', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: {
+          type: '.jira',
+          id: 'my-jira-id',
+          fields: { issueType: '10001', priority: 'High', parent: null },
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('validates a ServiceNow ITSM connector', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: {
+          type: '.servicenow',
+          id: 'sn-id',
+          fields: {
+            impact: '2',
+            severity: '1',
+            urgency: '2',
+            category: 'software',
+            subcategory: null,
+          },
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('validates the .none connector', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: { type: '.none', id: 'none', fields: null },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('does not require name on the connector', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: {
+          type: '.jira',
+          id: 'my-jira-id',
+          fields: { issueType: '10001', priority: 'High', parent: null },
+        },
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.connector).not.toHaveProperty('name');
+      }
+    });
+
+    it('rejects a wrong-typed value for a known connector field', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: {
+          type: '.jira',
+          id: 'my-jira-id',
+          // issueType must be string | null, not a number
+          fields: { issueType: 123, priority: 'High', parent: null },
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('strips a field key that does not belong to the connector type (structural union)', () => {
+      // Runtime Zod parse strips unknown keys; the Monaco editor rejects them via the generated
+      // JSON schema (`additionalProperties: false`) — covered in template_json_schema.test.ts.
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: {
+          type: '.jira',
+          id: 'my-jira-id',
+          // `impact` belongs to ServiceNow, not Jira
+          fields: { issueType: '10001', priority: 'High', parent: null, impact: '2' },
+        },
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success && result.data.connector?.type === '.jira') {
+        expect(result.data.connector.fields).not.toHaveProperty('impact');
+      }
+    });
+
+    it('rejects a connector missing the id', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: {
+          type: '.jira',
+          fields: { issueType: '10001', priority: 'High', parent: null },
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an unknown connector type', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        connector: { type: '.not-a-connector', id: 'x', fields: null },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('settings', () => {
+    it('validates syncAlerts and extractObservables', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        settings: { syncAlerts: true, extractObservables: false },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('allows either setting independently', () => {
+      const syncOnly = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        settings: { syncAlerts: false },
+      });
+      const extractOnly = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        settings: { extractObservables: true },
+      });
+
+      expect(syncOnly.success).toBe(true);
+      expect(extractOnly.success).toBe(true);
+    });
+
+    it('rejects a non-boolean setting value', () => {
+      const result = ParsedTemplateDefinitionSchema.safeParse({
+        ...baseDefinition,
+        settings: { syncAlerts: 'yes' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
 });
 
 describe('CreateTemplateInputSchema', () => {
   const validCreateInput = {
-    name: 'New Template',
+    name: 'Create template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: test_field\n    type: keyword',
   };
@@ -354,7 +617,7 @@ describe('CreateTemplateInputSchema', () => {
 
 describe('UpdateTemplateInputSchema', () => {
   const validUpdateInput = {
-    name: 'Updated Template',
+    name: 'Updated template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: updated_field\n    type: keyword',
   };
@@ -410,9 +673,24 @@ describe('UpdateTemplateInputSchema', () => {
     }
   });
 
-  it('requires all fields (PUT semantics)', () => {
+  it('accepts update input without a name (identity is derived server-side)', () => {
+    const updateWithoutName = {
+      owner: 'securitySolution',
+      definition: 'fields:\n  - name: updated_field\n    type: keyword',
+    };
+
+    const result = UpdateTemplateInputSchema.safeParse(updateWithoutName);
+
+    // `name` is optional on the wire — the route/service derive it from the definition's
+    // case-default title. The schema must accept the update without it.
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBeUndefined();
+    }
+  });
+
+  it('requires owner and definition (PUT semantics)', () => {
     const partialUpdate = {
-      name: 'Just updating name',
       // missing owner and definition
     };
 
@@ -464,6 +742,16 @@ describe('PatchTemplateInputSchema', () => {
     if (result.success) {
       expect(result.data).toEqual(ownerPatch);
     }
+  });
+
+  it('rejects patch with an empty name when provided', () => {
+    const emptyNamePatch = {
+      name: '',
+    };
+
+    const result = PatchTemplateInputSchema.safeParse(emptyNamePatch);
+
+    expect(result.success).toBe(false);
   });
 
   it('validates patch with only definition', () => {
@@ -557,5 +845,49 @@ describe('PatchTemplateInputSchema', () => {
     const result = PatchTemplateInputSchema.safeParse(invalidPatch);
 
     expect(result.success).toBe(false);
+  });
+
+  it('rejects a description longer than the max template description length', () => {
+    const result = PatchTemplateInputSchema.safeParse({
+      description: 'a'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a description at exactly the max template description length', () => {
+    const result = PatchTemplateInputSchema.safeParse({
+      description: 'a'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH),
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects more tags than allowed per template', () => {
+    const result = PatchTemplateInputSchema.safeParse({
+      tags: Array.from({ length: MAX_TAGS_PER_TEMPLATE + 1 }, (_, idx) => `tag-${idx}`),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty tag', () => {
+    const result = PatchTemplateInputSchema.safeParse({ tags: [''] });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a tag longer than the max tag length', () => {
+    const result = PatchTemplateInputSchema.safeParse({
+      tags: ['a'.repeat(MAX_TEMPLATE_TAG_LENGTH + 1)],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts an empty tags array (clearing tags)', () => {
+    const result = PatchTemplateInputSchema.safeParse({ tags: [] });
+
+    expect(result.success).toBe(true);
   });
 });

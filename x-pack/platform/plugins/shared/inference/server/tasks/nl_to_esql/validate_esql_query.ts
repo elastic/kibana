@@ -11,7 +11,7 @@ import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { trace } from '@opentelemetry/api';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import { formatQueryWithErrors } from './format_query_with_errors';
 
 export interface QueryValidateRunOutput {

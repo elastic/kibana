@@ -7,6 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ServiceNodesResponse } from '@kbn/apm-api-shared';
 import {
   METRIC_JAVA_HEAP_MEMORY_USED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
@@ -15,8 +16,8 @@ import {
   METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
   METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
   LABEL_TYPE,
   HOST_NAME,
 } from '../../../common/es_fields/apm';
@@ -26,15 +27,6 @@ import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { hasOTelMetrics } from './has_otel_metrics';
-
-export type ServiceNodesResponse = Array<{
-  name: string;
-  cpu: number | null;
-  heapMemory: number | null;
-  hostName: string | null | undefined;
-  nonHeapMemory: number | null;
-  threadCount: number | null;
-}>;
 
 async function getServiceNodes({
   kuery,
@@ -222,7 +214,7 @@ async function getOTelServiceNodes({
           },
           heapMemory: {
             filter: {
-              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP },
+              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP },
             },
             aggs: {
               usage: {
@@ -234,7 +226,7 @@ async function getOTelServiceNodes({
           },
           nonHeapMemory: {
             filter: {
-              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP },
+              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP },
             },
             aggs: {
               usage: {

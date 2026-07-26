@@ -181,7 +181,7 @@ export const ChangeAgentPrivilegeLevelFlyout: React.FC<Props> = ({
                     id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.warning"
                     defaultMessage="{icon} Root privilege cannot be removed for {x} of {y} selected agents. These agents are either Fleet Server agents, already unprivileged agents, or agents on an unsupported version."
                     values={{
-                      icon: <EuiIcon type="warning" />,
+                      icon: <EuiIcon type="warning" aria-hidden={true} />,
                       x: unsupportedAgents.length,
                       y: agentCount,
                     }}

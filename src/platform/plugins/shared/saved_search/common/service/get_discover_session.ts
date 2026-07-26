@@ -22,14 +22,14 @@ export const getDiscoverSession = async (
     id: so.item.id,
     title: so.item.attributes.title,
     description: so.item.attributes.description,
-    // TODO: so.item.attributes.tabs shouldn't be nullable soon
-    tabs: so.item.attributes.tabs!.map((tab) => ({
+    tabs: so.item.attributes.tabs.map((tab) => ({
       id: tab.id,
       label: tab.label,
       sort: tab.attributes.sort as SortOrder[],
       columns: tab.attributes.columns,
       grid: tab.attributes.grid,
       hideChart: tab.attributes.hideChart,
+      hideTable: tab.attributes.hideTable,
       isTextBasedQuery: tab.attributes.isTextBasedQuery,
       usesAdHocDataView: tab.attributes.usesAdHocDataView,
       serializedSearchSource: injectReferences(

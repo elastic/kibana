@@ -10,7 +10,7 @@
 import { fromLastValueAPItoLensState, fromLastValueLensStateToAPI } from './last_value';
 import type { LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
-import { LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES } from '../../schema/constants';
+import { LENS_LAST_VALUE_DEFAULT_MULTI_VALUE } from '../../schema/constants';
 
 describe('Last Value Transforms', () => {
   describe('fromLastValueAPItoLensState', () => {
@@ -18,8 +18,8 @@ describe('Last Value Transforms', () => {
       const input: LensApiLastValueOperation = {
         operation: 'last_value',
         field: 'status',
-        sort_by: '@timestamp',
-        show_array_values: false,
+        time_field: '@timestamp',
+        multi_value: false,
       };
 
       const expected: LastValueIndexPatternColumn = {
@@ -30,7 +30,7 @@ describe('Last Value Transforms', () => {
         dataType: 'number',
         params: {
           sortField: '@timestamp',
-          showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+          showArrayValues: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
         },
         customLabel: false,
         filter: undefined,
@@ -43,8 +43,8 @@ describe('Last Value Transforms', () => {
       const input: LensApiLastValueOperation = {
         operation: 'last_value',
         field: 'price',
-        sort_by: '@timestamp',
-        show_array_values: true,
+        time_field: '@timestamp',
+        multi_value: true,
         format: {
           type: 'number',
           decimals: 2,
@@ -62,24 +62,24 @@ describe('Last Value Transforms', () => {
       });
     });
 
-    it('should handle sort_by configuration', () => {
+    it('should handle time_field configuration', () => {
       const input: LensApiLastValueOperation = {
         operation: 'last_value',
         field: 'status',
-        sort_by: 'timestamp',
-        show_array_values: true,
+        time_field: 'timestamp',
+        multi_value: true,
       };
 
       const result = fromLastValueAPItoLensState(input);
       expect(result.params.sortField).toBe('timestamp');
     });
 
-    it('should handle show_array_values configuration', () => {
+    it('should handle multi_value configuration', () => {
       const input: LensApiLastValueOperation = {
         operation: 'last_value',
         field: 'tags',
-        sort_by: '@timestamp',
-        show_array_values: true,
+        time_field: '@timestamp',
+        multi_value: true,
       };
 
       const result = fromLastValueAPItoLensState(input);
@@ -97,15 +97,15 @@ describe('Last Value Transforms', () => {
         dataType: 'string',
         params: {
           sortField: '@timestamp',
-          showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+          showArrayValues: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
         },
       };
 
       const expected: LensApiLastValueOperation = {
         operation: 'last_value',
         field: 'status',
-        sort_by: '@timestamp',
-        show_array_values: false,
+        time_field: '@timestamp',
+        multi_value: false,
       };
 
       expect(fromLastValueLensStateToAPI(input)).toEqual(expected);
@@ -126,7 +126,7 @@ describe('Last Value Transforms', () => {
               decimals: 2,
             },
           },
-          showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+          showArrayValues: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
         },
       };
 
@@ -146,12 +146,12 @@ describe('Last Value Transforms', () => {
         dataType: 'string',
         params: {
           sortField: 'timestamp',
-          showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+          showArrayValues: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
         },
       };
 
       const result = fromLastValueLensStateToAPI(input);
-      expect(result.sort_by).toBe('timestamp');
+      expect(result.time_field).toBe('timestamp');
     });
 
     it('should handle show array values configuration', () => {
@@ -168,7 +168,7 @@ describe('Last Value Transforms', () => {
       };
 
       const result = fromLastValueLensStateToAPI(input);
-      expect(result.show_array_values).toBe(true);
+      expect(result.multi_value).toBe(true);
     });
   });
 });

@@ -128,7 +128,7 @@ export const AssetTitleMap: Record<
     defaultMessage: 'Views',
   }),
   knowledge_base: i18n.translate('xpack.fleet.epm.assetTitles.knowledgeBase', {
-    defaultMessage: 'Knowledge base',
+    defaultMessage: 'Integration knowledge',
   }),
   alert: i18n.translate('xpack.fleet.epm.assetTitles.rules', {
     defaultMessage: 'Rules',

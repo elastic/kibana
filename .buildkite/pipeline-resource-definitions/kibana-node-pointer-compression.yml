@@ -20,11 +20,16 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: "true"
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main
       pipeline_file: ".buildkite/pipelines/node_pointer_compression.yml"
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/node_pointer_compression.yml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       schedules:

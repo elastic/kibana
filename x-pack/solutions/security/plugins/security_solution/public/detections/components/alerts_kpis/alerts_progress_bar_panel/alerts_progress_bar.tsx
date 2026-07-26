@@ -15,10 +15,13 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ProgressBarRow } from './alerts_progress_bar_row';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
 import type { AddFilterProps } from '../common/types';
@@ -27,7 +30,6 @@ import * as i18n from './translations';
 import {
   CellActionsMode,
   SecurityCellActions,
-  SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
@@ -85,23 +87,28 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
+  const dataStatsTitleId = useGeneratedHtmlId();
 
   const [nonEmpty, formattedNonEmptyPercent] = useMemo(() => getAggregateData(data), [data]);
   const sourcererScopeId = useMemo(() => getSourcererScopeId(TableId.alertsOnAlertsPage), []);
 
   const dataStatsButton = (
-    <EuiButtonIcon
-      color="text"
-      iconType="info"
-      aria-label="info"
-      size="xs"
-      onClick={onButtonClick}
-    />
+    <EuiToolTip content="info" disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        iconType="info"
+        aria-label="info"
+        size="xs"
+        onClick={onButtonClick}
+      />
+    </EuiToolTip>
   );
 
   const dataStatsMessage = (
     <DataStatsWrapper>
-      <EuiPopoverTitle>{i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}</EuiPopoverTitle>
+      <EuiPopoverTitle id={dataStatsTitleId}>
+        {i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}
+      </EuiPopoverTitle>
       <EuiText size="s">
         {i18n.DATA_STATISTICS_MESSAGE(groupBySelection)}
         <EuiLink
@@ -129,6 +136,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-labelledby={dataStatsTitleId}
             button={dataStatsButton}
             isOpen={isPopoverOpen}
             closePopover={closePopover}
@@ -170,7 +178,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                             <SecurityCellActions
                               mode={CellActionsMode.INLINE}
                               visibleCellActions={0}
-                              triggerId={SecurityCellActionsTrigger.DEFAULT}
+                              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
                               data={{ field: groupBySelection, value: item.key }}
                               sourcererScopeId={sourcererScopeId}
                               metadata={{ scopeId: TableId.alertsOnAlertsPage }}

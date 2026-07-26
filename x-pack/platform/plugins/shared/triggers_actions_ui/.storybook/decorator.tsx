@@ -80,7 +80,6 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
       alertDeletionSettingsEnabled: false,
-      unifiedRulesPage: false,
     },
   });
 

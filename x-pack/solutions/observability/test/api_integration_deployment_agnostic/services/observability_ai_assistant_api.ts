@@ -140,11 +140,47 @@ function createObservabilityAIAssistantApiClient({
     }
   }
 
+  async function configureInferenceSettings({
+    featureId,
+    connectorId,
+  }: {
+    featureId: string;
+    connectorId: string;
+  }) {
+    const internalReqHeader = samlAuth.getInternalRequestHeader();
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    await supertestWithoutAuth
+      .put('/internal/search_inference_endpoints/settings')
+      .send({
+        features: [{ feature_id: featureId, endpoints: [{ id: connectorId }] }],
+      })
+      .set(roleAuthc.apiKeyHeader)
+      .set(internalReqHeader)
+      .set('kbn-xsrf', 'foo')
+      .set('elastic-api-version', '1')
+      .expect(200);
+  }
+
+  async function clearInferenceSettings() {
+    const internalReqHeader = samlAuth.getInternalRequestHeader();
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    await supertestWithoutAuth
+      .put('/internal/search_inference_endpoints/settings')
+      .send({ features: [] })
+      .set(roleAuthc.apiKeyHeader)
+      .set(internalReqHeader)
+      .set('kbn-xsrf', 'foo')
+      .set('elastic-api-version', '1')
+      .expect(200);
+  }
+
   return {
     makeApiRequest,
     deleteAllActionConnectors,
     deleteActionConnector,
     createProxyActionConnector,
+    configureInferenceSettings,
+    clearInferenceSettings,
   };
 }
 
@@ -174,6 +210,8 @@ export function ObservabilityAIAssistantApiProvider(context: DeploymentAgnosticF
     deleteAllActionConnectors: observabilityAIAssistantApiClient.deleteAllActionConnectors,
     createProxyActionConnector: observabilityAIAssistantApiClient.createProxyActionConnector,
     deleteActionConnector: observabilityAIAssistantApiClient.deleteActionConnector,
+    configureInferenceSettings: observabilityAIAssistantApiClient.configureInferenceSettings,
+    clearInferenceSettings: observabilityAIAssistantApiClient.clearInferenceSettings,
   };
 }
 

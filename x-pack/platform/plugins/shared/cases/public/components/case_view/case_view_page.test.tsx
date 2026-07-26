@@ -11,15 +11,25 @@ import { waitFor, screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useUrlParams } from '../../common/navigation/hooks';
 import { CaseViewPage } from './case_view_page';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { caseData, caseViewProps } from './mocks';
 import type { CaseViewPageProps } from './types';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../use_breadcrumbs');
 jest.mock('./use_on_refresh_case_view_page');
 jest.mock('../../common/hooks');
 jest.mock('../../common/lib/kibana');
+jest.mock(
+  '@kbn/response-ops-detections-close-reason',
+  () => ({
+    DEFAULT_CLOSING_REASON_OPTIONS: [],
+    DEFAULT_DETECTIONS_CLOSE_REASONS_KEY: 'securitySolution:closeReason',
+  }),
+  { virtual: true }
+);
 
 jest.mock('../header_page', () => ({
   HeaderPage: jest.fn(() => <div data-test-subj="test-case-view-header">{'Case view header'}</div>),
@@ -37,21 +47,9 @@ jest.mock('./components/case_view_activity', () => ({
   )),
 }));
 
-jest.mock('./components/case_view_alerts', () => ({
-  CaseViewAlerts: jest.fn(() => (
-    <div data-test-subj="test-case-view-alerts">{'Case view alerts'}</div>
-  )),
-}));
-
-jest.mock('./components/case_view_files', () => ({
-  CaseViewFiles: jest.fn(() => (
-    <div data-test-subj="test-case-view-files">{'Case view files'}</div>
-  )),
-}));
-
-jest.mock('./components/case_view_observables', () => ({
-  CaseViewObservables: jest.fn(() => (
-    <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
+jest.mock('./components/case_view_attachments', () => ({
+  CaseViewAttachments: jest.fn(() => (
+    <div data-test-subj="test-case-view-attachments">{'Case view attachments'}</div>
   )),
 }));
 
@@ -71,9 +69,12 @@ const caseProps: CaseViewPageProps = {
 };
 
 describe('CaseViewPage', () => {
+  let unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+
   beforeEach(() => {
     jest.clearAllMocks();
     useUrlParamsMock.mockReturnValue({});
+    unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   });
 
   it('shows the header section', async () => {
@@ -104,5 +105,21 @@ describe('CaseViewPage', () => {
     await waitFor(() => {
       expect(useCasesTitleBreadcrumbsMock).toHaveBeenCalledWith(caseProps.caseData.title);
     });
+  });
+
+  it.each([
+    CASE_VIEW_PAGE_TABS.ATTACHMENTS,
+    CASE_VIEW_PAGE_TABS.ALERTS,
+    CASE_VIEW_PAGE_TABS.EVENTS,
+    CASE_VIEW_PAGE_TABS.FILES,
+    CASE_VIEW_PAGE_TABS.OBSERVABLES,
+  ])('renders the consolidated attachments view for tabId=%s', async (tabId) => {
+    useUrlParamsMock.mockReturnValue({ urlParams: { tabId } });
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />, {
+      wrapperProps: { unifiedAttachmentTypeRegistry },
+    });
+
+    expect(await screen.findByTestId('test-case-view-attachments')).toBeInTheDocument();
   });
 });

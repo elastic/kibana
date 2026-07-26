@@ -88,7 +88,7 @@ function LabelOptions({
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiToolTip content={axisTooltipText} delay="long" position="right">
+          <EuiToolTip content={axisTooltipText} position="right">
             <SelectOption
               disabled={axisLabelControlDisabled}
               label={i18n.translate('visTypeXy.controls.pointSeries.categoryAxis.alignLabel', {
@@ -103,7 +103,7 @@ function LabelOptions({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiToolTip content={axisTooltipText} delay="long" position="right">
+          <EuiToolTip content={axisTooltipText} position="right">
             <TruncateLabelsOption
               disabled={axisLabelControlDisabled}
               value={axisLabels.truncate}

@@ -69,3 +69,25 @@ export interface SortingConfig {
     direction: 'asc' | 'desc';
   };
 }
+
+/**
+ * Default sort fields used when sorting is enabled but no explicit fields are configured.
+ *
+ * Provides Name (A-Z / Z-A) and Last updated (Newest / Oldest) sort options,
+ * matching the common pattern across `TableListView` consumers.
+ */
+export const DEFAULT_SORT_FIELDS: SortField[] = [
+  { field: 'title', name: 'Name' },
+  { field: 'updatedAt', name: 'Last updated' },
+];
+
+/**
+ * Default initial sort used when sorting is enabled but no explicit `initialSort` is configured.
+ *
+ * Sorts by `title` ascending (A-Z), matching `TableListView` behavior.
+ * Consumers that prefer "newest first" can set `initialSort: { field: 'updatedAt', direction: 'desc' }`.
+ */
+export const DEFAULT_INITIAL_SORT: { field: string; direction: 'asc' | 'desc' } = {
+  field: 'title',
+  direction: 'asc',
+};

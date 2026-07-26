@@ -31,7 +31,7 @@ export const WizardNav: FC<StepsNavProps> = ({
         <EuiButton
           disabled={!previousActive}
           onClick={previous}
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           size="s"
           data-test-subj="transformWizardNavButtonPrevious"
         >
@@ -46,7 +46,7 @@ export const WizardNav: FC<StepsNavProps> = ({
         <EuiButton
           disabled={!nextActive}
           onClick={next}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           size="s"
           data-test-subj="transformWizardNavButtonNext"
         >

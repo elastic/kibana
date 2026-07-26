@@ -20,7 +20,7 @@ jest.mock('../context');
 
 describe('TakeActionButton', () => {
   it('should render component with all options', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
@@ -31,7 +31,6 @@ describe('TakeActionButton', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -69,7 +68,6 @@ describe('TakeActionButton', () => {
               createComment: false,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -106,7 +104,6 @@ describe('TakeActionButton', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },

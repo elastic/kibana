@@ -59,19 +59,21 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     const { saved_objects: savedObjects, per_page: perPageT, ...rest } = queryResultSavedObjects;
 
+    const monitors = savedObjects.map((monitor) => {
+      const mon = mapSavedObjectToMonitor({
+        monitor,
+        internal: request.query?.internal,
+      });
+      return {
+        ...mon,
+        spaceId: monitor.namespaces?.[0],
+        spaces: monitor.namespaces ?? [],
+      };
+    });
+
     return {
       ...rest,
-      monitors: savedObjects.map((monitor) => {
-        const mon = mapSavedObjectToMonitor({
-          monitor,
-          internal: request.query?.internal,
-        });
-        return {
-          ...mon,
-          spaceId: monitor.namespaces?.[0],
-          spaces: monitor.namespaces ?? [],
-        };
-      }),
+      monitors,
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,

@@ -100,7 +100,10 @@ export const buildDataViewMock = ({
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName: timeFieldName || '',
     docvalueFields: [],
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({
+      convertToText: (value: unknown) => value,
+      convertToReact: (value: unknown) => value,
+    })),
     isTimeNanosBased: () => false,
     isPersisted: () => true,
     getTimeField: () => {

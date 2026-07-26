@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "timestamp": 1756914281687,
+    "date": "2025-09-03T15:44:41.687Z",
+    "kibanaCommitHash": "test-commit-hash",
+    "buildUrl": null,
+    "pullRequestUrl": null
+  },
+  "typeDefinitions": {
+    "task": {
+      "name": "task",
+      "migrationVersions": [
+        "7.4.0",
+        "7.6.0",
+        "8.0.0",
+        "8.2.0",
+        "8.5.0",
+        "8.8.0"
+      ],
+      "hash": "new-hash-for-test",
+      "modelVersions": [
+        {
+          "version": "1",
+          "modelVersionHash": "hash1",
+          "changeTypes": [
+            "mappings_deprecation"
+          ],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        },
+        {
+          "version": "2",
+          "modelVersionHash": "hash2",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "partition.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        },
+        {
+          "version": "3",
+          "modelVersionHash": "hash3",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "priority.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        },
+        {
+          "version": "4",
+          "modelVersionHash": "hash4",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "userScope.properties.apiKeyId.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        },
+        {
+          "version": "5",
+          "modelVersionHash": "hash5",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        },
+        {
+          "version": "6",
+          "modelVersionHash": "hash6",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        },
+        {
+          "version": "7",
+          "modelVersionHash": "hash7",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "fieldWithIndexFalse.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": "hash",
+            "create": "hash"
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.taskType.type": "keyword",
+        "properties.scheduledAt.type": "date",
+        "properties.runAt.type": "date",
+        "properties.retryAt.type": "date",
+        "properties.enabled.type": "boolean",
+        "properties.schedule.properties.interval.type": "keyword",
+        "properties.attempts.type": "integer",
+        "properties.status.type": "keyword",
+        "properties.scope.type": "keyword",
+        "properties.ownerId.type": "keyword",
+        "properties.partition.type": "integer",
+        "properties.priority.type": "integer",
+        "properties.userScope.properties.apiKeyId.type": "keyword",
+        "properties.fieldWithIndexFalse.type": "keyword",
+        "properties.fieldWithIndexFalse.index": false
+      }
+    }
+  }
+}

@@ -84,6 +84,7 @@ Object {
 exports[`Histogram Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,
@@ -222,6 +223,7 @@ Object {
 exports[`Histogram Transform Generator returns the expected transform params for timeslices slo using timesliceTarget = 0 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,
@@ -360,6 +362,7 @@ Object {
 exports[`Histogram Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,

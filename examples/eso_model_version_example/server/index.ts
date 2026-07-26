@@ -8,6 +8,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/server';
-import { EsoModelVersionExample } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = async () => new EsoModelVersionExample();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { EsoModelVersionExample } = await import('./plugin');
+  return new EsoModelVersionExample();
+};

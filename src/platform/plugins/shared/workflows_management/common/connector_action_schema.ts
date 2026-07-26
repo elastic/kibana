@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  PostBlockkitSubActionParamsSchema as SlackApiPostBlockkitParamsSchema,
+  PostMessageSubActionParamsSchema as SlackApiPostMessageParamsSchema,
+  ValidChannelIdSubActionParamsSchema as SlackApiValidChannelIdParamsSchema,
+} from '@kbn/connector-schemas/slack_api';
+import {
+  XSOARPlaybooksActionResponseSchema,
+  XSOARRunActionParamsSchema,
+  XSOARRunActionResponseSchema,
+} from '@kbn/connector-schemas/xsoar';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
+import { FetcherConfigSchema, KibanaHttpMethodSchema, KibanaStepMetaSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -36,6 +47,8 @@ import {
   GenAIStreamResponseSchema,
   GenAITestParamsSchema,
   GenAITestResponseSchema,
+  HttpParamsSchema,
+  HttpResponseSchema,
   InferenceCompletionParamsSchema,
   InferenceCompletionResponseSchema,
   InferenceRerankParamsSchema,
@@ -92,9 +105,6 @@ import {
   ServiceNowGetIncidentParamsSchema,
   ServiceNowIncidentResponseSchema,
   ServiceNowUpdateIncidentParamsSchema,
-  SlackApiGetChannelsParamsSchema,
-  SlackApiGetUsersParamsSchema,
-  SlackApiPostMessageParamsSchema,
   SlackApiResponseSchema,
   SlackParamsSchema,
   SlackResponseSchema,
@@ -114,8 +124,6 @@ import {
   TinesWebhooksParamsSchema,
   TorqParamsSchema,
   TorqResponseSchema,
-  WebhookParamsSchema,
-  WebhookResponseSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -136,7 +144,7 @@ export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSc
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackParamsSchema],
   ['.email', EmailParamsSchema],
-  ['.webhook', WebhookParamsSchema],
+  ['.http', HttpParamsSchema],
   ['.teams', TeamsParamsSchema],
   ['.bedrock', BedrockParamsSchema],
   ['.openai', OpenAIParamsSchema],
@@ -230,9 +238,9 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
   [
     '.slack_api',
     {
+      validChannelId: SlackApiValidChannelIdParamsSchema,
       postMessage: SlackApiPostMessageParamsSchema,
-      getChannels: SlackApiGetChannelsParamsSchema,
-      getUsers: SlackApiGetUsersParamsSchema,
+      postBlockkit: SlackApiPostBlockkitParamsSchema,
     },
   ],
   [
@@ -242,6 +250,13 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
       webhooks: TinesWebhooksParamsSchema,
       run: TinesRunParamsSchema,
       test: TinesTestParamsSchema,
+    },
+  ],
+  [
+    '.xsoar',
+    {
+      getPlaybooks: z.object({}),
+      run: XSOARRunActionParamsSchema,
     },
   ],
   [
@@ -295,7 +310,7 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
 export const ConnectorOutputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackResponseSchema],
   ['.email', EmailResponseSchema],
-  ['.webhook', WebhookResponseSchema],
+  ['.http', HttpResponseSchema],
   ['.teams', TeamsResponseSchema],
   ['.bedrock', BedrockResponseSchema],
   ['.openai', OpenAIResponseSchema],
@@ -388,9 +403,9 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
   [
     '.slack_api',
     {
+      validChannelId: SlackApiResponseSchema,
       postMessage: SlackApiResponseSchema,
-      getChannels: SlackApiResponseSchema,
-      getUsers: SlackApiResponseSchema,
+      postBlockkit: SlackApiResponseSchema,
     },
   ],
   [
@@ -400,6 +415,13 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
       webhooks: TinesResponseSchema,
       run: TinesResponseSchema,
       test: TinesResponseSchema,
+    },
+  ],
+  [
+    '.xsoar',
+    {
+      getPlaybooks: XSOARPlaybooksActionResponseSchema,
+      run: XSOARRunActionResponseSchema,
     },
   ],
   [
@@ -469,7 +491,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
@@ -485,16 +506,39 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
-      method: z.string(),
+      method: KibanaHttpMethodSchema.optional().describe('The HTTP method to use for the request.'),
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
+      query: z.record(z.string(), z.any()).optional(),
+      form_data: z
+        .record(
+          z.string(),
+          z.object({
+            content: z.string().describe('File content or field value'),
+            filename: z.string().optional().describe('Filename hint (e.g. "export.ndjson")'),
+            content_type: z
+              .string()
+              .optional()
+              .describe('MIME type of the content (e.g. "application/ndjson")'),
+          })
+        )
+        .optional()
+        .describe(
+          'Multipart form-data fields. Use instead of body for APIs that require file uploads (e.g. /api/saved_objects/_import). Mutually exclusive with body.'
+        ),
+      fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
     }),
-    outputSchema: z.any(),
+    outputSchema: z
+      .any()
+      .describe(
+        'JSON-parsed response body, or an empty object ({}) for 204 No Content / 304 Not Modified responses'
+      ),
     description: i18n.translate('workflows.connectors.kibana.request.description', {
-      defaultMessage: 'Make a generic request to a Kibana API',
+      defaultMessage:
+        "Make a generic request to a Kibana API. APIs that return 204 No Content or 304 Not Modified produce an empty output ('{}').",
     }),
   },
 ];

@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isSubQuery, within, Walker } from '../../ast';
-import type { ESQLAstQueryExpression } from '../../types';
+import { isSubQuery, within, Walker } from '@elastic/esql';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 
 /**
  * Finds the innermost subquery containing the cursor position and determines if the query contains subqueries.
@@ -31,8 +31,11 @@ export function findSubquery(
   Walker.walk(queryAst, {
     visitParens: (node, parent) => {
       const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
+      const isNonBinaryRhsSubquery =
+        parent?.type === 'function' &&
+        !(parent.subtype === 'binary-expression' && parent.args[1] === node);
 
-      if (isSubQuery(node) && within(offset, node) && !isForkBranch) {
+      if (isSubQuery(node) && within(offset, node) && !isForkBranch && !isNonBinaryRhsSubquery) {
         const candidate = node.child;
 
         // Skip non-ES|QL subqueries (e.g. PromQL nodes) which don't have commands.

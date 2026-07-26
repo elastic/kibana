@@ -76,7 +76,7 @@ export const ProcessTreeAlertsFilter = ({
     <EuiButtonEmpty
       data-test-subj="sessionView:sessionViewAlertDetailsEmptyFilterButton"
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -163,7 +163,6 @@ export const ProcessTreeAlertsFilter = ({
             >
               <EuiContextMenuPanel
                 data-test-subj="sessionView:sessionViewAlertDetailsFilterSelectorContainerMenu"
-                size="s"
                 className={'filterMenu'}
                 items={alertEventCategoryFilterMenuItems}
               />

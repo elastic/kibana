@@ -10,9 +10,11 @@
 import type { Writable } from '@kbn/utility-types';
 import type { DashboardOptions } from '../../../../server';
 
-export function extractOptions(state: { [key: string]: unknown }): Partial<DashboardOptions> {
+export function extractOptions(state: {
+  [key: string]: unknown;
+}): Partial<Writable<DashboardOptions>> {
   if (typeof state.options === 'object') {
-    return state.options as Partial<DashboardOptions>;
+    return state.options as Partial<Writable<DashboardOptions>>;
   }
 
   // <9.3 Options state spread directly into DashboardState

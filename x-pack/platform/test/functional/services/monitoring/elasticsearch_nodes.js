@@ -16,6 +16,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
   const PageObjects = getPageObjects(['monitoring']);
   const retry = getService('retry');
   const find = getService('find');
+  const browser = getService('browser');
 
   const SUBJ_LISTING_PAGE = 'elasticsearchNodesListingPage';
 
@@ -168,9 +169,15 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
         for (const icon of icons) {
           await icon.moveMouseTo();
           await icon.click();
-          const _text = await testSubjects.getVisibleTextAll(`${SUBJ_NODES_POPOVER_PREFIX}-${key}`);
-          text.push(_text[0]);
-          await icon.click();
+          const popoverSubj = `${SUBJ_NODES_POPOVER_PREFIX}-${key}`;
+          let popoverText = '';
+          await retry.waitForWithTimeout('popover content to render', 10000, async () => {
+            const popover = await testSubjects.find(popoverSubj, 2000);
+            popoverText = await popover.getVisibleText();
+            return popoverText.length > 0;
+          });
+          text.push(popoverText);
+          await browser.pressKeys(browser.keys.ESCAPE);
         }
       }
 

@@ -1,0 +1,242 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
+import {
+  fetchCompositeSloSummariesFromIndex,
+  mapCompositeSummaryIndexSource,
+} from './composite_slo_summary_index';
+
+const baseDoc = {
+  spaceId: 'default',
+  summaryUpdatedAt: '2026-01-01T00:00:00.000Z',
+  compositeSlo: {
+    id: 'comp-a-xxxxxxxx',
+    name: 'Composite A',
+    description: '',
+    tags: [],
+    objective: { target: 0.99 },
+    timeWindow: { duration: '30d', type: 'rolling' },
+    budgetingMethod: 'occurrences',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  },
+  unresolvedMemberIds: [],
+  members: [],
+};
+
+const nestedSummary = {
+  sliValue: 0.99,
+  status: 'HEALTHY',
+  errorBudget: {
+    initial: 0.01,
+    consumed: 0.2,
+    remaining: 0.8,
+    isEstimated: false,
+  },
+  fiveMinuteBurnRate: 0.1,
+  oneHourBurnRate: 0.2,
+  oneDayBurnRate: 0.3,
+};
+
+describe('composite_slo_summary_index', () => {
+  describe('mapCompositeSummaryIndexSource', () => {
+    it('maps the stored nested summary to the API summary shape', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        summary: nestedSummary,
+      });
+      expect(persisted?.summary).toEqual({
+        sliValue: 0.99,
+        status: 'HEALTHY',
+        errorBudget: {
+          initial: 0.01,
+          consumed: 0.2,
+          remaining: 0.8,
+          isEstimated: false,
+        },
+        fiveMinuteBurnRate: 0.1,
+        oneHourBurnRate: 0.2,
+        oneDayBurnRate: 0.3,
+      });
+      expect(persisted?.members).toEqual([]);
+    });
+
+    it('returns undefined for legacy flat summary documents (healed by the background task)', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        sliValue: 0.99,
+        status: 'HEALTHY',
+        errorBudgetInitial: 0.01,
+        errorBudgetConsumed: 0.2,
+        errorBudgetRemaining: 0.8,
+        errorBudgetIsEstimated: false,
+        fiveMinuteBurnRate: 0.1,
+        oneHourBurnRate: 0.2,
+        oneDayBurnRate: 0.3,
+      });
+      expect(persisted).toBeUndefined();
+    });
+
+    it('extracts members when present', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        summary: nestedSummary,
+        members: [
+          {
+            sloId: 'slo-a-xxxxxxxx',
+            name: 'Service A',
+            weight: 6,
+            normalisedWeight: 0.6,
+            sliValue: 0.995,
+            status: 'HEALTHY',
+            fiveMinuteBurnRate: 1.1,
+            oneHourBurnRate: 0.9,
+            oneDayBurnRate: 0.8,
+          },
+        ],
+      });
+      expect(persisted?.members).toHaveLength(1);
+      expect(persisted?.members?.[0].sloId).toBe('slo-a-xxxxxxxx');
+      expect(persisted?.members?.[0].fiveMinuteBurnRate).toBe(1.1);
+    });
+
+    it('normalises legacy member `id` field to `sloId`', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        summary: nestedSummary,
+        members: [
+          {
+            id: 'slo-a-xxxxxxxx',
+            name: 'Service A',
+            weight: 6,
+            normalisedWeight: 0.6,
+            sliValue: 0.995,
+            status: 'HEALTHY',
+          },
+        ],
+      });
+      expect(persisted?.members).toHaveLength(1);
+      expect(persisted?.members?.[0].sloId).toBe('slo-a-xxxxxxxx');
+      expect(Object.prototype.hasOwnProperty.call(persisted?.members?.[0] ?? {}, 'id')).toBe(false);
+    });
+
+    it('parses members that omit per-member burn rates (legacy index documents)', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        summary: nestedSummary,
+        members: [
+          {
+            sloId: 'slo-a-xxxxxxxx',
+            name: 'Service A',
+            weight: 1,
+            normalisedWeight: 1,
+            sliValue: 0.995,
+            // Legacy field no longer on member summary schema; stripped on decode.
+            contribution: 0.995,
+            status: 'HEALTHY',
+          },
+        ],
+      });
+      expect(persisted?.members).toHaveLength(1);
+      expect(
+        Object.prototype.hasOwnProperty.call(persisted?.members?.[0] ?? {}, 'contribution')
+      ).toBe(false);
+      expect(persisted?.members?.[0].fiveMinuteBurnRate).toBeUndefined();
+    });
+
+    it('ignores extra keys on the index document', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        summary: nestedSummary,
+        unexpectedTopLevelKey: 'ignored',
+      });
+      expect(persisted?.summary.sliValue).toBe(0.99);
+    });
+
+    it('returns undefined when a summary field is missing', () => {
+      expect(
+        mapCompositeSummaryIndexSource({
+          ...baseDoc,
+          summary: {
+            sliValue: 0.99,
+            status: 'HEALTHY',
+          },
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for invalid status', () => {
+      expect(
+        mapCompositeSummaryIndexSource({
+          ...baseDoc,
+          summary: {
+            ...nestedSummary,
+            status: 'UNKNOWN',
+          },
+        })
+      ).toBeUndefined();
+    });
+  });
+
+  describe('fetchCompositeSloSummariesFromIndex', () => {
+    it('searches by spaceId-prefixed ids + spaceId filter and maps found sources by composite id', async () => {
+      const search = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'default:comp-a',
+              _source: {
+                ...baseDoc,
+                summary: {
+                  sliValue: 0.99,
+                  status: 'HEALTHY',
+                  errorBudget: { initial: 0.01, consumed: 0, remaining: 1, isEstimated: false },
+                  fiveMinuteBurnRate: 0,
+                  oneHourBurnRate: 0,
+                  oneDayBurnRate: 0,
+                },
+              },
+            },
+          ],
+        },
+      });
+      const esClient = { search } as unknown as import('@kbn/core/server').ElasticsearchClient;
+
+      const map = await fetchCompositeSloSummariesFromIndex(esClient, 'default', [
+        'comp-a',
+        'comp-b',
+      ]);
+
+      expect(search).toHaveBeenCalledWith({
+        index: COMPOSITE_SUMMARY_INDEX_NAME,
+        size: 2,
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: ['default:comp-a', 'default:comp-b'] } },
+              { term: { spaceId: 'default' } },
+            ],
+          },
+        },
+      });
+      expect(map.size).toBe(1);
+      expect(map.get('comp-a')?.summary.sliValue).toBe(0.99);
+      expect(map.get('comp-b')).toBeUndefined();
+    });
+
+    it('returns empty map when no ids are provided', async () => {
+      const search = jest.fn();
+      const esClient = { search } as unknown as import('@kbn/core/server').ElasticsearchClient;
+
+      const map = await fetchCompositeSloSummariesFromIndex(esClient, 'default', []);
+
+      expect(search).not.toHaveBeenCalled();
+      expect(map.size).toBe(0);
+    });
+  });
+});

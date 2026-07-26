@@ -9,6 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { Subject } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
@@ -157,28 +158,38 @@ async function markAvailableTasksAsClaimed({
     taskMaxAttempts: pick(taskMaxAttempts, taskTypesToClaim),
   });
 
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
+  return withActiveSpan(
+    'mark-task-as-claimed',
+    {
+      attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
+    async () => {
+      const apmTrans = apm.startTransaction(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
 
-  try {
-    const result = await taskStore.updateByQuery(
-      {
-        query,
-        script,
-        sort,
-      },
-      {
-        max_docs: size,
+      try {
+        const result = await taskStore.updateByQuery(
+          {
+            query,
+            script,
+            sort,
+          },
+          {
+            max_docs: size,
+          }
+        );
+        apmTrans.end('success');
+        return result;
+      } catch (err) {
+        apmTrans.end('failure');
+        throw err;
       }
-    );
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+    }
+  );
 }
 
 async function sweepForClaimedTasks(

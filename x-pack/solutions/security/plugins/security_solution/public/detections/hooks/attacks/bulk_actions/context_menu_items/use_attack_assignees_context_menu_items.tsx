@@ -33,6 +33,7 @@ export const useAttackAssigneesContextMenuItems = ({
   setIsLoading,
   onSuccess,
   refresh,
+  telemetrySource,
 }: UseAttackAssigneesContextMenuItemsProps): BulkAttackContextMenuItems => {
   // Get all unique assignees from all attacks for the bulk hook
   const allAssignees = useMemo(() => {
@@ -46,6 +47,7 @@ export const useAttackAssigneesContextMenuItems = ({
   const bulkActionItems = useBulkAttackAssigneesItems({
     onAssigneesUpdate: onSuccess,
     alertAssignments: allAssignees,
+    telemetrySource,
   });
 
   const alertItems = useMemo(() => {

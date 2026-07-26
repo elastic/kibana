@@ -94,7 +94,11 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
-              {isScheduled ? <EuiIcon type="clock" /> : <EuiLoadingSpinner size="m" />}
+              {isScheduled ? (
+                <EuiIcon type="clock" aria-hidden={true} />
+              ) : (
+                <EuiLoadingSpinner size="m" />
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText

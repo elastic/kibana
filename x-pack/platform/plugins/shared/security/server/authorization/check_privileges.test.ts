@@ -12,7 +12,6 @@ import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 import type { HasPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 import { checkPrivilegesFactory } from './check_privileges';
-import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
 const application = 'kibana-our_application';
 
@@ -48,7 +47,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -853,7 +851,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -889,7 +886,6 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2025,7 +2021,6 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2060,7 +2055,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2875,7 +2869,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2895,160 +2888,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
   });
 });
 
-describe('#checkPrivilegesWithRequest with UIAM', () => {
-  it('scopes client with UIAM headers when using fake request with UIAM credentials', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse({
-      has_all_requested: true,
-      username: 'uiam-user',
-      cluster: {},
-      index: {},
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-          },
-        },
-      },
-    } as any);
-
-    const mockUiam = uiamServiceMock.create();
-    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
-      mockActions,
-      () => Promise.resolve(mockClusterClient),
-      () => mockUiam,
-      application
-    );
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: { authorization: 'ApiKey essu_uiam_credential_123' },
-    });
-    const checkPrivileges = checkPrivilegesWithRequest(request);
-    await checkPrivileges.atSpace('space_1', {});
-
-    // Should scope with UIAM headers added
-    expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-      headers: {
-        authorization: 'ApiKey essu_uiam_credential_123',
-        'x-client-authentication': 'some-shared-secret',
-      },
-    });
-    expect(mockUiam.getEsClientAuthenticationHeader).toHaveBeenCalled();
-  });
-
-  it('scopes client with request directly when using real request even with UIAM credentials', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse({
-      has_all_requested: true,
-      username: 'uiam-user',
-      cluster: {},
-      index: {},
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-          },
-        },
-      },
-    } as any);
-
-    const mockUiam = uiamServiceMock.create();
-    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
-      mockActions,
-      () => Promise.resolve(mockClusterClient),
-      () => mockUiam,
-      application
-    );
-
-    // Real request (not fake) - should use request directly even with UIAM-like credentials
-    const request = httpServerMock.createKibanaRequest({
-      headers: { authorization: 'ApiKey essu_uiam_credential_123' },
-    });
-    const checkPrivileges = checkPrivilegesWithRequest(request);
-    await checkPrivileges.atSpace('space_1', {});
-
-    // Should scope with request directly (not add UIAM headers)
-    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockUiam.getEsClientAuthenticationHeader).not.toHaveBeenCalled();
-  });
-
-  it('scopes client with request directly when using fake request with non-UIAM credentials', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse({
-      has_all_requested: true,
-      username: 'regular-user',
-      cluster: {},
-      index: {},
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-          },
-        },
-      },
-    } as any);
-
-    const mockUiam = uiamServiceMock.create();
-    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
-      mockActions,
-      () => Promise.resolve(mockClusterClient),
-      () => mockUiam,
-      application
-    );
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: { authorization: 'ApiKey regular_api_key_123' },
-    });
-    const checkPrivileges = checkPrivilegesWithRequest(request);
-    await checkPrivileges.atSpace('space_1', {});
-
-    // Should scope with request directly (non-UIAM credentials)
-    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockUiam.getEsClientAuthenticationHeader).not.toHaveBeenCalled();
-  });
-
-  it('scopes client with request directly when UIAM is not configured', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse({
-      has_all_requested: true,
-      username: 'regular-user',
-      cluster: {},
-      index: {},
-      application: {
-        [application]: {
-          'space:space_1': {
-            [mockActions.login]: true,
-          },
-        },
-      },
-    } as any);
-
-    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
-      mockActions,
-      () => Promise.resolve(mockClusterClient),
-      () => undefined, // No UIAM service
-      application
-    );
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: { authorization: 'ApiKey essu_uiam_credential_123' },
-    });
-    const checkPrivileges = checkPrivilegesWithRequest(request);
-    await checkPrivileges.atSpace('space_1', {});
-
-    // Should scope with request directly (no UIAM service configured)
-    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-  });
-});
-
 describe('#checkUserProfilesPrivileges.atSpace', () => {
   const checkPrivilegesAtSpaceTest = async (options: {
     spaceId: string;
@@ -3064,7 +2903,6 @@ describe('#checkUserProfilesPrivileges.atSpace', () => {
     const { checkUserProfilesPrivileges } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
-      () => undefined,
       application
     );
     const checkPrivileges = checkUserProfilesPrivileges(new Set(options.uids));

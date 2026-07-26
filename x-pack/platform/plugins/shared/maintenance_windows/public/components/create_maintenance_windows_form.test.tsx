@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { within, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
@@ -21,9 +22,17 @@ jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
   AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
 }));
+jest.mock('../hooks/use_create_maintenance_window', () => ({
+  useCreateMaintenanceWindow: jest.fn(),
+}));
+jest.mock('../hooks/use_update_maintenance_window', () => ({
+  useUpdateMaintenanceWindow: jest.fn(),
+}));
 
 const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { useKibana, useUiSetting } = jest.requireMock('../utils/kibana_react');
+const { useCreateMaintenanceWindow } = jest.requireMock('../hooks/use_create_maintenance_window');
+const { useUpdateMaintenanceWindow } = jest.requireMock('../hooks/use_update_maintenance_window');
 
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: jest.fn(),
@@ -49,14 +58,21 @@ const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
 
 describe('CreateMaintenanceWindowForm', () => {
   let appMockRenderer: AppMockRenderer;
+  let createMutate: jest.Mock;
+  let updateMutate: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    createMutate = jest.fn();
+    updateMutate = jest.fn();
     getRuleTypes.mockResolvedValue([
       { category: 'observability' },
       { category: 'management' },
       { category: 'securitySolution' },
     ]);
+
+    useCreateMaintenanceWindow.mockReturnValue({ mutate: createMutate, isLoading: false });
+    useUpdateMaintenanceWindow.mockReturnValue({ mutate: updateMutate, isLoading: false });
 
     useKibana.mockReturnValue({
       services: {
@@ -246,5 +262,57 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(
       screen.queryByTestId('maintenanceWindowMultipleSolutionsRemovedWarning')
     ).not.toBeInTheDocument();
+  });
+
+  describe('confirmation modal for saving without filters', () => {
+    const user = userEvent.setup({ delay: null });
+
+    const fillTitleAndSubmit = async () => {
+      const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
+      await user.click(titleInput);
+      await user.paste('My window');
+      await user.click(screen.getByTestId('create-submit'));
+    };
+
+    it('calls create when user confirms save without filters modal', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      await fillTitleAndSubmit();
+
+      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      await user.click(within(modal).getByRole('button', { name: 'Save without filters' }));
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({
+          title: 'My window',
+          scopedQuery: null,
+        });
+      });
+      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+    });
+
+    it('does not call create when user cancels save without filters modal', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      await fillTitleAndSubmit();
+
+      const modal = await screen.findByTestId('saveWithoutFiltersConfirmModal');
+      await user.click(within(modal).getByRole('button', { name: 'Cancel' }));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+      });
+      expect(createMutate).not.toHaveBeenCalled();
+    });
+
+    it('does not show confirmation modal when saving with filters (scoped query present)', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
+
+      await user.click(await screen.findByTestId('create-submit'));
+
+      await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
+      expect(screen.queryByTestId('saveWithoutFiltersConfirmModal')).not.toBeInTheDocument();
+    });
   });
 });

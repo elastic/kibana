@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { snakeCase } from 'lodash';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
@@ -27,6 +26,7 @@ import {
 import type {
   AvgIndexPatternColumn,
   BaseIndexPatternColumn,
+  ColumnBuildHints,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MetricColumn,
@@ -34,13 +34,15 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -97,7 +99,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   quickFunctionDocumentation?: string;
   unsupportedSettings?: LayerSettingsFeatures;
 }) {
-  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+  const labelLookup = (name: string, column?: ColumnBuildHints | BaseIndexPatternColumn) => {
     const label = ofName(name);
     return adjustTimeScaleLabelSuffix(
       label,
@@ -163,8 +165,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
           emptyAsNull:
-            hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
-              ? previousColumn.params?.emptyAsNull
+            hideZeroOption && hasOperationType(previousColumn, type)
+              ? getBooleanParam(previousColumn, 'emptyAsNull')
               : !columnParams?.usedInMath,
         },
       } as T;
@@ -213,14 +215,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toESQL: (column, columnId, _indexPattern, layer) => {
+    toESQL: (column) => {
       if (column.timeShift) return;
       if (!typeToESQLFn[type]) return;
-      // Use columnId to make param name unique
-      const paramKey = `field_${snakeCase(columnId)}`;
       return {
-        template: `${typeToESQLFn[type]}(??${paramKey})`,
-        params: { [paramKey]: column.sourceField },
+        template: `${typeToESQLFn[type]}(${esql.col(column.sourceField)})`,
       };
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {

@@ -37,7 +37,7 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
               type: AttachmentActionType.BUTTON as const,
               color: 'danger' as const,
               disabled: false,
-              iconType: 'minusInCircle',
+              iconType: 'minusCircle',
               label: i18n.REMOVE_ALERTS(totalAlerts),
               onClick: onModalOpen,
             },

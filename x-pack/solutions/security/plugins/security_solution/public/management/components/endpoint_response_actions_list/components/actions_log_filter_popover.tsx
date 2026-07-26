@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFilterButton, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FILTER_NAMES } from '../translations';
 import type { FilterName } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -43,7 +44,7 @@ export const ActionsLogFilterPopover = memo(
       () => (
         <EuiFilterButton
           data-test-subj={getTestId(`${filterName}-filter-popoverButton`)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
           numFilters={numFilters}
@@ -71,6 +72,10 @@ export const ActionsLogFilterPopover = memo(
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.filterPopover.ariaLabel',
+          { defaultMessage: 'Filter options' }
+        )}
       >
         {children}
       </EuiPopover>

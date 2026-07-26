@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useConvertIndexToLookup } from '../../../../../hooks/use_convert_index_to_lookup/use_convert_index_to_lookup';
 import { ConvertToLookupIndexModal } from './convert_to_lookup_index_modal';
 
-import { notificationService } from '../../../../../services/notification';
+import { useServices } from '../../../../../app_context';
 
 export const ConvertToLookupIndexModalContainer = ({
   onCloseModal,
@@ -21,6 +21,7 @@ export const ConvertToLookupIndexModalContainer = ({
   onSuccess: (lookupIndexName: string) => void;
   sourceIndexName: string;
 }) => {
+  const { notificationService } = useServices();
   const { isConverting, errorMessage, convert } = useConvertIndexToLookup({
     sourceIndexName,
     onSuccess,

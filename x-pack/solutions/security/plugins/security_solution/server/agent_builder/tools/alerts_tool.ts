@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -30,6 +30,15 @@ const alertsSchema = z.object({
     .optional()
     .describe(
       'Set to true when the user is asking for a count of alerts (e.g., "how many alerts", "count alerts", "total number of alerts"). When true, the query will be optimized to return a count result instead of individual alert documents.'
+    ),
+  time_window_hours: z
+    .number()
+    .int()
+    .min(1)
+    .max(168)
+    .optional()
+    .describe(
+      'How many hours back from now to search (1-168, default 24). Increase (e.g. 72 or 168) when the user asks about a longer period or a 24h search returns no alerts.'
     ),
 });
 
@@ -79,7 +88,7 @@ export const alertsTool = (
       },
     },
     handler: async (
-      { query: nlQuery, index, isCount },
+      { query: nlQuery, index, isCount, time_window_hours: timeWindowHours },
       { esClient, modelProvider, spaceId, events }
     ) => {
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
@@ -87,18 +96,24 @@ export const alertsTool = (
       // Enhance the query with KEEP clause instructions if searching alerts index
       const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
 
+      // When a window is requested, bind the ES|QL ?_tstart/?_tend params to it.
+      // Left undefined, runSearchTool keeps its existing default (last 24h).
+      const timeRange =
+        timeWindowHours != null ? { from: `now-${timeWindowHours}h`, to: 'now' } : undefined;
+
       logger.debug(
         `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${
           isCount ?? false
-        }`
+        }, timeWindowHours: ${timeWindowHours ?? 'default'}`
       );
       const results = await runSearchTool({
         nlQuery: enhancedQuery,
         index: searchIndex,
         esClient: esClient.asCurrentUser,
-        model: await modelProvider.getDefaultModel(),
+        modelProvider,
         events,
         logger,
+        timeRange,
       });
 
       return { results };

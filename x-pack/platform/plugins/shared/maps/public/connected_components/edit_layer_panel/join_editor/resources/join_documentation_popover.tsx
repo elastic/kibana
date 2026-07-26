@@ -6,7 +6,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '../../../../kibana_services';
 
@@ -18,13 +26,15 @@ export function JoinDocumentationPopover() {
       id="joinHelpPopover"
       anchorPosition="leftCenter"
       button={
-        <EuiButtonIcon
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-          iconType="documentation"
-          aria-label="Join documentation"
-        />
+        <EuiToolTip content="Join documentation" disableScreenReaderOutput>
+          <EuiButtonIcon
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+            }}
+            iconType="documentation"
+            aria-label="Join documentation"
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => {
@@ -32,6 +42,12 @@ export function JoinDocumentationPopover() {
       }}
       repositionOnScroll
       ownFocus
+      aria-label={i18n.translate(
+        'xpack.maps.layerPanel.joinEditor.joinDocumentationPopoverAriaLabel',
+        {
+          defaultMessage: 'Join documentation',
+        }
+      )}
     >
       <EuiPopoverTitle>
         <FormattedMessage id="xpack.maps.layerPanel.joinEditor.title" defaultMessage="Joins" />

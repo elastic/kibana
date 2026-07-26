@@ -13,7 +13,7 @@ import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object({
   pipeline: schema.object(pipelineSchema),
-  documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+  documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 }),
   verbose: schema.maybe(schema.boolean()),
 });
 

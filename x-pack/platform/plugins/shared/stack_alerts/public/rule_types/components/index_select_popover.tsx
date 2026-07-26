@@ -20,20 +20,28 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  convertFieldSpecToFieldOption,
   firstFieldOption,
-  getFields,
   getIndexOptions,
   getTimeFieldOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface KibanaDeps {
   http: HttpSetup;
+  cps?: {
+    cpsManager?: {
+      getProjectRouting: () => string | undefined;
+    };
+  };
 }
+
 interface Props {
   index: string[];
   esFields: Array<{
@@ -45,6 +53,7 @@ interface Props {
   }>;
   timeField: string | undefined;
   errors: IErrorObject;
+  dataViews: DataViewsPublicPluginStart;
   onIndexChange: (indices: string[]) => void;
   onTimeFieldChange: (timeField: string) => void;
 }
@@ -54,10 +63,12 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
   esFields,
   timeField,
   errors,
+  dataViews,
   onIndexChange,
   onTimeFieldChange,
 }) => {
-  const { http } = useKibana<KibanaDeps>().services;
+  const { http, cps } = useKibana<KibanaDeps>().services;
+  const projectRouting = cps?.cpsManager?.getProjectRouting();
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
@@ -66,7 +77,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
 
   const loadIndexOptions = debounce(async (search: string) => {
     setAreIndicesLoading(true);
-    setIndexOptions(await getIndexOptions(http!, search));
+    setIndexOptions(await getIndexOptions(http!, search, projectRouting));
     setAreIndicesLoading(false);
   }, 250);
 
@@ -97,6 +108,9 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
   return (
     <EuiPopover
       id="indexPopover"
+      aria-label={i18n.translate('xpack.stackAlerts.components.ui.indexSelectPopover.ariaLabel', {
+        defaultMessage: 'Index',
+      })}
       button={
         <EuiExpression
           display="columns"
@@ -134,18 +148,28 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="closePopover"
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.stackAlerts.components.ui.alertParams.closeIndexPopoverLabel',
                   {
                     defaultMessage: 'Close',
                   }
                 )}
-                onClick={closeIndexPopover}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="closePopover"
+                  iconType="cross"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.stackAlerts.components.ui.alertParams.closeIndexPopoverLabel',
+                    {
+                      defaultMessage: 'Close',
+                    }
+                  )}
+                  onClick={closeIndexPopover}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
@@ -193,9 +217,17 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               if (selectedIndices.length === 0) {
                 setTimeFieldOptions([firstFieldOption]);
               } else {
-                const currentEsFields = await getFields(http!, selectedIndices);
-                const timeFields = getTimeFieldOptions(currentEsFields);
-                setTimeFieldOptions([firstFieldOption, ...timeFields]);
+                try {
+                  const fieldSpecs = await dataViews.getFieldsForWildcard({
+                    pattern: selectedIndices.join(','),
+                    allowNoIndex: true,
+                  });
+                  const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
+                  const timeFields = getTimeFieldOptions(currentEsFields);
+                  setTimeFieldOptions([firstFieldOption, ...timeFields]);
+                } catch {
+                  setTimeFieldOptions([firstFieldOption]);
+                }
               }
             }}
             onSearchChange={loadIndexOptions}

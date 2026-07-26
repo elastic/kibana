@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'fs';
+import { ProxyAgent } from 'undici';
 import { fetchArtifactVersions } from './fetch_artifact_versions';
 import type { ProductName } from '@kbn/product-doc-common';
 import { getArtifactName, DocumentationProduct } from '@kbn/product-doc-common';
@@ -46,12 +47,13 @@ const artifactRepositoryUrl = 'https://lost.com';
 const localArtifactRepositoryUrl = 'file://usr/local/local_artifacts';
 
 const expectVersions = (
-  versions: Partial<Record<ProductName, string[]>>
-): Record<ProductName, string[]> => {
-  const response = {} as Record<ProductName, string[]>;
+  versions: Partial<Record<ProductName | 'openapi', string[]>>
+): Record<ProductName | 'openapi', string[]> => {
+  const response = {} as Record<ProductName | 'openapi', string[]>;
   Object.values(DocumentationProduct).forEach((productName) => {
     response[productName] = [];
   });
+  response.openapi = [];
   return {
     ...response,
     ...versions,
@@ -87,6 +89,17 @@ describe('fetchArtifactVersions', () => {
     expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`, {});
   });
 
+  it('passes a proxy dispatcher to fetch when a proxy URL is configured', async () => {
+    mockResponse(createResponse({ artifactNames: [] }));
+    const artifactRepositoryProxyUrl = 'http://proxy.example.com:3128';
+
+    await fetchArtifactVersions({ artifactRepositoryUrl, artifactRepositoryProxyUrl });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const fetchOptions = fetchMock.mock.calls[0][1] as { dispatcher?: ProxyAgent };
+    expect(fetchOptions.dispatcher).toBeInstanceOf(ProxyAgent);
+  });
+
   it('parses the local file', async () => {
     const artifactNames = [
       getArtifactName({ productName: 'kibana', productVersion: '8.16' }),
@@ -107,6 +120,7 @@ describe('fetchArtifactVersions', () => {
       elasticsearch: ['8.16'],
       kibana: ['8.16'],
       observability: [],
+      openapi: [],
       security: [],
     });
   });
@@ -150,6 +164,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.16'],
         elasticsearch: ['8.16'],
+        openapi: [],
       })
     );
   });
@@ -170,6 +185,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.15', '8.16', '8.17'],
         elasticsearch: ['8.16', '9.0'],
+        openapi: [],
       })
     );
   });

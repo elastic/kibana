@@ -23,7 +23,7 @@ const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : pat
 /**
  * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
  */
-const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplaceai'];
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplaceai', 'vectordb'];
 
 /**
  * Representation of a Package in the Kibana repository
@@ -236,6 +236,9 @@ class Package {
       visibility = 'private';
     } else if (dir.startsWith('x-pack/solutions/workplaceai/')) {
       group = 'workplaceai';
+      visibility = 'private';
+    } else if (dir.startsWith('x-pack/solutions/vectordb/')) {
+      group = 'vectordb';
       visibility = 'private';
     } else {
       // this conditional branch is the only one that applies in production

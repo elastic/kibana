@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricVisualizationStateOptionals } from './types';
+import type {
+  MetricLayoutWithDefault,
+  MetricStateDefaults,
+  PrimaryMetricPosition,
+  MetricStyleTemplatePresetId,
+} from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
+
+/**
+ * Default number of color bands (palette steps) for the metric color-by-value palette.
+ */
+export const LENS_METRIC_DEFAULT_COLOR_STEPS = 3;
 
 export const LENS_METRIC_GROUP_ID = {
   METRIC: 'metric',
@@ -22,25 +32,57 @@ export const LENS_METRIC_GROUP_ID = {
   TREND_BREAKDOWN_BY: 'trendBreakdownBy',
 } as const;
 
+export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconAlign'> = {
+  iconAlign: 'left' as const,
+};
+
+/**
+ * Style template presets by primary metric position
+ */
+export const LENS_METRIC_STYLE_TEMPLATE: Record<
+  MetricStyleTemplatePresetId,
+  Required<MetricLayoutWithDefault>
+> = {
+  bottom: {
+    titlesTextAlign: 'left',
+    primaryPosition: 'bottom',
+    primaryAlign: 'right',
+    secondaryAlign: 'right',
+  },
+  middle: {
+    titlesTextAlign: 'center',
+    primaryPosition: 'middle',
+    primaryAlign: 'center',
+    secondaryAlign: 'center',
+  },
+  top: {
+    titlesTextAlign: 'left',
+    primaryPosition: 'top',
+    primaryAlign: 'left',
+    secondaryAlign: 'left',
+  },
+} as const;
+
+const DEFAULT_STYLE_TEMPLATE_PRESET_ID: PrimaryMetricPosition = 'bottom';
+export const LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG =
+  LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE_PRESET_ID];
+
 /**
  * Defaults for select optional Metric vis state options
  */
-export const LENS_METRIC_STATE_DEFAULTS: Required<
-  Pick<
-    MetricVisualizationStateOptionals,
-    'titlesTextAlign' | 'valuesTextAlign' | 'iconAlign' | 'valueFontMode'
-  >
-> = {
-  titlesTextAlign: 'left',
-  valuesTextAlign: 'right',
-  iconAlign: 'left',
+export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
+  ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+  iconAlign: 'right',
   valueFontMode: 'default',
+  density: 'default',
+  secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
 };
 
 export const LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';
 
 export const LENS_METRIC_DEFAULT_TRENDLINE_NAME = 'default';
-export const METRIC_TRENDLINE_NAME = 'metricTrendline';
+export const LENS_METRIC_TRENDLINE_NAME = 'metricTrendline';
 
 export const LENS_METRIC_LABEL_POSITION = {
   BOTTOM: 'bottom',
@@ -72,4 +114,4 @@ export const LENS_METRIC_AVAILABLE_METRIC_ICONS = {
   TEMPERATURE: 'temperature',
 } as const;
 
-export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
+export const LENS_EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';

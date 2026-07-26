@@ -24,6 +24,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  CREATE_DATA_VIEW_SUMMARY,
   CREATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 import type { DataViewSpecRestResponse } from '../route_types';
@@ -50,7 +51,7 @@ export const createDataView = async ({
 };
 
 const registerCreateDataViewRouteFactory =
-  (path: string, serviceKey: string, description?: string) =>
+  (path: string, serviceKey: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -63,6 +64,7 @@ const registerCreateDataViewRouteFactory =
       .post({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -76,8 +78,24 @@ const registerCreateDataViewRouteFactory =
           validate: {
             request: {
               body: schema.object({
-                override: schema.maybe(schema.boolean({ defaultValue: false })),
-                refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+                override: schema.maybe(
+                  schema.boolean({
+                    defaultValue: false,
+                    meta: {
+                      description:
+                        'When `true`, overwrites an existing data view if a data view with the same name or ID already exists.',
+                    },
+                  })
+                ),
+                refresh_fields: schema.maybe(
+                  schema.boolean({
+                    defaultValue: false,
+                    meta: {
+                      description:
+                        'When `true`, reloads the data view fields after the data view is created.',
+                    },
+                  })
+                ),
                 data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
                 index_pattern:
                   serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
@@ -142,10 +160,13 @@ const registerCreateDataViewRouteFactory =
 export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
   DATA_VIEW_PATH,
   SERVICE_KEY,
+  CREATE_DATA_VIEW_SUMMARY,
   CREATE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerCreateDataViewRouteLegacy = registerCreateDataViewRouteFactory(
   DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  CREATE_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view endpoint instead.'
 );

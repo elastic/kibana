@@ -76,6 +76,7 @@ describe('convert processors to json', () => {
       processor: '{"1": """aaa"bbb"""}',
       inference_config: '{"1": """aaa"bbb"""}',
       field_map: '{"1": """aaa"bbb"""}',
+      input_output: '[{"1": """aaa"bbb"""}]',
       customOptions: '{"customProcessor": """aaa"bbb"""}',
     };
 
@@ -92,6 +93,8 @@ describe('convert processors to json', () => {
       // eslint-disable-next-line prettier/prettier
       field_map: { 1: "aaa\"bbb" },
       // eslint-disable-next-line prettier/prettier
+      input_output: [{ 1: "aaa\"bbb" }],
+      // eslint-disable-next-line prettier/prettier
       customProcessor: "aaa\"bbb"
     });
   });
@@ -102,6 +105,7 @@ describe('convert processors to json', () => {
       value: '',
       inference_config: '',
       field_map: '',
+      input_output: '',
       params: '',
       pattern_definitions: '',
       processor: '',
@@ -115,6 +119,7 @@ describe('convert processors to json', () => {
       value: '',
       inference_config: '',
       field_map: '',
+      input_output: '',
       params: '',
       pattern_definitions: '',
       processor: '',
@@ -124,6 +129,7 @@ describe('convert processors to json', () => {
     expect(result.value).toBe('');
     expect(result.inference_config).toBe('');
     expect(result.field_map).toBe('');
+    expect(result.input_output).toBe('');
     expect(result.params).toBe('');
     expect(result.pattern_definitions).toBe('');
     expect(result.processor).toBe('');

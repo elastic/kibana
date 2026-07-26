@@ -20,13 +20,13 @@ export const getOpenSearchAppMenuItem = ({
 }): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.open,
-    order: 2,
+    order: 3,
     label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
-      defaultMessage: 'Open',
+      defaultMessage: 'Open session',
     }),
     iconType: 'folderOpen',
     testId: 'discoverOpenButton',
-    run: ({ context: { onFinishAction } }) => {
+    render: ({ context: { onFinishAction } }) => {
       return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
     },
   };

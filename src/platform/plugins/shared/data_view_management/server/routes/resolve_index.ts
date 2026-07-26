@@ -45,12 +45,7 @@ export function registerResolveIndexRoute(router: IRouter): void {
         const params = {
           name: req.params.query,
           expand_wildcards: req.query.expand_wildcards || 'open',
-          // TODO: we should be sending this param here and esClient should pass it to body but it is not yet supported in esClient
-          // ...(req.query.project_routing ? { project_routing: req.query.project_routing } : {}),
-          // so we do this for now:
-          ...(req.query.project_routing
-            ? { body: { project_routing: req.query.project_routing } }
-            : {}),
+          ...(req.query.project_routing ? { project_routing: req.query.project_routing } : {}),
         };
 
         // @ts-ignore because the types for resolveIndex do not yet include body param

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
@@ -53,6 +55,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Create cloud connector',
+      description: 'Create a new Fleet cloud connector.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -64,6 +67,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_cloud_connector.yaml'),
+        },
         validate: {
           request: CreateCloudConnectorRequestSchema,
           response: {
@@ -98,6 +104,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get cloud connectors',
+      description: 'List all Fleet cloud connectors.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -109,6 +116,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_cloud_connectors.yaml'),
+        },
         validate: {
           request: GetCloudConnectorsRequestSchema,
           response: {
@@ -143,6 +153,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get cloud connector',
+      description: 'Get a cloud connector by ID.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -154,6 +165,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_cloud_connector.yaml'),
+        },
         validate: {
           request: GetCloudConnectorRequestSchema,
           response: {
@@ -188,6 +202,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Update cloud connector',
+      description: 'Update a cloud connector by ID.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -199,6 +214,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_cloud_connector.yaml'),
+        },
         validate: {
           request: UpdateCloudConnectorRequestSchema,
           response: {
@@ -233,6 +251,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Delete cloud connector (supports force deletion)',
+      description:
+        'Delete a cloud connector by ID. Use the `force` query parameter to delete even if package policies are still using it.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -244,6 +264,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_cloud_connector.yaml'),
+        },
         validate: {
           request: DeleteCloudConnectorRequestSchema,
           response: {
@@ -278,6 +301,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get cloud connector usage (package policies using the connector)',
+      description: 'Get a list of package policies that are using a given cloud connector.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {

@@ -8,7 +8,6 @@
 import { sortBy } from 'lodash';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
@@ -22,6 +21,7 @@ import type {
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { SecurityNavControl } from './nav_control_component';
+import { UserMenuComponent } from './user_menu_component';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
@@ -108,25 +108,36 @@ export class SecurityNavControlService {
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     core.chrome.navControls.registerRight({
       order: 4000,
-      mount: (element: HTMLElement) => {
-        ReactDOM.render(
-          core.rendering.addContext(
-            <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-              <SecurityNavControl
-                editProfileUrl={core.http.basePath.prepend('/security/account')}
-                logoutUrl={this.logoutUrl}
-                userMenuLinks$={this.userMenuLinks$}
-              />
-            </Providers>
-          ),
-          element
-        );
-
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
+      content: (
+        <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+          <SecurityNavControl
+            editProfileUrl={core.http.basePath.prepend('/security/account')}
+            logoutUrl={this.logoutUrl}
+            userMenuLinks$={this.userMenuLinks$}
+          />
+        </Providers>
+      ),
     });
 
+    if (core.chrome.next.isEnabled) {
+      this.registerChromeNextUserMenu(core, authc);
+    }
+
     this.navControlRegistered = true;
+  }
+
+  private registerChromeNextUserMenu(core: CoreStart, authc: AuthenticationServiceSetup) {
+    core.chrome.next.userMenu.set(
+      <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+        <SecurityNavControl
+          editProfileUrl={core.http.basePath.prepend('/security/account')}
+          logoutUrl={this.logoutUrl}
+          userMenuLinks$={this.userMenuLinks$}
+          renderButton={(props) => <UserMenuComponent {...props} />}
+          avatarSize="m"
+        />
+      </Providers>
+    );
   }
 
   private sortUserMenuLinks(userMenuLinks: UserMenuLink[]) {

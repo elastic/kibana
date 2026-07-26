@@ -7,8 +7,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { i18n } from '@kbn/i18n';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { LensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import type { AsyncState } from 'react-use/lib/useAsync';

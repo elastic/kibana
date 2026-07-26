@@ -14,11 +14,12 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
-  RegistryPolicyInputOnlyTemplate,
+  RegistryDataStream,
 } from '../../../types';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
@@ -29,7 +30,7 @@ import * as Registry from '../registry';
 
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import { getNormalizedDataStreams } from '../../../../common/services';
+import { getNormalizedDataStreams, hasDynamicSignalTypes } from '../../../../common/services';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
@@ -44,6 +45,83 @@ import { cleanupAssets } from './remove';
 export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
   packagePolicyInput[0].streams[0]?.vars?.[DATASET_VAR_NAME]?.value;
 
+interface CustomDatasetStream {
+  datasetName: string;
+  dataStreamType: string;
+  inputType: string;
+  resolvedDataStream?: RegistryDataStream;
+  originDataset?: string;
+}
+
+export const getCustomDatasetStreams = (
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  pkgInfo: PackageInfo
+): CustomDatasetStream[] => {
+  if (pkgInfo.type === 'input') {
+    const datasetName = getDatasetName(packagePolicy.inputs);
+    if (!datasetName) return [];
+
+    const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
+    const signalTypes: string[] = (
+      isDynamicSignalTypes
+        ? ['logs', 'metrics', 'traces']
+        : [
+            packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+              packagePolicy.inputs[0].streams[0].data_stream?.type ||
+              'logs',
+          ]
+    )
+      // Fleet does not create data streams for unmanaged signal types (e.g. profiles);
+      // those are owned by the producer/exporter (see FLEET_UNMANAGED_DATA_STREAM_TYPES).
+      .filter((type) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type));
+
+    return signalTypes.map((type) => ({
+      datasetName,
+      dataStreamType: type,
+      inputType: packagePolicy.inputs[0].type,
+    }));
+  }
+
+  const defaultDatasets = new Set((pkgInfo.data_streams || []).map((ds) => ds.dataset));
+  const seen = new Set<string>();
+  const results: CustomDatasetStream[] = [];
+
+  for (const input of packagePolicy.inputs || []) {
+    if (input.enabled === false) continue;
+    for (const stream of input.streams || []) {
+      if (stream.enabled === false) continue;
+
+      const datasetVarValue = stream.vars?.[DATASET_VAR_NAME]?.value;
+      if (
+        !datasetVarValue ||
+        typeof datasetVarValue !== 'string' ||
+        defaultDatasets.has(datasetVarValue)
+      ) {
+        continue;
+      }
+
+      const dataStreamType = stream.data_stream.type || 'logs';
+      const dedupeKey = `${datasetVarValue}:${dataStreamType}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+
+      const templateDs = (pkgInfo.data_streams || []).find(
+        (ds) => ds.dataset === stream.data_stream.dataset && ds.type === dataStreamType
+      );
+
+      results.push({
+        datasetName: datasetVarValue,
+        dataStreamType,
+        inputType: input.type,
+        resolvedDataStream: templateDs ? { ...templateDs, dataset: datasetVarValue } : undefined,
+        originDataset: templateDs ? stream.data_stream.dataset : undefined,
+      });
+    }
+  }
+
+  return results;
+};
+
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
   pkgInfo: PackageInfo,
@@ -51,6 +129,9 @@ export const findDataStreamsFromDifferentPackages = async (
   dataStreamType?: string
 ) => {
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
+  if (!dataStream.type) {
+    throw new FleetError(`Expected data_stream.type to be defined for dataset "${datasetName}"`);
+  }
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,
@@ -62,42 +143,31 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
   pkgInfo: PackageInfo,
   existingDataStreams: IndicesDataStream[]
 ) => {
-  return (existingDataStreams || []).some((ds) => ds._meta?.package?.name !== pkgInfo.name);
+  return (existingDataStreams || []).some(
+    (ds) => ds._meta?.package?.name && ds._meta.package.name !== pkgInfo.name
+  );
 };
 
 export const isInputPackageDatasetUsedByMultiplePolicies = (
   packagePolicies: PackagePolicy[],
   datasetName: string,
-  pkgName: string
+  pkgName: string,
+  excludePolicyId?: string
 ) => {
-  const allStreams = packagePolicies
-    .filter(
-      (packagePolicy) =>
-        packagePolicy?.package?.name === pkgName || packagePolicy?.package?.type === 'input'
-    )
-    .flatMap((packagePolicy) => {
-      return packagePolicy?.inputs[0]?.streams ?? [];
-    });
-  const filtered = allStreams.filter(
-    (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
-  );
+  const matchingPolicies = packagePolicies.filter((packagePolicy) => {
+    if (packagePolicy?.package?.name !== pkgName) return false;
+    if (excludePolicyId && packagePolicy.id === excludePolicyId) return false;
+    return (packagePolicy?.inputs ?? []).some((input) =>
+      (input?.streams ?? []).some(
+        (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
+      )
+    );
+  });
 
-  return filtered.length > 1;
+  return matchingPolicies.length > 0;
 };
 
-export const hasDynamicSignalTypes = (packageInfo?: PackageInfo): boolean => {
-  if (!packageInfo) {
-    return false;
-  }
-  const inputOnlyTemplate = packageInfo.policy_templates?.find(
-    (template) => 'input' in template && template.input === OTEL_COLLECTOR_INPUT_TYPE
-  ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-  return inputOnlyTemplate?.dynamic_signal_types === true;
-};
-
-// install the assets needed for inputs type packages
-export async function installAssetsForInputPackagePolicy(opts: {
+export async function installAssetsForCustomDatasetPolicy(opts: {
   pkgInfo: PackageInfo;
   logger: Logger;
   packagePolicy: NewPackagePolicy;
@@ -107,32 +177,40 @@ export async function installAssetsForInputPackagePolicy(opts: {
 }) {
   const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
 
-  if (pkgInfo.type !== 'input') return;
+  const customStreams = getCustomDatasetStreams(packagePolicy, pkgInfo);
+  if (customStreams.length === 0) return;
 
-  const datasetName = getDatasetName(packagePolicy.inputs);
-
-  // For OTel packages with dynamic_signal_types, we need to create index templates for all signal types
-  const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
-  const signalTypes: string[] = isDynamicSignalTypes
-    ? ['logs', 'metrics', 'traces']
-    : [
-        packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-          packagePolicy.inputs[0].streams[0].data_stream?.type ||
-          'logs',
-      ];
-
-  // Check each signal type and install templates as needed
-  for (const dataStreamType of signalTypes) {
+  for (const {
+    datasetName,
+    dataStreamType,
+    inputType,
+    resolvedDataStream,
+    originDataset,
+  } of customStreams) {
     await installAssetsForDataStreamType({
       pkgInfo,
       logger,
       datasetName,
       dataStreamType,
+      inputType,
       esClient,
       soClient,
       force,
+      resolvedDataStream,
+      originDataset,
     });
   }
+}
+
+export async function installAssetsForInputPackagePolicy(opts: {
+  pkgInfo: PackageInfo;
+  logger: Logger;
+  packagePolicy: NewPackagePolicy;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  force: boolean;
+}) {
+  return installAssetsForCustomDatasetPolicy(opts);
 }
 
 async function installAssetsForDataStreamType(opts: {
@@ -140,18 +218,56 @@ async function installAssetsForDataStreamType(opts: {
   logger: Logger;
   datasetName: string;
   dataStreamType: string;
+  inputType: string;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   force: boolean;
+  resolvedDataStream?: RegistryDataStream;
+  originDataset?: string;
 }) {
-  const { pkgInfo, logger, datasetName, dataStreamType, esClient, soClient, force } = opts;
-
-  const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
-    datasetName,
+  const {
     pkgInfo,
+    logger,
+    datasetName,
+    dataStreamType,
+    inputType,
     esClient,
-    dataStreamType
-  );
+    soClient,
+    force,
+    resolvedDataStream,
+    originDataset,
+  } = opts;
+
+  let dataStream: RegistryDataStream;
+  let existingDataStreams: IndicesDataStream[];
+
+  if (resolvedDataStream) {
+    dataStream = resolvedDataStream;
+    if (!dataStream.type) {
+      throw new FleetError(`Expected data_stream.type to be defined for dataset "${datasetName}"`);
+    }
+    existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+      type: dataStream.type,
+      dataset: datasetName,
+    });
+  } else {
+    ({ dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
+      datasetName,
+      pkgInfo,
+      esClient,
+      dataStreamType
+    ));
+  }
+
+  if (pkgInfo.type === 'input') {
+    applyTimeSeriesIndexMode({
+      dataStream,
+      inputType,
+      dataStreamType,
+      pkgName: pkgInfo.name,
+      logger,
+    });
+  }
 
   if (existingDataStreams.length) {
     const existingDataStreamsAreFromDifferentPackage =
@@ -169,7 +285,14 @@ async function installAssetsForDataStreamType(opts: {
       throw new PackagePolicyValidationError(
         `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
       );
-    } else {
+    }
+    if (existingDataStreamsAreFromDifferentPackage && force) {
+      logger.info(
+        `Data stream for dataset ${datasetName} already exists, but is managed by a different package, skipping index template creation`
+      );
+      return;
+    }
+    if (!force) {
       logger.info(
         `Data stream for dataset ${datasetName} already exists, skipping index template creation`
       );
@@ -184,14 +307,22 @@ async function installAssetsForDataStreamType(opts: {
 
   if (existingIndexTemplate) {
     const indexTemplateOwnedByDifferentPackage =
-      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
+      existingIndexTemplate._meta?.package?.name &&
+      existingIndexTemplate._meta.package.name !== pkgInfo.name;
     if (indexTemplateOwnedByDifferentPackage && !force) {
       // index template already exists but there is no data stream yet
       // we do not want to override the index template
       throw new PackagePolicyValidationError(
         `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
       );
-    } else {
+    }
+    if (indexTemplateOwnedByDifferentPackage && force) {
+      logger.info(
+        `Index template "${dataStream.type}-${datasetName}" already exists, but is managed by a different package, skipping index template creation`
+      );
+      return;
+    }
+    if (!force) {
       logger.info(
         `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation`
       );
@@ -240,13 +371,16 @@ async function installAssetsForDataStreamType(opts: {
       esClient,
       logger,
       onlyForDataStreams: [dataStream],
+      customDataStreamOriginDataset: resolvedDataStream ? originDataset : undefined,
+      customDataStreamOriginType: resolvedDataStream ? dataStreamType : undefined,
     });
-    // Upate ES index patterns
+
+    // Update ES index patterns — use datasetName as the map key
     await optimisticallyAddEsAssetReferences(
       soClient,
       installedPkgWithAssets.installation.name,
       [],
-      generateESIndexPatterns([dataStream])
+      generateESIndexPatterns([{ ...dataStream, path: datasetName }])
     );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
@@ -263,8 +397,8 @@ export async function removeAssetsForInputPackagePolicy(opts: {
 }) {
   const { logger, packageInfo, esClient, savedObjectsClient, datasetName } = opts;
 
-  if (packageInfo.type === 'input' && packageInfo.status === 'installed') {
-    logger.info(`Removing assets for input package ${packageInfo.name}:${packageInfo.version}`);
+  if (packageInfo.status === 'installed') {
+    logger.info(`Removing assets for package ${packageInfo.name}:${packageInfo.version}`);
     try {
       const installation = await getInstallation({
         savedObjectsClient,
@@ -307,8 +441,60 @@ export async function removeAssetsForInputPackagePolicy(opts: {
       );
     } catch (error) {
       logger.error(
-        `Failed to remove assets for input package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
+        `Failed to remove assets for package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
       );
     }
   }
 }
+
+/**
+ * Applies time_series index mode rules to a data stream:
+ * - Removes time_series index mode for non-metrics data streams
+ * - Adds time_series index mode for OTel metrics data streams if not present
+ * - Preserves existing time_series index mode for metrics data streams
+ */
+export const applyTimeSeriesIndexMode = ({
+  dataStream,
+  inputType,
+  dataStreamType,
+  pkgName,
+  logger,
+}: {
+  dataStream: RegistryDataStream;
+  inputType: string;
+  dataStreamType: string;
+  pkgName: string;
+  logger: Logger;
+}): void => {
+  const isOTelInput = inputType === OTEL_COLLECTOR_INPUT_TYPE;
+  const isMetricsType = dataStreamType === 'metrics';
+
+  // For OTel inputs with metrics type, preserve time_series index mode
+  // For all other cases, only preserve time_series for metrics type
+  const shouldRemoveTimeSeries =
+    !isMetricsType && dataStream.elasticsearch?.index_mode === 'time_series';
+
+  if (shouldRemoveTimeSeries) {
+    logger.debug(
+      `Ignoring time_series index mode for package "${pkgName}" ` +
+        `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
+    );
+
+    // Remove time_series index mode from dataStream.
+    if (dataStream.elasticsearch) {
+      const { index_mode, ...restElasticsearch } = dataStream.elasticsearch;
+      dataStream.elasticsearch = restElasticsearch;
+    }
+  } else if (isOTelInput && isMetricsType && !dataStream.elasticsearch?.index_mode) {
+    // For OTel metrics data streams, add time_series index mode if not already present
+    logger.debug(
+      `Adding time_series index mode for OTel package "${pkgName}" ` +
+        `because data stream type is "${dataStreamType}"`
+    );
+
+    if (!dataStream.elasticsearch) {
+      dataStream.elasticsearch = {};
+    }
+    dataStream.elasticsearch.index_mode = 'time_series';
+  }
+};

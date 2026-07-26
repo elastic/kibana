@@ -4,25 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aiops-plugin'
+  title: '@kbn/aiops-plugin'
   description: Moon project for @kbn/aiops-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/aiops
+  sourceRoot: x-pack/platform/plugins/shared/aiops
 dependsOn:
   - '@kbn/aiops-change-point-detection'
   - '@kbn/aiops-common'
   - '@kbn/aiops-components'
   - '@kbn/aiops-log-pattern-analysis'
   - '@kbn/aiops-log-rate-analysis'
+  - '@kbn/aiops-server-schemas'
   - '@kbn/aiops-test-utils'
   - '@kbn/analytics'
   - '@kbn/cases-plugin'
@@ -35,7 +35,11 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-service'
+  - '@kbn/content-management-plugin'
+  - '@kbn/data-view-editor-plugin'
+  - '@kbn/data-view-field-editor-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/saved-objects-finder-plugin'
   - '@kbn/datemath'
   - '@kbn/ebt-tools'
   - '@kbn/embeddable-plugin'
@@ -66,7 +70,6 @@ dependsOn:
   - '@kbn/ml-time-buckets'
   - '@kbn/ml-ui-actions'
   - '@kbn/ml-url-state'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-mount'
@@ -88,7 +91,8 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/licensing-types'
   - '@kbn/unified-data-table'
-  - '@kbn/presentation-publishing-schemas'
+  - '@kbn/cps'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -103,16 +107,6 @@ fileGroups:
     - server/**/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

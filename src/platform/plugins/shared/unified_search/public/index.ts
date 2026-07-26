@@ -29,7 +29,6 @@ export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';
 export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
 export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
-export { UPDATE_FILTER_REFERENCES_TRIGGER } from './triggers';
 
 export async function createFilterAction(
   filterManager: FilterManager,

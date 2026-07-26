@@ -6,6 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
 import { groupSamplesByCategory } from '../../../common/topn';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -91,7 +92,12 @@ export function StackTracesView() {
   }, [state.status, state.data?.charts.length, onPageReady, rangeFrom, rangeTo]);
   return (
     <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
-      <ProfilingAppPageTemplate tabs={tabs}>
+      <ProfilingAppPageTemplate
+        tabs={tabs}
+        pageTitle={i18n.translate('xpack.profiling.stackTracesView.pageTitle', {
+          defaultMessage: 'Stacktraces',
+        })}
+      >
         <StackTraces
           type={topNType}
           state={state}

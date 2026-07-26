@@ -12,7 +12,6 @@ import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
-import { FilterBar } from './filter_bar';
 import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(function SnapshotContainer() {
@@ -43,14 +42,10 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
       accountId,
       region,
       schema: preferredSchema,
+      includeTimeseries: true,
     },
     { sendRequestImmediately: true }
   );
 
-  return (
-    <>
-      <FilterBar interval={interval} />
-      <LayoutView loading={loading} nodes={nodes} interval={interval} />
-    </>
-  );
+  return <LayoutView loading={loading} nodes={nodes} interval={interval} />;
 });

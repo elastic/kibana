@@ -5,69 +5,91 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
+import { getRuleIdByName } from '../../../fixtures/helpers';
 import { SHORTER_TIMEOUT } from '../../../fixtures/constants';
 
-test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.rulesPage.goto();
-  });
+test.describe(
+  'Rules Page - Rules Tab',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.rulesPage.goto();
+    });
 
-  test('should see the Rules Table container', async ({ pageObjects }) => {
-    await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
-  });
+    test.afterEach(async ({ apiServices }) => {
+      const ruleId = await getRuleIdByName(apiServices, RULE_NAMES.FIRST_RULE_TEST);
+      if (ruleId) {
+        await apiServices.alerting.rules.enable(ruleId);
+      }
+    });
 
-  test('should see an editable rule in the Rules Table', async ({ pageObjects }) => {
-    await expect(pageObjects.rulesPage.ruleSearchField).toBeVisible();
-    const editableRules = pageObjects.rulesPage.getEditableRules();
-    await expect(editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST })).toHaveCount(1);
-  });
+    test('should see the Rules Table container', async ({ pageObjects }) => {
+      await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
+    });
 
-  test('should show the edit action button for an editable rule & open the edit rule flyout', async ({
-    pageObjects,
-  }) => {
-    const editableRules = pageObjects.rulesPage.getEditableRules();
-    const ruleRow = editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST });
+    test('should see an editable rule in the Rules Table', async ({ pageObjects }) => {
+      await expect(pageObjects.rulesPage.ruleSearchField).toBeVisible();
+      const editableRules = pageObjects.rulesPage.getEditableRules();
+      await expect(editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST })).toHaveCount(1);
+    });
 
-    // Verify the rule row exists & that the edit button visible on hover
-    await expect(ruleRow).toBeVisible();
-    await ruleRow.hover();
+    // Skipping because unified rules does not support an edit flyout
+    test.skip('should show the edit action button for an editable rule & open the edit rule flyout', async ({
+      pageObjects,
+    }) => {
+      const editableRules = pageObjects.rulesPage.getEditableRules();
+      const ruleRow = editableRules.filter({ hasText: RULE_NAMES.FIRST_RULE_TEST });
 
-    // Verify the rule edit action (ruleSidebarEditAction) is visible
-    const editActionContainer = pageObjects.rulesPage.getRuleSidebarEditAction(ruleRow);
-    await expect(editActionContainer).toBeVisible({ timeout: SHORTER_TIMEOUT });
+      // Verify the rule row exists & that the edit button visible on hover
+      await expect(ruleRow).toBeVisible();
+      await ruleRow.hover();
 
-    // Verify the edit button is also visible
-    const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);
-    await expect(editButton).toBeVisible();
+      // Verify the rule edit action (ruleSidebarEditAction) is visible
+      const editActionContainer = pageObjects.rulesPage.getRuleSidebarEditAction(ruleRow);
+      await expect(editActionContainer).toBeVisible({ timeout: SHORTER_TIMEOUT });
 
-    // Verify the edit button is clickable and opens the edit rule flyout
-    await editButton.click();
-    await pageObjects.rulesPage.expectEditRuleFlyoutVisible();
+      // Verify the edit button is also visible
+      const editButton = pageObjects.rulesPage.getEditActionButton(ruleRow);
+      await expect(editButton).toBeVisible();
 
-    // Verify the edit rule flyout is visible with expected elements
-    await expect(pageObjects.rulesPage.editRuleFlyout).toBeVisible();
-    await expect(pageObjects.rulesPage.editRuleFlyoutCancelButton).toBeVisible();
-    await expect(pageObjects.rulesPage.editRuleFlyoutSaveButton).toBeVisible();
+      // Verify the edit button is clickable and opens the edit rule flyout
+      await editButton.click();
+      await pageObjects.rulesPage.expectEditRuleFlyoutVisible();
 
-    // Close the edit rule flyout & verify the edit rule flyout is closed
-    await pageObjects.rulesPage.closeEditRuleFlyout();
-    await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
-  });
+      // Verify the edit rule flyout is visible with expected elements
+      await expect(pageObjects.rulesPage.editRuleFlyout).toBeVisible();
+      await expect(pageObjects.rulesPage.editRuleFlyoutCancelButton).toBeVisible();
+      await expect(pageObjects.rulesPage.editRuleFlyoutSaveButton).toBeVisible();
 
-  test('changes the rule status to "disabled"', async ({ pageObjects }) => {
-    await expect(pageObjects.rulesPage.rulesTable).toBeVisible();
+      // Close the edit rule flyout & verify the edit rule flyout is closed
+      await pageObjects.rulesPage.closeEditRuleFlyout();
+      await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
+    });
 
-    await pageObjects.rulesPage.clickRuleStatusDropDownMenu(RULE_NAMES.FIRST_RULE_TEST);
-    await pageObjects.rulesPage.clickDisableFromDropDownMenu();
+    test('changes the rule status to "disabled"', async ({ apiServices, pageObjects, page }) => {
+      const ruleId = await getRuleIdByName(apiServices, RULE_NAMES.FIRST_RULE_TEST);
+      expect(ruleId, `Rule "${RULE_NAMES.FIRST_RULE_TEST}" not found`).toBeDefined();
+      await apiServices.alerting.rules.enable(ruleId!);
 
-    await expect(pageObjects.rulesPage.confirmModalButton).toBeVisible();
-    await pageObjects.rulesPage.confirmModalButton.click();
+      // Reload the page so the UI reflects the freshly enabled state.
+      await page.reload();
+      await pageObjects.rulesPage.expectRuleToBeEnabled(RULE_NAMES.FIRST_RULE_TEST);
 
-    // Wait for the rule status to change
-    await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
-  });
-});
+      await test.step('disable the rule via the status dropdown', async () => {
+        await expect(pageObjects.rulesPage.rulesTable).toBeVisible();
+        await pageObjects.rulesPage.clickRuleStatusDropDownMenu(RULE_NAMES.FIRST_RULE_TEST);
+        await pageObjects.rulesPage.clickDisableFromDropDownMenu();
+
+        await expect(pageObjects.rulesPage.confirmModalButton).toBeVisible();
+        await pageObjects.rulesPage.confirmModalButton.click();
+
+        await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
+      });
+    });
+  }
+);

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { schema } from './schema';
 
 import type { CasesConfigurationUI } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
+import { createFormSerializer, createFormDeserializer } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { type UseSubmitCaseValue } from './use_submit_case';
+import { KibanaServices } from '../../common/lib/kibana';
+import { useShowLegacyCustomFields } from '../../common/use_show_old_custom_fields';
 
 export interface FormContextProps {
   children?: JSX.Element | JSX.Element[];
@@ -32,6 +35,25 @@ export const FormContext: React.FC<FormContextProps> = ({
   onSubmitCase,
 }) => {
   const { data: connectors = [] } = useGetSupportedActionConnectors();
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+  const { showLegacyCustomFields } = useShowLegacyCustomFields(
+    currentConfiguration.customFields ?? []
+  );
+  const includeLegacyCustomFields = !isTemplatesV2Enabled || showLegacyCustomFields;
+
+  const serializer = useCallback(
+    (data: CaseFormFieldsSchemaProps) =>
+      createFormSerializer(
+        connectors,
+        {
+          ...currentConfiguration,
+          owner: selectedOwner,
+        },
+        data,
+        { includeLegacyCustomFields }
+      ),
+    [connectors, currentConfiguration, selectedOwner, includeLegacyCustomFields]
+  );
 
   const { form } = useForm({
     defaultValue: {
@@ -49,15 +71,7 @@ export const FormContext: React.FC<FormContextProps> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: onSubmitCase,
-    serializer: (data: CaseFormFieldsSchemaProps) =>
-      createFormSerializer(
-        connectors,
-        {
-          ...currentConfiguration,
-          owner: selectedOwner,
-        },
-        data
-      ),
+    serializer,
     deserializer: createFormDeserializer,
   });
 

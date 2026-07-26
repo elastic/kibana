@@ -10,23 +10,6 @@
 import { transformOptionsIn } from './transform_options_in';
 
 describe('transformOptionsIn', () => {
-  it('should not provide any defaults', () => {
-    const apiOptions = undefined;
-    const result = transformOptionsIn(apiOptions);
-    expect(result).toEqual(JSON.stringify({}));
-  });
-
-  it('should pick only supported options', () => {
-    const apiOptions = { foo: false, hide_panel_titles: true };
-    const result = transformOptionsIn(apiOptions);
-    expect(result).toEqual(
-      JSON.stringify({
-        hidePanelTitles: true,
-      })
-    );
-    expect(result.indexOf('foo')).toBe(-1);
-  });
-
   it('should translate all options', () => {
     const apiOptions = {
       hide_panel_titles: true,

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import type { ToolCreateParams } from '@kbn/agent-builder-server';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import type { ToolTypeUpdateParams } from '../../tool_provider';
+import type { ToolTypeUpdateParams, ToolProviderListFilters } from '../../tool_provider';
 import type { ToolStorage } from './storage';
 import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
@@ -21,7 +22,7 @@ import type { ToolDocument, ToolPersistedDefinition } from './types';
  */
 export interface ToolClient {
   get(toolId: string): Promise<ToolPersistedDefinition>;
-  list(): Promise<ToolPersistedDefinition[]>;
+  list(filters?: ToolProviderListFilters): Promise<ToolPersistedDefinition[]>;
   create(esqlTool: ToolCreateParams): Promise<ToolPersistedDefinition>;
   update(toolId: string, updates: ToolTypeUpdateParams): Promise<ToolPersistedDefinition>;
   delete(toolId: string): Promise<boolean>;
@@ -59,11 +60,20 @@ class ToolClientImpl {
     return fromEs(document);
   }
 
-  async list(): Promise<ToolPersistedDefinition[]> {
+  async list(filters?: ToolProviderListFilters): Promise<ToolPersistedDefinition[]> {
+    const filterClauses: QueryDslQueryContainer[] = [createSpaceDslFilter(this.space)];
+
+    if (filters?.types && filters.types.length > 0) {
+      filterClauses.push({ terms: { type: filters.types } });
+    }
+    if (filters?.tags && filters.tags.length > 0) {
+      filterClauses.push({ terms: { tags: filters.tags } });
+    }
+
     const document = await this.storage.getClient().search({
       query: {
         bool: {
-          filter: [createSpaceDslFilter(this.space)],
+          filter: filterClauses,
         },
       },
       size: 1000,

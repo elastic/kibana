@@ -36,7 +36,6 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import type { CanvasApi } from './plugin_api';
 import { getPluginApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
-import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { getHasWorkpads } from './services/get_has_workpads';
 
@@ -179,8 +178,6 @@ export class CanvasPlugin
       const { transitions } = await import('./transitions');
       return transitions;
     });
-
-    setupPlugins.uiActions.registerTrigger(addCanvasElementTrigger);
 
     return {
       ...canvasApi,

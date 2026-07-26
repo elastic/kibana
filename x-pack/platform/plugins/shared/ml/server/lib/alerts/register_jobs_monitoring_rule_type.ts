@@ -29,6 +29,7 @@ import type { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { anomalyDetectionJobsHealthRuleParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection_jobs_health';
 
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import {
   ALERT_DATAFEED_RESULTS,
   ALERT_DELAYED_DATA_RESULTS,
@@ -41,7 +42,6 @@ import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import { assertUserError } from './utils';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 

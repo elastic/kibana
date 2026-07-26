@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/276038
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add persistent Entity AI summaries and warn when risk score changes
+description: "Entity AI summaries are stored in the entity metadata data stream so they no longer regenerate on every flyout open. When an entity's risk score changes after generation, a warning callout prompts you to regenerate the summary."

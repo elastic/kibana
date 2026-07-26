@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-endpoint",
+  "owner": "@elastic/security-defend-workflows",
+  "group": "security",
+  "visibility": "private"
+}

@@ -51,7 +51,6 @@ describe('renderApp', () => {
       chrome: {
         docTitle: { change: noop },
         setBreadcrumbs: noop,
-        setHelpExtension: noop,
       },
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },

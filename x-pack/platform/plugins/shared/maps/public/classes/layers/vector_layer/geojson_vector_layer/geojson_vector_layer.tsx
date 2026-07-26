@@ -122,7 +122,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       this.getSource().getSourceStatus(sourceDataRequest);
     return {
       icon: isDeprecated ? (
-        <EuiIcon type="warning" color="danger" />
+        <EuiIcon type="warning" color="danger" aria-hidden={true} />
       ) : (
         this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed)
       ),

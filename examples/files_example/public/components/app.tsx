@@ -21,6 +21,7 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -89,7 +90,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (
-          <EuiIcon color="danger" type="warning" arial-label={status} />
+          <EuiIcon color="danger" type="warning" aria-label={status} />
         ),
     },
     {
@@ -100,12 +101,14 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           description: 'View file',
           isPrimary: true,
           render: (item) => (
-            <EuiButtonIcon
-              disabled={isDeletingFile}
-              aria-label="View file details"
-              iconType="eye"
-              onClick={() => setSelectedItem(item)}
-            />
+            <EuiToolTip content="View file details" disableScreenReaderOutput>
+              <EuiButtonIcon
+                disabled={isDeletingFile}
+                aria-label="View file details"
+                iconType="eye"
+                onClick={() => setSelectedItem(item)}
+              />
+            </EuiToolTip>
           ),
         },
         {
@@ -138,6 +141,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
           <EuiInMemoryTable
+            tableCaption="Files example"
             columns={columns}
             items={items}
             itemId="id"

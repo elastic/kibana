@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -62,8 +62,10 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const missingRules = !hasDefaultRules && !canSave;
 
   useEffect(() => {
-    dispatch(getDynamicSettingsAction.get());
-  }, [dispatch]);
+    if (!settings) {
+      dispatch(getDynamicSettingsAction.get());
+    }
+  }, [dispatch, settings]);
 
   return (
     <>

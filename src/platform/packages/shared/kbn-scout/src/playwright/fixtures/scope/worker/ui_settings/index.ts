@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { UiSettingValues } from '@kbn/kbn-client';
 
 export interface UiSettingsFixture {
   /**
@@ -29,6 +29,14 @@ export interface UiSettingsFixture {
    * @returns A Promise that resolves once the default time is set.
    */
   setDefaultTime: ({ from, to }: { from: string; to: string }) => Promise<void>;
+  /**
+   * Sets the Kibana timezone to UTC.
+   */
+  setKibanaTimeZoneToUTC: () => Promise<void>;
+  /**
+   * Resets the Kibana timezone to its default value.
+   */
+  resetKibanaTimeZone: () => Promise<void>;
 }
 
 export { uiSettingsFixture } from './single_thread';

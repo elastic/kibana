@@ -32,8 +32,8 @@ function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>)
 }
 
 describe('Transformation API', () => {
-  it("should not save to library if there's already a saveObjectId", async () => {
-    const api = setupDashboardServicesApi({ savedObjectId: faker.string.uuid() });
+  it("should not save to library if there's already a ref_id", async () => {
+    const api = setupDashboardServicesApi({ ref_id: faker.string.uuid() });
     expect(await api.canLinkToLibrary()).toBe(false);
   });
 

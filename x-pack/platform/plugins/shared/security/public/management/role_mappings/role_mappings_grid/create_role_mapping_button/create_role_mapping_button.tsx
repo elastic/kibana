@@ -21,7 +21,7 @@ interface CreateRoleMappingButtonProps {
 export const CreateRoleMappingButton = ({ history }: CreateRoleMappingButtonProps) => {
   return (
     <EuiButton
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       data-test-subj="createRoleMappingButton"
       {...reactRouterNavigate(history, EDIT_ROLE_MAPPING_PATH)}
       fill

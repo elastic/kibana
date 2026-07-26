@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DeleteTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_URL } from '../../../../../../common/constants';

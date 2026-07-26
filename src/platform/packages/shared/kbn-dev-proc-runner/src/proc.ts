@@ -33,6 +33,8 @@ export interface ProcOptions {
   env?: Record<string, string | undefined>;
   stdin?: string;
   writeLogsToPath?: string;
+  /** When provided, each output line (ANSI-stripped) is pushed to this array. */
+  captureOutputLines?: string[];
 }
 
 async function withTimeout(
@@ -134,6 +136,10 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   ).pipe(
     tap({
       next(line) {
+        if (options.captureOutputLines) {
+          options.captureOutputLines.push(stripAnsi(line));
+        }
+
         if (stdioTarget) {
           stdioTarget.write(stripAnsi(line) + '\n');
         } else {

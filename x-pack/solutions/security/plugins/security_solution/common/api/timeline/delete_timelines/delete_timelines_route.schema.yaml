@@ -26,19 +26,39 @@ paths:
               properties:
                 savedObjectIds:
                   type: array
+                  maxItems: 100
                   items:
                     type: string
                   description: The list of IDs of the Timelines or Timeline templates to delete
-                  example:
-                    - '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
                 searchIds:
                   type: array
+                  maxItems: 100
                   description: Saved search IDs that should be deleted alongside the timelines
                   items:
                     type: string
-                  example:
-                    - 23f3-43g34g322-e5g5hrh6h-45454
+            examples:
+              deleteByIds:
+                summary: Delete timelines by saved object id
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+              deleteWithSearches:
+                summary: Delete Timelines and their linked saved searches
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                  searchIds:
+                    - 2c1b8f02-9ad6-4e33-8f6a-2c6b7d0a1f11
       responses:
         '200':
-          description: Indicates the Timeline was successfully deleted.
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Success
+                  value: {}

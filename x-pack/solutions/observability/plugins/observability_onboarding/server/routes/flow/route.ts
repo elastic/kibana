@@ -12,11 +12,19 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { dump } from 'js-yaml';
-import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
-import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
+import { stringify } from 'yaml';
+import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
+import { generateAgentConfigTar } from './generate_agent_config';
+import { createWiredStreamsRoutingProcessor } from './inject_wired_streams_routing';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
-import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
+import {
+  assertFlowOwnership,
+  createObservabilityOnboardingInternalRepository,
+  getCurrentUsername,
+  getObservabilityOnboardingFlow,
+  ONBOARDING_SESSION_NOT_FOUND_MESSAGE,
+  saveObservabilityOnboardingFlow,
+} from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
@@ -28,7 +36,6 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
-import { makeTar, type Entry } from './make_tar';
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -36,7 +43,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     authz: {
       enabled: false,
       reason:
-        "This endpoint is meant to be called from user's terminal and authenticated using API key with a limited privileges. For this reason there is no authorization and saved object is accessed using an internal Kibana user (the API key used by the user should not have those privileges)",
+        "This endpoint is meant to be called from user's terminal and authenticated using an API key with limited privileges. The saved object is accessed via an internal repository because that API key intentionally lacks privileges on the hidden `observability-onboarding-state` type. Authorization is enforced in-handler by a current-user ownership check against the flow's `createdBy`.",
     },
   },
   params: t.type({
@@ -60,6 +67,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         path: { id, name },
         body: { status, message, payload },
       },
+      context,
       core,
     } = resources;
 
@@ -70,7 +78,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
      */
     const decodedMessage = Buffer.from(message ?? '', 'base64').toString('utf-8');
     const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
@@ -78,8 +86,10 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     });
 
     if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound('Unable to report setup progress - onboarding session not found.');
+      throw Boom.notFound(ONBOARDING_SESSION_NOT_FOUND_MESSAGE);
     }
+
+    await assertFlowOwnership({ context, flow: savedObservabilityOnboardingState });
 
     const {
       id: savedObjectId,
@@ -121,7 +131,8 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason: 'Authorization is checked by the Saved Object client',
+      reason:
+        "The saved object is accessed via an internal repository because the hidden `observability-onboarding-state` type is not reachable through the request-scoped client. Authorization is enforced in-handler by a current-user ownership check against the flow's `createdBy`.",
     },
   },
   params: t.type({
@@ -134,26 +145,34 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       params: {
         path: { onboardingId },
       },
+      context,
       core,
       request,
     } = resources;
     const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
       savedObjectId: onboardingId,
     });
 
     if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound('Unable to report setup progress - onboarding session not found.');
+      throw Boom.notFound(ONBOARDING_SESSION_NOT_FOUND_MESSAGE);
     }
+
+    await assertFlowOwnership({ context, flow: savedObservabilityOnboardingState });
 
     const progress = { ...savedObservabilityOnboardingState?.progress };
 
     const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-    if (progress['ea-status']?.status === 'complete') {
-      const { agentId } = progress['ea-status']?.payload as ElasticAgentStepPayload;
+    const elasticAgentPayload = progress['ea-status']?.payload;
+    if (
+      progress['ea-status']?.status === 'complete' &&
+      elasticAgentPayload &&
+      'agentId' in elasticAgentPayload
+    ) {
+      const { agentId } = elasticAgentPayload as ElasticAgentStepPayload;
       try {
         const hasLogs = await getHasLogs(esClient, agentId);
         progress['logs-ingest'] = { status: hasLogs ? 'complete' : 'loading' };
@@ -183,16 +202,21 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason: 'Authorization is checked by the Saved Object client',
+      reason:
+        'The saved object is created via an internal repository (the hidden `observability-onboarding-state` type). Authorization is the existing Elasticsearch `hasLogMonitoringPrivileges` check, and the new flow is bound to the current user via `createdBy`.',
     },
   },
   async handler(resources) {
-    const { context, core, request, plugins, kibanaVersion } = resources;
+    const { context, core, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
     } = await context.core;
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
+    const createdBy = await getCurrentUsername(context);
+    if (!createdBy) {
+      throw Boom.forbidden('Unable to create onboarding session.');
+    }
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
     if (!hasPrivileges) {
@@ -207,6 +231,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
           savedObjectsClient,
           observabilityOnboardingState: {
             type: 'autoDetect',
+            createdBy,
             state: undefined,
             progress: {},
           },
@@ -293,7 +318,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     authz: {
       enabled: false,
       reason:
-        "This endpoint is meant to be called from user's terminal. Authorization is partially checked by the Package Service client, and saved object is accessed using internal Kibana user because the API key used for installing integrations should not have those privileges.",
+        "This endpoint is meant to be called from user's terminal. Fleet package privileges are checked via the Package Service client, and the saved object is accessed via an internal repository because the API key used for installing integrations intentionally lacks privileges on the hidden `observability-onboarding-state` type. Authorization is enforced in-handler by a current-user ownership check against the flow's `createdBy`.",
     },
   },
   params: t.type({
@@ -303,6 +328,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     query: t.union([
       t.partial({
         metricsEnabled: t.string,
+        writeToLogsStreams: t.string,
       }),
       t.undefined,
     ]),
@@ -310,10 +336,22 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
   }),
   async handler({ context, request, response, params, core, plugins, services }) {
     const coreStart = await core.start();
-    const fleetStart = await plugins.fleet.start();
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
 
-    // Check Fleet integration privileges before attempting to install packages
+    const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
+      savedObjectsClient,
+      savedObjectId: params.path.onboardingId,
+    });
+    if (!savedObservabilityOnboardingState) {
+      throw Boom.notFound(`Onboarding session '${params.path.onboardingId}' not found.`);
+    }
+    await assertFlowOwnership({
+      context,
+      flow: savedObservabilityOnboardingState,
+      notFoundMessage: `Onboarding session '${params.path.onboardingId}' not found.`,
+    });
+
+    const fleetStart = await plugins.fleet.start();
     const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetStart);
 
     if (!hasFleetPrivileges) {
@@ -326,14 +364,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     }
 
     const packageClient = fleetStart.packageService.asScoped(request);
-
-    const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
-      savedObjectsClient,
-      savedObjectId: params.path.onboardingId,
-    });
-    if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound(`Onboarding session '${params.path.onboardingId}' not found.`);
-    }
 
     const outputClient = await fleetStart.createOutputClient(request);
     const defaultOutputId = await outputClient.getDefaultDataOutputId();
@@ -352,12 +382,14 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     }
 
     const metricsEnabled = params.query?.metricsEnabled === 'true';
+    const writeToLogsStreams = params.query?.writeToLogsStreams === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
         packageClient,
-        metricsEnabled
+        metricsEnabled,
+        writeToLogsStreams
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
         if (result.status === 'fulfilled') {
@@ -413,11 +445,15 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
+    const shouldWriteToLogsStreams =
+      writeToLogsStreams &&
+      installedIntegrations.some((integration) => integration.installSource === 'custom');
+
     return response.ok({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar(output, installedIntegrations),
+      body: generateAgentConfigTar(output, installedIntegrations, shouldWriteToLogsStreams),
     });
   },
 });
@@ -443,7 +479,8 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient,
-  metricsEnabled: boolean = true
+  metricsEnabled: boolean = true,
+  writeToLogsStreams: boolean = false
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
@@ -457,7 +494,10 @@ async function ensureInstalledIntegrations(
           pkg.version,
           (input) =>
             !['httpjson', 'winlog'].includes(input.type) &&
-            (metricsEnabled || !input.type.endsWith('/metrics'))
+            (metricsEnabled || !input.type.endsWith('/metrics')),
+          undefined, // prerelease
+          undefined, // ignoreUnverified
+          false // injectWiredStreamsRouting (only custom logs should route to /logs)
         );
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
@@ -479,12 +519,25 @@ async function ensureInstalledIntegrations(
         type: 'logs',
         dataset: pkgName,
       };
+
+      const processors = [
+        ...(writeToLogsStreams ? [createWiredStreamsRoutingProcessor()] : []),
+        {
+          add_fields: {
+            target: 'service',
+            fields: {
+              name: pkgName,
+            },
+          },
+        },
+      ];
+
       const installed: InstalledIntegration = {
         installSource,
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
         title: pkgName,
-        config: dump({
+        config: stringify({
           inputs: [
             {
               id: `filestream-${pkgName}`,
@@ -494,16 +547,7 @@ async function ensureInstalledIntegrations(
                   id: `filestream-${pkgName}`,
                   data_stream: dataStream,
                   paths: integration.logFilePaths,
-                  processors: [
-                    {
-                      add_fields: {
-                        target: 'service',
-                        fields: {
-                          name: pkgName,
-                        },
-                      },
-                    },
-                  ],
+                  processors,
                 },
               ],
             },
@@ -546,21 +590,16 @@ async function ensureInstalledIntegrations(
  * checkout_service custom /path/to/error.log
  * ```
  */
-const MAX_INTEGRATIONS_LIMIT = 100;
+export const MAX_INTEGRATIONS_LIMIT = 100;
 
-function parseIntegrationsTSV(tsv: string) {
+export function parseIntegrationsTSV(tsv: string) {
   if (tsv.trim() === '') {
     return [];
   }
 
   const lines = tsv.trim().split('\n');
-  if (lines.length > MAX_INTEGRATIONS_LIMIT) {
-    throw new Error(
-      `Too many entries in the request. Maximum allowed is ${MAX_INTEGRATIONS_LIMIT}, but received ${lines.length}.`
-    );
-  }
 
-  return Object.values(
+  const integrations = Object.values(
     lines
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
@@ -594,6 +633,14 @@ function parseIntegrationsTSV(tsv: string) {
         throw new Error(`Invalid install source: ${installSource}`);
       }, {})
   );
+
+  if (integrations.length > MAX_INTEGRATIONS_LIMIT) {
+    throw new Error(
+      `Too many integrations in the request. Maximum allowed is ${MAX_INTEGRATIONS_LIMIT}, but received ${integrations.length}.`
+    );
+  }
+
+  return integrations;
 }
 
 function parseRegistryIntegrationMetadata(
@@ -610,37 +657,6 @@ function parseRegistryIntegrationMetadata(
     default:
       return undefined;
   }
-}
-
-function generateAgentConfigTar(output: Output, installedIntegrations: InstalledIntegration[]) {
-  const now = new Date();
-
-  return makeTar([
-    {
-      type: 'File',
-      path: 'elastic-agent.yml',
-      mode: 0o644,
-      mtime: now,
-      data: dump({
-        outputs: {
-          default: transformOutputToFullPolicyOutput(output, undefined, true),
-        },
-      }),
-    },
-    {
-      type: 'Directory',
-      path: 'inputs.d/',
-      mode: 0o755,
-      mtime: now,
-    },
-    ...installedIntegrations.map<Entry>((integration) => ({
-      type: 'File',
-      path: `inputs.d/${integration.pkgName}.yml`,
-      mode: 0o644,
-      mtime: now,
-      data: integration.config,
-    })),
-  ]);
 }
 
 export const flowRouteRepository = {

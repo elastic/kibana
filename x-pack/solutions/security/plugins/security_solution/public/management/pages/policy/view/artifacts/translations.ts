@@ -71,6 +71,7 @@ export type PolicyArtifactsPageRequiredLabels = Pick<
   | 'emptyUnexistingTitle'
   | 'emptyUnexistingMessage'
   | 'emptyUnexistingPrimaryActionButtonTitle'
+  | 'emptyUnexistingImportButtonTitle'
   | 'listTotalItemCountMessage'
   | 'listRemoveActionNotAllowedMessage'
   | 'listSearchPlaceholderMessage'

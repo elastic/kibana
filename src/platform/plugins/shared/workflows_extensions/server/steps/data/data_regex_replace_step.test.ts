@@ -31,6 +31,7 @@ describe('dataRegexReplaceStepDefinition', () => {
       renderInputTemplate: jest.fn((val) => val),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn(),
+      callKibanaApi: jest.fn(),
     },
     logger: {
       debug: jest.fn(),
@@ -40,7 +41,7 @@ describe('dataRegexReplaceStepDefinition', () => {
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
-    stepType: 'data.regex_replace',
+    stepType: 'data.regexReplace',
   });
 
   describe('simple replacement', () => {

@@ -1,0 +1,47 @@
+{
+  "sha1": "e0506c8a87559b09f04014dec96f2a071fe2dccb",
+  "tests": [
+    {
+      "id": "1b513f723098bcd-67df9619ed61daf",
+      "title": "Ingest Exploratory View test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "e0b56225d6d2301-f5763f6ded5f5d6",
+      "title": "Step Duration series builds series with step duration metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/step_duration.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "225887aa712da13-2f1411f8f65b4df",
+      "title": "Exploratory View - prefilled from the UX app opens a prefilled Exploratory View and breaks down by user agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/ux_prefill_exploratory_view.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    }
+  ]
+}

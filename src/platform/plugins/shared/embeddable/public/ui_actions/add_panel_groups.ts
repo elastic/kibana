@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 export const ADD_PANEL_VISUALIZATION_GROUP = {
   id: 'visualizations',
   getDisplayName: () =>
-    i18n.translate('embeddableApi.common.constants.grouping.visualizations', {
-      defaultMessage: 'Visualizations',
+    i18n.translate('embeddableApi.common.constants.grouping.otherVisualizations', {
+      defaultMessage: 'Other visualizations',
     }),
   getIconType: () => {
-    return 'visGauge';
+    return 'chartGauge';
   },
   order: 1000,
 };

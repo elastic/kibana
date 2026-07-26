@@ -87,16 +87,21 @@ export const getConnectorTypeTitle = (
     return null;
   }
 
-  const actionType = connector.isPreconfigured
-    ? PRECONFIGURED_CONNECTOR
-    : getGenAiConfig(connector)?.apiProvider ??
-      getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+  const actionType =
+    connector.isPreconfigured || ('isEis' in connector && connector.isEis)
+      ? PRECONFIGURED_CONNECTOR
+      : getGenAiConfig(connector)?.apiProvider ??
+        getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
 
   return actionType;
 };
 
 export const isElasticManagedLlmConnector = (
   connector:
-    | { actionTypeId: AIConnector['actionTypeId']; isPreconfigured: AIConnector['isPreconfigured'] }
+    | {
+        actionTypeId: AIConnector['actionTypeId'];
+        isPreconfigured?: boolean;
+        isEis?: boolean;
+      }
     | undefined
-) => connector?.actionTypeId === '.inference' && connector?.isPreconfigured;
+) => (connector?.actionTypeId === '.inference' && connector?.isPreconfigured) || connector?.isEis;

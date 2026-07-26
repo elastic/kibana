@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { getTitle } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
@@ -223,8 +223,15 @@ export function initializeCrossPanelActions({
       unsubscribeFromStore();
     },
     getIsFilterByMapExtent,
-    anyStateChange$: merge(isMovementSynchronized$, isFilterByMapExtent$).pipe(
-      map(() => undefined)
+    anyStateChange$: merge(
+      isMovementSynchronized$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      isFilterByMapExtent$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
     ),
     reinitializeState: (lastSaved: MapEmbeddableState) => {
       setIsMovementSynchronized(lastSaved.isMovementSynchronized);

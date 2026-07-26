@@ -84,8 +84,9 @@ export const functions = {
   ### DIVIDE \`/\`
   Divide one value by another. For numeric operands, if either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields)
   then the result is \`null\`.
-  note = "Division of two integer types will yield an integer result, rounding towards 0. "
-  + "If you need floating point division, [\`Cast (::)\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/operators#esql-cast-operator) one of the arguments to a \`DOUBLE\`.
+
+  Note: Division of two integer types will yield an integer result, rounding towards 0. "
+  If you need floating point division, [\`Cast (::)\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/operators#esql-cast-operator) one of the arguments to a \`DOUBLE\`.
   For dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate null result.
 
   `,
@@ -354,10 +355,10 @@ export const functions = {
   Use the match operator (\`:\`) to perform a [match query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query) on the specified field.
   Using \`:\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  The match operator is equivalent to the [match function](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-match).
+  The match operator is equivalent to the [match function](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/search-functions/match).
 
   For using the function syntax, or adding [match query parameters](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query#match-field-params), you can use the
-  [match function](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-match).
+  [match function](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/search-functions/match).
 
   \`:\` returns true if the provided query matches the row.
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -43,7 +43,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },
-      { esClient, modelProvider, logger }
+      { esClient, experimentalFeatures, modelProvider, logger }
     ) => {
       logger.debug(
         `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
@@ -53,6 +53,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
         nlQuery,
         indexPattern,
         limit,
+        includeDatasets: experimentalFeatures.datasets,
         esClient: esClient.asCurrentUser,
         model,
       });

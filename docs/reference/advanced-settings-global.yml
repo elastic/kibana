@@ -1,0 +1,104 @@
+---
+# This file is used to generate "Logging settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Global advanced settings in Kibana
+id: kibana-global-settings-reference
+page_description: |
+  Change the settings that apply to all of {{product.kibana}}.
+
+  1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+  2. Click **Global Settings**.
+  3. Scroll or search for the setting.
+  4. Make your change, then click **Save changes**.
+
+groups:
+  - group: General
+    id: kibana-general-global-settings
+    settings:
+
+      - setting: hideAnnouncements
+        id: hideAnnouncements-global
+        description: |
+          Stops showing messages and tours that highlight new features.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Custom branding
+    id: kibana-custom-branding-settings
+    note: "Custom branding is a [subscription feature](https://www.elastic.co/subscriptions)."
+    settings:
+
+      - setting: "xpackCustomBranding:logo"
+        id: custom-logo
+        description: |
+          A custom image that appears in the header of all {{product.kibana}} pages. Images must have a transparent background, and 128x128 pixels or smaller.
+        datatype: image
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "xpackCustomBranding:customizedLogo"
+        id: organization-name
+        description: |
+          The custom image that replaces the text next to the logo in the header of all {{product.kibana}} pages. Images look best when they are no larger than 200 x 84 pixels and have a transparent background.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "xpackCustomBranding:pageTitle"
+        id: page-title
+        description: |
+          The custom text that appears on {{product.kibana}} browser tabs.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "xpackCustomBranding:faviconSVG"
+        id: favicon-svg
+        description: |
+          The URL of a custom SVG image that appears on {{product.kibana}} browser tabs. Images must be 16x16 pixels.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "xpackCustomBranding:faviconPNG"
+        id: favicon-png
+        description: |
+          The URL of a custom PNG image that appears on {{product.kibana}} browser tabs.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable

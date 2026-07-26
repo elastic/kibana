@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // create drilldown
     await dashboardDrilldownPanelActions.clickCreateDrilldown();
     await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
-    await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
+    await testSubjects.click('drilldownFactoryItem-dashboard_drilldown');
     await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
       drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
       destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
@@ -127,6 +127,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboard.waitForRenderComplete();
   };
 
+  /**
+   * Purpose: Dashboard drilldown smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
       before(async () => {

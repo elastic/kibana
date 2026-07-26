@@ -34,6 +34,11 @@ export class OverlayService {
   private flyoutService = new FlyoutService();
   private systemFlyoutService = new SystemFlyoutService();
 
+  public closeAllFlyouts(): void {
+    this.flyoutService.closeAllFlyouts();
+    this.systemFlyoutService.closeAllFlyouts();
+  }
+
   public start({ targetDomElement, ...startDeps }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);

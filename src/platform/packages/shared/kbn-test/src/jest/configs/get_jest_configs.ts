@@ -59,9 +59,12 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
         .map((file) => resolve(REPO_ROOT, file))
         .filter((file) => existsSync(file));
     } else {
-      // Merge both git commands into one for better performance
+      // Merge both git commands into one for better performance.
+      // Exclude __fixtures__ so fixture tests/configs (e.g. the negative-testing
+      // canaries) are never treated as real tests or orphaned. This mirrors CI's
+      // discoverJestUnitConfigs, which already ignores **/__fixtures__/**.
       const combinedResult = await execAsync(
-        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.*.js' '**/*/jest.integration.config.*.js'`,
+        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.integration.config.js' '**/*/jest.integration.config.js' ':(glob,exclude)**/__fixtures__/**'`,
         { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 }
       );
 
@@ -72,7 +75,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
         .filter((file) => existsSync(file));
 
       // Separate configs from test files using regex patterns
-      const configPattern = /jest(\.integration)?\.config(\.\w+)?\.(j|t)s$/;
+      const configPattern = /jest(\.integration)?\.config\.(j|t)s$/;
       const testPattern = /\.(test|spec)\.(ts|tsx)$/;
 
       configFiles = allFiles.filter((file) => configPattern.test(file));
@@ -128,16 +131,9 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
     emptyConfigs.forEach((config) => configsToRecheck.add(config));
 
     // Add configs involved in duplicates for rechecking
-    // Only recheck if configs are in different directories
     testFileToConfigs.forEach((configs) => {
       if (configs.length > 1) {
-        const directories = configs.map((config) => dirname(config));
-        const uniqueDirectories = new Set(directories);
-
-        // Only recheck if configs are in different directories
-        if (uniqueDirectories.size > 1) {
-          configs.forEach((config) => configsToRecheck.add(config));
-        }
+        configs.forEach((config) => configsToRecheck.add(config));
       }
     });
 
@@ -182,18 +178,8 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
     const orphanedTestFiles = allTestFiles.filter((testFile) => !coveredTestFiles.has(testFile));
 
     // Find test files covered by multiple configs
-    // Exclude cases where all configs are in the same directory (e.g., numbered integration configs)
     const duplicateTestFiles = Array.from(finalTestFileToConfigs.entries())
-      .filter(([, configs]) => {
-        if (configs.length <= 1) return false;
-
-        // Check if all configs are in the same directory
-        const directories = configs.map((config) => dirname(config));
-        const uniqueDirectories = new Set(directories);
-
-        // If all configs are in the same directory, don't treat as duplicate
-        return uniqueDirectories.size > 1;
-      })
+      .filter(([, configs]) => configs.length > 1)
       .map(([testFile, configs]) => ({ testFile, configs }));
 
     return { configsWithTests, emptyConfigs, orphanedTestFiles, duplicateTestFiles };

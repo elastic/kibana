@@ -110,7 +110,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         });
 
         router.push('/{key}/management/{tab}', {
-          path: { key: streamName, tab: 'retention' },
+          path: { key: streamName, tab: 'overview' },
           query: { rangeFrom, rangeTo },
         });
 

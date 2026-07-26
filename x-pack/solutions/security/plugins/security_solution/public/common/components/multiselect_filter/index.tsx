@@ -85,11 +85,12 @@ const MultiselectFilterComponent = <T extends unknown>({
 
   return (
     <EuiPopover
+      aria-label={title}
       data-test-subj={dataTestSubj}
       button={
         <EuiFilterButton
           data-test-subj={`${dataTestSubj}-popoverButton`}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           grow={false}
           numFilters={items.length}
           numActiveFilters={selectedItems.length}
@@ -102,7 +103,7 @@ const MultiselectFilterComponent = <T extends unknown>({
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
     >
       <EuiSelectable

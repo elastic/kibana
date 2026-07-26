@@ -8,6 +8,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { useKibana } from '../hooks/use_kibana';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
@@ -41,6 +43,9 @@ export const ToolsActionsContext = createContext<ToolsActionsContextType | undef
 
 export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
   const { navigateToAgentBuilderUrl, createAgentBuilderUrl } = useNavigation();
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const createTool = useCallback(
     (toolType: ToolType) => {
@@ -128,7 +133,30 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
     deleteTool,
     confirmDelete,
     cancelDelete,
+    usedByAgents,
+    isForceConfirmModalOpen,
+    confirmForceDelete,
+    cancelForceDelete,
   } = useDeleteTool();
+
+  useEffect(() => {
+    if (isForceConfirmModalOpen && usedByAgents) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.TOOL,
+        agent_count: usedByAgents.agents.length,
+      });
+    }
+  }, [isForceConfirmModalOpen, usedByAgents, analytics]);
+
+  const handleConfirmForceDelete = useCallback(() => {
+    if (usedByAgents) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.TOOL,
+        agent_count: usedByAgents.agents.length,
+      });
+    }
+    confirmForceDelete();
+  }, [analytics, confirmForceDelete, usedByAgents]);
 
   const {
     isOpen: isBulkDeleteToolsModalOpen,
@@ -145,6 +173,10 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const bulkDeleteEsqlToolsTitleId = useGeneratedHtmlId({
     prefix: 'bulkDeleteEsqlToolsTitle',
+  });
+
+  const deleteToolUsedByAgentsTitleId = useGeneratedHtmlId({
+    prefix: 'deleteToolUsedByAgentsTitle',
   });
 
   return (
@@ -177,6 +209,31 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           buttonColor="danger"
         >
           <EuiText>{labels.tools.deleteEsqlToolConfirmationText}</EuiText>
+        </EuiConfirmModal>
+      )}
+      {isForceConfirmModalOpen && usedByAgents && (
+        <EuiConfirmModal
+          title={labels.tools.deleteToolUsedByAgentsTitle(usedByAgents.toolId)}
+          aria-labelledby={deleteToolUsedByAgentsTitleId}
+          titleProps={{ id: deleteToolUsedByAgentsTitleId }}
+          onCancel={cancelForceDelete}
+          onConfirm={handleConfirmForceDelete}
+          isLoading={isDeletingTool}
+          cancelButtonText={labels.tools.deleteToolUsedByAgentsCancelButton}
+          confirmButtonText={labels.tools.deleteToolUsedByAgentsConfirmButton}
+          buttonColor="danger"
+        >
+          <EuiText>
+            <p>{labels.tools.deleteToolUsedByAgentsDescription}</p>
+            {usedByAgents.agents.length > 0 && (
+              <p>
+                <strong>{labels.tools.deleteToolUsedByAgentsAgentListLabel}:</strong>{' '}
+                {labels.tools.deleteToolUsedByAgentsAgentList(
+                  usedByAgents.agents.map((a) => a.name)
+                )}
+              </p>
+            )}
+          </EuiText>
         </EuiConfirmModal>
       )}
       {isBulkDeleteToolsModalOpen && (

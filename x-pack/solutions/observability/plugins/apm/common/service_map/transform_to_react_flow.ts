@@ -9,6 +9,7 @@
  * Transform service map API response directly to React Flow format.
  */
 
+import type { AgentName } from '@kbn/apm-types';
 import {
   SERVICE_NAME,
   AGENT_NAME,
@@ -21,6 +22,8 @@ import type {
   ServiceMapResponse,
   ConnectionNode,
   ConnectionEdge,
+  ServiceConnectionNode,
+  ExternalConnectionNode,
 } from './types';
 import type {
   ServiceMapNode,
@@ -29,10 +32,10 @@ import type {
   ServiceMapNodeData,
   ServiceNodeData,
   DependencyNodeData,
-} from './react_flow_types';
-import { createEdgeMarker } from './utils';
+} from './types';
+import { createEdgeMarker, toDisplayName } from './utils';
 import { getPaths } from './get_paths';
-import { groupReactFlowNodes } from './group_react_flow_nodes';
+import { groupResourceNodes } from './group_resource_nodes';
 import {
   addMessagingConnections,
   getAllNodes,
@@ -43,31 +46,28 @@ import {
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
-function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
-  // Reuse ServiceAnomalyStats directly from the connection node
-  const serviceAnomalyStats = 'serviceAnomalyStats' in node ? node.serviceAnomalyStats : undefined;
-
+function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
   return {
     id: node.id,
-    label: node[SERVICE_NAME] || node.label || node.id,
-    agentName: node[AGENT_NAME],
+    label: node[SERVICE_NAME] ?? node.label ?? node.id,
+    agentName: node[AGENT_NAME] as AgentName,
     isService: true,
-    serviceAnomalyStats,
+    serviceAnomalyStats: node.serviceAnomalyStats,
   };
 }
 
-function toDependencyNodeData(node: ConnectionNode): DependencyNodeData {
+function toDependencyNodeData(node: ExternalConnectionNode): DependencyNodeData {
   return {
     id: node.id,
-    label: node[SPAN_DESTINATION_SERVICE_RESOURCE] || node.label || node.id,
+    label: node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? toDisplayName(node.id),
     spanType: node[SPAN_TYPE],
     spanSubtype: node[SPAN_SUBTYPE],
     isService: false,
   };
 }
 
-function isServiceNode(node: ConnectionNode): boolean {
-  return node[SERVICE_NAME] !== undefined;
+function isServiceNode(node: ConnectionNode): node is ServiceConnectionNode {
+  return SERVICE_NAME in node && node[SERVICE_NAME] !== undefined;
 }
 
 function toNodeData(node: ConnectionNode): ServiceMapNodeData {
@@ -98,6 +98,8 @@ function toReactFlowEdge(edge: ConnectionEdge): ServiceMapEdge {
       isBidirectional,
       sourceData: edge.sourceData,
       targetData: edge.targetData,
+      sourceLabel: edge.sourceLabel,
+      targetLabel: edge.targetLabel,
       resources: edge.resources,
     },
   };
@@ -139,9 +141,7 @@ export function transformToReactFlow(
     }),
   ];
 
-  const reactFlowNodes = [...uniqueNodes.values()]
-    .filter((node) => !markedEdges.some((e) => e.isInverseEdge && e.target === node.id))
-    .map(toReactFlowNode);
+  const reactFlowNodes = [...uniqueNodes.values()].map((node) => toReactFlowNode(node));
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {
@@ -150,7 +150,7 @@ export function transformToReactFlow(
     }
   }
 
-  const grouped = groupReactFlowNodes(reactFlowNodes, reactFlowEdges);
+  const grouped = groupResourceNodes(reactFlowNodes, reactFlowEdges);
 
   return {
     nodes: grouped.nodes,

@@ -260,15 +260,22 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         name: i18n.translate('indexPatternManagement.dataViewTable.columnDelete', {
           defaultMessage: 'Delete',
         }),
-        description: i18n.translate(
-          'indexPatternManagement.dataViewTable.columnDeleteDescription',
-          {
-            defaultMessage: 'Delete this data view',
-          }
-        ),
+        description: (dataView: RemoveDataViewProps) =>
+          dataView.managed
+            ? i18n.translate(
+                'indexPatternManagement.dataViewTable.columnDeleteDescriptionManaged',
+                {
+                  defaultMessage:
+                    'This data view is managed by Elastic and cannot be deleted. Duplicate it to make changes.',
+                }
+              )
+            : i18n.translate('indexPatternManagement.dataViewTable.columnDeleteDescription', {
+                defaultMessage: 'Delete this data view',
+              }),
         icon: 'trash',
         color: 'danger',
         type: 'icon',
+        enabled: (dataView: RemoveDataViewProps) => !dataView.managed,
         onClick: async (dataView: RemoveDataViewProps) => {
           const relationships = (await getRelationshipsForSelections([dataView])) as Record<
             string,
@@ -368,7 +375,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   const createButton = canSave ? (
     <EuiButton
       fill={true}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={() => setShowCreateDialog(true)}
       data-test-subj="createDataViewButton"
     >
@@ -387,6 +394,14 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
 
   const selection = {
     onSelectionChange: setSelectedItems,
+    selectable: (item: IndexPatternTableItem) => !item.managed,
+    selectableMessage: (selectable: boolean) =>
+      selectable
+        ? ''
+        : i18n.translate('indexPatternManagement.dataViewTable.managedDataViewNotSelectable', {
+            defaultMessage:
+              'This data view is managed by Elastic and cannot be deleted. Duplicate it to make changes.',
+          }),
   };
 
   let displayIndexPatternSection = (

@@ -43,6 +43,9 @@ export const GridLayoutOptions = ({
       }
       isOpen={isSettingsPopoverOpen}
       closePopover={() => setIsSettingsPopoverOpen(false)}
+      aria-label={i18n.translate('examples.gridExample.settingsPopover.ariaLabel', {
+        defaultMessage: 'Layout settings',
+      })}
     >
       <>
         <EuiFormRow

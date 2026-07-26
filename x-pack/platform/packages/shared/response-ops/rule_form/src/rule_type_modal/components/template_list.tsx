@@ -135,7 +135,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({
         {templates.length === 0 && (
           <EuiEmptyPrompt
             color="subdued"
-            iconType="search"
+            iconType="magnify"
             title={
               <h2>
                 {i18n.translate(

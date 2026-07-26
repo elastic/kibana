@@ -24,5 +24,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rules/update'));
     loadTestFile(require.resolve('./rules/enhance'));
     loadTestFile(require.resolve('./rules/qradar_create'));
+    loadTestFile(require.resolve('./rules/sentinel_create'));
+    loadTestFile(require.resolve('./resources/sentinel/upsert'));
   });
 }

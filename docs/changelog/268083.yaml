@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268083
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Search and data
+title: Improve Model Management Elastic Inference and Feature Settings pages
+description: Displays badges for the deprecation and end-of-life status of the models.

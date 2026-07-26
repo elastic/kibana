@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/elastic-agent-condition-language",
+  "owner": [
+    "@elastic/fleet"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

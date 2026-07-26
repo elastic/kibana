@@ -1,0 +1,325 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-lmd",
+    "id": "lmd_high_count_remote_file_transfer_record_1761555600000_3600_0_1",
+    "source": {
+      "job_id": "lmd_high_count_remote_file_transfer",
+      "result_type": "record",
+      "probability": 0.001,
+      "record_score": 86.4,
+      "initial_record_score": 86.4,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "svc-backup",
+      "function": "count",
+      "function_description": "count",
+      "typical": [
+        2.0
+      ],
+      "actual": [
+        45.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "svc-backup"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "web-server-prod-01"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "scp"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.0.0.10"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.ip",
+          "influencer_field_values": [
+            "10.0.0.20",
+            "10.0.0.21",
+            "10.0.0.22"
+          ]
+        }
+      ],
+      "user.name": [
+        "svc-backup"
+      ],
+      "host.name": [
+        "web-server-prod-01"
+      ],
+      "process.name": [
+        "scp"
+      ],
+      "source.ip": [
+        "10.0.0.10"
+      ],
+      "destination.ip": [
+        "10.0.0.20",
+        "10.0.0.21",
+        "10.0.0.22"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "lmd_high_file_size_remote_file_transfer_record_1761555600000_3600_0_2",
+    "source": {
+      "job_id": "lmd_high_file_size_remote_file_transfer",
+      "result_type": "record",
+      "probability": 0.002,
+      "record_score": 84.7,
+      "initial_record_score": 84.7,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "admin-user",
+      "function": "high_sum",
+      "function_description": "sum",
+      "field_name": "file.size",
+      "typical": [
+        10485760.0
+      ],
+      "actual": [
+        1073741824.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "admin-user"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "db-server-prod-02"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "rsync"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.0.0.15"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.ip",
+          "influencer_field_values": [
+            "10.0.0.25"
+          ]
+        }
+      ],
+      "user.name": [
+        "admin-user"
+      ],
+      "host.name": [
+        "db-server-prod-02"
+      ],
+      "process.name": [
+        "rsync"
+      ],
+      "source.ip": [
+        "10.0.0.15"
+      ],
+      "destination.ip": [
+        "10.0.0.25"
+      ],
+      "file.size": [
+        1073741824
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "lmd_high_count_remote_file_transfer_record_1761555600000_3600_0_5",
+    "source": {
+      "job_id": "lmd_high_count_remote_file_transfer",
+      "result_type": "record",
+      "probability": 0.0015,
+      "record_score": 78.2,
+      "initial_record_score": 78.2,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761559200000,
+      "partition_field_name": "user.name",
+      "partition_field_value": "dev-user",
+      "function": "count",
+      "function_description": "count",
+      "typical": [
+        3.0
+      ],
+      "actual": [
+        67.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "dev-user"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "app-server-dev-03"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "ftp"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.0.0.35"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.ip",
+          "influencer_field_values": [
+            "10.0.0.40",
+            "10.0.0.41",
+            "10.0.0.42",
+            "10.0.0.43"
+          ]
+        }
+      ],
+      "user.name": [
+        "dev-user"
+      ],
+      "host.name": [
+        "app-server-dev-03"
+      ],
+      "process.name": [
+        "ftp"
+      ],
+      "source.ip": [
+        "10.0.0.35"
+      ],
+      "destination.ip": [
+        "10.0.0.40",
+        "10.0.0.41",
+        "10.0.0.42",
+        "10.0.0.43"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "lmd_high_file_size_remote_file_transfer_record_1761555600000_3600_0_6",
+    "source": {
+      "job_id": "lmd_high_file_size_remote_file_transfer",
+      "result_type": "record",
+      "probability": 0.0018,
+      "record_score": 91.5,
+      "initial_record_score": 91.5,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761559200000,
+      "partition_field_name": "host.name",
+      "partition_field_value": "file-server-prod-01",
+      "function": "high_sum",
+      "function_description": "sum",
+      "field_name": "file.size",
+      "typical": [
+        52428800.0
+      ],
+      "actual": [
+        2147483648.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "svc-data-export"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "file-server-prod-01"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "smbclient"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.0.0.50"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.ip",
+          "influencer_field_values": [
+            "10.0.0.60"
+          ]
+        }
+      ],
+      "user.name": [
+        "svc-data-export"
+      ],
+      "host.name": [
+        "file-server-prod-01"
+      ],
+      "process.name": [
+        "smbclient"
+      ],
+      "source.ip": [
+        "10.0.0.50"
+      ],
+      "destination.ip": [
+        "10.0.0.60"
+      ],
+      "file.size": [
+        2147483648
+      ]
+    },
+    "type": "_doc"
+  }
+}

@@ -12,13 +12,23 @@ import { renderHook } from '@testing-library/react';
 import {
   OPEN_IN_DISCOVER_LABEL,
   OPEN_IN_DISCOVER_ARIA_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
+import {
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
+} from '../../components/observability/traces/ebt_constants';
 import { DocViewerExtensionActionsProvider } from '../use_doc_viewer_extension_actions';
 import { useOpenInDiscoverSectionAction } from '.';
 
 describe('useOpenInDiscoverSectionAction', () => {
   const tabLabel = 'Some section';
   const dataTestSubj = 'openInDiscover';
+  const ebt = {
+    element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY,
+    detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+  };
 
   it('returns undefined when href is missing and openInNewTab cannot be used', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -34,6 +44,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql: undefined,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
@@ -56,6 +67,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql: undefined,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
@@ -68,6 +80,11 @@ describe('useOpenInDiscoverSectionAction', () => {
         icon: 'discoverApp',
         dataTestSubj,
         onClick: undefined,
+        ebt: expect.objectContaining({
+          action: 'openInDiscover',
+          element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY,
+          detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+        }),
       })
     );
   });
@@ -88,15 +105,16 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
-        icon: 'discoverApp',
+        label: OPEN_IN_A_DISCOVER_TAB_LABEL,
+        ariaLabel: OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
+        icon: 'productDiscover',
         dataTestSubj,
         onClick: expect.any(Function),
       })
@@ -127,6 +145,7 @@ describe('useOpenInDiscoverSectionAction', () => {
           esql,
           tabLabel,
           dataTestSubj,
+          ebt,
         }),
       { wrapper }
     );
@@ -134,9 +153,9 @@ describe('useOpenInDiscoverSectionAction', () => {
     expect(result.current).toEqual(
       expect.objectContaining({
         href,
-        label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
-        icon: 'discoverApp',
+        label: OPEN_IN_A_DISCOVER_TAB_LABEL,
+        ariaLabel: OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
+        icon: 'productDiscover',
         dataTestSubj,
         onClick: expect.any(Function),
       })

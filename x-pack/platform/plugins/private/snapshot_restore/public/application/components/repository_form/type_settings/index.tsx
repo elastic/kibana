@@ -8,9 +8,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SectionError } from '@kbn/es-ui-shared-plugin/public';
+
 import { REPOSITORY_TYPES } from '../../../../../common';
 import type { Repository, RepositoryType, EmptyRepository } from '../../../../../common/types';
-import { SectionError } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import type { RepositorySettingsValidation } from '../../../services/validation';
 
@@ -26,6 +27,8 @@ interface Props {
   isManagedRepository?: boolean;
   updateRepository: (updatedFields: Partial<Repository>) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const TypeSettings: React.FunctionComponent<Props> = ({
@@ -33,6 +36,8 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
   isManagedRepository,
   updateRepository,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const { i18n } = useServices();
   const { type, settings } = repository;
@@ -76,6 +81,8 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
           isManagedRepository={isManagedRepository}
           updateRepositorySettings={updateRepositorySettings}
           settingErrors={settingErrors}
+          isReadOnlyToggleDisabled={isReadOnlyToggleDisabled}
+          readOnlyToggleDisabledTooltipContent={readOnlyToggleDisabledTooltipContent}
         />
       );
     }

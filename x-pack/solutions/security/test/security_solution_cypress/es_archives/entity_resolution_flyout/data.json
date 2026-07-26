@@ -1,0 +1,2098 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "solo-charlie",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "solo-charlie",
+        "name": "Charlie Brown",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "solo-charlie",
+        "name": "Charlie Brown"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "solo-eric",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "solo-eric",
+        "name": "Eric Cartman",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "solo-eric",
+        "name": "Eric Cartman"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "solo-frank",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "solo-frank",
+        "name": "Frank Castle",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "solo-frank",
+        "name": "Frank Castle"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "target-alice",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "target-alice",
+        "name": "Alice Johnson",
+        "source": "logs-endpoint.events.process-default",
+        "risk": {
+          "calculated_score_norm": 72.45
+        },
+        "relationships": {
+          "resolution": {
+            "risk": {
+              "calculated_score_norm": 82.50
+            }
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "target-alice",
+        "name": "Alice Johnson"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-alice-okta",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "alias-alice-okta",
+        "name": "alice@okta.com",
+        "source": "logs-entityanalytics_okta.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-alice"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "alias-alice-okta",
+        "name": "alice@okta.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-alice-entra",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "alias-alice-entra",
+        "name": "alice.j@entra.com",
+        "source": "logs-entityanalytics_entra_id.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-alice"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "alias-alice-entra",
+        "name": "alice.j@entra.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "target-diana",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "target-diana",
+        "name": "Diana Prince",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "target-diana",
+        "name": "Diana Prince"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-diana-okta",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "alias-diana-okta",
+        "name": "diana@okta.com",
+        "source": "logs-entityanalytics_okta.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-diana"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "alias-diana-okta",
+        "name": "diana@okta.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-diana-entra",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "alias-diana-entra",
+        "name": "diana.p@entra.com",
+        "source": "logs-entityanalytics_entra_id.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-diana"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "alias-diana-entra",
+        "name": "diana.p@entra.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "target-greg",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "target-greg",
+        "name": "Greg House",
+        "source": "logs-endpoint.events.process-default",
+        "risk": {
+          "calculated_score_norm": 50.10
+        },
+        "relationships": {
+          "resolution": {
+            "risk": {
+              "calculated_score_norm": 65.00
+            }
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "target-greg",
+        "name": "Greg House"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-greg-okta",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "alias-greg-okta",
+        "name": "greg@okta.com",
+        "source": "logs-entityanalytics_okta.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-greg"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "alias-greg-okta",
+        "name": "greg@okta.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-greg-entra",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "alias-greg-entra",
+        "name": "greg.h@entra.com",
+        "source": "logs-entityanalytics_entra_id.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-greg"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "user": {
+        "id": "alias-greg-entra",
+        "name": "greg.h@entra.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "target-host-web-server-1",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "target-host-web-server-1",
+        "name": "web-server-prod-1",
+        "source": "logs-endpoint.events.process-default",
+        "risk": {
+          "calculated_score_norm": 88.22
+        },
+        "relationships": {
+          "resolution": {
+            "risk": {
+              "calculated_score_norm": 91.00
+            }
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "host": {
+        "id": "target-host-web-server-1",
+        "name": "web-server-prod-1"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-host-web-server-1-cmdb",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "alias-host-web-server-1-cmdb",
+        "name": "web-server-prod-1.cmdb",
+        "source": "logs-cmdb.host-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-host-web-server-1"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "host": {
+        "id": "alias-host-web-server-1-cmdb",
+        "name": "web-server-prod-1.cmdb"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-host-001",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "searchcandidate-host-001",
+        "name": "Mara Beta Host 001",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "host": {
+        "id": "searchcandidate-host-001",
+        "name": "Mara Beta Host 001"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "target-service-api-gateway",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "service"
+        },
+        "id": "target-service-api-gateway",
+        "name": "api-gateway-prod",
+        "source": "logs-endpoint.events.process-default",
+        "risk": {
+          "calculated_score_norm": 33.10
+        },
+        "relationships": {
+          "resolution": {
+            "risk": {
+              "calculated_score_norm": 41.00
+            }
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "service": {
+        "id": "target-service-api-gateway",
+        "name": "api-gateway-prod"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alias-service-api-gateway-cmdb",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T08:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "service"
+        },
+        "id": "alias-service-api-gateway-cmdb",
+        "name": "api-gateway-prod.cmdb",
+        "source": "logs-cmdb.service-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "target-service-api-gateway"
+          }
+        },
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:30:00.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:01:00.000Z"
+      },
+      "service": {
+        "id": "alias-service-api-gateway-cmdb",
+        "name": "api-gateway-prod.cmdb"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-001",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:59:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-001",
+        "name": "Mara Alpha 001",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:59:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:59:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-001",
+        "name": "Mara Alpha 001"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-002",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:58:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-002",
+        "name": "Mara Alpha 002",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:59:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 22
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:58:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-002",
+        "name": "Mara Alpha 002"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-003",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:57:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-003",
+        "name": "Mara Alpha 003",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:58:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:57:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-003",
+        "name": "Mara Alpha 003"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-004",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:56:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-004",
+        "name": "Mara Alpha 004",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:58:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 24
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:56:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-004",
+        "name": "Mara Alpha 004"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-005",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:55:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-005",
+        "name": "Mara Alpha 005",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:57:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:55:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-005",
+        "name": "Mara Alpha 005"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-006",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:54:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-006",
+        "name": "Mara Alpha 006",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:57:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 26
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:54:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-006",
+        "name": "Mara Alpha 006"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-007",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:53:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-007",
+        "name": "Mara Alpha 007",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:56:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:53:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-007",
+        "name": "Mara Alpha 007"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-008",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:52:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-008",
+        "name": "Mara Alpha 008",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:56:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 28
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:52:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-008",
+        "name": "Mara Alpha 008"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-009",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:51:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-009",
+        "name": "Mara Alpha 009",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:55:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:51:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-009",
+        "name": "Mara Alpha 009"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-010",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:50:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-010",
+        "name": "Mara Alpha 010",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:55:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 30
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:50:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-010",
+        "name": "Mara Alpha 010"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-011",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:49:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-011",
+        "name": "Mara Alpha 011",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:54:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:49:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-011",
+        "name": "Mara Alpha 011"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-012",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:48:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-012",
+        "name": "Mara Alpha 012",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:54:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 32
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:48:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-012",
+        "name": "Mara Alpha 012"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-013",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:47:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-013",
+        "name": "Mara Alpha 013",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:53:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:47:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-013",
+        "name": "Mara Alpha 013"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-014",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:46:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-014",
+        "name": "Mara Alpha 014",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:53:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 34
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:46:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-014",
+        "name": "Mara Alpha 014"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-015",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:45:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-015",
+        "name": "Mara Alpha 015",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:52:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:45:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-015",
+        "name": "Mara Alpha 015"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-016",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:44:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-016",
+        "name": "Mara Alpha 016",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:52:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 36
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:44:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-016",
+        "name": "Mara Alpha 016"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-017",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:43:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-017",
+        "name": "Mara Alpha 017",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:51:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:43:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-017",
+        "name": "Mara Alpha 017"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-018",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:42:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-018",
+        "name": "Mara Alpha 018",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:51:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 38
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:42:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-018",
+        "name": "Mara Alpha 018"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-019",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:41:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-019",
+        "name": "Mara Alpha 019",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:50:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:41:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-019",
+        "name": "Mara Alpha 019"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-020",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:40:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-020",
+        "name": "Mara Alpha 020",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:50:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 40
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:40:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-020",
+        "name": "Mara Alpha 020"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-021",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:39:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-021",
+        "name": "Mara Alpha 021",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:49:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:39:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-021",
+        "name": "Mara Alpha 021"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-022",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:38:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-022",
+        "name": "Mara Alpha 022",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:49:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 42
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:38:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-022",
+        "name": "Mara Alpha 022"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-023",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:37:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-023",
+        "name": "Mara Alpha 023",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:48:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:37:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-023",
+        "name": "Mara Alpha 023"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-024",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:36:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-024",
+        "name": "Mara Alpha 024",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:48:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 44
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:36:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-024",
+        "name": "Mara Alpha 024"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-025",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:35:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-025",
+        "name": "Mara Alpha 025",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:47:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:35:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-025",
+        "name": "Mara Alpha 025"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-026",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:34:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-026",
+        "name": "Mara Alpha 026",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:47:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 46
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:34:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-026",
+        "name": "Mara Alpha 026"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-027",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:33:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-027",
+        "name": "Mara Alpha 027",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:46:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:33:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-027",
+        "name": "Mara Alpha 027"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-028",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:32:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-028",
+        "name": "Mara Alpha 028",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:46:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 48
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:32:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-028",
+        "name": "Mara Alpha 028"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-029",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:31:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-029",
+        "name": "Mara Alpha 029",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:45:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:31:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-029",
+        "name": "Mara Alpha 029"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-030",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:30:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-030",
+        "name": "Mara Alpha 030",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:45:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 50
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:30:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-030",
+        "name": "Mara Alpha 030"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-031",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:29:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-031",
+        "name": "Mara Alpha 031",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:44:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:29:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-031",
+        "name": "Mara Alpha 031"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-032",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:28:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-032",
+        "name": "Mara Alpha 032",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:44:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 52
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:28:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-032",
+        "name": "Mara Alpha 032"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-033",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:27:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-033",
+        "name": "Mara Alpha 033",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:43:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:27:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-033",
+        "name": "Mara Alpha 033"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-034",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:26:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-034",
+        "name": "Mara Alpha 034",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:43:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 54
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:26:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-034",
+        "name": "Mara Alpha 034"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-035",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:25:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-035",
+        "name": "Mara Alpha 035",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:42:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:25:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-035",
+        "name": "Mara Alpha 035"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-036",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:24:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-036",
+        "name": "Mara Alpha 036",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:42:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 56
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:24:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-036",
+        "name": "Mara Alpha 036"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-037",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:23:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-037",
+        "name": "Mara Alpha 037",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:41:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:23:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-037",
+        "name": "Mara Alpha 037"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-038",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:22:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-038",
+        "name": "Mara Alpha 038",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:41:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 58
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:22:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-038",
+        "name": "Mara Alpha 038"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-039",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:21:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-039",
+        "name": "Mara Alpha 039",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:40:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:21:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-039",
+        "name": "Mara Alpha 039"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-040",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:20:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-040",
+        "name": "Mara Alpha 040",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:40:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 60
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:20:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-040",
+        "name": "Mara Alpha 040"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-041",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:19:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-041",
+        "name": "Mara Alpha 041",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:39:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:19:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-041",
+        "name": "Mara Alpha 041"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-042",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:18:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-042",
+        "name": "Mara Alpha 042",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:39:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 62
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:18:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-042",
+        "name": "Mara Alpha 042"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-043",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:17:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-043",
+        "name": "Mara Alpha 043",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:38:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:17:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-043",
+        "name": "Mara Alpha 043"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-044",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:16:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-044",
+        "name": "Mara Alpha 044",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:38:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 64
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:16:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-044",
+        "name": "Mara Alpha 044"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-045",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:15:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-045",
+        "name": "Mara Alpha 045",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:37:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:15:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-045",
+        "name": "Mara Alpha 045"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-046",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:14:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-046",
+        "name": "Mara Alpha 046",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:37:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 66
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:14:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-046",
+        "name": "Mara Alpha 046"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-047",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:13:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-047",
+        "name": "Mara Alpha 047",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:36:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:13:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-047",
+        "name": "Mara Alpha 047"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-048",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:12:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-048",
+        "name": "Mara Alpha 048",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:36:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 68
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:12:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-048",
+        "name": "Mara Alpha 048"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-049",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:11:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-049",
+        "name": "Mara Alpha 049",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:35:30.000Z"
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:11:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-049",
+        "name": "Mara Alpha 049"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "searchcandidate-user-050",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-04-29T07:10:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "searchcandidate-user-050",
+        "name": "Mara Alpha 050",
+        "source": "logs-endpoint.events.process-default",
+        "lifecycle": {
+          "last_seen": "2026-04-29T07:35:00.000Z"
+        },
+        "risk": {
+          "calculated_score_norm": 70
+        }
+      },
+      "event": {
+        "ingested": "2026-04-29T07:10:00.000Z"
+      },
+      "user": {
+        "id": "searchcandidate-user-050",
+        "name": "Mara Alpha 050"
+      }
+    }
+  }
+}
+

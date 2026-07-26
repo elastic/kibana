@@ -18,8 +18,11 @@ export interface ClientDetails {
  * Options for the MCP client.
  * These map to reconnection options for the StreamableHTTPClientTransport.
  */
+export type FetchLike = (url: string | URL, init?: RequestInit) => Promise<Response>;
+
 export interface McpClientOptions {
   headers?: Record<string, string>;
+  fetch?: FetchLike;
   maxRetries?: number;
   reconnectionDelayGrowFactor?: number;
   initialReconnectionDelay?: number;
@@ -35,7 +38,30 @@ export interface CallToolParams {
 }
 
 /**
- * Non-text content as part of a tool call response.
+ * We reuse upstream MCP SDK types where possible to avoid drift from the MCP spec.
+ */
+import type {
+  Annotations as SdkAnnotations,
+  EmbeddedResource as SdkEmbeddedResource,
+  ResourceLink as SdkResourceLink,
+  TextContent as SdkTextContent,
+} from '@modelcontextprotocol/sdk/types.js';
+
+/**
+ * A resource link returned as part of a tool call response.
+ * Links are references to resources that can be fetched via resources/read.
+ */
+export type ResourceAnnotations = SdkAnnotations;
+export type ResourceLinkPart = SdkResourceLink;
+
+/**
+ * Embedded resource returned as part of a tool call response.
+ * Servers may embed resource contents (text or base64 blob) inline.
+ */
+export type EmbeddedResourcePart = SdkEmbeddedResource;
+
+/**
+ * Non-text (or otherwise unknown) content returned as part of a tool call response.
  */
 export interface NonTextPart {
   type: string;
@@ -45,12 +71,9 @@ export interface NonTextPart {
 /**
  * A text content as part of a tool call response.
  */
-export interface TextPart {
-  type: 'text';
-  text: string;
-}
+export type TextPart = SdkTextContent;
 
-export type ContentPart = TextPart | NonTextPart;
+export type ContentPart = TextPart | ResourceLinkPart | EmbeddedResourcePart | NonTextPart;
 
 /**
  * Type guard to check if a content part is a valid text part.
@@ -59,6 +82,29 @@ export type ContentPart = TextPart | NonTextPart;
 export function isTextPart(part: ContentPart | null | undefined): part is TextPart {
   return (
     part !== null && part !== undefined && part.type === 'text' && typeof part.text === 'string'
+  );
+}
+
+export function isResourceLinkPart(part: ContentPart | null | undefined): part is ResourceLinkPart {
+  return (
+    part !== null &&
+    part !== undefined &&
+    part.type === 'resource_link' &&
+    typeof (part as ResourceLinkPart).uri === 'string'
+  );
+}
+
+export function isEmbeddedResourcePart(
+  part: ContentPart | null | undefined
+): part is EmbeddedResourcePart {
+  const resource = (part as EmbeddedResourcePart | null | undefined)?.resource;
+  return (
+    part !== null &&
+    part !== undefined &&
+    part.type === 'resource' &&
+    typeof resource === 'object' &&
+    resource !== null &&
+    typeof resource.uri === 'string'
   );
 }
 

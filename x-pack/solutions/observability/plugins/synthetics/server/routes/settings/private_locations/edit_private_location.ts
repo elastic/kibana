@@ -21,6 +21,7 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
+import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
 
 const EditPrivateLocationSchema = schema.object({
   label: schema.maybe(
@@ -76,10 +77,13 @@ const checkPrivileges = async ({
   const checkSavedObjectsPrivileges =
     server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
-  const { hasAllRequested } = await checkSavedObjectsPrivileges(
-    'saved_object:synthetics-monitor/bulk_update',
-    monitorsSpaces
+  const results = await Promise.all(
+    syntheticsMonitorSOTypes.map((soType) =>
+      checkSavedObjectsPrivileges(`saved_object:${soType}/bulk_update`, monitorsSpaces)
+    )
   );
+
+  const hasAllRequested = results.every((result) => result.hasAllRequested);
 
   if (!hasAllRequested) {
     return response.forbidden({

@@ -1,0 +1,11 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266365
+issues:
+- https://github.com/elastic/kibana/issues/265694
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Search and data
+title: Validate SSL certificate paths for whitespace

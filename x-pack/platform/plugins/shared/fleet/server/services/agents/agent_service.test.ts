@@ -76,6 +76,7 @@ describe('AgentService', () => {
               readSettings: false,
               addAgents: false,
               addFleetServers: false,
+              generateAgentReports: false,
             },
             integrations: {
               all: true,

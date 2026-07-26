@@ -57,12 +57,8 @@ const createTestCases = (spaceId: string) => {
   return { normalTypes, hiddenType, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions } = deleteTestSuiteFactory(es, esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = deleteTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     return {

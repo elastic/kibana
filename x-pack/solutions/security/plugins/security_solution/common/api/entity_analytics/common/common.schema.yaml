@@ -15,31 +15,37 @@ components:
           type: boolean
         has_write_permissions:
           type: boolean
+        has_install_permissions:
+          type: boolean
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  type: object
-                  additionalProperties:
-                    type: boolean
-                index:
-                  type: object
-                  additionalProperties:
-                    type: object
-                    additionalProperties:
-                      type: boolean
-            kibana:
-              type: object
-              additionalProperties:
-                type: boolean
-          required:
-            - elasticsearch
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
+        install_privileges:
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
       required:
         - has_all_required
         - privileges
+    EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              type: object
+              additionalProperties:
+                type: boolean
+            index:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: boolean
+        kibana:
+          type: object
+          additionalProperties:
+            type: boolean
+      required:
+        - elasticsearch
     EntityAfterKey:
       type: object
       additionalProperties:
@@ -141,6 +147,32 @@ components:
         contribution_score:
           type: number
           format: double
+        entity_id:
+          type: string
+          description: The EUID of the entity within the graph that generated this alert.
+
+    RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        type:
+          type: string
+          maxLength: 100
+        subtype:
+          type: string
+          maxLength: 100
+        modifier_value:
+          type: number
+          format: double
+        contribution:
+          type: number
+          format: double
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - type
+        - contribution
 
     RiskScoreCategories:
       type: string
@@ -183,6 +215,9 @@ components:
           type: string
           example: "example.host"
           description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
+        calculation_run_id:
+          type: string
+          description: Unique identifier for the scoring run that produced this document.
         calculated_level:
           $ref: "#/components/schemas/EntityRiskLevels"
           example: "Critical"
@@ -228,24 +263,24 @@ components:
           type: array
           description: A list of modifiers that were applied to the risk score calculation.
           items:
+            $ref: "#/components/schemas/RiskScoreModifier"
+        score_type:
+          type: string
+          enum:
+            - base
+            - propagated
+            - resolution
+          description: >-
+            Distinguishes base, propagated, and resolution scores.
+        related_entities:
+          type: array
+          items:
             type: object
             properties:
-              type:
+              entity_id:
                 type: string
-              subtype:
+              relationship_type:
                 type: string
-              modifier_value:
-                type: number
-                format: double
-              contribution:
-                type: number
-                format: double
-              metadata:
-                type: object
-                additionalProperties: true
-            required:
-              - type
-              - contribution
 
     RiskScoreEntityIdentifierWeights:
       type: number

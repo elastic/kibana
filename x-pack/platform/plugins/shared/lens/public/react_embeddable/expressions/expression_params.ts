@@ -13,7 +13,6 @@ import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { cellValueTrigger, CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type {
   DocumentToExpressionReturnType,
   LensDocument,
@@ -26,6 +25,8 @@ import type {
   LensRuntimeState,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
+import { CELL_VALUE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
@@ -120,10 +121,22 @@ function buildGetCompatibleCellValueActions(
       .map((action) => ({
         id: action.id,
         type: action.type,
-        iconType: action.getIconType({ embeddable: api, data, trigger: cellValueTrigger })!,
-        displayName: action.getDisplayName({ embeddable: api, data, trigger: cellValueTrigger }),
+        iconType: action.getIconType({
+          embeddable: api,
+          data,
+          trigger: triggers[CELL_VALUE_TRIGGER],
+        })!,
+        displayName: action.getDisplayName({
+          embeddable: api,
+          data,
+          trigger: triggers[CELL_VALUE_TRIGGER],
+        }),
         execute: (cellData) =>
-          action.execute({ embeddable: api, data: cellData, trigger: cellValueTrigger }),
+          action.execute({
+            embeddable: api,
+            data: cellData,
+            trigger: triggers[CELL_VALUE_TRIGGER],
+          }),
       }));
   };
 }

@@ -9,7 +9,9 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { CancelActionResults } from '../../cancel_action_results';
 import {
+  isCancelAction,
   isExecuteAction,
   isGetFileAction,
   isMemoryDumpAction,
@@ -113,6 +115,16 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
+              if (isCancelAction(action)) {
+                hostOutput = (
+                  <CancelActionResults
+                    action={action}
+                    agentId={agentId}
+                    data-test-subj={getTestId('cancelOutput')}
+                    textSize="xs"
+                  />
+                );
+              }
               if (isProcessesAction(action)) {
                 hostOutput = (
                   <RunningProcessesActionResults
@@ -128,6 +140,7 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 hostOutput = (
                   <RunscriptActionResult
                     action={action}
+                    agentId={agentId}
                     data-test-subj={getTestId('actionsLogTray')}
                     textSize="xs"
                   />
@@ -145,8 +158,8 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              // CrowdStrike Isolate/Release actions
-              if (action.agentType === 'crowdstrike') {
+              // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
+              if (action.agentType === 'crowdstrike' && !isRunScriptAction(action)) {
                 hostOutput = <>{OUTPUT_MESSAGES.submittedSuccessfully(consoleCommandName)}</>;
               }
             }

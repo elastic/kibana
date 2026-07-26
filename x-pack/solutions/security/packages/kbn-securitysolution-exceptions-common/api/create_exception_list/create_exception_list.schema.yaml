@@ -54,6 +54,16 @@ paths:
                 - name
                 - description
                 - type
+            examples:
+              createDetection:
+                value:
+                  list_id: simple_list
+                  type: detection
+                  name: Sample Detection Exception List
+                  description: This is a sample detection type exception list.
+                  namespace_type: single
+                  tags: [malware]
+                  os_types: [linux]
       responses:
         200:
           description: Successful response

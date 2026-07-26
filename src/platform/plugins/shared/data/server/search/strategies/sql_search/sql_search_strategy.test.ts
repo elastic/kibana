@@ -117,7 +117,7 @@ describe('SQL search strategy', () => {
           format: 'json',
           id: 'foo',
           keep_alive: '60000ms',
-          wait_for_completion_timeout: '100ms',
+          wait_for_completion_timeout: '2000ms',
         });
         expect(searchOptions).toEqual({
           meta: true,

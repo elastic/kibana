@@ -60,6 +60,7 @@ export type IBody =
   | {
       index_filter?: estypes.QueryDslQueryContainer;
       runtime_mappings?: estypes.MappingRuntimeFields;
+      project_routing?: string;
     }
   | undefined;
 
@@ -67,6 +68,7 @@ export const bodySchema = schema.maybe(
   schema.object({
     index_filter: schema.maybe(schema.any()),
     runtime_mappings: schema.maybe(schema.any()),
+    project_routing: schema.maybe(schema.string()),
   })
 );
 export interface IQuery {
@@ -84,17 +86,19 @@ export interface IQuery {
 
 export const querySchema = schema.object({
   pattern: schema.string(),
-  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
     defaultValue: [],
   }),
   type: schema.maybe(schema.string()),
   rollup_index: schema.maybe(schema.string()),
   allow_no_index: schema.maybe(schema.boolean()),
   include_unmapped: schema.maybe(schema.boolean()),
-  fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  fields: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 50_000 })])
+  ),
   allow_hidden: schema.maybe(schema.boolean()),
   field_types: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 60 })], {
       defaultValue: [],
     })
   ),
@@ -112,11 +116,11 @@ const FieldDescriptorSchema = schema.object({
   readFromDocValues: schema.boolean(),
   searchable: schema.boolean(),
   type: schema.string(),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  esTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
   subType: fieldSubTypeSchema,
   metadata_field: schema.maybe(schema.boolean()),
-  fixedInterval: schema.maybe(schema.arrayOf(schema.string())),
-  timeZone: schema.maybe(schema.arrayOf(schema.string())),
+  fixedInterval: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+  timeZone: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
   timeSeriesMetric: schema.maybe(
     schema.oneOf([
       schema.literal('histogram'),
@@ -128,7 +132,7 @@ const FieldDescriptorSchema = schema.object({
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
   conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 100_000 }))
   ),
   defaultFormatter: schema.maybe(schema.string()),
 });
@@ -143,8 +147,8 @@ export const validate: VersionedRouteValidation<any, any, any> = {
     200: {
       body: () =>
         schema.object({
-          fields: schema.arrayOf(FieldDescriptorSchema),
-          indices: schema.arrayOf(schema.string()),
+          fields: schema.arrayOf(FieldDescriptorSchema, { maxSize: 500_000 }),
+          indices: schema.arrayOf(schema.string(), { maxSize: 500_000 }),
         }),
     },
   },
@@ -176,6 +180,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     // not available to get request
     const indexFilter = request.body?.index_filter;
     const runtimeMappings = request.body?.runtime_mappings;
+    const projectRouting = request.body?.project_routing;
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
@@ -203,6 +208,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         allowHidden,
         includeEmptyFields,
         runtimeMappings,
+        projectRouting,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
         abortSignal,
       });

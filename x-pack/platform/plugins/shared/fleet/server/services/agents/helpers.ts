@@ -23,7 +23,7 @@ type FleetServerAgentESResponse =
 export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
-    fields?: { status?: AgentStatus[] };
+    fields?: { status?: AgentStatus[]; pipeline_config?: string[]; signals?: string[] };
   }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
@@ -90,7 +90,11 @@ export function searchHitToAgent(
         }))
       : undefined,
     agent: hit._source?.agent
-      ? { id: hit._source?.agent.id, version: hit._source?.agent.version }
+      ? {
+          id: hit._source?.agent.id,
+          version: hit._source?.agent.version,
+          type: hit._source?.agent.type,
+        }
       : undefined,
 
     // key-value pairs
@@ -99,6 +103,11 @@ export function searchHitToAgent(
     unhealthy_reason: hit._source?.unhealthy_reason,
     last_known_status: hit._source?.last_known_status,
     upgrade: hit._source?.upgrade,
+    identifying_attributes: hit._source?.identifying_attributes,
+    non_identifying_attributes: hit._source?.non_identifying_attributes,
+    sequence_num: hit._source?.sequence_num,
+    capabilities: hit._source?.capabilities,
+    health: hit._source?.health,
   };
 
   if (!hit.fields?.status?.length) {
@@ -109,6 +118,12 @@ export function searchHitToAgent(
       );
   } else {
     agent.status = hit.fields.status[0];
+  }
+  if (hit.fields?.pipeline_config?.length) {
+    agent.pipeline_config = hit.fields.pipeline_config[0];
+  }
+  if (hit.fields?.signals?.length) {
+    agent.signals = hit.fields.signals;
   }
   return agent;
 }

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-settings-ids'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-ids'
+  title: '@kbn/management-settings-ids'
   description: Moon project for @kbn/management-settings-ids
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/settings/setting_ids
+  sourceRoot: src/platform/packages/shared/kbn-management/settings/setting_ids
 tags:
   - shared-common
   - package

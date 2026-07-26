@@ -1,0 +1,17 @@
+# Build output
+target/
+*.js
+!jest.config.js
+*.d.ts
+tsconfig.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

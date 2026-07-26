@@ -64,10 +64,6 @@ export function renderApp(
             linkType: 'documentation',
             href: `${docLinks.links.observability.monitorUptime}`,
           },
-          {
-            linkType: 'discuss',
-            href: 'https://discuss.elastic.co/c/uptime',
-          },
         ],
       }),
     setBadge,

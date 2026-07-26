@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const DEFAULT_SPACE_ID = `default`;
-
 /**
  * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
  */
@@ -52,8 +50,3 @@ export const API_VERSIONS = {
     v1: '2023-10-31',
   },
 };
-
-/**
- * The setting to control whether the Space Solution Tour is shown.
- */
-export const SHOW_SPACE_SOLUTION_TOUR_SETTING = 'showSpaceSolutionTour';

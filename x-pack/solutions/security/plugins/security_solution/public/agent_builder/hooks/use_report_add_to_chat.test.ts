@@ -31,8 +31,33 @@ describe('useReportAddToChat', () => {
     });
 
     const payload: AgentBuilderAddToChatTelemetry = {
-      pathway: 'rules_table',
+      pathway: 'rule_creation',
       attachments: ['rule'],
+    };
+
+    const { result } = renderHook(() => useReportAddToChat());
+
+    act(() => {
+      result.current(payload);
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, payload);
+  });
+
+  it('passes item_count through to reportEvent for bulk pathways', () => {
+    const reportEvent = jest.fn();
+    mockUseKibana.mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
+    });
+
+    const payload: AgentBuilderAddToChatTelemetry = {
+      pathway: 'bulk_alerts_alerts_page',
+      attachments: ['alert'],
+      item_count: 5,
     };
 
     const { result } = renderHook(() => useReportAddToChat());

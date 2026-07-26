@@ -8,7 +8,20 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
-import type { Dimension } from './types';
+import type { Dimension, MetricsSort } from './types';
+
+export type FlyoutTabId = 'overview' | 'esql-query';
+
+export interface FlyoutState {
+  // Position of the metric in the grid when the flyout was opened.
+  readonly gridPosition: number;
+  // Stable identifier for the metric being shown.
+  readonly metricUniqueKey: string;
+  // ES|QL query rendered for the metric in the flyout.
+  readonly esqlQuery: string;
+  // Selected tab inside the flyout body.
+  readonly selectedTabId?: FlyoutTabId;
+}
 
 export interface MetricsExperienceRestorableState {
   // Pagination page index
@@ -22,6 +35,12 @@ export interface MetricsExperienceRestorableState {
 
   // Selected dimensions
   selectedDimensions: Dimension[];
+
+  // Open metric details flyout state, persisted across navigation.
+  flyoutState?: FlyoutState;
+
+  // Selected sort
+  metricsSort: MetricsSort;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

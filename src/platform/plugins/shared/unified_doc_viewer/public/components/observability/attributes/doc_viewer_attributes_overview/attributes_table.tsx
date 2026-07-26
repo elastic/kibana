@@ -136,7 +136,7 @@ export const AttributesTable = ({
         cellPadding: 'm',
         fontSize: 's',
       }}
-      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
       inMemory={{ level: 'enhancements' }}
       toolbarVisibility={false}
     />

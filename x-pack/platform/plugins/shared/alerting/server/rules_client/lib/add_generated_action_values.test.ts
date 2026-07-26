@@ -23,6 +23,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import type { ConstructorOptions } from '../rules_client';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
@@ -53,6 +54,7 @@ describe('addGeneratedActionValues()', () => {
     namespace: 'default',
     getUserName: jest.fn(),
     createAPIKey: jest.fn(),
+    cloneAPIKey: jest.fn(),
     logger,
     internalSavedObjectsRepository,
     encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -69,6 +71,8 @@ describe('addGeneratedActionValues()', () => {
     uiSettings,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
   };
 
   const mockAction: RuleAction = {
@@ -115,7 +119,6 @@ describe('addGeneratedActionValues()', () => {
       [mockSystemAction],
       {
         ...rulesClientParams,
-        fieldsToExcludeFromPublicApi: [],
         minimumScheduleIntervalInMs: 0,
       }
     );
@@ -136,7 +139,6 @@ describe('addGeneratedActionValues()', () => {
       [mockSystemAction],
       {
         ...rulesClientParams,
-        fieldsToExcludeFromPublicApi: [],
         minimumScheduleIntervalInMs: 0,
       }
     );
@@ -181,7 +183,6 @@ describe('addGeneratedActionValues()', () => {
         [mockSystemAction],
         {
           ...rulesClientParams,
-          fieldsToExcludeFromPublicApi: [],
           minimumScheduleIntervalInMs: 0,
         }
       )

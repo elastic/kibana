@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { StreamQueryKql } from '../queries';
-
 export const emptyAssets = {
   dashboards: [] as string[],
   rules: [] as string[],
-  queries: [] as StreamQueryKql[],
 } as const;

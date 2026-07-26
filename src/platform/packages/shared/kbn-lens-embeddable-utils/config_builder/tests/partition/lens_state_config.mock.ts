@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const pieLegacyBasicState = {
   description: '',
@@ -112,7 +113,7 @@ export const pieLegacyBasicState = {
     adHocDataViews: {},
   },
   title: 'Partition baseline',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsPie',
   references: [
     {
@@ -349,7 +350,6 @@ export const waffleLegacyBasicState = {
           layerType: 'data',
           numberDisplay: 'percent',
           legendDisplay: 'default',
-          nestedLegend: true,
           collapseFns: {},
           categoryDisplay: 'default',
         },
@@ -1073,7 +1073,6 @@ export const waffleLegacyAdvancedStateWithCollapsedGroups = {
           layerType: 'data',
           numberDisplay: 'percent',
           legendDisplay: 'default',
-          nestedLegend: true,
           collapseFns: {
             partition_value_accessor_group_by_0: 'sum',
           },
@@ -1208,7 +1207,7 @@ export const pieLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1250,8 +1249,8 @@ export const pieLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],
@@ -1304,7 +1303,7 @@ export const treemapLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1346,8 +1345,8 @@ export const treemapLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],
@@ -1400,7 +1399,7 @@ export const mosaicLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1442,8 +1441,8 @@ export const mosaicLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],
@@ -1496,7 +1495,7 @@ export const waffleLegacyESQLState = {
     internalReferences: [
       {
         type: 'index-pattern',
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+        id: 'kibana_sample_data_ecommerce',
         name: 'indexpattern-datasource-layer-layer_0',
       },
     ],
@@ -1537,8 +1536,8 @@ export const waffleLegacyESQLState = {
       ],
     },
     adHocDataViews: {
-      'kibana_sample_data_ecommerce-no_time_field': {
-        id: 'kibana_sample_data_ecommerce-no_time_field',
+      kibana_sample_data_ecommerce: {
+        id: 'kibana_sample_data_ecommerce',
         title: 'kibana_sample_data_ecommerce',
         name: 'kibana_sample_data_ecommerce',
         sourceFilters: [],

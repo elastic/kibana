@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import type { InPaginateProps } from '.';
 
 export type PaginateProps = Omit<InPaginateProps, 'startPage'> & {
@@ -26,17 +25,4 @@ export const Paginate: React.FunctionComponent<PaginateProps> = ({
   ...childrenProps
 }) => {
   return <React.Fragment>{children(childrenProps)}</React.Fragment>;
-};
-
-Paginate.propTypes = {
-  children: PropTypes.func.isRequired,
-  rows: PropTypes.array.isRequired,
-  perPage: PropTypes.number.isRequired,
-  pageNumber: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  nextPageEnabled: PropTypes.bool.isRequired,
-  prevPageEnabled: PropTypes.bool.isRequired,
-  setPage: PropTypes.func.isRequired,
-  nextPage: PropTypes.func.isRequired,
-  prevPage: PropTypes.func.isRequired,
 };

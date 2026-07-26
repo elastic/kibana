@@ -15,6 +15,7 @@ describe('LeftPanel', () => {
   it('renders', () => {
     const { queryByText } = render(
       <UserDetailsPanel
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
@@ -27,7 +28,7 @@ describe('LeftPanel', () => {
       }
     );
 
-    const tabElement = queryByText('Risk contributions');
+    const tabElement = queryByText('Risk score');
 
     expect(tabElement).toBeInTheDocument();
   });
@@ -35,6 +36,7 @@ describe('LeftPanel', () => {
   it('does not render the tab if tab is not found', () => {
     const { queryByText } = render(
       <UserDetailsPanel
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
@@ -47,7 +49,7 @@ describe('LeftPanel', () => {
       }
     );
 
-    const tabElement = queryByText('Risk Inputs');
+    const tabElement = queryByText('Risk score');
 
     expect(tabElement).not.toBeInTheDocument();
   });
@@ -55,6 +57,7 @@ describe('LeftPanel', () => {
   it("doesn't render insights panel when there no misconfiguration findings", () => {
     const { queryByText } = render(
       <UserDetailsPanel
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
@@ -76,6 +79,7 @@ describe('LeftPanel', () => {
   it('render insights panel when there are misconfiguration findings', () => {
     const { queryByText } = render(
       <UserDetailsPanel
+        userName="test user"
         path={{
           tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
         }}

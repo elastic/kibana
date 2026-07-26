@@ -39,6 +39,17 @@ describe('ProcessTreeAlerts component', () => {
     mockedContext = createAppRootMockRenderer();
   });
 
+  const mockAlertWithIndex = {
+    ...mockAlert,
+    kibana: {
+      ...mockAlert.kibana,
+      alert: {
+        ...mockAlert.kibana?.alert,
+        index: '.alerts-security.alerts-default',
+      },
+    },
+  };
+
   describe('When ProcessTreeAlert is mounted', () => {
     it('should render alert row correctly', async () => {
       renderResult = mockedContext.render(<ProcessTreeAlert {...props} />);
@@ -108,14 +119,25 @@ describe('ProcessTreeAlerts component', () => {
 
     it('should execute onShowAlertDetails callback when clicking on expand button', async () => {
       const onShowAlertDetails = jest.fn();
+      const onClick = jest.fn();
       renderResult = mockedContext.render(
-        <ProcessTreeAlert {...props} onShowAlertDetails={onShowAlertDetails} />
+        <ProcessTreeAlert
+          {...props}
+          alert={mockAlertWithIndex}
+          onClick={onClick}
+          onShowAlertDetails={onShowAlertDetails}
+        />
       );
 
       const expandButton = renderResult.queryByTestId(EXPAND_BUTTON_TEST_ID);
       expect(expandButton).toBeTruthy();
       expandButton?.click();
       expect(onShowAlertDetails).toHaveBeenCalledTimes(1);
+      expect(onClick).not.toHaveBeenCalled();
+      expect(onShowAlertDetails.mock.calls[0]).toEqual([
+        mockAlertWithIndex.kibana?.alert?.uuid,
+        mockAlertWithIndex.kibana?.alert?.index,
+      ]);
     });
   });
 });

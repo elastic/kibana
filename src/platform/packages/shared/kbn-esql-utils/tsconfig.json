@@ -28,10 +28,12 @@
     "@kbn/i18n",
     "@kbn/datemath",
     "@kbn/es-query",
-    "@kbn/monaco",
+    "@kbn/code-editor",
     "@kbn/core",
-    "@kbn/projects-solutions-groups",
     "@kbn/index-management-shared-types",
     "@kbn/licensing-types",
+    "@kbn/controls-constants",
+    "@kbn/presentation-publishing",
+    "@kbn/controls-schemas",
   ]
 }

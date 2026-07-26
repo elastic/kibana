@@ -210,6 +210,7 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 
 export interface FieldStatsCommonRequestParams {
   index: string;
+  projectRouting?: string;
   timeFieldName?: string;
   earliestMs?: number | string | undefined;
   latestMs?: number | string | undefined;
@@ -235,6 +236,7 @@ export interface OverallStatsSearchStrategyParams {
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
+  projectRouting?: string;
   aggregatableFields: Array<{
     name: string;
     supportedAggs: SupportedAggs;

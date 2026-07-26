@@ -14,6 +14,7 @@ import type {
   SOSecretPath,
   DeletedSecretResponse,
   DeletedSecretReference,
+  BaseSettings,
 } from '../../../common/types';
 import type { SecretReference } from '../../types';
 import { FleetError } from '../../errors';
@@ -24,10 +25,46 @@ import { appContextService } from '../app_context';
 import { settingsService } from '..';
 import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 
-export async function isSecretStorageEnabled(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
+type SecretStorageSettingsKey = Extract<
+  keyof BaseSettings,
+  | 'secret_storage_requirements_met'
+  | 'output_secret_storage_requirements_met'
+  | 'action_secret_storage_requirements_met'
+  | 'ssl_secret_storage_requirements_met'
+  | 'download_source_auth_secret_storage_requirements_met'
+>;
+
+export interface SecretStorageCheckOptions {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  /**
+   * A human-readable name for the feature (used in logging).
+   * Defaults to "Secrets".
+   */
+  featureName?: string;
+  /**
+   * The minimum fleet server version required for this secret storage feature.
+   * Defaults to SECRETS_MINIMUM_FLEET_SERVER_VERSION.
+   */
+  minimumFleetServerVersion?: string;
+  /**
+   * The setting key to check/update for this feature.
+   * Defaults to 'secret_storage_requirements_met'.
+   */
+  settingKey?: SecretStorageSettingsKey;
+}
+
+export async function isSecretStorageEnabledForFeature(
+  opts: SecretStorageCheckOptions
 ): Promise<boolean> {
+  const {
+    esClient,
+    soClient,
+    featureName = 'Secrets',
+    minimumFleetServerVersion = SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey = 'secret_storage_requirements_met',
+  } = opts;
+
   const logger = appContextService.getLogger();
 
   // if serverless then secrets will always be supported
@@ -35,7 +72,7 @@ export async function isSecretStorageEnabled(
     appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
 
   if (isFleetServerStandalone) {
-    logger.trace('Secrets storage is enabled as fleet server is standalone');
+    logger.trace(`${featureName} storage is enabled as fleet server is standalone`);
     return true;
   }
 
@@ -43,34 +80,49 @@ export async function isSecretStorageEnabled(
   // once the requirement has been met, secrets are always on
   const settings = await settingsService.getSettingsOrUndefined(soClient);
 
-  if (settings && settings.secret_storage_requirements_met) {
-    logger.debug('Secrets storage requirements already met, turned on in settings');
+  if (settings && settings[settingKey]) {
+    logger.debug(`${featureName} storage requirements already met, turned on in settings`);
     return true;
   }
 
   const areAllFleetServersOnProperVersion = await checkFleetServerVersionsForSecretsStorage(
     esClient,
     soClient,
-    SECRETS_MINIMUM_FLEET_SERVER_VERSION
+    minimumFleetServerVersion
   );
 
   // otherwise check if we have the minimum fleet server version and enable secrets if so
   if (areAllFleetServersOnProperVersion) {
-    logger.debug('Enabling secrets storage as minimum fleet server version has been met');
+    logger.debug(`Enabling ${featureName} storage as minimum fleet server version has been met`);
     try {
       await settingsService.saveSettings(soClient, {
-        secret_storage_requirements_met: true,
+        [settingKey]: true,
       });
     } catch (err) {
       // we can suppress this error as it will be retried on the next function call
-      logger.warn(`Failed to save settings after enabling secrets storage: ${err.message}`);
+      logger.warn(`Failed to save settings after enabling ${featureName} storage: ${err.message}`);
     }
 
     return true;
   }
 
-  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
+  logger.info(
+    `${featureName} storage is disabled as minimum fleet server version has not been met`
+  );
   return false;
+}
+
+export async function isSecretStorageEnabled(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<boolean> {
+  return isSecretStorageEnabledForFeature({
+    esClient,
+    soClient,
+    featureName: 'Secrets',
+    minimumFleetServerVersion: SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey: 'secret_storage_requirements_met',
+  });
 }
 
 export async function createSecrets(opts: {

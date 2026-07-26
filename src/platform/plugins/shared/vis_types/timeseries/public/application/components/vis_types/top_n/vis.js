@@ -10,7 +10,7 @@
 import { getCoreStart } from '../../../../services';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createReactFieldFormatter } from '../../lib/create_field_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
@@ -55,7 +55,7 @@ function TopNVisualization(props) {
     if (seriesConfig) {
       const tickFormatter =
         seriesConfig.formatter === DATA_FORMATTERS.DEFAULT
-          ? createFieldFormatter(getMetricsField(seriesConfig.metrics), fieldFormatMap, 'html')
+          ? createReactFieldFormatter(getMetricsField(seriesConfig.metrics), fieldFormatMap)
           : createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, getConfig);
 
       const value = getLastValue(item.data);

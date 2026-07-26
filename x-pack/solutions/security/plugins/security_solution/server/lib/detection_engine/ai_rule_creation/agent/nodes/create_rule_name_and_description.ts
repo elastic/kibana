@@ -26,10 +26,18 @@ export const createRuleNameAndDescriptionNode = ({
   return async (state: typeof RuleCreationAnnotation.State) => {
     events?.reportProgress('Generating rule name and description...');
 
+    const esqlQuery = state.rule.query;
+    if (!esqlQuery) {
+      return {
+        ...state,
+        errors: ['Cannot generate rule name and description: ES|QL query is missing'],
+      };
+    }
+
     try {
       const baseRuleParams = await ruleCreationChain.invoke({
         user_request: state.userQuery,
-        esql_query: state.rule.query,
+        esql_query: esqlQuery,
       });
 
       events?.reportProgress('Rule name and description generated successfully');
@@ -42,7 +50,7 @@ export const createRuleNameAndDescriptionNode = ({
       events?.reportProgress(`Failed to create rule name and description: ${e.message}`);
       return {
         ...state,
-        criticalErrors: [`Failed to create rule name and description: ${e.message}`],
+        errors: [`Failed to create rule name and description: ${e.message}`],
       };
     }
   };

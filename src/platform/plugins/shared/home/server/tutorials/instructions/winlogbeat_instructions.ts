@@ -12,7 +12,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import type { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
+import { cloudPasswordAndResetLink, cloudServerlessApiKeyNote } from './cloud_instructions';
 
 export const createWinlogbeatInstructions = (context: TutorialContext) => {
   const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/winlogbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
@@ -137,7 +137,36 @@ export const createWinlogbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
+    },
+  },
+});
+
+export const createWinlogbeatCloudInstructionsServerless = () => ({
+  CONFIG: {
+    WINDOWS: {
+      title: i18n.translate(
+        'home.tutorials.common.winlogbeatCloudInstructionsServerless.config.windowsTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.winlogbeatCloudInstructionsServerless.config.windowsTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote(),
     },
   },
 });
@@ -236,7 +265,9 @@ export function onPremCloudInstructions(context: TutorialContext) {
 
 export function cloudInstructions(context: TutorialContext) {
   const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions(context);
-  const WINLOGBEAT_CLOUD_INSTRUCTIONS = createWinlogbeatCloudInstructions();
+  const WINLOGBEAT_CLOUD_INSTRUCTIONS = context.isServerless
+    ? createWinlogbeatCloudInstructionsServerless()
+    : createWinlogbeatCloudInstructions();
 
   return {
     instructionSets: [

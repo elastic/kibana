@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-fixture-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-fixture-plugin'
+  title: '@kbn/alerting-fixture-plugin'
   description: Moon project for @kbn/alerting-fixture-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/functional_with_es_ssl/plugins/alerts
+  sourceRoot: x-pack/platform/test/functional_with_es_ssl/plugins/alerts
 dependsOn:
   - '@kbn/core'
   - '@kbn/features-plugin'

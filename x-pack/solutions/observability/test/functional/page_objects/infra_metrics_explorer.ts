@@ -61,11 +61,6 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
       return await radioInput.click();
     },
 
-    async ensureMetricsExplorerFeedbackLinkIsVisible() {
-      await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
-      await testSubjects.existOrFail('infraMetricsExplorerFeedbackLink');
-    },
-
     async ensureMaxMetricsLimiteReachedIsVisible() {
       const subject = await testSubjects.find('metricsExplorer-metrics');
       await subject.click();

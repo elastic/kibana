@@ -6,7 +6,7 @@
  */
 
 import { tool } from '@langchain/core/tools';
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 import type { SiemMigrationResourceType } from '../../../../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationsDataResourcesClient } from '../../../data/siem_migrations_data_resources_client';
 

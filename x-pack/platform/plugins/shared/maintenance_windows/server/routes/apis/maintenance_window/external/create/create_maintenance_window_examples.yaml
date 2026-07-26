@@ -1,0 +1,13 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createMaintenanceWindowRequest:
+          $ref: './create_maintenance_window_request.yaml'
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          createMaintenanceWindowResponse:
+            $ref: './create_maintenance_window_response.yaml'

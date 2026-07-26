@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
@@ -25,7 +26,7 @@ import type {
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
-import { stepCreateAlertingRules } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
+import { stepCreateAlertingAssets } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -81,20 +82,35 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   const spaceIds = request.body?.space_ids ?? [spaceId];
 
   for (const spaceToInstallId of spaceIds) {
+    const spaceScopedClient = appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId);
+    const installAsAdditionalSpace =
+      (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceToInstallId;
+
+    const packageInstallContext = {
+      packageInfo,
+      paths: installedPkgWithAssets.paths,
+      archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+    };
+
     await installKibanaAssetsAndReferences({
-      savedObjectsClient: appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId),
+      savedObjectsClient: spaceScopedClient,
       logger,
       pkgName,
       pkgTitle: packageInfo.title,
-      installAsAdditionalSpace: true,
+      installAsAdditionalSpace,
       spaceId: spaceToInstallId,
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
-      packageInstallContext: {
-        packageInfo,
-        paths: installedPkgWithAssets.paths,
-        archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
-      },
+      packageInstallContext,
+    });
+
+    await stepCreateAlertingAssets({
+      logger,
+      savedObjectsClient: spaceScopedClient,
+      packageInstallContext,
+      spaceId: spaceToInstallId,
+      request,
+      installAsAdditionalSpace,
     });
   }
 
@@ -163,16 +179,45 @@ export const installRuleAssetsHandler: FleetRequestHandler<
 
   const { packageInfo } = installedPkgWithAssets;
 
-  await stepCreateAlertingRules({
+  const installAsAdditionalSpace =
+    (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId;
+
+  const spaceScopedClient = installAsAdditionalSpace
+    ? appContextService.getInternalUserSOClientForSpaceId(spaceId)
+    : savedObjectsClient;
+
+  const packageInstallContext = {
+    packageInfo,
+    paths: installedPkgWithAssets.paths,
+    archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+  };
+
+  // Ensure archive SO assets (including alerting_rule_template SOs) are present in this space
+  // before attempting rule creation. Only required for secondary spaces that have not yet had
+  // assets installed via the "Install Kibana assets" flow; the primary space already has them
+  // from the original install, and reinstalling unconditionally would wipe and recreate all
+  // Kibana assets (dashboards, visualizations, etc.) as an unintended side effect.
+  if (installAsAdditionalSpace) {
+    await installKibanaAssetsAndReferences({
+      savedObjectsClient: spaceScopedClient,
+      logger,
+      pkgName,
+      pkgTitle: packageInfo.title,
+      installAsAdditionalSpace,
+      spaceId,
+      assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
+      installedPkg: installation,
+      packageInstallContext,
+    });
+  }
+
+  await stepCreateAlertingAssets({
     logger,
-    savedObjectsClient,
-    packageInstallContext: {
-      packageInfo,
-      paths: installedPkgWithAssets.paths,
-      archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
-    },
+    savedObjectsClient: spaceScopedClient,
+    packageInstallContext,
     spaceId,
     request,
+    installAsAdditionalSpace,
   });
 
   return response.ok({ body: { success: true } });

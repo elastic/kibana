@@ -8,21 +8,13 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  BehaviorSubject,
-  Subject,
-  combineLatest,
-  combineLatestWith,
-  filter,
-  map,
-  pipe,
-} from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  apiPublishesUnsavedChanges,
+  apiHasSerializableState,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
@@ -43,6 +35,7 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { gatePublishingSubjectWhileLoading } from './gate_publishing_subject_while_loading';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -53,7 +46,7 @@ export interface ControlGroupRendererProps {
   viewMode?: ViewMode;
   filters?: Filter[];
   timeRange?: TimeRange;
-  query?: Query;
+  query?: Query | AggregateQuery;
   dataLoading?: boolean;
   compressed?: boolean;
 }
@@ -110,6 +103,7 @@ export const ControlGroupRenderer = ({
       ...searchApi,
       ...propsApi,
       reload$,
+      panelIsPinned: () => true,
       getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
@@ -150,20 +144,34 @@ export const ControlGroupRenderer = ({
     if (!parentApi || !input$) return;
 
     /**
-     * the ControlGroupRenderer will render before the children are available and combineCompatibleChildrenApis
-     * will default to the empty value; however, we shouldn't publish this until the value is real
+     * The ControlGroupRenderer will render before the children are available and
+     * combineCompatibleChildrenApis will default to the empty value; however, we
+     * shouldn't publish this until the value is real. Gate subscribers on
+     * childrenLoading$ and expose getValue/value from the latest post-load value.
      */
-    const ignoreWhileLoading = pipe(
-      combineLatestWith(parentApi.childrenLoading$),
-      filter(([, loading]) => !loading),
-      map(([result]) => result)
+    const subscriptions = new Subscription();
+
+    const esqlVariables$ = gatePublishingSubjectWhileLoading(
+      parentApi.esqlVariables$,
+      parentApi.childrenLoading$,
+      subscriptions
+    );
+    const appliedFilters$ = gatePublishingSubjectWhileLoading(
+      parentApi.appliedFilters$,
+      parentApi.childrenLoading$,
+      subscriptions
+    );
+    const appliedTimeslice$ = gatePublishingSubjectWhileLoading(
+      parentApi.appliedTimeslice$,
+      parentApi.childrenLoading$,
+      subscriptions
     );
 
     const publicApi = {
       ...parentApi,
-      esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
-      appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
-      appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
+      esqlVariables$,
+      appliedFilters$,
+      appliedTimeslice$,
       getControls: parentApi.layout$.getValue().controls ?? {},
       reload: () => {
         parentApi.reload$.next();
@@ -171,17 +179,15 @@ export const ControlGroupRenderer = ({
       getInput$: () => input$,
       getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
-        /** Set the last saved state to the new input and then reset each child to this state */
-        const newState = lastSavedState$Ref.current.getValue();
+        const newState = { ...lastSavedState$Ref.current.getValue() };
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
           newState[id] = {
             ...lastSavedState$Ref.current.value[id],
             ...control,
           };
         });
-        lastSavedState$Ref.current.next(newState);
-        asyncForEach(Object.values(parentApi.children$.getValue()), async (child) => {
-          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
+          if (apiHasSerializableState(child)) child.applySerializedState(newState[id]);
         });
       },
     };
@@ -208,6 +214,10 @@ export const ControlGroupRenderer = ({
       ...publicApi,
       openAddDataControlFlyout,
     } as unknown as ControlGroupRendererApi);
+
+    return () => {
+      subscriptions.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentApi, input$, uiActions]);
 

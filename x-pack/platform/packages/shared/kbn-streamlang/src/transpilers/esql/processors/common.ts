@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
 import type { Condition } from '../../../../types/conditions';
 import type { DissectGrokPatternField } from '../../../../types/formats';
+import { conditionToESQLAst } from '../condition_to_esql';
 
 /**
  * Cast (or create) each listed field to string to normalize branch schemas
@@ -78,24 +79,43 @@ export function combineOr(predicates: ESQLAstItem[]): ESQLAstItem | null {
  * - ES|QL can only simulate the missing field case with WHERE filtering
  * - Pattern mismatch failures cannot be (in a reasonable fashion) simulated in ES|QL (they nullify target fields instead)
  *
- * @param sourceField - The source field name to check for NULL/missing values
  * @param ignoreMissing - If false, returns WHERE command to filter missing fields
+ * @param sourceFields - The source field names to check for NULL/missing values
  * @returns WHERE command if filtering needed, undefined otherwise
+ *
+ * @example
+ * // Single field
+ * buildIgnoreMissingFilter(false, 'message')
+ * // → WHERE NOT(`message` IS NULL)
+ *
+ * @example
+ * // Multiple fields (e.g., network_direction)
+ * buildIgnoreMissingFilter(false, 'source.ip', 'destination.ip')
+ * // → WHERE NOT(`source.ip` IS NULL) AND NOT(`destination.ip` IS NULL)
  */
 export function buildIgnoreMissingFilter(
-  sourceField: string,
-  ignoreMissing: boolean
+  ignoreMissing: boolean,
+  ...sourceFields: string[]
 ): ESQLAstCommand | undefined {
-  if (ignoreMissing) {
+  if (ignoreMissing || sourceFields.length === 0) {
     return undefined; // No filtering needed when ignore_missing = true
   }
 
-  const fromColumn = Builder.expression.column(sourceField);
+  const notNullPredicates = sourceFields.map((field) =>
+    Builder.expression.func.call('NOT', [
+      Builder.expression.func.postfix('IS NULL', Builder.expression.column(field)),
+    ])
+  );
+
+  const combinedPredicate = combineAnd(notNullPredicates);
+
+  if (!combinedPredicate) {
+    return undefined;
+  }
+
   return Builder.command({
     name: 'where',
-    args: [
-      Builder.expression.func.call('NOT', [Builder.expression.func.postfix('IS NULL', fromColumn)]),
-    ],
+    args: [combinedPredicate],
   });
 }
 
@@ -125,6 +145,86 @@ export function buildOverrideFilter(
   return Builder.command({
     name: 'where',
     args: [Builder.expression.func.postfix('IS NULL', toColumn)],
+  });
+}
+
+/**
+ * Creates an EVAL command that conditionally routes the source expression through a CASE guard,
+ * storing either the real value or a fallback sentinel in a temp column.
+ *
+ * The default fallback is the empty string `""` — historically used because every command we
+ * route through this helper happened to short-circuit cleanly on an empty input. Callers whose
+ * downstream command does NOT short-circuit on `""` (e.g. `URI_PARTS`, which emits
+ * `path = ""` rather than NULL for an empty input and therefore leaks a non-null sub-field
+ * into the destructive-overwrite-merge step) should pass `Builder.expression.literal.nil()`
+ * so the temp column is NULL on gated rows. ES|QL's NULL propagation through commands then
+ * guarantees all output sub-fields are NULL, and the COALESCE merge naturally preserves
+ * prior `<to>.*` values.
+ *
+ * @param condition - The Streamlang condition that guards execution
+ * @param sourceExpression - The field/expression to pass through when the condition is true
+ * @param tempColumn - Name of the temporary output column
+ * @param fallback - Sentinel written when the condition is false (defaults to `""`)
+ * @returns EVAL command: `EVAL <tempColumn> = CASE(<condition>, <sourceExpression>, <fallback>)`
+ */
+export function buildConditionalEval(
+  condition: Condition,
+  sourceExpression: string,
+  tempColumn: string,
+  fallback: ESQLAstItem = Builder.expression.literal.string('')
+): ESQLAstCommand {
+  return Builder.command({
+    name: 'eval',
+    args: [
+      Builder.expression.func.binary('=', [
+        Builder.expression.column(tempColumn),
+        Builder.expression.func.call('CASE', [
+          conditionToESQLAst(condition),
+          Builder.expression.column(sourceExpression),
+          fallback,
+        ]),
+      ]),
+    ],
+  });
+}
+
+/**
+ * Creates a single EVAL command with COALESCE assignments that merge temp-prefixed columns into target-prefixed columns.
+ *
+ * @param fields - Field names to merge (without prefix)
+ * @param tempPrefix - Prefix used for the temporary output columns
+ * @param targetPrefix - Prefix used for the final target columns
+ * @returns EVAL command: `EVAL <targetPrefix>.<f> = COALESCE(<tempPrefix>.<f>, <targetPrefix>.<f>), ...`
+ */
+export function buildCoalescePrefixedFieldsEval(
+  fields: string[],
+  tempPrefix: string,
+  targetPrefix: string
+): ESQLAstCommand {
+  return Builder.command({
+    name: 'eval',
+    args: fields.map((field) =>
+      Builder.expression.func.binary('=', [
+        Builder.expression.column(`${targetPrefix}.${field}`),
+        Builder.expression.func.call('COALESCE', [
+          Builder.expression.column(`${tempPrefix}.${field}`),
+          Builder.expression.column(`${targetPrefix}.${field}`),
+        ]),
+      ])
+    ),
+  });
+}
+
+/**
+ * Creates a DROP command for a list of column names.
+ *
+ * @param columns - Column names to drop
+ * @returns DROP command: `DROP <col1>, <col2>, ...`
+ */
+export function buildDropColumns(columns: string[]): ESQLAstCommand {
+  return Builder.command({
+    name: 'drop',
+    args: columns.map((col) => Builder.expression.column(col)),
   });
 }
 

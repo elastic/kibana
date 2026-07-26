@@ -8,9 +8,11 @@
  */
 
 import type { QueryDslQueryContainer, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ClientSearchRequest } from '@kbn/data-streams';
 import { initializeDataStreamClient, type WorkflowLogEvent } from './data_stream';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 
 export interface LogSearchResult {
   total: number;
@@ -35,13 +37,16 @@ export interface SearchLogsParams {
 }
 
 export class LogsRepository {
-  constructor(private readonly coreDataStreams: DataStreamsStart) {}
+  constructor(
+    private readonly coreDataStreams: DataStreamsStart,
+    private readonly logger: Logger
+  ) {}
 
   public async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
     const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
 
-    await dataStreamClient.bulk({
-      operations: logEvents.flatMap((logEvent) => [{ create: {} }, logEvent]),
+    await retryTransientEsErrors(() => dataStreamClient.create({ documents: logEvents }), {
+      logger: this.logger,
     });
   }
 
@@ -109,19 +114,22 @@ export class LogsRepository {
   private async searchDataStream(query: ClientSearchRequest): Promise<LogSearchResult> {
     const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
 
-    const response = await dataStreamClient.search({
-      sort: [{ '@timestamp': { order: 'desc' } }],
-      size: 1000,
-      ...query,
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        dataStreamClient.search({
+          sort: [{ '@timestamp': { order: 'desc' } }],
+          size: 1000,
+          ...query,
+        }),
+      { logger: this.logger }
+    );
 
     return {
       total:
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      logs: response.hits.hits.map((hit) => hit._source!),
+      logs: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
     };
   }
 }

@@ -77,7 +77,7 @@ const CodePanel: React.FC<CodePanelProps> = (props) => {
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
                 {(copy) => (
-                  <EuiButton onClick={copy} fill iconType="copyClipboard">
+                  <EuiButton onClick={copy} fill iconType="copy">
                     {strings.details.copyToClipboardButton()}
                   </EuiButton>
                 )}

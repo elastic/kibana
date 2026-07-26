@@ -30,11 +30,11 @@ describe('useUnifiedHistogramRuntimeState', () => {
 
     await toolkit.initializeTabs();
 
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
-    return { toolkit, stateContainer };
+    return { toolkit };
   };
 
   const renderUseUnifiedHistogramRuntimeState = async ({
@@ -48,21 +48,13 @@ describe('useUnifiedHistogramRuntimeState', () => {
       ({ toolkit } = await setup());
     }
 
-    const stateContainer = selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.getCurrentTab().id
-    ).stateContainer$.getValue()!;
+    const hook = renderHook(() => useUnifiedHistogramRuntimeState(localStorageKeyPrefix), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
 
-    const hook = renderHook(
-      () => useUnifiedHistogramRuntimeState(stateContainer, localStorageKeyPrefix),
-      {
-        wrapper: ({ children }) => (
-          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
-        ),
-      }
-    );
-
-    return { hook, stateContainer };
+    return { hook, toolkit };
   };
 
   beforeEach(() => {
@@ -70,16 +62,15 @@ describe('useUnifiedHistogramRuntimeState', () => {
   });
 
   it('should return the current tab id', async () => {
-    const { hook, stateContainer } = await renderUseUnifiedHistogramRuntimeState();
+    const { hook, toolkit } = await renderUseUnifiedHistogramRuntimeState();
 
-    expect(hook.result.current.currentTabId).toBe(stateContainer.getCurrentTab().id);
+    expect(hook.result.current.currentTabId).toBe(toolkit.getCurrentTab().id);
   });
 
   it('should call useDiscoverHistogramMock with correct arguments', async () => {
-    const { stateContainer } = await renderUseUnifiedHistogramRuntimeState();
+    await renderUseUnifiedHistogramRuntimeState();
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
-      stateContainer,
       expect.objectContaining({
         initialLayoutProps: undefined,
       })
@@ -87,7 +78,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
   });
 
   it('should call useDiscoverHistogramMock with initialLayoutProps for default local storage key prefix', async () => {
-    const { toolkit, stateContainer } = await setup();
+    const { toolkit } = await setup();
 
     const histogramConfig$ = selectTabRuntimeState(
       toolkit.runtimeStateManager,
@@ -105,7 +96,6 @@ describe('useUnifiedHistogramRuntimeState', () => {
     await renderUseUnifiedHistogramRuntimeState({ toolkit });
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
-      stateContainer,
       expect.objectContaining({
         initialLayoutProps: { topPanelHeight: 123 },
       })
@@ -114,7 +104,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
 
   it('should call useDiscoverHistogramMock with initialLayoutProps for custom local storage key prefix', async () => {
     const localStorageKeyPrefix = 'customKeyPrefix';
-    const { toolkit, stateContainer } = await setup();
+    const { toolkit } = await setup();
 
     const histogramConfig$ = selectTabRuntimeState(
       toolkit.runtimeStateManager,
@@ -135,7 +125,6 @@ describe('useUnifiedHistogramRuntimeState', () => {
     });
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
-      stateContainer,
       expect.objectContaining({
         initialLayoutProps: { topPanelHeight: 456 },
       })

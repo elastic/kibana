@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
+import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type { CreateCaseParams } from '../cases/create';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlAnomalyCharts } from './anomaly_charts';
@@ -17,6 +17,7 @@ export function MachineLearningAnomalyExplorerProvider(
   anomalyCharts: MlAnomalyCharts
 ) {
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -96,10 +97,6 @@ export function MachineLearningAnomalyExplorerProvider(
       await testSubjects.existOrFail('mlAnomalyExplorerSwimlaneViewBy');
     },
 
-    async assertFeedbackButtonExists() {
-      await testSubjects.existOrFail('mlFeatureFeedbackButton');
-    },
-
     async assertAnnotationsPanelExists(state: string) {
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotationsPanel ${state}`, {
         timeout: 30 * 1000,
@@ -151,12 +148,7 @@ export function MachineLearningAnomalyExplorerProvider(
         );
         await label.click();
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
+        await common.waitForSaveModalToClose();
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

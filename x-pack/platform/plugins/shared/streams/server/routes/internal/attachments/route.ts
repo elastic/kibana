@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ATTACHMENT_SUGGESTIONS_LIMIT, STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type { Attachment } from '../../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../../lib/streams/attachments/types';
-import { assertAttachmentsAccess } from '../../utils/assert_attachments_access';
-
 const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
 
 export interface SuggestAttachmentsResponse {
@@ -41,10 +39,9 @@ const suggestAttachmentsRoute = createServerRoute({
       .optional(),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestAttachmentsResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     await streamsClient.ensureStream(params.path.streamName);
 

@@ -42,6 +42,8 @@ describe('bedrockClaudeAdapter', () => {
       connectorId: 'test-connector-id',
       config: {},
       capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
   });
 
@@ -114,6 +116,47 @@ Human:`,
           ],
         },
       });
+    });
+
+    it('forwards `maxContentLength` for buffered (converse) requests', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'converse',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards `maxContentLength` for streaming (converseStream) requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too.
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'converseStream',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
     });
 
     it('correctly format tools', () => {
@@ -245,6 +288,27 @@ Human:`,
           role: 'user',
           content: [{ toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } }],
         },
+      ]);
+    });
+
+    it('drops empty assistant messages without tool calls', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            { role: MessageRole.Assistant, content: '' },
+            { role: MessageRole.User, content: 'another question' },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'user', content: [{ text: 'another question' }] },
       ]);
     });
 
@@ -547,6 +611,58 @@ Human:`,
       expect(tools).toEqual(undefined); // Claude requires tools to be undefined when no tools are available
 
       expect(system).toEqual([{ text: addNoToolUsageDirective('some system instruction') }]);
+    });
+
+    it('keeps tools when ToolChoiceType.None and tool messages exist', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          system: 'some system instruction',
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'myFunction',
+                    arguments: { foo: 'bar' },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              role: MessageRole.Tool,
+              name: 'myFunction',
+              toolCallId: '0',
+              response: { ok: true },
+            },
+          ],
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: {
+                type: 'object',
+                properties: {},
+              },
+            },
+          },
+          toolChoice: ToolChoiceType.none,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { toolChoice, tools } = getCallParams();
+      expect(toolChoice).toEqual({ auto: {} });
+      expect(Array.isArray(tools)).toBe(true);
+      expect(tools.length).toBeGreaterThan(0);
     });
 
     it('propagates the abort signal when provided', () => {

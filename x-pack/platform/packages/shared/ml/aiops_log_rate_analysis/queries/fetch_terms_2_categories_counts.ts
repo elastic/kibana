@@ -86,7 +86,10 @@ export async function fetchTerms2CategoriesCounts(
 
   significantCategories.forEach((category) => {
     significantTerms.forEach((term) => {
-      searches.push({ index: params.index });
+      searches.push({
+        index: params.index,
+        ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
+      });
       searches.push(
         getTerm2CategoryCountRequest(
           params,
@@ -111,7 +114,10 @@ export async function fetchTerms2CategoriesCounts(
     });
 
     itemSets.forEach((itemSet) => {
-      searches.push({ index: params.index });
+      searches.push({
+        index: params.index,
+        ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
+      });
       searches.push(
         getTerm2CategoryCountRequest(
           params,

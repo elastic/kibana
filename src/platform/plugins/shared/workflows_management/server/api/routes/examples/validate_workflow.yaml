@@ -1,0 +1,42 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        validateWorkflowRequestExample:
+          description: 'Example request to validate a workflow YAML definition'
+          value:
+            yaml: "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          validateWorkflowValidResponseExample:
+            description: 'Example response for a valid workflow definition'
+            value:
+              valid: true
+              errors: []
+          validateWorkflowInvalidResponseExample:
+            description: 'Example response for an invalid workflow definition'
+            value:
+              valid: false
+              errors:
+                - "steps.0: Unknown step type 'nonexistent.step'"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/validate" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/validate
+      {
+        "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+      }

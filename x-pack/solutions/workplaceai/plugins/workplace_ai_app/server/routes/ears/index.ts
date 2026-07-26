@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { registerStartOAuthRoute } from './start_oauth';
-export { registerFetchSecretsRoute } from './fetch_secrets';
+export { registerExchangeCodeRoute } from './exchange_code';
+export { registerRefreshTokenRoute } from './refresh_token';
+export { registerRevokeTokenRoute } from './revoke_token';

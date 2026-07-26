@@ -6,7 +6,7 @@ Retriever-focused evaluation suites for the `@kbn/llm-tasks-plugin`.
 
 ```bash
 # Start Scout server
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run evaluations
 node scripts/playwright test --config x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts

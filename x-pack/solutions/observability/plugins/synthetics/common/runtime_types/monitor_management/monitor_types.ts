@@ -345,6 +345,7 @@ export const EncryptedSyntheticsMonitorCodec = t.union([
 export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
+  t.partial({ spaces: t.array(t.string), spaceId: t.string, revision: t.number }),
 ]);
 
 const HeartbeatFieldsCodec = t.intersection([
@@ -358,7 +359,9 @@ const HeartbeatFieldsCodec = t.intersection([
     'monitor.id': t.string,
     'monitor.project.id': t.string,
     'monitor.fleet_managed': t.boolean,
+    'monitor.interval': t.number,
     meta: t.record(t.string, t.union([t.string, t.array(t.string)])),
+    kibanaUrl: t.string,
   }),
 ]);
 

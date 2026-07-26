@@ -83,7 +83,7 @@ describe('Put payload schema', () => {
           kibana: [{ _reserved: ['customApplication1'], spaces: ['*'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0._reserved]: definition for this key is missing"`
+        `"[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)"`
       );
     });
 
@@ -155,7 +155,7 @@ describe('Put payload schema', () => {
           kibana: [{ _reserved: ['customApplication1'], spaces: ['marketing'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0._reserved]: definition for this key is missing"`
+        `"[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)"`
       );
     });
   });

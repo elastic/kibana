@@ -64,25 +64,31 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportButtonTitle: i18n.translate(
     'xpack.securitySolution.eventFilters.pageImportButtonTitle',
     {
-      defaultMessage: 'Import event filter list',
+      defaultMessage: 'Import event filters',
     }
   ),
   pageExportButtonTitle: i18n.translate(
     'xpack.securitySolution.eventFilters.pageExportButtonTitle',
     {
-      defaultMessage: 'Export event filter list',
+      defaultMessage: 'Export event filters',
     }
   ),
   pageExportSuccessToastTitle: i18n.translate(
     'xpack.securitySolution.eventFilters.exportSuccessToastTitle',
     {
-      defaultMessage: 'Event filter list exported successfully',
+      defaultMessage: 'Event filters exported successfully',
     }
   ),
   pageExportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.eventFilters.exportErrorToastTitle',
     {
-      defaultMessage: 'Event filter list export failed',
+      defaultMessage: 'Event filters export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import event filters here.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -158,6 +164,10 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.eventFilters.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add event filter' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.eventFilters.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import event filters' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.eventFilters.searchPlaceholderInfo',

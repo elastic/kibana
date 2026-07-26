@@ -19,7 +19,7 @@ export type TooltipProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
 export const Tooltip: React.FC<TooltipProps> = ({ children, show, content, ...tooltipProps }) => (
   <>
     {show ? (
-      <EuiToolTip content={content} delay="long" {...tooltipProps}>
+      <EuiToolTip content={content} {...tooltipProps}>
         <>{children}</>
       </EuiToolTip>
     ) : (

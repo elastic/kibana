@@ -8,12 +8,12 @@
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormAppend,
   EuiFormControlLayout,
-  EuiFormLabel,
+  EuiFormPrepend,
   EuiHorizontalRule,
   EuiIconTip,
   EuiPopover,
@@ -66,6 +66,7 @@ export function NormalizationMenu(props: Props) {
 
   const theme = useEuiTheme();
 
+  const popoverTitleId = useGeneratedHtmlId({ prefix: 'normalizationMenuPopover' });
   const baselineScaleFactorInputId = useGeneratedHtmlId({ prefix: 'baselineScaleFactor' });
   const comparisonScaleFactorInputId = useGeneratedHtmlId({ prefix: 'comparisonScaleFactor' });
 
@@ -92,11 +93,12 @@ export function NormalizationMenu(props: Props) {
             setIsPopoverOpen((popoverOpen) => !popoverOpen);
           }}
           compressed
-          prepend={NORMALIZE_BY_LABEL}
+          prepend={<EuiFormPrepend label={NORMALIZE_BY_LABEL} id={popoverTitleId} />}
           append={
-            <EuiButtonIcon
+            <EuiFormAppend
+              element="button"
+              iconLeft="chevronSingleDown"
               data-test-subj="profilingNormalizationMenuButton"
-              iconType="arrowDown"
               aria-label={i18n.translate(
                 'xpack.profiling.normalizationMenu.menuPopoverButtonAriaLabel',
                 { defaultMessage: 'Open normalization menu' }
@@ -104,8 +106,9 @@ export function NormalizationMenu(props: Props) {
             />
           }
           css={css`
-            .euiFormLabel {
-              max-width: none;
+            .euiFormControlLayout__prepend {
+              max-inline-size: none;
+              overflow: visible !important;
             }
           `}
         >
@@ -123,6 +126,7 @@ export function NormalizationMenu(props: Props) {
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-labelledby={popoverTitleId}
     >
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
@@ -189,7 +193,9 @@ export function NormalizationMenu(props: Props) {
       <EuiSpacer size="s" />
       <EuiFieldNumber
         fullWidth
-        prepend={<EuiFormLabel htmlFor={baselineScaleFactorInputId}>{SCALE_LABEL}</EuiFormLabel>}
+        prepend={
+          <EuiFormPrepend inputId={baselineScaleFactorInputId}>{SCALE_LABEL}</EuiFormPrepend>
+        }
         data-test-subj="profilingNormalizationMenuFieldNumber"
         id={baselineScaleFactorInputId}
         value={baseline}
@@ -214,7 +220,9 @@ export function NormalizationMenu(props: Props) {
       <EuiSpacer size="s" />
       <EuiFieldNumber
         fullWidth
-        prepend={<EuiFormLabel htmlFor={comparisonScaleFactorInputId}>{SCALE_LABEL}</EuiFormLabel>}
+        prepend={
+          <EuiFormPrepend inputId={comparisonScaleFactorInputId}>{SCALE_LABEL}</EuiFormPrepend>
+        }
         data-test-subj="profilingNormalizationMenuFieldNumber"
         id={comparisonScaleFactorInputId}
         value={comparison}

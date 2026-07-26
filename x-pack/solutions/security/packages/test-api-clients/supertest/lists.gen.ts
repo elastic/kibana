@@ -53,8 +53,14 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-   * Create `.lists` and `.items` data streams in the relevant space.
-   */
+      * **DEPRECATED.** `deprecated: true` is set on this operation. Value list backing data streams for the space
+are now created as part of supported workflows; calling this explicitly is rarely required.
+**WARNING:** Do not use for new integrations. Prefer the UI or the list and list-item APIs after confirming
+indices exist with `GET /api/lists/index`.
+
+Creates the `.lists` and `.items` data streams in the current Kibana space.
+
+      */
   createListIndex(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
@@ -214,6 +220,12 @@ You can import items to a new or existing list.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * Returns the caller's authentication state and the Elasticsearch `cluster`, `index`, and `application`
+privileges for `.lists` and `.items` data streams in the current Kibana space. Use this to decide which list
+APIs (`read` vs `all` operations) are available before you create or import lists.
+
+      */
   readListPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/lists/privileges', kibanaSpace))
@@ -257,11 +269,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };

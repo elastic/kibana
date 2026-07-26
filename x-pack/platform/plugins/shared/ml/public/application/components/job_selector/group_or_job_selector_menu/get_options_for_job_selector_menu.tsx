@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES, type MlPages } from '../../../../locator';
 import { FlyoutType } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
-import { ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 const ANOMALY_EXPLORER_TITLE = i18n.translate('xpack.ml.anomalyExplorerPageLabel', {
   defaultMessage: 'Anomaly Explorer',
@@ -59,7 +59,7 @@ export const getOptionsForJobSelectorMenuItems = ({
       }
     ),
     disabled: page === ML_PAGES.ANOMALY_EXPLORER && isSingleMetricViewerDisabled,
-    icon: 'visLine',
+    icon: 'chartLine',
     onClick: async () => {
       const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
       if (!mlLocator) {
@@ -117,7 +117,7 @@ export const getOptionsForJobSelectorMenuItems = ({
               },
             }),
             disabled: removeJobIdDisabled,
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             onClick: () => {
               if (onRemoveJobId) {
                 onRemoveJobId([jobId]);
@@ -138,7 +138,7 @@ export const getOptionsForJobSelectorMenuItems = ({
       name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.viewDatafeedCounts', {
         defaultMessage: 'View datafeed counts',
       }),
-      icon: 'visAreaStacked',
+      icon: 'chartAreaStack',
       onClick: () => {
         setActiveJobId(jobId);
         setActiveFlyout(FlyoutType.DATAFEED_CHART);

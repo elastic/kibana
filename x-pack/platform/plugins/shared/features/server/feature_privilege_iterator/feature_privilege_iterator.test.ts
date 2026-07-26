@@ -8,7 +8,7 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import { LICENSE_TYPE } from '@kbn/licensing-types';
 import { KibanaFeature } from '..';
-import type { SubFeaturePrivilegeConfig } from '../../common';
+import type { FeatureKibanaPrivileges, SubFeaturePrivilegeConfig } from '../../common';
 import type { FeaturePrivilegeIteratorOptions } from './feature_privilege_iterator';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 
@@ -81,6 +81,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -155,6 +156,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -228,6 +230,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -302,6 +305,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -346,6 +350,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -466,6 +471,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -799,6 +805,7 @@ describe('featurePrivilegeIterator', () => {
                     createComment: ['cases-create-comment-sub-type'],
                     reopenCase: ['cases-reopen-sub-type'],
                     assign: ['cases-assign-sub-type'],
+                    manageTemplates: ['cases-manage-templates-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -835,6 +842,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] }],
               read: [],
             },
@@ -854,6 +862,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type', 'cases-create-comment-sub-type'],
             reopenCase: ['cases-reopen-type', 'cases-reopen-sub-type'],
             assign: ['cases-assign-type', 'cases-assign-sub-type'],
+            manageTemplates: ['cases-manage-templates-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -876,8 +885,9 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [],
               enable: [],
-              read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] }],
+              read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
@@ -895,6 +905,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-sub-type'],
             reopenCase: ['cases-reopen-sub-type'],
             assign: ['cases-assign-sub-type'],
+            manageTemplates: ['cases-manage-templates-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -1036,6 +1047,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
@@ -1076,6 +1088,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
@@ -1241,6 +1254,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [],
             },
@@ -1491,6 +1505,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
@@ -1532,6 +1547,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
@@ -1671,6 +1687,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [],
             },
@@ -1711,6 +1728,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
@@ -1735,5 +1753,149 @@ describe('featurePrivilegeIterator', () => {
         },
       },
     ]);
+  });
+
+  describe('alerts', () => {
+    const buildFeatureWithAlertsSubFeature = (
+      subFeaturePrivilege: Pick<SubFeaturePrivilegeConfig, 'includeIn' | 'alerts'>
+    ) =>
+      new KibanaFeature({
+        id: 'foo',
+        name: 'foo',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: { all: [], read: [] },
+            ui: [],
+          },
+          read: {
+            savedObject: { all: [], read: [] },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub feature 1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-feature-priv-1',
+                    name: 'first sub feature privilege',
+                    savedObject: { all: [], read: [] },
+                    ui: [],
+                    ...subFeaturePrivilege,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+    const getAlerts = (feature: KibanaFeature) =>
+      Array.from(
+        getFeaturePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          licenseType: 'basic',
+        })
+      ).reduce<Record<string, FeatureKibanaPrivileges['alerts']>>(
+        (acc, { privilegeId, privilege }) => {
+          acc[privilegeId] = privilege.alerts;
+          return acc;
+        },
+        {}
+      );
+
+    it('rolls up `alerts.read` into the primary privilege the sub-feature privilege is included in', () => {
+      const feature = buildFeatureWithAlertsSubFeature({
+        includeIn: 'all',
+        alerts: { read: true },
+      });
+
+      const alerts = getAlerts(feature);
+
+      expect(alerts.all).toEqual({ read: true });
+      expect(alerts.read).toBeUndefined();
+    });
+
+    it('rolls up an `includeIn: "read"` sub-feature privilege into both the `all` and `read` privileges', () => {
+      const feature = buildFeatureWithAlertsSubFeature({
+        includeIn: 'read',
+        alerts: { read: true },
+      });
+
+      const alerts = getAlerts(feature);
+
+      expect(alerts.all).toEqual({ read: true });
+      expect(alerts.read).toEqual({ read: true });
+    });
+
+    it('does not grant `alerts.read` when the sub-feature privilege does not request it', () => {
+      const feature = buildFeatureWithAlertsSubFeature({
+        includeIn: 'all',
+        alerts: { read: false },
+      });
+
+      const alerts = getAlerts(feature);
+
+      expect(alerts.all).toBeUndefined();
+      expect(alerts.read).toBeUndefined();
+    });
+
+    it('does not grant `alerts.read` when the sub-feature privilege does not define `alerts`', () => {
+      const feature = buildFeatureWithAlertsSubFeature({ includeIn: 'all' });
+
+      const alerts = getAlerts(feature);
+
+      expect(alerts.all).toBeUndefined();
+      expect(alerts.read).toBeUndefined();
+    });
+
+    it('preserves the primary privilege `alerts.read` when no sub-feature privilege contributes it', () => {
+      const feature = new KibanaFeature({
+        id: 'foo',
+        name: 'foo',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            alerts: { read: true },
+            savedObject: { all: [], read: [] },
+            ui: [],
+          },
+          read: {
+            savedObject: { all: [], read: [] },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub feature 1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-feature-priv-1',
+                    name: 'first sub feature privilege',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      const alerts = getAlerts(feature);
+
+      expect(alerts.all).toEqual({ read: true });
+      expect(alerts.read).toBeUndefined();
+    });
   });
 });

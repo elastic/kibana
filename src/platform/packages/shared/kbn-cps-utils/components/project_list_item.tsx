@@ -29,15 +29,16 @@ interface ProjectListItemProps {
   isOriginProject?: boolean;
 }
 
-const SOLUTION_ICONS: Record<string, string> = {
+const PROJECT_TYPE_ICONS: Record<string, string> = {
   elasticsearch: 'logoElasticsearch',
   es: 'logoElasticsearch',
   security: 'logoSecurity',
   observability: 'logoObservability',
+  vectordb: 'logoVectorDB',
 } as const;
 
 const getSolutionIcon = (solution: string): string => {
-  return SOLUTION_ICONS[solution] || 'empty';
+  return PROJECT_TYPE_ICONS[solution] || 'empty';
 };
 
 const CSP_LABELS: Record<string, string> = {
@@ -72,7 +73,7 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={getSolutionIcon(project._type)} />
+              <EuiIcon type={getSolutionIcon(project._type)} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="text">
@@ -99,11 +100,15 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
                   title={i18n.translate('cpsUtils.projectPicker.tagTooltipTitle', {
                     defaultMessage: 'Custom tags',
                   })}
-                  content={tags.map((tag) => (
+                  content={
                     <EuiThemeProvider colorMode="dark">
-                      <EuiBadge css={{ margin: `${euiTheme.size.xs}` }}>{tag}</EuiBadge>
+                      {tags.map((tag) => (
+                        <EuiBadge key={tag} css={{ margin: `${euiTheme.size.xs}` }}>
+                          {tag}
+                        </EuiBadge>
+                      ))}
                     </EuiThemeProvider>
-                  ))}
+                  }
                 >
                   <EuiBadge iconType="tag" tabIndex={0}>
                     {tags.length}

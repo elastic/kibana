@@ -14,6 +14,8 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { getRuleMigrationStatsMock } from '../../__mocks__/migration_rule_stats';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
+import { MigrationSource } from '../../../common/types';
+import type { HandleMissingResourcesIndexed } from '../../../common/types';
 
 const mockOnClose = jest.fn();
 const mockStartMigration = jest.fn();
@@ -34,6 +36,9 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
         rules: {
           api: {
             getMissingResources: jest.fn(),
+          },
+          telemetry: {
+            reportSetupLookupNameCopied: jest.fn(),
           },
         },
       },
@@ -85,6 +90,23 @@ jest.mock('../../logic/use_start_migration', () => {
   };
 });
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(() => true),
+}));
+
+const mockUseMissingResources = jest.fn();
+jest.mock('../../../common/hooks/use_missing_resources', () => ({
+  useMissingResources: (...args: unknown[]) => mockUseMissingResources(...args),
+}));
+
+jest.mock('../../service/hooks/use_enhance_rules', () => ({
+  useEnhanceRules: () => ({ enhanceRules: jest.fn(), isLoading: false, error: null }),
+}));
+
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({ addError: jest.fn(), addSuccess: jest.fn() }),
+}));
+
 jest.mock('../../hooks/use_start_rules_migration_modal');
 const useStartRulesMigrationModalMock = useStartRulesMigrationModal as jest.MockedFunction<
   typeof useStartRulesMigrationModal
@@ -92,6 +114,12 @@ const useStartRulesMigrationModalMock = useStartRulesMigrationModal as jest.Mock
 
 describe('MigrationDataInputFlyout', () => {
   beforeEach(() => {
+    mockUseMissingResources.mockReturnValue({
+      missingResourcesIndexed: undefined,
+      onMissingResourcesFetched: jest.fn(),
+      missingResourceCount: 0,
+    });
+
     useStartRulesMigrationModalMock.mockImplementation(({ onStartMigrationWithSettings }) => {
       return {
         modal: (
@@ -269,6 +297,70 @@ describe('MigrationDataInputFlyout', () => {
     expect(mockStartMigration).toHaveBeenCalledWith(migrationStats, 'not_fully_translated', {
       connectorId: 'Test Connector 1',
       skipPrebuiltRulesMatching: false,
+    });
+  });
+
+  describe('QRadar skip reference set step', () => {
+    const MISSING_LOOKUPS = { macros: [], lookups: ['ref_set_1', 'ref_set_2'] };
+
+    beforeEach(() => {
+      const react = jest.requireActual('react');
+      mockUseMissingResources.mockImplementation(
+        ({
+          handleMissingResourcesIndexed,
+          migrationSource,
+        }: {
+          handleMissingResourcesIndexed?: HandleMissingResourcesIndexed;
+          migrationSource: MigrationSource;
+        }) => {
+          react.useEffect(() => {
+            handleMissingResourcesIndexed?.({
+              migrationSource,
+              newMissingResourcesIndexed: MISSING_LOOKUPS,
+            });
+          }, [handleMissingResourcesIndexed, migrationSource]);
+
+          return {
+            missingResourcesIndexed: MISSING_LOOKUPS,
+            onMissingResourcesFetched: jest.fn(),
+            missingResourceCount: MISSING_LOOKUPS.lookups.length,
+          };
+        }
+      );
+    });
+
+    const qradarMigrationStats = getRuleMigrationStatsMock({
+      id: 'qradar-migration-1',
+      status: SiemMigrationTaskStatus.READY,
+      vendor: MigrationSource.QRADAR,
+    });
+
+    it('advances from Reference Set step to Enhancements step when skip button is clicked', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <MigrationDataInputFlyout onClose={jest.fn()} migrationStats={qradarMigrationStats} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('lookupsUploadSkipButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('referenceSetsUploadStepNumber')).toHaveTextContent('Current step is 2');
+      expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('3');
+      expect(queryByTestId('enhancementTypeSelect')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('lookupsUploadSkipButton'));
+
+      await waitFor(() => {
+        expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('Current step is 3');
+      });
+
+      expect(getByTestId('enhancementTypeSelect')).toBeInTheDocument();
+      expect(getByTestId('enhancementFilePicker')).toBeInTheDocument();
+
+      expect(queryByTestId('lookupsUploadSkipButton')).not.toBeInTheDocument();
+      expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
     });
   });
 });

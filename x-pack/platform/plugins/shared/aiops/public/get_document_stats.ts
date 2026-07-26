@@ -32,6 +32,7 @@ export interface DocumentStatsSearchStrategyParams {
   includeSelectedSignificantItem?: boolean;
   selectedGroup?: GroupTableItem | null;
   trackTotalHits?: boolean;
+  projectRouting?: string;
 }
 
 export const getDocumentCountStatsRequest = (
@@ -53,6 +54,7 @@ export const getDocumentCountStatsRequest = (
     includeSelectedSignificantItem,
     selectedGroup,
     trackTotalHits,
+    projectRouting,
   } = params;
 
   const filterCriteria = buildExtendedBaseFilterCriteria(
@@ -84,7 +86,6 @@ export const getDocumentCountStatsRequest = (
     ...(changePoints
       ? {
           change_point_request: {
-            // @ts-expect-error missing from ES spec
             change_point: {
               buckets_path: 'eventRate>_count',
             },
@@ -103,6 +104,7 @@ export const getDocumentCountStatsRequest = (
     },
     track_total_hits: trackTotalHits === true,
     size: 0,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   if (isPopulatedObject(runtimeFieldMap)) {

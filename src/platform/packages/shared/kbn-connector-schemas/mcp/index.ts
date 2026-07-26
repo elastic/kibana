@@ -14,6 +14,7 @@ export {
   MCPConnectorConfigSchema,
   MCPConnectorSecretsSchema,
   MCPAuthType,
+  API_KEY_PLACEHOLDER,
   // Sub-action schemas
   TestConnectorRequestSchema,
   ListToolsRequestSchema,

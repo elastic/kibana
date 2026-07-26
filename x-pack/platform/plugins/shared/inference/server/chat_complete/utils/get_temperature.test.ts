@@ -45,10 +45,57 @@ describe('getTemperatureIfValid', () => {
   });
 
   it("returns an empty object for OpenAI models that don't support temperature", () => {
-    ['o1', 'o1-pro', 'o3', 'o1-mini', 'o3-mini'].forEach((model) => {
+    [
+      'o1',
+      'o1-pro',
+      'o3',
+      'o1-mini',
+      'o3-mini',
+      'gpt-5',
+      'gpt-5.2-chat',
+      'openai/gpt-5',
+      'llm-gateway/gpt-5.2-chat',
+    ].forEach((model) => {
       expect(getTemperatureIfValid(0.7, { connector: OPENAI_CONNECTOR, modelName: model })).toEqual(
         {}
       );
+    });
+  });
+
+  it('keeps connector-config temperature even for excluded models (escape hatch)', () => {
+    const connector = {
+      type: InferenceConnectorType.OpenAI,
+      config: { temperature: 0.25 },
+    } as unknown as InferenceConnector;
+
+    expect(
+      getTemperatureIfValid(undefined, { connector, modelName: 'llm-gateway/gpt-5.2-chat' })
+    ).toEqual({
+      temperature: 0.25,
+    });
+  });
+
+  it('uses connector-config temperature when model supports it (including 0)', () => {
+    const connectorZero = {
+      type: InferenceConnectorType.OpenAI,
+      config: { temperature: 0 },
+    } as unknown as InferenceConnector;
+
+    expect(
+      getTemperatureIfValid(undefined, { connector: connectorZero, modelName: 'gpt-4' })
+    ).toEqual({
+      temperature: 0,
+    });
+
+    const connectorNonZero = {
+      type: InferenceConnectorType.OpenAI,
+      config: { temperature: 0.25 },
+    } as unknown as InferenceConnector;
+
+    expect(
+      getTemperatureIfValid(undefined, { connector: connectorNonZero, modelName: 'gpt-4' })
+    ).toEqual({
+      temperature: 0.25,
     });
   });
 });

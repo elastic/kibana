@@ -52,9 +52,13 @@ import {
   updateListRoute,
 } from '.';
 
-export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void => {
+export const initRoutes = (
+  router: ListsPluginRouter,
+  config: ConfigType,
+  kibanaVersion: string
+): void => {
   // lists
-  createListRoute(router);
+  createListRoute(router, kibanaVersion);
   readListRoute(router);
   updateListRoute(router);
   deleteListRoute(router);
@@ -70,7 +74,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   deleteListItemRoute(router);
   patchListItemRoute(router);
   exportListItemRoute(router);
-  importListItemRoute(router, config);
+  importListItemRoute(router, config, kibanaVersion);
   findListItemRoute(router);
 
   // indexes of lists

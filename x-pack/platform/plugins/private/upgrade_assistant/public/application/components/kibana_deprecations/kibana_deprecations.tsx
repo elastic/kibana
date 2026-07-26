@@ -15,8 +15,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DomainDeprecationDetails } from '@kbn/core/public';
-import type { MissingPrivileges } from '../../../shared_imports';
-import { WithPrivileges, SectionLoading, GlobalFlyout } from '../../../shared_imports';
+import {
+  type MissingPrivileges,
+  WithPrivileges,
+  SectionLoading,
+  GlobalFlyout,
+} from '@kbn/es-ui-shared-plugin/public';
 import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';

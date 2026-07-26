@@ -16,11 +16,16 @@ import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
 
+let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
+
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
+  loadConnectorAuthStatus: jest.fn(),
 }));
-const { loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
+const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
+  '../../../lib/action_connector_api'
+);
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveActionsCapability: jest.fn(),
@@ -34,13 +39,17 @@ jest.mock('../../../context/health_context', () => ({
   HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('./actions_connectors_list', () => {
-  return () => (
-    <div data-test-subj="actionsConnectorsListComponent">
-      {'Render Actions connectors list component'}
-    </div>
-  );
-});
+jest.mock('./actions_connectors_list', () => ({
+  __esModule: true,
+  default: (props: Record<string, unknown>) => {
+    lastActionsConnectorsListProps = props;
+    return (
+      <div data-test-subj="actionsConnectorsListComponent">
+        {'Render Actions connectors list component'}
+      </div>
+    );
+  },
+}));
 jest.mock('./actions_connectors_event_log_list_table', () => {
   return () => (
     <div data-test-subj="connectorEventLogListTableComponent">
@@ -55,6 +64,9 @@ describe('ActionsConnectorsHome', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     hasSaveActionsCapability.mockReturnValue(true);
+    lastActionsConnectorsListProps = undefined;
+    loadAllActions.mockResolvedValue([]);
+    loadConnectorAuthStatus.mockResolvedValue({});
   });
 
   it('renders Actions connectors list component', async () => {
@@ -281,5 +293,42 @@ describe('ActionsConnectorsHome', () => {
 
     const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
     expect(documentationButton).toBeEnabled();
+  });
+
+  it('passes auth-status load failure to connectors list', async () => {
+    loadConnectorAuthStatus.mockRejectedValue({
+      body: { message: 'Auth status endpoint failed' },
+    });
+
+    const props: RouteComponentProps<MatchParams> = {
+      history: createMemoryHistory({
+        initialEntries: ['/connectors'],
+      }),
+      location: createLocation('/connectors'),
+      match: {
+        isExact: true,
+        path: '/connectors',
+        url: '',
+        params: {
+          section: 'connectors',
+        },
+      },
+    };
+
+    render(
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <QueryClientProvider client={queryClient}>
+            <ActionsConnectorsHome {...props} />
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
+    );
+
+    await screen.findByTestId('actionsConnectorsListComponent');
+
+    expect(lastActionsConnectorsListProps?.connectorAuthStatusError).toBe(
+      'Auth status endpoint failed'
+    );
   });
 });

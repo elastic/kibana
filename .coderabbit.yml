@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+inheritance: true
+reviews:
+  review_status: false
+  poem: false
+  auto_review:
+    labels:
+      - reviewer:coderabbit
+      - "!reviewer:skip-ai"
+      - "!reviewer:macroscope"
+      - "!backport"

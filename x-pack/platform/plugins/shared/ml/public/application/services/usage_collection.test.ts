@@ -61,4 +61,15 @@ describe('usage_collection', () => {
       undefined
     );
   });
+
+  test('count accepts custom rule editor opened event name', () => {
+    const mlUsageCollection = mlUsageCollectionProvider(usageCollection);
+    mlUsageCollection.count('custom_rule_editor_opened_single_metric_viewer_chart');
+    expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+      'ml',
+      'count',
+      'custom_rule_editor_opened_single_metric_viewer_chart',
+      undefined
+    );
+  });
 });

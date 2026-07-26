@@ -13,17 +13,18 @@ import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiScreenReaderOnly,
   EuiTable,
+  EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
-  EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiButtonIcon,
-  EuiScreenReaderOnly,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -168,20 +169,23 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
       <EuiTableRowCell width="150px" css={{ color: euiTheme.colors.textSubdued }}>
         {moment(timestamp).format('HH:mm:ss.SSS')}
       </EuiTableRowCell>
-      <EuiTableRowCell>{message}</EuiTableRowCell>
+      <EuiTableRowCell truncateText>{message}</EuiTableRowCell>
 
       <EuiTableRowCell width="250px">{humanFriendlyDataset}</EuiTableRowCell>
 
       <EuiTableRowCell width="48px">
         <EuiPopover
+          aria-label={MENU_LABEL}
           button={
-            <EuiButtonIcon
-              data-test-subj="infraLogEntryExampleMessageRowButton"
-              aria-label={MENU_LABEL}
-              iconType="boxesHorizontal"
-              size="s"
-              onClick={toggleMenu}
-            />
+            <EuiToolTip content={MENU_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="infraLogEntryExampleMessageRowButton"
+                aria-label={MENU_LABEL}
+                iconType="boxesVertical"
+                size="s"
+                onClick={toggleMenu}
+              />
+            </EuiToolTip>
           }
           isOpen={isMenuOpen}
           closePopover={closeMenu}

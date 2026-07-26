@@ -55,4 +55,10 @@ describe('ServerStatus', () => {
     component = mountWithIntl(<ServerStatus serverState={getStatus()} name="Kibana" />);
     expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Kibana"`);
   });
+
+  it('omits the name slot when `name` is not provided', () => {
+    const component = mountWithIntl(<ServerStatus serverState={getStatus()} />);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Green"`);
+    expect(component.find('EuiText').exists()).toBe(false);
+  });
 });

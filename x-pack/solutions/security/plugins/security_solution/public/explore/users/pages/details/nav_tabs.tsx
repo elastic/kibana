@@ -10,39 +10,52 @@ import * as i18n from '../translations';
 import type { UsersDetailsNavTab } from './types';
 import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../../common/constants';
-
-const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
-  `${USERS_PATH}/name/${userName}/${tabName}`;
+import { getTabsOnUsersDetailsUrl } from '../../../../common/components/link_to';
 
 export const navTabsUsersDetails = (
   userName: string,
-  hasMlUserPermissions: boolean
+  hasMlUserPermissions: boolean,
+  options?: {
+    entityId?: string;
+    identityFields?: Record<string, string>;
+    urlStateQuery?: string;
+  }
 ): UsersDetailsNavTab => {
-  const hiddenTabs = [];
+  const { entityId, identityFields, urlStateQuery = '' } = options ?? {};
+  const hiddenTabs: UsersTableType[] = [];
+
+  const hrefFor = (tabName: UsersTableType) =>
+    `${USERS_PATH}${getTabsOnUsersDetailsUrl(
+      userName,
+      tabName,
+      urlStateQuery,
+      entityId,
+      identityFields
+    )}`;
 
   const userDetailsNavTabs = {
     [UsersTableType.events]: {
       id: UsersTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
+      href: hrefFor(UsersTableType.events),
       disabled: false,
     },
     [UsersTableType.authentications]: {
       id: UsersTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.authentications),
+      href: hrefFor(UsersTableType.authentications),
       disabled: false,
     },
     [UsersTableType.anomalies]: {
       id: UsersTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.anomalies),
+      href: hrefFor(UsersTableType.anomalies),
       disabled: false,
     },
     [UsersTableType.risk]: {
       id: UsersTableType.risk,
       name: i18n.NAVIGATION_RISK_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.risk),
+      href: hrefFor(UsersTableType.risk),
       disabled: false,
     },
   };

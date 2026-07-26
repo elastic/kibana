@@ -9,7 +9,7 @@ import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import type { TaskManagerConfig } from './config';
+import { ApiKeyType, type TaskManagerConfig } from './config';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -74,6 +74,8 @@ const pluginInitializerContextParams = {
     update_by_query: 1000,
   },
   auto_calculate_default_ech_capacity: false,
+  api_key_type: ApiKeyType.ES,
+  grant_uiam_api_keys: false,
 };
 
 describe('TaskManagerPlugin', () => {
@@ -164,6 +166,28 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
+    });
+
+    test('passes the fake request enricher obtained at setup to TaskPollingLifecycle', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+
+      const coreSetup = coreMock.createSetup();
+      const enricher = jest.fn();
+      (coreSetup.security.acquireFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
+
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
+      });
+
+      expect(coreSetup.security.acquireFakeRequestEnricher).toHaveBeenCalledTimes(1);
+      const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
+      expect(pollingLifecycleOpts.enrichFakeRequest).toBe(enricher);
     });
   });
 

@@ -56,7 +56,7 @@ describe('createShowTopNCellActionFactory', () => {
   });
 
   it('should return icon type', () => {
-    expect(showTopNAction.getIconType(context)).toEqual('visBarVertical');
+    expect(showTopNAction.getIconType(context)).toEqual('chartBarVertical');
   });
 
   describe('isCompatible', () => {

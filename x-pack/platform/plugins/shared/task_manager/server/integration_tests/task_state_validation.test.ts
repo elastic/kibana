@@ -176,7 +176,7 @@ describe('task state validation', () => {
         baz: 'test',
       });
       expect(errorLogSpy).toHaveBeenCalledWith(
-        `Task fooType "${task.id}" failed: Error: [invalidField]: definition for this key is missing`,
+        `Task fooType "${task.id}" failed: Error: [invalidField]: Additional properties are not allowed ('invalidField' was unexpected)`,
         expect.anything()
       );
     });

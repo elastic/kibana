@@ -21,6 +21,7 @@ export function ActionsOpsgenieServiceProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -34,7 +35,9 @@ export function ActionsOpsgenieServiceProvider(
 
     async setConnectorFields({ name, apiUrl, apiKey }: ConnectorFormFields) {
       await testSubjects.setValue('nameInput', name);
-      await testSubjects.setValue('config.apiUrl-input', apiUrl);
+      await retry.try(async () => {
+        await testSubjects.setValue('config.apiUrl-input', apiUrl);
+      });
       await testSubjects.setValue('secrets.apiKey-input', apiKey);
     },
 

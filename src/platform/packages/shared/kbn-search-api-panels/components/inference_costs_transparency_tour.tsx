@@ -121,7 +121,7 @@ export const InferenceCostsTransparencyTour = ({
                 data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
               >
                 {i18n.TOUR_CTA}
               </EuiButton>,

@@ -93,7 +93,7 @@
 
 {
   "attributes": {
-    "title": "A sharedtype saved-object with id: conflict_1"
+    "title": "A shared saved-object in all spaces"
   },
   "id": "conflict_1",
   "type": "sharedtype",
@@ -103,27 +103,7 @@
 
 {
   "attributes": {
-    "title": "A sharedtype saved-object with id: conflict_2a"
-  },
-  "id": "conflict_2a",
-  "type": "sharedtype",
-  "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzQ4OCwxXQ=="
-}
-
-{
-  "attributes": {
-    "title": "A sharedtype saved-object with id: conflict_2b"
-  },
-  "id": "conflict_2b",
-  "type": "sharedtype",
-  "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzQ4OCwxXQ=="
-}
-
-{
-  "attributes": {
-    "title": "A sharedtype saved-object with id: conflict_3"
+    "title": "A shared saved-object in all spaces"
   },
   "id": "conflict_3",
   "type": "sharedtype",
@@ -133,9 +113,10 @@
 
 {
   "attributes": {
-    "title": "A sharedtype saved-object with id: conflict_4a"
+    "title": "A shared saved-object in all spaces"
   },
   "id": "conflict_4a",
+  "originId": "conflict_4",
   "type": "sharedtype",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ4OCwxXQ=="
@@ -168,6 +149,161 @@
   "id": "conflict-newid",
   "type": "resolvetype",
   "updated_at": "2017-09-21T18:51:23.794Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test if an imported object with a missing reference will have an exact match conflict when the missing reference is replaced"
+  },
+  "id": "outbound-missing-reference-conflict-1",
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test if an imported object with a missing reference will have an inexact match conflict when the missing reference is replaced"
+  },
+  "id": "outbound-missing-reference-conflict-2a",
+  "originId": "outbound-missing-reference-conflict-2",
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test if an imported object with a reference to this originId will be remapped properly"
+  },
+  "id": "inbound-reference-origin-match-1-newId",
+  "originId": "inbound-reference-origin-match-1",
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
+  },
+  "id": "inbound-reference-origin-match-2a",
+  "originId": "inbound-reference-origin-match-2",
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
+  },
+  "id": "inbound-reference-origin-match-2b",
+  "originId": "inbound-reference-origin-match-2",
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "elasticsearch",
+    "author": "John Doe",
+    "comments": [
+      {
+        "user": "bob",
+        "message": "very helpful",
+        "date": "2024-01-16",
+        "rating": 4
+      },
+      {
+        "user": "alice",
+        "message": "kibana and this one are great",
+        "date": "2024-01-15",
+        "rating": 5
+      }
+    ]
+  },
+  "id": "1",
+  "type": "nestedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "kibana",
+    "author": "Jane Smith",
+    "comments": [
+      {
+        "user": "charlie",
+        "message": "excellent examples",
+        "date": "2024-02-10",
+        "rating": 5
+      },
+      {
+        "user": "diana",
+        "message": "could use more detail",
+        "date": "2024-02-12",
+        "rating": 3
+      }
+    ]
+  },
+  "id": "2",
+  "type": "nestedtype",
+  "updated_at": "2024-02-15T14:23:45.180Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "logstash",
+    "author": "Mr Nobody",
+    "comments": [
+      {
+        "user": "frank",
+        "message": "perfect for beginners",
+        "date": "2024-03-05",
+        "rating": 4
+      },
+      {
+        "user": "bob",
+        "message": "charlie and diana's posts helped me",
+        "date": "2024-02-14",
+        "rating": 5
+      }
+    ]
+  },
+  "id": "3",
+  "type": "nestedtype",
+  "updated_at": "2024-03-11T09:15:32.450Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "beats",
+    "author": "Deep Author",
+    "comments": [
+      {
+        "user": "grace",
+        "message": "deeply insightful",
+        "date": "2024-04-01",
+        "rating": 5,
+        "metadata": {
+          "author": "graceinternal",
+          "tag": "review"
+        }
+      }
+    ]
+  },
+  "id": "4",
+  "type": "nestedtype",
+  "updated_at": "2024-04-05T10:30:00.000Z",
   "version": "WzQ4OCwxXQ=="
 }
 

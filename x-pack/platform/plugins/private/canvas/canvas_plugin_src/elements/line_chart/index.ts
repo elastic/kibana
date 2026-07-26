@@ -12,7 +12,7 @@ export const lineChart: ElementFactory = () => ({
   displayName: 'Line',
   type: 'chart',
   help: 'A customizable line chart',
-  icon: 'visLine',
+  icon: 'chartLine',
   expression: `kibana
 | selectFilter
 | demodata

@@ -36,7 +36,7 @@ describe('getExpandAction', () => {
       const { icon } = setup({ isExpanded });
 
       // Then
-      expect(icon).toBe('arrowDown');
+      expect(icon).toBe('chevronSingleDown');
     });
 
     describe('when the action is clicked', () => {
@@ -61,7 +61,7 @@ describe('getExpandAction', () => {
       const { icon } = setup({ isExpanded });
 
       // Then
-      expect(icon).toBe('arrowRight');
+      expect(icon).toBe('chevronSingleRight');
     });
 
     describe('when the action is clicked', () => {

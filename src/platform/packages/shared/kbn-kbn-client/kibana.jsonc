@@ -1,0 +1,11 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/kbn-client",
+  "owner": [
+    "@elastic/kibana-operations",
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

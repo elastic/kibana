@@ -12,9 +12,13 @@ import type { DashboardMigrationFilters } from '../../../../../../common/siem_mi
 const STATUS_FILTERS: Record<StatusFilterBase, DashboardMigrationFilters> = {
   [StatusFilterBase.FAILED]: { failed: true },
   [StatusFilterBase.INSTALLED]: { installed: true },
-  [StatusFilterBase.TRANSLATED]: { installed: false, fullyTranslated: true },
-  [StatusFilterBase.PARTIALLY_TRANSLATED]: { installed: false, partiallyTranslated: true },
-  [StatusFilterBase.UNTRANSLATABLE]: { untranslatable: true },
+  [StatusFilterBase.TRANSLATED]: { installed: false, fullyTranslated: true, failed: false },
+  [StatusFilterBase.PARTIALLY_TRANSLATED]: {
+    installed: false,
+    partiallyTranslated: true,
+    failed: false,
+  },
+  [StatusFilterBase.UNTRANSLATABLE]: { untranslatable: true, failed: false },
 };
 
 export const convertFilterOptions = (filterOptions?: FilterOptionsBase) => {

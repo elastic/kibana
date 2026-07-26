@@ -7,8 +7,19 @@
 
 import { generateKeyPairSync } from 'crypto';
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import { shouldExecute, applyFilterlist, fieldNames } from './health_diagnostic_utils';
-import { Action } from './health_diagnostic_service.types';
+import {
+  shouldExecute,
+  applyFilterlist,
+  fieldNames,
+  mergeByPriority,
+} from './health_diagnostic_utils';
+import {
+  Action,
+  QueryType,
+  type HealthDiagnosticQueryV1,
+  type HealthDiagnosticQueryV2,
+  type ParseFailureQuery,
+} from './health_diagnostic_service.types';
 
 describe('Security Solution - Health Diagnostic Queries - utils', () => {
   describe('applyFilterlist', () => {
@@ -629,6 +640,104 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
         'user.name',
         'user.roles[]',
       ]);
+    });
+  });
+
+  describe('mergeByPriority', () => {
+    const makeV1 = (id: string): HealthDiagnosticQueryV1 => ({
+      version: 1,
+      id,
+      name: `query-${id}`,
+      index: 'test-index',
+      type: QueryType.DSL,
+      query: '{"query":{"match_all":{}}}',
+      scheduleCron: '5m',
+      filterlist: { 'user.name': Action.KEEP },
+      enabled: true,
+    });
+
+    const makeV2 = (id: string): HealthDiagnosticQueryV2 => ({
+      version: 2,
+      id,
+      name: `query-${id}`,
+      integrations: ['endpoint.*'],
+      type: QueryType.DSL,
+      query: '{"query":{"match_all":{}}}',
+      scheduleCron: '5m',
+      filterlist: { 'user.name': Action.KEEP },
+      enabled: true,
+    });
+
+    const makeParseFailure = (id?: string): ParseFailureQuery => ({
+      ...(id !== undefined ? { id } : {}),
+      name: 'bad-query',
+      _raw: { version: 99 },
+    });
+
+    test('returns v2 queries unchanged when v1 is empty', () => {
+      const v2 = [makeV2('a'), makeV2('b')];
+      expect(mergeByPriority([], v2)).toEqual(v2);
+    });
+
+    test('returns v1 queries unchanged when v2 is empty', () => {
+      const v1 = [makeV1('a'), makeV1('b')];
+      expect(mergeByPriority(v1, [])).toEqual(v1);
+    });
+
+    test('returns empty array when both inputs are empty', () => {
+      expect(mergeByPriority([], [])).toEqual([]);
+    });
+
+    test('returns all queries when there is no id overlap', () => {
+      const v1 = [makeV1('a'), makeV1('b')];
+      const v2 = [makeV2('c'), makeV2('d')];
+      const result = mergeByPriority(v1, v2);
+      expect(result).toHaveLength(4);
+      const ids = result.map((q) => (q as { id: string }).id);
+      expect(ids).toContain('a');
+      expect(ids).toContain('b');
+      expect(ids).toContain('c');
+      expect(ids).toContain('d');
+    });
+
+    test('v2 version wins when both artifacts contain the same id', () => {
+      const v1Query = makeV1('shared-id');
+      const v2Query = makeV2('shared-id');
+      const result = mergeByPriority([v1Query], [v2Query]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(v2Query);
+    });
+
+    test('queries with the same name but different ids are both returned', () => {
+      const v1Query: HealthDiagnosticQueryV1 = { ...makeV1('id-1'), name: 'same-name' };
+      const v2Query: HealthDiagnosticQueryV2 = { ...makeV2('id-2'), name: 'same-name' };
+      const result = mergeByPriority([v1Query], [v2Query]);
+      expect(result).toHaveLength(2);
+    });
+
+    test('ParseFailureQuery with id participates in dedup (v2 wins)', () => {
+      const v1Failure = makeParseFailure('conflict-id');
+      const v2Query = makeV2('conflict-id');
+      const result = mergeByPriority([v1Failure], [v2Query]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(v2Query);
+    });
+
+    test('ParseFailureQuery without id is always included', () => {
+      const v2 = [makeV2('a')];
+      const failure = makeParseFailure();
+      const result = mergeByPriority([failure], v2);
+      expect(result).toHaveLength(2);
+      expect(result).toContain(failure);
+    });
+
+    test('multiple id-less ParseFailureQueries are all included', () => {
+      const f1 = makeParseFailure();
+      const f2 = makeParseFailure();
+      const result = mergeByPriority([f1], [f2]);
+      expect(result).toHaveLength(2);
+      expect(result).toContain(f1);
+      expect(result).toContain(f2);
     });
   });
 

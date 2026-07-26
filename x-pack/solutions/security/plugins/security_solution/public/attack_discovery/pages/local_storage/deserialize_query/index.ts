@@ -6,7 +6,7 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { getDefaultQuery } from '../../helpers';
 

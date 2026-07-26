@@ -11,12 +11,14 @@ import moment from 'moment';
 
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiComment,
   EuiFlexGroup,
   EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +28,7 @@ import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 import type { AIMessage as AIMessageType } from '../../types';
+import { useKibana } from '../../hooks/use_kibana';
 
 import { CopyActionButton } from './copy_action_button';
 import { CitationsTable } from './citations_table';
@@ -42,13 +45,48 @@ const AIMessageCSS = css`
   white-space: break-spaces;
 `;
 
+const ADD_TO_DATASET_ARIA_LABEL = i18n.translate(
+  'xpack.searchPlayground.chat.message.assistant.addToDatasetLabel',
+  {
+    defaultMessage: 'Add assistant message to dataset',
+  }
+);
+
+const ADD_TO_DATASET_BUTTON_LABEL = i18n.translate(
+  'xpack.searchPlayground.chat.message.assistant.addToDatasetButton',
+  {
+    defaultMessage: 'Add to dataset',
+  }
+);
+
 export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
   const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
   const { content, createdAt, citations, retrievalDocs, inputTokens } = message;
   const username = i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
     defaultMessage: 'AI',
   });
+  const addToDatasetAction =
+    services.evals?.getAddToDatasetAction != null
+      ? services.evals.getAddToDatasetAction({
+          ariaLabel: ADD_TO_DATASET_ARIA_LABEL,
+          label: ADD_TO_DATASET_BUTTON_LABEL,
+          initialExample: {
+            input: {
+              searchQuery: inputTokens.searchQuery,
+              retrievalDocs,
+              citations,
+            },
+            output: {
+              content: String(content),
+            },
+            metadata: {
+              source: 'search_playground',
+            },
+          },
+        })
+      : null;
   const AIMessageWrapperCSS = css`
     .euiAvatar {
       background-color: ${euiTheme.colors.emptyShade};
@@ -206,6 +244,17 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
                 defaultMessage: 'Copy assistant message',
               })}
             />
+            {addToDatasetAction ? (
+              <EuiToolTip content={addToDatasetAction.ariaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="searchPlaygroundAssistantMessageButton"
+                  aria-label={addToDatasetAction.ariaLabel}
+                  color="text"
+                  iconType={addToDatasetAction.iconType}
+                  onClick={addToDatasetAction.onClick}
+                />
+              </EuiToolTip>
+            ) : null}
           </>
         }
       >

@@ -6,26 +6,24 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
-import type { ESQLControlState, PublishesESQLVariables } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { omit } from 'lodash';
+import { parseControlGroupJson } from '../../application/main/state_management/redux/utils';
 
 export const addControlsFromSavedSession = async (
   container: CanAddNewPanel & Partial<PublishesESQLVariables>,
   controlGroupJson: string,
   uuid?: string | undefined
 ): Promise<void> => {
-  const controlsState = controlGroupJson.length
-    ? (JSON.parse(controlGroupJson) as ControlPanelsState<ESQLControlState>)
-    : {};
+  const controlsState = parseControlGroupJson(controlGroupJson);
   const esqlVariables$ = container.esqlVariables$;
   const esqlVariables = esqlVariables$?.getValue();
 
   // Only add controls whose variableName does not exist in current esqlVariables
   for (const panel of Object.values(controlsState)) {
-    const variableName = panel.variableName;
+    const variableName = panel.variable_name;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
     if (!variableExists) {
       await container.addNewPanel(

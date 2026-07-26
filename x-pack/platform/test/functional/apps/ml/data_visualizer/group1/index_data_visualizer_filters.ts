@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
-  farequoteDataViewTestData,
 } from '../index_test_data';
 import type { TestData } from '../types';
 
@@ -21,7 +20,6 @@ const PINNED_FILTER = {
   negated: false,
 };
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
@@ -61,7 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `${testData.suiteTitle} loads the index data visualizer page`
       );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-        testData.sourceIndexOrSavedSearch
+        testData.sourceIndexOrSavedSearch,
+        testData.isSavedSearch
       );
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
@@ -102,7 +101,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `${testData.suiteTitle} loads the index data visualizer page`
       );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-        testData.sourceIndexOrSavedSearch
+        testData.sourceIndexOrSavedSearch,
+        testData.isSavedSearch
       );
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
@@ -128,7 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
   describe('data visualizer with pinned global filters', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
@@ -139,10 +138,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await ml.testResources.deleteSavedSearches();
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
-    });
-
-    describe(`with ${farequoteDataViewTestData.suiteTitle}`, function () {
-      runTests(farequoteDataViewTestData);
     });
 
     describe(`with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`, function () {

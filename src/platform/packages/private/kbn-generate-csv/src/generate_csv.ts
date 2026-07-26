@@ -69,7 +69,8 @@ export class CsvGenerator {
     private logger: Logger,
     private stream: Writable,
     private isServerless: boolean = false,
-    private jobId: string
+    private jobId: string,
+    private useInternalUser: boolean = false
   ) {}
   /*
    * Load field formats for each field in the list
@@ -112,7 +113,7 @@ export class CsvGenerator {
       // check truthiness to guard against _score, _type, etc
       if (tableColumn && dataTableCell) {
         try {
-          cell = formatters[tableColumn].convert(dataTableCell);
+          cell = formatters[tableColumn].convertToText(dataTableCell);
         } catch (err) {
           this.logger.error(err, { tags: [this.jobId] });
           cell = '-';
@@ -298,6 +299,7 @@ export class CsvGenerator {
         currentFilters,
         forceNow: this.job.forceNow,
         logger: this.logger,
+        timezone: settings.timezone,
       });
       this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
         tags: [this.jobId],
@@ -330,7 +332,8 @@ export class CsvGenerator {
         settings,
         this.clients,
         abortController,
-        this.logger
+        this.logger,
+        this.useInternalUser
       );
       logger.debug('Using search strategy: scroll', { tags: [this.jobId] });
     } else {
@@ -340,7 +343,8 @@ export class CsvGenerator {
         settings,
         this.clients,
         abortController,
-        this.logger
+        this.logger,
+        this.useInternalUser
       );
       logger.debug('Using search strategy: pit', { tags: [this.jobId] });
     }

@@ -27,10 +27,11 @@ export const findGaps = async ({
   page: number;
   perPage: number;
 }> => {
-  const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder } = params;
+  const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder, excludedReasons } =
+    params;
 
   try {
-    const filter = buildGapsFilter({ start, end, statuses });
+    const filter = buildGapsFilter({ start, end, statuses, excludedReasons });
 
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
@@ -93,6 +94,7 @@ export const findGapsSearchAfter = async ({
     hasFilledIntervals,
     updatedBefore,
     failedAutoFillAttemptsLessThan,
+    excludedReasons,
   } = params;
 
   if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
@@ -109,6 +111,7 @@ export const findGapsSearchAfter = async ({
       hasFilledIntervals,
       failedAutoFillAttemptsLessThan,
       updatedBefore,
+      excludedReasons,
     });
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIdsSearchAfter(
       RULE_SAVED_OBJECT_TYPE,

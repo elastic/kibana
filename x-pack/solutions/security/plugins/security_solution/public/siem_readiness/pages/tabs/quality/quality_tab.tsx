@@ -15,12 +15,15 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButtonEmpty,
+  EuiProgress,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { IndexInfo, DataQualityResultDocument } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -31,6 +34,10 @@ import { useBasePath } from '../../../../common/lib/kibana';
 import { QualityWarningPrompt } from './quality_warning_prompt';
 import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { isQualityIncompatible } from '../../../hooks/visibility_status_utils';
+import { useAutoCheckIndices } from './use_auto_check_indices';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
@@ -41,7 +48,10 @@ interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
   checkedAt: number | undefined;
 }
 
-export const QualityTab: React.FC = () => {
+export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
+}) => {
+  const { euiTheme } = useEuiTheme();
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
@@ -55,34 +65,64 @@ export const QualityTab: React.FC = () => {
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
 
-  // Prepare categories data with computed status field
+  // Extract flat list of all index names for auto-checking, in activeCategories order
+  const allIndexNames = useMemo(() => {
+    if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
+
+    return activeCategories.flatMap((activeCategory) => {
+      const catData = getReadinessCategoriesData.mainCategoriesMap.find(
+        (c) => c.category === activeCategory
+      );
+      return catData?.indices.map((index) => index.indexName) ?? [];
+    });
+  }, [getReadinessCategoriesData?.mainCategoriesMap, activeCategories]);
+
+  // Auto-check all indices when tab is visited
+  const { isChecking, isComplete, progress, currentIndexName } = useAutoCheckIndices({
+    indexNames: allIndexNames,
+    enabled: !getReadinessCategories.isLoading && allIndexNames.length > 0,
+  });
+
+  // Prepare categories data with computed status field, in activeCategories order
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    return getReadinessCategoriesData.mainCategoriesMap.map((category) => ({
-      category: category.category,
-      items: category.indices.map((index) => {
-        const result = indexDataQualityMap.get(index.indexName);
-        const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-        const isIncompatible = incompatibleCount > 0;
-
+    return activeCategories
+      .map((activeCategory) => {
+        const catData = getReadinessCategoriesData.mainCategoriesMap.find(
+          (c) => c.category === activeCategory
+        );
+        if (!catData?.indices.length) return null;
         return {
-          ...index,
-          status: isIncompatible ? ('incompatible' as const) : ('healthy' as const),
-          incompatibleFieldCount: incompatibleCount,
-          checkedAt: result?.checkedAt,
+          category: catData.category,
+          items: catData.indices.map((index) => {
+            const qualityResult = indexDataQualityMap.get(index.indexName);
+            const incompatibleCount = qualityResult?.incompatibleFieldCount ?? 0;
+            return {
+              ...index,
+              status: isQualityIncompatible(incompatibleCount)
+                ? ('incompatible' as const)
+                : ('healthy' as const),
+              incompatibleFieldCount: incompatibleCount,
+              checkedAt: qualityResult?.checkedAt,
+            };
+          }),
         };
-      }),
-    }));
-  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap]);
+      })
+      .filter((c): c is CategoryData<IndexInfoWithStatus> => c !== null);
+  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
 
-  // Calculate total incompatible indices
+  // Calculate total incompatible indices - count unique indices only
   const totalIncompatibleIndices = useMemo(() => {
-    return categories.reduce(
-      (sum, category) =>
-        sum + category.items.filter((item) => item.status === 'incompatible').length,
-      0
-    );
+    const uniqueIncompatibleIndices = new Set<string>();
+    categories.forEach((category) => {
+      category.items
+        .filter((item) => item.status === 'incompatible')
+        .forEach((item) => {
+          uniqueIncompatibleIndices.add(item.indexName);
+        });
+    });
+    return uniqueIncompatibleIndices.size;
   }, [categories]);
 
   const hasIncompatibleIndices = totalIncompatibleIndices > 0;
@@ -103,7 +143,9 @@ export const QualityTab: React.FC = () => {
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
-    const hasIncompatibleFields = category.items.some((item) => item.incompatibleFieldCount > 0);
+    const hasIncompatibleFields = category.items.some((item) =>
+      isQualityIncompatible(item.incompatibleFieldCount)
+    );
     const status = hasIncompatibleFields ? 'Actions required' : 'Healthy';
     const statusColor = hasIncompatibleFields ? 'warning' : 'success';
 
@@ -113,7 +155,9 @@ export const QualityTab: React.FC = () => {
     );
 
     const affectedIndices = new Set(
-      category.items.filter((item) => item.incompatibleFieldCount > 0).map((item) => item.indexName)
+      category.items
+        .filter((item) => isQualityIncompatible(item.incompatibleFieldCount))
+        .map((item) => item.indexName)
     ).size;
 
     const totalDataSources = category.items.length;
@@ -263,28 +307,24 @@ export const QualityTab: React.FC = () => {
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.action', {
           defaultMessage: 'Actions',
         }),
-        width: '15%',
-        render: () => {
-          const dataQualityUrl = `${basePath}/app/security/data_quality`;
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={dataQualityUrl}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
-                  defaultMessage: 'View Data quality',
-                })}
-              </EuiButtonEmpty>
-            </div>
-          );
-        },
+        actions: [
+          {
+            render: () => {
+              const dataQualityUrl = `${basePath}/app/security/data_quality`;
+              return (
+                <EuiButtonEmpty size="s" href={dataQualityUrl} target="_blank">
+                  {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
+                    defaultMessage: 'View Data quality',
+                  })}
+                </EuiButtonEmpty>
+              );
+            },
+          },
+        ],
       },
     ],
     [basePath]
@@ -321,28 +361,6 @@ export const QualityTab: React.FC = () => {
     );
   }
 
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.title', {
-            defaultMessage: 'No data available',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.description', {
-              defaultMessage: 'No category data found. Please check your indices.',
-            })}
-          </p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -351,6 +369,26 @@ export const QualityTab: React.FC = () => {
           <QualityWarningPrompt incompatibleIndicesCount={totalIncompatibleIndices} />
           <EuiSpacer size="m" />
         </>
+      )}
+      {(isChecking || isComplete) && (
+        <EuiProgress
+          value={progress.checked}
+          max={progress.total}
+          size="s"
+          color={isComplete ? 'success' : 'primary'}
+          label={
+            isComplete
+              ? i18n.translate('xpack.securitySolution.siemReadiness.quality.complete.label', {
+                  defaultMessage: 'All indices checked',
+                })
+              : i18n.translate('xpack.securitySolution.siemReadiness.quality.checking.label', {
+                  defaultMessage: 'Checking: {indexName}',
+                  values: { indexName: currentIndexName },
+                })
+          }
+          valueText={`${progress.checked}/${progress.total}`}
+          style={{ marginBottom: euiTheme.size.base }}
+        />
       )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
@@ -370,7 +408,7 @@ export const QualityTab: React.FC = () => {
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
               >
@@ -400,6 +438,12 @@ export const QualityTab: React.FC = () => {
           defaultMessage: 'indices',
         })}
         defaultSortField="indexName"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={
+          activeCategories.length < CATEGORY_ORDER.length &&
+          (getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0
+        }
+        hasUnfilteredData={(getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0}
       />
     </>
   );

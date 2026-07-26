@@ -15,6 +15,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { schema } from '@kbn/config-schema';
 import type { IConfigServiceMock } from '@kbn/config-mocks';
 import type { Logger } from '@kbn/logging';
@@ -31,9 +32,11 @@ const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const internalOriginHeader = 'x-elastic-internal-origin';
 const internalProductQueryParam = 'elasticInternalOrigin';
+const destructiveMethods = ['POST', 'PUT', 'DELETE'] as const;
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 const testConfig: Parameters<typeof createConfigService>[0] = {
@@ -51,7 +54,11 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
       'some-header': 'some-value',
       'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
     },
-    xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+    xsrf: {
+      disableProtection: false,
+      allowlist: [allowlistedTestPath],
+      allowedSchemes: [],
+    },
     restrictInternalApis: false,
   },
 };
@@ -165,7 +172,6 @@ describe('core lifecycle handlers', () => {
 
   describe('xsrf post-auth handler', () => {
     const testPath = '/xsrf/test/route';
-    const destructiveMethods = ['POST', 'PUT', 'DELETE'];
     const nonDestructiveMethods = ['GET', 'HEAD'];
 
     const getSupertest = (method: string, path: string): supertest.Test => {
@@ -345,6 +351,89 @@ describe('core lifecycle handlers', () => {
         .expect(200, 'ok()');
     });
   });
+});
+
+describe('xsrf post-auth handler with allowedSchemes (Authorization bypass)', () => {
+  const testPath = '/xsrf/allowed_schemes/test/route';
+  const schemeHeader = 'x-test-auth-scheme';
+
+  let server: HttpService;
+  let innerServer: HttpServerSetup['server'];
+
+  const bootServer = async (allowedSchemes: Array<'apikey' | 'bearer'>) => {
+    const configService = createConfigService({
+      server: {
+        ...testConfig.server,
+        xsrf: {
+          disableProtection: false,
+          allowlist: [],
+          allowedSchemes,
+        },
+      },
+    });
+    server = createInternalHttpService({ configService });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
+    const serverSetup = await server.setup(setupDeps);
+    const { registerAuth } = serverSetup;
+    registerAuth((req, res, toolkit) => {
+      const scheme = req.headers[schemeHeader] as string | undefined;
+      if (scheme == null) {
+        // Authenticated request with no HTTP auth scheme (e.g. session/cookie auth).
+        return toolkit.authenticated({ state: { http_authentication_scheme: null } });
+      }
+      return toolkit.authenticated({ state: { http_authentication_scheme: scheme } });
+    });
+    const router = serverSetup.createRouter('/');
+    router.post(
+      { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: 'ok' })
+    );
+    router.put(
+      { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: 'ok' })
+    );
+    router.delete(
+      { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => res.ok({ body: 'ok' })
+    );
+    innerServer = serverSetup.server;
+    await server.start();
+  };
+
+  afterEach(async () => {
+    await server.stop();
+  });
+
+  const getSupertest = (
+    method: (typeof destructiveMethods)[number],
+    path: string
+  ): supertest.Test =>
+    (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as supertest.Test;
+
+  // These integration tests exercise only the seam between the real registerAuth →
+  // toolkit.authenticated({ state }) → getAuthState pipeline and the xsrf handler. The full
+  // allow/deny decision matrix (scheme and config permutations) is already covered exhaustively
+  // by the mocked-getAuthState unit tests in lifecycle_handlers.test.ts.
+
+  it('rejects a POST with basic scheme even when apikey and bearer are allowed', async () => {
+    await bootServer(['apikey', 'bearer']);
+    await getSupertest('POST', testPath).set(schemeHeader, 'basic').expect(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Request must contain a kbn-xsrf header.',
+    });
+  });
+
+  it.each(destructiveMethods)(
+    'accepts a %s with an allowed scheme and no kbn-xsrf (confirms every destructive method routes through the handler)',
+    async (method) => {
+      await bootServer(['apikey', 'bearer']);
+      await getSupertest(method, testPath).set(schemeHeader, 'apikey').expect(200, 'ok');
+    }
+  );
 });
 
 describe('core lifecycle handlers with restrict internal routes enforced', () => {

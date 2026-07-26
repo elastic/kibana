@@ -12,18 +12,21 @@ import { useSelectedLocation } from './use_selected_location';
 import { createEsQuery } from '../../../../../../common/utils/es_search';
 import type { Ping } from '../../../../../../common/runtime_types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 
 export function useFailedTestByStep({ to, from }: { to: string; from: string }) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
+  const { remoteName } = useGetUrlParams();
+
   const selectedLocation = useSelectedLocation();
 
   const params = createEsQuery({
-    index: SYNTHETICS_INDEX_PATTERN,
+    index: getSyntheticsCcsIndex(remoteName),
     size: 0,
     track_total_hits: true,
     query: {
@@ -75,9 +78,9 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
 
   const { data, loading } = useReduxEsSearch<Ping, typeof params>(
     params,
-    [lastRefresh, monitorId],
+    [lastRefresh, monitorId, from, to, remoteName],
     {
-      name: `getFailedTestsByStep/${monitorId}`,
+      name: `getFailedTestsByStep/${monitorId}/${from}/${to}`,
       isRequestReady: !!selectedLocation,
     }
   );

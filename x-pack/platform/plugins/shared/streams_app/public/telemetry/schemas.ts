@@ -478,6 +478,12 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
           description: 'Whether the user can manage failure store',
         },
       },
+      create_snapshot_repository: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can create snapshot repositories',
+        },
+      },
     },
   },
 };

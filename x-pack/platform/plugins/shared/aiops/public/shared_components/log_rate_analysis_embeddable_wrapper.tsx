@@ -76,8 +76,17 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+      cps,
+    } = pluginStart;
 
     return {
       data,
@@ -88,12 +97,22 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
       share,
       storage,
       unifiedSearch,
+      cps,
       ...coreStart,
     };
   }, [coreStart, pluginStart]);
 
   const datePickerDeps = {
-    ...pick(deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'userProfile', 'i18n']),
+    ...pick(deps, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+      'cps',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
 

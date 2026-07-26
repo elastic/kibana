@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useQuery } from '@kbn/react-query';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
+
+export interface StepExecutionListResult {
+  results: EsWorkflowStepExecution[];
+  total: number;
+  page?: number;
+  size?: number;
+}
+
+interface UseWorkflowStepExecutionsParams {
+  /** Workflow ID. */
+  workflowId: string | null;
+  /** Filter by step ID. */
+  stepId?: string | null;
+  /** Number of results per page. */
+  size?: number;
+  /** Page number. */
+  page?: number;
+  /** Datemath lower bound of the time range filter (e.g. 'now-1d') applied to startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound of the time range filter (e.g. 'now') applied to startedAt. */
+  startedBefore?: string;
+}
+
+export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParams) {
+  const api = useWorkflowsApi();
+
+  return useQuery({
+    queryKey: [
+      'workflows',
+      params.workflowId,
+      'step-executions',
+      params.stepId,
+      params.page,
+      params.size,
+      params.startedAfter,
+      params.startedBefore,
+    ],
+    queryFn: async () => {
+      if (!params.workflowId) {
+        return { results: [], total: 0 };
+      }
+      return api.getWorkflowStepExecutions(params.workflowId, {
+        ...(params.stepId ? { stepId: params.stepId } : {}),
+        page: params.page,
+        size: params.size ?? 100,
+        ...(params.startedAfter != null && params.startedAfter !== ''
+          ? { startedAfter: params.startedAfter }
+          : {}),
+        ...(params.startedBefore != null && params.startedBefore !== ''
+          ? { startedBefore: params.startedBefore }
+          : {}),
+      });
+    },
+    enabled: params.workflowId !== null,
+  });
+}

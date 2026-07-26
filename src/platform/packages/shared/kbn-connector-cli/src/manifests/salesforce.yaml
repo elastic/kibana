@@ -1,0 +1,18 @@
+spec_id: .salesforce
+name: "Salesforce (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  scope:
+    value: "api refresh_token"
+  tokenUrl:
+    vault: secret/ent-search-team/connectors-sources/salesforce-external-client-app
+    field: token_url
+  authorizationUrl:
+    vault: secret/ent-search-team/connectors-sources/salesforce-external-client-app
+    field: authz_url
+  clientId:
+    vault: secret/ent-search-team/connectors-sources/salesforce-external-client-app
+    field: auth_code_client_id
+  clientSecret:
+    vault: secret/ent-search-team/connectors-sources/salesforce-external-client-app
+    field: auth_code_client_secret

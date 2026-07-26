@@ -8,8 +8,8 @@
  */
 
 import * as React from 'react';
-import type { EsqlQuery } from '@kbn/esql-language';
-import { Parser, Walker } from '@kbn/esql-language';
+import { Parser, Walker } from '@elastic/esql';
+import type { EsqlQuery } from '@elastic/esql';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Annotation } from '../annotations';
 

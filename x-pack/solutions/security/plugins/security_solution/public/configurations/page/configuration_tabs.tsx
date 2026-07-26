@@ -56,6 +56,7 @@ export const ConfigurationsTabs = React.memo(() => {
       {filteredTabs.map((tab) => (
         <EuiTab
           key={tab.deepLinkId}
+          data-test-subj={`configurationsTab-${tab.tabId}`}
           onClick={() => onSelectedTabChanged(tab.deepLinkId)}
           isSelected={tab.tabId === params.tab}
         >

@@ -44,12 +44,12 @@ describe('kuery functions', () => {
         const result = not.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(Object.keys(result).length).toBe(1);
+        expect(Object.keys(result!).length).toBe(1);
 
-        expect(result.bool).toHaveProperty('must_not');
-        expect(Object.keys(result.bool!).length).toBe(1);
+        expect(result!.bool).toHaveProperty('must_not');
+        expect(Object.keys(result!.bool!).length).toBe(1);
 
-        expect(result.bool!.must_not).toEqual(ast.toElasticsearchQuery(childNode, indexPattern));
+        expect(result!.bool!.must_not).toEqual(ast.toElasticsearchQuery(childNode, indexPattern));
       });
     });
 

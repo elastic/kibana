@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { filter, omit, some } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import { filter, mapValues, omit, some } from 'lodash';
 import { asyncForEach } from '@kbn/std';
 import deepmerge from 'deepmerge';
 
@@ -49,7 +50,6 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       async (context, _request, response) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         let installation;
 
@@ -129,17 +129,24 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   ? `${packAssetSavedObject.attributes.name}-elastic`
                   : packAssetSavedObject.attributes.name;
 
+              const now = moment().toISOString();
+              const enrichedQueries = (packAssetSavedObject.attributes.queries ?? []).map((q) => ({
+                ...q,
+                schedule_id: q.schedule_id ?? uuidv4(),
+                start_date: q.start_date ?? now,
+              }));
+
               await savedObjectsClient.create(
                 packSavedObjectType,
                 {
                   name,
                   description: packAssetSavedObject.attributes.description,
-                  queries: packAssetSavedObject.attributes.queries,
+                  queries: enrichedQueries,
                   enabled: false,
-                  created_at: moment().toISOString(),
-                  created_by: currentUser,
-                  updated_at: moment().toISOString(),
-                  updated_by: currentUser,
+                  created_at: now,
+                  created_by: 'elastic',
+                  updated_at: now,
+                  updated_by: 'elastic',
                   version: packAssetSavedObject.attributes.version ?? 1,
                 },
                 {
@@ -170,6 +177,20 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               });
 
               if (packSavedObjectsResponse.total) {
+                const now = moment().toISOString();
+                const mergedQueries = deepmerge(
+                  convertSOQueriesToPack(
+                    packSavedObjectsResponse.saved_objects[0].attributes.queries
+                  ),
+                  convertSOQueriesToPack(packAssetSavedObject.attributes.queries),
+                  { arrayMerge: combineMerge }
+                );
+                const enrichedQueries = mapValues(mergedQueries, (queryData) => ({
+                  ...queryData,
+                  schedule_id: queryData.schedule_id ?? uuidv4(),
+                  start_date: queryData.start_date ?? now,
+                }));
+
                 await savedObjectsClient.update(
                   packSavedObjectsResponse.saved_objects[0].type,
                   packSavedObjectsResponse.saved_objects[0].id,
@@ -177,19 +198,10 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     omit(packSavedObjectsResponse.saved_objects[0].attributes, 'queries'),
                     omit(packAssetSavedObject.attributes, 'queries'),
                     {
-                      updated_at: moment().toISOString(),
-                      updated_by: currentUser,
-                      queries: convertPackQueriesToSO(
-                        deepmerge(
-                          convertSOQueriesToPack(
-                            packSavedObjectsResponse.saved_objects[0].attributes.queries
-                          ),
-                          convertSOQueriesToPack(packAssetSavedObject.attributes.queries),
-                          {
-                            arrayMerge: combineMerge,
-                          }
-                        )
-                      ),
+                      created_by: 'elastic',
+                      updated_at: now,
+                      updated_by: 'elastic',
+                      queries: convertPackQueriesToSO(enrichedQueries),
                     },
                     {
                       arrayMerge: combineMerge,

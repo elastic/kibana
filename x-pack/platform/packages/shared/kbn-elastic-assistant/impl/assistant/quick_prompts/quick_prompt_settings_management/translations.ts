@@ -35,6 +35,13 @@ export const QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE = i18n.translate(
   }
 );
 
+export const QUICK_PROMPT_TABLE_CAPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPromptTableCaption',
+  {
+    defaultMessage: 'Quick Prompt',
+  }
+);
+
 export const QUICK_PROMPT_EDIT_FLYOUT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPromptEditFlyout.title',
   {

@@ -18,35 +18,42 @@ import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  WritableToolResultStore,
   AgentHandlerContext,
+  HooksServiceStart,
   ScopedRunner,
   ToolProvider,
   ToolRegistry,
+  WritableToolResultStore,
 } from '@kbn/agent-builder-server';
-import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type {
   ConversationStateManager,
+  PluginsService,
   PromptManager,
   SkillsService,
   ToolManager,
   ToolPromptManager,
   ToolStateManager,
+  WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
+import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStart } from '../services/attachments';
-import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
-import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
-import { createModelProviderMock, createModelProviderFactoryMock } from './model_provider';
+import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
+import type { ModelProviderFactoryMock, ModelProviderMock } from './model_provider';
+import { createModelProviderFactoryMock, createModelProviderMock } from './model_provider';
 import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
-import type { SkillServiceStart } from '../services/skills';
+import type { SkillRegistry, SkillServiceStart } from '../services/skills';
+import type { PluginsServiceStart } from '../services/plugins/plugin_service';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
+export type SkillsStoreMock = jest.Mocked<WritableSkillsStore>;
+export type SkillRegistryMock = jest.Mocked<SkillRegistry>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ToolRegistryMock = jest.Mocked<ToolRegistry>;
@@ -54,12 +61,13 @@ export type AttachmentsServiceMock = jest.Mocked<AttachmentsService>;
 export type AttachmentStateManagerMock = jest.Mocked<AttachmentStateManager>;
 export type PromptManagerMock = jest.Mocked<PromptManager>;
 export type StateManagerMock = jest.Mocked<ConversationStateManager>;
-export type FileSystemStoreMock = jest.Mocked<IFileStore>;
 export type SkillsServiceMock = jest.Mocked<SkillsService>;
 export type ToolManagerMock = jest.Mocked<ToolManager>;
 export type ToolPromptManagerMock = jest.Mocked<ToolPromptManager>;
 export type ToolStateManagerMock = jest.Mocked<ToolStateManager>;
 export type SkillServiceStartMock = jest.Mocked<SkillServiceStart>;
+export type PluginsServiceStartMock = jest.Mocked<PluginsServiceStart>;
+export type PluginsServiceMock = jest.Mocked<PluginsService>;
 
 export const createToolProviderMock = (): ToolProviderMock => {
   return {
@@ -81,20 +89,47 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
   };
 };
 
+const createEmptyVolumeMock = () => ({
+  id: 'mock',
+  get: jest.fn(),
+  list: jest.fn().mockResolvedValue([]),
+  glob: jest.fn().mockResolvedValue([]),
+  exists: jest.fn().mockResolvedValue(false),
+});
+
 export const createToolResultStoreMock = (): ToolResultStoreMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    add: jest.fn(),
+    asReadonly: jest.fn(),
+    getVolume: jest.fn().mockReturnValue(createEmptyVolumeMock()),
+    getEntry: jest.fn().mockResolvedValue(undefined),
+    getEntryByResultId: jest.fn().mockResolvedValue(undefined),
+    listEntries: jest.fn().mockResolvedValue([]),
+    entryExists: jest.fn().mockResolvedValue(false),
+  } as unknown as ToolResultStoreMock;
+};
+
+export const createSkillsStoreMock = (): SkillsStoreMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
     add: jest.fn(),
     delete: jest.fn(),
     asReadonly: jest.fn(),
-  };
+    getVolume: jest.fn().mockReturnValue(createEmptyVolumeMock()),
+    getEntry: jest.fn().mockResolvedValue(undefined),
+    listEntries: jest.fn().mockResolvedValue([]),
+    entryExists: jest.fn().mockResolvedValue(false),
+  } as unknown as SkillsStoreMock;
 };
 
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
     validate: jest.fn(),
     getTypeDefinition: jest.fn(),
+    getRegisteredTypeIds: jest.fn(),
   };
 };
 
@@ -102,6 +137,7 @@ export const createAttachmentsService = (): AttachmentsServiceMock => {
   return {
     getTypeDefinition: jest.fn(),
     convertAttachmentTool: jest.fn(),
+    getRegisteredTypeIds: jest.fn(),
   };
 };
 
@@ -109,8 +145,10 @@ export const createPromptManagerMock = (): PromptManagerMock => {
   return {
     set: jest.fn(),
     get: jest.fn(),
+    delete: jest.fn(),
     dump: jest.fn(),
     getConfirmationStatus: jest.fn(),
+    getAuthorizationStatus: jest.fn(),
     clear: jest.fn(),
     forTool: jest.fn(),
   };
@@ -118,19 +156,25 @@ export const createPromptManagerMock = (): PromptManagerMock => {
 
 export const createSkillsServiceMock = (): SkillsServiceMock => {
   return {
-    list: jest.fn(),
-    getSkillDefinition: jest.fn(),
+    list: jest.fn().mockResolvedValue([]),
+    get: jest.fn().mockResolvedValue(undefined),
+    bulkGet: jest.fn().mockResolvedValue(new Map()),
     convertSkillTool: jest.fn(),
   };
 };
 
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
+    setEventEmitter: jest.fn(),
+    setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
     list: jest.fn(),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
+    getToolMeta: jest.fn(),
+    getExecutable: jest.fn(),
     getDynamicToolIds: jest.fn(),
+    getSummarizer: jest.fn(),
   };
 };
 
@@ -142,8 +186,34 @@ export const createStateManagerMock = (): StateManagerMock => {
 
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
-    getSkillDefinition: jest.fn(),
-    listSkills: jest.fn(),
+    getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
+    registerSkill: jest.fn().mockResolvedValue(undefined),
+  };
+};
+
+export const createPluginsServiceStartMock = (): PluginsServiceStartMock => {
+  return {
+    getRegistry: jest.fn(),
+    installPlugin: jest.fn(),
+    deletePlugin: jest.fn(),
+  };
+};
+
+export const createPluginsServiceMock = (): PluginsServiceMock => {
+  return {
+    resolveSkillIds: jest.fn().mockResolvedValue([]),
+  };
+};
+
+export const createSkillRegistryMock = (): SkillRegistryMock => {
+  return {
+    has: jest.fn().mockResolvedValue(false),
+    get: jest.fn(),
+    bulkGet: jest.fn().mockResolvedValue(new Map()),
+    list: jest.fn().mockResolvedValue([]),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
   };
 };
 
@@ -156,6 +226,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getDiff: jest.fn(),
     add: jest.fn(),
     update: jest.fn(),
+    updateOrigin: jest.fn().mockResolvedValue(true),
     delete: jest.fn(),
     restore: jest.fn(),
     permanentDelete: jest.fn(),
@@ -163,26 +234,19 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
     resolveRefs: jest.fn(),
-    resolveAttachment: jest.fn(),
+    evaluateStalenessForActiveAttachments: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),
   };
 };
 
-export const createFileSystemStoreMock = (): FileSystemStoreMock => {
-  return {
-    read: jest.fn(),
-    ls: jest.fn(),
-    glob: jest.fn(),
-    grep: jest.fn(),
-  };
-};
-
 export const createToolPromptManagerMock = (): ToolPromptManagerMock => {
   return {
     checkConfirmationStatus: jest.fn(),
+    checkAuthorizationStatus: jest.fn(),
     askForConfirmation: jest.fn(),
+    askForAuthorization: jest.fn(),
   };
 };
 
@@ -204,6 +268,7 @@ export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   request: KibanaRequest;
   toolManager: ToolManagerMock;
   skillServiceStart: SkillServiceStartMock;
+  pluginsServiceStart: PluginsServiceStartMock;
 }
 
 export interface CreateRunnerDepsMock extends CreateRunnerDeps {
@@ -214,6 +279,7 @@ export interface CreateRunnerDepsMock extends CreateRunnerDeps {
   agentsService: AgentsServiceStartMock;
   logger: MockedLogger;
   skillServiceStart: SkillServiceStartMock;
+  pluginsServiceStart: PluginsServiceStartMock;
   toolManager: ToolManagerMock;
 }
 
@@ -221,9 +287,10 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   toolProvider: ToolProviderMock;
   toolRegistry: ToolRegistryMock;
   resultStore: ToolResultStoreMock;
+  skillsStore: SkillsStoreMock;
   attachments: AttachmentsServiceMock;
-  filestore: FileSystemStoreMock;
   skills: SkillsServiceMock;
+  plugins: PluginsServiceMock;
   toolManager: ToolManagerMock;
 }
 
@@ -238,29 +305,47 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     toolRegistry: createToolRegistryMock(),
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
+    renderers: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
+    todoStateManager: createTodoStateManager(),
     events: {
       emit: jest.fn(),
     },
     logger: loggerMock.create(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
-    filestore: createFileSystemStoreMock(),
+    hooks: createHooksServiceStartMock(),
+    filesystemService: {
+      getFilesystem: jest.fn(),
+      flush: jest.fn().mockResolvedValue(undefined),
+    },
+    bashService: undefined,
     skills: createSkillsServiceMock(),
+    plugins: createPluginsServiceMock(),
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
-      filestore: false,
       skills: false,
+      subagents: false,
+      todos: false,
+      datasets: false,
+      askUserQuestion: false,
+      bash: false,
     },
+    subAgentExecutor: {
+      executeSubAgent: jest.fn(),
+      getExecution: jest.fn(),
+    },
+    executionMode: AgentExecutionMode.conversation,
   };
 };
 
 export interface ToolHandlerContextMock extends ToolHandlerContext {
   toolProvider: ToolProviderMock;
   resultStore: ToolResultStoreMock;
+  skillsStore: SkillsStoreMock;
   attachments: AttachmentStateManagerMock;
-  filestore: FileSystemStoreMock;
   prompts: ToolPromptManagerMock;
   stateManager: ToolStateManagerMock;
   skills: SkillsServiceMock;
@@ -272,6 +357,11 @@ export interface ToolHandlerContextMock extends ToolHandlerContext {
 
 export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
   return {
+    callContext: {
+      toolId: 'toolId',
+      toolCallId: 'toolCallId',
+      callSource: 'agent',
+    },
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
@@ -279,6 +369,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     toolProvider: createToolProviderMock(),
     runner: createScopedRunnerMock(),
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     events: {
       reportProgress: jest.fn(),
       sendUiEvent: jest.fn(),
@@ -287,10 +378,18 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     prompts: createToolPromptManagerMock(),
     stateManager: createToolStateManagerMock(),
     attachments: createAttachmentStateManagerMock(),
-    filestore: createFileSystemStoreMock(),
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
+    runContext: { runId: 'mock-run-id', stack: [] },
+    experimentalFeatures: {
+      skills: false,
+      subagents: false,
+      todos: false,
+      datasets: false,
+      askUserQuestion: false,
+      bash: false,
+    },
   };
 };
 
@@ -299,6 +398,12 @@ export const createScopedRunnerMock = (): jest.Mocked<ScopedRunner> => {
     runTool: jest.fn(),
     runInternalTool: jest.fn(),
     runAgent: jest.fn(),
+  };
+};
+
+export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
+  return {
+    run: jest.fn(async (_event: any, context: any) => context),
   };
 };
 
@@ -316,13 +421,30 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
+    todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
+    renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
-    filestore: createFileSystemStoreMock(),
+    hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
+    pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    experimentalFeatures: {
+      skills: false,
+      subagents: false,
+      todos: false,
+      datasets: false,
+      askUserQuestion: false,
+      bash: false,
+    },
+    subAgentExecutor: {
+      executeSubAgent: jest.fn(),
+      getExecution: jest.fn(),
+    },
+    executionMode: AgentExecutionMode.conversation,
   };
 };
 
@@ -339,7 +461,11 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
+    renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
+    pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    getExecutionService: jest.fn(),
   };
 };

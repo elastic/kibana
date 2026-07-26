@@ -194,6 +194,36 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return space;
   }
 
+  public async getPersistedFeatureVisibility(id: string) {
+    if (this.useRbac) {
+      try {
+        await this.ensureAuthorizedAtSpace(
+          id,
+          this.authorization.actions.login,
+          `Unauthorized to get ${id} space`
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.GET,
+            savedObject: { type: 'space', id },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.GET,
+        savedObject: { type: 'space', id },
+      })
+    );
+
+    return this.spacesClient.getPersistedFeatureVisibility(id);
+  }
+
   public async create(space: Space) {
     if (this.useRbac) {
       try {

@@ -9,10 +9,10 @@ import { renderHook } from '@testing-library/react';
 import { useInfiniteOverviewTrendsRequests } from './use_infinite_overview_trends_requests';
 import { WrappedHelper } from '../../../utils/testing';
 import type { OverviewStatusMetaData } from '../overview/types';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));
@@ -34,7 +34,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
   const createMockMonitor = (configId: string, locationId: string) =>
     ({
       configId,
-      locationId,
+      locations: [{ id: locationId, label: locationId, status: 'up' }],
       name: `Monitor ${configId}`,
       schedule: '5',
     } as OverviewStatusMetaData);

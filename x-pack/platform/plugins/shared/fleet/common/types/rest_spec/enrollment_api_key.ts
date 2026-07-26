@@ -32,6 +32,9 @@ export interface DeleteEnrollmentAPIKeyRequest {
   params: {
     keyId: string;
   };
+  query: {
+    forceDelete?: boolean;
+  };
 }
 
 export interface DeleteEnrollmentAPIKeyResponse {
@@ -49,4 +52,21 @@ export interface PostEnrollmentAPIKeyRequest {
 export interface PostEnrollmentAPIKeyResponse {
   action: string;
   item: EnrollmentAPIKey;
+}
+
+export interface BulkDeleteEnrollmentAPIKeysRequest {
+  body: {
+    tokenIds?: string[];
+    kuery?: string;
+    // false (revoke): invalidate the API key and mark the token as inactive.
+    // true (delete): invalidate the API key and remove the token document.
+    forceDelete?: boolean;
+  };
+}
+
+export interface BulkDeleteEnrollmentAPIKeysResponse {
+  action: string;
+  count: number;
+  successCount: number;
+  errorCount: number;
 }

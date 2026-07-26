@@ -3,8 +3,8 @@ navigation_title: "OpenAI"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/openai-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: deprecated 9.5
+  serverless: deprecated
 ---
 
 # OpenAI connector and action [openai-action-type]
@@ -15,6 +15,13 @@ The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST
 * Azure OpenAI
 * {applies_to}`stack: ga 9.1` Other (OpenAI-compatible service).
 
+::::{important}
+:applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
+This connector is deprecated and is being progressively removed from the create connector UI. Existing connectors and their rule actions continue to work.
+
+For new AI integrations, use {{es}} {{infer}} endpoints. Migrate existing LLM connectors and related rule actions before the future removal.
+::::
+
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
@@ -23,12 +30,6 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For 
 :alt: OpenAI connector
 :screenshot:
 :::
-
-::::{important}
-Elastic provides no official support for connecting to the Azure OpenAI service through a proxy. However if you must use a proxy, ensure that the proxy supports streaming and is SSE-compatible. Elastic will only parse streamed responses.
-
-To validate that your connectivity problems are caused by using a proxy, you can attempt to set up the connector and access the Azure OpenAI service without using a proxy.
-::::
 
 ### Connector configuration [openai-connector-configuration]
 
@@ -159,4 +160,4 @@ Ensure your local LLM is running and accessible via an OpenAI-compatible API end
 
 ### Example
 
-For a concrete example, refer to [Connect to your own local LLM](docs-content://solutions/security/ai/connect-to-own-local-llm.md) in the Elastic Security solution documentation.
+For setup guides, refer to [Self-managed custom LLMs](docs-content://explore-analyze/ai-features/llm-guides/local-llms-overview.md) in the Elastic documentation.

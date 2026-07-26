@@ -388,11 +388,15 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/playbook/search`,
-      options: {
-        authRequired: false,
-      },
       validate: {},
-      security: { authz: { enabled: false, reason: 'This route is opted out from authorization' } },
+      security: {
+        authz: { enabled: false, reason: 'This route is opted out from authorization' },
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an external service endpoint and does not require authentication.',
+        },
+      },
     },
     async function (
       context: RequestHandlerContext,
@@ -406,11 +410,15 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/incident`,
-      options: {
-        authRequired: false,
-      },
       validate: {},
-      security: { authz: { enabled: false, reason: 'This route is opted out from authorization' } },
+      security: {
+        authz: { enabled: false, reason: 'This route is opted out from authorization' },
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an external service endpoint and does not require authentication.',
+        },
+      },
     },
     async function (
       context: RequestHandlerContext,

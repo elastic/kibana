@@ -34,7 +34,7 @@ export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
   const health = (
     <EuiHealth
       color={transformHealthColor}
-      textSize={compact ? 'xs' : undefined}
+      textSize={compact ? 's' : undefined}
       data-test-subj="transformListHealth"
     >
       {transformHealthLabel}

@@ -6,7 +6,7 @@
  */
 
 import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
-import type { DownloadSource, FleetProxy } from '../../../types';
+import type { DownloadSource, EnrollmentSettingsProxy } from '../../../types';
 import { getDownloadBaseUrl, getDownloadSourceProxyArgs } from '../manual';
 
 export const StandaloneInstructions = ({
@@ -16,7 +16,7 @@ export const StandaloneInstructions = ({
 }: {
   agentVersion: string;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: EnrollmentSettingsProxy;
 }): CommandsByPlatform => {
   const downloadBaseUrl = getDownloadBaseUrl(downloadSource);
   const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =

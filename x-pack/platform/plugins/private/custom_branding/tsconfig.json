@@ -7,7 +7,8 @@
   "include": [
     "public/**/*",
     "server/**/*",
-    "common/**/*"
+    "common/**/*",
+    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -20,6 +21,7 @@
     "@kbn/core-ui-settings-common",
     "@kbn/config-schema",
     "@kbn/licensing-types",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

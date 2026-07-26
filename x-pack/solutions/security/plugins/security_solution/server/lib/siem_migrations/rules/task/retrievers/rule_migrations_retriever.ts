@@ -7,15 +7,17 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 import { IntegrationRetriever } from './integration_retriever';
 import { PrebuiltRulesRetriever } from './prebuilt_rules_retriever';
 import { RuleResourceRetriever } from './rule_resource_retriever';
 
-export interface RuleMigrationsRetrieverClients {
+export interface RuleMigrationsRetrieverDeps {
   data: RuleMigrationsDataClient;
   rules: RulesClient;
   savedObjects: SavedObjectsClientContract;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /** The timeout to populate ELSER indices in minutes */
@@ -32,10 +34,13 @@ export class RuleMigrationsRetriever {
   public readonly integrations: IntegrationRetriever;
   public readonly prebuiltRules: PrebuiltRulesRetriever;
 
-  constructor(migrationId: string, clients: RuleMigrationsRetrieverClients) {
-    this.resources = new RuleResourceRetriever(migrationId, clients.data.resources);
-    this.integrations = new IntegrationRetriever(clients);
-    this.prebuiltRules = new PrebuiltRulesRetriever(clients);
+  constructor(migrationId: string, deps: RuleMigrationsRetrieverDeps) {
+    this.resources = new RuleResourceRetriever(migrationId, {
+      experimentalFeatures: deps.experimentalFeatures,
+      resourcesDataClient: deps.data.resources,
+    });
+    this.integrations = new IntegrationRetriever(deps);
+    this.prebuiltRules = new PrebuiltRulesRetriever(deps);
   }
 
   private async populateElserIndices() {

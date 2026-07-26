@@ -1,0 +1,131 @@
+{
+  "sha1": "274f7422b9058c52fa818c9a6bdff23e4f78ae22",
+  "tests": [
+    {
+      "id": "3bed0bb91cd183e-e5db1d53fa33f8a",
+      "title": "Dev Tools breadcrumbs sets the last breadcrumb for Console",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "3bed0bb91cd183e-6a4684ba72aaba5",
+      "title": "Dev Tools breadcrumbs sets the last breadcrumb for Grok Debugger",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "3bed0bb91cd183e-6ab72298db218f8",
+      "title": "Dev Tools breadcrumbs sets the last breadcrumb for Search Profiler",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "3bed0bb91cd183e-9d4063e656ce769",
+      "title": "Dev Tools breadcrumbs sets the last breadcrumb for Painless Lab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "387f6409090cad1-a3d6ebf663de5d7",
+      "title": "Dev Tools feature controls dev tools all privileges allow navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "387f6409090cad1-50691839b9729f9",
+      "title": "Dev Tools feature controls dev tools read privileges allow navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "387f6409090cad1-4ae8f2d672a942f",
+      "title": "Dev Tools feature controls users without dev tools privileges cannot access dev tools UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "387f6409090cad1-72adf96bc45a377",
+      "title": "Dev Tools feature controls space with dev tools enabled exposes registered dev tool apps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "387f6409090cad1-8dafc3ea42e8597",
+      "title": "Dev Tools feature controls space with dev tools disabled hides and blocks registered dev tool apps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -15,6 +15,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+
+import { useKibana } from '../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { useMovingAttacksCallout } from './use_moving_attacks_callout';
 import * as i18n from './translations';
@@ -27,6 +30,9 @@ export const HIDE_BUTTON_TEST_DATA_ID = 'hide-callout-button' as string;
  */
 export const MovingAttacksCallout: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const { isMovingAttacksCalloutVisible, hideMovingAttacksCallout } = useMovingAttacksCallout();
 
@@ -38,6 +44,19 @@ export const MovingAttacksCallout: React.FC = React.memo(() => {
   const hideButtonSpacing = css`
     margin-left: ${euiTheme.size.s};
   `;
+
+  const onViewAttacksClick = useCallback(() => {
+    telemetry.reportEvent(AttacksEventTypes.FeaturePromotionCalloutAction, {
+      action: 'view_attacks',
+    });
+  }, [telemetry]);
+
+  const onHideClick = useCallback(() => {
+    hideMovingAttacksCallout();
+    telemetry.reportEvent(AttacksEventTypes.FeaturePromotionCalloutAction, {
+      action: 'hide',
+    });
+  }, [hideMovingAttacksCallout, telemetry]);
 
   return isMovingAttacksCalloutVisible ? (
     <>
@@ -55,7 +74,7 @@ export const MovingAttacksCallout: React.FC = React.memo(() => {
         <p css={calloutDescriptionWidth}>
           <FormattedMessage
             id="xpack.securitySolution.attackDiscovery.movingAttacksCallout.description"
-            defaultMessage="You can now schedule scans and view promoted attacks from Detections -> Attacks. Manual scans are still available only here, on the legacy page. Attack Discovery will move completely to the Detections section in a future release."
+            defaultMessage="You can now schedule scans, generate attacks manually, and view validated attacks from Detections -> Attacks. This Attack Discovery page will be removed in the next release."
           />
         </p>
 
@@ -64,6 +83,7 @@ export const MovingAttacksCallout: React.FC = React.memo(() => {
           size="s"
           deepLinkId={SecurityPageName.attacks}
           data-test-subj="viewAttacksButton"
+          onClick={onViewAttacksClick}
         >
           {i18n.VIEW_ATTACKS_BUTTON}
         </SecuritySolutionLinkButton>
@@ -72,7 +92,7 @@ export const MovingAttacksCallout: React.FC = React.memo(() => {
           data-test-subj={HIDE_BUTTON_TEST_DATA_ID}
           css={hideButtonSpacing}
           size="s"
-          onClick={hideMovingAttacksCallout}
+          onClick={onHideClick}
         >
           {i18n.HIDE_BUTTON}
         </EuiButton>

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<FollowerIndexForm /> state transitions updateFields() should merge new fields value with existing followerIndex 1`] = `
+Object {
+  "followerIndex": Object {
+    "leaderIndex": "bar",
+    "name": "new-name",
+    "remoteCluster": "remote",
+  },
+}
+`;
+
+exports[`<FollowerIndexForm /> state transitions updateFormErrors() should merge errors with existing fieldsErrors 1`] = `
+Object {
+  "fieldsErrors": Object {
+    "leaderIndex": null,
+    "name": "Some error",
+  },
+}
+`;

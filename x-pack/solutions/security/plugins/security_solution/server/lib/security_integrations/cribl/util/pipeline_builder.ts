@@ -38,7 +38,7 @@ const buildCriblRoutingProcessors = (mappings: RouteEntry[]): ProcessorContainer
       reroute: {
         dataset: `${datasetName}`,
         if: `ctx['_dataId'] == '${mapping.dataId}'`,
-        namespace: ['default'],
+        namespace: [mapping.namespace || 'default'],
       },
     });
   });

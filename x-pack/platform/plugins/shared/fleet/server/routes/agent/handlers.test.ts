@@ -7,9 +7,18 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { getAgentStatusForAgentPolicy } from '../../services/agents/status';
+import { appContextService } from '../../services';
+
+import {
+  getAgentStatusForAgentPolicy,
+  getIncomingDataByAgentsId,
+} from '../../services/agents/status';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { getPackageInfo } from '../../services/epm/packages';
+
+import { getAgentEffectiveConfigHandler, getAgentDataHandler } from './handlers';
 
 import {
   getAgentStatusForAgentPolicyHandler,
@@ -28,16 +37,26 @@ jest.mock('../../services/app_context', () => {
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
+      getInternalUserESClient: jest.fn(),
     },
   };
 });
 
+jest.mock('../../services/spaces/helpers', () => ({
+  isSpaceAwarenessEnabled: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('../../services/agents/status', () => ({
   getAgentStatusForAgentPolicy: jest.fn(),
+  getIncomingDataByAgentsId: jest.fn(),
 }));
 
 jest.mock('../../services/agents/agent_metrics', () => ({
   fetchAndAssignAgentMetrics: jest.fn(),
+}));
+
+jest.mock('../../services/epm/packages', () => ({
+  getPackageInfo: jest.fn(),
 }));
 
 describe('Handlers', () => {
@@ -349,6 +368,153 @@ describe('Handlers', () => {
       expect(response.ok.mock.calls[0][0]?.body).toEqual({
         items: ['8.1.0', '8.0.0', '7.17.0'],
       });
+    });
+  });
+
+  describe('getAgentEffectiveConfigHandler', () => {
+    let mockContext: any;
+    let mockResponse: any;
+    let mockEsClient: any;
+    let mockSoClient: any;
+    let mockGetInternalUserESClient: jest.Mock;
+
+    beforeEach(() => {
+      mockEsClient = {
+        get: jest.fn(),
+      };
+      mockSoClient = {
+        getCurrentNamespace: jest.fn().mockReturnValue('default'),
+      };
+      mockGetInternalUserESClient = jest.fn().mockReturnValue(mockEsClient);
+      mockResponse = httpServerMock.createResponseFactory();
+      mockContext = {
+        core: Promise.resolve({
+          savedObjects: { client: mockSoClient },
+        }),
+        fleet: Promise.resolve({}),
+      };
+      jest
+        .spyOn(appContextService, 'getInternalUserESClient')
+        .mockReturnValue(mockGetInternalUserESClient());
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('returns effective_config on success', async () => {
+      mockEsClient.get.mockResolvedValue({
+        _source: { effective_config: { foo: 'bar' }, namespaces: ['default'] },
+      });
+      const request = { params: { agentId: 'agent-1' }, query: {} };
+      await getAgentEffectiveConfigHandler(mockContext, request as any, mockResponse);
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { effective_config: { foo: 'bar' } } });
+    });
+
+    it('returns notFound if SavedObjectsErrorHelpers.isNotFoundError', async () => {
+      const error = new Error('not found');
+      jest.spyOn(SavedObjectsErrorHelpers, 'isNotFoundError').mockReturnValue(true);
+      mockEsClient.get.mockRejectedValue(error);
+      const request = { params: { agentId: 'agent-404' }, query: {} };
+      await getAgentEffectiveConfigHandler(mockContext, request as any, mockResponse);
+      expect(mockResponse.notFound).toHaveBeenCalledWith({
+        body: { message: 'Agent agent-404 not found' },
+      });
+    });
+
+    it('throw error if agent not matches namespace', async () => {
+      mockEsClient.get.mockResolvedValue({
+        _source: { effective_config: { foo: 'bar' }, namespaces: ['other-namespace'] },
+      });
+      const request = { params: { agentId: 'agent-1' }, query: {} };
+      await expect(
+        getAgentEffectiveConfigHandler(mockContext, request as any, mockResponse)
+      ).rejects.toThrow('agent-1 not found in namespace');
+    });
+  });
+
+  describe('getAgentDataHandler', () => {
+    let mockResponse: any;
+    let mockContext: any;
+
+    beforeEach(() => {
+      (getIncomingDataByAgentsId as jest.Mock).mockResolvedValue({ items: [], dataPreview: [] });
+      mockResponse = httpServerMock.createResponseFactory();
+      mockContext = {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: {} } },
+          savedObjects: { client: { getCurrentNamespace: jest.fn().mockReturnValue('default') } },
+        }),
+      };
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('passes dataStreamPattern: undefined when the package has empty data_streams (prevents empty string reaching hasPrivileges)', async () => {
+      (getPackageInfo as jest.Mock).mockResolvedValue({ data_streams: [] });
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'aws_cloudwatch_input_otel',
+            pkgVersion: '0.5.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+        expect.objectContaining({ dataStreamPattern: undefined })
+      );
+    });
+
+    it('passes dataStreamPattern: undefined when data_streams is absent from the package info', async () => {
+      (getPackageInfo as jest.Mock).mockResolvedValue({});
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'aws_cloudwatch_input_otel',
+            pkgVersion: '0.5.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+        expect.objectContaining({ dataStreamPattern: undefined })
+      );
+    });
+
+    it('passes a non-empty dataStreamPattern when the package has data_streams', async () => {
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        data_streams: [{ type: 'logs', dataset: 'aws.cloudwatch' }],
+      });
+
+      await getAgentDataHandler(
+        mockContext,
+        {
+          query: {
+            agentsIds: ['agent-1'],
+            pkgName: 'aws',
+            pkgVersion: '1.0.0',
+            previewData: false,
+          },
+        } as any,
+        mockResponse
+      );
+
+      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as jest.Mock).mock.calls;
+      expect(dataStreamPattern).toBeDefined();
+      expect(dataStreamPattern).not.toBe('');
     });
   });
 });

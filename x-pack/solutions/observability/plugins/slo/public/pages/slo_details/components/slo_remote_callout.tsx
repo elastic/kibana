@@ -50,7 +50,7 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         href={sloDetailsUrl}
         color="primary"
         target="_blank"
-        iconType="popout"
+        iconType="external"
         iconSide="right"
       >
         {i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {

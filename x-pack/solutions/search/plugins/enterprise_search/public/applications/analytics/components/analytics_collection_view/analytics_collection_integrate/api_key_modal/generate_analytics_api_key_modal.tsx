@@ -10,22 +10,23 @@ import React, { useRef, useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-  EuiText,
-  EuiCodeBlock,
   EuiCallOut,
+  EuiCodeBlock,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -108,7 +109,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                           data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-generateApiKeyButton"
                           data-test-subj="generateApiKeyButton"
                           iconSide="left"
-                          iconType="plusInCircle"
+                          iconType="plusCircle"
                           fill
                           onClick={() => {
                             makeRequest({
@@ -157,18 +158,26 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                           </EuiCodeBlock>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            buttonRef={copyApiKeyRef}
-                            data-test-subj="enterpriseSearchGenerateAnalyticsApiKeyModalButton"
-                            data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-csvDownloadButton"
-                            aria-label={i18n.translate(
+                          <EuiToolTip
+                            content={i18n.translate(
                               'xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.csvDownloadButton',
                               { defaultMessage: 'Download API key' }
                             )}
-                            iconType="download"
-                            href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
-                            download={`${keyName}.csv`}
-                          />
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              buttonRef={copyApiKeyRef}
+                              data-test-subj="enterpriseSearchGenerateAnalyticsApiKeyModalButton"
+                              data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-csvDownloadButton"
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.csvDownloadButton',
+                                { defaultMessage: 'Download API key' }
+                              )}
+                              iconType="download"
+                              href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
+                              download={`${keyName}.csv`}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

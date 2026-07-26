@@ -56,6 +56,11 @@ export interface DonutChartProps {
   onPartitionClick?: (level: string) => void;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
+  /**
+   * Custom formatter for partition values (e.g., tooltips).
+   * Defaults to `defaultPartitionValueFormatter`.
+   */
+  valueFormatter?: (value: number) => string;
 }
 
 export interface DonutChartWrapperProps {
@@ -164,6 +169,7 @@ export const DonutChart = ({
   onPartitionClick,
   title,
   totalCount,
+  valueFormatter,
 }: DonutChartProps) => {
   const { baseTheme, theme } = useThemes();
 
@@ -209,7 +215,9 @@ export const DonutChart = ({
               data={data}
               layout={PartitionLayout.sunburst}
               valueAccessor={(d: Datum) => d.value as number}
-              valueFormatter={(d: number) => `${defaultPartitionValueFormatter(d)}`}
+              valueFormatter={
+                valueFormatter ?? ((d: number) => `${defaultPartitionValueFormatter(d)}`)
+              }
               layers={[
                 {
                   groupByRollup: (d: Datum) => d.label ?? d.key,

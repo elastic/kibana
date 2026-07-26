@@ -40,15 +40,13 @@
       "savedObjectsTaggingOss",
       "serverless",
       "noDataPage",
-      "embeddableEnhanced",
       "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "charts",
-      "savedObjects",
-      "presentationPanel"
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common/constants",

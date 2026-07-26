@@ -57,7 +57,7 @@ export const FilterInBtn = ({
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '+', field, dataGridRef);
       }}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterForButton"
@@ -89,7 +89,7 @@ export const FilterOutBtn = ({
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '-', field, dataGridRef);
       }}
-      iconType="minusInCircle"
+      iconType="minusCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterOutButton"
@@ -121,7 +121,7 @@ export function buildCopyValueButton(
           toastNotifications,
         });
       }}
-      iconType="copyClipboard"
+      iconType="copy"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="copyClipboardButton"

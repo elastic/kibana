@@ -253,7 +253,7 @@ export const commitAction = ({
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
-    block: 'center',
+    block: 'nearest',
   });
 };
 

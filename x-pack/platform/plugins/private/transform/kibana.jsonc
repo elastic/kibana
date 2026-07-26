@@ -29,7 +29,7 @@
       "contentManagement",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["dataViewEditor", "security", "usageCollection", "spaces", "alerting"],
+    "optionalPlugins": ["dataViewEditor", "security", "usageCollection", "spaces", "alerting", "cps"],
     "requiredBundles": ["esUiShared", "discover", "kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]
   }

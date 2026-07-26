@@ -7,29 +7,33 @@
 
 import { apiService } from '../../../../utils/api_service';
 import type {
-  FailedStepsApiResponse,
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   Ping,
 } from '../../../../../common/runtime_types';
-import {
-  FailedStepsApiResponseType,
-  SyntheticsJourneyApiResponseType,
-  PingType,
-} from '../../../../../common/runtime_types';
+import { SyntheticsJourneyApiResponseType, PingType } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
+  timestamp?: string;
+  // When true, only `steps` are fetched and the server skips the journey
+  // details (prev/next sibling) lookup. Used by screenshot-only consumers.
+  stepsOnly?: boolean;
 }
 
-export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
+export async function fetchScreenshotBlockSet(
+  hashes: string[],
+  remoteName?: string
+): Promise<ScreenshotBlockDoc[]> {
   const response = await apiService.post<{ result: ScreenshotBlockDoc[] }>(
     SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
     {
-      hashes: params,
+      hashes,
+      ...(remoteName ? { remoteName } : {}),
     }
   );
   return response.result;
@@ -38,22 +42,15 @@ export async function fetchScreenshotBlockSet(params: string[]): Promise<Screens
 export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
+  const query = {
+    ...(params.remoteName ? { remoteName: params.remoteName } : {}),
+    ...(params.timestamp ? { timestamp: params.timestamp } : {}),
+    ...(params.stepsOnly ? { stepsOnly: true } : {}),
+  };
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    undefined,
+    Object.keys(query).length ? query : undefined,
     SyntheticsJourneyApiResponseType
-  );
-}
-
-export async function fetchJourneysFailedSteps({
-  checkGroups,
-}: {
-  checkGroups: string[];
-}): Promise<FailedStepsApiResponse> {
-  return apiService.get(
-    SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
-    { checkGroups },
-    FailedStepsApiResponseType
   );
 }
 
@@ -62,11 +59,13 @@ export async function fetchLastSuccessfulCheck({
   timestamp,
   stepIndex,
   location,
+  remoteName,
 }: {
   monitorId: string;
   timestamp: string;
   stepIndex: number;
   location?: string;
+  remoteName?: string;
 }): Promise<Ping> {
   return await apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
@@ -75,6 +74,7 @@ export async function fetchLastSuccessfulCheck({
       timestamp,
       stepIndex,
       location,
+      ...(remoteName ? { remoteName } : {}),
     },
     PingType
   );

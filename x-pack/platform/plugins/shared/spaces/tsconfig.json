@@ -1,7 +1,15 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "jest",
+      "@emotion/jest",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+      "@kbn/core-user-settings-types"
+    ]
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
@@ -20,6 +28,7 @@
     "@kbn/config-schema",
     "@kbn/utility-types",
     "@kbn/std",
+    "@kbn/ai-assistant-common",
     "@kbn/core-saved-objects-server",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
@@ -51,13 +60,26 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/ui-theme",
     "@kbn/core-chrome-browser",
-    "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
-    "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/css-utils",
     "@kbn/licensing-types",
     "@kbn/react-query",
     "@kbn/scout",
+    "@kbn/es-query",
+    "@kbn/cps",
+    "@kbn/cps-common",
+    "@kbn/cps-utils",
+    "@kbn/tour-queue",
+    "@kbn/context-switcher-components",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/cloud",
+    "@kbn/deeplinks-observability",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-security",
+    "@kbn/deeplinks-shared",
+    "@kbn/deeplinks-workplace-ai",
+    "@kbn/core-user-profile-server"
   ],
   "exclude": ["target/**/*"]
 }

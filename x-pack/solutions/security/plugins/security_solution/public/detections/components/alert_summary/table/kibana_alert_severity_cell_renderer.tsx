@@ -22,7 +22,7 @@ const capitalizeFirstLetter = (value: string): string =>
 
 export interface KibanaAlertSeverityCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
 }

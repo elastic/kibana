@@ -13,14 +13,20 @@ export const refreshIntervalSchema = schema.object(
   {
     pause: schema.boolean({
       meta: {
-        description: 'Set to false to auto-refresh data on an interval.',
+        description: 'When `true`, auto-refresh is paused.',
       },
     }),
     value: schema.number({
       meta: {
-        description: 'A numeric value indicating refresh frequency in milliseconds.',
+        description: 'The refresh interval in milliseconds.',
       },
     }),
   },
-  { meta: { id: 'kbn-data-service-server-refreshIntervalSchema' } }
+  {
+    meta: {
+      id: 'kbn-data-service-server-refreshIntervalSchema',
+      title: 'Refresh interval',
+      description: 'Specifies the auto-refresh interval for the object.',
+    },
+  }
 );

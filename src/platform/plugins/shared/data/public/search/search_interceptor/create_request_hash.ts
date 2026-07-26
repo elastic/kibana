@@ -8,7 +8,7 @@
  */
 
 import { Sha256 } from '@kbn/crypto-browser';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 /**
  * Generate the hash for this request.
@@ -21,7 +21,7 @@ import stringify from 'json-stable-stringify';
  */
 function createRequestHash(keys: Record<string, any>) {
   const { preference, ...rest } = keys;
-  const hash = new Sha256().update(stringify(rest), 'utf8').digest('hex');
+  const hash = new Sha256().update(stableStringify(rest), 'utf8').digest('hex');
   return hash;
 }
 

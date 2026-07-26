@@ -15,7 +15,7 @@ import type { SampleDataIngestPluginStart } from '@kbn/sample-data-ingest/public
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { App } from './components/stack_app';
 
 export interface SearchHomepageAppInfo {
@@ -67,6 +67,7 @@ export interface SearchHomepageServicesContextDeps {
 export type SearchHomepageServicesContext = CoreStart &
   SearchHomepageAppPluginStartDependencies & {
     history: AppMountParameters['history'];
+    kibanaVersion: string;
   };
 
 export interface AppUsageTracker {

@@ -6,12 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
+import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { isBinaryExpression, isIdentifier } from '../../../ast/is';
-import { PromqlParamName } from './utils';
-import { collectMetricsAndLabels, findPromqlExpression } from '../../../promql/traversal';
+import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
+import { getPromqlOutputMetadata, getPromqlUserDefinedColumn, PromqlParamName } from './utils';
 
 export const columnsAfter = async (
   command: ESQLCommand,
@@ -20,24 +19,28 @@ export const columnsAfter = async (
   { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
-  const pipeIndex = query.indexOf('|', promqlCommand.location.max);
+  const pipeIndex = findPipeOutsideQuotes(query, promqlCommand.location.min);
   const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
-  const userDefinedColumn = getUserDefinedColumn(promqlCommand);
-  const stepColumn = getStepColumn(promqlCommand);
 
   if (pipeIndex === -1) {
     return sourceColumns;
   }
 
-  const { metrics, breakdownLabels } = getPromqlOutputColumns(promqlCommand, {
-    excludeMetrics: !!userDefinedColumn,
-  });
+  const userDefinedColumn = getUserDefinedColumn(promqlCommand);
+  const stepColumn = getStepColumn(promqlCommand);
+
+  const { expressionColumn, metrics, breakdownLabels } = getPromqlOutputColumns(
+    promqlCommand,
+    query,
+    !!userDefinedColumn
+  );
 
   const sourceByName = new Map(sourceColumns.map((column) => [column.name, column]));
 
   return buildColumns({
     stepColumn,
     userDefinedColumn,
+    expressionColumn,
     sourceByName,
     metrics,
     breakdownLabels,
@@ -45,15 +48,9 @@ export const columnsAfter = async (
 };
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
-  const { query } = command;
-
-  if (!isBinaryExpression(query) || query.name !== '=') {
-    return undefined;
-  }
-
   // Grammar: valueName is always UNQUOTED_IDENTIFIER | QUOTED_IDENTIFIER
-  const target = query.args[0];
-  if (!isIdentifier(target)) {
+  const target = getPromqlUserDefinedColumn(command);
+  if (!target) {
     return undefined;
   }
 
@@ -66,11 +63,7 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 }
 
 function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
-  const hasStep = command.params?.entries?.some(
-    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Step
-  );
-
-  if (!hasStep) {
+  if (!command.query) {
     return undefined;
   }
 
@@ -83,36 +76,44 @@ function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefine
 
 function getPromqlOutputColumns(
   command: ESQLAstPromqlCommand,
-  { excludeMetrics }: { excludeMetrics: boolean }
+  query: string,
+  hasUserDefinedColumn: boolean
 ): {
+  expressionColumn: ESQLUserDefinedColumn | undefined;
   metrics: Set<string>;
   breakdownLabels: Set<string>;
 } {
-  const query = findPromqlExpression(command.query);
+  const { expression, metrics, breakdownLabels } = getPromqlOutputMetadata(command);
 
-  if (!query?.expression) {
-    return { metrics: new Set(), breakdownLabels: new Set() };
-  }
-
-  const { metrics, breakdownLabels } = collectMetricsAndLabels(query.expression);
-  const includeMetrics = query.expression.type === 'selector' && !excludeMetrics;
+  const expressionColumn =
+    expression && expression.type !== 'selector' && !hasUserDefinedColumn
+      ? {
+          name: query.substring(expression.location.min, expression.location.max + 1),
+          type: 'unknown' as const,
+          location: expression.location,
+          userDefined: true as const,
+        }
+      : undefined;
+  const includeMetrics = expression?.type === 'selector' && !hasUserDefinedColumn;
 
   if (!includeMetrics) {
-    return { metrics: new Set(), breakdownLabels };
+    return { expressionColumn, metrics: new Set(), breakdownLabels };
   }
 
-  return { metrics, breakdownLabels };
+  return { expressionColumn, metrics, breakdownLabels };
 }
 
 function buildColumns({
   stepColumn,
   userDefinedColumn,
+  expressionColumn,
   sourceByName,
   metrics,
   breakdownLabels,
 }: {
   stepColumn: ESQLColumnData | undefined;
   userDefinedColumn: ESQLUserDefinedColumn | undefined;
+  expressionColumn: ESQLColumnData | undefined;
   sourceByName: Map<string, ESQLColumnData>;
   metrics: Set<string>;
   breakdownLabels: Set<string>;
@@ -122,6 +123,7 @@ function buildColumns({
 
   columns = appendColumn(columns, columnNames, stepColumn);
   columns = appendColumn(columns, columnNames, userDefinedColumn);
+  columns = appendColumn(columns, columnNames, expressionColumn);
   columns = appendPromqlFields(columns, columnNames, sourceByName, metrics);
   columns = appendPromqlFields(columns, columnNames, sourceByName, breakdownLabels);
 

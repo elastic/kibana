@@ -41,6 +41,10 @@ export class CopyIntegrationPage {
     return this.getAgentPolicySelect().getByRole('progressbar');
   }
 
+  getAgentPolicyAgentsDescription() {
+    return this.page.testSubj.locator('agentPolicyAgentsDescription');
+  }
+
   async fillPackagePolicyName(name: string) {
     const input = this.getPackagePolicyNameInput();
     await input.clear();

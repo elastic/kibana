@@ -5,28 +5,18 @@
  * 2.0.
  */
 
-import { attacksVolumeAggregations } from './aggregations';
+import { getAttacksVolumeAggregations } from './aggregations';
+import { ATTACK_IDS_FIELD, MAX_ATTACKS_COUNT } from '../common/constants';
 
-describe('attacksVolumeAggregations', () => {
-  it('returns the correct aggregation structure with default size', () => {
-    const agg = attacksVolumeAggregations();
-    expect(agg).toEqual({
-      attacks_volume: {
-        terms: {
-          field: 'kibana.alert.attack_ids',
-          size: 10000,
-        },
-      },
-    });
-  });
+describe('getAttacksVolumeAggregations', () => {
+  it('returns correct aggregation structure', () => {
+    const aggs = getAttacksVolumeAggregations();
 
-  it('returns the correct aggregation structure with custom size', () => {
-    const agg = attacksVolumeAggregations(500);
-    expect(agg).toEqual({
-      attacks_volume: {
+    expect(aggs).toEqual({
+      attacks: {
         terms: {
-          field: 'kibana.alert.attack_ids',
-          size: 500,
+          field: ATTACK_IDS_FIELD,
+          size: MAX_ATTACKS_COUNT,
         },
       },
     });
