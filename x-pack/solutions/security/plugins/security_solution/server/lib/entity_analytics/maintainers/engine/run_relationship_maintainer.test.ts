@@ -71,6 +71,7 @@ const makeClients = (
 };
 
 const baseConfig: RelationshipIntegrationConfig = {
+  source: 'entity-index',
   kind: 'bucketed',
   id: 'elastic_defend',
   name: 'Elastic Defend',
@@ -86,6 +87,7 @@ const baseConfig: RelationshipIntegrationConfig = {
 };
 
 const oktaConfig: RelationshipIntegrationConfig = {
+  source: 'entity-index',
   kind: 'standard',
   id: 'okta',
   name: 'Okta',
@@ -1384,6 +1386,46 @@ describe('runRelationshipMaintainer', () => {
       });
 
       expect(result.totalBuckets).toBe(0);
+    });
+  });
+
+  describe('source dispatch', () => {
+    it('dispatches to runLogsIntegration for source: "logs" configs', async () => {
+      const { esClient, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const logger = loggerMock.create();
+
+      const logsConfig: RelationshipIntegrationConfig = {
+        source: 'logs',
+        kind: 'standard',
+        id: 'system_auth',
+        name: 'System Auth',
+        indexPattern: (ns) => `logs-system.auth-${ns}`,
+        relationshipKey: 'communicates_with',
+        targetEntityType: 'host',
+        esqlWhereClause: 'event.action == "ssh_login"',
+      };
+
+      // Probe returns empty → outcome: empty, no further calls
+      esql.mockResolvedValueOnce({
+        columns: [{ name: 'sliceBoundary', type: 'date' }, { name: 'actorCount', type: 'long' }],
+        values: [],
+      });
+
+      const result = await runRelationshipMaintainer({
+        esClient,
+        cpsEsClient: undefined,
+        logger,
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [logsConfig],
+        signal: undefined,
+        telemetryCollector: { sources: [], relationshipTypeApplied: {} },
+      });
+
+      expect(result.totalBuckets).toBe(0);
+      expect(result.totalRecords).toBe(0);
     });
   });
 

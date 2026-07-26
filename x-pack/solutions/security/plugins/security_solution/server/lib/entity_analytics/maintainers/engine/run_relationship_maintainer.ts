@@ -17,7 +17,6 @@ import type {
   RelationshipIntegrationConfig,
   CompositeAfterKey,
   CompositeBucket,
-  EntityRelationshipRecord,
 } from './types';
 import {
   buildActorDiscoveryQuery,
@@ -33,11 +32,52 @@ import {
 } from './write_relationship_metadatas';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
+import { runLogsIntegration } from './run_logs_integration';
 import type {
   RelationshipMaintainerSourceResult,
   RelationshipMaintainerTelemetryCollector,
 } from '../types';
 export type { RelationshipMaintainerSourceResult, RelationshipMaintainerTelemetryCollector };
+
+const ZERO_WRITE: WriteEntityIdsResult = {
+  updated: 0,
+  notFound: 0,
+  errors: 0,
+  droppedTargets: 0,
+  relationshipTypeApplied: {},
+  succeededEntityIds: new Set(),
+};
+
+const ZERO_METADATA: WriteRelationshipMetadatasResult = {
+  docsAttempted: 0,
+  docsApplied: 0,
+};
+
+function mergeWriteResult(a: WriteEntityIdsResult, b: WriteEntityIdsResult): WriteEntityIdsResult {
+  const relationshipTypeApplied = { ...a.relationshipTypeApplied };
+  for (const [key, count] of Object.entries(b.relationshipTypeApplied)) {
+    relationshipTypeApplied[key] = (relationshipTypeApplied[key] ?? 0) + count;
+  }
+  return {
+    updated: a.updated + b.updated,
+    notFound: a.notFound + b.notFound,
+    errors: a.errors + b.errors,
+    droppedTargets: a.droppedTargets + b.droppedTargets,
+    relationshipTypeApplied,
+    validTargetIds: undefined,
+    succeededEntityIds: new Set([...a.succeededEntityIds, ...b.succeededEntityIds]),
+  };
+}
+
+function mergeMetadataResult(
+  a: WriteRelationshipMetadatasResult,
+  b: WriteRelationshipMetadatasResult
+): WriteRelationshipMetadatasResult {
+  return {
+    docsAttempted: a.docsAttempted + b.docsAttempted,
+    docsApplied: a.docsApplied + b.docsApplied,
+  };
+}
 
 interface CompositeAggregations {
   users: {
@@ -187,7 +227,9 @@ async function runIntegration(
   let iterations = 0;
   let truncated = false;
   let totalBuckets = 0;
-  const records: EntityRelationshipRecord[] = [];
+  let totalRecordsCount = 0;
+  let write = ZERO_WRITE;
+  let metadata = ZERO_METADATA;
   const transportOpts = signal ? { signal } : undefined;
   let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
 
@@ -244,8 +286,52 @@ async function runIntegration(
 
       const { columns, values } = esqlResult;
       const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
-      records.push(...pageRecords);
+      totalRecordsCount += pageRecords.length;
       logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+
+      // Write per-page: stream writes inside the loop to bound memory.
+      // Both writes are inside the try so any transport failure sets outcome:
+      // 'error' and the outer loop continues to other integrations.
+      if (pageRecords.length > 0) {
+        const pageWrite = await writeEntityIds(
+          crudClient,
+          logger,
+          pageRecords,
+          esClient,
+          namespace,
+          config.validateTargetIds
+        );
+        write = mergeWriteResult(write, pageWrite);
+
+        // Only write metadata for actors that actually landed in the latest index.
+        // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
+        // the metadata write for that actor so the two stores stay in sync.
+        const { validTargetIds, succeededEntityIds } = pageWrite;
+        const actorFilteredRecords = pageRecords.filter(
+          (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
+        );
+
+        // When target validation also ran, further restrict to the validated target set.
+        const metadataRecords = validTargetIds
+          ? actorFilteredRecords.flatMap((r) => {
+              const filteredRels: Record<string, string[]> = {};
+              for (const [relType, targetEuids] of Object.entries(r.relationships)) {
+                const valid = targetEuids.filter((id) => validTargetIds.has(id));
+                if (valid.length > 0) filteredRels[relType] = valid;
+              }
+              return Object.keys(filteredRels).length > 0
+                ? [{ ...r, relationships: filteredRels }]
+                : [];
+            })
+          : actorFilteredRecords;
+        const pageMeta = await writeRelationshipMetadatas(entityMetadataClient, logger, metadataRecords, {
+          scanId: metadataContext.scanId,
+          lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+          entitySource: config.id,
+          observedAt: metadataContext.observedAt,
+        });
+        metadata = mergeMetadataResult(metadata, pageMeta);
+      }
 
       // Composite agg's documented termination contract is "stop when after_key
       // is absent." Trust newAfterKey directly rather than inferring termination
@@ -255,55 +341,12 @@ async function runIntegration(
       afterKey = newAfterKey;
     } while (afterKey);
 
-    // Stream per-integration: write latest entities first, then metadata.
-    // Both writes are inside the try so any transport failure sets outcome:
-    // 'error' and the outer loop continues to other integrations.
-    const write = await writeEntityIds(
-      crudClient,
-      logger,
-      records,
-      esClient,
-      namespace,
-      config.validateTargetIds
-    );
-    // Only write metadata for actors that actually landed in the latest index.
-    // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
-    // the metadata write for that actor so the two stores stay in sync.
-    const { validTargetIds, succeededEntityIds } = write;
-    const actorFilteredRecords = records.filter(
-      (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
-    );
-
-    // When target validation also ran, further restrict to the validated target set.
-    const metadataRecords = validTargetIds
-      ? actorFilteredRecords.flatMap((r) => {
-          const filteredRels: Record<string, string[]> = {};
-          for (const [relType, targetEuids] of Object.entries(r.relationships)) {
-            const valid = targetEuids.filter((id) => validTargetIds.has(id));
-            if (valid.length > 0) filteredRels[relType] = valid;
-          }
-          return Object.keys(filteredRels).length > 0
-            ? [{ ...r, relationships: filteredRels }]
-            : [];
-        })
-      : actorFilteredRecords;
-    const metadata = await writeRelationshipMetadatas(
-      entityMetadataClient,
-      logger,
-      metadataRecords,
-      {
-        scanId: metadataContext.scanId,
-        lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-        entitySource: config.id,
-        observedAt: metadataContext.observedAt,
-      }
-    );
     // When truncated, the final loop pass incremented `iterations` before
     // breaking without fetching a page — clamp to actual pages completed.
     const completedIterations = truncated ? MAX_ITERATIONS : iterations;
     return {
       buckets: totalBuckets,
-      recordsCount: records.length,
+      recordsCount: totalRecordsCount,
       write,
       metadata,
       outcome,
@@ -314,16 +357,9 @@ async function runIntegration(
     logger.error(`[${config.id}] Integration failed: ${errMsg(err)}`);
     return {
       buckets: totalBuckets,
-      recordsCount: records.length,
-      write: {
-        updated: 0,
-        notFound: 0,
-        errors: 0,
-        droppedTargets: 0,
-        relationshipTypeApplied: {},
-        succeededEntityIds: new Set(),
-      },
-      metadata: { docsAttempted: 0, docsApplied: 0 },
+      recordsCount: totalRecordsCount,
+      write: ZERO_WRITE,
+      metadata: ZERO_METADATA,
       outcome: 'error',
       iterations,
       truncated: false,
@@ -431,32 +467,46 @@ export const runRelationshipMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
-    const {
-      buckets,
-      recordsCount,
-      write,
-      metadata,
-      outcome,
-      iterations,
-      truncated: integrationTruncated,
-    } = await runIntegration(
-      config,
-      readClient,
-      logger,
-      namespace,
-      crudClient,
-      entityMetadataClient,
-      signal,
-      metadataContext
-    );
+    const integrationResult =
+      config.source === 'logs'
+        ? await runLogsIntegration(
+            config,
+            readClient,
+            logger,
+            namespace,
+            crudClient,
+            entityMetadataClient,
+            signal,
+            metadataContext
+          )
+        : await runIntegration(
+            config,
+            readClient,
+            logger,
+            namespace,
+            crudClient,
+            entityMetadataClient,
+            signal,
+            metadataContext
+          );
 
-    totalIterations += iterations;
+    const { recordsCount, write, metadata, outcome, truncated: integrationTruncated } =
+      integrationResult;
+
+    // Map source-specific iteration/bucket fields to unified accumulators.
+    // log-source runner returns `slices` (not `iterations`/`buckets`).
+    const integrationIterations =
+      'slices' in integrationResult ? integrationResult.slices : integrationResult.iterations;
+    const integrationBuckets =
+      'buckets' in integrationResult ? integrationResult.buckets : recordsCount;
+
+    totalIterations += integrationIterations;
     if (integrationTruncated) truncated = true;
 
     if (outcome === 'error') {
       logger.warn(`[${config.id}] Integration failed; skipping totals accumulation for this run`);
     } else {
-      totalBuckets += buckets;
+      totalBuckets += integrationBuckets;
       totalRecords += recordsCount;
       totalWritten += write.updated;
       totalNotFound += write.notFound;
@@ -468,7 +518,7 @@ export const runRelationshipMaintainer = async ({
     if (telemetryCollector) {
       telemetryCollector.sources.push({
         id: config.id,
-        scanned: buckets,
+        scanned: integrationBuckets,
         qualified: recordsCount,
         outcome,
       });
