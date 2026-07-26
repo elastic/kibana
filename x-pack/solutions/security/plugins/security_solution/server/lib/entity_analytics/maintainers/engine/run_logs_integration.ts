@@ -10,7 +10,12 @@ import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
 
 import type { RelationshipIntegrationConfig } from './types';
-import { COMPOSITE_PAGE_SIZE, LOOKBACK_WINDOW } from './constants';
+import {
+  COMPOSITE_PAGE_SIZE,
+  EXTRACT_QUERY_TIMEOUT_MS,
+  LOOKBACK_WINDOW,
+  LOOKBACK_WINDOW_MS,
+} from './constants';
 import {
   buildActorSliceProbeQuery,
   parseActorSliceProbeResult,
@@ -98,10 +103,9 @@ export const runLogsIntegration = async (
   let totalWrite = ZERO_WRITE;
   let totalMetadata = ZERO_METADATA;
 
-  // LOOKBACK_WINDOW is an ES date math expression ('now-30d'), not a parseable ISO timestamp.
-  // Compute the actual 30-day-ago ISO string once so subsequent +1ms slice advances work correctly.
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  let sliceStart = new Date(Date.now() - thirtyDaysMs).toISOString();
+  // LOOKBACK_WINDOW is ES date math ('now-30d') and cannot be parsed as ISO.
+  // Use LOOKBACK_WINDOW_MS for JS Date arithmetic so +1ms slice advances work correctly.
+  let sliceStart = new Date(Date.now() - LOOKBACK_WINDOW_MS).toISOString();
 
   try {
     while (true) {
@@ -175,7 +179,7 @@ export const runLogsIntegration = async (
       });
       const extractResponse = (await esClient.esql.query(
         { query: extractQuery },
-        transportOpts
+        { ...transportOpts, requestTimeout: EXTRACT_QUERY_TIMEOUT_MS }
       )) as {
         columns: Array<{ name: string; type: string }>;
         values: unknown[][];
@@ -245,12 +249,16 @@ export const runLogsIntegration = async (
       sliceStart = new Date(new Date(toDate).getTime() + 1).toISOString();
     }
 
+    const outcome = recordsCount === 0 ? 'empty' : 'producing';
+    logger.info(
+      `[${config.id}] Integration complete: outcome=${outcome} slices=${slices} records=${recordsCount} written=${totalWrite.updated} notFound=${totalWrite.notFound} errors=${totalWrite.errors}`
+    );
     return {
       slices,
       recordsCount,
       write: totalWrite,
       metadata: totalMetadata,
-      outcome: recordsCount === 0 ? 'empty' : 'producing',
+      outcome,
       truncated: false,
     };
   } catch (err) {

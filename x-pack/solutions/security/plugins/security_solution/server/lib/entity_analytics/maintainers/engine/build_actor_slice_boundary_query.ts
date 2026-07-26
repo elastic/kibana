@@ -42,20 +42,27 @@ export const buildActorSliceBoundaryQuery = (
 
   // Actor-presence gate: mirrors the same logic as `build_actor_slice_probe_query.ts`
   // so the boundary extension query and probe narrow on the same actor population.
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
   const actorPresenceFilter = config.customActor
     ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
     : euid.esql.getEuidDocumentsContainsIdFilter('user');
 
-  // Field evals are only needed when the standard user EUID expression requires them.
-  // Skip when customActor.evalOverride provides a self-contained expression.
-  const fieldEvals = !config.customActor?.evalOverride
-    ? getFieldEvaluationsEsql('user')
-    : undefined;
+  // When probeActorKey is set, use the cheap expression instead of the full EUID
+  // chain — same rationale as `build_actor_slice_probe_query.ts`. The boundary
+  // query only needs to count/group actors to find MAX(@timestamp); it does not
+  // produce EUIDs that are written anywhere.
+  const probeActorKey = config.customActor?.probeActorKey;
+  const useProbeKey = probeActorKey != null;
+
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
+  const fieldEvals =
+    !useProbeKey && !config.customActor?.evalOverride ? getFieldEvaluationsEsql('user') : undefined;
   const fieldEvalsLine = fieldEvals ? `| EVAL ${fieldEvals}` : undefined;
 
-  // Actor EUID expression: use the custom override when provided, otherwise the
-  // standard EUID evaluation for 'user' (same as `build_actor_slice_probe_query.ts`).
-  const actorEuidEval = config.customActor?.evalOverride
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
+  const actorEuidEval = useProbeKey
+    ? `actorUserId = ${probeActorKey}`
+    : config.customActor?.evalOverride
     ? `actorUserId = ${config.customActor.evalOverride}`
     : euid.esql.getEuidEvaluation('user', 'actorUserId', { withTypeId: true });
 

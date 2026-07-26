@@ -76,7 +76,10 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     // the composite agg sources causes bucket explosion (the same username
     // appears with dozens of distinct Unix UIDs / Windows SIDs across hosts),
     // multiplying Step 1 pages and Step 2 ES|QL queries for zero benefit.
-    customActor: { fields: ['user.email', 'user.name'] },
+    customActor: {
+      fields: ['user.email', 'user.name'],
+      probeActorKey: 'COALESCE(TO_STRING(`user.email`), TO_STRING(`user.name`))',
+    },
     // `event.category` is multivalued in ECS (Elastic Agent's syslog SSH events
     // emit `["authentication", "session"]`). ES|QL `IN` returns NULL for a
     // multivalued left-hand side, so `event.category IN (...)` silently drops
@@ -99,6 +102,14 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     targetEntityType: 'host',
     bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
+    // Windows logon events use local-namespace EUID: `user.name@host.id@local`.
+    // `user.id` contains Windows SIDs which are unique per user per machine —
+    // including it causes bucket explosion (thousands of distinct SIDs for the
+    // same logical user, multiplying pages and ES|QL queries for zero benefit).
+    customActor: {
+      fields: ['user.email', 'user.name'],
+      probeActorKey: 'COALESCE(TO_STRING(`user.email`), TO_STRING(`user.name`))',
+    },
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")

@@ -48,22 +48,10 @@ export const buildActorSliceProbeQuery = (
 
   // Actor-presence gate: mirrors the same logic as `build_targets_per_actor_query.ts`
   // so the probe and main query narrow on the same actor population.
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
   const actorPresenceFilter = config.customActor
     ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
     : euid.esql.getEuidDocumentsContainsIdFilter('user');
-
-  // Field evals (e.g. entity.namespace) are only needed when the standard user EUID expression
-  // requires them. Skip when customActor.evalOverride provides a self-contained expression.
-  const fieldEvals = !config.customActor?.evalOverride
-    ? getFieldEvaluationsEsql('user')
-    : undefined;
-  const fieldEvalsLine = fieldEvals ? `| EVAL ${fieldEvals}` : undefined;
-
-  // Actor EUID expression: use the custom override when provided, otherwise the standard
-  // EUID evaluation for 'user' (same as `build_targets_per_actor_query.ts`).
-  const actorEuidEval = config.customActor?.evalOverride
-    ? `actorUserId = ${config.customActor.evalOverride}`
-    : euid.esql.getEuidEvaluation('user', 'actorUserId', { withTypeId: true });
 
   // Integration-specific filter (event.action, event.outcome, etc.) — present on
   // standard/bucketed configs; override configs don't carry esqlWhereClause.
@@ -71,6 +59,26 @@ export const buildActorSliceProbeQuery = (
     'esqlWhereClause' in config && config.esqlWhereClause
       ? `    AND ${config.esqlWhereClause}`
       : undefined;
+
+  // When probeActorKey is set, skip the full EUID eval chain (entity.namespace
+  // resolution + multi-field COALESCE) and use the cheaper expression instead.
+  // The probe only counts distinct actors to find a time boundary — it does not
+  // need a fully-qualified EUID. This can reduce probe time significantly on
+  // large indices (e.g. 30s → 4s on 748M docs with SAMPLE 0.1).
+  const probeActorKey = config.customActor?.probeActorKey;
+  const useProbeKey = probeActorKey != null;
+
+  // Full EUID eval path (used when no probeActorKey is set).
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
+  const fieldEvals =
+    !useProbeKey && !config.customActor?.evalOverride ? getFieldEvaluationsEsql('user') : undefined;
+  const fieldEvalsLine = fieldEvals ? `| EVAL ${fieldEvals}` : undefined;
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
+  const actorEuidEval = useProbeKey
+    ? `actorUserId = ${probeActorKey}`
+    : config.customActor?.evalOverride
+    ? `actorUserId = ${config.customActor.evalOverride}`
+    : euid.esql.getEuidEvaluation('user', 'actorUserId', { withTypeId: true });
 
   const lines = [
     ESQL_ENGINE_PREAMBLE,

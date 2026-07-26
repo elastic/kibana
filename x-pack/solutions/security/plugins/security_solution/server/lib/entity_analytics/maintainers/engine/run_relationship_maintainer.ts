@@ -345,6 +345,13 @@ async function runIntegration(
     // When truncated, the final loop pass incremented `iterations` before
     // breaking without fetching a page — clamp to actual pages completed.
     const completedIterations = truncated ? MAX_ITERATIONS : iterations;
+    logger.info(
+      `[${
+        config.id
+      }] Integration complete: outcome=${outcome} iterations=${completedIterations} buckets=${totalBuckets} records=${totalRecordsCount} written=${
+        write.updated
+      } notFound=${write.notFound} errors=${write.errors}${truncated ? ' (truncated)' : ''}`
+    );
     return {
       buckets: totalBuckets,
       recordsCount: totalRecordsCount,

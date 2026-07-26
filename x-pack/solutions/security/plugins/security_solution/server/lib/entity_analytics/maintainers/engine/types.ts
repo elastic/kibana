@@ -87,6 +87,20 @@ export interface CustomActorBinding {
    * segments, bare identifiers otherwise).
    */
   evalOverride?: string;
+  /**
+   * Cheap ES|QL expression used exclusively by the probe and boundary queries
+   * to count distinct actors. When set, replaces the full EUID eval chain
+   * (entity.namespace resolution + CONCAT) with a simpler expression, making
+   * the probe significantly faster on large indices.
+   *
+   * The expression must produce a non-null string that uniquely identifies an
+   * actor within the integration's data. It does NOT need to match the full
+   * EUID — it is only used for counting, never written to the entity store.
+   *
+   * Example for system_auth (user.email/user.name actors, no namespace needed):
+   *   `COALESCE(TO_STRING(\`user.email\`), TO_STRING(\`user.name\`))`
+   */
+  probeActorKey?: string;
 }
 
 /**
