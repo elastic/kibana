@@ -511,44 +511,58 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     id: 'workflow-execution-a',
     category: 'workflow-execution',
     variant: 'A',
-    description: 'Ad-hoc single-step verification of an existing workflow step',
+    description: 'VirusTotal hash verification via a connector-step workflow',
     input: {
       question:
-        'I have a workflow with a step that queries our alerts index for the Chrysalis loader hash ' +
-        '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f. Before I run the whole workflow, ' +
-        'can you execute just that query step and show me what it returns?',
+        'The Chrysalis loader hash is 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f. ' +
+        'Author and run a workflow that checks this hash against VirusTotal using the configured VirusTotal ' +
+        'connector, and tell me the verdict.',
     },
     output: {
       reference:
-        'Executes the single named workflow step in isolation against the real environment and reports the ' +
-        'returned rows, rather than running (or offering to run) the entire workflow.',
+        'Authors a workflow with a `virustotal.scanFileHash` connector step (connector-id referencing the ' +
+        'configured VirusTotal connector) rather than raw HTTP, then executes it end-to-end and reports the ' +
+        "verdict (malicious/clean detection counts) from the connector's response -- following the same " +
+        'connector-step-as-tool pattern documented for security automation (enrichment step queries a threat ' +
+        'intel connector, agent reasons over the result).',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: ['platform.workflows.workflow_execute_step'],
+      expectedTools: [
+        'platform.core.generate_workflow',
+        'platform.workflows.validate_workflow',
+        'platform.core.execute_workflow',
+      ],
       severity: 'high',
-      tags: ['workflow', 'step-execution'],
+      tags: ['workflow', 'vt-check', 'connector-step'],
     },
   },
   {
     id: 'workflow-execution-b',
     category: 'workflow-execution',
     variant: 'B',
-    description: 'Run an existing workflow end-to-end',
+    description: 'On-call schedule lookup via a connector-step workflow',
     input: {
       question:
-        "Run the Chrysalis incident-notification workflow now — it's already attached to this conversation.",
+        'Who is currently on call to own a Chrysalis incident response? Author and run a workflow that queries ' +
+        'the on-call schedule via the configured PagerDuty connector, and tell me the primary responder.',
     },
     output: {
       reference:
-        'Calls the execute-workflow tool to run the full attached workflow end-to-end and reports the ' +
-        'outcome, rather than executing individual steps or re-authoring the workflow.',
+        'Authors a workflow with a `pagerduty.listOncalls` connector step (connector-id referencing the ' +
+        'configured PagerDuty connector) rather than raw HTTP, then executes it end-to-end and reports the ' +
+        "current on-call assignee from the connector's response -- matching the documented " +
+        '"Queries the PagerDuty integration to find the on-call engineer" workflow-as-tool pattern.',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: ['platform.core.execute_workflow'],
+      expectedTools: [
+        'platform.core.generate_workflow',
+        'platform.workflows.validate_workflow',
+        'platform.core.execute_workflow',
+      ],
       severity: 'medium',
-      tags: ['workflow', 'full-run'],
+      tags: ['workflow', 'on-call', 'connector-step'],
     },
   },
   {
