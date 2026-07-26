@@ -55,6 +55,13 @@ export class DualWriteStore implements PndStore {
 
   // -- Write methods: primary first, then shadow (best-effort) --
 
+  async createInvestigationIfMissing(
+    ...args: Parameters<PndStore['createInvestigationIfMissing']>
+  ): Promise<void> {
+    await this.primary.createInvestigationIfMissing(...args);
+    this.fanOutWrite('createInvestigationIfMissing', args);
+  }
+
   async updateProposalStatus(...args: Parameters<PndStore['updateProposalStatus']>) {
     const result = await this.primary.updateProposalStatus(...args);
     this.fanOutWrite('updateProposalStatus', args);
@@ -102,19 +109,20 @@ export class DualWriteStore implements PndStore {
    * succeeded so the caller should not be blocked by the shadow. Shadow failures
    * are logged as warnings.
    */
-  private fanOutWrite<MethodName extends keyof PndStore>(methodName: MethodName): void {
+  private fanOutWrite<MethodName extends keyof PndStore>(
+    methodName: MethodName,
+    args: Parameters<PndStore[MethodName]>
+  ): void {
     void Promise.resolve().then(async () => {
       try {
-        // The shadow store is a PndStore, but its write methods throw during
-        // the stub phase. We catch and log so the dual-write seam does not
-        // crash the process.
         const method = this.shadow[methodName] as (...a: unknown[]) => Promise<unknown>;
-        // Re-derive args from the typed call site is not possible without
-        // generic constraints; this stub intentionally swallows the error.
-        // Once the shadow is real, callers pass the same esClient + payload.
-        await method(...(_args as unknown[]));
+        await method(...(args as unknown[]));
       } catch (error) {
-        this.logger.warn(`DualWriteStore: shadow ${String(methodName)} failed: ${error?.message}`);
+        this.logger.warn(
+          `DualWriteStore: shadow ${String(methodName)} failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
     });
   }

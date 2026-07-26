@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type {
   GetInvestigationResponse,
   ListInvestigationProposalsResponse,
@@ -16,6 +16,8 @@ import type { EvidencePackage, WorkerEvaluationRecord } from '../../common/schem
 import type { DetectionChangeSignal } from '../../common/schemas/detection_change';
 import type { Proposal as CanonicalProposal } from '../../common/schemas';
 import type { DismissalReason, ProposalStatusUpdate } from './investigation_store';
+
+type Investigation = ListInvestigationsResponse['investigations'][number];
 
 /**
  * Interface extracted from {@link InvestigationStore} so the PND plugin can
@@ -32,6 +34,17 @@ export interface PndStore {
     esClient: ElasticsearchClient,
     id: string
   ): Promise<GetInvestigationResponse['investigation'] | null>;
+  /**
+   * Create a new Investigation if `id` doesn't already exist (idempotent —
+   * a re-run with the same id is a no-op). This is the "open an
+   * Investigation Conversation" step Watch orchestrators need on first
+   * touch of a fresh alert, before any proposal/evidence can be attached to
+   * it (proposals reference investigationId but nothing else mints one).
+   */
+  createInvestigationIfMissing(
+    esClient: ElasticsearchClient,
+    investigation: Investigation
+  ): Promise<void>;
   listProposals(
     esClient: ElasticsearchClient,
     investigationId: string
@@ -39,9 +52,14 @@ export interface PndStore {
   updateProposalStatus(
     esClient: ElasticsearchClient,
     proposalId: string,
-    update: ProposalStatusUpdate
+    update: ProposalStatusUpdate,
+    request?: KibanaRequest
   ): Promise<ProposalStatusUpdate | null>;
-  saveProposal(esClient: ElasticsearchClient, proposal: CanonicalProposal): Promise<void>;
+  saveProposal(
+    esClient: ElasticsearchClient,
+    proposal: CanonicalProposal,
+    request?: KibanaRequest
+  ): Promise<void>;
   saveEvidencePackage(esClient: ElasticsearchClient, evidence: EvidencePackage): Promise<void>;
   saveWorkerEvaluationRecord(
     esClient: ElasticsearchClient,

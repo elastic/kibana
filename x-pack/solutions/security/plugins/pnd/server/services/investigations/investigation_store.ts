@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type {
   GetInvestigationResponse,
@@ -29,6 +29,8 @@ import type {
   WorkerEvaluationRecord,
 } from '../../common/schemas';
 import type { DetectionChangeSignal } from '../../common/schemas/detection_change';
+import type { PndStore } from './pnd_store';
+import { canonicalProposalToUiProposalDoc } from './template_mapping';
 
 type Investigation = ListInvestigationsResponse['investigations'][number];
 type Proposal = ListInvestigationProposalsResponse['proposals'][number];
@@ -80,7 +82,7 @@ interface ProposalDoc extends Proposal {
  * both indices and seeds them from the bundled demo data if they are empty, so
  * the app reads real, persisted documents rather than in-memory constants.
  */
-export class InvestigationStore {
+export class InvestigationStore implements PndStore {
   private seedPromise?: Promise<void>;
 
   constructor(private readonly logger: Logger) {}
@@ -246,6 +248,36 @@ export class InvestigationStore {
     }
   }
 
+  /**
+   * Create a new Investigation document if `id` doesn't already exist.
+   * Idempotent by design: a Watch orchestrator may run this on every alert
+   * touch, so a create-if-missing (rather than blind index/overwrite) means
+   * a re-triggered run against the same alert doesn't clobber analyst edits
+   * (assignee, status, priorityScore) made since the Investigation opened.
+   */
+  public async createInvestigationIfMissing(
+    esClient: ElasticsearchClient,
+    investigation: Investigation
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    try {
+      await esClient.create({
+        index: PND_INVESTIGATIONS_INDEX,
+        id: investigation.id,
+        document: investigation,
+        refresh: true,
+      });
+    } catch (error) {
+      // 409 = version conflict = document already exists. That's the
+      // expected/common path once an Investigation has been opened once;
+      // treat it as success rather than surfacing to the caller.
+      if (error?.meta?.statusCode === 409) {
+        return;
+      }
+      throw error;
+    }
+  }
+
   public async listProposals(
     esClient: ElasticsearchClient,
     investigationId: string
@@ -274,7 +306,8 @@ export class InvestigationStore {
   public async updateProposalStatus(
     esClient: ElasticsearchClient,
     proposalId: string,
-    update: ProposalStatusUpdate
+    update: ProposalStatusUpdate,
+    _request?: KibanaRequest
   ): Promise<ProposalStatusUpdate | null> {
     await this.ensureReady(esClient);
     const doc: Record<string, unknown> = { status: update.status };
@@ -317,7 +350,8 @@ export class InvestigationStore {
    */
   public async saveProposal(
     esClient: ElasticsearchClient,
-    proposal: CanonicalProposal
+    proposal: CanonicalProposal,
+    _request?: KibanaRequest
   ): Promise<void> {
     await this.ensureReady(esClient);
     await esClient.index({
@@ -326,6 +360,33 @@ export class InvestigationStore {
       document: proposal,
       refresh: true,
     });
+
+    // Also project into the UI-facing index the Investigations UI's Proposals
+    // tab actually reads (listProposals queries PND_PROPOSALS_INDEX, not
+    // PND_CANONICAL_PROPOSALS_INDEX — two different schemas for two
+    // different consumers, see canonicalProposalToUiProposalDoc's doc
+    // comment). Best-effort: a failure here must not fail the canonical
+    // write, which is the source of truth for eval/scoring.
+    try {
+      await esClient.index({
+        index: PND_PROPOSALS_INDEX,
+        id: proposal.id,
+        // Denormalised investigationId copy so listProposals' term-query
+        // works without a join, mirroring the seedIfEmpty bulk convention;
+        // stripped in listProposals before the doc reaches the API.
+        document: {
+          ...canonicalProposalToUiProposalDoc(proposal),
+          investigationId: proposal.investigationId,
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `PND: saveProposal UI-projection write failed for ${proposal.id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   /** Persist a canonical EvidencePackage produced by a Watch Worker run. */

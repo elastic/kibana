@@ -8,7 +8,9 @@
 import { TEMPLATE_VERSION_CURRENT } from '@kbn/pnd-common';
 import type { ConversationTemplateReference } from '@kbn/agent-builder-common';
 import type { Investigation, Proposal, Incident } from '@kbn/pnd-common';
+import type { Proposal as UiProposal } from '@kbn/pnd-common';
 import type { ConversationWriterCreateRequest } from '@kbn/agent-builder-server';
+import type { Proposal as CanonicalProposal } from '../../common/schemas';
 
 /**
  * Maps a PND `template_id` literal to the platform
@@ -52,6 +54,7 @@ export function investigationToConversationCreate(
       ...(inv.affectedSurface ? { affected_surface: inv.affectedSurface } : {}),
       pending_proposal_count: String(inv.pendingProposalCount),
     },
+    rounds: [],
     origin: { external_conversation_id: inv.id },
   };
 }
@@ -67,7 +70,7 @@ export function investigationToConversationCreate(
 export function proposalToConversationCreate(proposal: Proposal): ConversationWriterCreateRequest {
   return {
     agent_id: 'pnd-watch-orchestrator',
-    title: proposal.summary ?? `Proposal: ${proposal.type}`,
+    title: proposal.summary || `Proposal: ${proposal.type}`,
     template: pndTemplateIdToConversationTemplate('proposal'),
     extended_fields: {
       parent_conversation_id: proposal.parentConversationId,
@@ -78,9 +81,9 @@ export function proposalToConversationCreate(proposal: Proposal): ConversationWr
       approval_required: String(proposal.approvalRequired),
       ...(proposal.assignee ? { assignee: proposal.assignee } : {}),
       ...(proposal.sla ? { sla: proposal.sla } : {}),
-      ...(proposal.verdict ? { verdict: proposal.verdict } : {}),
       ...(proposal.dismissalReason ? { dismissal_reason: proposal.dismissalReason } : {}),
     },
+    rounds: [],
     origin: { external_conversation_id: proposal.id },
   };
 }
@@ -104,6 +107,70 @@ export function incidentToConversationCreate(incident: Incident): ConversationWr
       ...(incident.severity ? { severity: incident.severity } : {}),
       ...(incident.assignee ? { assignee: incident.assignee } : {}),
     },
+    rounds: [],
     origin: { external_conversation_id: incident.id },
+  };
+}
+
+/**
+ * Maps a PND canonical Proposal's status (`new | escalated | dismissed |
+ * needs-evidence | modified | approved` — the Daybreak eval-contract enum
+ * used by `saveProposal`) to the UI-facing Proposal status enum (`pending |
+ * approved | modified | dismissed | escalated | deferred | executed` — the
+ * analyst-workflow enum `updateProposalStatus` reads/writes). The two enums
+ * only partly overlap; unmapped canonical statuses fall back to `pending`
+ * since that's the safe "needs analyst attention" default.
+ */
+export function canonicalProposalStatusToUiStatus(
+  status: CanonicalProposal['status']
+): 'pending' | 'approved' | 'modified' | 'dismissed' | 'escalated' | 'deferred' | 'executed' {
+  switch (status) {
+    case 'escalated':
+    case 'dismissed':
+    case 'modified':
+    case 'approved':
+      return status;
+    case 'new':
+    case 'needs-evidence':
+    default:
+      return 'pending';
+  }
+}
+
+/**
+ * Projects a PND canonical Proposal (the Daybreak eval-contract shape
+ * `saveProposal` persists to `pnd-canonical-proposals`) into the UI-facing
+ * `ProposalDoc` shape the Investigations UI's Proposals tab reads via
+ * `listProposals` from `pnd-proposals`.
+ *
+ * These are two different schemas for two different consumers (the eval/
+ * scoring contract vs. the analyst CRUD workflow — see proposal.ts's header
+ * comment and investigation.gen.ts's Proposal type) that were never
+ * reconciled: every live Watch worker run wrote a canonical proposal that
+ * was correctly persisted but invisible in the UI, because the UI only ever
+ * read the separate `pnd-proposals` index (previously populated only by the
+ * static 50-doc seed in real_data.ts). This projection is what makes a live
+ * proposal show up in the Proposals tab without changing either schema.
+ */
+export function canonicalProposalToUiProposalDoc(
+  proposal: CanonicalProposal
+): Omit<UiProposal, 'template_version'> {
+  return {
+    id: proposal.id,
+    template_id: 'proposal',
+    parentConversationId: proposal.investigationId,
+    type: proposal.sourceWatch,
+    confidence: proposal.confidence,
+    reasoning: proposal.reasoning,
+    evidenceRefs: proposal.evidenceRefs.map((id) => ({ id, type: 'evidence' })),
+    status: canonicalProposalStatusToUiStatus(proposal.status),
+    assignee: null,
+    sla: null,
+    events: [],
+    sourceWatchId: proposal.sourceWatch,
+    approvalRequired: proposal.approvalRequired,
+    summary: proposal.recommendation,
+    recommendation: proposal.recommendation,
+    ...(proposal.ruleTuningTrigger ? { ruleTuningTrigger: proposal.ruleTuningTrigger } : {}),
   };
 }
