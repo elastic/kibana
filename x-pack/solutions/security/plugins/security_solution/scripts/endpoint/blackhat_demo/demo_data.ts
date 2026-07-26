@@ -76,6 +76,29 @@ const NETWORK_INDEX = 'logs-endpoint.events.network-default';
 const REGISTRY_INDEX = 'logs-endpoint.events.registry-default';
 const ALERTS_INDEX = 'logs-endpoint.alerts-default';
 
+/**
+ * `logs-endpoint.events.file-default` is written by `forensic_seed_data.ts`, not
+ * by this module — but cleanup here is the ONLY cleanup path (`--cleanup` calls
+ * `cleanupBlackhatDemoData` alone), so omitting it left every prior generation's
+ * file events behind on each reseed.
+ */
+const FILE_INDEX = 'logs-endpoint.events.file-default';
+
+/**
+ * The seeded `logs-endpoint.alerts-default` doc is promoted into
+ * `.alerts-security.alerts-<space>` by the always-on "Endpoint Security
+ * (Elastic Defend)" detection rule (1m interval) — and that promoted copy is
+ * what the Alerts UI and the alert-triage/forensic skills actually read.
+ * Deleting only the source doc therefore leaves the promoted duplicate behind,
+ * so each reseed adds another identical ransomware alert to the UI.
+ * Both the `.internal.`-prefixed backing index and the standalone alias form
+ * are targeted: Kibana can create either depending on stack lineage.
+ */
+const PROMOTED_ALERT_INDICES = [
+  '.internal.alerts-security.alerts-default-*',
+  '.alerts-security.alerts-default',
+];
+
 interface DemoEvent {
   offsetMinutes: number;
   host: keyof typeof AGENT_IDS;
@@ -234,7 +257,7 @@ export async function seedBlackhatDemoData(
 }
 
 export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }): Promise<void> {
-  const indices = [PROCESS_INDEX, NETWORK_INDEX, REGISTRY_INDEX, ALERTS_INDEX];
+  const indices = [PROCESS_INDEX, NETWORK_INDEX, REGISTRY_INDEX, FILE_INDEX, ALERTS_INDEX];
 
   // Match on `host.hostname` / `host.name` (stable across reseeds), not just
   // the legacy `blackhat-demo-*` placeholder agent-id prefix. Once agent-id
@@ -260,6 +283,23 @@ export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }
     indices.map((index) =>
       esClient
         .deleteByQuery({ index, query: deleteQuery, refresh: true, ignore_unavailable: true })
+        .catch(() => {})
+    )
+  );
+
+  // Promoted detection-engine alert copies live in a system index that requires
+  // `allow_no_indices` tolerance and must be cleaned separately — see the
+  // PROMOTED_ALERT_INDICES comment for why deleting the source doc is not enough.
+  await Promise.all(
+    PROMOTED_ALERT_INDICES.map((index) =>
+      esClient
+        .deleteByQuery({
+          index,
+          query: deleteQuery,
+          refresh: true,
+          ignore_unavailable: true,
+          conflicts: 'proceed',
+        })
         .catch(() => {})
     )
   );
