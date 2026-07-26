@@ -85,7 +85,9 @@ describe('buildDisplayOptions', () => {
       'curl',
     ]);
     expect(
-      buildItems.every((o) => (o.data?.menuItem as { connectorType: string }).connectorType === '.slack')
+      buildItems.every(
+        (o) => (o.data?.menuItem as { connectorType: string }).connectorType === '.slack'
+      )
     ).toBe(true);
   });
 
