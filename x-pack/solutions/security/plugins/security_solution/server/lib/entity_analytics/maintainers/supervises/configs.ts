@@ -108,6 +108,7 @@ function buildSupervisesConfig(
   return {
     kind: 'override',
     id: source.id,
+    source: 'entity-index',
     name: source.name,
     // Actors are entity docs, so Step 1 discovers by entity.id over the entity
     // index, and the entity-index @timestamp lookback is disabled in favour of a

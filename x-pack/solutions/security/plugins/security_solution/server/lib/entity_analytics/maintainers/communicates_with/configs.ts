@@ -23,6 +23,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
   {
     kind: 'standard',
     id: 'elastic_defend',
+    source: 'logs',
     name: 'Elastic Defend',
     indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
     relationshipKey: 'communicates_with',
@@ -39,6 +40,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
   {
     kind: 'standard',
     id: 'system_auth',
+    source: 'logs',
     name: 'System Auth',
     indexPattern: (ns) => `logs-system.auth-${ns}`,
     relationshipKey: 'communicates_with',
@@ -66,6 +68,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
   {
     kind: 'standard',
     id: 'system_security',
+    source: 'logs',
     name: 'System Security',
     indexPattern: (ns) => `logs-system.security-${ns}`,
     relationshipKey: 'communicates_with',
@@ -84,6 +87,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
   {
     kind: 'standard',
     id: 'jamf_pro',
+    source: 'logs',
     name: 'Jamf Pro',
     indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
     relationshipKey: 'communicates_with',
@@ -96,6 +100,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
   {
     kind: 'standard',
     id: 'aws_cloudtrail',
+    source: 'logs',
     name: 'AWS CloudTrail',
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipKey: 'communicates_with',

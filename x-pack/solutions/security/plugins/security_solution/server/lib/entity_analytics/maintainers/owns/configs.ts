@@ -29,6 +29,7 @@ export function buildOwnsConfigs(lastProcessedTimestamp?: string): RelationshipI
     {
       kind: 'override',
       id: OKTA_ENTITY_SOURCE,
+      source: 'entity-index',
       name: 'Okta Entity Analytics',
       // Step 1 actor discovery reads the entity index (actors are user entity docs).
       indexPattern: getLatestEntityIndexPattern,

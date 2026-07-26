@@ -97,6 +97,12 @@ export interface CustomActorBinding {
 interface RelationshipIntegrationBase {
   /** Unique machine-readable identifier, e.g. 'elastic_defend'. */
   id: string;
+  /**
+   * Controls which runner the engine dispatches to.
+   * - 'logs': uses the time-sliced probe→extend→extract→write loop
+   * - 'entity-index': uses the existing 2-step composite agg + ES|QL model
+   */
+  source: 'logs' | 'entity-index';
   /** Human-readable name used in log messages. */
   name: string;
   /** Returns the Elasticsearch index pattern for this integration in the given namespace. */
@@ -135,6 +141,12 @@ interface RelationshipIntegrationBase {
    * and Step 2 EUID expression describe the same actor — they cannot drift.
    */
   customActor?: CustomActorBinding;
+  /**
+   * Target number of distinct actors per time slice for log-source configs.
+   * The probe query aims to find a slice containing this many distinct actors.
+   * Defaults to COMPOSITE_PAGE_SIZE (3500) if not specified.
+   */
+  maxActorsPerSlice?: number;
   /**
    * When true, the engine validates each derived target EUID against the entity
    * index before writing, filtering out any IDs that have no matching entity

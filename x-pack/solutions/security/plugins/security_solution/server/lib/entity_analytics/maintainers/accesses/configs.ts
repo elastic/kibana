@@ -31,6 +31,7 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
   {
     kind: 'bucketed',
     id: 'elastic_defend',
+    source: 'logs',
     name: 'Elastic Defend',
     indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
     targetEntityType: 'host',
@@ -47,6 +48,7 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
   {
     kind: 'bucketed',
     id: 'aws_cloudtrail',
+    source: 'logs',
     name: 'AWS CloudTrail',
     indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     targetEntityType: 'host',
@@ -63,6 +65,7 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
   {
     kind: 'bucketed',
     id: 'system_auth',
+    source: 'logs',
     name: 'System Auth',
     indexPattern: (ns) => `logs-system.auth-${ns}`,
     targetEntityType: 'host',
@@ -90,6 +93,7 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
   {
     kind: 'bucketed',
     id: 'system_security',
+    source: 'logs',
     name: 'System Security',
     indexPattern: (ns) => `logs-system.security-${ns}`,
     targetEntityType: 'host',

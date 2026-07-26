@@ -26,6 +26,7 @@ export function buildAdministersConfigs(
     {
       kind: 'override',
       id: 'entityanalytics_ad',
+      source: 'entity-index',
       name: 'Active Directory Entity Analytics',
       // Step 1 actor discovery reads the entity index (actors are entity docs,
       // users or hosts), not raw logs.

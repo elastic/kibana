@@ -8,6 +8,8 @@
 export const LOOKBACK_WINDOW = 'now-30d';
 export const COMPOSITE_PAGE_SIZE = 3500;
 export const MAX_ITERATIONS = 1000;
+/** Sampling probability for the actor slice probe query. Reads ~10% of docs to find the slice boundary cheaply. */
+export const SLICE_SAMPLE_PROBABILITY = 0.1;
 
 /**
  * Required ES|QL preamble for every Step 2 query the engine runs.
