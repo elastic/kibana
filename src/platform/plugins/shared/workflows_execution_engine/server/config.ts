@@ -73,6 +73,15 @@ const configSchema = schema.object({
   hitlExternalResume: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  syncExecution: schema.object({
+    /**
+     * Maximum wall-clock time allowed for a single synchronous workflow execution.
+     * When the deadline is reached the internal AbortController is aborted, which
+     * propagates cancellation through the execution loop to any in-flight step.
+     * Callers may impose a shorter deadline via ExecuteWorkflowOptions.abortSignal.
+     */
+    maxDurationMs: schema.number({ defaultValue: 60_000, min: 1_000 }),
+  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;

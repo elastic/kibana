@@ -51,6 +51,7 @@ export interface ExecuteWorkflowResponse {
   result?: {
     status: ExecutionStatus;
     output?: Record<string, unknown>;
+    error?: { type: string; message: string; details?: Record<string, unknown> };
   };
 }
 

@@ -118,9 +118,16 @@ export const executeWorkflowSync = async ({
     { ...dependencies, capabilities: options.capabilities }
   );
   if (!inputsValid) {
+    const failedExecution = await syncExecutionPersistence.getWorkflowExecutionById(
+      syncWorkflowExecution.id,
+      spaceId
+    );
     return {
       workflowExecutionId: syncWorkflowExecution.id,
-      result: { status: ExecutionStatus.FAILED },
+      result: {
+        status: ExecutionStatus.FAILED,
+        ...(failedExecution?.error ? { error: failedExecution.error } : {}),
+      },
     };
   }
 
@@ -130,6 +137,15 @@ export const executeWorkflowSync = async ({
   if (options.abortSignal?.aborted) {
     abort();
   }
+
+  const maxDurationMs = config.syncExecution.maxDurationMs;
+  const timeoutId = setTimeout(
+    () =>
+      abortController.abort(
+        new Error(`Synchronous workflow execution timed out after ${maxDurationMs}ms`)
+      ),
+    maxDurationMs
+  );
 
   try {
     const workflowsExecutionEngine = await getWorkflowsExecutionEngine();
@@ -154,6 +170,7 @@ export const executeWorkflowSync = async ({
       },
     };
   } finally {
+    clearTimeout(timeoutId);
     options.abortSignal?.removeEventListener('abort', abort);
   }
 };
