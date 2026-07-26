@@ -36,12 +36,34 @@ async function resolveAgentIds(
     throw new Error(`Fleet agents lookup failed: ${response.status} ${await response.text()}`);
   }
   const body = (await response.json()) as {
-    items: Array<{ id: string; local_metadata?: { host?: { hostname?: string } } }>;
+    items: Array<{
+      id: string;
+      status?: string;
+      enrolled_at?: string;
+      local_metadata?: { host?: { hostname?: string } };
+    }>;
   };
 
   const result: Record<string, string> = {};
   for (const hostname of hostnames) {
-    const match = body.items.find((item) => item.local_metadata?.host?.hostname === hostname);
+    // A demo host accumulates MULTIPLE Fleet enrollments over its lifetime
+    // (initial build, a broken SNAPSHOT install, the current GA reinstall).
+    // `items.find()` returns whichever Fleet happens to sort first, which is
+    // non-deterministically an offline/uninstalled generation — seeding that
+    // stale agent id produces cosmetically valid ES|QL rows whose live osquery
+    // and response-action dispatches silently target a dead agent. Rank
+    // online-first, then most-recently-enrolled, matching the same fix already
+    // applied in `resolve_agent_ids_tool.ts` (osquery) and `endpoint_lookup.ts`
+    // (response actions).
+    const candidates = body.items.filter(
+      (item) => item.local_metadata?.host?.hostname === hostname
+    );
+    const match = candidates.sort((a, b) => {
+      const aOnline = a.status === 'online' ? 0 : 1;
+      const bOnline = b.status === 'online' ? 0 : 1;
+      if (aOnline !== bOnline) return aOnline - bOnline;
+      return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');
+    })[0];
     if (match) {
       result[hostname] = match.id;
     }
