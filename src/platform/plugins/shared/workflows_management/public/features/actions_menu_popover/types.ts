@@ -23,11 +23,18 @@ export interface JumpToStepEntry {
   lineStart: number;
 }
 
+/**
+ * How to build a fresh `request` step for a connector: either an empty
+ * skeleton, or one prefilled from a pasted cURL command.
+ */
+export type BuildRequestMode = 'scratch' | 'curl';
+
 export type MenuItemData =
   | { kind: 'action'; action: ActionOptionData }
   | { kind: 'command'; command: EditorCommand }
   | { kind: 'jump'; entry: JumpToStepEntry }
-  | { kind: 'nav'; target: 'viewAll' | 'viewExisting' };
+  | { kind: 'nav'; target: 'viewAll' | 'viewExisting' }
+  | { kind: 'buildRequest'; connectorType: string; mode: BuildRequestMode };
 
 /**
  * Options passed to EuiSelectable carry MenuItemData inside the standard

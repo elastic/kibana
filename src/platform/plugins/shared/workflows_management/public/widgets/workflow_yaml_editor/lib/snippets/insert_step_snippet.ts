@@ -448,12 +448,24 @@ function getInsertPointFromCursor(
   return at(cursorLine + 1, false);
 }
 
+export interface InsertStepSnippetOptions {
+  /**
+   * Pre-built snippet text for a single step-sequence item (the `- name: …`
+   * block, without a `steps:` header). When provided, it is inserted verbatim
+   * (re-indented to the insert location) instead of generating one from
+   * `stepType`. Used by flows that build a fully-formed step ahead of time,
+   * e.g. mapping a pasted cURL command to a `request` step.
+   */
+  snippetOverride?: string;
+}
+
 export function insertStepSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document | null,
   stepType: string,
   cursorPosition?: monaco.Position | null,
-  editor?: monaco.editor.IStandaloneCodeEditor
+  editor?: monaco.editor.IStandaloneCodeEditor,
+  { snippetOverride }: InsertStepSnippetOptions = {}
 ) {
   let document: Document;
   try {
@@ -467,7 +479,9 @@ export function insertStepSnippet(
 
   if (!stepsPair) {
     const lineCount = model.getLineCount();
-    const insertText = isBuiltInStepType(stepType)
+    const insertText = snippetOverride
+      ? `steps:\n${prependIndentToLines(snippetOverride, 2)}`
+      : isBuiltInStepType(stepType)
       ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: true })
       : generateConnectorSnippet(stepType, { full: true, withStepsSection: true });
 
@@ -551,9 +565,11 @@ export function insertStepSnippet(
     }
   }
 
-  const snippetText = isBuiltInStepType(stepType)
-    ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: false })
-    : generateConnectorSnippet(stepType, { full: true, withStepsSection: false });
+  const snippetText =
+    snippetOverride ??
+    (isBuiltInStepType(stepType)
+      ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: false })
+      : generateConnectorSnippet(stepType, { full: true, withStepsSection: false }));
 
   if (editor) editor.pushUndoStop();
 
