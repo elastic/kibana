@@ -18,7 +18,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   ArchiveItemInput,
@@ -61,6 +61,18 @@ import {
 
 const MONDAY_MCP_SERVER_URL = 'https://mcp.monday.com/mcp';
 const MONDAY_API_URL = 'https://api.monday.com/v2';
+
+const callGraphQL = async (
+  ctx: ActionContext,
+  query: string,
+  variables: Record<string, unknown>
+) => {
+  const { data } = await ctx.client.post(MONDAY_API_URL, { query, variables });
+  if (data?.errors?.length) {
+    throw new Error((data.errors as Array<{ message: string }>).map((e) => e.message).join('; '));
+  }
+  return data?.data ?? null;
+};
 
 export const MondayCom: ConnectorSpec = {
   metadata: {
@@ -197,12 +209,12 @@ export const MondayCom: ConnectorSpec = {
         'and need its full details without paginating a board.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query:
-            'query GetItem($ids: [ID!]) { items(ids: $ids) { id name board { id } group { id title } column_values { id text value } } }',
-          variables: { ids: [String(input.itemId)] },
-        });
-        return data?.data?.items?.[0] ?? null;
+        const result = await callGraphQL(
+          ctx,
+          'query GetItem($ids: [ID!]) { items(ids: $ids) { id name board { id } group { id title } column_values { id text value } } }',
+          { ids: [String(input.itemId)] }
+        );
+        return result?.items?.[0] ?? null;
       },
     },
 
@@ -214,17 +226,17 @@ export const MondayCom: ConnectorSpec = {
         'Returns matching items with their names, column values, and group membership.',
       input: GetItemsByColumnValueInputSchema,
       handler: async (ctx, input: GetItemsByColumnValueInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query:
-            'query GetItemsByColumnValue($boardId: ID!, $columnId: String!, $columnValues: [String!]!, $limit: Int) { items_page_by_column_values(board_id: $boardId, columns: [{ column_id: $columnId, column_values: $columnValues }], limit: $limit) { items { id name group { id title } column_values { id text value } } } }',
-          variables: {
+        const result = await callGraphQL(
+          ctx,
+          'query GetItemsByColumnValue($boardId: ID!, $columnId: String!, $columnValues: [String!]!, $limit: Int) { items_page_by_column_values(board_id: $boardId, columns: [{ column_id: $columnId, column_values: $columnValues }], limit: $limit) { items { id name group { id title } column_values { id text value } } } }',
+          {
             boardId: String(input.boardId),
             columnId: input.columnId,
             columnValues: [input.columnValue],
             limit: input.limit,
-          },
-        });
-        return data?.data?.items_page_by_column_values ?? null;
+          }
+        );
+        return result?.items_page_by_column_values ?? null;
       },
     },
 
@@ -268,16 +280,16 @@ export const MondayCom: ConnectorSpec = {
         "structure as the parent board's subitems board. Returns the created subitem with its ID.",
       input: CreateSubitemInputSchema,
       handler: async (ctx, input: CreateSubitemInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query:
-            'mutation CreateSubitem($parentItemId: ID!, $itemName: String!, $columnValues: JSON) { create_subitem(parent_item_id: $parentItemId, item_name: $itemName, column_values: $columnValues) { id name board { id } } }',
-          variables: {
+        const result = await callGraphQL(
+          ctx,
+          'mutation CreateSubitem($parentItemId: ID!, $itemName: String!, $columnValues: JSON) { create_subitem(parent_item_id: $parentItemId, item_name: $itemName, column_values: $columnValues) { id name board { id } } }',
+          {
             parentItemId: String(input.parentItemId),
             itemName: input.subitemName,
             columnValues: input.columnValues != null ? JSON.stringify(input.columnValues) : null,
-          },
-        });
-        return data?.data?.create_subitem ?? null;
+          }
+        );
+        return result?.create_subitem ?? null;
       },
     },
 
@@ -288,12 +300,12 @@ export const MondayCom: ConnectorSpec = {
         'discover available group IDs. Returns the moved item with its updated group.',
       input: MoveItemToGroupInputSchema,
       handler: async (ctx, input: MoveItemToGroupInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query:
-            'mutation MoveItem($itemId: ID!, $groupId: String!) { move_item_to_group(item_id: $itemId, group_id: $groupId) { id } }',
-          variables: { itemId: String(input.itemId), groupId: input.groupId },
-        });
-        return data?.data?.move_item_to_group ?? null;
+        const result = await callGraphQL(
+          ctx,
+          'mutation MoveItem($itemId: ID!, $groupId: String!) { move_item_to_group(item_id: $itemId, group_id: $groupId) { id } }',
+          { itemId: String(input.itemId), groupId: input.groupId }
+        );
+        return result?.move_item_to_group ?? null;
       },
     },
 
@@ -304,11 +316,12 @@ export const MondayCom: ConnectorSpec = {
         'accessible via filters and are not permanently deleted. Returns the archived item.',
       input: ArchiveItemInputSchema,
       handler: async (ctx, input: ArchiveItemInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query: 'mutation ArchiveItem($itemId: ID!) { archive_item(item_id: $itemId) { id } }',
-          variables: { itemId: String(input.itemId) },
-        });
-        return data?.data?.archive_item ?? null;
+        const result = await callGraphQL(
+          ctx,
+          'mutation ArchiveItem($itemId: ID!) { archive_item(item_id: $itemId) { id } }',
+          { itemId: String(input.itemId) }
+        );
+        return result?.archive_item ?? null;
       },
     },
 
@@ -319,11 +332,12 @@ export const MondayCom: ConnectorSpec = {
         'This action cannot be undone. Returns the deleted item ID.',
       input: DeleteItemInputSchema,
       handler: async (ctx, input: DeleteItemInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query: 'mutation DeleteItem($itemId: ID!) { delete_item(item_id: $itemId) { id } }',
-          variables: { itemId: String(input.itemId) },
-        });
-        return data?.data?.delete_item ?? null;
+        const result = await callGraphQL(
+          ctx,
+          'mutation DeleteItem($itemId: ID!) { delete_item(item_id: $itemId) { id } }',
+          { itemId: String(input.itemId) }
+        );
+        return result?.delete_item ?? null;
       },
     },
 
@@ -366,12 +380,12 @@ export const MondayCom: ConnectorSpec = {
         'retrieve the update ID. Replaces the full body text; returns the updated update.',
       input: EditUpdateInputSchema,
       handler: async (ctx, input: EditUpdateInput) => {
-        const { data } = await ctx.client.post(MONDAY_API_URL, {
-          query:
-            'mutation EditUpdate($id: ID!, $body: String!) { edit_update(id: $id, body: $body) { id body } }',
-          variables: { id: String(input.updateId), body: input.body },
-        });
-        return data?.data?.edit_update ?? null;
+        const result = await callGraphQL(
+          ctx,
+          'mutation EditUpdate($id: ID!, $body: String!) { edit_update(id: $id, body: $body) { id body } }',
+          { id: String(input.updateId), body: input.body }
+        );
+        return result?.edit_update ?? null;
       },
     },
 

@@ -220,6 +220,14 @@ describe('MondayCom', () => {
         expect.objectContaining({ variables: { ids: ['11223344'] } })
       );
     });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({ data: { errors: [{ message: 'Not authorized' }] } });
+      const input = parse('getItem', { itemId: 11223344 });
+      await expect(MondayCom.actions.getItem.handler(mockContext, input)).rejects.toThrow(
+        'Not authorized'
+      );
+    });
   });
 
   describe('getItemsByColumnValue action', () => {
@@ -246,6 +254,18 @@ describe('MondayCom', () => {
           },
         })
       );
+    });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({ data: { errors: [{ message: 'Permission denied' }] } });
+      const input = parse('getItemsByColumnValue', {
+        boardId: 99887766,
+        columnId: 'status',
+        columnValue: 'Done',
+      });
+      await expect(
+        MondayCom.actions.getItemsByColumnValue.handler(mockContext, input)
+      ).rejects.toThrow('Permission denied');
     });
   });
 
@@ -326,6 +346,14 @@ describe('MondayCom', () => {
         })
       );
     });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({ data: { errors: [{ message: 'Invalid parent item' }] } });
+      const input = parse('createSubitem', { parentItemId: 11223344, subitemName: 'Sub task' });
+      await expect(MondayCom.actions.createSubitem.handler(mockContext, input)).rejects.toThrow(
+        'Invalid parent item'
+      );
+    });
   });
 
   describe('moveItemToGroup action', () => {
@@ -344,6 +372,14 @@ describe('MondayCom', () => {
         })
       );
     });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({ data: { errors: [{ message: 'Group not found' }] } });
+      const input = parse('moveItemToGroup', { itemId: 11223344, groupId: 'bad_group' });
+      await expect(MondayCom.actions.moveItemToGroup.handler(mockContext, input)).rejects.toThrow(
+        'Group not found'
+      );
+    });
   });
 
   describe('archiveItem action', () => {
@@ -360,6 +396,14 @@ describe('MondayCom', () => {
         expect.objectContaining({ variables: { itemId: '11223344' } })
       );
     });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({ data: { errors: [{ message: 'Item already archived' }] } });
+      const input = parse('archiveItem', { itemId: 11223344 });
+      await expect(MondayCom.actions.archiveItem.handler(mockContext, input)).rejects.toThrow(
+        'Item already archived'
+      );
+    });
   });
 
   describe('deleteItem action', () => {
@@ -374,6 +418,16 @@ describe('MondayCom', () => {
       expect(mockPost).toHaveBeenCalledWith(
         'https://api.monday.com/v2',
         expect.objectContaining({ variables: { itemId: '11223344' } })
+      );
+    });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({
+        data: { errors: [{ message: 'Item not found' }, { message: 'Insufficient permissions' }] },
+      });
+      const input = parse('deleteItem', { itemId: 11223344 });
+      await expect(MondayCom.actions.deleteItem.handler(mockContext, input)).rejects.toThrow(
+        'Item not found; Insufficient permissions'
       );
     });
   });
@@ -438,6 +492,14 @@ describe('MondayCom', () => {
       expect(mockPost).toHaveBeenCalledWith(
         'https://api.monday.com/v2',
         expect.objectContaining({ variables: { id: '98765', body: 'Corrected text.' } })
+      );
+    });
+
+    it('throws when the GraphQL response contains errors', async () => {
+      mockPost.mockResolvedValueOnce({ data: { errors: [{ message: 'Update not found' }] } });
+      const input = parse('editUpdate', { updateId: 98765, body: 'Corrected text.' });
+      await expect(MondayCom.actions.editUpdate.handler(mockContext, input)).rejects.toThrow(
+        'Update not found'
       );
     });
   });
