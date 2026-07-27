@@ -457,7 +457,7 @@ export class OtelAppender implements DisposableAppender {
     this.promotedAttributes = promoted;
 
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor(exporter)],
+      processors: [new BatchLogRecordProcessor({ exporter })],
       resource,
     });
     // The scope name 'kibana' identifies this instrumentation library.
