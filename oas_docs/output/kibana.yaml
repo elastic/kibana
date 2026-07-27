@@ -105825,13 +105825,13 @@ components:
               type: object
               properties:
                 placement:
-                  description: Label placement relative to the secondary metric value (before or after).
+                  description: Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.
                   enum:
                     - before
                     - after
                   type: string
                 visible:
-                  description: When `true`, displays the label.
+                  description: When `true`, displays the secondary metric name as its label. Defaults to `false`.
                   type: boolean
             value:
               additionalProperties: false

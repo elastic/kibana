@@ -22,7 +22,10 @@ const palette: PaletteOutput<CustomPaletteParams> = {
 
 // Remove legacy state properties as they should be removed in the initialize method
 const fullState: Required<
-  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+  Omit<
+    MetricVisualizationState,
+    'secondaryPrefix' | 'secondaryLabel' | 'valuesTextAlign' | 'titleWeight'
+  >
 > = {
   layerId: 'first',
   layerType: 'data',
@@ -32,7 +35,6 @@ const fullState: Required<
   breakdownByAccessor: 'breakdown-col-id',
   collapseFn: 'sum',
   subtitle: 'subtitle',
-  secondaryLabel: 'extra-text',
   progressDirection: 'vertical',
   maxCols: 5,
   color: 'static-color',

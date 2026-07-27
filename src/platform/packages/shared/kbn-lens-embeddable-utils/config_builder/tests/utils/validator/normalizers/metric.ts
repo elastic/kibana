@@ -149,11 +149,19 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
     // Without a secondary metric, the transform resets secondary styling to its defaults.
     if (viz.secondaryMetricAccessor) {
       viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      viz.secondaryLabelPosition = viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+      // The secondary label is the operation name, so a legacy custom label is dropped and only
+      // its visibility survives, mirroring `getUpdatedMetricState`.
+      const legacyLabel = viz.secondaryLabel ?? viz.secondaryPrefix;
+      viz.secondaryLabelPosition =
+        legacyLabel === ''
+          ? 'hidden'
+          : viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
     } else {
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
       viz.secondaryLabelPosition = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
+    delete viz.secondaryLabel;
+    delete viz.secondaryPrefix;
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
     viz.valueFontMode = viz.valueFontMode ?? 'default';

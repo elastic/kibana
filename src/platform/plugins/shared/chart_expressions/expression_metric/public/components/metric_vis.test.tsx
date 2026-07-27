@@ -315,7 +315,7 @@ describe('MetricVisComponent', function () {
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: undefined },
+          metric: { ...config.metric, subtitle: 'subtitle' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
@@ -331,13 +331,13 @@ describe('MetricVisComponent', function () {
       await rerender({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: 'secondary label' },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabelPosition: 'hidden' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
 
       expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
-      expect(screen.getByText(/secondary label/)).toBeInTheDocument();
+      expect(screen.getByText(secondaryValue)).toBeInTheDocument();
     });
 
     it('should display progress bar if min and max provided', async () => {
@@ -593,38 +593,40 @@ describe('MetricVisComponent', function () {
       }
     });
 
-    it('should display secondary label or secondary metric', async () => {
+    it('should display the secondary metric name only when it is visible', async () => {
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryLabel: 'howdy' },
+          metric: { ...config.metric, secondaryLabelPosition: 'before' },
         },
       });
 
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+
       let charts = screen.getAllByRole('listitem');
       for (const row of table.rows) {
-        const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
+        const regExp = new RegExp(`${secondaryLabel}number-${row[minPriceColumnId]}`, 'i');
         // Check that at least one listitem contains the expected text
         expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
 
-      // Now remove the prefix and check the secondary label is there
+      // Now hide the name and check only the value is there
       await rerender({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryLabel: undefined },
+          metric: { ...config.metric, secondaryLabelPosition: 'hidden' },
         },
       });
 
       charts = screen.getAllByRole('listitem');
 
-      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
-        const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
+        const regExp = new RegExp(`number-${row[minPriceColumnId]}`, 'i');
         expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
+      expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
     });
 
     it('should respect maxCols and minTiles', async () => {

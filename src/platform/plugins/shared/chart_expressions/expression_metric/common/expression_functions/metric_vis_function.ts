@@ -62,12 +62,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
-    secondaryLabel: {
-      types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
-        defaultMessage: 'Optional text displayed next to the Secondary Metric.',
-      }),
-    },
     progressDirection: {
       types: ['string'],
       options: [ChartLayoutDirection.Vertical, ChartLayoutDirection.Horizontal],
@@ -198,7 +192,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryLabelPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
-        defaultMessage: 'Specifies the position of the Secondary Metric label',
+        defaultMessage:
+          'Specifies whether the Secondary Metric label is hidden, or placed before or after the value',
       }),
       required: false,
     },
@@ -277,7 +272,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             subtitle: args.subtitle,
-            secondaryLabel: args.secondaryLabel,
             color: args.color,
             icon: args.icon,
             palette: args.palette,

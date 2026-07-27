@@ -328,7 +328,7 @@ const metricStylingSchema = schema.object(
     secondary: schema.maybe(
       schema.object({
         /**
-         * Label configuration
+         * Label configuration. The label text is the secondary metric operation name.
          */
         label: schema.maybe(
           schema.object({
@@ -337,7 +337,10 @@ const metricStylingSchema = schema.object(
              */
             visible: schema.maybe(
               schema.boolean({
-                meta: { description: 'When `true`, displays the label.' },
+                meta: {
+                  description:
+                    'When `true`, displays the secondary metric name as its label. Defaults to `false`.',
+                },
                 defaultValue: DEFAULT_SECONDARY_LABEL_VISIBLE,
               })
             ),
@@ -350,7 +353,7 @@ const metricStylingSchema = schema.object(
               placementSchema({
                 meta: {
                   description:
-                    'Label placement relative to the secondary metric value (before or after).',
+                    'Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.',
                 },
                 defaultValue: DEFAULT_SECONDARY_LABEL_PLACEMENT,
               })

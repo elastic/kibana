@@ -20,7 +20,6 @@ import type {
 const VALUE = 42;
 const STATIC_COLOR = ' #FFB300';
 const COLUMN_NAME = 'Column name';
-const SECONDARY_LABEL = 'Secondary label';
 const PALETTE: [string, string, string] = ['#f00', '#0f0', '#00f'];
 const TEXT_PALETTE: [string, string, string] = ['#a00', '#0a0', '#00a'];
 
@@ -43,7 +42,6 @@ describe('getSecondaryMetricInfo', () => {
   const row = { secondary: VALUE };
   const config: Pick<VisParams, 'metric' | 'dimensions'> = {
     metric: {
-      secondaryLabel: SECONDARY_LABEL,
       secondaryTrend: {},
       secondaryColor: 'red',
     },
@@ -56,7 +54,6 @@ describe('getSecondaryMetricInfo', () => {
     row,
     columns,
     secondaryMetric: config.dimensions.secondaryMetric,
-    secondaryLabel: config.metric.secondaryLabel,
   };
 
   const defaultTrendConfig: TrendConfig = {
@@ -73,27 +70,19 @@ describe('getSecondaryMetricInfo', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns label when there is a prefix', () => {
+  it('returns the column name as the label', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
-    });
-    expect(result.label).toBe(SECONDARY_LABEL);
-  });
-
-  it('returns label when we do not show the prefix', () => {
-    const result = getSecondaryMetricInfo({
-      ...defaultSecondaryMetricInfoArgs,
-      secondaryLabel: '',
-    });
-    expect(result.label).toBe('');
-  });
-
-  it('returns label when there is auto prefix', () => {
-    const result = getSecondaryMetricInfo({
-      ...defaultSecondaryMetricInfoArgs,
-      secondaryLabel: undefined,
     });
     expect(result.label).toBe(COLUMN_NAME);
+  });
+
+  it('returns no label when the label is not shown', () => {
+    const result = getSecondaryMetricInfo({
+      ...defaultSecondaryMetricInfoArgs,
+      showLabel: false,
+    });
+    expect(result.label).toBe('');
   });
 
   it('returns info when staticColor is provided', () => {
@@ -103,7 +92,7 @@ describe('getSecondaryMetricInfo', () => {
     });
     const expected: SecondaryMetricInfo = {
       value: `${VALUE}`,
-      label: SECONDARY_LABEL,
+      label: COLUMN_NAME,
       badgeColor: STATIC_COLOR,
     };
 
@@ -128,7 +117,7 @@ describe('getSecondaryMetricInfo', () => {
 
     expect(result.value).toBe(`${VALUE}`);
     expect(result.icon).toBe(INCREASE_ICON);
-    expect(result.label).toBe(SECONDARY_LABEL);
+    expect(result.label).toBe(COLUMN_NAME);
     expect(result.badgeColor).toBe('#00f');
     expect(result.badgeTextColor).toBe('#00a');
   });
@@ -167,7 +156,7 @@ describe('getSecondaryMetricInfo', () => {
 
     expect(result.value).toBe(`-2`);
     expect(result.icon).toBe(DECREASE_ICON);
-    expect(result.label).toBe(SECONDARY_LABEL);
+    expect(result.label).toBe(COLUMN_NAME);
     expect(result.badgeColor).toBe(PALETTE[0]);
     expect(result.badgeTextColor).toBe(TEXT_PALETTE[0]);
   });
@@ -228,7 +217,7 @@ describe('getSecondaryMetricInfo', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
     });
-    const expected = { value: `${VALUE}`, label: SECONDARY_LABEL };
+    const expected = { value: `${VALUE}`, label: COLUMN_NAME };
     expect(result).toEqual(expected);
   });
 

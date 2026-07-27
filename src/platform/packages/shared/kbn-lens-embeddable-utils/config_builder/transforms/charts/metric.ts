@@ -156,12 +156,31 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
   return metric.type === 'primary';
 }
 
+/**
+ * The secondary label is the operation name, so only its visibility and placement are
+ * configurable. An explicit value is always written when there is a secondary metric,
+ * otherwise the Lens state migration would read the missing value as a chart predating
+ * `Name visibility` and turn the label on.
+ */
+function getSecondaryLabelPosition(
+  label: NonNullable<MetricStyling['secondary']>['label']
+): MetricVisualizationState['secondaryLabelPosition'] {
+  const isVisible = label?.visible ?? DEFAULT_SECONDARY_LABEL_VISIBLE;
+  if (!isVisible) {
+    return 'hidden';
+  }
+  return label?.placement ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+}
+
 function convertStylingToStateFormat(
   styling: MetricStyling | undefined,
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return { density: DEFAULT_DENSITY };
+    return {
+      density: DEFAULT_DENSITY,
+      ...(hasSecondary ? { secondaryLabelPosition: getSecondaryLabelPosition(undefined) } : {}),
+    };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
@@ -181,8 +200,7 @@ function convertStylingToStateFormat(
     iconAlign: styling.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
-          secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
-          secondaryLabelPosition: secondaryStyling?.label?.placement,
+          secondaryLabelPosition: getSecondaryLabelPosition(secondaryStyling?.label),
           secondaryAlign: secondaryStyling?.value?.alignment,
         })
       : {}),
@@ -218,7 +236,11 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          ...(visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
+          // `secondaryLabel`/`secondaryPrefix` are legacy state kept as a fallback: attributes
+          // already stored at the latest version skip the transform that drops them
+          ...(visualization.secondaryLabelPosition === 'hidden' ||
+          visualization.secondaryLabel === '' ||
+          visualization.secondaryPrefix === ''
             ? {
                 label: {
                   visible: false,
@@ -226,7 +248,7 @@ function convertStylingToAPIFormat(
               }
             : {
                 label: {
-                  visible: DEFAULT_SECONDARY_LABEL_VISIBLE,
+                  visible: true,
                   placement:
                     visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
                 },
@@ -522,11 +544,6 @@ function enrichConfigurationWithVisualizationProperties(
   if (secondaryMetric) {
     if (visualization.secondaryTrend?.type === 'dynamic') {
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
-    }
-
-    const secondaryLabelOverride = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    if (secondaryLabelOverride && secondaryLabelOverride.length > 0) {
-      secondaryMetric.label = secondaryLabelOverride;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {

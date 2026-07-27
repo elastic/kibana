@@ -98,7 +98,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: 'Average of bytes',
           subtitle: undefined,
-          extraText: 'Maximum of bytes 19,986',
+          // The secondary metric name is hidden by default
+          extraText: '19,986',
           value: '5,727.322',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,

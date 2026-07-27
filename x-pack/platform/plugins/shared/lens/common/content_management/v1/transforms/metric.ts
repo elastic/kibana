@@ -11,7 +11,8 @@ import type { LensAttributes } from '../../../../server/content_management/v1';
 /**
  * Cleanup metric properties
  * - Move `valuesTextAlign` to `primaryAlign` and `secondaryAlign`
- * - Move `secondaryPrefix` to `secondaryLabel`
+ * - Drop `secondaryPrefix`/`secondaryLabel` in favour of the secondary metric operation name,
+ *   preserving their visibility in `secondaryLabelPosition`
  */
 export function metricMigrations(attributes: LensAttributes): LensAttributes {
   if (!attributes.state || attributes.visualizationType !== 'lnsMetric') {
@@ -35,7 +36,7 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
 export const getUpdatedMetricState = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {
-  const { secondaryPrefix, valuesTextAlign, ...restState } = state;
+  const { secondaryPrefix, secondaryLabel, valuesTextAlign, ...restState } = state;
   let newState = { ...restState };
 
   if (valuesTextAlign) {
@@ -46,10 +47,19 @@ export const getUpdatedMetricState = (
     };
   }
 
-  if (secondaryPrefix && !newState.secondaryLabel) {
+  if (newState.secondaryMetricAccessor) {
+    // The legacy label had 3 modes: `undefined` (the operation name), `''` (no label) and any
+    // other string (a custom label overriding the operation name). Only the visibility survives:
+    // the label is now always the operation name, so custom text is dropped.
+    const legacyLabel = secondaryLabel ?? secondaryPrefix;
     newState = {
       ...newState,
-      secondaryLabel: secondaryPrefix,
+      secondaryLabelPosition:
+        legacyLabel === ''
+          ? 'hidden'
+          : // A state without an explicit position predates `Name visibility`, where the label
+            // was shown before the value by default. Newer states always set it explicitly.
+            newState.secondaryLabelPosition ?? 'before',
     };
   }
 

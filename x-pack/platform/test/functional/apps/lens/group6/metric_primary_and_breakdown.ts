@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '97.220.3.248',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 19,755',
+          extraText: '19,755',
           value: '19,755',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: 'rgba(255, 255, 255, 1)',
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '169.228.188.120',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 18,994',
+          extraText: '18,994',
           value: '18,994',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: 'rgba(255, 255, 255, 1)',
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '78.83.247.30',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 17,246',
+          extraText: '17,246',
           value: '17,246',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: 'rgba(255, 255, 255, 1)',
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '226.82.228.233',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 15,687',
+          extraText: '15,687',
           value: '15,687',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: 'rgba(255, 255, 255, 1)',
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '93.28.27.24',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 15,614.333',
+          extraText: '15,614.333',
           value: '15,614.333',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: 'rgba(255, 255, 255, 1)',
@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: 'Other',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 5,722.775',
+          extraText: '5,722.775',
           value: '5,722.775',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: 'rgba(255, 255, 255, 1)',

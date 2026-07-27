@@ -218,16 +218,17 @@ export const MetricVis = ({
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
-      // When baseline is 'primary' but the primary value is non-numeric at runtime,
-      // reset the label to use the column name
-      const isNumericBaseline = Number.isFinite(config.metric.secondaryTrend.baseline);
-      const isCompareToPrimaryInvalid = !isNumericBaseline && typeof value !== 'number';
+      const { secondaryLabelPosition } = config.metric;
+      // `hidden` has no equivalent in the chart, where it is expressed as an empty label,
+      // so any placement works
+      const isLabelHidden = secondaryLabelPosition === 'hidden';
+      const labelPosition = isLabelHidden ? 'before' : secondaryLabelPosition;
 
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
         secondaryMetric,
-        secondaryLabel: isCompareToPrimaryInvalid ? undefined : config.metric.secondaryLabel,
+        showLabel: !isLabelHidden,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,
       });
@@ -239,7 +240,7 @@ export const MetricVis = ({
         badgeTextColor: secondaryMetricInfo.badgeTextColor,
         ariaDescription: secondaryMetricInfo.description,
         icon: secondaryMetricInfo.icon,
-        labelPosition: config.metric.secondaryLabelPosition,
+        labelPosition,
         badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
       };
     }

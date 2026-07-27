@@ -11,7 +11,8 @@ import { convertApplyColorTo } from './apply_color_to';
 import { convertDensity } from './density';
 
 export const getRuntimeConverters = () => [
-  // v1 CM transform (idempotent): secondaryPrefix → secondaryLabel, valuesTextAlign → primaryAlign/secondaryAlign
+  // v1 CM transform (idempotent): secondaryPrefix/secondaryLabel → secondaryLabelPosition,
+  // valuesTextAlign → primaryAlign/secondaryAlign
   getUpdatedMetricState,
   removeLegacyTitleWeight,
   convertApplyColorTo,

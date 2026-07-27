@@ -138,7 +138,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getMetricTiles()).to.have.length(N_TILES);
     });
 
-    it('should replace secondary metric label and badge when changing primary metric type to non-numeric', async () => {
+    it('should show and hide the secondary metric name', async () => {
+      await openBaseMetric();
+      await lens.openDimensionEditor(
+        'lnsMetric_secondaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      // The name is hidden by default
+      expect(await lens.getSecondaryMetricLabel()).to.be(undefined);
+
+      await testSubjects.click('lnsMetric_secondaryNameVisibility_before');
+      await lens.waitForVisualization('mtrVis');
+      expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
+
+      await testSubjects.click('lnsMetric_secondaryNameVisibility_hidden');
+      await lens.waitForVisualization('mtrVis');
+      expect(await lens.getSecondaryMetricLabel()).to.be(undefined);
+    });
+
+    it('should keep the secondary metric name and reset the badge when changing primary metric type to non-numeric', async () => {
       await openBaseMetric();
 
       // Set primary metric: count of records
@@ -152,10 +170,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openDimensionEditor(
         'lnsMetric_secondaryMetricDimensionPanel > lns-dimensionTrigger'
       );
+      await testSubjects.click('lnsMetric_secondaryNameVisibility_before');
       await testSubjects.click('lnsMetric_color_mode_dynamic');
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
-      // Check the label and the badge text
-      expect(await lens.getSecondaryMetricLabel()).to.be('Difference');
+      // Comparing to the primary metric no longer renames the secondary metric
+      expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
       expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
 
       await lens.closeDimensionEditor();
@@ -170,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         isPreviousIncompatible: true,
       });
 
-      // The badge text should change and the label should be "Average of bytes"
+      // The badge text should change while the name stays the same
       expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
       expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322\n↑');
 

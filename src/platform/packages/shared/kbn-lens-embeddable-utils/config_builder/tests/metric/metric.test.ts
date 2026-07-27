@@ -171,6 +171,67 @@ describe('Metric', () => {
     });
   });
 
+  describe('secondary metric name visibility', () => {
+    const getConfigWithSecondaryLabel = (
+      label?: NonNullable<NonNullable<MetricConfig['styling']>['secondary']>['label']
+    ) =>
+      ({
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        ...(label ? { styling: { secondary: { label } } } : {}),
+      } satisfies MetricConfig);
+
+    const convert = (config: MetricConfig) => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      return {
+        visualization: lensState.state.visualization as MetricVisualizationState,
+        apiOutput: builder.toAPIFormat(lensState) as MetricConfig,
+      };
+    };
+
+    it('should hide the name when no label visibility is specified', () => {
+      const { visualization, apiOutput } = convert(getConfigWithSecondaryLabel());
+
+      expect(visualization.secondaryLabelPosition).toBe('hidden');
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+    });
+
+    it('should hide the name when the label is explicitly not visible', () => {
+      const { visualization, apiOutput } = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+
+      expect(visualization.secondaryLabelPosition).toBe('hidden');
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+    });
+
+    it.each(['before', 'after'] as const)(
+      'should place a visible name %s the value',
+      (placement) => {
+        const { visualization, apiOutput } = convert(
+          getConfigWithSecondaryLabel({ visible: true, placement })
+        );
+
+        expect(visualization.secondaryLabelPosition).toBe(placement);
+        expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement });
+      }
+    );
+
+    it('should default a visible name to before the value', () => {
+      const { visualization } = convert(getConfigWithSecondaryLabel({ visible: true }));
+
+      expect(visualization.secondaryLabelPosition).toBe('before');
+    });
+  });
+
   describe('color by value named palette', () => {
     it('(API -> SO -> API) round-trips a named palette on a single-value metric as a numeric range', () => {
       const config = {

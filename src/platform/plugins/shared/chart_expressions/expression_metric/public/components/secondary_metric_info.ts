@@ -12,7 +12,7 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
-import type { DimensionsVisParam, MetricVisParam } from '../../common';
+import type { DimensionsVisParam } from '../../common';
 import type { FormatOverrides } from './helpers';
 import { getMetricFormatter } from './helpers';
 
@@ -34,7 +34,8 @@ export interface SecondaryMetricInfoArgs {
   row: DatatableRow;
   columns: DatatableColumn[];
   secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
-  secondaryLabel: MetricVisParam['secondaryLabel'];
+  /** When `false` the label is omitted, e.g. when the name visibility is `hidden` */
+  showLabel?: boolean;
   trendConfig?: TrendConfig;
   staticColor?: string;
 }
@@ -204,7 +205,7 @@ export function getSecondaryMetricInfo({
   row,
   columns,
   secondaryMetric,
-  secondaryLabel,
+  showLabel = false,
   trendConfig,
   staticColor,
 }: SecondaryMetricInfoArgs): SecondaryMetricInfo {
@@ -215,7 +216,8 @@ export function getSecondaryMetricInfo({
     getEnhancedNumberSignFormatter(trendConfig)
   );
 
-  const label = secondaryLabel ?? secondaryMetricColumn?.name ?? '';
+  // The label is the name of the secondary metric operation
+  const label = showLabel ? secondaryMetricColumn?.name ?? '' : '';
 
   const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
   const formattedValue = secondaryMetricFormatter(rawValue);
