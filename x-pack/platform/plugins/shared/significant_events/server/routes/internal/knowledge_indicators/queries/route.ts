@@ -43,6 +43,21 @@ const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
 
+/**
+ * `findQueries` / `findIndicators` early-return on an empty stream list, while
+ * `getQueryLinks` treats empty as "all streams". Resolve accessible stream names
+ * (same pattern as `listAllFeaturesRoute`) so search and list stay aligned.
+ */
+const resolveStreamNames = async (
+  streamNames: string[] | undefined,
+  listStreams: () => Promise<Array<{ name: string }>>
+): Promise<string[]> => {
+  if (streamNames?.length) {
+    return streamNames;
+  }
+  return (await listStreams()).map((stream) => stream.name);
+};
+
 const dateFromString = z
   .string()
   .max(MAX_ID_LENGTH)
@@ -459,13 +474,17 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
+    );
+
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
     const queryLinks = await fetchQueryLinks(
       {
-        streamNames,
+        streamNames: resolvedStreamNames,
         query,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
@@ -532,6 +551,10 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
+    );
+
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
@@ -546,7 +569,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames,
+        streamNames: resolvedStreamNames,
         alertsReader,
         spaceId: await getSpaceId(request),
       },

@@ -49,6 +49,15 @@ describe('Annotate', () => {
         '**Test Failures**<br />\n[[job]](https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id) [[logs]](https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id) OSS CI Group #1 / test should fail'
       );
     });
+
+    it('should create an annotation with issue link if github issue is present', () => {
+      mockFailure.githubIssue = 'https://github.com/elastic/kibana/issues/1234';
+      const annotation = getAnnotation([mockFailure], mockArtifacts);
+
+      expect(annotation).toEqual(
+        '**Test Failures**<br />\n[[job]](https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id) [[logs]](https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id) [[issue]](https://github.com/elastic/kibana/issues/1234) OSS CI Group #1 / test should fail'
+      );
+    });
   });
 
   describe('getSlackMessage', () => {

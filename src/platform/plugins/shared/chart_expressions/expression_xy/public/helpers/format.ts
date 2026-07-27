@@ -10,6 +10,7 @@
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { isNumber, isUndefined } from 'lodash';
 
@@ -53,7 +54,22 @@ export const getFormatParam = (format: FieldFormat, param: string, maxDepth = 3)
   return getNested(format.params(), 0);
 };
 
-export const getDecimalsFromFormat = (format: FieldFormat) => {
-  const value = getFormatParam(format, 'decimals');
-  return isNumber(value) ? value : undefined;
+export const getMaximumFractionDigits = (format: FieldFormat): number | undefined => {
+  const decimals = getFormatParam(format, 'decimals');
+
+  if (!isNumber(decimals)) {
+    return undefined;
+  }
+
+  switch (format.type?.id) {
+    case FIELD_FORMAT_IDS.NUMBER:
+    case FIELD_FORMAT_IDS.CURRENCY:
+      return decimals;
+    case FIELD_FORMAT_IDS.PERCENT:
+      return decimals + 2; // formatter multiplies by 100 before rendering, so we add 2
+    default:
+      // to be safe, when we don't know if applicable (e.g., in bytes/bits, duration, etc,
+      // formatter scales value by unit), we fall back to undefined
+      return undefined;
+  }
 };
