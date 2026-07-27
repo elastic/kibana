@@ -99,6 +99,9 @@ describe('bulkCreate', () => {
     });
 
     const clientArgs = createCasesClientMockArgs();
+    // This suite asserts the exact bulkCreateCases payload; the extended_fields
+    // mirroring (templates flag ON) is covered by dedicated tests below.
+    clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
 
     clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
       saved_objects: [caseSO],
@@ -1429,6 +1432,27 @@ describe('bulkCreate', () => {
         expect.stringContaining('Failed to update template usage stats')
       );
     });
+
+    it('rejects a template reference without a pinned version (no server-side expansion on bulkCreate)', async () => {
+      await expect(
+        bulkCreate({ cases: getCases({ template: { id: 'tmpl-1' } }) }, clientArgs, casesClient)
+      ).rejects.toThrow('template.version is required');
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('accepts a version-pinned template reference', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ template: { id: 'tmpl-1', version: 2 } }) },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+    });
   });
 
   describe('customFields → extended_fields adapter (write-time mirror)', () => {
@@ -1476,7 +1500,7 @@ describe('bulkCreate', () => {
     it('does not mirror customFields into extended_fields when templates flag is disabled', async () => {
       // FAILURE SCENARIO: adapter runs unconditionally — extended_fields written when flag is off.
       const clientArgs = createCasesClientMockArgs();
-      // config.templates.enabled defaults to false in the mock
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
       });

@@ -24,6 +24,11 @@ export const CASE_DETAILS_STATUS =
 
 export const CASE_DETAILS_TAGS = '[data-test-subj="case-tags"]';
 
+// In the redesign the tags field renders as an editable combobox, so each tag value is a
+// combobox pill rather than a plain badge inside `case-tags`.
+export const CASE_DETAILS_TAGS_COMBOBOX_PILL =
+  '[data-test-subj="case-tags"] [data-test-subj="euiComboBoxPill"]';
+
 export const CASE_DETAILS_TIMELINE_LINK_MARKDOWN =
   '[data-test-subj="description"] [data-test-subj="scrollable-markdown"] button';
 

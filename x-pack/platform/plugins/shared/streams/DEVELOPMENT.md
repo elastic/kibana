@@ -319,7 +319,6 @@ Key services and their clients:
 - `SystemService` → `SystemClient`
 - `ContentService` → `ContentClient`
 - `QueryService` → `QueryClient`
-- `TaskService` → `TaskClient`
 
 #### State Management (Server)
 

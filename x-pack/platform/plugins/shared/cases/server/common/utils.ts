@@ -77,14 +77,39 @@ export const defaultSortField = 'created_at';
  */
 export const nullUser: User = { username: null, full_name: null, email: null };
 
+/**
+ * A stored template reference is always version-pinned. The create request may omit `version`
+ * (server-side template expansion resolves it to the latest), so by the time a case is persisted
+ * the version must have been stamped — this converts the request shape to the storage shape and
+ * guards the invariant.
+ */
+const pinStoredTemplate = (
+  template: CasePostRequest['template']
+): CaseTransformedAttributes['template'] => {
+  if (template == null) {
+    return template;
+  }
+
+  if (template.version === undefined) {
+    throw new Error(
+      `Cannot persist case: template ${template.id} has no pinned version. Template expansion must resolve the version before the case is saved.`
+    );
+  }
+
+  return { id: template.id, version: template.version };
+};
+
 export const transformNewCase = ({
   user,
-  newCase,
+  newCase: { template, ...newCase },
 }: {
   user: User;
   newCase: CasePostRequest;
 }): CaseTransformedAttributes => ({
   ...newCase,
+  // Re-added only when present so an absent template stays absent (an explicit
+  // `template: undefined` key changes SO create payloads and snapshots).
+  ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,

@@ -54,7 +54,7 @@ describe('Session index', () => {
       runAt: new Date(),
       status: TaskStatus.Idle,
     },
-    abortController: new AbortController(),
+    signal: new AbortController().signal,
     executionUuid: 'test-execution-uuid',
   };
 
@@ -1152,7 +1152,7 @@ describe('Session index', () => {
           ...mockRunContext.taskInstance,
           state: { shardMissingCounter: 9 },
         },
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         executionUuid: 'test-execution-uuid',
       };
 

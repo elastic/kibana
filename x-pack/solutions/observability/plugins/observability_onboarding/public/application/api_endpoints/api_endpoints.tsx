@@ -30,6 +30,8 @@ import { ApiKeyField } from './api_key_field';
 import { EndpointField } from './endpoint_field';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
+import { SecurityCallout } from './security_callout';
+import { useSecurityCalloutDismissal } from './use_security_callout_dismissal';
 
 const DIRECT_ENDPOINTS_DOCS_LINK = 'https://ela.st/connect-deployment-endpoints';
 const MANAGED_INPUTS_DOCS_LINK = 'https://ela.st/managed-inputs';
@@ -44,7 +46,9 @@ export const ApiEndpoints = () => {
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const { endpoints, isLoading, isError } = useApiEndpoints();
-  const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
+  const { encodedApiKeys, keyCreatedBeforeByEndpointId, creatingEndpointId, createApiKey } =
+    useApiKeys();
+  const { dismissedByEndpointId, dismissCallout } = useSecurityCalloutDismissal();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
   const [apiKeysManagementUrl, setApiKeysManagementUrl] = useState<string | undefined>(undefined);
@@ -163,6 +167,12 @@ export const ApiEndpoints = () => {
               />
             </>
           )}
+          <SecurityCallout
+            wasKeyCreatedBefore={Boolean(keyCreatedBeforeByEndpointId[selectedEndpoint.id])}
+            hasApiKey={Boolean(encodedApiKeys[selectedEndpoint.id])}
+            isDismissed={Boolean(dismissedByEndpointId[selectedEndpoint.id])}
+            onDismiss={() => dismissCallout(selectedEndpoint.id)}
+          />
           <EuiSpacer size="m" />
           <EuiFlexGroup direction={isMobile ? 'column' : 'row'} gutterSize="s" responsive={false}>
             <EuiFlexItem>
@@ -173,6 +183,7 @@ export const ApiEndpoints = () => {
                 encodedApiKey={encodedApiKeys[selectedEndpoint.id]}
                 isCreating={creatingEndpointId === selectedEndpoint.id}
                 canCreate={canCreateApiKey}
+                wasKeyCreatedBefore={Boolean(keyCreatedBeforeByEndpointId[selectedEndpoint.id])}
                 onCreate={() => createApiKey(selectedEndpoint.id)}
               />
             </EuiFlexItem>

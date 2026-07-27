@@ -31,14 +31,18 @@ import { css } from '@emotion/react';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
-import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
-import { MlPageHeader } from '../components/page_header';
+import {
+  useCreateAndNavigateToManagementMlLink,
+  useMlManagementLink,
+} from '../contexts/kibana/use_create_url';
+import { MlAppHeader } from '../components/ml_app_header';
 import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_overview';
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
 import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
 import { OverviewFooterItem } from './components/overview_ml_footer_item';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { DatePicker } from '../components/ml_page/date_picker';
 
 export const useOverviewPageCustomCss = () => {
   const {
@@ -129,34 +133,25 @@ export const OverviewPage: FC = () => {
     '',
     'overview'
   );
+  const managementOverviewHref = useMlManagementLink('', 'overview');
+  const trainedModelsHref = useMlManagementLink('', ML_PAGES.TRAINED_MODELS_MANAGE);
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
 
   return (
     <>
-      <MlPageHeader restrictWidth={1200}>
-        <EuiFlexGroup direction="column" gutterSize="s">
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.overview.welcomeBanner.header.title', {
+          defaultMessage: 'Machine Learning',
+        })}
+      />
+      <EuiPageBody restrictWidth={1200}>
+        <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.ml.overview.welcomeBanner.header.title"
-                  defaultMessage="Machine Learning"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText color="subdued">
-              {i18n.translate('xpack.ml.overview.welcomeBanner.header.titleDescription', {
-                defaultMessage:
-                  'Analyze your data and generate models for its patterns of behavior.',
-              })}
-            </EuiText>
+            <DatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </MlPageHeader>
-      <EuiPageBody restrictWidth={1200}>
+        <EuiSpacer size="l" />
         <UpgradeWarning />
-        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="m" direction="column">
           {isADEnabled || isDFAEnabled ? (
             <>
@@ -352,7 +347,10 @@ export const OverviewPage: FC = () => {
                 })}
                 docLink={helpLink}
                 callToAction={
-                  <EuiLink onClick={navigateToStackManagementMLOverview}>
+                  <EuiLink
+                    href={managementOverviewHref}
+                    onClick={navigateToStackManagementMLOverview}
+                  >
                     {i18n.translate('xpack.ml.overview.goToManagmentLink', {
                       defaultMessage: 'Go to management',
                     })}
@@ -373,7 +371,7 @@ export const OverviewPage: FC = () => {
                 })}
                 docLink={trainedModelsDocLink}
                 callToAction={
-                  <EuiLink onClick={navigateToTrainedModels}>
+                  <EuiLink href={trainedModelsHref} onClick={navigateToTrainedModels}>
                     {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
                       defaultMessage: 'Manage trained models',
                     })}
