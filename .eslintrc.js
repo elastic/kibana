@@ -3146,10 +3146,16 @@ module.exports = {
       excludedFiles: [
         'x-pack/solutions/observability/plugins/**/*.test.*',
         'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
         'x-pack/solutions/observability/packages/**/*.test.*',
         'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
         'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
         'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
       ],
       rules: {
         '@kbn/telemetry/ebt_props_should_be_present': 'warn',
