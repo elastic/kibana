@@ -121,10 +121,14 @@ export type ApmOtelAttributes = {
     'attributes.gen_ai.request.seed': number;
     'attributes.gen_ai.response.id': string;
     'attributes.gen_ai.response.finish_reasons': string[];
-    // EDOT extensions for prompt/response capture
+    // EDOT extensions for prompt/response capture.
+    // Messages are stored as an array of individually-serialized JSON message
+    // strings (one per message) so each element stays under the ES flattened
+    // ignore_above:1024 limit — a single JSON array blob would be silently
+    // dropped from the index.
     'attributes.gen_ai.provider.name': string;
-    'attributes.gen_ai.input.messages': string;
-    'attributes.gen_ai.output.messages': string;
+    'attributes.gen_ai.input.messages': string | string[];
+    'attributes.gen_ai.output.messages': string | string[];
     'attributes.gen_ai.system_instructions': string;
     'attributes.gen_ai.conversation.id': string;
   };

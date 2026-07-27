@@ -32,50 +32,94 @@ describe('hasGenAiData', () => {
 });
 
 describe('parseGenAiMessages', () => {
-  it('parses a JSON array string with role/content schema', () => {
-    const raw = JSON.stringify([
-      { role: 'user', content: 'Hello' },
-      { role: 'assistant', content: 'Hi there' },
-    ]);
-    const result = parseGenAiMessages(raw);
-    expect(result).toHaveLength(2);
-    expect(result[0].role).toBe('user');
-    expect(result[0].content).toBe('Hello');
+  describe('OLD format (single-element array containing a JSON array string)', () => {
+    it('parses a JSON array string with role/content schema', () => {
+      const raw = JSON.stringify([
+        { role: 'user', content: 'Hello' },
+        { role: 'assistant', content: 'Hi there' },
+      ]);
+      const result = parseGenAiMessages([raw]);
+      expect(result).toHaveLength(2);
+      expect(result[0].role).toBe('user');
+      expect(result[0].content).toBe('Hello');
+    });
+
+    it('parses messages with parts array schema', () => {
+      const raw = JSON.stringify([
+        { role: 'user', parts: [{ type: 'text', content: 'Explain this code' }] },
+      ]);
+      const result = parseGenAiMessages([raw]);
+      expect(result[0].parts?.[0].type).toBe('text');
+    });
+
+    it('parses messages with function/tool parts', () => {
+      const raw = JSON.stringify([
+        { role: 'assistant', parts: [{ type: 'function', name: 'get_weather', args: {} }] },
+      ]);
+      const result = parseGenAiMessages([raw]);
+      expect(result[0].parts?.[0].type).toBe('function');
+    });
+
+    it('returns raw-text fallback when JSON is malformed', () => {
+      const result = parseGenAiMessages(['[broken json']);
+      expect(result).toHaveLength(1);
+      expect(result[0].role).toBe('user');
+      expect(result[0].content).toBe('[broken json');
+    });
+
+    it('handles a plain object (non-array) within a single-element array', () => {
+      const raw = JSON.stringify({ role: 'user', content: 'single message' });
+      const result = parseGenAiMessages([raw]);
+      expect(result).toHaveLength(1);
+      expect(result[0].role).toBe('user');
+    });
   });
 
-  it('parses messages with parts array schema', () => {
-    const raw = JSON.stringify([
-      { role: 'user', parts: [{ type: 'text', content: 'Explain this code' }] },
-    ]);
-    const result = parseGenAiMessages(raw);
-    expect(result[0].parts?.[0].type).toBe('text');
+  describe('NEW format (array of individual message strings)', () => {
+    it('happy path: 2-element array, each a valid message JSON', () => {
+      const result = parseGenAiMessages([
+        JSON.stringify({ role: 'user', content: 'hello' }),
+        JSON.stringify({ role: 'assistant', content: 'hi' }),
+      ]);
+      expect(result).toHaveLength(2);
+      expect(result[0].role).toBe('user');
+      expect(result[0].content).toBe('hello');
+      expect(result[1].role).toBe('assistant');
+      expect(result[1].content).toBe('hi');
+    });
+
+    it('mixed roles: user, assistant, system, tool messages', () => {
+      const result = parseGenAiMessages([
+        JSON.stringify({ role: 'system', content: 'You are a helpful assistant.' }),
+        JSON.stringify({ role: 'user', content: 'What is the weather?' }),
+        JSON.stringify({ role: 'tool', content: 'Sunny, 72°F' }),
+        JSON.stringify({ role: 'assistant', content: 'It is sunny and 72°F.' }),
+      ]);
+      expect(result).toHaveLength(4);
+      expect(result[0].role).toBe('system');
+      expect(result[1].role).toBe('user');
+      expect(result[2].role).toBe('tool');
+      expect(result[3].role).toBe('assistant');
+    });
+
+    it('malformed element: one element is not valid JSON => falls back to raw string content', () => {
+      const result = parseGenAiMessages([
+        JSON.stringify({ role: 'user', content: 'hello' }),
+        '{not valid json',
+      ]);
+      expect(result).toHaveLength(2);
+      expect(result[0].role).toBe('user');
+      expect(result[1].role).toBe('user');
+      expect(result[1].content).toBe('{not valid json');
+    });
   });
 
-  it('parses messages with function/tool parts', () => {
-    const raw = JSON.stringify([
-      { role: 'assistant', parts: [{ type: 'function', name: 'get_weather', args: {} }] },
-    ]);
-    const result = parseGenAiMessages(raw);
-    expect(result[0].parts?.[0].type).toBe('function');
-  });
-
-  it('returns raw-text fallback when JSON is malformed', () => {
-    const result = parseGenAiMessages('{broken json');
-    expect(result).toHaveLength(1);
-    expect(result[0].role).toBe('unknown');
-    expect(result[0].content).toBe('{broken json');
-  });
-
-  it('handles a plain object (non-array)', () => {
-    const raw = JSON.stringify({ role: 'user', content: 'single message' });
-    const result = parseGenAiMessages(raw);
-    expect(result).toHaveLength(1);
-    expect(result[0].role).toBe('user');
-  });
-
-  it('returns empty array for null/undefined', () => {
-    expect(parseGenAiMessages(null)).toHaveLength(0);
+  it('returns empty array for undefined', () => {
     expect(parseGenAiMessages(undefined)).toHaveLength(0);
+  });
+
+  it('returns empty array for empty array input', () => {
+    expect(parseGenAiMessages([])).toHaveLength(0);
   });
 });
 
@@ -90,8 +134,8 @@ describe('getGenAiFields', () => {
     'attributes.gen_ai.request.max_tokens': [2048],
     'attributes.gen_ai.response.model': ['gpt-4o-2024-08-06'],
     'attributes.gen_ai.response.id': ['resp-abc123'],
-    'attributes.gen_ai.input.messages': [JSON.stringify([{ role: 'user', content: 'Hello' }])],
-    'attributes.gen_ai.output.messages': [JSON.stringify([{ role: 'assistant', content: 'Hi!' }])],
+    'attributes.gen_ai.input.messages': [JSON.stringify({ role: 'user', content: 'Hello' })],
+    'attributes.gen_ai.output.messages': [JSON.stringify({ role: 'assistant', content: 'Hi!' })],
   };
 
   it('extracts all core fields correctly', () => {

@@ -6,6 +6,7 @@
  */
 
 import { EuiAvatar, EuiComment, EuiCommentList, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiMessage } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
@@ -48,10 +49,14 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
   if (allMessages.length === 0) return null;
 
   return (
-    <EuiCommentList aria-label="GenAI conversation">
+    <EuiCommentList
+      aria-label={i18n.translate('xpack.apm.genAi.messages.conversationAriaLabel', {
+        defaultMessage: 'GenAI conversation',
+      })}
+    >
       {allMessages.map((msg, i) => (
         <EuiComment
-          key={i}
+          key={`${msg.role}-${i}`}
           username={msg.role}
           timelineAvatar={<RoleAvatar role={msg.role} />}
           timelineAvatarAriaLabel={msg.role}

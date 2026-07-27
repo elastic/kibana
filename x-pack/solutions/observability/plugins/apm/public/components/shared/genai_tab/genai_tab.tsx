@@ -216,12 +216,16 @@ export function GenAiTab({ genAi }: Props) {
             })}
           >
             <EuiBasicTable
+              itemId="id"
               tableLayout="auto"
               compressed
               items={detailRows}
               columns={DETAIL_COLUMNS}
               data-test-subj="genAiDetails"
               css={detailTableCss}
+              tableCaption={i18n.translate('xpack.apm.genAi.section.details.tableCaption', {
+                defaultMessage: 'GenAI details',
+              })}
             />
           </GenAiSection>
         </>

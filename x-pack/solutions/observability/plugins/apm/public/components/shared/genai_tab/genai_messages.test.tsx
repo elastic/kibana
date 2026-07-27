@@ -81,8 +81,8 @@ describe('GenAiMessages', () => {
   });
 
   it('shows View more toggle for very long content (> 1000 chars)', () => {
-    // MaybeViewMore threshold: Math.ceil(content.length / 60) * 18 > 300
-    // Need content.length > 60 * 300/18 ≈ 1000 chars
+    // MaybeViewMore threshold: max(newlineLines, charLines) * 18 > 300 (MAX_HEIGHT).
+    // For single-line prose: charLines = ceil(len/60), so > 1000 chars triggers.
     const longContent = 'a'.repeat(1200);
     renderMessages([{ role: 'user', content: longContent }]);
     expect(screen.getByText('View more')).toBeInTheDocument();
@@ -94,5 +94,11 @@ describe('GenAiMessages', () => {
     const toggle = screen.getByText('View more');
     fireEvent.click(toggle);
     expect(screen.getByText('View less')).toBeInTheDocument();
+  });
+
+  it('renders the View more toggle with the apmViewMoreLink data-test-subj', () => {
+    renderMessages([{ role: 'user', content: 'a'.repeat(1200) }]);
+    expect(screen.getByTestId('apmViewMoreLink')).toBeInTheDocument();
+    expect(screen.getByTestId('apmViewMoreLink')).toHaveTextContent('View more');
   });
 });

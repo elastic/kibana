@@ -94,18 +94,29 @@ function first<T>(metadata: Record<string, unknown>, key: string): T | undefined
   return undefined;
 }
 
-export function parseGenAiMessages(raw: unknown): GenAiMessage[] {
-  if (!raw) return [];
-  const str = typeof raw === 'string' ? raw : JSON.stringify(raw);
-  try {
-    const parsed = JSON.parse(str);
-    const arr = Array.isArray(parsed) ? parsed : [parsed];
-    return arr.map((item) => {
-      if (typeof item === 'object' && item !== null) return item as GenAiMessage;
-      return { role: 'unknown', content: String(item) };
+export function parseGenAiMessages(raw: string[] | undefined): GenAiMessage[] {
+  if (!raw || raw.length === 0) return [];
+  // NEW format: multi-element array where each element is one message JSON object
+  if (raw.length > 1 || (raw.length === 1 && !raw[0].trimStart().startsWith('['))) {
+    // each element is a single message like {"role":"user","content":"..."}
+    return raw.flatMap((s) => {
+      try {
+        const msg = JSON.parse(s);
+        // normalise: return as GenAiMessage (handle parts/content)
+        if (msg && typeof msg === 'object' && 'role' in msg) return [msg as GenAiMessage];
+        return [{ role: 'user', content: s }];
+      } catch {
+        return [{ role: 'user', content: s }];
+      }
     });
+  }
+  // OLD format: single element containing the full JSON array "[{...},{...}]"
+  try {
+    const parsed = JSON.parse(raw[0]);
+    if (Array.isArray(parsed)) return parsed as GenAiMessage[];
+    return [parsed as GenAiMessage];
   } catch {
-    return [{ role: 'unknown', content: str }];
+    return [{ role: 'user', content: raw[0] }];
   }
 }
 
@@ -134,8 +145,12 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       id: f(ATTRIBUTE_GEN_AI_RESPONSE_ID) as string | undefined,
       finish_reasons: f(ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS) as string[] | undefined,
     },
-    inputMessages: parseGenAiMessages(f(ATTRIBUTE_GEN_AI_INPUT_MESSAGES)),
-    outputMessages: parseGenAiMessages(f(ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)),
+    inputMessages: parseGenAiMessages(
+      metadata[ATTRIBUTE_GEN_AI_INPUT_MESSAGES] as string[] | undefined
+    ),
+    outputMessages: parseGenAiMessages(
+      metadata[ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES] as string[] | undefined
+    ),
     systemInstructions: f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS) as string | undefined,
   };
 }
