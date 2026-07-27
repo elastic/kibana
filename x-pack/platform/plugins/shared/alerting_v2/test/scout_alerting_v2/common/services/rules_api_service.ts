@@ -36,6 +36,8 @@ export interface RulesApiService {
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
+  enable: (id: string) => Promise<RuleResponse>;
+  disable: (id: string) => Promise<RuleResponse>;
   bulkDelete: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkDisable: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkEnable: (params: BulkByIdsParams) => Promise<BulkResponse>;
@@ -137,6 +139,24 @@ export const getRulesApiService = ({
           ignoreErrors: [404],
           retries: 0,
         });
+      }),
+    enable: (id: string) =>
+      measurePerformanceAsync(log, 'rules.enable', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/_enable`,
+          headers: COMMON_HEADERS,
+        });
+        return response.data;
+      }),
+    disable: (id: string) =>
+      measurePerformanceAsync(log, 'rules.disable', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/_disable`,
+          headers: COMMON_HEADERS,
+        });
+        return response.data;
       }),
     bulkDelete,
     bulkDisable: (params: BulkByIdsParams) =>
