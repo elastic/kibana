@@ -8,7 +8,7 @@
 import type React from 'react';
 import { createTagsPasteHandler, getNewTags, hasTagDelimiter, splitTags } from './tags_input';
 
-describe('tags_input helpers', () => {
+describe('tags_combo_box tags_input helpers', () => {
   describe('hasTagDelimiter', () => {
     it.each([
       ['tag1,tag2', true],
@@ -38,16 +38,16 @@ describe('tags_input helpers', () => {
       expect(getNewTags([], ['tag1', ' tag2 ', '  '])).toEqual(['tag1', 'tag2']);
     });
 
-    it('ignores values already present', () => {
-      expect(getNewTags(['tag1'], ['tag1', 'tag2'])).toEqual(['tag2']);
+    it('ignores values already present (case-insensitive)', () => {
+      expect(getNewTags(['Prod'], ['prod', 'tag2'])).toEqual(['tag2']);
     });
 
-    it('de-duplicates within the batch', () => {
-      expect(getNewTags([], ['tag1', 'tag1', 'tag2'])).toEqual(['tag1', 'tag2']);
+    it('de-duplicates within the batch case-insensitively, keeping the first casing', () => {
+      expect(getNewTags([], ['Tag1', 'tag1', 'tag2'])).toEqual(['Tag1', 'tag2']);
     });
 
     it('returns an empty array when there is nothing new to add', () => {
-      expect(getNewTags(['tag1', 'tag2'], ['tag1', ' tag2 ', ''])).toEqual([]);
+      expect(getNewTags(['tag1', 'tag2'], ['TAG1', ' tag2 ', ''])).toEqual([]);
     });
   });
 
