@@ -205,8 +205,8 @@ Key rules:
 
 1. Run the `scout-best-practices-reviewer` skill against the new test
 2. **Make sure the test fails** — intentionally break the feature and confirm the test catches it
-3. Run locally: `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>`
-4. Update manifests: `node scripts/scout.js update-test-config-manifests`
+3. Run locally: `node scripts/scout run-tests --arch stateful --domain classic --testFiles <path>`
+4. Update manifests: `node scripts/scout update-test-config-manifests`
 5. Open a PR with **only this spec file's migration** (one spec per PR)
 6. **Run the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner)** — do not merge until stable
 
@@ -218,7 +218,7 @@ After the Scout test is verified:
 2. Remove orphaned code (tasks, screens, objects only used by the deleted test)
 3. Check for orphaned imports (grep to verify no other usages)
 4. Remove from all relevant config/index files
-5. Update manifests: `node scripts/scout.js update-test-config-manifests`
+5. Update manifests: `node scripts/scout update-test-config-manifests`
 
 ## Common mistakes
 

@@ -140,7 +140,7 @@ echo "Exit code: $?"
 # Non-zero = red confirmed ✓  |  Zero = test already passes — rewrite it
 ```
 
-For Scout API/UI tests: `node scripts/scout run-tests --config <config-path>`
+For Scout API/UI tests: `node scripts/scout run-tests --arch stateful --domain classic --config <config-path>`
 
 ### Step 3: Green — implement fix
 
@@ -176,7 +176,7 @@ Restart services for a clean environment — stale reproduction state produces f
    **No feature flags** (`server_args` empty):
    ```bash
    pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
-   node scripts/scout.js start-server --arch stateful --domain classic &
+   node scripts/scout start-server --arch stateful --domain classic &
    TIMEOUT=60; COUNT=0
    until curl -s -u elastic:changeme http://localhost:5620/api/status \
      | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
@@ -191,7 +191,7 @@ Restart services for a clean environment — stale reproduction state produces f
    pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
    mkdir -p config_sets/bug_fixer
    # Write kibana.yml from server_args in analysis.json (same content as reproduction session)
-   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
+   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
    TIMEOUT=60; COUNT=0
    until curl -s -u elastic:changeme http://localhost:5620/api/status \
      | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do

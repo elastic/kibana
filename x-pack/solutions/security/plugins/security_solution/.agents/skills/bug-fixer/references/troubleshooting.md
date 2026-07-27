@@ -2,7 +2,7 @@
 
 | Problem | Solution |
 |---------|----------|
-| Scout server fails to start | Check `node scripts/scout.js start-server` output; ensure port 5620 is free and `yarn kbn bootstrap` completed |
+| Scout server fails to start | Check `node scripts/scout start-server` output; ensure port 5620 is free and `yarn kbn bootstrap` completed |
 | Scout server slow to start | Can take 5+ min on first run; poll `http://localhost:5620/api/status` rather than assuming a fixed wait time |
 | ES returns 401 | Default credentials are `elastic` / `changeme` |
 | Feature flags not taking effect | Verify `config_sets/bug_fixer/kibana.yml` was written before starting the server; restart with `--serverConfigSet bug_fixer` |

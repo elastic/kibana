@@ -15,7 +15,7 @@ This page shows the **minimum setup** to add Scout tests to a plugin/package. Fo
 Generate a working scaffold (folders, configs, and sample tests) by following the guided setup:
 
 ```bash
-node scripts/scout.js generate
+node scripts/scout generate
 ```
 
 This command will also automatically enable your plugin or package's Scout tests in the CI by updating the `.buildkite/scout_ci_config.yml` file.
@@ -33,7 +33,7 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 After adding or changing specs, generate the metadata used by CI discovery and selective testing:
 
 ```bash
-node scripts/scout.js update-test-config-manifests
+node scripts/scout update-test-config-manifests
 ```
 
 Commit the generated `.meta` files. They are generated artifacts and should not be edited by hand.
@@ -151,7 +151,7 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 
 ::::::::::{step} Update test config manifests
 
-After adding or changing specs, run `node scripts/scout.js update-test-config-manifests`. Commit the generated `.meta` files, but do not edit them by hand.
+After adding or changing specs, run `node scripts/scout update-test-config-manifests`. Commit the generated `.meta` files, but do not edit them by hand.
 
 ::::::::::
 
@@ -186,7 +186,7 @@ A namespace holds the same layout you'd otherwise place at the Scout root, one l
 Pass `--namespace` to the [Scout CLI](#scout-setup-cli):
 
 ```bash
-node scripts/scout.js generate \
+node scripts/scout generate \
   --path x-pack/solutions/security/plugins/security_solution \
   --namespace detection_engine
 ```

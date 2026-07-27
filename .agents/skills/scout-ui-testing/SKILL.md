@@ -113,9 +113,9 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Run / debug quickly
 
 - Use either `--config` or `--testFiles` (they are mutually exclusive).
-- Run by config: `node scripts/scout.js run-tests --arch stateful --domain classic --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
-- Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
-- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag> --headed`.
+- Run by config: `node scripts/scout run-tests --arch stateful --domain classic --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
+- Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
+- For faster iteration, start servers once in another terminal: `node scripts/scout start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag> --headed`.
 - `run-tests` auto-detects custom config sets from `.../test/scout_<name>/...` paths.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <name>` when your tests require a custom config set.
 - Debug: `SCOUT_LOG_LEVEL=debug`, or `node scripts/playwright test --config <...> --project local --ui`
@@ -123,7 +123,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## CI enablement
 
 - Scout tests run in CI only for modules listed under `plugins.enabled` / `packages.enabled` in `.buildkite/scout_ci_config.yml`.
-- `node scripts/scout.js generate` registers the module under `enabled` so the new configs run in CI.
+- `node scripts/scout generate` registers the module under `enabled` so the new configs run in CI.
 
 ## References
 

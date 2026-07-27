@@ -1,6 +1,6 @@
 ---
 name: scout-create-scaffold
-description: Generate or repair a Scout test scaffold for a Kibana plugin/package (test/scout*/{api,ui} Playwright configs, fixtures, example specs). Use when you need the initial Scout directory structure; prefer `node scripts/scout.js generate` with flags for non-interactive/LLM execution.
+description: Generate or repair a Scout test scaffold for a Kibana plugin/package (test/scout*/{api,ui} Playwright configs, fixtures, example specs). Use when you need the initial Scout directory structure; prefer `node scripts/scout generate` with flags for non-interactive/LLM execution.
 ---
 
 # Create Scout Scaffold (Generator-First)
@@ -26,23 +26,23 @@ description: Generate or repair a Scout test scaffold for a Kibana plugin/packag
 Run from the Kibana repo root:
 
 ```bash
-node scripts/scout.js generate --path <moduleRoot> --type <api|ui|both>
+node scripts/scout generate --path <moduleRoot> --type <api|ui|both>
 ```
 
 Common variants:
 
 ```bash
 # UI scaffold, sequential (non-parallel)
-node scripts/scout.js generate --path <moduleRoot> --type ui --no-ui-parallel
+node scripts/scout generate --path <moduleRoot> --type ui --no-ui-parallel
 
 # Generate into a custom Scout root (test/scout_<configSet>/...)
-node scripts/scout.js generate --path <moduleRoot> --type both --scout-root scout_<configSet>
+node scripts/scout generate --path <moduleRoot> --type both --scout-root scout_<configSet>
 
 # Generate a functional-area namespace in a large plugin
-node scripts/scout.js generate --path <moduleRoot> --type both --namespace <namespace>
+node scripts/scout generate --path <moduleRoot> --type both --namespace <namespace>
 
 # If some Scout directories already exist, generate only missing sections without prompting
-node scripts/scout.js generate --path <moduleRoot> --type both --force
+node scripts/scout generate --path <moduleRoot> --type both --force
 ```
 
 Notes:
@@ -100,7 +100,7 @@ Pick **one** pattern and wire it after `scout.js generate` completes:
 
 ## After Generating
 
-- After replacing the example specs or changing test files, run `node scripts/scout.js update-test-config-manifests`.
+- After replacing the example specs or changing test files, run `node scripts/scout update-test-config-manifests`.
   - Commit the generated `.meta` files so CI discovery and selective testing can find the configs.
   - Treat `.meta` files as generated artifacts; never edit them by hand.
 - Custom server config sets:

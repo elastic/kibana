@@ -142,5 +142,5 @@ export const servers: ScoutServerConfig = {
 [Start the local server](./run-scout-tests.md#scout-run-tests-server-config-set) with the custom config:
 
 ```bash
-node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet uiam_local
+node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet uiam_local
 ```

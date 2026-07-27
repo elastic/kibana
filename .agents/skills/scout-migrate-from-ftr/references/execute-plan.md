@@ -186,8 +186,8 @@ Keep Scout tests for what **requires a real browser and running server**: naviga
 ### 9) Verify and run tests locally
 
 - **Typecheck:** For **Pattern A**, run **`node scripts/type_check --project <plugin-root>/tsconfig.json`**. For **Pattern B**, run **`node scripts/type_check --project <plugin>/test/scout/api/tsconfig.json`** (and UI project if present). Use full **`node scripts/type_check`** when shared types changed broadly. Huge **`TS6059` / `TS6307`** counts under a **Scout-only** project usually mean **Pattern B** + forbidden **`server/`** relatives—switch to **Pattern A** or fix imports (step 6).
-- Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
-  `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
+- Use `node scripts/scout run-tests --arch stateful --domain classic --testFiles <path>` and
+  `node scripts/scout run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
 - If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config set from the Playwright config path.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <configSet>` when your tests require a custom config set.
 - Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
