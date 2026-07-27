@@ -17,18 +17,10 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  getSeverityLabel,
-  type Discovery,
-  type EventLifecycleResponse,
-} from '@kbn/significant-events-schema';
+import { getSeverityLabel, type EventLifecycleResponse } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
-import {
-  getLifecycleStatusColor,
-  getLifecycleStatusLabel,
-  isVisibleDiscoveryKind,
-} from '../shared/status_display';
+import { getLifecycleStatusColor, getLifecycleStatusLabel } from '../shared/status_display';
 
 interface TimelineEntry {
   icon: string;
@@ -42,7 +34,6 @@ interface TimelineEntry {
 
 const FLOW_ICONS = {
   detection: 'bell',
-  discovery: 'inspect',
   event: 'documentEdit',
 } as const;
 
@@ -58,25 +49,6 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       .filter(Boolean)
       .join(' · '),
   }));
-
-  const discoveries: TimelineEntry[] = data.discoveries
-    .filter((discovery): discovery is Discovery & { kind: Exclude<Discovery['kind'], 'handled'> } =>
-      isVisibleDiscoveryKind(discovery.kind)
-    )
-    .map((discovery) => ({
-      icon: FLOW_ICONS.discovery,
-      label: getLifecycleStatusLabel(discovery.kind),
-      color: getLifecycleStatusColor(discovery.kind),
-      timestamp: discovery['@timestamp'],
-      title: discovery.title,
-      description:
-        discovery.kind === 'discovery' && discovery.severity != null
-          ? i18n.translate('xpack.streams.lifecycle.severity', {
-              defaultMessage: 'Severity: {severity}',
-              values: { severity: getSeverityLabel(discovery.severity) },
-            })
-          : undefined,
-    }));
 
   const events: TimelineEntry[] = [...data.events]
     .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
@@ -97,7 +69,7 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       detail: event.assessment_note,
     }));
 
-  return [...detections, ...discoveries, ...events].sort(
+  return [...detections, ...events].sort(
     (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)
   );
 }

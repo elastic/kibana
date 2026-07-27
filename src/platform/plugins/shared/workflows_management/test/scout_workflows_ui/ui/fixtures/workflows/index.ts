@@ -17,6 +17,7 @@ export {
   getIterationLoopWorkflowYaml,
   getManyIterationsWorkflowYaml,
   getDummyWorkflowYaml,
+  getMultiStepTypeWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
   getRootLevelAutocompleteYaml,

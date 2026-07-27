@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
   - '@kbn/features-plugin'
+  - '@kbn/navigation-plugin'
 tags:
   - plugin
   - prod
