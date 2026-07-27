@@ -98,7 +98,7 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
     type: ToolType.builtin,
     description: `Generate or update a dashboard from ordered operations.
 
-Persists the resulting dashboard as an attachment and returns its id, a compact dashboard summary, and one-sentence summaries for successfully authored panels (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 
 Use operations[] to:
 1. set metadata
