@@ -73,6 +73,16 @@ function createDataViewReference(dataViewId: string, layerId: string): SavedObje
   };
 }
 
+/**
+ * Reference name under which an XY by-value annotation layer persists its data
+ * view. Must match the name produced by the Lens XY persistence logic
+ * (`getLayerReferenceName` in x-pack/.../lens/public/visualizations/xy/persistence.ts),
+ * which lives in a plugin this shared package cannot import from.
+ */
+export function getXYAnnotationLayerReferenceName(layerId: string): string {
+  return `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`;
+}
+
 function createAnnotationLayerDataViewReference(
   dataViewId: string,
   layerId: string
@@ -80,7 +90,7 @@ function createAnnotationLayerDataViewReference(
   return {
     type: INDEX_PATTERN_ID,
     id: dataViewId,
-    name: `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`,
+    name: getXYAnnotationLayerReferenceName(layerId),
   };
 }
 
@@ -223,6 +233,30 @@ export function isDataViewSpec(spec: unknown): spec is DataViewSpec {
   return spec != null && typeof spec === 'object' && 'title' in spec;
 }
 
+export function isDataViewSpecWithTitle(spec: unknown): spec is DataViewSpec & { title: string } {
+  return isDataViewSpec(spec) && typeof spec.title === 'string' && spec.title.length > 0;
+}
+
+/**
+ * Builds the `data_view_spec` data source from an ad-hoc
+ * `DataViewSpec`. Shared by data layers and XY annotation layers so both emit an
+ * inline data view identically.
+ */
+export function buildDataViewSpecDataSource(
+  dataViewSpec: DataViewSpec & { title: string }
+): Extract<DataSourceType, { type: typeof AS_CODE_DATA_VIEW_SPEC_TYPE }> {
+  const fieldSettings = toApiFieldSettings(dataViewSpec);
+  return {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: dataViewSpec.title,
+    time_field: dataViewSpec.timeFieldName,
+    ...(dataViewSpec.allowHidden !== undefined
+      ? { allow_hidden_indices: dataViewSpec.allowHidden }
+      : {}),
+    ...(fieldSettings ? { field_settings: fieldSettings } : {}),
+  };
+}
+
 function getReferenceCriteria(layerId: string) {
   return (ref: SavedObjectReference) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`;
 }
@@ -239,17 +273,8 @@ export function buildDataSourceStateNoESQL(
 
   if (adhocReference && adHocDataViews?.[adhocReference.id]) {
     const dataViewSpec = adHocDataViews[adhocReference.id];
-    if (isDataViewSpec(dataViewSpec) && dataViewSpec.title) {
-      const fieldSettings = toApiFieldSettings(dataViewSpec);
-      return {
-        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-        index_pattern: dataViewSpec.title,
-        time_field: dataViewSpec.timeFieldName,
-        ...(dataViewSpec.allowHidden !== undefined
-          ? { allow_hidden_indices: dataViewSpec.allowHidden }
-          : {}),
-        ...(fieldSettings ? { field_settings: fieldSettings } : {}),
-      };
+    if (isDataViewSpecWithTitle(dataViewSpec)) {
+      return buildDataViewSpecDataSource(dataViewSpec);
     }
   }
 

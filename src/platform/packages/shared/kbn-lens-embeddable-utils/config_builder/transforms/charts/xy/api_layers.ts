@@ -27,7 +27,7 @@ import {
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   AnnotationLayerByValueType,
@@ -59,8 +59,10 @@ import {
 } from '../../columns/utils';
 import {
   buildDataSourceState,
+  buildDataViewSpecDataSource,
   generateApiLayer,
-  isDataViewSpec,
+  getXYAnnotationLayerReferenceName,
+  isDataViewSpecWithTitle,
   isFormBasedLayer,
   isTextBasedLayer,
   nonNullable,
@@ -421,9 +423,38 @@ export function buildAPIReferenceLinesLayer(
   };
 }
 
-function findAnnotationDataView(layerId: string, references: SavedObjectReference[]) {
-  const ref = references.find((r) => r.name === `xy-visualization-layer-${layerId}`);
+function findAnnotationDataViewId(
+  layerId: string,
+  references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[] = []
+) {
+  const name = getXYAnnotationLayerReferenceName(layerId);
+  // Persisted data views are referenced from the top-level `references`, while
+  // inline (ad hoc) data views are referenced from `state.internalReferences`.
+  // Both use the `xy-visualization-layer-<layerId>` name, so check both.
+  const ref =
+    references.find((r) => r.name === name) ?? adhocReferences.find((r) => r.name === name);
   return ref?.id;
+}
+
+// Builds the API `data_source` for a query annotation layer. When the resolved
+// data view is an inline (ad hoc) one it is emitted as a `data_view_spec`
+// (mirroring `buildDataSourceStateNoESQL` for data layers); otherwise it is a
+// reference to a persisted data view.
+function buildAnnotationDataSource(
+  adHocDataView: unknown,
+  dataViewId: string
+): Extract<
+  DataSourceType,
+  { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
+> {
+  if (isDataViewSpecWithTitle(adHocDataView)) {
+    return buildDataViewSpecDataSource(adHocDataView);
+  }
+  return {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: dataViewId,
+  };
 }
 
 function getTextConfigurationForQueryAnnotation(
@@ -481,16 +512,16 @@ export function buildAPIAnnotationsLayer(
     };
   }
 
-  const indexPatternId =
+  // If the layer is persisted, its data view id is the layer indexPatternId.
+  // If the data view is ad hoc, we need to find the data view id from the references.
+  const dataViewId =
     'indexPatternId' in layer
       ? layer.indexPatternId
-      : findAnnotationDataView(layer.layerId, references);
+      : findAnnotationDataViewId(layer.layerId, references, adhocReferences);
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const ignore_global_filters =
-    layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
-  const adHocDataView = adHocDataViews[layer.layerId];
-  const referencedDataView = findAnnotationDataView(layer.layerId, references);
+  // `adHocDataViews` is keyed by the (generated) data view id, so resolve it via
+  // the layer's data view id rather than the layer id.
+  const adHocDataView = dataViewId ? adHocDataViews[dataViewId] : undefined;
 
   // Only query annotations actually query an index, so the data view is only
   // meaningful for them. Manual point/range annotations are positioned purely by
@@ -499,7 +530,7 @@ export function buildAPIAnnotationsLayer(
   // is re-derived from the chart's data layers when converting back to state.
   const hasQueryAnnotation = layer.annotations.some(isQueryAnnotationConfig);
 
-  if (hasQueryAnnotation && !indexPatternId) {
+  if (hasQueryAnnotation && !dataViewId) {
     // A query annotation without a resolvable data view cannot be represented.
     throw new Error('XY visualization: cannot find data view ID for annotation layer.');
   }
@@ -508,22 +539,13 @@ export function buildAPIAnnotationsLayer(
     DataSourceType,
     { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
   > | null =
-    !hasQueryAnnotation || !indexPatternId
+    !hasQueryAnnotation || !dataViewId
       ? null
-      : isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
-      ? {
-          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-          index_pattern: indexPatternId,
-          time_field: adHocDataView.timeFieldName,
-        }
-      : {
-          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-          ref_id: referencedDataView ?? indexPatternId,
-        };
+      : buildAnnotationDataSource(adHocDataView, dataViewId);
   return {
     type: 'annotations',
     ...(dataSource ? { data_source: dataSource } : {}),
-    ignore_global_filters,
+    ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
