@@ -226,7 +226,7 @@ pivot:
       - "Feature:Service Maps"
       - "Team:actionable-obs"
       - "Team:obs-exploration"
-      - "Team:obs-presentation"
+      - "Team:obs-signals-traces"
       - "Team:Observability"
       - "author:actionable-obs"
       - "Feature:Streams"
