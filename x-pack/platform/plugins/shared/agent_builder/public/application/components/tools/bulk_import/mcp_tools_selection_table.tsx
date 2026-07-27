@@ -60,7 +60,6 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
 
   // Track when "select all" is active to prevent the table's internal selection
   // mechanism from limiting selection to only the visible page items.
-  // Using a ref to avoid stale closure issues in the selection change callback.
   const isSelectAllActiveRef = useRef(false);
 
   const {
@@ -69,7 +68,7 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
     results: filteredTools,
   } = useMcpToolsSearch({ tools, isDisabled });
 
-  // Reset page index when filtered results change
+  // Reset to page 0 whenever the search filter changes.
   useEffect(() => {
     setTablePageIndex(0);
   }, [filteredTools]);
@@ -78,6 +77,29 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
     const selectedNames = new Set(selectedTools.map((tool) => tool.name));
     return tools.filter((tool) => selectedNames.has(tool.name));
   }, [tools, selectedTools]);
+
+  // Must match EUI's fixed sort (name asc) so currentPageTools aligns with
+  // what EuiBasicTable receives as its items prop.
+  const sortedFilteredTools = useMemo(
+    () => [...filteredTools].sort((a, b) => a.name.localeCompare(b.name)),
+    [filteredTools]
+  );
+
+  const currentPageTools = useMemo(
+    () =>
+      sortedFilteredTools.slice(
+        tablePageIndex * tablePageSize,
+        (tablePageIndex + 1) * tablePageSize
+      ),
+    [sortedFilteredTools, tablePageIndex, tablePageSize]
+  );
+
+  // Refs keep handleSelectionChange stable; a new callback recreates the selection
+  // object, which causes EUI's class component to loop via componentDidUpdate.
+  const selectedMcpToolsRef = useRef(selectedMcpTools);
+  selectedMcpToolsRef.current = selectedMcpTools;
+  const currentPageToolsRef = useRef(currentPageTools);
+  currentPageToolsRef.current = currentPageTools;
 
   const columns: Array<EuiBasicTableColumn<McpTool>> = useMemo(
     () => [
@@ -122,7 +144,13 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
         isSelectAllActiveRef.current = false;
         return;
       }
-      onChange(newSelection);
+      isSelectAllActiveRef.current = false;
+      // Preserve off-page selections and merge with the current-page change.
+      const currentPageNames = new Set(currentPageToolsRef.current.map((t) => t.name));
+      const offPageSelected = selectedMcpToolsRef.current.filter(
+        (t) => !currentPageNames.has(t.name)
+      );
+      onChange([...offPageSelected, ...newSelection]);
     },
     [onChange, tools.length]
   );
@@ -136,14 +164,22 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
     onChange([...tools]);
   }, [onChange, tools]);
 
+  // Only pass current-page items to EUI: getDerivedStateFromProps fires
+  // onSelectionChange for any selected item absent from the current page's items,
+  // which would wipe off-page selections on every render.
+  const selectedCurrentPageTools = useMemo(() => {
+    const selectedNames = new Set(selectedTools.map((t) => t.name));
+    return currentPageTools.filter((t) => selectedNames.has(t.name));
+  }, [currentPageTools, selectedTools]);
+
   const selection: EuiInMemoryTableProps<McpTool>['selection'] = useMemo(
     () => ({
       selectable: () => !isDisabled,
       selectableMessage: () => '',
       onSelectionChange: handleSelectionChange,
-      selected: selectedMcpTools,
+      selected: selectedCurrentPageTools,
     }),
-    [isDisabled, handleSelectionChange, selectedMcpTools]
+    [isDisabled, handleSelectionChange, selectedCurrentPageTools]
   );
 
   const emptyMessage = useMemo(() => {
@@ -183,13 +219,18 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
         selection={selection}
         search={searchConfig}
         onTableChange={({ page }: CriteriaWithPagination<McpTool>) => {
+          // EuiBasicTable clears selection before firing onChange on page changes.
+          // Capture now and restore below; React batches both calls so this one wins.
+          const selectionToRestore = selectedMcpToolsRef.current;
           if (page) {
-            setTablePageIndex(page.index);
             if (page.size !== tablePageSize) {
               setTablePageSize(page.size);
               setTablePageIndex(0);
+            } else {
+              setTablePageIndex(page.index);
             }
           }
+          onChange(selectionToRestore);
         }}
         pagination={{
           initialPageSize: DEFAULT_PAGE_SIZE,
