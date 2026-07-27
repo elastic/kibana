@@ -29,7 +29,9 @@
     "@kbn/agent-builder-common",
     "@kbn/code-editor",
     "@kbn/esql",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/code-editor-mock",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }
