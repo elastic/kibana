@@ -44,7 +44,7 @@ const waitForPageFilters = () => {
 const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
-  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
+  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.exist');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
