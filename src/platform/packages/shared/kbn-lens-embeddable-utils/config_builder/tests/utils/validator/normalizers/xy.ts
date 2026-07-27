@@ -60,7 +60,9 @@ function getAPILayerType(layer: any): string | undefined {
   }
   if (layerType === 'referenceLine') return 'reference_lines';
   if (layerType === 'annotations') {
-    return layer.persistanceType === 'byReference' ? 'annotation_group' : 'annotations';
+    return layer.persistanceType === 'byReference' || layer.annotationGroupId
+      ? 'annotation_group'
+      : 'annotations';
   }
   return undefined;
 }
@@ -120,7 +122,7 @@ const alignIds: NormalizerConfig<XYAttributes> = {
       const canonicalLayerId = `${apiType}_${i}`;
 
       if (layer.layerType === 'annotations') {
-        if (layer.persistanceType === 'byReference') {
+        if (layer.persistanceType === 'byReference' || layer.annotationGroupId) {
           layer.annotationGroupRef = `ref-${canonicalLayerId}`;
         } else {
           // byValue annotation layers: remap event IDs to canonical format
@@ -243,6 +245,20 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
             return entry;
           })
           .filter((yc: any) => Object.keys(yc).length > 1);
+      } else if (layer.layerType === 'annotations' && layer.annotationGroupId) {
+        // TODO: validate normalization of annotation group references
+        // Runtime by-reference: normalize to canonical persisted byReference format
+        attributes.references.push({
+          id: layer.annotationGroupId,
+          name: layer.annotationGroupRef,
+          type: 'event-annotation-group',
+        });
+        layer.persistanceType = 'byReference';
+        delete layer.annotationGroupId;
+        delete layer.annotations;
+        delete layer.__lastSaved;
+        delete layer.indexPatternId;
+        delete layer.ignoreGlobalFilters;
       }
     }
 
