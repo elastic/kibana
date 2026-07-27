@@ -113,7 +113,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           title: labels.deleteError,
           text: e instanceof Error ? e.message : undefined,
         });
-      } finally {
         setIsDeleting(false);
       }
     },
