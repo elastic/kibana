@@ -14,7 +14,7 @@ import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/a
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import {
-  FLEET_ROUTING_PATHS,
+  INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -178,7 +178,7 @@ describe('When on the package policy create page', () => {
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
-      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicySinglePage
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}

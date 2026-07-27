@@ -55,7 +55,6 @@ import { FLEET_ROUTING_PATHS } from './constants';
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
-import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
@@ -335,11 +334,6 @@ export const AppRoutes = memo(() => {
               />
             </ErrorLayout>
           )}
-        </Route>
-
-        {/* TODO: Move this route to the Integrations app */}
-        <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-          <CreatePackagePolicyPage />
         </Route>
 
         <Route

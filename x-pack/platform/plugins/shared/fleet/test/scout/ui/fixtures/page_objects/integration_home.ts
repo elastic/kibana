@@ -64,6 +64,17 @@ export class IntegrationHomePage {
     );
   }
 
+  async navigateToDetailPage(pkgkey: string) {
+    await this.page.gotoApp(`integrations/detail/${pkgkey}/overview`);
+  }
+
+  async waitForDetailPageToLoad() {
+    await this.page.testSubj.waitForSelector('addIntegrationPolicyButton', {
+      state: 'visible',
+      timeout: 20_000,
+    });
+  }
+
   getAddIntegrationPolicyButton() {
     return this.page.testSubj.locator('addIntegrationPolicyButton');
   }
