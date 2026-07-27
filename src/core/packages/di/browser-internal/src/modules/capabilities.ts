@@ -11,7 +11,8 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { Capabilities, CoreStart } from '@kbn/core-di-browser';
 
 export function loadCapabilities({ bind }: ContainerModuleLoadOptions): void {
-  // TODO: is it ok to do this? nothing prevents someone from trying to use this in the setup phase
+  // TODO: is it ok to do this? nothing prevents someone from trying to use this in the setup phase.
+  // This question is valid for a few adapters
   bind(Capabilities)
     .toResolvedValue(({ capabilities }) => capabilities, [CoreStart('application')])
     .inSingletonScope();
