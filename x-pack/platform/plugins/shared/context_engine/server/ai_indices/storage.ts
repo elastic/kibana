@@ -20,7 +20,6 @@ const storageSettings = {
   name: aiIndicesIndexName,
   schema: {
     properties: {
-      name: types.keyword({}),
       description: types.text({}),
       date_created: types.date({}),
       date_modified: types.date({}),
@@ -38,7 +37,6 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface AiIndexDocument {
-  name: string;
   description?: string;
   date_created: string;
   date_modified: string;

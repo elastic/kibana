@@ -81,9 +81,9 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      technicalPreview: true,
       requiresPageReload: true,
-      readonly: false,
+      readonly: true,
+      readonlyMode: 'ui',
     },
     [AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.enabled.name', {
