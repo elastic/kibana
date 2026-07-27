@@ -71,7 +71,7 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   '.nvmrc',
 ];
 
-/** Uncategorized-only diffs: skip FTR when every file matches. */
+/** Skip FTR when every changed file matches, regardless of owning module. */
 export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   'docs/**',
   '**/docs/**',
@@ -106,6 +106,8 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/*.jpg',
   '**/*.jpeg',
   '**/*.webp',
+  // Scout (Playwright) test trees never affect FTR, whichever module owns them.
+  '**/test/scout{_*,}/**',
 ];
 
 /** True when this PR should omit FTR configs. */
@@ -121,6 +123,10 @@ export function shouldSkipFtrTests(
     return false;
   }
 
+  if (allChangedFilesInScope(changedFiles, FTR_IRRELEVANT_PATHS)) {
+    return true;
+  }
+
   if (affectedModules.size > 0) {
     for (const id of affectedModules) {
       if (!FTR_EXCLUDED_MODULES.has(id)) {
@@ -130,5 +136,5 @@ export function shouldSkipFtrTests(
     return true;
   }
 
-  return allChangedFilesInScope(changedFiles, FTR_IRRELEVANT_PATHS);
+  return false;
 }
