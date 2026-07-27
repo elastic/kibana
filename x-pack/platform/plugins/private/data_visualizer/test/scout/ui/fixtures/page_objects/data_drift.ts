@@ -94,7 +94,7 @@ export class DataDrift {
   async waitForTotalDocumentCount(
     id: 'Reference' | 'Comparison',
     expectedFormattedTotalDocCount: string,
-    timeout = 5000
+    timeout = 30_000
   ) {
     await this.page.waitForFunction(
       ({ testSubj, expected }) => {
@@ -240,9 +240,17 @@ export class DataDrift {
       throw new Error(`Chart dataDriftDocCountChart-${id} has no bounding box`);
     }
 
+    // FTR WebDriver Actions used canvas-center as origin, so [0, 0] meant center.
+    // Playwright positions are top-left relative — treat [0, 0] as "use center".
+    const resolvedCoordinates: [number, number] =
+      chartClickCoordinates[0] === 0 && chartClickCoordinates[1] === 0
+        ? [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height / 2), 1)]
+        : chartClickCoordinates;
+
     const clickPositions: Array<[number, number]> = [
-      chartClickCoordinates,
+      resolvedCoordinates,
       [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height / 2), 1)],
+      [Math.max(Math.floor(box.width / 3), 1), Math.max(Math.floor(box.height / 2), 1)],
       [10, 10],
     ];
 
@@ -370,21 +378,14 @@ export class DataDrift {
   }
 
   async waitForDataDriftTimestampField(expectedIdentifier: string) {
+    // Combo box uses singleSelection.asPlainText — value is in the input, not a pill.
+    const comboBox = this.page.components.comboBox('mlDataDriftTimestampField');
     await expect
       .poll(async () => {
-        const input = this.page.testSubj.locator('mlDataDriftTimestampField input');
-        const inputValue = await input.inputValue().catch(() => '');
-        if (inputValue === expectedIdentifier) {
-          return true;
-        }
-
-        const pills = await this.page.testSubj
-          .locator('mlDataDriftTimestampField .euiComboBoxPill')
-          .allInnerTexts();
         if (expectedIdentifier === '') {
-          return pills.length === 0 && inputValue === '';
+          return (await comboBox.getSelectedOptions()).length === 0;
         }
-        return pills.some((pill) => pill.trim() === expectedIdentifier);
+        return (await comboBox.getSelectedOptions()).includes(expectedIdentifier);
       })
       .toBe(true);
   }

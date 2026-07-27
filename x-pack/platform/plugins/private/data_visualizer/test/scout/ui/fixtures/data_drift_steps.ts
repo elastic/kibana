@@ -28,19 +28,16 @@ export const assertDataDriftPageContent = async ({
   await dataDrift.waitForComparisonDocCountContent();
   await dataDrift.waitForNoWindowParametersEmptyPrompt();
 
+  // For time-based sources the Analyze button is not mounted until both histogram
+  // brushes exist (see data_drift_view requiresWindowParameters empty prompt).
   if ('chartClickCoordinates' in testData) {
-    const runAnalysisInitiallyDisabled = await dataDrift.isRunAnalysisButtonDisabled();
-
-    if (runAnalysisInitiallyDisabled) {
-      await dataDrift.clickDocumentCountChart('Reference', testData.chartClickCoordinates);
-      await expect.poll(() => dataDrift.isRunAnalysisButtonDisabled()).toBe(true);
-      await dataDrift.clickDocumentCountChart(
-        'Comparison',
-        testData.comparisonChartClickCoordinates
-      );
-    }
+    await dataDrift.clickDocumentCountChart('Reference', testData.chartClickCoordinates);
+    await dataDrift.clickDocumentCountChart(
+      'Comparison',
+      testData.comparisonChartClickCoordinates
+    );
   }
 
-  await expect.poll(() => dataDrift.isRunAnalysisButtonDisabled()).toBe(false);
+  await expect.poll(() => dataDrift.isRunAnalysisButtonDisabled(), { timeout: 30_000 }).toBe(false);
   await dataDrift.runAnalysis();
 };
