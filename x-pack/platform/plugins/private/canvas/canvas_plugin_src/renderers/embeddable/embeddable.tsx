@@ -8,8 +8,10 @@
 import type { CoreStart } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { omit } from 'lodash';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -27,6 +29,31 @@ import { embeddableInputToExpression } from './embeddable_input_to_expression';
 const { embeddable: strings } = RendererStrings;
 
 const children: Record<string, { setFilters: (filters: Filter[] | undefined) => void }> = {};
+
+const CanvasEmbeddableContainer: FC<{ children: ReactNode }> = ({ children: childNodes }) => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      & .embPanel--dragHandle:hover {
+        background-color: ${transparentize(
+          euiTheme.colors.warning,
+          colorMode === 'DARK' ? 0.3 : 0.1
+        )};
+      }
+    `,
+    [colorMode, euiTheme]
+  );
+
+  return (
+    <div
+      className={CANVAS_EMBEDDABLE_CLASSNAME}
+      css={styles}
+      style={{ width: '100%', height: '100%', cursor: 'auto' }}
+    >
+      {childNodes}
+    </div>
+  );
+};
 
 const renderReactEmbeddable = ({
   type,
@@ -108,12 +135,9 @@ const renderReactEmbeddable = ({
 
   return (
     <KibanaRenderContextProvider {...core}>
-      <div
-        className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: '100%', height: '100%', cursor: 'auto' }}
-      >
+      <CanvasEmbeddableContainer>
         <RendererWrapper />
-      </div>
+      </CanvasEmbeddableContainer>
     </KibanaRenderContextProvider>
   );
 };
