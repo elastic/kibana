@@ -268,7 +268,9 @@ export function initializeLayoutManager(
   };
 
   // On initialization, place incoming embeddables if there is at least one
-  addIncomingEmbeddables(incomingEmbeddables);
+  new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
+    addIncomingEmbeddables(incomingEmbeddables);
+  });
 
   // --------------------------------------------------------------------------------------
   // API definition
@@ -538,6 +540,7 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
+            // console.log({ currentLayout, childrenChanges });
             const hasPanelChanges =
               childrenChanges.some(
                 (childChanges) =>

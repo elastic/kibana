@@ -461,7 +461,16 @@ export class SavedMap {
         return;
       }
     } else {
-      mapEmbeddableState = getByValueState(this._mapEmbeddableState, this._attributes);
+      const storedState = this._store.getState();
+      mapEmbeddableState = {
+        ...getByValueState(this._mapEmbeddableState, this._attributes),
+        hiddenLayers: getLayerListRaw(storedState)
+          .filter((layer) => !layer.visible)
+          .map((layer) => layer.id),
+        isLayerTOCOpen: getIsLayerTOCOpen(storedState),
+        mapCenter: { ...getMapCenter(storedState), zoom: getMapZoom(storedState) },
+        openTOCDetails: getOpenTOCDetails(storedState),
+      };
     }
 
     if (tags) {
