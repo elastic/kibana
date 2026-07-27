@@ -100,7 +100,11 @@ apiTest.describe(
         });
 
         const e = await snap.waitForLogRecord(
-          (attrs) => attrs['event.action'] === 'http_request' && attrs['url.path'] === '/api/status'
+          (attrs) =>
+            attrs['event.action'] === 'http_request' &&
+            // Pin to our request via the X-Forwarded-For we set — internal status checks from the
+            // auth flow also hit /api/status but without it, and could otherwise be matched first.
+            attrs['http.request.headers.x-forwarded-for'] === '1.2.3.4'
         );
 
         expectTraditionalEnvelope(e);

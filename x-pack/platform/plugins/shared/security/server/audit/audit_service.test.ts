@@ -846,10 +846,17 @@ describe('#createLoggingConfig', () => {
     );
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
-    expect((appenders.auditTrailAppender as OtelAppenderConfig).attributes).toEqual({
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
+    expect(otelAppender.attributes).toEqual({
       'custom.attr': 'value',
       ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
     });
+    // includeResources must cover ALL configured attribute keys — not just the audit two — so a
+    // deployment-provided resource attribute (e.g. project.id) is not stripped from the resource.
+    expect(otelAppender.includeResources).toEqual([
+      'custom.attr',
+      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+    ]);
   });
 
   test('does not inject fieldDrops, fieldDefaults, fieldAdditions or includeResources for non-OTel appenders', async () => {

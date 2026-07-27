@@ -261,8 +261,15 @@ export const createLoggingConfig = (config: ConfigType['audit'], isServerless = 
             fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
             fieldUppercase: [...(baseAppender.fieldUppercase ?? []), ...AUDIT_OTEL_FIELD_UPPERCASE],
             fieldAdditions: { ...baseAppender.fieldAdditions, ...AUDIT_OTEL_FIELD_ADDITIONS },
-            // Ship a minimal resource: keep only the audit resource attributes we set below.
-            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+            // Slim the resource to the configured attributes — the appender's own `attributes` plus
+            // the audit service.name/service.type — dropping the detectors' host/OS/process/env
+            // fields. The allowlist is derived from the attribute keys (not just
+            // AUDIT_OTEL_RESOURCE_ATTRIBUTES) so deployment-provided resource attributes such as
+            // project.id survive; stripping them breaks log delivery.
+            includeResources: Object.keys({
+              ...baseAppender.attributes,
+              ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+            }),
             attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
           }
         : baseAppender;
