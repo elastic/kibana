@@ -8,14 +8,14 @@
  */
 
 import type { ServiceIdentifier } from 'inversify';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 /**
  * The event-based telemetry reporting API.
- * @see {@link AnalyticsServiceStart}
+ * @see {@link AnalyticsServiceSetup}
  * @public
  */
-export type IAnalytics = AnalyticsServiceStart;
+export type IAnalytics = Pick<AnalyticsServiceSetup, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 /**
  * The event-based telemetry reporting service.

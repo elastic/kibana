@@ -8,8 +8,8 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Analytics, CoreStart } from '@kbn/core-di-server';
+import { Analytics, CoreSetup } from '@kbn/core-di-server';
 
 export function loadAnalytics({ bind }: ContainerModuleLoadOptions): void {
-  bind(Analytics).toService(CoreStart('analytics'));
+  bind(Analytics).toService(CoreSetup('analytics'));
 }
