@@ -225,7 +225,7 @@ Priority is assigned based on **impact**, not scenario type. An edge case or err
 
 ### Consult the team's critical-workflows map
 
-Before finalizing priority, look up the owning team's critical-workflows map — it lists workflows the team treats as P0/P1 by domain, which the abstract definitions above cannot encode. See [`critical-workflows.md`](critical-workflows.md) for the registry, lookup precedence, and the no-map fallback rule.
+Before finalizing priority, look up the owning team's critical-workflows map — it lists workflows the team treats as P0/P1 by domain, which the abstract definitions above cannot encode. See [`critical-workflows.md`](critical-workflows.md) for the file-lookup convention, precedence, and the no-map fallback rule.
 
 ---
 
