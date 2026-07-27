@@ -23,11 +23,11 @@ export const HOME_PAGE_BANNER_COPY = {
   },
   noData: {
     title: i18n.translate('xpack.serverlessVectordb.home.banner.emptyState.title', {
-      defaultMessage: 'Set up your vector database in 2 simple steps.',
+      defaultMessage: 'Set up your Elasticsearch Vector Database in 2 simple steps.',
     }),
     description: i18n.translate('xpack.serverlessVectordb.home.banner.emptyState.description', {
       defaultMessage:
-        'Use our getting started wizard or browse documentation, articles and notebooks.',
+        'Use our getting started guides or browse documentation, articles and notebooks to generate embeddings from your content or store your current vectors in an optimized index..',
     }),
     buttonLabel: i18n.translate('xpack.serverlessVectordb.home.banner.emptyState.getStarted', {
       defaultMessage: 'Get started',

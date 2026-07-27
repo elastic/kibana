@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiIllustration, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { cloudRocketDeploy as cloudRocketDeployIllustration } from '@elastic/eui-illustrations';
+import { cloudRocketDeploy } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { useKibana } from '../hooks/use_kibana';
 import { useLocalStorage } from '../hooks/use_local_storage';
@@ -41,7 +41,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
     );
   }
 
-  if (hasData && isDismissed) {
+  if (hasData || isDismissed) {
     return null;
   }
 
@@ -54,28 +54,20 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
       <EuiSpacer size="xxl" />
       <AnnouncementBanner
         data-test-subj="homePageBanner"
-        color="plain"
+        color="highlighted"
         title={title}
         text={description}
-        onDismiss={hasData ? handleDismiss : undefined}
-        media={<EuiIllustration type={cloudRocketDeployIllustration} />}
+        onDismiss={handleDismiss}
+        media={<EuiIllustration type={cloudRocketDeploy} />}
         actionProps={{
-          primary: hasData
-            ? {
-              children: buttonLabel,
-              href: docLinks.links.enterpriseSearch.elasticInferenceServiceSupportedModels,
-              target: '_blank',
-              'data-test-subj': 'homePageBannerViewSupportedModelsBtn',
-              // 'data-telemetry-id': 'serverlessVectordb-home-banner-viewSupportedModels-btn',
-            }
-            : {
-              children: buttonLabel,
-              fill: true,
-              iconType: 'rocket',
-              onClick: handleGetStarted,
-              'data-test-subj': 'homePageBannerGetStartedBtn',
-              // 'data-telemetry-id': 'serverlessVectordb-home-banner-getStarted-btn',
-            },
+          primary: {
+            children: buttonLabel,
+            fill: true,
+            iconType: 'rocket',
+            onClick: handleGetStarted,
+            'data-test-subj': 'homePageBannerGetStartedBtn',
+            // 'data-telemetry-id': 'serverlessVectordb-home-banner-getStarted-btn',
+          },
         }}
       />
     </>
