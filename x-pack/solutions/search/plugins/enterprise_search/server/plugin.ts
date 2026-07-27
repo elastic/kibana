@@ -55,7 +55,6 @@ import type { PluginsSetup, PluginsStart, RouteDependencies } from './types';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { getConnectorsSearchResultProvider } from './utils/connectors_search_result_provider';
-import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import type { ConfigType } from '.';
@@ -292,7 +291,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       globalSearch.registerResultProvider(
         getSearchResultProvider(config, contentConnectors?.getConnectorTypes() || [])
       );
-      globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
     }
   }

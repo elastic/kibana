@@ -39,8 +39,24 @@ const getEntityAnalyticsStateSearchParams = (): URLSearchParams => {
   return new URLSearchParams(window.location.search);
 };
 
+/**
+ * Expandable-flyout URL state used when navigating from Agent Builder into Entity Analytics.
+ * `right` is required (entity overview). `left` is optional (investigation / details panel).
+ */
+export interface EntityAnalyticsFlyoutNavigationState {
+  preview: unknown[];
+  right: {
+    id: string;
+    params: Record<string, unknown>;
+  };
+  left?: {
+    id: string;
+    params: Record<string, unknown>;
+  };
+}
+
 const getEntityAnalyticsNavigationPathWithFlyout = (
-  flyout: Record<string, unknown>
+  flyout: EntityAnalyticsFlyoutNavigationState
 ): string | undefined => {
   const encodedFlyoutSearch = encodeFlyout(flyout);
   if (encodedFlyoutSearch == null) {
@@ -275,7 +291,7 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
 }: {
   application: ApplicationStart;
   appId: string;
-  flyout: Record<string, unknown>;
+  flyout: EntityAnalyticsFlyoutNavigationState;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;

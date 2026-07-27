@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import {
   basicCase,
   alertComment,
@@ -46,7 +47,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts table'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'security.event',
@@ -56,7 +57,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-events-table">{'Events table'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'file',
@@ -66,7 +67,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-files-table">{'Files table'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   // Comment is intentionally registered without `getAttachmentTabViewObject`
   // to mirror production: comments live in the activity tab, not here.
@@ -75,7 +76,7 @@ const buildRegistry = () => {
     displayName: 'Comment',
     icon: 'editorComment',
     getAttachmentViewObject: () => ({ event: 'added a comment' }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   return registry;
 };
@@ -94,6 +95,9 @@ const onUpdateFieldMock = jest.fn();
 
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
+    // Attachment filters now persist to local storage; clear between tests so a
+    // filter selected in one test does not leak into the next.
+    localStorage.clear();
     useGetCaseFileStatsMock.mockReturnValue({ data: fileStatsData });
   });
 

@@ -18,7 +18,10 @@ export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
+export const EVALS_RESOLVE_INSTRUMENTATION_URL =
+  `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
+export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
 export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
 export const EVALS_TRACING_PROJECT_TRACES_URL =

@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
@@ -206,7 +207,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: ruleName,
@@ -303,7 +304,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: uuidv4(),
@@ -374,7 +375,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: uuidv4(),
@@ -444,7 +445,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: uuidv4(),

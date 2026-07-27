@@ -22,10 +22,12 @@ import React, { Component, type FC, memo, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '@kbn/spaces-plugin/common';
-import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { SpacesApiUi } from '@kbn/spaces-plugin/public';
+
+import type { DisplaySpace } from '../privileges/kibana/display_space';
 
 interface Props {
-  spaces: Space[];
+  spaces: DisplaySpace[];
   buttonText: string;
   spacesApiUi: SpacesApiUi;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -17,6 +17,7 @@ import {
   formatAlertDelay,
   formatNoDataStrategy,
   formatRecoveryDelay,
+  formatRecoveryStrategy,
   getRecoverEsqlSegment,
 } from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
@@ -106,14 +107,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
               defaultMessage: 'Recovery',
             }),
-            description:
-              rule.recovery_strategy === 'query'
-                ? i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
-                    defaultMessage: 'Custom',
-                  })
-                : i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
-                    defaultMessage: 'Default',
-                  }),
+            description: formatRecoveryStrategy(rule.recovery_strategy),
             'data-test-subj': 'alertingV2RuleDetailsRecovery',
           },
           {
@@ -151,6 +145,9 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       : []),
   ];
 
+  // The summary flyout renders the description in its header.
+  const description = isSummary ? undefined : rule.metadata.description;
+
   return (
     <>
       {isSummary && (
@@ -162,6 +159,14 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {description && (
+        <>
+          <EuiText size="s" data-test-subj="ruleConditionsDescription">
+            <p>{description}</p>
+          </EuiText>
           <EuiSpacer size="m" />
         </>
       )}

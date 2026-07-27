@@ -30,7 +30,7 @@
     "@kbn/connector-schemas",
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/agent-builder-sml-plugin",
     "@kbn/actions-plugin",
     "@kbn/code-editor",
     "@kbn/logging-mocks",

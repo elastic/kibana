@@ -15,6 +15,7 @@ import {
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
+  clearChangeHistory,
   combineToNdJson,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createPrebuiltRuleAssetSavedObjects,
@@ -23,33 +24,15 @@ import {
   getCustomQueryRuleParams,
   installPrebuiltRules,
   performUpgradePrebuiltRules,
+  refreshChangeHistory,
 } from '../../../utils';
 import { revertPrebuiltRule } from '../../../utils/rules/prebuilt_rules/revert_prebuilt_rule';
-
-const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const detectionsApi = getService('detectionsApi');
   const es = getService('es');
   const log = getService('log');
-
-  const refreshHistory = async () => {
-    await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
-  };
-
-  const clearHistory = async () => {
-    try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
-    } catch {
-      // Change history index may not exist yet
-    }
-  };
 
   // Skip in Serverless until "xpack.alerting.ruleChangeTracking.enabled" and
   // xpack.securitySolution.enableExperimental: [ruleChangesHistoryEnabled] feature flags
@@ -58,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await clearHistory();
+      await clearChangeHistory(es);
     });
 
     describe('history API', () => {
@@ -67,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .createRule({ body: getCustomQueryRuleParams() })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -90,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .createRule({ body: getCustomQueryRuleParams() })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
 
@@ -136,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
           }
 
-          await refreshHistory();
+          await refreshChangeHistory(es);
         });
 
         it('returns the requested page with the right size and total', async () => {
@@ -196,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          await refreshHistory();
+          await refreshChangeHistory(es);
 
           const { body } = await detectionsApi
             .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -222,7 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          await refreshHistory();
+          await refreshChangeHistory(es);
 
           const { body } = await detectionsApi
             .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -237,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .createRule({ body: getCustomQueryRuleParams() })
             .expect(200);
 
-          await refreshHistory();
+          await refreshChangeHistory(es);
 
           const { body } = await detectionsApi
             .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -254,7 +237,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .createRule({ body: getCustomQueryRuleParams() })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -275,7 +258,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -295,7 +278,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: rule } = await detectionsApi.readRule({ query: { rule_id: ruleId } });
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -320,7 +303,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -339,7 +322,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await installPrebuiltRules(es, supertest);
 
         const { body: rule } = await detectionsApi.readRule({ query: { rule_id: ruleId } });
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -367,7 +350,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const { body: rule } = await detectionsApi.readRule({ query: { rule_id: ruleId } });
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -413,7 +396,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const duplicatedRuleId = bulkResponse.attributes.results.created[0].id;
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: duplicatedRuleId }, query: {} })
@@ -453,7 +436,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const duplicatedRuleId = bulkResponse.attributes.results.created[0].id;
 
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: duplicatedRuleId }, query: {} })
@@ -493,7 +476,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const { body: rule } = await detectionsApi.readRule({ query: { rule_id: ruleId } });
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -522,7 +505,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: rule } = await detectionsApi.readRule({
           query: { rule_id: 'bulk-import-count-1' },
         });
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -542,7 +525,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: rule } = await detectionsApi.readRule({
           query: { rule_id: 'bulk-install-count-1' },
         });
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
@@ -572,7 +555,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: rule } = await detectionsApi.readRule({
           query: { rule_id: 'bulk-upgrade-count-1' },
         });
-        await refreshHistory();
+        await refreshChangeHistory(es);
 
         const { body } = await detectionsApi
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })

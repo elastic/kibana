@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { buildReadAccessFilter } from '../../access_control';
 import { getUserFromRequest, isAdminFromRequest } from '../../../utils';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import { createClient, type AgentClient } from './client';
+import { createClient, createSystemClient, type AgentClient } from './client';
 
 const testSpace = 'default';
 const mockUser = { id: 'user-1', username: 'test-user' };
@@ -263,5 +263,84 @@ describe('AgentClient', () => {
         expect(mockEsClient.index).toHaveBeenCalledTimes(1);
       });
     });
+  });
+});
+
+describe('SystemAgentClient', () => {
+  const profile = {
+    id: 'platform.sig_events.test-agent',
+    type: 'platform.test.type',
+    name: 'System agent',
+    description: 'Installed at startup',
+    configuration: { tools: [], connector_ids: [] },
+  };
+
+  const buildDoc = (type = profile.type) => ({
+    _id: `default_${profile.id}`,
+    _source: {
+      id: profile.id,
+      name: profile.name,
+      type,
+      space: testSpace,
+      description: profile.description,
+      created_by_name: 'system',
+      access_control: { access_mode: 'public', entries: [] },
+      config: profile.configuration,
+      created_at: '2020-01-01T00:00:00.000Z',
+      updated_at: '2020-01-01T00:00:00.000Z',
+    },
+  });
+
+  const createSystemAgentClient = () =>
+    createSystemClient({
+      space: testSpace,
+      logger: loggerMock.create(),
+      elasticsearch: { client: { asInternalUser: {} } } as never,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('creates a system-owned agent without a request', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await createSystemAgentClient().ensureAgent(profile);
+
+    expect(mockEsClient.index).toHaveBeenCalledWith({
+      id: `${testSpace}_${profile.id}`,
+      op_type: 'create',
+      document: expect.objectContaining({
+        id: profile.id,
+        type: profile.type,
+        space: testSpace,
+        created_by_name: 'system',
+      }),
+    });
+  });
+
+  it('preserves an existing agent', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
+
+    await createSystemAgentClient().ensureAgent(profile);
+
+    expect(mockEsClient.index).not.toHaveBeenCalled();
+  });
+
+  it('rejects an existing agent with a different type', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('chat')] } });
+
+    await expect(createSystemAgentClient().ensureAgent(profile)).rejects.toThrow(
+      'the id is already used by an agent of type "chat"'
+    );
+  });
+
+  it('accepts a concurrent create by another Kibana node', async () => {
+    mockEsClient.search
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      .mockResolvedValueOnce({ hits: { hits: [buildDoc()] } });
+    mockEsClient.index.mockRejectedValue(new Error('version conflict'));
+
+    await expect(createSystemAgentClient().ensureAgent(profile)).resolves.toBeUndefined();
   });
 });

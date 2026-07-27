@@ -8,7 +8,4 @@
  */
 
 export const BASE_PATH = '/api/data_views';
-export const INITIAL_REST_VERSION = '2023-10-31';
-
-export const DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG = 'dataViewsAsCode.enabled';
-export const DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG_DEFAULT = false;
+export const INITIAL_REST_VERSION = '1';

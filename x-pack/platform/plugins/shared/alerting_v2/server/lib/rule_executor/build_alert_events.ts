@@ -10,12 +10,43 @@ import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEvent, AlertEventSeverity } from '../../resources/datastreams/alert_events';
+import type {
+  AlertEvent,
+  AlertEventSeverity,
+  AlertEventType,
+} from '../../resources/datastreams/alert_events';
 import {
   alertEventSeverity,
+  alertEventType,
   buildRuleEventDocument,
 } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
+
+/**
+ * Maps a `rule.kind` to the `AlertEventType` its events should be stamped
+ * with at creation time.
+ *
+ * A stateful (`kind: 'alert'`) rule produces `type: 'alert'` events, tracked
+ * as episodes by the director. A stateless (`kind: 'signal'`) rule produces
+ * `type: 'signal'` events, never episode-tracked.
+ *
+ * The `switch` is written exhaustively over `RuleKind`: the `default` branch
+ * assigns `rule.kind` to a `never`-typed local, which produces a compile
+ * error the moment a new `RuleKind` variant is added but not handled here.
+ * This prevents a future kind from silently defaulting to one branch.
+ */
+export const resolveAlertEventType = (rule: Pick<RuleResponse, 'kind'>): AlertEventType => {
+  switch (rule.kind) {
+    case 'alert':
+      return alertEventType.alert;
+    case 'signal':
+      return alertEventType.signal;
+    default: {
+      const unhandled: never = rule.kind;
+      throw new Error(`Unhandled rule.kind: ${unhandled as string}`);
+    }
+  }
+};
 
 const SEVERITY_COLUMN = 'severity';
 const SUPPORTED_SEVERITIES = new Set<AlertEventSeverity>(
@@ -88,6 +119,7 @@ export interface BuildAlertEventsBaseOpts {
   ruleVersion: number;
   spaceId: string;
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
+  type: AlertEventType;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
@@ -101,6 +133,7 @@ export function createAlertEventsBatchBuilder({
   ruleVersion,
   spaceId,
   ruleAttributes,
+  type,
   scheduledTimestamp,
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
@@ -133,7 +166,7 @@ export function createAlertEventsBatchBuilder({
         data: rowDoc,
         status: 'breached',
         source,
-        type: 'signal',
+        type,
         space_id: spaceId,
         severity: extractSeverity(rowDoc),
       });
@@ -153,6 +186,7 @@ export interface BuildRecoveryAlertEventsOpts {
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: Set<string>;
   scheduledTimestamp: string;
+  type: AlertEventType;
   dataPresentGroupHashes?: ReadonlySet<string>;
 }
 
@@ -169,6 +203,7 @@ export function buildRecoveryAlertEvents({
   activeGroupHashes,
   breachedGroupHashes,
   scheduledTimestamp,
+  type,
   dataPresentGroupHashes,
 }: BuildRecoveryAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
@@ -188,7 +223,7 @@ export function buildRecoveryAlertEvents({
         data: {},
         status: 'recovered',
         source: 'internal',
-        type: 'signal',
+        type,
         space_id: spaceId,
       })
     );
@@ -200,6 +235,7 @@ export interface BuildContinuedBreachAlertEventsOpts {
   spaceId: string;
   groupHashes: string[];
   scheduledTimestamp: string;
+  type: AlertEventType;
 }
 
 /**
@@ -214,6 +250,7 @@ export function buildContinuedBreachAlertEvents({
   spaceId,
   groupHashes,
   scheduledTimestamp,
+  type,
 }: BuildContinuedBreachAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
 
@@ -225,7 +262,7 @@ export function buildContinuedBreachAlertEvents({
     data: {},
     status: 'breached' as const,
     source: 'internal',
-    type: 'signal' as const,
+    type,
     space_id: spaceId,
   }));
 }
@@ -236,6 +273,7 @@ export interface BuildNoDataAlertEventsOpts {
   spaceId: string;
   groupHashes: string[];
   scheduledTimestamp: string;
+  type: AlertEventType;
 }
 
 /**
@@ -249,6 +287,7 @@ export function buildNoDataAlertEvents({
   spaceId,
   groupHashes,
   scheduledTimestamp,
+  type,
 }: BuildNoDataAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
 
@@ -260,7 +299,7 @@ export function buildNoDataAlertEvents({
     data: {},
     status: 'no_data' as const,
     source: 'internal',
-    type: 'signal' as const,
+    type,
     space_id: spaceId,
   }));
 }
@@ -285,6 +324,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   breachedGroupHashes: Set<string>;
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
+  type: AlertEventType;
 }
 /**
  * Creates `recovered` alert events by running a custom recovery query.
@@ -304,6 +344,7 @@ export function buildQueryRecoveryAlertEvents({
   breachedGroupHashes,
   esqlResponse,
   scheduledTimestamp,
+  type,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
@@ -358,7 +399,7 @@ export function buildQueryRecoveryAlertEvents({
       data,
       status: 'recovered',
       source: 'internal',
-      type: 'signal',
+      type,
       space_id: spaceId,
     })
   );

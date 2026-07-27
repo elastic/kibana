@@ -8,12 +8,15 @@
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   INVESTIGATION_PROGRESS_UI_EVENT,
   investigationStateSchema,
 } from '@kbn/significant-events-schema';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import dedent from 'dedent';
+import { createSignificantEventsAvailability } from '../../../agent_builder/tools/significant_events_availability';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID =
   platformSignificantEventsTools.reportInvestigationProgress;
@@ -36,14 +39,19 @@ const toolDescription = dedent`
   )}
 `;
 
-export const createInvestigationProgressReportTool = (): BuiltinToolDefinition<
-  typeof investigationStateSchema
-> => ({
+export const createInvestigationProgressReportTool = ({
+  server,
+  logger,
+}: {
+  server: StreamsServer;
+  logger: Logger;
+}): BuiltinToolDefinition<typeof investigationStateSchema> => ({
   id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
   type: ToolType.builtin,
   description: toolDescription,
   schema: investigationStateSchema,
   tags: ['streams', 'investigation'],
+  availability: createSignificantEventsAvailability({ server, logger }),
   handler: async (state, context) => {
     context.events.sendUiEvent(INVESTIGATION_PROGRESS_UI_EVENT, state);
 

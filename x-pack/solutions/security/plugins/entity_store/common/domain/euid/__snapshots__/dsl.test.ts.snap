@@ -460,3 +460,235 @@ Object {
   },
 }
 `;
+
+exports[`getEuidDslFilterBasedOnEntityRecord user (trusts resolved entity.namespace, reverse-maps source clause) aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace: aws record filter 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "user.name": "alice",
+        },
+      },
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "terms": Object {
+                      "event.kind": Array [
+                        "asset",
+                      ],
+                    },
+                  },
+                  Object {
+                    "terms": Object {
+                      "event.module": Array [
+                        "asset_discovery",
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "match": Object {
+                "cloud.provider": "aws",
+              },
+            },
+          ],
+        },
+      },
+    ],
+    "must": Array [
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.email",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "user.email": "",
+              },
+            },
+          ],
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.id",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "user.id": "",
+              },
+            },
+          ],
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.domain",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "user.domain": "",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getEuidDslFilterBasedOnEntityRecord user (trusts resolved entity.namespace, reverse-maps source clause) aws vs gcp: distinct cloud.provider disambiguation from the resolved namespace: gcp record filter 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "user.name": "alice",
+        },
+      },
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "terms": Object {
+                      "event.kind": Array [
+                        "asset",
+                      ],
+                    },
+                  },
+                  Object {
+                    "terms": Object {
+                      "event.module": Array [
+                        "asset_discovery",
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "match": Object {
+                "cloud.provider": "gcp",
+              },
+            },
+          ],
+        },
+      },
+    ],
+    "must": Array [
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.email",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "user.email": "",
+              },
+            },
+          ],
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.id",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "user.id": "",
+              },
+            },
+          ],
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.domain",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "term": Object {
+                "user.domain": "",
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;

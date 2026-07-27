@@ -36,8 +36,8 @@ import type {
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
-const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
-  [...items].sort((a, b) => a.order - b.order);
+const sortByOrder = <T extends { order?: number }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 /**
  * Calculate how many items can be displayed.
@@ -397,7 +397,7 @@ export const getPopoverPanels = ({
   }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-    const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
+    const sortedItems = sortByOrder(itemsToProcess);
 
     sortedItems.forEach((item) => {
       if (item.separator === 'above') {

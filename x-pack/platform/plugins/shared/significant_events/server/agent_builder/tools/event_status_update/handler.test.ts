@@ -10,63 +10,62 @@ import { updateEventStatusToolHandler } from './handler';
 describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
     const eventClient = {
-      findById: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'event-1', status: 'promoted', discovery_slug: 'slug-1' }],
+      findByEventUuid: jest.fn().mockResolvedValue({
+        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'open' }],
       }),
-      findByDiscoverySlug: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'event-1', status: 'promoted', discovery_slug: 'slug-1' }],
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'open' }],
       }),
       bulkCreate: jest.fn().mockResolvedValue({}),
     };
 
     const result = await updateEventStatusToolHandler({
       eventClient: eventClient as never,
-      eventId: 'event-1',
-      status: 'acknowledged',
+      eventUuid: 'event-1',
+      status: 'closed',
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ status: 'acknowledged' })],
+      [expect.objectContaining({ status: 'closed' })],
       { throwOnFail: true, refresh: 'wait_for' }
     );
-    expect(result.event_id).not.toBe('event-1');
+    expect(result.event_uuid).not.toBe('event-1');
     expect(result).toEqual({
-      event_id: result.event_id,
+      event_uuid: result.event_uuid,
       updated: 1,
       ignored: 0,
-      status: 'acknowledged',
+      status: 'closed',
     });
   });
 
   it('ignores when event is missing or status unchanged', async () => {
     const eventClientMissing = {
-      findById: jest.fn().mockResolvedValue({ hits: [] }),
-      findByDiscoverySlug: jest.fn(),
+      findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn(),
       bulkCreate: jest.fn(),
     };
     const missing = await updateEventStatusToolHandler({
       eventClient: eventClientMissing as never,
-      eventId: 'event-1',
-      status: 'demoted',
+      eventUuid: 'event-1',
+      status: 'dismissed',
     });
-    expect(missing).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, status: 'demoted' });
-    expect(eventClientMissing.findByDiscoverySlug).not.toHaveBeenCalled();
+    expect(missing).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'dismissed' });
 
     const eventClientSame = {
-      findById: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'event-1', status: 'demoted', discovery_slug: 'slug-1' }],
+      findByEventUuid: jest.fn().mockResolvedValue({
+        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'dismissed' }],
       }),
-      findByDiscoverySlug: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'event-1', status: 'demoted', discovery_slug: 'slug-1' }],
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'dismissed' }],
       }),
       bulkCreate: jest.fn(),
     };
     const same = await updateEventStatusToolHandler({
       eventClient: eventClientSame as never,
-      eventId: 'event-1',
-      status: 'demoted',
+      eventUuid: 'event-1',
+      status: 'dismissed',
     });
-    expect(same).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, status: 'demoted' });
+    expect(same).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'dismissed' });
   });
 });

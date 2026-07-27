@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { SyntheticEvent } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { EuiLink, EuiText } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';

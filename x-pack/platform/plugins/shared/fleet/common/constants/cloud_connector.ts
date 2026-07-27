@@ -38,6 +38,8 @@ export const GCP_CREDENTIALS_CLOUD_CONNECTOR_ID = 'gcp_credentials_cloud_connect
 
 // Cloud connector support flag
 export const SUPPORTS_CLOUD_CONNECTORS_VAR_NAME = 'supports_cloud_connectors';
+// Renamed from supports_cloud_connectors in newer integrations (e.g. elastic/integrations#19828)
+export const SUPPORTS_IDENTITY_FEDERATION_VAR_NAME = 'supports_identity_federation';
 
 // OTel Verifier package constants
 export const VERIFIER_PKG_NAME = 'verifier_otel';
@@ -101,6 +103,7 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   AUDIENCE_VAR_NAME,
   GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+  SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
 ];
 
 // Cloud connector permission allowlist

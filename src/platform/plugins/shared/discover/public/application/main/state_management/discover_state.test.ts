@@ -52,6 +52,29 @@ import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
+import type { ProfileStateDefinition } from '../../../context_awareness';
+import { ProfileStateType } from '../../../context_awareness';
+
+interface MultiUrlProfileState {
+  firstUrlValue: string;
+  secondUrlValue: string;
+  persistentValue: string;
+}
+
+const MULTI_URL_PROFILE_STATE_DEF: ProfileStateDefinition<MultiUrlProfileState> = {
+  key: 'multiUrlProfileState',
+  descriptor: {
+    firstUrlValue: { type: ProfileStateType.Url },
+    secondUrlValue: { type: ProfileStateType.Url },
+    persistentValue: { type: ProfileStateType.Persistent },
+  },
+  defaultState: {
+    firstUrlValue: 'defaultFirstUrl',
+    secondUrlValue: 'defaultSecondUrl',
+    persistentValue: 'defaultPersistent',
+  },
+};
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -305,6 +328,61 @@ describe('Discover state', () => {
       );
       expect(state.getCurrentTab().appState.sort).toEqual([['bytes', 'desc']]);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
+    });
+  });
+
+  describe('Test discover initial profile state handling', () => {
+    test('URL profile state defaults override locally persisted profile state before stripping', async () => {
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry.registerDefinition(MULTI_URL_PROFILE_STATE_DEF);
+      const {
+        internalState,
+        stateStorageContainer,
+        initializeTabs,
+        initializeSingleTab,
+        getCurrentTab,
+        injectCurrentTab,
+      } = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMock],
+        services,
+      });
+
+      await initializeTabs();
+      const tab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [
+            {
+              ...tab,
+              profileState: {
+                [MULTI_URL_PROFILE_STATE_DEF.key]: {
+                  firstUrlValue: 'localFirstUrl',
+                  persistentValue: 'localPersistent',
+                },
+              },
+            },
+          ],
+          selectedTabId: tab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [MULTI_URL_PROFILE_STATE_DEF.key]: {
+          firstUrlValue: MULTI_URL_PROFILE_STATE_DEF.defaultState.firstUrlValue,
+          secondUrlValue: 'urlSecondUrl',
+        },
+      });
+
+      await initializeSingleTab({ tabId: tab.id, skipWaitForDataFetching: true });
+
+      expect(getCurrentTab().profileState).toEqual({
+        [MULTI_URL_PROFILE_STATE_DEF.key]: {
+          secondUrlValue: 'urlSecondUrl',
+          persistentValue: 'localPersistent',
+        },
+      });
+      internalState.dispatch(injectCurrentTab(internalStateActions.stopSyncing)({}));
     });
   });
 

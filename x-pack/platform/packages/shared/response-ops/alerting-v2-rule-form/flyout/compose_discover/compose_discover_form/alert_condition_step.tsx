@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useFormState } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ import type { FormValues } from '../../../form/types';
 import { QuerySummary } from '../query_summary';
 import { EsqlQuerySummarySection } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
-import { useComposeDiscoverTimeField } from '../compose_discover_time_field_context';
+import { useComposeDiscoverTimeField } from '../use_compose_discover_time_field';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
 
 interface AlertConditionStepProps {
@@ -46,6 +46,9 @@ export function AlertConditionStep({
   onManualSplit,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<FormValues>();
+  // Rules are registered by always-mounted QueryFieldRules in ComposeDiscoverForm.
+  const { errors } = useFormState<FormValues>({ name: 'query' });
+  const queryError = errors.query;
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
@@ -60,7 +63,12 @@ export function AlertConditionStep({
     [query, isAlert, state.queryCommitted]
   );
 
-  const { timeFieldOptions } = useComposeDiscoverTimeField();
+  const { timeFieldOptions, isTimeFieldResolved } = useComposeDiscoverTimeField();
+
+  // When the current field isn't on the index (no date fields, or a stored
+  // `@timestamp` that doesn't exist), show a blank selection + invalid state so
+  // the user picks one, rather than fabricating `@timestamp`.
+  const currentTimeFieldIsOption = timeFieldOptions.some((option) => option.value === timeField);
 
   /*
    * Output columns of the full pipeline -> options for the group fields selector.
@@ -179,18 +187,45 @@ export function AlertConditionStep({
         </>
       )}
 
+      {queryError?.message ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="s"
+            color="danger"
+            role="alert"
+            data-test-subj="composeDiscoverQueryFieldError"
+          >
+            {queryError.message}
+          </EuiText>
+        </>
+      ) : null}
+
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldLabel', {
           defaultMessage: 'Time field',
         })}
         fullWidth
+        isInvalid={!isTimeFieldResolved}
+        error={
+          !isTimeFieldResolved ? (
+            <span data-test-subj="composeDiscoverTimeFieldError">
+              {i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldError', {
+                defaultMessage:
+                  'No time field could be resolved for this query. Edit your query to target data with a date field.',
+              })}
+            </span>
+          ) : undefined
+        }
       >
         <EuiSelect
           compressed
           fullWidth
           options={timeFieldOptions}
-          value={timeField}
+          value={currentTimeFieldIsOption ? timeField : ''}
+          hasNoInitialSelection={!currentTimeFieldIsOption}
+          isInvalid={!isTimeFieldResolved}
           onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
           disabled={state.childOpen}
           data-test-subj="composeDiscoverTimeField"

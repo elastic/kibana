@@ -40,7 +40,7 @@ describe('TemplateMetadataPreview', () => {
   it('renders the case default title', () => {
     renderComponent();
 
-    expect(screen.getByText('Case title')).toBeInTheDocument();
+    expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Test case title')).toBeInTheDocument();
   });
 
@@ -57,7 +57,7 @@ describe('TemplateMetadataPreview', () => {
       },
     });
 
-    expect(screen.getByText('Case title')).toBeInTheDocument();
+    expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Default title')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByText('A test description')).toBeInTheDocument();

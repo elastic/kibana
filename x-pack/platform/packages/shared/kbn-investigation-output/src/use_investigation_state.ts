@@ -78,6 +78,8 @@ export interface UseInvestigationStateResult {
   status: InvestigationStatus;
   /** Detail message for the `failed` and `unavailable` statuses. */
   error?: string;
+  /** Agent builder conversation id created by the investigation step, if available. */
+  conversationId?: string;
 }
 
 /**
@@ -114,6 +116,7 @@ export function useInvestigationState({
   isRunning: boolean;
 }): UseInvestigationStateResult {
   const [state, setState] = useState<InvestigationState | undefined>();
+  const [conversationId, setConversationId] = useState<string | undefined>();
   const [settled, setSettled] = useState<
     { status: 'complete' | 'failed' | 'unavailable'; error?: string } | undefined
   >();
@@ -128,6 +131,7 @@ export function useInvestigationState({
     if (lastExecutionIdRef.current !== workflowExecutionId) {
       lastExecutionIdRef.current = workflowExecutionId;
       setState(undefined);
+      setConversationId(undefined);
     }
     setSettled(undefined);
     setIsFollowing(false);
@@ -194,7 +198,12 @@ export function useInvestigationState({
           return;
         }
 
-        const output = stepExecution?.output as { structured_output?: unknown } | undefined;
+        const output = stepExecution?.output as
+          | { structured_output?: unknown; conversation_id?: string }
+          | undefined;
+        if (output?.conversation_id) {
+          setConversationId(output.conversation_id);
+        }
         const parsed = investigationStateSchema.safeParse(output?.structured_output);
 
         if (parsed.success) {
@@ -300,5 +309,5 @@ export function useInvestigationState({
   const status: InvestigationStatus =
     settled?.status ?? (isFollowing || isRunningInput ? 'running' : 'loading');
 
-  return { state, status, error: settled?.error };
+  return { state, status, error: settled?.error, conversationId };
 }

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276705
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+title: Prefix email subjects for Elastic Cloud trial deployments
+description: Email subjects sent from Elastic Cloud trial deployments through the built-in Elastic email service are now prefixed with `[Elastic Cloud Trial]`.

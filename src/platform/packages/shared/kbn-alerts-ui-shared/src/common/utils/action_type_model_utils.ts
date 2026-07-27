@@ -116,6 +116,7 @@ export function transformSpecToActionTypeModel(
     selectMessage: spec.metadata.description,
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
+    isTestable: spec.isTestable,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
     docsUrl: getDocsUrlFromSpec(spec, docLinks),
     getHideInUi: (_actionTypes: ActionType[]) =>

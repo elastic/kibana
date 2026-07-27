@@ -6,9 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ISessionService } from '@kbn/data-plugin/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -76,7 +73,6 @@ import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_deta
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout/entity_details/service_right';
 import type { ESQuery } from '../../../common/typed_json';
 import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
-import { APP_UI_ID } from '../../../common/constants';
 import type {
   EntityAttachmentIdentifier,
   EntityAttachmentRiskStats,
@@ -86,13 +82,21 @@ import {
   getHostNameForHostDetailsUrl,
   getServiceNameForServiceDetailsUrl,
   getUserNameForUserDetailsUrl,
-  navigateToEntityAnalyticsWithFlyoutInApp,
-  type SecurityAgentBuilderChrome,
 } from '../attachment_types/entity_explore_navigation';
+import { useEntityAnalyticsAgentNavigation } from '../attachment_types/entity_analytics_agent_navigation_context';
 import type { RiskScoreState } from '../../entity_analytics/api/hooks/use_risk_score';
 import { entityAttachmentQueryClient } from '../attachment_types/entity_attachment/query_client';
 
 const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
+
+/**
+ * Namespaced Inspect query ids for the Agent Builder entity Preview canvas.
+ * Must not collide with the Security entity flyout ids — both share one Redux store, and the
+ * flyout's `useQueryInspector` cleanup `deleteQuery` would otherwise disable Preview Inspect.
+ */
+const AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${HOST_PANEL_RISK_SCORE_QUERY_ID}`;
+const AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${USER_PANEL_RISK_SCORE_QUERY_ID}`;
+const AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${SERVICE_PANEL_RISK_SCORE_QUERY_ID}`;
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -153,10 +157,6 @@ const buildRiskScoreStateFromAttachmentRiskStats = <T extends EntityType>(
 };
 
 const useOpenHostInvestigationInEntityAnalytics = ({
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
   hostName,
   entityIdForPanels,
   scopeId,
@@ -166,12 +166,7 @@ const useOpenHostInvestigationInEntityAnalytics = ({
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
   entityStoreEntityId,
-  searchSession,
 }: {
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
   hostName: string;
   entityIdForPanels?: string;
   scopeId: string;
@@ -181,65 +176,53 @@ const useOpenHostInvestigationInEntityAnalytics = ({
   hasVulnerabilitiesFindings: boolean;
   hasNonClosedAlerts: boolean;
   entityStoreEntityId?: string;
-  searchSession?: ISessionService;
 }): ((path?: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
+  const { navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
 
   return useCallback(
     (path?: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: SearchEntityType.host,
       });
-      navigateToEntityAnalyticsWithFlyoutInApp({
-        application,
-        appId: APP_UI_ID,
-        agentBuilder,
-        chrome,
-        openSidebarConversation,
-        searchSession,
-        flyout: {
-          preview: [],
-          left: {
-            id: HostDetailsPanelKey,
-            params: {
-              entityId: entityIdForPanels,
-              hostName,
-              scopeId,
-              isRiskScoreExist,
-              path,
-              hasMisconfigurationFindings,
-              hasVulnerabilitiesFindings,
-              hasNonClosedAlerts,
-              entityStoreEntityId,
-            },
+      navigateWithFlyout({
+        preview: [],
+        left: {
+          id: HostDetailsPanelKey,
+          params: {
+            entityId: entityIdForPanels,
+            hostName,
+            scopeId,
+            isRiskScoreExist,
+            path,
+            hasMisconfigurationFindings,
+            hasVulnerabilitiesFindings,
+            hasNonClosedAlerts,
+            entityStoreEntityId,
           },
-          right: {
-            id: HostPanelKey,
-            params: {
-              contextID: safeContextID,
-              scopeId,
-              hostName,
-              entityId: entityIdForPanels,
-            },
+        },
+        right: {
+          id: HostPanelKey,
+          params: {
+            contextID: safeContextID,
+            scopeId,
+            hostName,
+            entityId: entityIdForPanels,
           },
         },
       });
     },
     [
-      application,
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
       entityIdForPanels,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
       hasVulnerabilitiesFindings,
       hostName,
       isRiskScoreExist,
+      navigateWithFlyout,
       safeContextID,
       scopeId,
       entityStoreEntityId,
-      searchSession,
       telemetry,
     ]
   );
@@ -248,24 +231,9 @@ const useOpenHostInvestigationInEntityAnalytics = ({
 const HostEntityFlyoutOverviewCanvas: React.FC<{
   hostName: string;
   entityId?: string;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
-  searchSession?: ISessionService;
   attachmentRiskStats?: EntityAttachmentRiskStats;
   attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
-}> = ({
-  hostName,
-  entityId,
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
-  searchSession,
-  attachmentRiskStats,
-  attachmentResolutionRiskStats,
-}) => {
+}> = ({ hostName, entityId, attachmentRiskStats, attachmentResolutionRiskStats }) => {
   const euidApi = useEntityStoreEuidApi();
 
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -361,7 +329,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     deleteQuery,
     inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
     loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
-    queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID,
     refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
     setQuery,
   });
@@ -412,10 +380,6 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   const entityStoreEntityId = observedHost.entityRecord?.entity?.id;
 
   const openDetailsPanel = useOpenHostInvestigationInEntityAnalytics({
-    application,
-    agentBuilder,
-    chrome,
-    openSidebarConversation,
     hostName,
     entityIdForPanels: panelDisplayEntityId,
     scopeId,
@@ -425,7 +389,6 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
     entityStoreEntityId,
-    searchSession,
   });
 
   const noEntityInStore = !entityFromStoreResult.isLoading && !observedHost.entityRecord;
@@ -487,6 +450,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
@@ -495,10 +459,6 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
 };
 
 const useOpenUserInvestigationInEntityAnalytics = ({
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
   userName,
   entityIdForPanels,
   identityFields,
@@ -508,12 +468,7 @@ const useOpenUserInvestigationInEntityAnalytics = ({
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
   entityStoreEntityId,
-  searchSession,
 }: {
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
   userName: string;
   entityIdForPanels?: string;
   identityFields: IdentityFields;
@@ -523,65 +478,53 @@ const useOpenUserInvestigationInEntityAnalytics = ({
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
   entityStoreEntityId?: string;
-  searchSession?: ISessionService;
 }): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
+  const { navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
 
   return useCallback(
     (path: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: SearchEntityType.user,
       });
-      navigateToEntityAnalyticsWithFlyoutInApp({
-        application,
-        appId: APP_UI_ID,
-        agentBuilder,
-        chrome,
-        openSidebarConversation,
-        searchSession,
-        flyout: {
-          preview: [],
-          left: {
-            id: UserDetailsPanelKey,
-            params: {
-              userName,
-              identityFields,
-              isRiskScoreExist,
-              scopeId,
-              path,
-              entityId: entityIdForPanels,
-              hasMisconfigurationFindings,
-              hasNonClosedAlerts,
-              entityStoreEntityId,
-            },
+      navigateWithFlyout({
+        preview: [],
+        left: {
+          id: UserDetailsPanelKey,
+          params: {
+            userName,
+            identityFields,
+            isRiskScoreExist,
+            scopeId,
+            path,
+            entityId: entityIdForPanels,
+            hasMisconfigurationFindings,
+            hasNonClosedAlerts,
+            entityStoreEntityId,
           },
-          right: {
-            id: UserPanelKey,
-            params: {
-              contextID: safeContextID,
-              userName,
-              identityFields,
-              entityId: entityIdForPanels,
-              scopeId,
-            },
+        },
+        right: {
+          id: UserPanelKey,
+          params: {
+            contextID: safeContextID,
+            userName,
+            identityFields,
+            entityId: entityIdForPanels,
+            scopeId,
           },
         },
       });
     },
     [
-      application,
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
       entityIdForPanels,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
       identityFields,
       isRiskScoreExist,
+      navigateWithFlyout,
       safeContextID,
       scopeId,
       entityStoreEntityId,
-      searchSession,
       telemetry,
       userName,
     ]
@@ -591,24 +534,9 @@ const useOpenUserInvestigationInEntityAnalytics = ({
 const UserEntityFlyoutOverviewCanvas: React.FC<{
   userName: string;
   entityId?: string;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
-  searchSession?: ISessionService;
   attachmentRiskStats?: EntityAttachmentRiskStats;
   attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
-}> = ({
-  userName,
-  entityId: entityIdProp,
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
-  searchSession,
-  attachmentRiskStats,
-  attachmentResolutionRiskStats,
-}) => {
+}> = ({ userName, entityId: entityIdProp, attachmentRiskStats, attachmentResolutionRiskStats }) => {
   const euidApi = useEntityStoreEuidApi();
 
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -698,7 +626,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     deleteQuery,
     inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
     loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
-    queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID,
     refetch: useEntityStoreInspectForRisk
       ? entityFromStoreResult?.refetch ?? (() => {})
       : riskScoreState.refetch,
@@ -712,10 +640,6 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   const entityStoreEntityId = observedUser.entityRecord?.entity?.id;
 
   const openDetailsPanel = useOpenUserInvestigationInEntityAnalytics({
-    application,
-    agentBuilder,
-    chrome,
-    openSidebarConversation,
     userName,
     entityIdForPanels: panelDisplayEntityId,
     identityFields: documentEntityIdentifiers,
@@ -725,7 +649,6 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     entityStoreEntityId,
-    searchSession,
   });
 
   const riskScoreStateFromStore = observedUser.entityRecord
@@ -830,6 +753,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
@@ -838,10 +762,6 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
 };
 
 const useOpenServiceInvestigationInEntityAnalytics = ({
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
   serviceName,
   entityId,
   identityFields,
@@ -849,12 +769,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
   safeContextID,
   isRiskScoreExist,
   entityStoreEntityId,
-  searchSession,
 }: {
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
   serviceName: string;
   entityId: string;
   identityFields: IdentityFields;
@@ -862,61 +777,49 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
   safeContextID: string;
   isRiskScoreExist: boolean;
   entityStoreEntityId?: string;
-  searchSession?: ISessionService;
 }): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
+  const { navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
 
   return useCallback(
     (path: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: SearchEntityType.service,
       });
-      navigateToEntityAnalyticsWithFlyoutInApp({
-        application,
-        appId: APP_UI_ID,
-        agentBuilder,
-        chrome,
-        openSidebarConversation,
-        searchSession,
-        flyout: {
-          preview: [],
-          left: {
-            id: ServiceDetailsPanelKey,
-            params: {
-              isRiskScoreExist,
-              identityFields,
-              scopeId,
-              entityId,
-              serviceName,
-              entityStoreEntityId,
-              path,
-            },
+      navigateWithFlyout({
+        preview: [],
+        left: {
+          id: ServiceDetailsPanelKey,
+          params: {
+            isRiskScoreExist,
+            identityFields,
+            scopeId,
+            entityId,
+            serviceName,
+            entityStoreEntityId,
+            path,
           },
-          right: {
-            id: ServicePanelKey,
-            params: {
-              contextID: safeContextID,
-              scopeId,
-              entityId,
-              serviceName,
-            },
+        },
+        right: {
+          id: ServicePanelKey,
+          params: {
+            contextID: safeContextID,
+            scopeId,
+            entityId,
+            serviceName,
           },
         },
       });
     },
     [
-      application,
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
       entityId,
       entityStoreEntityId,
       identityFields,
       isRiskScoreExist,
+      navigateWithFlyout,
       safeContextID,
       scopeId,
       serviceName,
-      searchSession,
       telemetry,
     ]
   );
@@ -925,24 +828,9 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
 const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   serviceName: string;
   entityId: string;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
-  searchSession?: ISessionService;
   attachmentRiskStats?: EntityAttachmentRiskStats;
   attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
-}> = ({
-  serviceName,
-  entityId,
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
-  searchSession,
-  attachmentRiskStats,
-  attachmentResolutionRiskStats,
-}) => {
+}> = ({ serviceName, entityId, attachmentRiskStats, attachmentResolutionRiskStats }) => {
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const isPreviewMode = false;
@@ -1037,7 +925,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     deleteQuery,
     inspect,
     loading,
-    queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID,
     refetch: riskScoreState.refetch,
     setQuery,
   });
@@ -1050,10 +938,6 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     : undefined;
 
   const openDetailsPanel = useOpenServiceInvestigationInEntityAnalytics({
-    application,
-    agentBuilder,
-    chrome,
-    openSidebarConversation,
     serviceName,
     entityId,
     identityFields: documentEntityIdentifiers,
@@ -1061,7 +945,6 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     safeContextID,
     isRiskScoreExist,
     entityStoreEntityId,
-    searchSession,
   });
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
@@ -1120,6 +1003,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             isPreviewMode={isPreviewMode}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
@@ -1134,16 +1018,6 @@ export interface EntityCardFlyoutOverviewCanvasProps {
    * the per-type canvas with `hostName`/`userName`/`serviceName` + optional `entityId`.
    */
   identifier: EntityAttachmentIdentifier;
-  application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
-  /**
-   * Optional search session service. Forwarded to the per-type flyout canvas so the
-   * `navigateToEntityAnalyticsWithFlyoutInApp` helper can clear the active search session
-   * before the legitimate `agent_builder → securitySolutionUI` navigation.
-   */
-  searchSession?: ISessionService;
   /** Rich risk-doc projection from `security.get_entity`; preferred over entity-store summary risk. */
   riskStats?: EntityAttachmentRiskStats;
   /** Resolution-group risk fallback; threaded through to {@link FlyoutRiskSummary}. */
@@ -1162,11 +1036,6 @@ export interface EntityCardFlyoutOverviewCanvasProps {
  */
 export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCanvasProps> = ({
   identifier,
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
-  searchSession,
   riskStats,
   resolutionRiskStats,
 }) => {
@@ -1192,11 +1061,6 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
       <HostEntityFlyoutOverviewCanvas
         hostName={hostName}
         entityId={entityId}
-        application={application}
-        agentBuilder={agentBuilder}
-        chrome={chrome}
-        openSidebarConversation={openSidebarConversation}
-        searchSession={searchSession}
         attachmentRiskStats={riskStats}
         attachmentResolutionRiskStats={resolutionRiskStats}
       />
@@ -1209,11 +1073,6 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
       <UserEntityFlyoutOverviewCanvas
         userName={userName}
         entityId={entityId}
-        application={application}
-        agentBuilder={agentBuilder}
-        chrome={chrome}
-        openSidebarConversation={openSidebarConversation}
-        searchSession={searchSession}
         attachmentRiskStats={riskStats}
         attachmentResolutionRiskStats={resolutionRiskStats}
       />
@@ -1226,11 +1085,6 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
       <ServiceEntityFlyoutOverviewCanvas
         serviceName={displayName}
         entityId={entityId}
-        application={application}
-        agentBuilder={agentBuilder}
-        chrome={chrome}
-        openSidebarConversation={openSidebarConversation}
-        searchSession={searchSession}
         attachmentRiskStats={riskStats}
         attachmentResolutionRiskStats={resolutionRiskStats}
       />

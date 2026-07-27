@@ -14,6 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 
@@ -45,6 +46,7 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
   });
 
   const { investigateInTimeline } = useInvestigateInTimeline();
+  const { closeFlyout } = useExpandableFlyoutApi();
   const openTimelineCallback = useCallback(async () => {
     investigateInTimeline({
       timeRange: {
@@ -58,7 +60,11 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
         query: kqlQuery,
       },
     });
-  }, [kqlQuery, last30MinRange, investigateInTimeline]);
+    // Timeline opens as a full-screen overlay, but the entity flyout renders on a
+    // higher z-index and would otherwise stay visible on top of it (see issue #277997).
+    // Close the flyout so Timeline takes over, mirroring the document details flyout.
+    closeFlyout();
+  }, [kqlQuery, last30MinRange, investigateInTimeline, closeFlyout]);
 
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',

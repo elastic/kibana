@@ -14,22 +14,22 @@ import {
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_hypothesis_test',
-    text: 'Every evidences[] entry where the judge stamped confirmed: true (evidence the judge re-verified via execute_esql in this cycle) must document a hypothesis test using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Entries without a confirmed stamp (carried forward from input without re-verification in this cycle) are exempt and may retain whatever description they arrived with.',
+    text: 'Every signal where the judge set `confirmed` to true or false must document its verification using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   {
     id: 'evidence_description_informational_exempt',
-    text: 'Informational entries are exempt and should be treated as acceptable: quiet-rule entries (esql_query is null, trusting the detection-pipeline kind:quiet signal) and "no confirming query available" dispositions do not need the four-part structure. Do not penalize them.',
+    text: 'Informational entries are exempt and should be treated as acceptable: quiet-rule signals (evidence is null, trusting the detection-pipeline kind:quiet signal) and "no confirming query available" dispositions do not need the four-part structure. Do not penalize them.',
     score: 1,
   },
   {
     id: 'evidence_description_no_payload',
-    text: 'Evidence descriptions contain no raw payload values, PII, tokens, UUIDs, or raw log lines — only service names, error types/codes, field paths, and counts.',
+    text: 'Signal descriptions contain no raw IDs, UUIDs, metric values, PII, PCI, CVV, SSNs, credentials, secrets, or tokens. Concise non-sensitive log signatures are acceptable when they identify decisive evidence; do not penalize literal non-sensitive error text.',
     score: 1,
   },
 ];
 
-/** LLM evaluator: grades whether each evidence `description` follows the 4-part hypothesis-test structure. */
+/** LLM evaluator: grades whether each signal's `description` follows the 4-part hypothesis-test structure. */
 export const createEvidenceDescriptionEvaluator = <
   TExample extends Example,
   TOutput extends TaskOutput

@@ -58,6 +58,8 @@ interface CommandMenuListProps {
   readonly onSelect: (option: CommandMenuListOption) => void;
   readonly width?: number;
   readonly 'data-test-subj'?: string;
+  /** When true, Space also selects the highlighted option, like Enter. */
+  readonly spaceSelection?: boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -68,6 +70,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       onSelect,
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
+      spaceSelection,
     },
     ref
   ) => {
@@ -78,9 +81,13 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const optionKeysSignature = useMemo(
+      () => options.map((option) => option.key).join('|'),
+      [options]
+    );
     useEffect(() => {
       setActiveIndex(0);
-    }, [options.length]);
+    }, [optionKeysSignature]);
 
     const scrollIndexIntoView = (index: number) => {
       const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
@@ -120,6 +127,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           keys.ENTER,
           keys.TAB,
         ];
+        // Always claim Space, even with zero options: results can lag a
+        // keystroke behind, and a leaked space would type as plain text.
+        if (event.key === keys.SPACE && spaceSelection) {
+          return true;
+        }
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
@@ -128,6 +140,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
           handleSetActive((prev) => Math.max(prev - 1, 0));
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
+          handleSelectOption();
+        } else if (event.key === keys.SPACE && spaceSelection) {
           handleSelectOption();
         }
       },

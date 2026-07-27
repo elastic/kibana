@@ -630,10 +630,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onIlmPolicyChange={(ilmPolicy) => {
               ilmPolicyRef.current = ilmPolicy;
             }}
+            deploymentSelector={
+              !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
+            }
           />
-
-          {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
-          {!useCheckableCardsForSetupTechnologySelector && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -696,6 +696,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ...(addIntegrationFlyoutProps?.selectIntegrationStep
       ? [addIntegrationFlyoutProps?.selectIntegrationStep]
       : []),
+    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
+              {
+                defaultMessage: 'Deployment',
+              }
+            ),
+            children: setupTechnologySelector,
+            headingElement: 'h2',
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
         defaultMessage: 'Configure integration',
@@ -717,20 +731,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
-      ? [
-          {
-            title: i18n.translate(
-              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
-              {
-                defaultMessage: 'Deployment',
-              }
-            ),
-            children: setupTechnologySelector,
-            headingElement: 'h2',
-          },
-        ]
-      : []),
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {

@@ -9,7 +9,7 @@
 
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors, withDataViewsAsCodeEnabled } from './utils';
+import { getDataViewsAsCodeService, handleErrors } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
@@ -22,7 +22,7 @@ export const registerPostDataViewAsCodeRoute = (
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Create a data view',
       options: {
         availability: {
@@ -62,16 +62,10 @@ export const registerPostDataViewAsCodeRoute = (
           },
         },
       },
-      withDataViewsAsCodeEnabled(
-        handleErrors(async (ctx, req, res) => {
-          const dataViewsAsCodeService = await getDataViewsAsCodeService(
-            ctx,
-            getStartServices,
-            req
-          );
-          const storedDataView = await dataViewsAsCodeService.create(req.body);
+      handleErrors(async (ctx, req, res) => {
+        const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
+        const storedDataView = await dataViewsAsCodeService.create(req.body);
 
-          return res.created({ body: storedDataView });
-        })
-      )
+        return res.created({ body: storedDataView });
+      })
     );

@@ -273,6 +273,7 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
+        userProfileService: this.coreStart.userProfile,
         getWorkflowSource: (workflowId, sid) =>
           this.crudService.getWorkflowDocumentSource(workflowId, sid, {
             includeGlobal: true,
@@ -290,6 +291,11 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsByIds(ids, spaceId, options);
+  }
+
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    await this.ensureInitialized();
+    return this.crudService.findExistingWorkflowIds(ids);
   }
 
   public async getWorkflowsSourceByIds(

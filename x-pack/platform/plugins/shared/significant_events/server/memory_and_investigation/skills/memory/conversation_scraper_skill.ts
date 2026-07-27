@@ -17,6 +17,7 @@ export const createConversationScraperSkill = (options: MemoryToolsOptions) =>
     id: 'streams-conversation-scraper',
     name: 'streams-conversation-scraper',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),

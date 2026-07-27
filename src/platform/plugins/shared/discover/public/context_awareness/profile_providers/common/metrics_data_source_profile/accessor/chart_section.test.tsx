@@ -42,9 +42,12 @@ type UnifiedGridProps = ChartSectionProps & {
     notifications?: { showErrorDialog: (args: { title: string; error: Error }) => void };
     docLinks?: { links: { query: { queryESQL: string } } };
     logger?: unknown;
+    featureFlags?: unknown;
   };
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  getRecentlyExploredMetrics?: () => readonly string[];
+  onMetricExplored?: (metricUniqueKey: string) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -88,6 +91,15 @@ const mockShowErrorDialog = jest.fn();
 const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
 const mockScopedLogger = { __sentinel: 'scopedLogger' };
 const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
+const mockFeatureFlags = { __sentinel: 'featureFlags' };
+const mockStorage = {
+  get: jest.fn((): unknown => null),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+};
+// Stable references so the memoized RecentMetricsStorage instance survives re-renders.
+const mockHttp = { basePath: { get: () => '' } };
 
 jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
@@ -104,6 +116,11 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
       },
     },
     logger: mockLogger,
+    core: {
+      featureFlags: mockFeatureFlags,
+      http: mockHttp,
+    },
+    storage: mockStorage,
   })),
 }));
 
@@ -209,7 +226,7 @@ describe('MetricsExperienceGridWrapper', () => {
     });
   });
 
-  it('forwards externalServices (discoverShared, dataViews, notifications, docLinks, scoped logger) to the metrics grid', () => {
+  it('forwards externalServices (discoverShared, dataViews, notifications, docLinks, scoped logger, featureFlags) to the metrics grid', () => {
     renderChartSection();
 
     expect(mockLogger.get).toHaveBeenCalledWith(METRICS_DATA_SOURCE_PROFILE_ID);
@@ -223,6 +240,7 @@ describe('MetricsExperienceGridWrapper', () => {
         links: { query: { queryESQL: mockEsqlReferenceHref } },
       }),
       logger: mockScopedLogger,
+      featureFlags: mockFeatureFlags,
     });
   });
 
@@ -250,5 +268,19 @@ describe('MetricsExperienceGridWrapper', () => {
       ...METRICS_GRID_SETTINGS_DEFAULTS,
       counterAggregation: 'max',
     });
+  });
+
+  it('surfaces the persisted recently explored snapshot and records new interactions', () => {
+    mockStorage.get.mockReturnValue(['metrics-*::cpu']);
+
+    renderChartSection();
+
+    expect(unifiedGridProps?.getRecentlyExploredMetrics?.()).toEqual(['metrics-*::cpu']);
+
+    act(() => {
+      unifiedGridProps?.onMetricExplored?.('metrics-*::memory');
+    });
+
+    expect(mockStorage.set).toHaveBeenCalled();
   });
 });

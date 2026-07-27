@@ -16,6 +16,9 @@ export const createSignificantEventsOnboardingSkill = (options: MemoryToolsOptio
     id: 'significant-events-onboarding',
     name: 'significant-events-onboarding',
     basePath: 'skills/platform/streams',
+    // Onboarding interview only — keep out of elastic capabilities so investigation
+    // agents do not auto-load it.
+    excludeFromElasticCapabilities: true,
     description:
       'Interview the user to build a mental model of their system for significant events analysis. Use when the user wants to describe their architecture, deployment infrastructure, observability setup, or any operational context that should be remembered for RCA and remediation.',
     content,

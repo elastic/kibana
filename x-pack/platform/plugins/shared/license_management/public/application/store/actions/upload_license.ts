@@ -7,7 +7,7 @@
 
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { addLicense } from './add_license';
 import { putLicense, type PutLicenseResponse } from '../../lib/es';
 import { addUploadErrorMessage } from './add_error_message';

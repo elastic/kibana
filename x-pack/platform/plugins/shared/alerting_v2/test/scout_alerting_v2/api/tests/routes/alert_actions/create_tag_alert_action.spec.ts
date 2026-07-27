@@ -161,6 +161,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: ['production'] },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
