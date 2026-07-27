@@ -41,3 +41,6 @@ telemetry.labels.serverless: vectordb
 xpack.ml.ad.enabled: false    # Disables Anomaly Detection
 xpack.ml.dfa.enabled: false   # Disables Data Frame Analytics
 xpack.ml.nlp.enabled: false   # Disables NLP/Trained Models
+
+## Hide index mode in index management UI. vectorDB is the only allowed mode in this project type
+xpack.index_management.enableIndexMode: false

@@ -187,6 +187,17 @@ export const ConfigSchema = z
       .optional()
       .describe('When true, creates a conversation for the step.'),
     /**
+     * When true, newly created conversations are public so other users who can use the
+     * underlying agent can list, view, and continue them. Ignored when continuing an
+     * existing conversation. Defaults to private.
+     */
+    'public-conversation': z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
+      ),
+    /**
      * Connector telemetry feature id used to attribute this step's LLM calls for billing
      * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
      * attribution is used.
@@ -306,7 +317,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "platform.sig_events.investigation"
+  agent-id: "significant_events.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."
@@ -328,6 +339,20 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
     conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
     message: "Continue from the previous analysis and complete any missing steps."
 \`\`\``,
+
+      `## Create a public conversation
+\`\`\`yaml
+- name: shared_analysis
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  create-conversation: true
+  public-conversation: true
+  with:
+    message: "Analyze the event and share findings with the team. {{ event | json }}"
+\`\`\`
+
+Public conversations are visible to other users who can use the underlying agent.
+This setting only applies when the step creates a new conversation.`,
 
       `## Get structured output using a JSON schema
 \`\`\`yaml

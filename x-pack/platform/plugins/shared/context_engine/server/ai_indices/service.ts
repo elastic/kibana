@@ -8,27 +8,27 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { MAX_AI_INDICES } from '../../common/constants';
+import {
+  AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
+  AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
+  MAX_AI_INDICES,
+} from '../../common/constants';
 import type {
   AiIndexDest,
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
-/**
- * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `ai-index-` base.
- */
-const DEST_INDEX_PREFIX = 'ai-index-';
-const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
-const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
-
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
-  name: document.name,
   ...(document.description !== undefined && { description: document.description }),
   dest: document.dest,
   automations: document.automations,
@@ -51,10 +51,27 @@ export class AiIndexService {
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
   }
 
+  /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
+  async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
+    await this.assertValidDest(properties.dest);
+
+    const now = new Date().toISOString();
+    const document: AiIndexDocument = { ...properties, date_created: now, date_modified: now };
+
+    try {
+      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new AiIndexAlreadyExistsError(aiIndexId);
+      }
+      throw error;
+    }
+  }
+
   /**
    * Creates or fully replaces an AI index, preserving `date_created` on update.
    * Concurrent writes are guarded with optimistic concurrency control; a losing
-   * writer gets a {@link AiIndexConflictError}.
+   * writer gets an {@link AiIndexConflictError}.
    */
   async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
@@ -100,11 +117,12 @@ export class AiIndexService {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
-      sort: [{ name: 'asc' }],
     });
-    return response.hits.hits.flatMap((hit) =>
-      hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []
-    );
+    // Sorted by id in memory: Elasticsearch disallows sorting on `_id`, and the
+    // result set is bounded by MAX_AI_INDICES.
+    return response.hits.hits
+      .flatMap((hit) => (hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []))
+      .sort((a, b) => a.id.localeCompare(b.id));
   }
 
   /**

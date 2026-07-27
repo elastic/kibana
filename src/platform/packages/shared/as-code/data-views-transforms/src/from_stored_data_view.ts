@@ -41,6 +41,7 @@ export function fromStoredDataView(
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: index.title,
     time_field: index.timeFieldName,
+    ...(index.allowHidden !== undefined ? { allow_hidden_indices: index.allowHidden } : {}),
     ...(fieldSettings && { field_settings: fieldSettings }),
   };
 }

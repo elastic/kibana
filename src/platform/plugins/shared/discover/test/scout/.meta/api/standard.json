@@ -1,5 +1,5 @@
 {
-  "sha1": "643f47633b2a78f06618461256191295d1e736bb",
+  "sha1": "720019a12b006feca58af921641f9f0de6b0e916",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -185,6 +185,118 @@
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/delete_discover_session.spec.ts",
         "line": 79,
         "column": 10
+      }
+    },
+    {
+      "id": "2488c04f8298ab6-70a59647e23e599",
+      "title": "POST /s/<space>/api/core/capabilities - Discover space feature controls space with no features disabled exposes discover and visualize capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_disabled_space.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "2488c04f8298ab6-8ba91d697a6db29",
+      "title": "POST /s/<space>/api/core/capabilities - Discover space feature controls space with Discover disabled hides the discover navlink and zeroes discover capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_disabled_space.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "2488c04f8298ab6-6163915bef68bf6",
+      "title": "POST /s/<space>/api/core/capabilities - Discover space feature controls space with Visualize disabled hides the visualize field action capability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_disabled_space.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c67390764372a-809637b073218ce",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:all grants save, short URLs and the CSV export capability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c67390764372a-1ead19c2c1a99f8",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:read hides save, short URLs and the visualize field action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c67390764372a-65aa229432faaf4",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:read + url_create still hides save but allows short URLs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 81,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c67390764372a-44605e15a84296d",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:read + visualize:read shows the visualize field action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "77c67390764372a-52aad5c62ca9ff3",
+      "title": "POST /api/core/capabilities - Discover role privileges no discover privileges hides the navlink and zeroes discover capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 106,
+        "column": 12
       }
     },
     {
@@ -470,6 +582,136 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/api/tests/search_discover_sessions.spec.ts",
         "line": 165,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3258bb11252bc7-8d4c7aff3e4def5",
+      "title": "PUT /api/discover_sessions/{id} creates a Discover session at the requested ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/upsert_discover_session.spec.ts",
+        "line": 48,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3258bb11252bc7-254c3dd318a426c",
+      "title": "PUT /api/discover_sessions/{id} fully replaces an existing Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/upsert_discover_session.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3258bb11252bc7-1a605ce24e127ec",
+      "title": "PUT /api/discover_sessions/{id} updates an existing session whose ID predates the as-code format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/upsert_discover_session.spec.ts",
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3258bb11252bc7-c3261ad23aca6e7",
+      "title": "PUT /api/discover_sessions/{id} returns 400 for an invalid ID when creating a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/upsert_discover_session.spec.ts",
+        "line": 227,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3258bb11252bc7-03306eb253dff05",
+      "title": "PUT /api/discover_sessions/{id} returns 403 when the user cannot update Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/api/tests/upsert_discover_session.spec.ts",
+        "line": 243,
         "column": 10
       }
     }
