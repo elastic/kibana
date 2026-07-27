@@ -280,12 +280,10 @@ The memory budgets are the assumption capacity planning is built on; if the task
 These are distinct enums for distinct contexts — confusing them is a recurring review finding (see [PR #260373](https://github.com/elastic/kibana/pull/260373)):
 
 - **`TaskCost`** — integer enum (`Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`). Use for the **task type definition's** `cost` field and for the **per-instance `cost` override** in `TaskInstance.cost` *when the value is set in code* against the `TaskInstance` type. This is the value the capacity pool reads.
-- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` with `getTaskCostFromInstance(...)` before comparing or feeding it back to capacity logic — it isn't re-exported from the public `@kbn/task-manager-plugin/server` barrel, so import it directly from `@kbn/task-manager-plugin/server/task`.
+- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` with `getTaskCostFromInstance(...)` (exported from `@kbn/task-manager-plugin/server`) before comparing or feeding it back to capacity logic.
 
 ```ts
-import { TaskCost, InstanceTaskCost } from '@kbn/task-manager-plugin/server';
-// `getTaskCostFromInstance` isn't re-exported from the public barrel — import it from the source file
-import { getTaskCostFromInstance } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost, InstanceTaskCost, getTaskCostFromInstance } from '@kbn/task-manager-plugin/server';
 
 // Task type registration — integer enum
 { cost: TaskCost.ExtraLarge }
