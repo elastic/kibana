@@ -6,6 +6,7 @@
  */
 
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { EvalExperimentsToolDeps } from './tools/deps';
 import { evalsTools } from './tools/common';
 import { createEvalExperimentsSkill } from './skill';
@@ -13,6 +14,7 @@ import { createEvalExperimentsSkill } from './skill';
 const deps: EvalExperimentsToolDeps = {
   workflowsApi: {} as unknown as EvalExperimentsToolDeps['workflowsApi'],
   serverBasePath: '',
+  logger: loggingSystemMock.createLogger(),
   getStartDependencies: jest.fn(),
 };
 

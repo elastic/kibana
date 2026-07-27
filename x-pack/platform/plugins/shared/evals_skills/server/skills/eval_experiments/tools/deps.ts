@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import type { EvalsSkillsStartDependencies } from '../../../types';
 
@@ -14,5 +15,6 @@ export interface EvalExperimentsToolDeps {
   workflowsApi: WorkflowsManagementApi;
   /** Configured server base path (without any space segment) - used to build result deep links. */
   serverBasePath: string;
+  logger: Logger;
   getStartDependencies: () => Promise<EvalsSkillsStartDependencies>;
 }

@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { EVALS_EXPERIMENT_WORKFLOW_TAG } from '@kbn/evals-plugin/common';
@@ -29,24 +30,32 @@ interface WorkflowsApiMock {
   updateWorkflow: jest.Mock;
   executeWorkflow: jest.Mock;
   getWorkflow: jest.Mock;
+  cancelWorkflowExecution: jest.Mock;
 }
 
 const createDeps = (
   overrides: Partial<EvalExperimentsToolDeps> = {}
-): { deps: EvalExperimentsToolDeps; workflowsApi: WorkflowsApiMock } => {
+): {
+  deps: EvalExperimentsToolDeps;
+  workflowsApi: WorkflowsApiMock;
+  logger: ReturnType<typeof loggingSystemMock.createLogger>;
+} => {
   const workflowsApi: WorkflowsApiMock = {
     createWorkflow: jest.fn(),
     updateWorkflow: jest.fn(),
     executeWorkflow: jest.fn(),
     getWorkflow: jest.fn(),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
   };
+  const logger = loggingSystemMock.createLogger();
   const deps: EvalExperimentsToolDeps = {
     workflowsApi: workflowsApi as unknown as EvalExperimentsToolDeps['workflowsApi'],
     serverBasePath: '',
+    logger,
     getStartDependencies: jest.fn().mockResolvedValue({}),
     ...overrides,
   };
-  return { deps, workflowsApi };
+  return { deps, workflowsApi, logger };
 };
 
 const securityWith = (hasAllRequested: boolean) =>
@@ -275,6 +284,58 @@ describe('runEvalExperimentTool', () => {
     );
 
     expect(workflowsApi.executeWorkflow.mock.calls[0][0]).toMatchObject({ workflowId: 'wf-1' });
+  });
+
+  it('cancels already-launched executions when a later launch in the fan-out fails', async () => {
+    const { deps, workflowsApi } = createDeps();
+    workflowsApi.executeWorkflow
+      .mockResolvedValueOnce({ workflowExecutionId: 'we-1' })
+      .mockRejectedValueOnce(new Error('workflow engine boom'));
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(
+        { ...validConfig, connector_ids: ['c1', 'c2'] },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    // The caller gets no ids back, so the one that launched must not be left running.
+    expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'we-1',
+      'default',
+      expect.anything()
+    );
+  });
+
+  it('logs the orphan when the rollback itself fails', async () => {
+    const { deps, workflowsApi, logger } = createDeps();
+    workflowsApi.executeWorkflow
+      .mockResolvedValueOnce({ workflowExecutionId: 'we-1' })
+      .mockRejectedValueOnce(new Error('workflow engine boom'));
+    workflowsApi.cancelWorkflowExecution.mockRejectedValue(new Error('cancel failed'));
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(
+        { ...validConfig, connector_ids: ['c1', 'c2'] },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to cancel orphaned experiment workflow execution we-1')
+    );
+  });
+
+  it('does not attempt cancellation when the first launch fails', async () => {
+    const { deps, workflowsApi } = createDeps();
+    workflowsApi.executeWorkflow.mockRejectedValueOnce(new Error('workflow engine boom'));
+
+    await runEvalExperimentTool(deps).handler(validConfig, createContext());
+
+    expect(workflowsApi.cancelWorkflowExecution).not.toHaveBeenCalled();
   });
 
   it('returns an error result and does not launch when the caller lacks manage_evals', async () => {
