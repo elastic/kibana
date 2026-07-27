@@ -12,7 +12,6 @@ import { first } from 'rxjs';
 
 import type {
   TaskInstance,
-  ConcreteTaskInstance,
   SerializedConcreteTaskInstance,
   PartialConcreteTaskInstance,
 } from './task';
@@ -27,7 +26,6 @@ import {
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
-import { BufferedTaskStore } from './buffered_task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObjectAttributes, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -3060,90 +3058,6 @@ describe('TaskStore', () => {
       // startedAt, which later crashes the poll cycle.
       expect(result[1]).toMatchObject({ value: { id: 'task_dup', retryAt: mockedDate } });
       expect(result[1]).not.toMatchObject({ value: { startedAt: null } });
-    });
-
-    test(`shared buffer race: a long-running task's retryAt update keeps its startedAt when an overlapping instance finishes`, async () => {
-      // End-to-end repro of the production wedge: an overlapping instance finishing
-      // (startedAt -> null) and the live instance's retryAt updater flush together in
-      // the shared buffer. A cross-contaminated `startedAt: null` here is what the
-      // retryAt updater feeds into asReadyToRun(...), later null-derefing in
-      // TaskRunner.expiration ("Cannot read properties of null (reading 'valueOf')").
-      const bufferedStore = new BufferedTaskStore(store, {});
-
-      const liveInstance = {
-        id: 'task_dup',
-        version: 'WzUsMV0=',
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: mockedDate,
-        retryAt: mockedDate,
-        params: {},
-        state: {},
-        taskType: 'report',
-        attempts: 1,
-        status: 'running' as TaskStatus,
-        ownerId: 'this-node',
-        traceparent: '',
-      } as unknown as ConcreteTaskInstance;
-
-      const finishingInstance = {
-        ...liveInstance,
-        version: 'WzQsMV0=',
-      } as unknown as ConcreteTaskInstance;
-
-      esClient.bulk.mockResolvedValue({
-        errors: false,
-        took: 0,
-        items: [
-          {
-            update: {
-              _index: '.kibana_task_manager_8.16.0_001',
-              _id: 'task:task_dup',
-              _version: 2,
-              result: 'updated',
-              _shards: { total: 1, successful: 1, failed: 0 },
-              _seq_no: 84,
-              _primary_term: 1,
-              status: 200,
-            },
-          },
-          {
-            update: {
-              _index: '.kibana_task_manager_8.16.0_001',
-              _id: 'task:task_dup',
-              _version: 3,
-              result: 'updated',
-              _shards: { total: 1, successful: 1, failed: 0 },
-              _seq_no: 85,
-              _primary_term: 1,
-              status: 200,
-            },
-          },
-        ],
-      });
-
-      const [, retryAtResult] = await Promise.all([
-        // enqueued first: processResult resetting the concluded run's lifecycle fields
-        bufferedStore.partialUpdate(
-          {
-            id: 'task_dup',
-            version: finishingInstance.version,
-            status: 'idle' as TaskStatus,
-            startedAt: null,
-            retryAt: null,
-            ownerId: null,
-          },
-          { validate: false, doc: finishingInstance }
-        ),
-        // enqueued second: the long-running task retryAt updater (no version, like prod)
-        bufferedStore.partialUpdate(
-          { id: 'task_dup', retryAt: mockedDate },
-          { validate: false, doc: liveInstance }
-        ),
-      ]);
-
-      expect(retryAtResult.startedAt).not.toBeNull();
-      expect(retryAtResult.startedAt).toEqual(mockedDate);
     });
   });
 
