@@ -49,6 +49,9 @@ jest.mock('@kbn/core-di-browser', () => ({
         },
       };
     }
+    if (token === 'featureFlags') {
+      return {};
+    }
     if (token === 'chrome') {
       return { docTitle: { change: mockDocTitleChange } };
     }
