@@ -16,6 +16,7 @@ let capturedOnTemplateChange: ((t: string) => void) | undefined;
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
     prompt: string | undefined;
+    esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
     onTemplateChange: (t: string) => void;
@@ -25,6 +26,7 @@ jest.mock('./components/custom_content_component', () => ({
       <div
         data-test-subj="mockCustomContentComponent"
         data-prompt={props.prompt ?? ''}
+        data-esql-query={props.esqlQuery ?? ''}
         data-saved-template={props.savedTemplate ?? ''}
         data-generation-version={props.generationVersion}
       />
@@ -34,6 +36,7 @@ jest.mock('./components/custom_content_component', () => ({
 
 const baseState: CustomContentEmbeddableState = {
   prompt: 'Show KPI cards',
+  esqlQuery: 'FROM logs | STATS count = COUNT(*)',
   template: '<div>static html</div>',
 };
 
@@ -78,6 +81,29 @@ describe('customContentEmbeddableFactory', () => {
       const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
       expect(embeddable.api.serializeState().template).toBeUndefined();
     });
+
+    it('round-trips esqlQuery from initial state', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      expect(embeddable.api.serializeState().esqlQuery).toBe(baseState.esqlQuery);
+    });
+
+    it('serializes esqlQuery as undefined when not provided', async () => {
+      const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
+      expect(embeddable.api.serializeState().esqlQuery).toBeUndefined();
+    });
+
+    it('reflects esqlQuery update applied via applySerializedState', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esqlQuery: 'FROM metrics | STATS avg = AVG(value)',
+        });
+      });
+      expect(embeddable.api.serializeState().esqlQuery).toBe(
+        'FROM metrics | STATS avg = AVG(value)'
+      );
+    });
   });
 
   describe('anyStateChange$', () => {
@@ -86,6 +112,21 @@ describe('customContentEmbeddableFactory', () => {
       const listener = jest.fn();
       embeddable.api.anyStateChange$.subscribe(listener);
       expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('emits when esqlQuery changes via applySerializedState', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      const listener = jest.fn();
+      embeddable.api.anyStateChange$.subscribe(listener);
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esqlQuery: 'FROM metrics | LIMIT 10',
+        });
+      });
+
+      expect(listener).toHaveBeenCalled();
     });
 
     it('emits when prompt or template changes via applySerializedState', async () => {
@@ -102,12 +143,13 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('Component', () => {
-    it('passes prompt and savedTemplate to CustomContentComponent', async () => {
+    it('passes prompt, esqlQuery and savedTemplate to CustomContentComponent', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
       expect(el).toHaveAttribute('data-prompt', 'Show KPI cards');
+      expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
 

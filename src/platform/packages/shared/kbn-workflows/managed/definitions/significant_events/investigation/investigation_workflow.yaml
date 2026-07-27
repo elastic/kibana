@@ -28,7 +28,7 @@ triggers:
           type: array
           items:
             type: string
-          description: Optional data stream names to scope observability queries.
+          description: Optional logical stream names to scope observability queries.
         context:
           type: object
           additionalProperties: true
@@ -83,7 +83,7 @@ steps:
         {{ inputs.message }}
 
         {% if inputs.stream_names and inputs.stream_names.size > 0 %}
-        Data streams (use get_index_info to discover available fields in each):
+        Related streams:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
         {% endif %}
