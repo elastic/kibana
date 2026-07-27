@@ -5,12 +5,27 @@
  * 2.0.
  */
 
+import { setTimeout as delay } from 'timers/promises';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import pMap from 'p-map';
 
 import type { EsAssetReference } from '../../../types';
 import { ElasticsearchAssetType } from '../../../types';
 import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
+
+/**
+ * Assets are verified right after they are written, so a clean 404 is often just read-after-write
+ * lag (cluster-state propagation for templates/pipelines/ILM) rather than a real install failure.
+ * We re-check only the still-missing assets a few times before declaring them missing.
+ */
+const DEFAULT_MAX_ATTEMPTS = 3;
+const DEFAULT_RETRY_DELAY_MS = 2000;
+
+export interface VerifyEsAssetsOptions {
+  maxAttempts?: number;
+  retryDelayMs?: number;
+}
 
 /**
  * Checks whether a single ES asset exists. Returns true if the asset is present, false if it is
@@ -66,9 +81,40 @@ async function esAssetExists(
 /**
  * Returns the subset of `refs` whose corresponding ES assets do not exist.
  * Per-asset errors are treated as "present" (logged but not surfaced as missing) to prevent
- * transient ES errors from triggering spurious install failures.
+ * transient ES errors from triggering spurious install failures. Missing assets are re-checked
+ * with a short backoff to absorb read-after-write lag right after installation.
  */
 export async function verifyEsAssetsExist(
+  esClient: ElasticsearchClient,
+  refs: EsAssetReference[],
+  logger: { warn: (msg: string) => void },
+  options: VerifyEsAssetsOptions = {}
+): Promise<EsAssetReference[]> {
+  const { maxAttempts = DEFAULT_MAX_ATTEMPTS, retryDelayMs = DEFAULT_RETRY_DELAY_MS } = options;
+
+  let toCheck = refs;
+  let missing: EsAssetReference[] = [];
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    missing = await checkAssets(esClient, toCheck, logger);
+    if (missing.length === 0) {
+      return [];
+    }
+
+    if (attempt < maxAttempts) {
+      logger.warn(
+        `verifyEsAssetsExist: ${missing.length} asset(s) missing on attempt ${attempt}/${maxAttempts}, retrying in ${retryDelayMs}ms`
+      );
+      // Only the still-missing assets need re-checking; present ones won't disappear.
+      toCheck = missing;
+      await delay(retryDelayMs);
+    }
+  }
+
+  return missing;
+}
+
+async function checkAssets(
   esClient: ElasticsearchClient,
   refs: EsAssetReference[],
   logger: { warn: (msg: string) => void }

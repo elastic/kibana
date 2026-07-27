@@ -121,6 +121,7 @@
     "@kbn/app-header",
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
+    "@kbn/management-settings-ids",
   ],
   "exclude": ["target/**/*"]
 }

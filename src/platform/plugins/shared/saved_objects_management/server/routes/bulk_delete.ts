@@ -9,6 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
+} from '@kbn/core-saved-objects-server';
 import type { v1 } from '../../common';
 
 export const registerBulkDeleteRoute = (router: IRouter) => {
@@ -24,10 +29,10 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
       validate: {
         body: schema.arrayOf(
           schema.object({
-            type: schema.string(),
-            id: schema.string(),
+            type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
           }),
-          { maxSize: 10_000 }
+          { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
         ),
       },
     },

@@ -56,7 +56,7 @@ export const getResolutionState = async (
   esClient: ElasticsearchClient,
   index: string,
   entityType: EntityType,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<{
   resolvedEntities: number;
   targetEntities: number;
@@ -70,7 +70,7 @@ export const getResolutionState = async (
     | STATS aliasCount = COUNT(*) BY entity.relationships.resolution.resolved_to
     | STATS resolvedEntities = SUM(aliasCount), resolutionGroups = COUNT(*), maxGroupAliases = MAX(aliasCount)`;
 
-  const { columns, values } = await executeEsqlQuery({ esClient, query, abortController });
+  const { columns, values } = await executeEsqlQuery({ esClient, query, signal });
 
   // No aliases: ES returns null for SUM/MAX; report as 0. Look up by column name, not position.
   const row = values[0] ?? [];
@@ -131,7 +131,7 @@ const toHealthReportPayload = (statusResult: GetStatusResult) => {
 async function runTask({
   taskInstance,
   fakeRequest,
-  abortController,
+  signal,
   logger,
   core,
   telemetryReporter,
@@ -139,7 +139,6 @@ async function runTask({
   logger: Logger;
   core: EntityStoreCoreSetup;
   telemetryReporter: TelemetryReporter;
-  abortController: AbortController;
 }): Promise<RunResult> {
   const namespace = taskInstance.state.namespace as string | undefined;
 
@@ -163,13 +162,12 @@ async function runTask({
     isServerless: false,
   });
   const index = getLatestEntitiesIndexName(namespace);
-  const abortSignal = abortController.signal;
 
   // Report Entity Store usage and resolution state per entity type
   await Promise.all(
     ALL_ENTITY_TYPES.map(async (entityType) => {
       try {
-        const { count: storeSize } = await getStoreSize(esClient, index, entityType, abortSignal);
+        const { count: storeSize } = await getStoreSize(esClient, index, entityType, signal);
         telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
           storeSize,
           entityType,
@@ -177,7 +175,7 @@ async function runTask({
         });
 
         const { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize } =
-          await getResolutionState(esClient, index, entityType, abortController);
+          await getResolutionState(esClient, index, entityType, signal);
         const standaloneEntities = Math.max(0, storeSize - resolvedEntities - targetEntities);
         telemetryReporter.reportEvent(ENTITY_STORE_RESOLUTION_STATE_EVENT, {
           entityType,
@@ -201,7 +199,7 @@ async function runTask({
   try {
     const { count: docCount } = await esClient.count(
       { index: getMetadataEntitiesDataStreamName(namespace) },
-      { signal: abortSignal }
+      { signal }
     );
     telemetryReporter.reportEvent(ENTITY_STORE_METADATA_USAGE_EVENT, { namespace, docCount });
   } catch (e) {
@@ -245,7 +243,7 @@ export function registerStatusReportTask({
       [config.type]: {
         title: config.title,
         timeout: config.timeout,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController, executionUuid }) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest, signal, executionUuid }) => ({
           run: () =>
             wrapTaskRun({
               spanName: 'entityStore.task.status_report.run',
@@ -257,7 +255,7 @@ export function registerStatusReportTask({
                 runTask({
                   taskInstance,
                   fakeRequest,
-                  abortController,
+                  signal,
                   executionUuid,
                   logger: logger.get(taskInstance.id),
                   core,

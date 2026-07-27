@@ -13,14 +13,13 @@ import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
-  expectNoBulkTruncationMetadata,
   NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
 
 const BULK_DISABLE_URL = `${testData.RULE_API_PATH}/_bulk_disable`;
 
-apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
@@ -50,59 +49,11 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
       body: { ids: [ruleA.id, ruleB.id] },
     });
     expect(response).toHaveStatusCode(200);
-    expect(response.body.errors).toStrictEqual([]);
-    expect(response.body.rules).toHaveLength(2);
-    expectNoBulkTruncationMetadata(response.body);
-    const returnedIds = response.body.rules.map((rule: { id: string }) => rule.id);
-    expect(returnedIds.sort()).toStrictEqual([ruleA.id, ruleB.id].sort());
+    expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
     // Verify the side effect: both rules are now disabled.
     const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
     expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
   });
-
-  apiTest(
-    'disable: should disable all rules with match_all: true',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-a' } })
-      );
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-b' } })
-      );
-      const response = await apiClient.post(BULK_DISABLE_URL, {
-        headers: writerHeaders,
-        body: { match_all: true },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(2);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
-      expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
-    }
-  );
-
-  apiTest(
-    'disable: should disable only rules matching the filter',
-    async ({ apiClient, apiServices }) => {
-      const prodRule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'prod-rule', tags: ['production'] } })
-      );
-      const devRule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'dev-rule', tags: ['development'] } })
-      );
-      const response = await apiClient.post(BULK_DISABLE_URL, {
-        headers: writerHeaders,
-        body: { filter: 'metadata.tags: "production"' },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(prodRule.id);
-      // The dev rule should still be enabled.
-      const stored = await apiServices.alertingV2.rules.get(devRule.id);
-      expect(stored.enabled).toBe(true);
-    }
-  );
 
   apiTest(
     'disable: should be idempotent when called on already-disabled rules',
@@ -110,22 +61,23 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'already-disabled' } })
       );
-      // Use the service to flip state via the (other) bulk_disable endpoint.
+      // Flip state via the same endpoint we're testing.
       await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
       const response = await apiClient.post(BULK_DISABLE_URL, {
         headers: writerHeaders,
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(rule.id);
-      expect(response.body.rules[0].enabled).toBe(false);
+      // Already-disabled rules still count as affected: the operation is
+      // idempotent and clients should not have to special-case them.
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
+      const stored = await apiServices.alertingV2.rules.get(rule.id);
+      expect(stored.enabled).toBe(false);
     }
   );
 
   apiTest(
-    'disable: should report unknown ids in the errors array',
+    'disable: should report unknown ids in the errors array with RULE_NOT_FOUND code',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'existing-rule' } })
@@ -135,70 +87,12 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
         body: { ids: [rule.id, 'does-not-exist'] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body.affected_count).toBe(1);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0]).toMatchObject({
         id: 'does-not-exist',
-        error: { statusCode: 404 },
+        error: { code: 'RULE_NOT_FOUND' },
       });
-    }
-  );
-
-  apiTest(
-    'disable: should disable only rules matching a `kind` filter',
-    async ({ apiClient, apiServices }) => {
-      const alertRule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ kind: 'alert', metadata: { name: 'alert-rule' } })
-      );
-      const signalRule = await apiServices.alertingV2.rules.create(
-        // Signal rules must opt out of the default `state_transition`,
-        // which the schema only allows for `kind: 'alert'`.
-        buildCreateRuleData({
-          kind: 'signal',
-          state_transition: undefined,
-          recovery_strategy: undefined,
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | LIMIT 10' },
-          },
-          metadata: { name: 'signal-rule' },
-        })
-      );
-
-      const response = await apiClient.post(BULK_DISABLE_URL, {
-        headers: writerHeaders,
-        body: { filter: 'kind: alert' },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(alertRule.id);
-      expectNoBulkTruncationMetadata(response.body);
-
-      // The signal rule must still be enabled.
-      const stored = await apiServices.alertingV2.rules.get(signalRule.id);
-      expect(stored.enabled).toBe(true);
-    }
-  );
-
-  apiTest(
-    'disable: should return 200 with empty results when filter matches nothing',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'enabled-rule' } })
-      );
-
-      const response = await apiClient.post(BULK_DISABLE_URL, {
-        headers: writerHeaders,
-        body: { filter: 'kind: nonexistent' },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.rules).toStrictEqual([]);
-      expect(response.body.errors).toStrictEqual([]);
-      expectNoBulkTruncationMetadata(response.body);
     }
   );
 
@@ -221,12 +115,12 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
         body: { ids: [ruleA.id, ruleB.id] },
       });
       expect(disableResponse).toHaveStatusCode(200);
-      expect(disableResponse.body.rules).toHaveLength(2);
+      expect(disableResponse.body.affected_count).toBe(2);
 
       // Re-enable only A. The sibling bulk_enable endpoint has its own spec; here it's
       // just setup, so we go through the service helper.
       const enableResponse = await apiServices.alertingV2.rules.bulkEnable({ ids: [ruleA.id] });
-      expect(enableResponse.rules).toHaveLength(1);
+      expect(enableResponse.affected_count).toBe(1);
 
       // Final expected state: A enabled, B disabled, C enabled.
       const finalA = await apiServices.alertingV2.rules.get(ruleA.id);
@@ -246,7 +140,7 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('validation: should reject body without any selector', async ({ apiClient }) => {
+  apiTest('validation: should reject a body with no ids field', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_DISABLE_URL, {
       headers: writerHeaders,
       body: {},
@@ -254,18 +148,10 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('validation: should reject combining ids with filter', async ({ apiClient }) => {
+  apiTest('validation: should reject unknown fields (strict schema)', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_DISABLE_URL, {
       headers: writerHeaders,
-      body: { ids: ['some-id'], filter: 'metadata.tags: "x"' },
-    });
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: should reject combining match_all with ids', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_DISABLE_URL, {
-      headers: writerHeaders,
-      body: { match_all: true, ids: ['some-id'] },
+      body: { ids: ['some-id'], unknown: 'value' },
     });
     expect(response).toHaveStatusCode(400);
   });
@@ -302,7 +188,7 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
     }
   );
 

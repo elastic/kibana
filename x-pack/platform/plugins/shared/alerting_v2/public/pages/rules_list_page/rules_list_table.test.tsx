@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
@@ -297,34 +297,40 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 5 rules');
     });
 
-    it('shows "Select first {max} rules" without disclosure until select-all is active', () => {
+    it('disables Select all and shows a help tip when total exceeds the bulk cap', () => {
       renderTable({
         selectedCount: 1,
         isAllSelected: false,
-        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 2000,
       });
 
-      const btn = screen.getByTestId('selectAllRulesButton');
-      expect(btn).toHaveTextContent('Select first');
-      expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
-
-      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+      expect(screen.getByTestId('selectAllRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('bulkSelectAllLimitTooltip')).toBeInTheDocument();
     });
 
-    it('shows disclosure only after select-all when total exceeds bulk cap', () => {
+    it('explains the cap in the Select all help tip', async () => {
       renderTable({
-        selectedCount: BULK_FILTER_MAX_RULES,
-        isAllSelected: true,
-        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 2000,
       });
 
-      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('Selected');
-      expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
-        /10,?000/
-      );
-      const disc = screen.getByTestId('bulkSelectAllLimitDisclosure');
-      expect(disc).toHaveTextContent('Only the first');
-      expect(disc.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+      fireEvent.mouseOver(screen.getByTestId('bulkSelectAllLimitTooltip'));
+
+      const disc = await screen.findByTestId('bulkSelectAllLimitDisclosure');
+      expect(disc).toHaveTextContent('Select all is available only when');
+      expect(disc).toHaveTextContent('Narrow your filter');
+    });
+
+    it('enables Select all with no help tip when total is within the bulk cap', () => {
+      renderTable({
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES,
+      });
+
+      expect(screen.getByTestId('selectAllRulesButton')).toBeEnabled();
+      expect(screen.queryByTestId('bulkSelectAllLimitTooltip')).not.toBeInTheDocument();
     });
 
     it('hides "Select all" button when all selected', () => {

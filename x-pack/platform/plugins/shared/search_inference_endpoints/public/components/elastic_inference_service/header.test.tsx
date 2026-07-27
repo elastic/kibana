@@ -22,6 +22,22 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
+const mockKibanaReturn = (options?: { manage?: boolean; cloud?: Record<string, unknown> }) => {
+  const manage = options?.manage ?? true;
+  const cloud = options?.cloud ?? { isCloudEnabled: false };
+
+  return {
+    services: {
+      cloud,
+      application: {
+        capabilities: {
+          searchInferenceEndpoints: { show: true, manage },
+        },
+      },
+    },
+  };
+};
+
 describe('ElasticInferenceServiceModelsHeader', () => {
   const onManageRegions = jest.fn();
 
@@ -31,11 +47,7 @@ describe('ElasticInferenceServiceModelsHeader', () => {
       if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
       return defaultValue;
     });
-    mockUseKibana.mockReturnValue({
-      services: {
-        cloud: { isCloudEnabled: false },
-      },
-    });
+    mockUseKibana.mockReturnValue(mockKibanaReturn());
   });
 
   it('renders the page title and description', () => {
@@ -77,6 +89,18 @@ describe('ElasticInferenceServiceModelsHeader', () => {
       expect(queryByTestId('eisManageRegionsButton')).not.toBeInTheDocument();
     });
 
+    it('hidden when manage capability is false', () => {
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
+      mockUseKibana.mockReturnValue(mockKibanaReturn({ manage: false }));
+      const { queryByTestId } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
+      expect(queryByTestId('eisManageRegionsButton')).not.toBeInTheDocument();
+    });
+
     it('calls onManageRegions when button is clicked', () => {
       mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
         if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
@@ -93,16 +117,16 @@ describe('ElasticInferenceServiceModelsHeader', () => {
 
   describe('Cloud usage button', () => {
     it('shows when cloud is enabled and billingUrl is available', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
+      mockUseKibana.mockReturnValue(
+        mockKibanaReturn({
           cloud: {
             isCloudEnabled: true,
             getPrivilegedUrls: jest
               .fn()
               .mockResolvedValue({ billingUrl: 'https://cloud.elastic.co/billing/' }),
           },
-        },
-      });
+        })
+      );
       const { getByText } = render(
         <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
       );
@@ -119,14 +143,14 @@ describe('ElasticInferenceServiceModelsHeader', () => {
     });
 
     it('hidden when cloud is enabled but billingUrl is not available', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
+      mockUseKibana.mockReturnValue(
+        mockKibanaReturn({
           cloud: {
             isCloudEnabled: true,
             getPrivilegedUrls: jest.fn().mockResolvedValue({}),
           },
-        },
-      });
+        })
+      );
       const { queryByText } = render(
         <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
       );

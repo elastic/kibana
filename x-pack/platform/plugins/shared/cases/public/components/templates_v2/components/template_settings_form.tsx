@@ -44,9 +44,11 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
   formResetKey = 0,
   compact = false,
 }) => {
-  // Alert syncing is not a feature in every solution (e.g. Observability disables it), so the toggle
-  // is hidden there — mirroring the create-case form and case settings popover.
-  const { isSyncAlertsEnabled } = useCasesFeatures();
+  // Alert syncing and observable extraction are not features in every solution (e.g. Observability
+  // disables both), so the toggles are hidden there — mirroring the create-case form and V1 templates.
+  const { isSyncAlertsEnabled, observablesAuthorized, isExtractObservablesEnabled } =
+    useCasesFeatures();
+  const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
 
   const setSetting = useCallback(
     (key: keyof TemplateSettings, value: boolean) => {
@@ -92,14 +94,16 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
         </>
       )}
 
-      <EuiFormRow fullWidth helpText={commonI18n.EXTRACT_OBSERVABLES_HELP}>
-        <EuiSwitch
-          label={commonI18n.EXTRACT_OBSERVABLES_LABEL}
-          checked={settings?.extractObservables ?? false}
-          onChange={(e) => setSetting('extractObservables', e.target.checked)}
-          data-test-subj="templateSettingsExtractObservablesSwitch"
-        />
-      </EuiFormRow>
+      {canExtractObservables && (
+        <EuiFormRow fullWidth helpText={commonI18n.EXTRACT_OBSERVABLES_HELP}>
+          <EuiSwitch
+            label={commonI18n.EXTRACT_OBSERVABLES_LABEL}
+            checked={settings?.extractObservables ?? false}
+            onChange={(e) => setSetting('extractObservables', e.target.checked)}
+            data-test-subj="templateSettingsExtractObservablesSwitch"
+          />
+        </EuiFormRow>
+      )}
 
       <EuiHorizontalRule margin="l" />
 

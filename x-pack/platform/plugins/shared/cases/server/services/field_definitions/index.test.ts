@@ -31,11 +31,16 @@ const makeFieldDefinitionSO = (
 
 describe('FieldDefinitionsService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let refreshAnalyticsV2DataView: jest.Mock;
   let service: FieldDefinitionsService;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
-    service = new FieldDefinitionsService({ unsecuredSavedObjectsClient: soClient });
+    refreshAnalyticsV2DataView = jest.fn();
+    service = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient: soClient,
+      refreshAnalyticsV2DataView,
+    });
   });
 
   describe('getFieldDefinitions', () => {
@@ -140,6 +145,65 @@ describe('FieldDefinitionsService', () => {
     });
   });
 
+  describe('getGlobalFieldDefinitionsForSearch', () => {
+    it('returns only isGlobal definitions for the given owners', async () => {
+      const globalField = makeFieldDefinitionSO({ isGlobal: true });
+      const nonGlobalField = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
+      soClient.find.mockResolvedValue({
+        saved_objects: [globalField, nonGlobalField],
+        total: 2,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getGlobalFieldDefinitionsForSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+          perPage: 10000,
+        })
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('my_field');
+    });
+
+    it('fetches all owners when owner is omitted', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [makeFieldDefinitionSO({ isGlobal: true })],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      await service.getGlobalFieldDefinitionsForSearch({});
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: undefined,
+          perPage: 10000,
+        })
+      );
+    });
+
+    it('excludes non-global definitions', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [makeFieldDefinitionSO({ isGlobal: false })],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getGlobalFieldDefinitionsForSearch({
+        owner: ['securitySolution'],
+      });
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getFieldDefinition', () => {
     it('retrieves a single field definition by id', async () => {
       const so = makeFieldDefinitionSO();
@@ -185,6 +249,18 @@ describe('FieldDefinitionsService', () => {
       const [, attributes, options] = soClient.create.mock.calls[0];
       expect((attributes as FieldDefinition).fieldDefinitionId).toBe(options!.id);
     });
+
+    it('refreshes the analytics v2 data view after creating', async () => {
+      soClient.create.mockResolvedValue(makeFieldDefinitionSO());
+
+      await service.createFieldDefinition({
+        name: 'my_field',
+        owner: 'securitySolution',
+        definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+      });
+
+      expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('updateFieldDefinition', () => {
@@ -207,6 +283,20 @@ describe('FieldDefinitionsService', () => {
       expect(soClient.get).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
       expect(result).toBe(so);
     });
+
+    it('refreshes the analytics v2 data view after updating', async () => {
+      const so = makeFieldDefinitionSO({ name: 'updated_field' });
+      soClient.update.mockResolvedValue(so as never);
+      soClient.get.mockResolvedValue(so);
+
+      await service.updateFieldDefinition('fd-1', {
+        name: 'updated_field',
+        owner: 'securitySolution',
+        definition: 'name: updated_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+      });
+
+      expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('deleteFieldDefinition', () => {
@@ -216,6 +306,14 @@ describe('FieldDefinitionsService', () => {
       await service.deleteFieldDefinition('fd-1');
 
       expect(soClient.delete).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
+    });
+
+    it('refreshes the analytics v2 data view after deleting', async () => {
+      soClient.delete.mockResolvedValue({});
+
+      await service.deleteFieldDefinition('fd-1');
+
+      expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
     });
   });
 });

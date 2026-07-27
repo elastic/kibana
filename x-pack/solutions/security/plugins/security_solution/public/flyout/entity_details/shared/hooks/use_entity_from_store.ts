@@ -160,10 +160,21 @@ export function useEntityFromStore(
     return { ...identityFields };
   }, [identityFields]);
 
+  /**
+   * Partial-identity lookup: unlike the default partition semantics used by extraction, the
+   * stored entity carries the higher-ranked identity fields (e.g. `host.id`), so requiring their
+   * absence would never match. See https://github.com/elastic/kibana/issues/278276.
+   */
   const documentFilter = useMemo(
     () =>
       euidApi?.euid
-        ? euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, identityDocument)
+        ? euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+            entityType as EntityType,
+            identityDocument,
+            {
+              excludeHigherRankedFields: false,
+            }
+          )
         : undefined,
     [euidApi?.euid, entityType, identityDocument]
   );

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { classifyError } from './error_utils';
 import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '@kbn/streams-plugin/server';
+import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
+import { classifyError } from './error_utils';
 
 describe('classifyError', () => {
   it('returns not-found message for 404 statusCode', () => {
@@ -43,6 +44,12 @@ describe('classifyError', () => {
   it('returns connector message for "No connector available"', () => {
     const result = classifyError(new Error('No connector available'));
     expect(result).toContain('inference connector');
+  });
+
+  it('returns pause remediation for SignificantEventsPausedError before generic 409', () => {
+    expect(classifyError(new SignificantEventsPausedError())).toContain(
+      'Significant Events activity is paused'
+    );
   });
 
   it('returns lock contention message for 409 statusCode', () => {

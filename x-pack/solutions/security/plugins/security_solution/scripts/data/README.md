@@ -139,7 +139,13 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 ## Threat intel RSS (mustard demo)
 
-`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL whose article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs and hunt into the pack indices.
+`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL with a **single current item** (canonical title, no dated duplicate) so mustard `source_ingestion` demos real ingest once per pack without minting near-duplicate "today" cards.
+
+`--threat-intel-reports` (implies `--threat-intel`) also bulk-writes **seeded historic reports** into `.kibana-threat-reports` from `--start-date` through **`--end-date` minus 24h**. The trailing day is left empty so mustard `source_ingestion` can create the real Last-24h reports. Historic docs rotate distinct per-pack article variants (`historicArticles` in `PACK_TI_SCENARIOS`) so Hub timelines are not the same four titles with date suffixes. The newest ~40% of historic slots also use per-pack emerging `source.name` aliases (older slots stay on the four canonical names) so Hub **Sources** can rise vs prior period; live RSS and the Sources index stay canonical. Newest historic slots use Critical/High so longer presets still show severity variety. Use `--threat-intel-report-count` to override the default **12 historic reports per pack**.
+
+Live RSS stays **one canonical article per pack** (severity ladder for enrich). Article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs from the **current RSS items** and hunt into the pack indices.
+
+**Demo caution:** do **not** demo Threat Correlation on seeded historic reports. Hub Correlate (`report_id` mode) needs stored diamond / enrich outputs that historics lack (`extraction_method: seeded`). Correlate from Last-24h workflow-enriched reports only; use historic cards for timeline density and variety.
 
 Observable contract in `lib/threat_intel_fixtures.ts` (`PACK_TI_SCENARIOS`):
 
@@ -152,15 +158,20 @@ Fixture ids/names stay eval-neutral (`ti-rss-<pack>`, subscription `threat-intel
 
 Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs-aws.cloudtrail.*`, `logs-kubernetes.audit.*`, `logs-github.audit.*`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
 
-`--threat-intel` with no `--packs` selects all four packs. Use `--alert-mode preview` so pack hunts mint Detection Engine alerts (needed for non-zero Env. hits via `hit_provenance_backfill`).
+`--threat-intel` / `--threat-intel-reports` with no `--packs` selects all four packs. Use `--alert-mode preview` so pack hunts mint Detection Engine alerts (needed for non-zero Env. hits via `hit_provenance_backfill` on workflow-ingested reports).
 
 ```bash
-# On generate-cli-data-quality (this branch)
-yarn data:generate --clean -n 50 --episodes ep1 \
+# Wider window + historic Hub reports for 24h/7d/30d/90d timelines
+yarn data:generate --clean -n 120 --episodes ep1 \
+  --start-date 180d --end-date now \
+  --packs okta,aws-iam,kubernetes,github-actions \
   --threat-intel \
+  --threat-intel-reports \
   --alert-mode preview \
   --kibanaUrl http://127.0.0.1:5601/kbn
 ```
+
+Requires mustard Kibana to have created `.kibana-threat-reports` (start Hub once against the same ES) before `--threat-intel-reports` can index. Generate logs should include `Seeded N historic threat report(s)` (expect **48** = 12×4 packs) ending ~24h before `--end-date`. If that line is missing, historic seeding did not run.
 
 ### Mustard demo script (pipeline + Tier 1 / Tier 2 hunts)
 
@@ -176,9 +187,9 @@ Restart Kibana after flag changes (`iocIndicatorSyncEnabled` syncs extracted IOC
 
 **A. Seed + pipeline (workflows)**
 
-1. Generate once with the command above (packs + TI RSS + preview alerts).
-2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources.
-3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions on those reports.
+1. Generate once with the command above (packs + TI RSS + historic Hub reports + preview alerts). Confirm generate logs `Seeded N threat report(s) into .kibana-threat-reports`.
+2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources (**1 current RSS item each**) into the live 24h window only.
+3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions (and severity, once mustard enrich classifies it) on those workflow-ingested reports.
 4. Run `threat-intel.digest_delivery` → seeded `threat-intel-digest` subscription produces a digest row.
 5. Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect non-zero Env. hits after preview alerts + indicator sync.
 
@@ -240,6 +251,8 @@ After step 3 (extraction), in Agent Builder use topic prompts that force the hun
 ### Optional extras
 
 - `--threat-intel`: Per-pack RSS sources + digest subscription for mustard TI workflows (defaults `--packs` to all four when omitted)
+- `--threat-intel-reports`: Also seed historic Hub reports into `.kibana-threat-reports` across the generate window (implies `--threat-intel`)
+- `--threat-intel-report-count`: Historic reports per pack (default: 12) when `--threat-intel-reports` is set
 - `--attacks`: Synthetic Attack Discoveries
 - `--cases`: Cases from ~50% of discoveries (implies `--attacks`)
 - `--no-validate-fixtures`: Disable fixture validation
@@ -258,7 +271,7 @@ After step 3 (extraction), in Agent Builder use topic prompts that force the hun
 3. Optional `--clean`
 4. Scale + index episode events/alerts into concrete indices
 5. Index selected packs (+ install custom MITRE hunts unless `alert-mode=none`)
-6. Optional `--threat-intel`: seed per-pack RSS sources + digest subscription
+6. Optional `--threat-intel` / `--threat-intel-reports`: seed per-pack RSS sources + digest subscription (+ historic Hub reports when reports flag is set)
 7. Initialize detections / ensure preview index (skipped for `none`)
 8. **preview:** honest Rule Preview per producing rule → copy  
    **live:** enable rules for the detection engine (unless `--leave-rules-disabled`)  

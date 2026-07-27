@@ -149,6 +149,12 @@ const handleConversationExecution = async ({
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 
+  const author = await deps.conversationService.getConversationRoundAuthor({
+    request,
+    conversation,
+    origin,
+  });
+
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
     storeConversation && conversation.operation === 'CREATE'
@@ -162,6 +168,7 @@ const handleConversationExecution = async ({
     request,
     nextInput,
     origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,

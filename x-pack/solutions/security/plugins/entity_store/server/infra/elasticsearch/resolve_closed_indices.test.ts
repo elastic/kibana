@@ -161,7 +161,7 @@ describe('resolveClosedIndexAdjustments', () => {
     expect(resolveIndex).toHaveBeenCalledTimes(1);
   });
 
-  it('second resolveIndex call uses the concrete backing index names', async () => {
+  it('batches backing index names into a single resolveIndex call when small enough to fit', async () => {
     const resolveIndex = jest
       .fn()
       .mockResolvedValueOnce({
@@ -187,6 +187,113 @@ describe('resolveClosedIndexAdjustments', () => {
     );
   });
 
+  it('splits backing index names across multiple batches when URL length would be exceeded', async () => {
+    // 300 names × ~21 bytes each exceeds 3500 bytes per batch, guaranteeing multiple batches
+    const allBackingIndices = Array.from(
+      { length: 300 },
+      (_, i) => `.ds-logs-batch-${String(i).padStart(6, '0')}`
+    );
+
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-batch',
+            backing_indices: allBackingIndices,
+            timestamp_field: '@timestamp',
+          },
+        ],
+      })
+      .mockResolvedValue(emptyResolve);
+
+    await resolveClosedIndexAdjustments(makeEsClient(resolveIndex), ['logs-batch'], logger);
+
+    // More than 2 calls means batching occurred (call 1 = pattern resolve, calls 2+ = batches)
+    expect(resolveIndex.mock.calls.length).toBeGreaterThan(2);
+
+    // Every backing index name must appear in exactly one batch call
+    const batchCalls = resolveIndex.mock.calls.slice(1);
+    const allNamesFromBatches = batchCalls.flatMap((args) => (args[0] as { name: string[] }).name);
+    expect(allNamesFromBatches).toEqual(allBackingIndices);
+  });
+
+  it('merges closed backing index results across all batches', async () => {
+    const allBackingIndices = Array.from(
+      { length: 300 },
+      (_, i) => `.ds-logs-merge-${String(i).padStart(6, '0')}`
+    );
+    // Mark the first and last index as closed so they are guaranteed to be in different batches
+    const closedSet = new Set([
+      allBackingIndices[0],
+      allBackingIndices[allBackingIndices.length - 1],
+    ]);
+
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-merge',
+            backing_indices: allBackingIndices,
+            timestamp_field: '@timestamp',
+          },
+        ],
+      })
+      .mockImplementation(({ name }: { name: string[] }) =>
+        Promise.resolve({
+          indices: name.map((n) => ({
+            name: n,
+            attributes: [closedSet.has(n) ? 'closed' : 'open'],
+          })),
+          aliases: [],
+          data_streams: [],
+        })
+      );
+
+    const result = await resolveClosedIndexAdjustments(
+      makeEsClient(resolveIndex),
+      ['logs-merge'],
+      logger
+    );
+
+    expect(result.negations).toContain('-logs-merge');
+    expect(result.openBackingIndices).toHaveLength(allBackingIndices.length - closedSet.size);
+    for (const closed of closedSet) {
+      expect(result.openBackingIndices).not.toContain(closed);
+    }
+  });
+
+  it('returns empty result and logs a warning if a batch resolveIndex call fails', async () => {
+    const backingIndices = ['.ds-logs-foo-000001', '.ds-logs-foo-000002'];
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          { name: 'logs-foo', backing_indices: backingIndices, timestamp_field: '@timestamp' },
+        ],
+      })
+      .mockRejectedValue(new Error('batch resolve failed'));
+
+    const result = await resolveClosedIndexAdjustments(
+      makeEsClient(resolveIndex),
+      ['logs-foo'],
+      logger
+    );
+
+    expect(result).toEqual({ openBackingIndices: [], negations: [] });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to resolve closed indices')
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('batch resolve failed'));
+  });
+
   it('calls resolveIndex with correct expand_wildcards and ignore options', async () => {
     const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
 
@@ -198,6 +305,68 @@ describe('resolveClosedIndexAdjustments', () => {
       ignore_unavailable: true,
       allow_no_indices: true,
     });
+  });
+
+  it('limits concurrent batch resolveIndex calls to 30 at a time', async () => {
+    // Long names (~183 chars) keep each URL chunk to ~18 indices.
+    // 800 names → ~45 chunks, well above the 30 concurrency cap.
+    const longPrefix = '.ds-logs-climit-' + 'a'.repeat(160);
+    const allBackingIndices = Array.from(
+      { length: 800 },
+      (_, i) => `${longPrefix}-${String(i).padStart(6, '0')}`
+    );
+
+    let activeCalls = 0;
+    let peakActiveCalls = 0;
+    const pendingResolvers: Array<() => void> = [];
+
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-climit',
+            backing_indices: allBackingIndices,
+            timestamp_field: '@timestamp',
+          },
+        ],
+      })
+      .mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            activeCalls++;
+            peakActiveCalls = Math.max(peakActiveCalls, activeCalls);
+            pendingResolvers.push(() => {
+              activeCalls--;
+              resolve(emptyResolve);
+            });
+          })
+      );
+
+    const resultPromise = resolveClosedIndexAdjustments(
+      makeEsClient(resolveIndex),
+      ['logs-climit'],
+      logger
+    );
+
+    // Flush all microtasks so pLimit fills up to its concurrency cap before we inspect.
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
+    expect(peakActiveCalls).toBe(30);
+    expect(activeCalls).toBe(30);
+
+    // Drain in rounds: resolving a batch lets pLimit start the next queued chunks.
+    while (pendingResolvers.length > 0) {
+      pendingResolvers.splice(0).forEach((r) => r());
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
+
+    await resultPromise;
+
+    // Sanity check: there were more than 30 chunks, so the cap was actually exercised.
+    expect(resolveIndex.mock.calls.length - 1).toBeGreaterThan(30);
   });
 
   it('returns empty result and logs a warning on resolveIndex failure', async () => {

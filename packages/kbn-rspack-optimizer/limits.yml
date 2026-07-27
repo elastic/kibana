@@ -6,12 +6,12 @@ pageLoadAssetSize:
   agentBuilderPlatform: 22339
   agentBuilderSml: 328
   agentBuilderVisualizations: 1284
-  agentBuilderWorkflows: 854
+  agentBuilderWorkflows: 761
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 15636
-  apm: 31420
+  alertingVTwo: 15502
+  apm: 31419
   apmShared: 1896
   apmSourcesAccess: 779
   automaticImport: 13257
@@ -19,25 +19,28 @@ pageLoadAssetSize:
   canvas: 6000
   cases: 2799
   charts: 1188
+  clientApps: 1017
   cloud: 8477
   cloudConnect: 4998
   cloudDataMigration: 1755
   cloudDefend: 3152
-  cloudExperiments: 75153
+  cloudExperiments: 67357
   cloudFullStory: 1373
   cloudLinks: 18103
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
   contentManagement: 6738
+  contextEngine: 1415
   controls: 4166
   core: 320
   cps: 5002
   crossClusterReplication: 7691
+  customContent: 1037
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
-  data: 11799
+  data: 11798
   dataFederation: 3324
   dataQuality: 5836
   datasetQuality: 41081
@@ -82,7 +85,7 @@ pageLoadAssetSize:
   files: 3957
   filesManagement: 952
   fileUpload: 217
-  fleet: 4772
+  fleet: 6095
   genAiSettings: 1542
   globalSearch: 5183
   globalSearchBar: 21462
@@ -176,22 +179,22 @@ pageLoadAssetSize:
   serverless: 1272
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 7168
+  serverlessVectordb: 7165
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 440
   shared-core: 348361
-  shared-misc: 103676
+  shared-misc: 103637
   shared-packages: 4103474
   shared-plugins: 12276963
-  shared-solution-packages: 353542
-  significant_events: 2588
+  shared-solution-packages: 353531
+  significant_events: 2455
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
   stackConnectors: 63574
-  streams: 6521
+  streams: 4709
   streamsApp: 83679
   synthetics: 18443
   telemetry: 20586
@@ -211,13 +214,13 @@ pageLoadAssetSize:
   vendors: 4591364
   vendors-heavy: 2182280
   visDefaultEditor: 738
-  visTypeGauge: 7639
-  visTypeHeatmap: 6961
-  visTypeMetric: 6932
-  visTypePie: 22756
+  visTypeGauge: 7638
+  visTypeHeatmap: 6960
+  visTypeMetric: 6931
+  visTypePie: 22755
   visTypeTable: 13200
-  visTypeTagcloud: 3119
-  visTypeTimelion: 6661
+  visTypeTagcloud: 3118
+  visTypeTimelion: 6660
   visTypeTimeseries: 12718
   visTypeVega: 4860
   visTypeVislib: 21971
