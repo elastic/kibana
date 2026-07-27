@@ -564,6 +564,73 @@ describe('AddCollectorFlyout', () => {
     });
   });
 
+  describe('runtime selector', () => {
+    beforeEach(() => {
+      mockedSendGetOneAgentPolicy.mockResolvedValue({
+        data: { item: { id: 'opamp' } },
+      } as any);
+      mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+        data: { items: [{ api_key: 'test-token' }] },
+      } as any);
+    });
+
+    it('defaults to Elastic Agent with ./otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
+    });
+
+    it('Elastic Agent filter button is active by default', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      const elasticAgentBtn = component.getByText('Elastic Agent').closest('button');
+      const otelContribBtn = component.getByText('OTel Contrib Collector').closest('button');
+
+      expect(elasticAgentBtn).toHaveAttribute('aria-pressed', 'true');
+      expect(otelContribBtn).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('switching to OTel Contrib Collector shows otelcol-contrib command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol-contrib --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+    });
+
+    it('switching back to Elastic Agent restores otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+      fireEvent.click(component.getByText('Elastic Agent'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
+    });
+  });
+
   describe('Managed OTLP', () => {
     beforeEach(() => {
       mockedSendGetOneAgentPolicy.mockResolvedValue({

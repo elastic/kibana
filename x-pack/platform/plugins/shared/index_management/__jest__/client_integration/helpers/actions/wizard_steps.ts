@@ -55,12 +55,12 @@ export const wizardSteps = {
         standard: 'index_mode_standard',
         time_series: 'index_mode_time_series',
         logsdb: 'index_mode_logsdb',
-        lookup: 'index_mode_logsdb', // Note: lookup and logsdb share the same test-subj
+        lookup: 'index_mode_lookup',
+        vectordb_document: 'index_mode_vectordb_document',
       };
       const optionTestSubj = indexModeTestSubjMap[indexMode];
 
       // Try to find the option in the dropdown (if SuperSelect opened)
-      // Use queryAllByTestId and filter by id attribute since logsdb and lookup share the same test-subj
       const options = screen.queryAllByTestId(optionTestSubj);
       const option = options.find((el) => el.getAttribute('id') === indexMode);
       if (option) {

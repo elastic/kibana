@@ -31,6 +31,8 @@ import {
   usePersistConfigurationMockResponse,
 } from '../../configure_cases/__mock__';
 import * as configureCasesI18n from '../../configure_cases/translations';
+import * as customFieldsI18n from '../../custom_fields/translations';
+import * as templatesI18n from '../../templates/translations';
 import * as observableTypesI18n from '../../observable_types/translations';
 import { CASE_SETTINGS_TITLE } from '../translations';
 
@@ -121,16 +123,70 @@ describe('ConfigureCasesRedesign', () => {
     expect(screen.getByTestId('cases-redesign-observable-types-section')).toBeInTheDocument();
   });
 
-  it('does not render legacy custom fields or templates sections when templates v2 is disabled', async () => {
-    renderWithTestingProviders(<ConfigureCasesRedesign />);
+  describe('when templates v2 is disabled', () => {
+    // The beforeEach default mocks templatesEnabled: false; the v2 templates /
+    // field-library pages are unregistered in that state, so the settings page
+    // must remain the (only) place to manage custom fields and templates.
 
-    await screen.findByTestId('cases-redesign-settings-panel');
+    it('renders the custom fields and templates section always expanded, without the show-legacy switch', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-    expect(
-      screen.queryByTestId('cases-redesign-legacy-custom-fields-section')
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('custom-fields-form-group')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('templates-form-group')).not.toBeInTheDocument();
+      expect(
+        await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
+      expect(screen.getByTestId('templates-list')).toBeInTheDocument();
+      expect(screen.queryByTestId('show-legacy-custom-fields-switch')).not.toBeInTheDocument();
+    });
+
+    it('does not render migration copy, v2-page links, or deprecated badges', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await screen.findByTestId('cases-redesign-legacy-custom-fields-section');
+
+      expect(screen.queryByTestId('legacy-templates-view-new-link')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('legacy-custom-fields-view-new-link')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('legacy-custom-fields-deprecated-badge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('legacy-templates-deprecated-badge')).not.toBeInTheDocument();
+    });
+
+    it('uses the standard add-button labels rather than the legacy ones', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: [],
+          templates: [],
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('add-custom-field')).toHaveTextContent(
+        customFieldsI18n.ADD_CUSTOM_FIELD
+      );
+      expect(screen.getByTestId('add-template')).toHaveTextContent(templatesI18n.ADD_TEMPLATE);
+    });
+
+    it('persists custom field deletion', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const list = await screen.findByTestId('custom-fields-list');
+      await userEvent.click(
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+      await userEvent.click(screen.getByText('Delete'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          customFields: expect.not.arrayContaining([
+            expect.objectContaining({ key: customFieldsConfigurationMock[0].key }),
+          ]),
+        })
+      );
+    });
   });
 
   it('renders the legacy section with switch off by default when templates v2 is enabled', async () => {

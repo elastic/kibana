@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
-  getBaseConnectorType,
   getStepIconType,
   getTriggerTypeIconType,
   HardcodedIcons,
@@ -92,7 +91,7 @@ export const StepIcon = React.memo(
         );
       }
 
-      iconType = getStepIconType(getBaseConnectorType(stepType));
+      iconType = getStepIconType(stepType);
     }
 
     if (typeof iconType === 'string' && iconType.startsWith('data:')) {

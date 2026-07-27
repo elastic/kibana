@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createPrompt } from '@kbn/inference-common';
+import { createPrompt, type ToolDefinition } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import featuresUserPrompt from './user_prompt.text';
 import featuresSystemPrompt from './system_prompt.text';
@@ -187,7 +187,13 @@ const searchSimilarFeaturesSchema = {
   required: ['candidate_id', 'title', 'description', 'type'],
 } as const;
 
-export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: string }) {
+export function createIdentifyFeaturesPrompt({
+  systemPrompt,
+  additionalTools,
+}: {
+  systemPrompt: string;
+  additionalTools?: Record<string, ToolDefinition>;
+}) {
   return createPrompt({
     name: 'identify_features',
     input: z.object({
@@ -218,6 +224,7 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
           description: 'Finalize features identification',
           schema: featuresSchema,
         },
+        ...(additionalTools ?? {}),
       },
     })
     .get();

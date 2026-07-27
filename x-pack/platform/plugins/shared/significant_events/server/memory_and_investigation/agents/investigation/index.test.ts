@@ -24,7 +24,11 @@ describe('investigation agent type', () => {
       baseConfiguration: {
         enable_elastic_capabilities: true,
         connector_ids: [],
-        skill_ids: ['significant-events-memory', 'observability.investigation'],
+        skill_ids: [
+          'significant-events-memory',
+          'observability.investigation',
+          'streams-management',
+        ],
       },
     });
   });
