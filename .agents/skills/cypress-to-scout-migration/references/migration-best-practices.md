@@ -147,14 +147,14 @@ spaceTest('full workflow', async ({ pageObjects }) => {
 
 Parallel test runs are encouraged but have trade-offs:
 
-- Test suites **must** be Space-isolated (`spaceTest` + `scoutSpace`)
-- Kibana archive ingestion must be done **within the test suite file**, not in the global setup hook
-- Kibana / ES may be slower because multiple workers ingest and interact with the UI concurrently
+- Use `spaceTest` + `scoutSpace` when tests create or mutate saved objects, UI settings, or other space-scoped state; each worker gets its own Kibana space.
+- Plain `test` is acceptable in a parallel config only when the suite is read-only in the default space or manually isolates every shared resource.
+- Space isolation does not isolate Elasticsearch indices, cluster settings, or other global state; use unique resource names and explicit cleanup for those resources.
+- Kibana archive ingestion must be done **within the test suite file**, not in the global setup hook.
+- Kibana / ES may be slower because multiple workers ingest and interact with the UI concurrently.
 
-Use `spaceTest` + `scoutSpace` — each worker gets its own Kibana space.
-
-- Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook()`
-- Clean up space-scoped mutations in `afterAll`
+- Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook()`.
+- Clean up space-scoped mutations in `afterAll`.
 - Place parallel specs in `test/scout*/ui/parallel_tests/`
 - Place sequential specs in `test/scout*/ui/tests/`
 
