@@ -90,9 +90,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
 
-    // The OAS snapshot and API contracts checks are derived from server route
-    // definitions, so a Scout-tests-only diff cannot affect them. They are gated
-    // together because `check_api_contracts` depends_on `check_oas_snapshot`.
+    // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
@@ -661,8 +659,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    // Run Saved Objects checks systematically — unless the diff is exclusively
-    // Scout tests, which cannot change Saved Objects registrations.
+    // Run Saved Objects checks systematically
     if (!scoutTestsOnly) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
