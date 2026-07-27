@@ -128,7 +128,7 @@ export const PolicyList = memo(() => {
   }, [getAppUrl, policyListPath]);
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
+    'integrations',
     {
       path: pagePathGetters.add_integration_to_policy({
         pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
