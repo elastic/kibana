@@ -142,17 +142,27 @@ export const PostHog: ConnectorSpec = {
       input: PostHogListIssuesInputSchema,
       handler: async (ctx, input: PostHogListIssuesInput) => {
         try {
-          const response = await ctx.client.get(buildProjectUrl(ctx, '/error_tracking/issues/'), {
-            params: {
+          // The plain GET /error_tracking/issues/ endpoint only supports limit/offset.
+          // Filtering by status, assignee, date range, and search requires the query endpoint.
+          const response = await ctx.client.post(
+            buildProjectUrl(ctx, '/error_tracking/query/issues/'),
+            {
               status: input.status,
-              assignee: input.assignee,
-              date_from: input.dateFrom,
-              date_to: input.dateTo,
-              order_by: input.orderBy,
+              assignee:
+                input.assigneeId && input.assigneeType
+                  ? { id: input.assigneeId, type: input.assigneeType }
+                  : undefined,
+              dateRange:
+                input.dateFrom || input.dateTo
+                  ? { date_from: input.dateFrom, date_to: input.dateTo }
+                  : undefined,
+              searchQuery: input.searchQuery,
+              orderBy: input.orderBy,
+              orderDirection: input.orderDirection,
               limit: input.limit,
               offset: input.offset,
-            },
-          });
+            }
+          );
           return response.data;
         } catch (error) {
           throw formatPostHogError('listIssues', error);

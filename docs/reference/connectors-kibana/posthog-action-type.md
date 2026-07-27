@@ -34,7 +34,7 @@ Personal API Key
 
 | Action | Description |
 |--------|-------------|
-| `listIssues` | List error-tracking issues. Parameters: `status`, `assignee`, `dateFrom`, `dateTo`, `orderBy`, `limit`, `offset`. |
+| `listIssues` | List error-tracking issues. Parameters: `status` (defaults to `active`), `assigneeId`, `assigneeType`, `dateFrom`, `dateTo`, `searchQuery`, `orderBy`, `orderDirection`, `limit`, `offset`. |
 | `getIssue` | Get a single error-tracking issue by ID. Parameters: `issueId` (required). |
 | `updateIssueStatus` | Move an issue to a new status (`active`, `resolved`, `archived`, `suppressed`, `pending_release`). Parameters: `issueId`, `status` (both required). |
 | `assignIssue` | Assign or reassign an issue to a user or role. Parameters: `issueId`, `assigneeId` (both required), `assigneeType`. |

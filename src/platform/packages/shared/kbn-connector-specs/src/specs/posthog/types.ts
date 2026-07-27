@@ -14,10 +14,21 @@ const ISSUE_STATUSES = ['active', 'resolved', 'archived', 'suppressed', 'pending
 export const PostHogListIssuesInputSchema = lazySchema(() =>
   z.object({
     status: z
-      .enum(ISSUE_STATUSES)
+      .enum([...ISSUE_STATUSES, 'all'] as const)
       .optional()
-      .describe('Filter issues by status. Omit to include all statuses.'),
-    assignee: z.string().max(200).optional().describe('Filter by assignee user or role ID.'),
+      .default('active')
+      .describe(
+        'Filter issues by status. Defaults to "active". Use "all" to include every status.'
+      ),
+    assigneeId: z
+      .string()
+      .max(200)
+      .optional()
+      .describe('Filter by assignee user or role ID. Requires assigneeType.'),
+    assigneeType: z
+      .enum(['user', 'role'])
+      .optional()
+      .describe('Whether assigneeId refers to a user or a role.'),
     dateFrom: z
       .string()
       .max(40)
@@ -32,10 +43,19 @@ export const PostHogListIssuesInputSchema = lazySchema(() =>
       .describe(
         'Only include issues last seen at or before this time. ISO 8601 or a relative offset.'
       ),
+    searchQuery: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Free-text search across issue name, description, and exception message.'),
     orderBy: z
       .enum(['last_seen', 'first_seen', 'occurrences', 'users', 'sessions'])
       .optional()
       .describe('Field to sort results by. Defaults to last_seen.'),
+    orderDirection: z
+      .enum(['ASC', 'DESC'])
+      .optional()
+      .describe('Sort direction. Defaults to DESC.'),
     limit: z
       .number()
       .int()

@@ -62,24 +62,33 @@ describe('PostHog', () => {
   });
 
   describe('listIssues action', () => {
-    it('should list issues with filters', async () => {
-      mockClient.get.mockResolvedValue({
-        data: { count: 1, results: [{ id: 'i1', status: 'active' }] },
+    it('should list issues with filters via the query endpoint', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { results: [{ id: 'i1', status: 'active' }], hasMore: false },
       });
 
       const result = await PostHog.actions.listIssues.handler(mockContext, {
         status: 'active',
+        assigneeId: 'u1',
+        assigneeType: 'user',
+        dateFrom: '-7d',
         limit: 20,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${BASE}/error_tracking/issues/`, {
-        params: expect.objectContaining({ status: 'active', limit: 20 }),
-      });
-      expect(result).toEqual({ count: 1, results: [{ id: 'i1', status: 'active' }] });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${BASE}/error_tracking/query/issues/`,
+        expect.objectContaining({
+          status: 'active',
+          assignee: { id: 'u1', type: 'user' },
+          dateRange: { date_from: '-7d', date_to: undefined },
+          limit: 20,
+        })
+      );
+      expect(result).toEqual({ results: [{ id: 'i1', status: 'active' }], hasMore: false });
     });
 
     it('should throw a formatted error on failure', async () => {
-      mockClient.get.mockRejectedValue({
+      mockClient.post.mockRejectedValue({
         response: { status: 401, data: { detail: 'Invalid API key' } },
         message: 'Request failed',
       });
