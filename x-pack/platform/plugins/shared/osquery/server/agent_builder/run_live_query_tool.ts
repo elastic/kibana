@@ -144,7 +144,14 @@ export const runLiveQueryTool = (
         space,
       });
 
-      const actionId = result.response.action_id as string;
+      // `result.response.action_id` is the parent/group action id (used by the Fleet
+      // UI's live-queries list). It is NOT the id Fleet/osquerybeat stamps on individual
+      // result documents — that's the nested per-query `action_id` created in
+      // createDynamicQueries. This tool only ever dispatches a single ad-hoc query (no
+      // packs), so there is exactly one nested query; polling on the parent id instead
+      // of this one always returns zero hits even after the agent has responded.
+      const nestedQueries = (result.response.queries ?? []) as Array<{ action_id?: string }>;
+      const actionId = (nestedQueries[0]?.action_id ?? result.response.action_id) as string;
       const agentCount = result.response.agents?.length ?? result.fleetActionsCount;
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export type LiveQueryPollStatus = 'completed' | 'partial' | 'pending';
 
@@ -34,6 +34,14 @@ const extractRowFromHit = (source: Record<string, unknown>): Record<string, unkn
   return nested ?? source;
 };
 
+// Matches the index pattern used by the real results search strategy
+// (query.all_results.dsl.ts) — the *result rows* live in the
+// `logs-osquery_manager.result-*` data stream, NOT `logs-osquery_manager.action.responses*`
+// (that stream doesn't exist on stateful deployments; it's a serverless/ack-only
+// concept used by query.action_results.dsl.ts for a different purpose — whether an
+// agent acknowledged the action, not the query output rows themselves).
+const RESULTS_INDEX_PATTERN = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
+
 export const pollActionResponses = async (
   esClient: ElasticsearchClient,
   actionId: string,
@@ -47,7 +55,7 @@ export const pollActionResponses = async (
     await sleep(intervalMs);
     try {
       const searchResult = await esClient.search({
-        index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+        index: RESULTS_INDEX_PATTERN,
         size: maxRows,
         ignore_unavailable: true,
         query: {
