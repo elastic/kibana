@@ -7,6 +7,7 @@
 
 import type { SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM } from '@kbn/security-solution-plugin/common/constants';
 import {
+  GET_SAVED_OBJECTS_TAGS_OPTION,
   SAVED_OBJECTS_SETTINGS,
   SAVED_OBJECTS_TAGS_FILTER,
 } from '../screens/common/stack_management';
@@ -47,4 +48,9 @@ export const goToSavedObjectSettings = () => {
 
 export const clickSavedObjectTagsFilter = () => {
   cy.get(SAVED_OBJECTS_TAGS_FILTER).trigger('click');
+};
+
+export const clickSavedObjectTagOption = (optionId: string) => {
+  // Legacy saved objects and content list both render tag-searchbar-option-* nodes.
+  cy.get(GET_SAVED_OBJECTS_TAGS_OPTION(optionId)).first().click();
 };

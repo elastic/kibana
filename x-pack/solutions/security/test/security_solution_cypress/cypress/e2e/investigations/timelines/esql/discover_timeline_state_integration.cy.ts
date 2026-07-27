@@ -8,6 +8,7 @@
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
 import {
+  clickSavedObjectTagOption,
   clickSavedObjectTagsFilter,
   goToSavedObjectSettings,
 } from '../../../../tasks/stack_management';
@@ -44,10 +45,7 @@ import {
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
-import {
-  GET_SAVED_OBJECTS_TAGS_OPTION,
-  SAVED_OBJECTS_ROW_TITLES,
-} from '../../../../screens/common/stack_management';
+import { SAVED_OBJECTS_ROW_TITLES } from '../../../../screens/common/stack_management';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
@@ -70,8 +68,7 @@ const handleIntercepts = () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/236526
-describe.skip(
+describe(
   'Discover Timeline State Integration',
   {
     tags: ['@ess', '@skipInServerless'],
@@ -190,7 +187,7 @@ describe.skip(
         goToSavedObjectSettings();
         cy.get(LOADING_INDICATOR).should('not.exist');
         clickSavedObjectTagsFilter();
-        cy.get(GET_SAVED_OBJECTS_TAGS_OPTION('Security_Solution')).trigger('click');
+        clickSavedObjectTagOption('Security_Solution');
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
@@ -214,7 +211,7 @@ describe.skip(
         goToSavedObjectSettings();
         cy.get(LOADING_INDICATOR).should('not.exist');
         clickSavedObjectTagsFilter();
-        cy.get(GET_SAVED_OBJECTS_TAGS_OPTION('Security_Solution')).trigger('click');
+        clickSavedObjectTagOption('Security_Solution');
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
