@@ -29,8 +29,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
-import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
-import { fillPlaceholders } from './console_snippets';
+import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from '../constants/languages';
+import { fillPlaceholders } from '../constants/console_snippets';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
 import type { DocsPanelProps, OnboardingPill, VectorPath, WizardStep } from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';

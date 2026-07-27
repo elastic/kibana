@@ -14,10 +14,12 @@ import {
   GENERATE_VECTORS_INGEST_SNIPPETS,
   GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS,
   GENERATE_VECTORS_SEARCH_SNIPPETS,
+} from '../constants/generate_language_snippets';
+import {
   HAVE_VECTORS_INGEST_SNIPPETS,
   HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS,
   HAVE_VECTORS_SEARCH_SNIPPETS,
-} from './language_snippets';
+} from '../constants/byoe_language_snippets';
 import {
   GENERATE_VECTORS_INGEST,
   GENERATE_VECTORS_SEARCH,
@@ -25,7 +27,7 @@ import {
   HAVE_VECTORS_INGEST,
   HAVE_VECTORS_SEARCH,
   HAVE_VECTORS_SEARCH_HYBRID,
-} from './console_snippets';
+} from '../constants/console_snippets';
 
 const docsLabel = i18n.translate('vectordbOnboarding.docsLabel', {
   defaultMessage: 'View documentation',

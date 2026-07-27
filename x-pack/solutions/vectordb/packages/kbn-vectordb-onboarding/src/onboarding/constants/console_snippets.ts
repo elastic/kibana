@@ -16,7 +16,7 @@ export const fillPlaceholders = (snippet: string, url?: string, apiKey?: string)
 };
 
 export const HAVE_VECTORS_INGEST = `# Create an index with a dense_vector field
-PUT my-vectors
+PUT my_dense_vectors
 {
   "mappings": {
     "properties": {
@@ -29,14 +29,14 @@ PUT my-vectors
 }
 
 # Index a document with your pre-computed embedding
-POST my-vectors/_doc
+POST my_dense_vectors/_doc
 {
   "text": "Elasticsearch is a distributed search and analytics engine.",
   "vector": [0.12, -0.04, 0.88, 0.21, 0.55]
 }`;
 
 export const HAVE_VECTORS_SEARCH = `# Run a kNN search with your query vector
-POST my-vectors/_search
+POST my_dense_vectors/_search
 {
   "knn": {
     "field": "vector",
@@ -44,9 +44,8 @@ POST my-vectors/_search
   }
 }`;
 
-// TODO: placeholder example — replace with the final hybrid search example
 export const HAVE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining kNN and lexical matches
-POST my-vectors/_search
+POST my_dense_vectors/_search
 {
   "retriever": {
     "rrf": {
@@ -60,7 +59,7 @@ POST my-vectors/_search
         {
           "standard": {
             "query": {
-              "match": { "text": "what is elasticsearch?" }
+              "match": { "text": "What is Elasticsearch?" }
             }
           }
         }
@@ -70,7 +69,7 @@ POST my-vectors/_search
 }`;
 
 export const GENERATE_VECTORS_INGEST = `# Create an index that generates vectors automatically
-PUT my-vectors
+PUT my_semantic_vectors
 {
   "mappings": {
     "properties": {
@@ -79,26 +78,27 @@ PUT my-vectors
   }
 }
 
-# Index a document — Elasticsearch generates the embedding for you
-POST my-vectors/_doc
-{
-  "text": "Elasticsearch is a distributed search and analytics engine."
-}`;
+# Bulk index documents — Elasticsearch generates the embedding for you
+POST /_bulk?pretty
+{ "index": { "_index": "my_semantic_vectors" } }
+{"text":"Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano."}
+{ "index": { "_index": "my_semantic_vectors" } }
+{"text":"Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees."}
+{ "index": { "_index": "my_semantic_vectors" } }
+{"text":"Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing."}`;
 
 export const GENERATE_VECTORS_SEARCH = `# Run a semantic search using natural language
-POST my-vectors/_search
+GET my_semantic_vectors/_search
 {
   "query": {
-    "semantic": {
-      "field": "text",
-      "query": "what is elasticsearch?"
+    "match": {
+      "text": "Where is best for backpacking?"
     }
   }
 }`;
 
-// TODO: placeholder example — replace with the final hybrid search example
 export const GENERATE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining semantic and lexical matches
-POST my-vectors/_search
+POST my_semantic_vectors/_search
 {
   "retriever": {
     "rrf": {
@@ -108,7 +108,7 @@ POST my-vectors/_search
             "query": {
               "semantic": {
                 "field": "text",
-                "query": "what is elasticsearch?"
+                "query": "Where is best for backpacking?"
               }
             }
           }
@@ -116,7 +116,7 @@ POST my-vectors/_search
         {
           "standard": {
             "query": {
-              "match": { "text": "what is elasticsearch?" }
+              "match": { "text": "Where is best for backpacking?" }
             }
           }
         }
