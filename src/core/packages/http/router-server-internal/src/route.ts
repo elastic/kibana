@@ -12,12 +12,18 @@ import {
   type SafeRouteMethod,
   type RouteConfig,
   getRequestValidation,
+  getResponseValidation,
+  isFullValidatorContainer,
 } from '@kbn/core-http-server';
 import type {
   RouteSecurityGetter,
   RouteSecurity,
   AnyKibanaRequest,
   IKibanaResponse,
+  OnRequestValidationError,
+  RequestValidationError,
+  RouteValidatorFullConfigResponse,
+  KibanaResponseFactory,
   RouteAccess,
   RouteConfigOptions,
   PostValidationMetadata,
@@ -31,6 +37,7 @@ import type { Mutable } from 'utility-types';
 import { onceCacheOnSuccess } from '@kbn/std';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
+import { RequestValidationFailure } from './request_validation_failure';
 import { RouteValidator } from './validator';
 import { BASE_PUBLIC_VERSION } from './versioned_router';
 import { kibanaResponseFactory } from './response';
@@ -63,7 +70,8 @@ interface Dependencies {
   handler: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
   log: Logger;
   method: RouteMethod;
-  isDev: boolean;
+  /** @default false */
+  isDev?: boolean;
 }
 
 export function buildRoute({
@@ -75,20 +83,7 @@ export function buildRoute({
   isDev,
 }: Dependencies): InternalRouterRoute {
   route = prepareRouteConfigValidation(route);
-  // In development, build schemas eagerly at registration time so config errors
-  // surface immediately at plugin.setup(). In production, defer to first request
-  // to avoid loading all schemas into memory upfront.
-  let getRouteSchemas: () => RouteValidator<unknown, unknown, unknown> | undefined;
-  if (isDev) {
-    // Eager path — build immediately, throw at registration if invalid
-    const routeSchemas = routeSchemasFromRouteConfig(route, method);
-    getRouteSchemas = () => routeSchemas;
-  } else {
-    // Deferred path (production) — schema construction on first request.
-    // Use onceCacheOnSuccess to ensure a broken schema retries on every request
-    // rather than silently bypassing validation after the first failure.
-    getRouteSchemas = onceCacheOnSuccess(() => routeSchemasFromRouteConfig(route, method));
-  }
+  const validations = buildLazyValidationGetters({ route, method, isDev });
 
   return {
     handler: async (req) => {
@@ -98,8 +93,10 @@ export function buildRoute({
         method,
         route,
         router,
+        routeSchemas: validations.routeValidator(),
+        onRequestValidationError: validations.onRequestValidationError(),
+        responseValidation: validations.responseValidation(),
         isDev,
-        routeSchemas: getRouteSchemas(),
       });
     },
     method,
@@ -114,6 +111,8 @@ export function buildRoute({
 /** @internal */
 interface HandlerDependencies extends Dependencies {
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
+  onRequestValidationError?: OnRequestValidationError;
+  responseValidation?: RouteValidatorFullConfigResponse;
 }
 
 type RouteInfo = Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource' | 'deprecated'>;
@@ -124,13 +123,28 @@ interface ValidationContext {
   log: Logger;
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
   version?: string;
+  shouldLogDefaultValidationError?: boolean;
+}
+
+interface ValidationFailure {
+  error: RequestValidationError;
+  request: AnyKibanaRequest;
 }
 
 /** @internal */
 export function validateHapiRequest(
   request: Request,
-  { routeInfo, router, log, routeSchemas, version }: ValidationContext
-): { ok: AnyKibanaRequest; error?: never } | { ok?: never; error: IKibanaResponse } {
+  {
+    routeInfo,
+    router,
+    log,
+    routeSchemas,
+    version,
+    shouldLogDefaultValidationError = true,
+  }: ValidationContext
+):
+  | { ok: AnyKibanaRequest; error?: never }
+  | { ok?: never; error: { response: IKibanaResponse; validationFailure: ValidationFailure } } {
   let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as Mutable<AnyKibanaRequest>;
@@ -139,15 +153,23 @@ export function validateHapiRequest(
     kibanaRequest = CoreKibanaRequest.from(request) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
 
-    log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
+    const validationError = normalizeRequestValidationError(error);
 
     const response = kibanaResponseFactory.badRequest({
-      body: error.message,
+      body: validationError.message,
       headers: isPublicAccessApiRoute(routeInfo)
         ? getVersionHeader(BASE_PUBLIC_VERSION)
         : undefined,
     });
-    return { error: response };
+    if (shouldLogDefaultValidationError) {
+      log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
+    }
+    return {
+      error: {
+        response,
+        validationFailure: { error: validationError, request: kibanaRequest },
+      },
+    };
   } finally {
     router.emitPostValidate(
       kibanaRequest!,
@@ -161,7 +183,16 @@ export function validateHapiRequest(
 /** @internal */
 export const handle = async (
   request: Request,
-  { router, route, handler, routeSchemas, log }: HandlerDependencies
+  {
+    router,
+    route,
+    handler,
+    routeSchemas,
+    onRequestValidationError = getRouteOnRequestValidationError(route),
+    responseValidation = getRouteResponseValidation(route),
+    log,
+    isDev = false,
+  }: HandlerDependencies
 ) => {
   const { error, ok: kibanaRequest } = validateHapiRequest(request, {
     routeInfo: {
@@ -172,9 +203,25 @@ export const handle = async (
     router,
     log,
     routeSchemas,
+    shouldLogDefaultValidationError: !onRequestValidationError,
   });
   if (error) {
-    return error;
+    const customResponse = await handleRequestValidationFailure({
+      failure: error.validationFailure,
+      defaultResponse: error.response,
+      hapiRequest: request,
+      onRequestValidationError,
+      responseFactory: kibanaResponseFactory,
+      log,
+      isDev,
+      validateResponse: responseValidation
+        ? (response) => validateOnRequestValidationErrorResponse(responseValidation, response)
+        : undefined,
+    });
+    if (isPublicAccessApiRoute(route.options)) {
+      injectVersionHeader(BASE_PUBLIC_VERSION, customResponse);
+    }
+    return customResponse;
   }
   const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
   if (isPublicAccessApiRoute(route.options)) {
@@ -191,6 +238,99 @@ function isPublicAccessApiRoute({
   httpResource?: boolean;
 } = {}): boolean {
   return !httpResource && access === 'public';
+}
+
+function normalizeRequestValidationError(rawError: unknown): RequestValidationError {
+  if (rawError instanceof RequestValidationFailure) {
+    return {
+      message: rawError.message,
+      source: rawError.source,
+      rawError: rawError.rawError,
+    };
+  }
+
+  const message = rawError instanceof Error ? rawError.message : String(rawError);
+  return {
+    message,
+    source: 'unknown',
+    rawError,
+  };
+}
+
+export async function handleRequestValidationFailure({
+  failure,
+  defaultResponse,
+  hapiRequest,
+  onRequestValidationError,
+  responseFactory,
+  log,
+  isDev,
+  validateResponse,
+}: {
+  failure: ValidationFailure;
+  defaultResponse: IKibanaResponse;
+  hapiRequest: Request;
+  onRequestValidationError?: OnRequestValidationError;
+  responseFactory: KibanaResponseFactory;
+  log: Logger;
+  isDev: boolean;
+  validateResponse?: (response: IKibanaResponse) => string | undefined;
+}): Promise<IKibanaResponse> {
+  if (!onRequestValidationError) {
+    return defaultResponse;
+  }
+
+  const customResponse = await onRequestValidationError(
+    failure.error,
+    failure.request,
+    responseFactory
+  );
+  const validationErrorMessage = isDev ? validateResponse?.(customResponse) : undefined;
+  if (validationErrorMessage) {
+    return responseFactory.custom({
+      statusCode: 500,
+      body: `Failed output validation: ${validationErrorMessage}`,
+    });
+  }
+  logRequestValidationError(log, hapiRequest, customResponse.status, failure.error.rawError);
+  return customResponse;
+}
+
+export function logRequestValidationError(
+  log: Logger,
+  request: Request,
+  statusCode: number,
+  rawError: unknown
+) {
+  const error = rawError instanceof Error ? rawError : new Error(String(rawError));
+  log.error(
+    `${statusCode} Request Validation Error`,
+    formatErrorMeta(statusCode, { request, error })
+  );
+}
+
+function validateOnRequestValidationErrorResponse(
+  responseValidation: RouteValidatorFullConfigResponse | undefined,
+  response: IKibanaResponse
+): string | undefined {
+  const validation = responseValidation?.[response.status];
+  if (!validation) {
+    return `No response validation defined for status code [${response.status}] in 'validate.response'.`;
+  }
+  if (!validation.body) {
+    return undefined;
+  }
+
+  try {
+    const { unsafe } = responseValidation;
+    const validator = RouteValidator.from({
+      body: validation.body(),
+      unsafe: { body: unsafe?.body },
+    });
+    validator.getBody(response.payload, 'response body');
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
 }
 
 /**
@@ -222,6 +362,65 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     });
     return RouteValidator.from(validation);
   }
+}
+
+/**
+ * In development, build schemas eagerly at registration time so config errors
+ * surface immediately at plugin.setup(). In production, defer to first request
+ * to avoid loading all schemas into memory upfront.
+ */
+function buildLazyValidationGetters({
+  route,
+  method,
+  isDev,
+}: {
+  route: InternalRouteConfig<unknown, unknown, unknown, RouteMethod>;
+  method: RouteMethod;
+  isDev?: boolean;
+}): {
+  routeValidator: () => RouteValidator<unknown, unknown, unknown> | undefined;
+  onRequestValidationError: () => OnRequestValidationError | undefined;
+  responseValidation: () => RouteValidatorFullConfigResponse | undefined;
+} {
+  if (isDev) {
+    // Eager path — build immediately, throw at registration if invalid
+    const routeValidator = routeSchemasFromRouteConfig(route, method);
+    const onRequestValidationError = getRouteOnRequestValidationError(route);
+    const responseValidation = getRouteResponseValidation(route);
+    return {
+      routeValidator: () => routeValidator,
+      onRequestValidationError: () => onRequestValidationError,
+      responseValidation: () => responseValidation,
+    };
+  } else {
+    // Deferred path (production) — schema construction on first request.
+    // Use onceCacheOnSuccess to ensure a broken schema retries on every request
+    // rather than silently bypassing validation after the first failure.
+    return {
+      routeValidator: onceCacheOnSuccess(() => routeSchemasFromRouteConfig(route, method)),
+      onRequestValidationError: onceCacheOnSuccess(() => getRouteOnRequestValidationError(route)),
+      responseValidation: onceCacheOnSuccess(() => getRouteResponseValidation(route)),
+    };
+  }
+}
+
+function getRouteOnRequestValidationError<P, Q, B>(
+  route: InternalRouteConfig<P, Q, B, RouteMethod>
+): OnRequestValidationError | undefined {
+  if (!route.validate) {
+    return undefined;
+  }
+  const validate = typeof route.validate === 'function' ? route.validate() : route.validate;
+  return isFullValidatorContainer(validate) ? validate.onRequestValidationError : undefined;
+}
+
+function getRouteResponseValidation<P, Q, B>(
+  route: InternalRouteConfig<P, Q, B, RouteMethod>
+): RouteValidatorFullConfigResponse | undefined {
+  if (!route.validate) {
+    return undefined;
+  }
+  return getResponseValidation(route.validate);
 }
 
 function getPostValidateEventMetadata(

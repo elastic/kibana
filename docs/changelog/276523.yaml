@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/276523
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Add "Creating action" status message to Response Console
+description: The Response Console now shows a "Creating action" message while a response
+  action request is being created, instead of jumping straight to the pending state.
+  The long-running command hint also starts only after the action enters pending.
