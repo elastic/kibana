@@ -38,6 +38,7 @@ import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_cal
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
+import { validateSkillSelection } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
@@ -270,6 +271,14 @@ export const conversePayloadSchema = schema.object({
             { meta: { description: 'Tool selection to enable for this execution.' } }
           )
         ),
+        skill_ids: schema.maybe(
+          schema.arrayOf(schema.string(), {
+            meta: {
+              description:
+                'Skill IDs to enable for this execution, replacing the stored skill list.',
+            },
+          })
+        ),
       },
       {
         meta: {
@@ -375,6 +384,18 @@ export function registerChatRoutes({
       });
       if (errors.length > 0) {
         throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
+      }
+    }
+
+    if (payload.configuration_overrides?.skill_ids) {
+      const { skills: skillsService } = getInternalServices();
+      const skillRegistry = await skillsService.getRegistry({ request });
+      const errors = await validateSkillSelection({
+        skillRegistry,
+        skillIds: payload.configuration_overrides.skill_ids,
+      });
+      if (errors.length > 0) {
+        throw createBadRequestError(`Invalid skill override: ${errors.join(', ')}`);
       }
     }
   };

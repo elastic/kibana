@@ -220,10 +220,7 @@ describe('runDefaultAgentMode', () => {
   });
 
   describe('plugin skill filtering', () => {
-    const runWithPluginSkills = async (
-      pluginSkillIds: string[],
-      configurationOverrides?: { skill_ids?: string[] }
-    ) => {
+    const runWithPluginSkills = async (pluginSkillIds: string[]) => {
       const context = createAgentHandlerContextMock();
       setupDefaultMocks(context);
       context.plugins.resolveSkillIds.mockResolvedValue(pluginSkillIds);
@@ -232,7 +229,6 @@ describe('runDefaultAgentMode', () => {
         {
           nextInput: { message: 'hello' },
           agentConfiguration: { tools: [], plugin_ids: ['my-plugin'] } as any,
-          configurationOverrides: configurationOverrides as any,
         },
         context
       );
@@ -240,40 +236,14 @@ describe('runDefaultAgentMode', () => {
       return selectSkillsMock.mock.calls[0][0];
     };
 
-    it('passes all plugin skill IDs to selectSkills when no skill_ids override is active', async () => {
+    it('passes all resolved plugin skill IDs to selectSkills unfiltered', async () => {
       const args = await runWithPluginSkills(['plugin-skill-a', 'plugin-skill-b']);
       expect(args.additionalSkillIds).toEqual(['plugin-skill-a', 'plugin-skill-b']);
-      expect(args.isSkillIdsOverrideActive).toBe(false);
     });
 
-    it('passes only the intersection of plugin skill IDs and override IDs when a skill_ids override is active', async () => {
-      const args = await runWithPluginSkills(['plugin-skill-a', 'plugin-skill-b'], {
-        skill_ids: ['plugin-skill-a', 'other-skill'],
-      });
-      expect(args.additionalSkillIds).toEqual(['plugin-skill-a']);
-      expect(args.isSkillIdsOverrideActive).toBe(true);
-    });
-
-    it('passes an empty array when the override IDs do not match any plugin skill IDs', async () => {
-      const args = await runWithPluginSkills(['plugin-skill-a', 'plugin-skill-b'], {
-        skill_ids: ['unrelated-skill'],
-      });
+    it('passes an empty array when plugin_ids resolves to no skills', async () => {
+      const args = await runWithPluginSkills([]);
       expect(args.additionalSkillIds).toEqual([]);
-      expect(args.isSkillIdsOverrideActive).toBe(true);
-    });
-
-    it('passes all plugin skill IDs unchanged when the override includes all of them', async () => {
-      const args = await runWithPluginSkills(['plugin-skill-a', 'plugin-skill-b'], {
-        skill_ids: ['plugin-skill-a', 'plugin-skill-b', 'elastic-builtin'],
-      });
-      expect(args.additionalSkillIds).toEqual(['plugin-skill-a', 'plugin-skill-b']);
-      expect(args.isSkillIdsOverrideActive).toBe(true);
-    });
-
-    it('passes an empty array and marks override active when plugin_ids resolves to no skills', async () => {
-      const args = await runWithPluginSkills([], { skill_ids: ['some-skill'] });
-      expect(args.additionalSkillIds).toEqual([]);
-      expect(args.isSkillIdsOverrideActive).toBe(true);
     });
   });
 });

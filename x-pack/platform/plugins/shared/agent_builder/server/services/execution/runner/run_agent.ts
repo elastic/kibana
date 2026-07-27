@@ -138,25 +138,22 @@ export const runAgent = async ({
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId, { access: 'use' });
 
-  // When applying the skill_ids configuration override, we only want to use the intersection
-  // of overridden skills and skills available to the agent so that the skills override does
-  // not inadvertently grant the agent access to skills it wasn't originally configured with.
-
-  // When agent.configuration.skill_ids is undefined (all skills allowed), the intersection
-  // of "all skills" and the override is just the override itself.
-  const skillIdOverride = agentParams.configurationOverrides?.skill_ids;
-  const effectiveSkillIdsToUse =
-    skillIdOverride !== undefined && agent.configuration.skill_ids?.length
-      ? skillIdOverride.filter((id) => agent.configuration.skill_ids!.includes(id))
-      : skillIdOverride;
+  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+  // skill_ids is treated the same as tools: a straight replace, not an intersection against
+  // the agent's stored skill_ids. Any agent using a 'type' (code configuration) brings its own
+  // base skill_ids, and that type merge runs AFTER this layer (see resolveAgentConfiguration
+  // below / mergeAgentConfiguration), re-adding the type's base skills regardless of what this
+  // override said — so intersecting here bought no real containment, it just silently dropped
+  // legitimate overrides that named an elastic-capability built-in when the agent also had a
+  // non-empty explicit skill_ids (see PR #280617 review).
   const agentWithOverrides = {
     ...agent,
     configuration: {
       ...agent.configuration,
       ...(agentParams.configurationOverrides || {}),
-      ...(skillIdOverride !== undefined ? { skill_ids: effectiveSkillIdsToUse } : {}),
     },
   };
+
   const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
     agent: agentWithOverrides,
     request,

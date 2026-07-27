@@ -198,38 +198,23 @@ describe('runAgent', () => {
       expect(resolveArg().tools).toEqual(overrideTools);
     });
 
-    describe('skill_ids intersection', () => {
-      it('passes the override through unchanged when agent skill_ids is undefined (all skills allowed)', async () => {
+    describe('skill_ids override (straight replace, no intersection)', () => {
+      it('replaces skill_ids with the override when agent skill_ids is undefined (all skills allowed)', async () => {
         await runWithOverrides({}, { skill_ids: ['elastic-builtin', 'custom'] });
         expect(resolveArg().skill_ids).toEqual(['elastic-builtin', 'custom']);
       });
 
-      it('passes the override through unchanged when agent skill_ids is an empty list', async () => {
-        // Empty list means "no explicit user skills" (elastic capabilities may still apply).
-        // The override should not be filtered against an empty list.
+      it('replaces skill_ids with the override when agent skill_ids is an empty list', async () => {
         await runWithOverrides({ skill_ids: [] }, { skill_ids: ['elastic-builtin'] });
         expect(resolveArg().skill_ids).toEqual(['elastic-builtin']);
       });
 
-      it('intersects the override with the agent skill_ids when the agent has an explicit non-empty list', async () => {
+      it("replaces skill_ids with the override verbatim, even when it names IDs outside the agent's explicit list — the type merge downstream (mergeAgentConfiguration) re-adds any base skill_ids regardless, so intersecting here bought no containment (PR #280617 review)", async () => {
         await runWithOverrides(
           { skill_ids: ['allowed-1', 'allowed-2'] },
           { skill_ids: ['allowed-1', 'rogue'] }
         );
-        expect(resolveArg().skill_ids).toEqual(['allowed-1']);
-      });
-
-      it('produces an empty intersection when none of the override IDs are in the agent list', async () => {
-        await runWithOverrides({ skill_ids: ['allowed-1'] }, { skill_ids: ['rogue-1', 'rogue-2'] });
-        expect(resolveArg().skill_ids).toEqual([]);
-      });
-
-      it('passes through all override IDs that are in the agent list', async () => {
-        await runWithOverrides(
-          { skill_ids: ['s1', 's2', 's3'] },
-          { skill_ids: ['s2', 's3', 'not-allowed'] }
-        );
-        expect(resolveArg().skill_ids).toEqual(['s2', 's3']);
+        expect(resolveArg().skill_ids).toEqual(['allowed-1', 'rogue']);
       });
 
       it('does not change agent skill_ids when no skill_ids override is provided', async () => {
@@ -247,7 +232,7 @@ describe('runAgent', () => {
         );
         const config = resolveArg();
         expect(config.instructions).toBe('new');
-        expect(config.skill_ids).toEqual(['s1']);
+        expect(config.skill_ids).toEqual(['s1', 'not-allowed']);
       });
     });
   });

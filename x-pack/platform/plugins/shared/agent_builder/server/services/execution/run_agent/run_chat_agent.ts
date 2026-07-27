@@ -137,19 +137,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
 
-  // If skills override is configured, we only want the intersection of plugin skills and
-  // explicit override
-  const overrideSkillIds = configurationOverrides?.skill_ids;
-  const isSkillIdsOverrideActive = overrideSkillIds !== undefined;
-  const filteredPluginSkillIds = isSkillIdsOverrideActive
-    ? pluginSkillIds.filter((id) => overrideSkillIds!.includes(id))
-    : pluginSkillIds;
+  // agentConfiguration here is already the effective, post-override configuration (run_agent.ts
+  // replaces skill_ids with any configuration_overrides.skill_ids before this runs, then folds
+  // in the agent type's base skill_ids). No extra intersection against pluginSkillIds is needed
+  // here — that used to silently drop overrides naming an elastic-capability built-in whenever
+  // the agent also had explicit skill_ids (see PR #280617 review).
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: filteredPluginSkillIds,
-    isSkillIdsOverrideActive,
+    additionalSkillIds: pluginSkillIds,
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);

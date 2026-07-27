@@ -82,11 +82,4 @@ export interface InternalSkillDefinition {
    * `enable_elastic_capabilities` set.
    */
   excludeFromElasticCapabilities?: boolean;
-  /**
-   * When true, this skill is included even when `skill_ids` is overridden at
-   * runtime (e.g. via `configuration_overrides.skill_ids`). Use for platform-level
-   * skills that should always be available to any agent regardless of overrides
-   * (e.g. skill-management).
-   */
-  includeWithSkillOverride?: boolean;
 }

@@ -27,7 +27,6 @@ export const skillManagementSkill = defineSkillType({
   id: 'skill-management',
   name: 'skill-management',
   basePath: 'skills/platform/agent-builder',
-  includeWithSkillOverride: true,
   description:
     'Author a new Agent Builder skill, or view or edit an existing one. Use when the user asks to create, build, generate, design, scaffold, see, show, display, view, edit, update, modify, change, improve, or fix a skill, capability, or expertise area for an agent.',
   content: dedent(`
