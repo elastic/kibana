@@ -122,7 +122,8 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
       esClientMock,
       soClientMock,
       expect.objectContaining({
-        kuery: 'policy_id:("1" or "2")',
+        // kuery must cover both base and versioned variants (e.g. policy_id:1#*)
+        kuery: expect.stringContaining('policy_id:1#*'),
       })
     );
   });
@@ -163,6 +164,49 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
       version
     );
     expect(result).toBe(true);
+  });
+
+  it('should query versioned policy_id variants when Fleet Server agent is reassigned', async () => {
+    const version = '1.0.0';
+
+    jest
+      .spyOn(mockedPackagePolicyService, 'list')
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: '1',
+            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
+            package: { name: 'fleet_server', version: '10.0.0' },
+          },
+        ],
+      } as any)
+      .mockResolvedValueOnce({ items: [] } as any);
+
+    mockedAgentPolicyService.getAllManagedAgentPolicies.mockResolvedValueOnce([]);
+
+    // Simulate an agent whose policy_id is the versioned variant (fleet-server-policy#9.4)
+    mockedGetAgentsByKuery.mockResolvedValueOnce({
+      agents: [
+        {
+          id: 'agent-1',
+          local_metadata: { elastic: { agent: { version: '10.0.0' } } },
+        },
+      ],
+    } as any);
+
+    mockedGetAgentStatusById.mockResolvedValue('online');
+
+    const result = await checkFleetServerVersionsForSecretsStorage(
+      esClientMock,
+      soClientMock,
+      version
+    );
+
+    expect(result).toBe(true);
+    // Kuery must include the wildcard variant so versioned agents are found
+    const kuery = mockedGetAgentsByKuery.mock.calls[0][2].kuery as string;
+    expect(kuery).toContain('fleet-server-policy#*');
   });
 });
 
@@ -368,7 +412,7 @@ describe('hasActiveFleetServersForPolicies', () => {
 
       await hasFleetServersForPolicies(mockEsClient, mockSoClient, [{ id: 'fleet-server-policy' }]);
 
-      const kuery = (getAgentStatusForAgentPolicy as jest.Mock).mock.calls[0][3] as string;
+      const kuery = (getAgentStatusForAgentPolicy as jest.Mock).mock.calls.at(-1)![3] as string;
       // Must match the base policy_id exactly
       expect(kuery).toContain('policy_id:"fleet-server-policy"');
       // Must also match versioned variants like fleet-server-policy#9.4

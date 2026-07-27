@@ -17,7 +17,10 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../../common/constants';
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { buildPolicyIdOrVariantsKuery } from '../../../common/services/version_specific_policies_utils';
+import {
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+} from '../../../common/services/version_specific_policies_utils';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
@@ -140,9 +143,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
     return false;
   }
 
-  const kuery = `policy_id:(${Array.from(policyIds)
-    .map((id) => `"${escapeQuotes(id)}"`)
-    .join(' or ')})`;
+  const kuery = buildPolicyIdsOrVariantsKuery(Array.from(policyIds));
 
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
   const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
