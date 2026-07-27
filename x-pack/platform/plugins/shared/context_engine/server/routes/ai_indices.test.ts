@@ -708,7 +708,7 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
             event: expect.objectContaining({ action: 'ai_index_get', outcome: 'success' }),
-            kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
+            kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } }, // factory default
           })
         );
       });

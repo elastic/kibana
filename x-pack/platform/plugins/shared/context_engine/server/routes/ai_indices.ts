@@ -281,9 +281,7 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         try {
           const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId);
-          auditLogger?.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, outcome: 'success' })
-          );
+          auditLogger?.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
           auditLogger?.log(
@@ -318,9 +316,7 @@ export const registerAiIndexRoutes = ({
           const body: ListAiIndexResponse = {
             ai_indices: await getAiIndexService().list(),
           };
-          auditLogger?.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, outcome: 'success' })
-          );
+          auditLogger?.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
           return response.ok({ body });
         } catch (error) {
           auditLogger?.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
