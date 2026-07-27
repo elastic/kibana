@@ -77,6 +77,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
+const MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE = 4096; // 4 KB
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -1142,7 +1143,14 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private setCustomTaskRunEventFields = (fields: Record<string, unknown>): void => {
-    this.taskRunEventCustomFields = fields;
+    const serializedSize = JSON.stringify(fields).length;
+    if (serializedSize > MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE) {
+      this.logger.warn(
+        `Dropping custom task run event fields for task ${this.taskType} because the serialized size (${serializedSize} bytes) exceeds the ${MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE} byte limit.`
+      );
+    } else {
+      this.taskRunEventCustomFields = fields;
+    }
   };
 
   private logTaskRunStartEvent(task: ConcreteTaskInstance, startedAt: Date): void {

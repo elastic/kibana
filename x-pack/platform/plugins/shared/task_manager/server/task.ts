@@ -116,7 +116,10 @@ export interface RunContext {
    * The provided fields are written to the task-manager-owned `kibana.task.data`
    * field, which is mapped as `flattened`.
    *
-   * Note: Calling this more than once replaces any previously set fields.
+   * Notes:
+   *  - Calling this more than once replaces any previously set fields.
+   *  - The serialized fields must not exceed 4 KB. Larger payloads are
+   *  dropped with a warning to protect the shared event log index.
    */
   setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
 }

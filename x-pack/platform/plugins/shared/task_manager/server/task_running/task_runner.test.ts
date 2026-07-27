@@ -3332,6 +3332,66 @@ describe('TaskManagerRunner', () => {
         });
       });
 
+      test('drops custom fields when the serialized size exceeds 4 KB and logs a warning', async () => {
+        const id = _.random(1, 20).toString();
+        const bigValue = 'x'.repeat(5000);
+        const { runner, logger } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ big: bigValue });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent.event.action).toBe('task-run');
+        expect(runEvent.event.outcome).toBe('success');
+        expect(runEvent.kibana.task.data).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Dropping custom task run event fields for task bar because the serialized size'
+          )
+        );
+      });
+
+      test('keeps the previously set fields when a subsequent oversized payload is dropped', async () => {
+        const id = _.random(1, 20).toString();
+        const bigValue = 'x'.repeat(5000);
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ ok: true });
+                  context.setCustomTaskRunEventFields({ big: bigValue });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          kibana: { task: { data: { ok: true } } },
+        });
+        expect(runEvent.kibana.task.data.big).toBeUndefined();
+      });
+
       test('adds custom fields set before cancellation onto the task-cancel event', async () => {
         jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
