@@ -167,7 +167,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   private createHeaders<TRequestBody>(options: HttpSelfFetchOptions<TRequestBody>): Headers {
     const headers = new Headers();
 
-    addHeaders(headers, this.params.authRequestHeaders.get(this.request));
+    const authHeaders = this.request.isFakeRequest
+      ? getFakeRequestAuthHeaders(this.request)
+      : this.params.authRequestHeaders.get(this.request);
+    addHeaders(headers, authHeaders);
     if (options.forwardRequestHeaders) {
       addHeaders(headers, getForwardedRequestHeaders(this.request));
     }
@@ -278,6 +281,11 @@ const parseDepth = (value: string | string[] | undefined): number => {
 const isForwardableRequestHeader = (name: string): boolean => {
   const normalizedName = name.toLowerCase();
   return !isProtectedHeader(normalizedName) && FORWARDED_REQUEST_HEADER_NAMES.has(normalizedName);
+};
+
+const getFakeRequestAuthHeaders = (request: KibanaRequest): AuthHeaders | undefined => {
+  const { authorization } = request.headers;
+  return authorization === undefined ? undefined : { authorization };
 };
 
 const getForwardedRequestHeaders = (request: KibanaRequest): HttpSelfFetchHeaders => {

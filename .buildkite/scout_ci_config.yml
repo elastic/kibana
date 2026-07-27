@@ -69,6 +69,7 @@ plugins:
     - searchprofiler
     - security
     - security_solution
+    - security_solution_serverless
     - serverless_observability
     - share
     - significant_events
