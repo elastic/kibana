@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,23 +25,23 @@ import {
   EuiSwitch,
   EuiText,
   EuiTextArea,
+  EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
 } from '@kbn/management-settings-ids';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { DEFAULT_INDEX_PATTERNS, parseIndexPatterns } from '@kbn/streams-schema';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import {
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -51,13 +52,17 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
+import { summarizeIndexPatternsMatch } from './index_patterns_feedback';
 import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
 import { AppsSection } from './apps_section';
+import { MaintenanceSection } from './maintenance_section';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -81,6 +86,19 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
+  // Pause turns these Settings toggles off (and Resume restores only those that
+  // were previously on). While paused, the toggles are not editable.
+  // `blocksActivity` is also true while status is loading (pessimistic).
+  const {
+    blocksActivity,
+    isBlocked,
+    status: maintenanceStatus,
+    activityBlockTooltip,
+  } = useBlocksNewActivity();
+  const isActivityToggleDisabled = !canEditSettings || blocksActivity;
+  const isActivityConfigDisabled = (draftEnabled: boolean) =>
+    !canEditSettings || !draftEnabled || blocksActivity;
+
   // getBooleanValue$ builds a new observable on every call, so memoize it —
   // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
   // render of this settings tab, not just when the flag actually changes.
@@ -98,14 +116,38 @@ export function SettingsTab() {
   );
   const [indexPatterns, setIndexPatterns] = useState<string>(savedIndexPatterns);
 
+  const isQueryStreamsEnabled = useMemo(
+    () => core.settings.client.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false),
+    [core.settings.client]
+  );
+
+  const { data: streamsData } = useFetchStreams();
+  const indexPatternsMatch = useMemo(() => {
+    if (!streamsData) {
+      return undefined;
+    }
+    return summarizeIndexPatternsMatch(
+      parseIndexPatterns(indexPatterns),
+      streamsData.streams.map((item) => item.stream)
+    );
+  }, [indexPatterns, streamsData]);
+
   const continuousExtraction = useContinuousExtractionSettings({
     globalClient: core.settings.globalClient,
     http: core.http,
+    enabledFromStatus: maintenanceStatus?.featureSettings?.continuousOnboardingEnabled,
   });
   const scheduledDiscovery = useScheduledDiscoverySettings({
     client: core.settings.client,
     http: core.http,
+    enabledFromStatus: maintenanceStatus?.featureSettings?.scheduledDiscoveryEnabled,
   });
+
+  // Any dirty continuous/scheduled change is blocked while paused (server 409).
+  // Disable while status is loading too; pause tooltip copy only when actually paused.
+  const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
+  const saveBlockedByPause = blocksActivity && activitySettingsDirty;
+  const showPausedSaveTooltip = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -130,6 +172,7 @@ export function SettingsTab() {
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
@@ -146,15 +189,17 @@ export function SettingsTab() {
     setParsedTuningConfig(null);
   }, [savedIndexPatterns, savedConfigYamlState, continuousExtraction, scheduledDiscovery]);
 
-  const handleSave = useCallback(async () => {
+  const performSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      if (indexPatterns !== savedIndexPatterns) {
+      const normalizedIndexPatterns = parseIndexPatterns(indexPatterns).join(', ');
+      setIndexPatterns(normalizedIndexPatterns);
+      if (normalizedIndexPatterns !== savedIndexPatterns) {
         await core.settings.client.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
-          indexPatterns
+          normalizedIndexPatterns
         );
-        setSavedIndexPatterns(indexPatterns);
+        setSavedIndexPatterns(normalizedIndexPatterns);
       }
 
       if (continuousExtraction.hasChanged) {
@@ -198,6 +243,33 @@ export function SettingsTab() {
     parsedTuningConfig,
   ]);
 
+  const handleSave = useCallback(() => {
+    // Index patterns are forward-looking (they may match streams that don't
+    // exist yet), so zero current matches is a confirmable nudge, not a hard
+    // block. Only prompt when the patterns actually changed and the stream list
+    // has loaded, so a failed/pending fetch can't wrongly block a valid save.
+    // Query streams are always eligible independent of patterns, so don't prompt
+    // when enabled query streams mean something will still be onboarded.
+    const patternsChanged = parseIndexPatterns(indexPatterns).join(', ') !== savedIndexPatterns;
+    const queryStreamsEligible =
+      isQueryStreamsEnabled && (indexPatternsMatch?.queryStreamCount ?? 0) > 0;
+    if (
+      patternsChanged &&
+      indexPatternsMatch &&
+      indexPatternsMatch.matchedStreamCount === 0 &&
+      !queryStreamsEligible
+    ) {
+      setIsConfirmingZeroMatch(true);
+      return;
+    }
+    void performSave();
+  }, [indexPatterns, savedIndexPatterns, indexPatternsMatch, isQueryStreamsEnabled, performSave]);
+
+  const handleConfirmZeroMatch = useCallback(() => {
+    setIsConfirmingZeroMatch(false);
+    void performSave();
+  }, [performSave]);
+
   return (
     <>
       {!canEditSettings && (
@@ -225,6 +297,10 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
+      <MaintenanceSection canManage={canManageStreams} />
+
+      <EuiSpacer />
+
       <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
@@ -275,33 +351,6 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {scheduledDiscovery.saved.enabled && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                size="s"
-                color="success"
-                iconType="check"
-                title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryActiveStatus',
-                  {
-                    defaultMessage:
-                      'Scheduled discovery is active in this space. Detection runs every {detectionIntervalMinutes} minutes and review runs every {reviewIntervalMinutes} minutes.',
-                    values: {
-                      detectionIntervalMinutes:
-                        scheduledDiscovery.saved.detectionIntervalMinutes ??
-                        DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
-                      reviewIntervalMinutes:
-                        scheduledDiscovery.saved.reviewIntervalMinutes ??
-                        DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-                    },
-                  }
-                )}
-                data-test-subj="streams-settings-scheduled-discovery-status"
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
@@ -317,13 +366,21 @@ export function SettingsTab() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryHelp',
-                      {
-                        defaultMessage:
-                          'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
-                      }
-                    )}
+                    {isBlocked
+                      ? i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryPausedHelp',
+                          {
+                            defaultMessage:
+                              'Turned off while Significant Events activity is paused. Resume above to restore scheduled discovery if it was enabled before pause.',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryHelp',
+                          {
+                            defaultMessage:
+                              'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
+                          }
+                        )}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -331,193 +388,204 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiSwitch
-                    data-test-subj="streams-settings-scheduled-discovery-toggle"
-                    label={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.enableScheduledDiscovery',
-                      { defaultMessage: 'Enable scheduled discovery' }
-                    )}
-                    checked={scheduledDiscovery.draft.enabled}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        enabled: e.target.checked,
-                      }))
-                    }
-                    disabled={!canEditSettings}
-                  />
+                  <EuiToolTip content={activityBlockTooltip}>
+                    <EuiSwitch
+                      data-test-subj="streams-settings-scheduled-discovery-toggle"
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.enableScheduledDiscovery',
+                        { defaultMessage: 'Enable scheduled discovery' }
+                      )}
+                      checked={scheduledDiscovery.draft.enabled}
+                      onChange={(e) =>
+                        scheduledDiscovery.setDraft((prev) => ({
+                          ...prev,
+                          enabled: e.target.checked,
+                        }))
+                      }
+                      disabled={isActivityToggleDisabled}
+                    />
+                  </EuiToolTip>
                 </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.detectionIntervalLabel',
-                    { defaultMessage: 'Detection interval (minutes)' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.detectionIntervalHelp',
-                    { defaultMessage: 'How often scheduled detection runs.' }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-scheduled-detection-interval"
-                    value={scheduledDiscovery.draft.detectionIntervalMinutes}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        detectionIntervalMinutes: clampNumber(
-                          e.target.value,
-                          MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                          Number.MAX_SAFE_INTEGER
-                        ),
-                      }))
-                    }
-                    min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.targetCoverageLabel',
-                    { defaultMessage: 'Target coverage (minutes)' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.targetCoverageHelp',
-                    {
-                      defaultMessage:
-                        'Every active rule is scanned at least once within this window. Must exceed the detection interval to spread the fleet across runs.',
-                    }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-scheduled-target-coverage"
-                    value={scheduledDiscovery.draft.targetCoverageMinutes}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        targetCoverageMinutes: clampNumber(
-                          e.target.value,
-                          MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                          Number.MAX_SAFE_INTEGER
-                        ),
-                      }))
-                    }
-                    min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
-                    { defaultMessage: 'Review interval (minutes)' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.reviewIntervalHelp',
-                    { defaultMessage: 'How often scheduled discovery and triage review runs.' }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-scheduled-review-interval"
-                    value={scheduledDiscovery.draft.reviewIntervalMinutes}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        reviewIntervalMinutes: clampNumber(
-                          e.target.value,
-                          MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                          Number.MAX_SAFE_INTEGER
-                        ),
-                      }))
-                    }
-                    min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeLabel',
-                    { defaultMessage: 'Discovery batch size' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeHelp',
-                    { defaultMessage: 'Maximum detections sent to each scheduled discovery pass.' }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-scheduled-discovery-batch-size"
-                    value={scheduledDiscovery.draft.discoveryBatchSize}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        discoveryBatchSize: clampNumber(
-                          e.target.value,
-                          MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                          MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                        ),
-                      }))
-                    }
-                    min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
-                    { defaultMessage: 'Triage batch size' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeHelp',
-                    { defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.' }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-scheduled-triage-batch-size"
-                    value={scheduledDiscovery.draft.triageBatchSize}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        triageBatchSize: clampNumber(
-                          e.target.value,
-                          MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                          MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                        ),
-                      }))
-                    }
-                    min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesLabel',
-                    { defaultMessage: 'Review passes' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesHelp',
-                    {
-                      defaultMessage:
-                        'Maximum discovery and triage pass pairs per scheduled review run.',
-                    }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-scheduled-max-review-passes"
-                    value={scheduledDiscovery.draft.maxReviewPasses}
-                    onChange={(e) =>
-                      scheduledDiscovery.setDraft((prev) => ({
-                        ...prev,
-                        maxReviewPasses: clampNumber(
-                          e.target.value,
-                          MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
-                          MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES
-                        ),
-                      }))
-                    }
-                    min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                    max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                  />
-                </EuiFormRow>
+                {scheduledDiscovery.draft.enabled && (
+                  <>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.detectionIntervalLabel',
+                        { defaultMessage: 'Detection interval (minutes)' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.detectionIntervalHelp',
+                        { defaultMessage: 'How often scheduled detection runs.' }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-scheduled-detection-interval"
+                        value={scheduledDiscovery.draft.detectionIntervalMinutes}
+                        onChange={(e) =>
+                          scheduledDiscovery.setDraft((prev) => ({
+                            ...prev,
+                            detectionIntervalMinutes: clampNumber(
+                              e.target.value,
+                              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+                              Number.MAX_SAFE_INTEGER
+                            ),
+                          }))
+                        }
+                        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.targetCoverageLabel',
+                        { defaultMessage: 'Target coverage (minutes)' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.targetCoverageHelp',
+                        {
+                          defaultMessage:
+                            'Every active rule is scanned at least once within this window. Must exceed the detection interval to spread the fleet across runs.',
+                        }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-scheduled-target-coverage"
+                        value={scheduledDiscovery.draft.targetCoverageMinutes}
+                        onChange={(e) =>
+                          scheduledDiscovery.setDraft((prev) => ({
+                            ...prev,
+                            targetCoverageMinutes: clampNumber(
+                              e.target.value,
+                              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+                              Number.MAX_SAFE_INTEGER
+                            ),
+                          }))
+                        }
+                        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
+                        { defaultMessage: 'Review interval (minutes)' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.reviewIntervalHelp',
+                        { defaultMessage: 'How often scheduled discovery and triage review runs.' }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-scheduled-review-interval"
+                        value={scheduledDiscovery.draft.reviewIntervalMinutes}
+                        onChange={(e) =>
+                          scheduledDiscovery.setDraft((prev) => ({
+                            ...prev,
+                            reviewIntervalMinutes: clampNumber(
+                              e.target.value,
+                              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+                              Number.MAX_SAFE_INTEGER
+                            ),
+                          }))
+                        }
+                        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeLabel',
+                        { defaultMessage: 'Discovery batch size' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeHelp',
+                        {
+                          defaultMessage:
+                            'Maximum detections sent to each scheduled discovery pass.',
+                        }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-scheduled-discovery-batch-size"
+                        value={scheduledDiscovery.draft.discoveryBatchSize}
+                        onChange={(e) =>
+                          scheduledDiscovery.setDraft((prev) => ({
+                            ...prev,
+                            discoveryBatchSize: clampNumber(
+                              e.target.value,
+                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
+                            ),
+                          }))
+                        }
+                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
+                        { defaultMessage: 'Triage batch size' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeHelp',
+                        {
+                          defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.',
+                        }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-scheduled-triage-batch-size"
+                        value={scheduledDiscovery.draft.triageBatchSize}
+                        onChange={(e) =>
+                          scheduledDiscovery.setDraft((prev) => ({
+                            ...prev,
+                            triageBatchSize: clampNumber(
+                              e.target.value,
+                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
+                            ),
+                          }))
+                        }
+                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesLabel',
+                        { defaultMessage: 'Review passes' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesHelp',
+                        {
+                          defaultMessage:
+                            'Maximum discovery and triage pass pairs per scheduled review run.',
+                        }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-scheduled-max-review-passes"
+                        value={scheduledDiscovery.draft.maxReviewPasses}
+                        onChange={(e) =>
+                          scheduledDiscovery.setDraft((prev) => ({
+                            ...prev,
+                            maxReviewPasses: clampNumber(
+                              e.target.value,
+                              MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+                              MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES
+                            ),
+                          }))
+                        }
+                        min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
+                        max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                  </>
+                )}
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -581,6 +649,39 @@ export function SettingsTab() {
                     disabled={!canEditSettings}
                   />
                 </EuiFormRow>
+                {indexPatternsMatch && (
+                  <EuiText size="xs" data-test-subj="streams-settings-index-patterns-feedback">
+                    {indexPatternsMatch.matchedStreamCount > 0 && (
+                      <p>
+                        {i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.indexPatternsMatchCount',
+                          {
+                            defaultMessage:
+                              'Matches {count, plural, one {# stream} other {# streams}}.',
+                            values: { count: indexPatternsMatch.matchedStreamCount },
+                          }
+                        )}
+                      </p>
+                    )}
+                    {indexPatternsMatch.unmatchedPatterns.length > 0 && (
+                      <p>
+                        <EuiTextColor color="warning">
+                          {i18n.translate(
+                            'xpack.streams.significantEventsDiscovery.settings.indexPatternsNoMatch',
+                            {
+                              defaultMessage:
+                                '{count, plural, one {# pattern matches} other {# patterns match}} no current streams: {patterns}',
+                              values: {
+                                count: indexPatternsMatch.unmatchedPatterns.length,
+                                patterns: indexPatternsMatch.unmatchedPatterns.join(', '),
+                              },
+                            }
+                          )}
+                        </EuiTextColor>
+                      </p>
+                    )}
+                  </EuiText>
+                )}
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -601,41 +702,6 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {continuousExtraction.saved.enabled && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                size="s"
-                color="success"
-                iconType="check"
-                title={
-                  (continuousExtraction.saved.intervalHours ??
-                    DEFAULT_EXTRACTION_INTERVAL_HOURS) === 0
-                    ? i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingActiveStatusEveryRun',
-                        {
-                          defaultMessage:
-                            'Continuous onboarding is active. Streams have no cooldown and are re-eligible for onboarding immediately after each run.',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingActiveStatus',
-                        {
-                          defaultMessage:
-                            'Continuous onboarding is active. Streams are re-onboarded at most every {hours} hours.',
-                          values: {
-                            hours:
-                              continuousExtraction.saved.intervalHours ??
-                              DEFAULT_EXTRACTION_INTERVAL_HOURS,
-                          },
-                        }
-                      )
-                }
-                data-test-subj="streams-settings-continuous-onboarding-status"
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
@@ -651,13 +717,21 @@ export function SettingsTab() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingHelp',
-                      {
-                        defaultMessage:
-                          'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
-                      }
-                    )}
+                    {isBlocked
+                      ? i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingPausedHelp',
+                          {
+                            defaultMessage:
+                              'Turned off while Significant Events activity is paused. Resume above to restore continuous onboarding if it was enabled before pause.',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingHelp',
+                          {
+                            defaultMessage:
+                              'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
+                          }
+                        )}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -665,81 +739,84 @@ export function SettingsTab() {
             <EuiFlexItem grow={5}>
               <EuiForm component="div">
                 <EuiFormRow>
-                  <EuiSwitch
-                    data-test-subj="streams-settings-continuous-onboarding-toggle"
-                    label={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.enableContinuousKiOnboarding',
-                      { defaultMessage: 'Enable continuous KI onboarding' }
-                    )}
-                    checked={continuousExtraction.draft.enabled}
-                    onChange={(e) =>
-                      continuousExtraction.setDraft((prev) => ({
-                        ...prev,
-                        enabled: e.target.checked,
-                      }))
-                    }
-                    disabled={!canEditSettings}
-                  />
+                  <EuiToolTip content={activityBlockTooltip}>
+                    <EuiSwitch
+                      data-test-subj="streams-settings-continuous-onboarding-toggle"
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.enableContinuousKiOnboarding',
+                        { defaultMessage: 'Enable continuous KI onboarding' }
+                      )}
+                      checked={continuousExtraction.draft.enabled}
+                      onChange={(e) =>
+                        continuousExtraction.setDraft((prev) => ({
+                          ...prev,
+                          enabled: e.target.checked,
+                        }))
+                      }
+                      disabled={isActivityToggleDisabled}
+                    />
+                  </EuiToolTip>
                 </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalLabel',
-                    { defaultMessage: 'Onboarding interval (hours)' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalHelp',
-                    {
-                      defaultMessage:
-                        'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
-                    }
-                  )}
-                >
-                  <EuiFieldNumber
-                    data-test-subj="streams-settings-onboarding-interval"
-                    value={continuousExtraction.draft.intervalHours}
-                    onChange={(e) =>
-                      continuousExtraction.setDraft((prev) => ({
-                        ...prev,
-                        intervalHours: Math.max(
-                          MIN_EXTRACTION_INTERVAL_HOURS,
-                          Number(e.target.value) || 0
-                        ),
-                      }))
-                    }
-                    min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsLabel',
-                    { defaultMessage: 'Excluded streams' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsHelp',
-                    {
-                      defaultMessage:
-                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous onboarding.',
-                    }
-                  )}
-                >
-                  <EuiTextArea
-                    data-test-subj="streams-settings-excluded-streams"
-                    value={continuousExtraction.draft.excludedStreamPatterns}
-                    onChange={(e) =>
-                      continuousExtraction.setDraft((prev) => ({
-                        ...prev,
-                        excludedStreamPatterns: e.target.value,
-                      }))
-                    }
-                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
-                    placeholder={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
-                      { defaultMessage: 'logs.debug.*' }
-                    )}
-                    rows={2}
-                  />
-                </EuiFormRow>
+                {continuousExtraction.draft.enabled && (
+                  <>
+                    <EuiFormRow>
+                      <EuiText color="subdued" size="xs">
+                        <p>
+                          {i18n.translate(
+                            'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingScopeHelp',
+                            {
+                              defaultMessage:
+                                'Onboards the streams matching your index patterns in the Data sources section above.',
+                            }
+                          )}
+                        </p>
+                        {isQueryStreamsEnabled &&
+                          indexPatternsMatch &&
+                          indexPatternsMatch.queryStreamCount > 0 && (
+                            <p data-test-subj="streams-settings-onboarding-query-streams-note">
+                              {i18n.translate(
+                                'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingQueryStreamsNote',
+                                {
+                                  defaultMessage:
+                                    'Also onboards {count, plural, one {# query stream} other {# query streams}}, which are always eligible regardless of index patterns.',
+                                  values: { count: indexPatternsMatch.queryStreamCount },
+                                }
+                              )}
+                            </p>
+                          )}
+                      </EuiText>
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalLabel',
+                        { defaultMessage: 'Onboarding interval (hours)' }
+                      )}
+                      helpText={i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalHelp',
+                        {
+                          defaultMessage:
+                            'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
+                        }
+                      )}
+                    >
+                      <EuiFieldNumber
+                        data-test-subj="streams-settings-onboarding-interval"
+                        value={continuousExtraction.draft.intervalHours}
+                        onChange={(e) =>
+                          continuousExtraction.setDraft((prev) => ({
+                            ...prev,
+                            intervalHours: Math.max(
+                              MIN_EXTRACTION_INTERVAL_HOURS,
+                              Number(e.target.value) || 0
+                            ),
+                          }))
+                        }
+                        min={MIN_EXTRACTION_INTERVAL_HOURS}
+                        disabled={isActivityConfigDisabled(continuousExtraction.draft.enabled)}
+                      />
+                    </EuiFormRow>
+                  </>
+                )}
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -805,6 +882,37 @@ export function SettingsTab() {
 
       {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
 
+      {isConfirmingZeroMatch && (
+        <EuiConfirmModal
+          data-test-subj="streams-settings-zero-match-confirm"
+          title={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmTitle',
+            { defaultMessage: 'No streams match these patterns' }
+          )}
+          onCancel={() => setIsConfirmingZeroMatch(false)}
+          onConfirm={handleConfirmZeroMatch}
+          cancelButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmCancel',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmConfirm',
+            { defaultMessage: 'Save anyway' }
+          )}
+          buttonColor="warning"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmBody',
+              {
+                defaultMessage:
+                  'None of your index patterns match any current stream, so Significant Events will not detect or onboard anything yet. Patterns can match streams created later. Save anyway?',
+              }
+            )}
+          </p>
+        </EuiConfirmModal>
+      )}
+
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
           <EuiFlexGroup justifyContent="flexEnd">
@@ -825,22 +933,27 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="streams-settings-save-button"
-                    color="primary"
-                    fill
-                    size="s"
-                    onClick={handleSave}
-                    isLoading={isSaving}
-                    isDisabled={
-                      !canEditSettings || (hasTuningConfigChanges && parsedTuningConfig === null)
-                    }
-                  >
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
-                      { defaultMessage: 'Save changes' }
-                    )}
-                  </EuiButton>
+                  <EuiToolTip content={showPausedSaveTooltip ? activityBlockTooltip : undefined}>
+                    <EuiButton
+                      data-test-subj="streams-settings-save-button"
+                      color="primary"
+                      fill
+                      size="s"
+                      onClick={handleSave}
+                      isLoading={isSaving}
+                      isDisabled={
+                        !canEditSettings ||
+                        saveBlockedByPause ||
+                        (hasTuningConfigChanges && parsedTuningConfig === null)
+                      }
+                      hasAriaDisabled={saveBlockedByPause}
+                    >
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
+                        { defaultMessage: 'Save changes' }
+                      )}
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
