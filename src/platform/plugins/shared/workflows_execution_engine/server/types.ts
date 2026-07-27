@@ -48,7 +48,6 @@ export type WorkflowExecutionMode = 'async' | 'sync';
 export interface ExecuteWorkflowOptions {
   executionMode?: WorkflowExecutionMode;
   executionId?: string;
-  metadata?: Record<string, string>;
   capabilities?: WorkflowExecutionCapabilities;
   abortSignal?: AbortSignal;
 }

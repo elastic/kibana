@@ -71,14 +71,9 @@ export const executeWorkflowSync = async ({
     coreStart.elasticsearch.client
   );
 
-  const syncContext = {
-    ...context,
-    ...(options.metadata ? { metadata: options.metadata } : {}),
-  };
-
   const workflowExecution = await buildWorkflowExecutionDocument({
     workflow,
-    context: syncContext,
+    context,
     defaultTriggeredBy: 'manual',
     authenticatedUser,
     now: new Date(),
