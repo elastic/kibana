@@ -321,11 +321,26 @@ const ChartItem = React.memo(
     onViewDetails,
     userMessages,
   }: ChartItemProps) => {
-    const { profileId, gridSettings } = useMetricsExperienceState();
+    const { profileId, gridSettings, onMetricExplored } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
+    );
+
+    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+      (event) => {
+        // Only count clicks on panel action controls (Inspect, View details, Explore in
+        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
+        // on the chart body, legend, or time series selection.
+        const isActionClick = (event.target as HTMLElement).closest(
+          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
+        );
+        if (isActionClick) {
+          onMetricExplored?.(getMetricUniqueKey(metricItem));
+        }
+      },
+      [onMetricExplored, metricItem]
     );
 
     const applicableDimensions = useStableApplicableDimensions(
@@ -375,6 +390,7 @@ const ChartItem = React.memo(
         isFocused={isFocused}
         isSelected={isSelected}
         onFocus={onFocusCell}
+        onClickCapture={recordExploredMetric}
       >
         <Chart
           id={metricItem.metricName}
@@ -454,6 +470,7 @@ const A11yGridCell = React.forwardRef(
       isFocused,
       isSelected,
       onFocus,
+      onClickCapture,
     }: React.PropsWithChildren<{
       id: string;
       rowIndex: number;
@@ -462,6 +479,7 @@ const A11yGridCell = React.forwardRef(
       isFocused: boolean;
       isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
+      onClickCapture?: React.MouseEventHandler<HTMLDivElement>;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
@@ -484,6 +502,7 @@ const A11yGridCell = React.forwardRef(
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
+        onClickCapture={onClickCapture}
         css={css`
           outline: none;
           cursor: pointer;
