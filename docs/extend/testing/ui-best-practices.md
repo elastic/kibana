@@ -301,7 +301,7 @@ export class MyAppPage {
 
 :::::
 
-If your component isn't covered yet, `page.testSubj` locators or an existing legacy EUI wrapper are acceptable compatibility fallbacks. Don't add or extend wrappers in a test suite. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team in `#kibana-qa` on Slack with a short justification of what your test needs, so the addition follows the [shared contribution workflow](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than being duplicated per suite.
+If your component isn't covered yet, `page.testSubj` locators or an existing `Eui*Wrapper` class exported by `@kbn/scout` are acceptable compatibility fallbacks. Don't add or extend wrappers in a test suite. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team in `#kibana-qa` on Slack with a short justification of what your test needs, so the addition follows the [shared contribution workflow](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than being duplicated per suite.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
