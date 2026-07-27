@@ -34,32 +34,58 @@ export {
 } from './rule_events_metric_series';
 
 export interface ChangePointHistogramWindow {
-  /** Source-bucket window. Ends at the reliable write horizon. */
-  bounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
-  /** Write-time `@timestamp` prune that covers every source minute in `bounds`. */
+  /**
+   * Source-bucket span handed to `hard_bounds`. The upper edge is *exclusive*:
+   * ES rounds it down to `fixed_interval` and then drops every bucket whose key
+   * is `>= max` (`LongBounds.contain`).
+   */
+  hardBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
+  /**
+   * Newest bucket the series may contain, one interval below the exclusive
+   * upper edge of {@link ChangePointHistogramWindow.hardBounds}. Used as
+   * `extended_bounds.max`.
+   */
+  seriesMax: AggregationsFieldDateMath;
+  /** Write-time `@timestamp` prune that covers every source minute in `hardBounds`. */
   writeTimeLookback: string;
 }
 
 /**
  * Analysis window for change_point.
  *
- * `lookback` (`now-40m`) is the analysis *duration*. The series ends at
- * `now - MAX_WRITE_DELAY` so not-yet-written closed minutes are excluded, and
- * starts `duration` earlier. This is the `hard_bounds` span, which keeps
- * out-of-window docs from stretching the histogram; only the upper edge is
- * also used as an `extended_bounds` (see
- * {@link buildChangePointTimeSeriesAggs}). The write-time filter is widened to
- * the same source span.
+ * `lookback` (`now-40m`) is the analysis *duration*. The series ends at the
+ * reliable write horizon `now - MAX_WRITE_DELAY` so not-yet-written closed
+ * minutes are excluded, and starts `duration` earlier. That span is
+ * `hard_bounds`, which keeps out-of-window docs from stretching the histogram.
+ *
+ * `seriesMax` is one `bucketInterval` below the horizon rather than at it,
+ * because `hard_bounds` treats its upper edge as exclusive while
+ * `extended_bounds` emits a bucket *at* its own rounded `max`. Feeding both the
+ * same instant would append a bucket that exists but can never receive a doc
+ * (see {@link buildChangePointTimeSeriesAggs}). Stepping back one interval also
+ * guarantees the newest bucket is complete: every source minute it covers is at
+ * or below the horizon, so all of them are already written.
+ *
+ * The write-time prune is widened by `bucketInterval` on top of the source span
+ * because ES rounds `hard_bounds.min` *down* to the interval grid, pulling in up
+ * to `bucketInterval - 1m` of older source minutes whose rule events were
+ * written before an un-widened prune would start.
  */
-export function buildChangePointHistogramWindow(lookback: string): ChangePointHistogramWindow {
+export function buildChangePointHistogramWindow(
+  lookback: string,
+  bucketInterval: string
+): ChangePointHistogramWindow {
   const lookbackMinutes = parseLookbackMinutes(lookback);
   const writeDelayMinutes = getDurationMinutes(METRIC_SERIES_MAX_WRITE_DELAY);
-  const sourceMin = `now-${lookbackMinutes + writeDelayMinutes}m`;
-  const sourceMax = `now-${METRIC_SERIES_MAX_WRITE_DELAY}`;
+  const bucketMinutes = getDurationMinutes(bucketInterval);
 
   return {
-    bounds: { min: sourceMin, max: sourceMax },
-    writeTimeLookback: getAnalysisWriteTimeLookback(lookbackMinutes),
+    hardBounds: {
+      min: `now-${lookbackMinutes + writeDelayMinutes}m`,
+      max: `now-${writeDelayMinutes}m`,
+    },
+    seriesMax: `now-${writeDelayMinutes + bucketMinutes}m`,
+    writeTimeLookback: getAnalysisWriteTimeLookback(lookbackMinutes, bucketMinutes),
   };
 }
 
@@ -92,13 +118,23 @@ export function buildChangePointHistogramWindow(lookback: string): ChangePointHi
  * observed bucket, so a rule without history for the whole window gets a short
  * series and an honest `indeterminable` instead of a step up from fabricated
  * zeros that reads as a spike.
+ *
+ * That `max` is `seriesMax`, *not* `hardBounds.max`, and the two must stay
+ * distinct. ES rounds both bounds down to `fixed_interval`, then applies them
+ * with opposite inclusivity: `extended_bounds` emits a bucket at its rounded
+ * `max`, while `hard_bounds` rejects any key `>= max`. Handing both the same
+ * instant therefore creates a newest bucket that is always present and always
+ * unreachable — a hard `0` that `keep_values` feeds to change_point as a real
+ * observation, which reads as a dip on an otherwise healthy rule.
  */
 export function buildChangePointTimeSeriesAggs({
   bucketInterval,
-  bounds,
+  hardBounds,
+  seriesMax,
 }: {
   bucketInterval: string;
-  bounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
+  hardBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
+  seriesMax: AggregationsFieldDateMath;
 }): Record<string, AggregationsAggregationContainer> {
   return {
     over_time: {
@@ -106,8 +142,8 @@ export function buildChangePointTimeSeriesAggs({
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
         fixed_interval: bucketInterval,
         min_doc_count: 0,
-        extended_bounds: { max: bounds.max },
-        hard_bounds: bounds,
+        extended_bounds: { max: seriesMax },
+        hard_bounds: hardBounds,
       },
       aggs: {
         // Deduplicate overlapping MATCH recounts at source-minute resolution.

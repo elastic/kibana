@@ -53,9 +53,11 @@ describe('Significant Events rule scheduling', () => {
   });
 
   it('widens the idle gate to the earliest write-time bound across profiles', () => {
-    // Default profile is wider (125m + 7m write delay) than critical (40m + 7m).
-    expect(getIdleGateLookback('now-40m')).toBe('now-132m');
+    // Default profile is wider (125m + 7m write delay) than critical (40m + 7m),
+    // plus the default profile's 5m bucket interval so the gate is never
+    // narrower than the scan window it guards.
+    expect(getIdleGateLookback('now-40m')).toBe('now-137m');
     // A critical lookback wider than default still wins.
-    expect(getIdleGateLookback('now-200m')).toBe('now-207m');
+    expect(getIdleGateLookback('now-200m')).toBe('now-212m');
   });
 });

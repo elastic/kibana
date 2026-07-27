@@ -121,19 +121,37 @@ export function getAnalysisProfileConfig(
  * analysis window of `lookbackMinutes` ending at `now - MAX_WRITE_DELAY`.
  * Source min is `now - (lookbackMinutes + writeDelay)`; write-time docs for
  * that edge can land around the same horizon.
+ *
+ * `bucketIntervalMinutes` widens the bound by one analysis bucket. ES rounds a
+ * `date_histogram`'s `hard_bounds.min` *down* to `fixed_interval`, so the window
+ * really starts up to `bucketIntervalMinutes - 1` earlier than the requested
+ * instant. Those extra source minutes were written before an un-widened prune
+ * begins, so pruning at the unrounded instant drops them and leaves the oldest
+ * bucket holding a partial sum — a dip at index 0 on every scan.
  */
-export function getAnalysisWriteTimeLookback(lookbackMinutes: number): string {
+export function getAnalysisWriteTimeLookback(
+  lookbackMinutes: number,
+  bucketIntervalMinutes: number
+): string {
   const writeDelayMinutes = getDurationMinutes(METRIC_SERIES_MAX_WRITE_DELAY);
-  return `now-${lookbackMinutes + writeDelayMinutes}m`;
+  return `now-${lookbackMinutes + writeDelayMinutes + bucketIntervalMinutes}m`;
 }
 
 /**
  * Idle-gate lookback: earliest write-time bound across the configured critical
  * profile and the fixed default profile, so a space with only default-profile
  * activity in the wider window is not cancelled early.
+ *
+ * Padded with the default profile's bucket interval to keep the invariant that
+ * the gate is never narrower than a scan window it guards; otherwise a space
+ * whose only activity sits in the interval-rounding margin would be cancelled
+ * before the scan that would have found it.
  */
 export function getIdleGateLookback(criticalLookback: string): string {
   const criticalMinutes = parseLookbackMinutes(criticalLookback);
   const widestMinutes = Math.max(criticalMinutes, DEFAULT_ANALYSIS_LOOKBACK_MINUTES);
-  return getAnalysisWriteTimeLookback(widestMinutes);
+  return getAnalysisWriteTimeLookback(
+    widestMinutes,
+    getDurationMinutes(DEFAULT_ANALYSIS_BUCKET_INTERVAL)
+  );
 }

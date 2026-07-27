@@ -15,24 +15,53 @@ import {
 
 describe('buildChangePointHistogramWindow', () => {
   it('ends at now-MAX_WRITE_DELAY and extends min by the same write delay', () => {
-    // 40m analysis duration ending at now-7m → source min now-47m; write-time prune now-47m.
-    expect(buildChangePointHistogramWindow('now-40m')).toEqual({
-      bounds: { min: 'now-47m', max: 'now-7m' },
-      writeTimeLookback: 'now-47m',
+    // Critical profile: 40m duration ending at now-7m → source min now-47m.
+    expect(buildChangePointHistogramWindow('now-40m', '1m')).toEqual({
+      hardBounds: { min: 'now-47m', max: 'now-7m' },
+      seriesMax: 'now-8m',
+      writeTimeLookback: 'now-48m',
     });
-    expect(buildChangePointHistogramWindow('now-125m')).toEqual({
-      bounds: { min: 'now-132m', max: 'now-7m' },
-      writeTimeLookback: 'now-132m',
+    // Default profile: 125m duration, 5m buckets.
+    expect(buildChangePointHistogramWindow('now-125m', '5m')).toEqual({
+      hardBounds: { min: 'now-132m', max: 'now-7m' },
+      seriesMax: 'now-12m',
+      writeTimeLookback: 'now-137m',
     });
+  });
+
+  it('keeps seriesMax one interval below the exclusive hard_bounds.max', () => {
+    // `hard_bounds.max` is exclusive but `extended_bounds.max` emits a bucket at
+    // its own value, so sharing one instant would fabricate an unfillable
+    // newest bucket. The gap must be exactly one interval: any wider and the
+    // series loses a real, fully-written bucket.
+    for (const bucketMinutes of [1, 5, 10]) {
+      const { hardBounds, seriesMax } = buildChangePointHistogramWindow(
+        'now-40m',
+        `${bucketMinutes}m`
+      );
+      expect(hardBounds.max).toBe('now-7m');
+      expect(seriesMax).toBe(`now-${7 + bucketMinutes}m`);
+    }
+  });
+
+  it('widens the write-time prune past the interval-rounded lower edge', () => {
+    // ES rounds `hard_bounds.min` down to the interval grid, so the window can
+    // start up to `interval - 1m` earlier than requested. The prune has to cover
+    // those minutes or the oldest bucket reads as a partial sum.
+    const { hardBounds, writeTimeLookback } = buildChangePointHistogramWindow('now-125m', '5m');
+    const minMinutes = Number(String(hardBounds.min).match(/now-(\d+)m/)![1]);
+    const pruneMinutes = Number(writeTimeLookback.match(/now-(\d+)m/)![1]);
+    expect(pruneMinutes - minMinutes).toBe(5);
   });
 });
 
 describe('buildChangePointTimeSeriesAggs', () => {
   it('deduplicates at 1m with MAX then SUM into the configured outer interval', () => {
-    const { bounds } = buildChangePointHistogramWindow('now-40m');
+    const { hardBounds, seriesMax } = buildChangePointHistogramWindow('now-125m', '5m');
     const aggs = buildChangePointTimeSeriesAggs({
       bucketInterval: '5m',
-      bounds,
+      hardBounds,
+      seriesMax,
     });
 
     expect(METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL).toBe('1m');
@@ -44,9 +73,10 @@ describe('buildChangePointTimeSeriesAggs', () => {
         // Upper edge only. Pinning `max` keeps the trailing zeros of a rule
         // that went silent; leaving `min` open starts the series at the rule's
         // first observed bucket instead of fabricating history back to the
-        // window edge.
-        extended_bounds: { max: bounds.max },
-        hard_bounds: bounds,
+        // window edge. It reads `seriesMax`, one interval inside the exclusive
+        // `hard_bounds.max`, so the newest bucket can actually hold docs.
+        extended_bounds: { max: seriesMax },
+        hard_bounds: hardBounds,
       },
       aggs: {
         per_minute: {

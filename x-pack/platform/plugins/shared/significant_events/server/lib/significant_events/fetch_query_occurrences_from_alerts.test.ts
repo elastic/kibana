@@ -447,4 +447,114 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(timestampRange?.gte).toBe(FROM.toISOString());
     expect(timestampRange?.lte).toBe(new Date(TO.getTime() + 7 * 60_000).toISOString());
   });
+
+  describe('write-horizon clamp', () => {
+    // A closed source minute is written up to MAX_WRITE_DELAY (7m) later, so the
+    // newest minutes of a `now`-anchored range have no rows yet and must not be
+    // zero-filled as "no matches".
+    const NOW = new Date('2026-01-01T01:00:00.000Z');
+    const HORIZON_ISO = '2026-01-01T00:53:00.000Z';
+
+    beforeEach(() => {
+      jest.spyOn(Date, 'now').mockReturnValue(NOW.getTime());
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('ends the timeline at the write horizon instead of zero-filling up to now', async () => {
+      const { esClient, esql } = createMocks();
+
+      esql.mockResolvedValueOnce(
+        makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:50:00.000Z', count: 4 }])
+      );
+
+      const result = await computeOccurrences(
+        {
+          ruleIds: ['rule-a'],
+          from: new Date('2026-01-01T00:50:00.000Z'),
+          to: NOW,
+          bucketSize: '1m',
+          spaceId: SPACE_ID,
+        },
+        { esClient }
+      );
+
+      // 10 requested minutes minus the 7 that cannot be written yet: [00:50, 00:53].
+      expect(result.timeline.map((b) => b.date)).toEqual([
+        '2026-01-01T00:50:00.000Z',
+        '2026-01-01T00:51:00.000Z',
+        '2026-01-01T00:52:00.000Z',
+        HORIZON_ISO,
+      ]);
+      expect(result.aggregatedOccurrences.map((b) => b.count)).toEqual([4, 0, 0, 0]);
+    });
+
+    it('derives the source-bucket range and the write-time prune from the clamped end', async () => {
+      const { esClient, esql } = createMocks();
+
+      esql.mockResolvedValueOnce(makeStatsResponse([]));
+
+      await computeOccurrences(
+        {
+          ruleIds: ['rule-a'],
+          from: new Date('2026-01-01T00:50:00.000Z'),
+          to: NOW,
+          bucketSize: '1m',
+          spaceId: SPACE_ID,
+        },
+        { esClient }
+      );
+
+      const calledWith = esql.mock.calls[0][1] as {
+        query: string;
+        filter?: {
+          bool?: {
+            filter?: Array<{ range?: { '@timestamp'?: { lte?: string } } }>;
+          };
+        };
+      };
+      expect(calledWith.query).toContain(`bucket <= TO_DATETIME("${HORIZON_ISO}")`);
+      // Clamped end widened by MAX_WRITE_DELAY lands back on `now`; leaving the
+      // prune on the caller's `to` would keep it 7m wider than the ES|QL range.
+      const timestampRange = calledWith.filter?.bool?.filter?.find(
+        (clause) => clause.range?.['@timestamp']
+      )?.range?.['@timestamp'];
+      expect(timestampRange?.lte).toBe(NOW.toISOString());
+    });
+
+    it('returns no data without querying when the whole range is inside the horizon', async () => {
+      const { esClient, esql } = createMocks();
+
+      const result = await computeOccurrences(
+        {
+          ruleIds: ['rule-a'],
+          from: new Date('2026-01-01T00:56:00.000Z'),
+          to: NOW,
+          bucketSize: '1m',
+          spaceId: SPACE_ID,
+        },
+        { esClient }
+      );
+
+      expect(esql).not.toHaveBeenCalled();
+      expect(result.timeline).toEqual([]);
+      expect(result.aggregatedOccurrences).toEqual([]);
+    });
+
+    it('leaves a range that already ends before the horizon untouched', async () => {
+      const { esClient, esql } = createMocks();
+
+      esql.mockResolvedValueOnce(makeStatsResponse([]));
+
+      const result = await computeOccurrences(
+        { ruleIds: ['rule-a'], from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
+        { esClient }
+      );
+
+      expect(result.timeline).toHaveLength(6);
+      expect(result.timeline[result.timeline.length - 1].date).toBe(TO.toISOString());
+    });
+  });
 });

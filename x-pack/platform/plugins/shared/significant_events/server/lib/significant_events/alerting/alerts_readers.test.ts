@@ -164,7 +164,10 @@ describe('SignificantEventsAlertsReaderV2', () => {
       [makeQueryLink({ title: 'Linked rule title' })]
     );
 
-    const { bounds, writeTimeLookback } = buildChangePointHistogramWindow(LOOKBACK);
+    const { hardBounds, seriesMax, writeTimeLookback } = buildChangePointHistogramWindow(
+      LOOKBACK,
+      BUCKET_INTERVAL
+    );
     expect(search).toHaveBeenCalledWith(
       'significant_events_alerts_v2_change_point_scan',
       expect.objectContaining({
@@ -186,7 +189,8 @@ describe('SignificantEventsAlertsReaderV2', () => {
             aggs: {
               ...buildChangePointTimeSeriesAggs({
                 bucketInterval: BUCKET_INTERVAL,
-                bounds,
+                hardBounds,
+                seriesMax,
               }),
             },
           },

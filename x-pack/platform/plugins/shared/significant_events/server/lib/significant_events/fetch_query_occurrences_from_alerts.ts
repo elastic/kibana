@@ -178,11 +178,25 @@ export async function computeOccurrences(
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
   const ruleIdColumn = alertsReader.ruleIdColumn;
 
+  // A closed source minute is written up to MAX_WRITE_DELAY later, so the newest
+  // minutes of a `now`-anchored range have no rows yet. `fillTimeline` cannot
+  // tell that apart from "the rule matched nothing" and zero-fills it, painting
+  // a trailing cliff on every live chart. Ending the grid at the write horizon
+  // leaves those buckets absent instead of falsely flat. Ranges that already end
+  // in the past are untouched.
+  const writeHorizon = new Date(Date.now() - parseDuration(METRIC_SERIES_MAX_WRITE_DELAY));
+  const effectiveTo = to < writeHorizon ? to : writeHorizon;
+
+  // Whole range sits inside the write horizon: nothing is readable yet.
+  if (effectiveTo < from) {
+    return emptyResult;
+  }
+
   // Build the grid once; reused by lazy per-rule fill and the aggregate.
   // `buckets` is capped at MAX_FILL_BUCKETS, so for ranges wider than the cap
   // the LIMIT below intentionally matches the truncated grid: SORT bucket ASC
   // keeps the earliest buckets, the only ones the timeline can render.
-  const timeline = buildTimeline({ from, to, intervalMs });
+  const timeline = buildTimeline({ from, to: effectiveTo, intervalMs });
   const buckets = Math.max(timeline.length, 1);
 
   // One row per (rule × bucket): batch rules under the row cap, run in parallel
@@ -194,7 +208,7 @@ export async function computeOccurrences(
   // Precise window is on source `bucket` inside the ES|QL request. Convert once
   // here so the reader never calls Date#toISOString on a missing range.
   const rangeFromIso = from.toISOString();
-  const rangeToIso = to.toISOString();
+  const rangeToIso = effectiveTo.toISOString();
 
   // Widen the write-time `@timestamp` prune by MAX_WRITE_DELAY so late rule
   // runs (cadence + jitter) for in-window minutes are still candidates; ES|QL
@@ -207,7 +221,7 @@ export async function computeOccurrences(
             '@timestamp': {
               gte: rangeFromIso,
               lte: new Date(
-                to.getTime() + parseDuration(METRIC_SERIES_MAX_WRITE_DELAY)
+                effectiveTo.getTime() + parseDuration(METRIC_SERIES_MAX_WRITE_DELAY)
               ).toISOString(),
             },
           },

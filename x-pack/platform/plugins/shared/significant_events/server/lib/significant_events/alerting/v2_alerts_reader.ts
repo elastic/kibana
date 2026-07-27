@@ -161,7 +161,10 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     spaceId,
     ruleIds,
   }: ChangePointScanParams) {
-    const { bounds, writeTimeLookback } = buildChangePointHistogramWindow(lookback);
+    const { hardBounds, seriesMax, writeTimeLookback } = buildChangePointHistogramWindow(
+      lookback,
+      bucketInterval
+    );
 
     return {
       runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
@@ -180,7 +183,8 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
           aggs: {
             ...buildChangePointTimeSeriesAggs({
               bucketInterval,
-              bounds,
+              hardBounds,
+              seriesMax,
             }),
           },
         },
