@@ -252,6 +252,49 @@ describe('AlertFlyoutHeader', () => {
     expect(renderCellActions).not.toBe(noopCellActionRenderer);
   });
 
+  it('reports telemetry while an alert document flyout is open in Discover', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    const { unmount } = render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: undefined,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.DISCOVER_TABLE,
+      });
+    });
+
+    unmount();
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      FlyoutV2EventTypes.FlyoutClosed,
+      expect.objectContaining({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: undefined,
+        session: FLYOUT_SESSION_KIND.START,
+        durationMs: expect.any(Number),
+      })
+    );
+  });
+
   it('opens notes in a nested system flyout from Discover header', async () => {
     const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
     const store = createStore(() => ({}));

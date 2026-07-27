@@ -32,7 +32,10 @@ import {
   FLYOUT_TOOL,
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
-import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
+import {
+  trackFlyoutMounted,
+  trackFlyoutOpen,
+} from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export const MISSING_METADATA_CALLOUT = i18n.translate(
   'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
@@ -134,6 +137,19 @@ export const AlertFlyoutHeader = ({
       });
     }
   }, [history, historyKey, hit, services, store]);
+
+  useEffect(() => {
+    if (!services) {
+      return;
+    }
+
+    return trackFlyoutMounted(services.telemetry, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.DISCOVER_TABLE,
+    });
+  }, [hit.id, services]);
 
   useEffect(() => {
     let isCanceled = false;

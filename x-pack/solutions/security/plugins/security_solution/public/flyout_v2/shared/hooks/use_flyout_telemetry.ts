@@ -94,6 +94,20 @@ const reportFlyoutClosed = (
 };
 
 /**
+ * Reports an opened event immediately and returns a callback that reports the matching closed
+ * event. Use this for flyouts whose lifecycle is represented by a React component mount rather
+ * than an `OverlayRef`.
+ */
+export const trackFlyoutMounted = (
+  telemetry: TelemetryServiceStart,
+  meta: FlyoutTelemetryMeta
+): (() => void) => {
+  const openedAt = Date.now();
+  reportFlyoutOpened(telemetry, meta);
+  return () => reportFlyoutClosed(telemetry, meta, Date.now() - openedAt);
+};
+
+/**
  * Reports a matching opened/closed event pair for direct system-flyout callers that cannot use
  * `useOpenFlyout` because they render outside the Security Solution React provider tree.
  */
@@ -102,11 +116,8 @@ export const trackFlyoutOpen = (
   ref: OverlayRef,
   meta: FlyoutTelemetryMeta
 ): void => {
-  const openedAt = Date.now();
-  reportFlyoutOpened(telemetry, meta);
-  ref.onClose
-    .then(() => reportFlyoutClosed(telemetry, meta, Date.now() - openedAt))
-    .catch(() => {});
+  const reportClosed = trackFlyoutMounted(telemetry, meta);
+  ref.onClose.then(reportClosed).catch(() => {});
 };
 
 /**
