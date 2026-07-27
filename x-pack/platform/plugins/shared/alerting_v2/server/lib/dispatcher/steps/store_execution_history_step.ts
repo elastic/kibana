@@ -15,13 +15,18 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyId,
+  DispatchFailure,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   Rule,
   RuleId,
 } from '../types';
-import { ACTION_POLICY_EVENT_ACTIONS, type ActionPolicyEventAction } from './constants';
+import {
+  ACTION_POLICY_EVENT_ACTIONS,
+  type ActionPolicyEventAction,
+  type DispatchFailureReason,
+} from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
 
 const RULE_REF_CAP = 50;
@@ -60,7 +65,20 @@ interface UnmatchedDispatcherFields {
   episode_ids: string[];
 }
 
-type DispatcherFields = PolicySummaryDispatcherFields | UnmatchedDispatcherFields;
+interface DispatchFailureDispatcherFields {
+  failure_reason: DispatchFailureReason;
+  action_group_id: ActionGroupId;
+  workflow_id: string;
+  episode_count: number;
+  episode_ids: string[];
+  rule_count: number;
+  rule_ids?: string[];
+}
+
+type DispatcherFields =
+  | PolicySummaryDispatcherFields
+  | UnmatchedDispatcherFields
+  | DispatchFailureDispatcherFields;
 
 @injectable()
 export class StoreExecutionHistoryStep implements DispatcherStep {
@@ -77,11 +95,17 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       throttled = [],
       dispatchable = [],
       dispatchedExecutions,
+      dispatchFailures = [],
       rules,
       input,
     } = state;
 
-    if (dispatch.length === 0 && throttled.length === 0 && dispatchable.length === 0) {
+    if (
+      dispatch.length === 0 &&
+      throttled.length === 0 &&
+      dispatchable.length === 0 &&
+      dispatchFailures.length === 0
+    ) {
       return { type: 'continue' };
     }
 
@@ -113,6 +137,10 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     );
     for (const [ruleId, episodeIds] of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
+    }
+
+    for (const failure of dispatchFailures) {
+      this.emitDispatchFailure({ timestamp, executionUuid, failure, rules });
     }
 
     return { type: 'continue' };
@@ -192,6 +220,52 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       })
     );
   }
+
+  private emitDispatchFailure({
+    timestamp,
+    executionUuid,
+    failure,
+    rules,
+  }: {
+    timestamp: string;
+    executionUuid: string;
+    failure: DispatchFailure;
+    rules: Map<RuleId, Rule> | undefined;
+  }): void {
+    const ruleIds = Array.from(new Set(failure.episodes.map((episode) => episode.rule_id)));
+    const episodeIds = Array.from(new Set(failure.episodes.map((episode) => episode.episode_id)));
+    const capped = ruleIds.slice(0, RULE_REF_CAP);
+    const spillOver = ruleIds.slice(RULE_REF_CAP);
+
+    const refs: SavedObjectRef[] = [
+      policyRef({ id: failure.policyId, spaceId: failure.spaceId }),
+      ...capped.map((id) => {
+        const rule = rules?.get(id);
+        return ruleRef({ id, spaceId: rule?.spaceId ?? failure.spaceId });
+      }),
+    ];
+
+    this.eventLogService.logEvent(
+      buildEvent({
+        timestamp,
+        executionUuid,
+        action: ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
+        outcome: 'failure',
+        error: failure.message,
+        spaceId: failure.spaceId,
+        savedObjects: refs,
+        dispatcherFields: {
+          failure_reason: failure.reason,
+          action_group_id: failure.actionGroupId,
+          workflow_id: failure.workflowId,
+          episode_count: episodeIds.length,
+          episode_ids: episodeIds,
+          rule_count: ruleIds.length,
+          rule_ids: spillOver.length > 0 ? spillOver : undefined,
+        },
+      })
+    );
+  }
 }
 
 function aggregateByPolicy(
@@ -266,6 +340,8 @@ function buildEvent({
   timestamp,
   executionUuid,
   action,
+  outcome = 'success',
+  error,
   spaceId,
   savedObjects,
   dispatcherFields,
@@ -273,13 +349,16 @@ function buildEvent({
   timestamp: string;
   executionUuid: string;
   action: ActionPolicyEventAction;
+  outcome?: 'success' | 'failure';
+  error?: string;
   spaceId: string;
   savedObjects: SavedObjectRef[];
   dispatcherFields: DispatcherFields;
 }): IEvent {
   return {
     '@timestamp': timestamp,
-    event: { action, outcome: 'success' },
+    event: { action, outcome },
+    ...(error ? { error: { message: error } } : {}),
     kibana: {
       saved_objects: savedObjects,
       space_ids: [spaceId],

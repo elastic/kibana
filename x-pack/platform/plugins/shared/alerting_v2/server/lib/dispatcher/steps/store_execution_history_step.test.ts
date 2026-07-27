@@ -16,8 +16,9 @@ import {
   createDispatcherPipelineState,
   createRule,
 } from '../fixtures/test_utils';
-import type { ActionPolicy, ActionPolicyId, Rule, RuleId } from '../types';
+import type { ActionPolicy, ActionPolicyId, DispatchFailure, Rule, RuleId } from '../types';
 import { StoreExecutionHistoryStep } from './store_execution_history_step';
+import { DISPATCH_FAILURE_REASONS } from './constants';
 
 describe('StoreExecutionHistoryStep', () => {
   let eventLogger: ReturnType<typeof eventLoggerMock.create>;
@@ -275,6 +276,139 @@ describe('StoreExecutionHistoryStep', () => {
 
     expect(result).toEqual({ type: 'continue' });
     expect(eventLogger.logEvent).not.toHaveBeenCalled();
+  });
+
+  it('emits a dispatch_failed event for a failed action-group → workflow attempt', async () => {
+    const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
+    const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'default',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      episodes: [
+        createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-1' }),
+        createAlertEpisode({ rule_id: 'rule-b', episode_id: 'ep-2' }),
+      ],
+      reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
+      message: 'Workflow wf-a is disabled, enable it to dispatch for group group-1',
+    };
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatchFailures: [failure],
+        rules: new Map<RuleId, Rule>([
+          [ruleA.id, ruleA],
+          [ruleB.id, ruleB],
+        ]),
+      })
+    );
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.event?.action).toBe('dispatch_failed');
+    expect(event?.event?.outcome).toBe('failure');
+    expect(event?.error?.message).toBe(
+      'Workflow wf-a is disabled, enable it to dispatch for group group-1'
+    );
+    expect(event?.kibana?.saved_objects).toEqual([
+      {
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        id: 'policy-1',
+        rel: 'primary',
+        namespace: undefined,
+      },
+      {
+        type: RULE_SAVED_OBJECT_TYPE,
+        type_id: 'alert',
+        id: 'rule-a',
+        rel: 'primary',
+        namespace: undefined,
+      },
+      {
+        type: RULE_SAVED_OBJECT_TYPE,
+        type_id: 'alert',
+        id: 'rule-b',
+        rel: 'primary',
+        namespace: undefined,
+      },
+    ]);
+    expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
+      failure_reason: 'workflow_disabled',
+      action_group_id: 'group-1',
+      workflow_id: 'wf-a',
+      episode_count: 2,
+      episode_ids: ['ep-1', 'ep-2'],
+      rule_count: 2,
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
+    });
+  });
+
+  it('emits dispatch_failed events even when nothing else was recorded', async () => {
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'default',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      episodes: [createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' })],
+      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      message: 'boom',
+    };
+
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }));
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatch_failed');
+  });
+
+  it('sets namespace and space_ids on dispatch_failed events for non-default spaces', async () => {
+    const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'my-space',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      episodes: [createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' })],
+      reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
+      message: 'not found',
+    };
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatchFailures: [failure],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+      })
+    );
+
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.kibana?.space_ids).toEqual(['my-space']);
+    expect(event?.kibana?.saved_objects?.[0]?.namespace).toBe('my-space');
+    expect(event?.kibana?.saved_objects?.[1]?.namespace).toBe('my-space');
+  });
+
+  it('spills failure rule ids beyond the SO-ref cap into dispatcher.rule_ids', async () => {
+    const ruleIds = Array.from({ length: 55 }, (_, i) => `rule-${i}`);
+    const rules = new Map<RuleId, Rule>(
+      ruleIds.map((id) => [id, createRule({ id, spaceId: 'default' })])
+    );
+    const failure: DispatchFailure = {
+      policyId: 'policy-1',
+      spaceId: 'default',
+      actionGroupId: 'group-1',
+      workflowId: 'wf-a',
+      episodes: ruleIds.map((rule_id, i) => createAlertEpisode({ rule_id, episode_id: `ep-${i}` })),
+      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      message: 'boom',
+    };
+
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure], rules }));
+
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    const refs = event?.kibana?.saved_objects ?? [];
+    const ruleRefs = refs.filter((ref) => ref?.type === RULE_SAVED_OBJECT_TYPE);
+    expect(ruleRefs).toHaveLength(50);
+    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_count).toBe(55);
+    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toHaveLength(5);
   });
 
   it('sets namespace and space_ids for non-default spaces', async () => {
