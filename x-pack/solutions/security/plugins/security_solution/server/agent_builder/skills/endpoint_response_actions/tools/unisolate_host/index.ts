@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -39,12 +39,13 @@ const unisolateHostSchema = z.object({
 
 export const unisolateHostTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinToolDefinition<typeof unisolateHostSchema> => {
   return {
     id: UNISOLATE_TOOL_ID,
     type: ToolType.builtin,
     description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
+    tags: ['security', 'endpoint', 'response-actions'],
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch.
     confirmation: {

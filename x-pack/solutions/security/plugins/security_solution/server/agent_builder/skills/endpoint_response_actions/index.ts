@@ -8,16 +8,6 @@
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import {
-  isolateHostTool,
-  unisolateHostTool,
-  getEndpointStatusTool,
-  listEndpointsTool,
-  getRunningProcessesTool,
-  scanHostTool,
-  getResponseActionStatusTool,
-} from './tools';
 import { ENDPOINT_RESPONSE_ACTIONS_REFERENCE } from './skill_reference';
 
 const ID = 'endpoint-response-actions';
@@ -80,9 +70,10 @@ get-file, upload, runscript, or memory-dump.
 - Branch on typed tool errors (\`insufficient_privileges\`, \`endpoint_not_found\`,
   \`action_not_found\`, \`unknown_error\`) — details in \`./reference\`.`;
 
-export const createEndpointResponseActionsSkill = (
-  endpointAppContextService: EndpointAppContextService
-): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
+export const createEndpointResponseActionsSkill = (): SkillDefinition<
+  typeof NAME,
+  typeof BASE_PATH
+> => {
   return defineSkillType({
     id: ID,
     name: NAME,
@@ -97,14 +88,19 @@ export const createEndpointResponseActionsSkill = (
         content: ENDPOINT_RESPONSE_ACTIONS_REFERENCE,
       },
     ],
-    getInlineTools: () => [
-      listEndpointsTool(endpointAppContextService),
-      isolateHostTool(endpointAppContextService),
-      unisolateHostTool(endpointAppContextService),
-      getEndpointStatusTool(endpointAppContextService),
-      getRunningProcessesTool(endpointAppContextService),
-      scanHostTool(endpointAppContextService),
-      getResponseActionStatusTool(endpointAppContextService),
+    // Tools are now registered globally (agentBuilder.tools.register, see
+    // register_tools.ts) so they show up in the Tools Library like every
+    // other built-in tool. getRegistryTools still binds them to this skill
+    // by ID so the agent exposes them whenever the skill is selected —
+    // this replaces the previous getInlineTools() skill-scoped path.
+    getRegistryTools: () => [
+      LIST_ENDPOINTS_TOOL_ID,
+      ISOLATE_TOOL_ID,
+      UNISOLATE_TOOL_ID,
+      GET_ENDPOINT_STATUS_TOOL_ID,
+      RUNNING_PROCESSES_TOOL_ID,
+      SCAN_TOOL_ID,
+      GET_RESPONSE_ACTION_STATUS_TOOL_ID,
     ],
   });
 };

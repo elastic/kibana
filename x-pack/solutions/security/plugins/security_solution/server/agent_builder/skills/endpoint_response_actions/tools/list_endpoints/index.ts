@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -32,13 +32,14 @@ const listEndpointsSchema = z.object({
 
 export const listEndpointsTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinToolDefinition<typeof listEndpointsSchema> => {
   return {
     id: LIST_ENDPOINTS_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state, OS, and last seen time for each endpoint.',
     schema: listEndpointsSchema,
+    tags: ['security', 'endpoint', 'response-actions'],
     handler: async (params, { logger, request, spaceId }) => {
       try {
         // The endpoint metadata list route gates this behind `canReadSecuritySolution`
