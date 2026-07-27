@@ -42,7 +42,12 @@ import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
-import { buildRulesListFilter } from './utils';
+import {
+  ENABLED_FILTER_ID,
+  KIND_FILTER_ID,
+  TAG_FILTER_ID,
+  toRulesQueryParams,
+} from './rules_query_params';
 import {
   RuleCreateOptionsPanel,
   getCreateWithAgentTooltipText,
@@ -149,19 +154,20 @@ export const RulesListPage = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
 
-  const filter = useMemo(
+  const { filter, search } = useMemo(
     () =>
-      buildRulesListFilter({
-        enabled: statusFilter,
-        tags: tagsFilter,
-        kind: modeFilter,
+      toRulesQueryParams({
+        search: debouncedSearch || undefined,
+        ...(statusFilter ? { [ENABLED_FILTER_ID]: { include: [statusFilter] } } : {}),
+        ...(modeFilter ? { [KIND_FILTER_ID]: { include: [modeFilter] } } : {}),
+        ...(tagsFilter.length > 0 ? { [TAG_FILTER_ID]: { include: tagsFilter } } : {}),
       }),
-    [statusFilter, tagsFilter, modeFilter]
+    [debouncedSearch, statusFilter, tagsFilter, modeFilter]
   );
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, filter]);
+  }, [search, filter]);
 
   const {
     data: rulesData,
@@ -172,7 +178,7 @@ export const RulesListPage = () => {
     page,
     perPage,
     filter,
-    search: debouncedSearch || undefined,
+    search,
     sortField,
     sortOrder: sortDirection,
   });
@@ -338,7 +344,7 @@ export const RulesListPage = () => {
             totalItemCount={rulesData?.total ?? 0}
             page={page}
             perPage={perPage}
-            search={debouncedSearch}
+            search={search ?? ''}
             filter={filter}
             hasActiveFilters={hasActiveFilters}
             sortField={SORT_FIELD_TO_TABLE_FIELD[sortField]}
