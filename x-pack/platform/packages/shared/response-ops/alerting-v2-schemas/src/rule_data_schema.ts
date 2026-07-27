@@ -539,7 +539,6 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strict()
   .check((ctx) => {

@@ -15,8 +15,10 @@ interface StopAndRemoveV1Params {
   type: EntityType;
   namespace: string;
   logger: Logger;
+  // Must be the internal/system ES client. V1 cleanup performs privileged transform, enrich, and
+  // index/template/pipeline admin plus a raw `.kibana` delete — legacy migration work the user
+  // enabling the entity store is not (and should not be) required to be authorized for.
   esClient: ElasticsearchClient;
-  internalEsClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -49,7 +51,6 @@ export async function stopAndRemoveV1({
   namespace,
   logger,
   esClient,
-  internalEsClient,
   taskManager,
   savedObjectsClient,
 }: StopAndRemoveV1Params) {
@@ -61,7 +62,6 @@ export async function stopAndRemoveV1({
         namespace,
         logger,
         esClient,
-        internalEsClient,
         taskManager,
         savedObjectsClient,
       });
@@ -83,7 +83,6 @@ async function stopAndRemoveV1Once({
   namespace,
   logger,
   esClient,
-  internalEsClient,
   taskManager,
   savedObjectsClient,
 }: StopAndRemoveV1Params) {
@@ -157,7 +156,7 @@ async function stopAndRemoveV1Once({
     tryAsBoolean(esClient.indices.delete({ index: resetIndex }, { ignore: [404] })),
     tryAsBoolean(esClient.indices.deleteDataStream({ name: updatesDataStream }, { ignore: [404] })),
     tryAsBoolean(
-      internalEsClient.delete(
+      esClient.delete(
         { index: '.kibana', id: getV1EntityDefinitionSoDocId(definitionId) },
         { ignore: [404] }
       )
