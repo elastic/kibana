@@ -24,17 +24,14 @@ interface EsErrorBody {
 }
 
 export interface EsErrorLogDetails {
-  /** Human-readable summary suitable for the log message body. */
   message: string;
-  /** Structured ECS-shaped metadata so failures remain queryable in logs. */
   meta: LogMeta;
 }
 
 /**
- * Normalizes a thrown value into a readable summary plus structured ECS
- * `error.*` metadata. For Elasticsearch `ResponseError`s it surfaces the
- * underlying error `type` and `reason` (preferring the deepest `root_cause`),
- * which a plain `String(error)` swallows.
+ * Normalizes a thrown value into a log message plus ECS `error.*` metadata,
+ * surfacing the `type`/`reason` that a plain `String(error)` swallows for
+ * Elasticsearch `ResponseError`s.
  */
 export const getEsErrorLogDetails = (error: unknown): EsErrorLogDetails => {
   if (error instanceof EsErrors.ResponseError) {

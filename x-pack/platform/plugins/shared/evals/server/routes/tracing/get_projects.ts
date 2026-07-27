@@ -60,9 +60,6 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             });
           }
 
-          // Query that isolates evaluation root spans. Shared between the paging
-          // pass and the per-page trace-id pass so both operate on the exact
-          // same set of documents.
           const buildRootSpanQuery = (additionalFilters: Array<Record<string, unknown>> = []) => ({
             bool: {
               must_not: [
@@ -79,10 +76,8 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             },
           });
 
-          // Pass 1: page over candidate projects with cheap per-project metrics.
-          // The `trace_ids` sub-agg is omitted here on purpose - nesting it under
-          // the `size: 1000` terms agg scales buckets as `project_count ×
-          // maxTraceIdsPerProject` and trips `search.max_buckets`.
+          // `trace_ids` is intentionally not a sub-agg here: nesting it under this
+          // terms agg scales buckets by project count and trips `search.max_buckets`.
           const pagingResponse = await esClient.search({
             index: TRACES_INDEX_PATTERN,
             size: 0,
@@ -135,8 +130,6 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const pagedBuckets = allBuckets.slice(startIndex, startIndex + perPage);
           const pagedProjectNames = pagedBuckets.map((bucket) => bucket.key as string);
 
-          // Pass 2: collect root-span trace ids for the current page only. Scoping
-          // to `pagedProjectNames` bounds buckets by `perPage`, not project count.
           const traceIdToProject: Record<string, string> = {};
           if (pagedProjectNames.length > 0) {
             const traceIdsResponse = await esClient.search({

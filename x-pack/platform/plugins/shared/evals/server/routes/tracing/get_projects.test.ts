@@ -43,8 +43,6 @@ const buildProjectBucket = ({
   error_count: { doc_count: errorDocCount, distinct_traces: { value: distinctErrorTraces } },
 });
 
-// Models the pass-2 aggregation response that maps each paged project to its
-// root-span trace ids.
 const buildTraceIdsResponse = (projectTraceIds: Array<{ name: string; traceIds: string[] }>) => ({
   aggregations: {
     projects: {
@@ -338,11 +336,7 @@ describe('GET /internal/evals/tracing/projects', () => {
     await handler(context, makeRequest(), kibanaResponseFactory);
 
     const pagingCall = esClient.search.mock.calls[0][0] as any;
-    // The paging pass still enumerates candidate projects...
     expect(pagingCall.aggs.projects.terms.size).toBe(1000);
-    // ...but must NOT carry the per-project trace_ids terms agg, otherwise the
-    // total bucket count scales as project_count × maxTraceIdsPerProject and
-    // trips search.max_buckets on real data.
     expect(pagingCall.aggs.projects.aggs.trace_ids).toBeUndefined();
   });
 
@@ -364,26 +358,20 @@ describe('GET /internal/evals/tracing/projects', () => {
     expect(esClient.search).toHaveBeenCalledTimes(2);
     const traceIdsCall = esClient.search.mock.calls[1][0] as any;
 
-    // Only the 10 paged project names are used to scope the trace_ids pass.
     const nameFilter = traceIdsCall.query.bool.filter.find(
-      (f: Record<string, any>) => f.terms && f.terms.name
+      (f: Record<string, unknown>) => (f.terms as Record<string, unknown>)?.name !== undefined
     );
     expect(nameFilter.terms.name).toEqual(
       Array.from({ length: 10 }, (_, i) => `project-${i + 10}`)
     );
 
-    // The expensive trace_ids terms agg now lives here, sized per-page: with
-    // per_page=10, maxTraceIdsPerProject = floor(60000 / 10) = 6000, and the
-    // project terms agg is bounded by the page size (10).
     expect(traceIdsCall.aggs.projects.terms.size).toBe(10);
     expect(traceIdsCall.aggs.projects.aggs.trace_ids.terms.field).toBe('trace_id');
-    expect(traceIdsCall.aggs.projects.aggs.trace_ids.terms.size).toBe(6000);
+    expect(traceIdsCall.aggs.projects.aggs.trace_ids.terms.size).toBe(Math.floor(60_000 / 10));
   });
 
   it('succeeds with a large number of distinct projects (bucket count bounded by per_page)', async () => {
     const { handler, context, esClient } = setup();
-    // Far more distinct projects than the 28 that would trip search.max_buckets
-    // under the old single-pass aggregation.
     const buckets = Array.from({ length: 200 }, (_, i) =>
       buildProjectBucket({ name: `project-${i}` })
     );
@@ -510,11 +498,8 @@ describe('GET /internal/evals/tracing/projects', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(500);
-    // Client-visible response stays generic to avoid leaking internal detail...
     expect(response.payload).toEqual({ message: 'Failed to get tracing projects' });
 
-    // ...but the server log surfaces the real root cause plus structured ECS
-    // metadata so failures like this are diagnosable.
     const [logMessage, logMeta] = (logger.error as jest.Mock).mock.calls[0];
     expect(logMessage).toContain('too_many_buckets_exception');
     expect(logMeta).toEqual(
