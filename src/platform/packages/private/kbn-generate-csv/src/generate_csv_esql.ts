@@ -16,7 +16,7 @@ import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/da
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
 import {
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   appendLimitToQuery,
   getNamedParams,
   fixESQLQueryWithVariables,
@@ -87,15 +87,8 @@ export class CsvESQLGenerator {
     // Rewrite identifier-type (FIELDS/FUNCTIONS) variables (e.g. ?var → ??var) for ES compatibility
     const esqlQuery = fixESQLQueryWithVariables(this.job.query.esql, this.job.esqlVariables);
 
-    const timeFieldName = getTimeFieldFromESQLQuery(esqlQuery);
-    let timeRange;
-    if (timeFieldName && this.job.filters) {
-      ({ timeRange } = extractTimeRange(this.job.filters, timeFieldName));
-    }
-
-    // Builds _tstart/_tend params (from time range) and user-defined variable params
-    const params = getNamedParams(esqlQuery, timeRange, this.job.esqlVariables);
-
+    // Override filters with forceNow first so that _tstart/_tend named params are built
+    // from the already-resolved (forceNow-anchored) time range rather than wall-clock "now".
     let currentFilters = this.job.filters;
     if (this.job.forceNow) {
       this.logger.debug(`Overriding time range filter using forceNow: ${this.job.forceNow}`, {
@@ -109,6 +102,7 @@ export class CsvESQLGenerator {
         forceNow: this.job.forceNow,
         logger: this.logger,
         timeFieldName: this.job.timeFieldName,
+        timezone,
       });
       this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
         tags: [this.jobId],
@@ -117,6 +111,15 @@ export class CsvESQLGenerator {
         currentFilters = updatedFilters;
       }
     }
+
+    // Builds _tstart/_tend params (from the potentially forceNow-updated time range) and
+    // user-defined variable params
+    const timeFieldName = parseTimeFieldFromESQLQuery(esqlQuery);
+    let timeRange;
+    if (timeFieldName && currentFilters) {
+      ({ timeRange } = extractTimeRange(currentFilters, timeFieldName));
+    }
+    const params = getNamedParams(esqlQuery, timeRange, this.job.esqlVariables);
 
     const filter =
       currentFilters &&

@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/279883
+issues:
+- https://github.com/elastic/kibana/issues/279845
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Fix missing time range in dashboard user activity logs
+description: User activity logs now record the dashboard time range when `timeRestore`
+  is disabled, instead of logging null values.

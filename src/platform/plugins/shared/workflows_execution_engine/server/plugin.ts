@@ -213,11 +213,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
           }
-          const taskAbortController = createWorkflowTaskAbortController(abortController);
+          const taskAbortController = createWorkflowTaskAbortController(signal);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -290,7 +290,7 @@ export class WorkflowsExecutionEnginePlugin
                   stepExecutionRepository,
                   workflowRunId,
                   spaceId,
-                  taskAbortController,
+                  signal: taskAbortController.signal,
                   config,
                   logger,
                   fakeRequest,
@@ -336,11 +336,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
           }
-          const taskAbortController = createWorkflowTaskAbortController(abortController);
+          const taskAbortController = createWorkflowTaskAbortController(signal);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -418,7 +418,7 @@ export class WorkflowsExecutionEnginePlugin
                   stepExecutionRepository,
                   workflowRunId,
                   spaceId,
-                  taskAbortController,
+                  signal: taskAbortController.signal,
                   config,
                   logger,
                   fakeRequest,
@@ -467,11 +467,11 @@ export class WorkflowsExecutionEnginePlugin
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a scheduled workflow without Kibana Request');
           }
-          const taskAbortController = createWorkflowTaskAbortController(abortController);
+          const taskAbortController = createWorkflowTaskAbortController(signal);
           return {
             run: async () => {
               const { workflowId, spaceId } = taskInstance.params as {
@@ -665,7 +665,7 @@ export class WorkflowsExecutionEnginePlugin
                 stepExecutionRepository,
                 workflowRunId: workflowExecution.id,
                 spaceId: workflowExecution.spaceId,
-                taskAbortController,
+                signal: taskAbortController.signal,
                 logger,
                 config,
                 fakeRequest,
@@ -914,7 +914,7 @@ export class WorkflowsExecutionEnginePlugin
           stepExecutionRepository,
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
-          taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
+          signal: new AbortController().signal, // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
           config: this.config,
           fakeRequest: request,
