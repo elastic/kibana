@@ -8,7 +8,9 @@ from pathlib import Path
 
 from session_resources import (
     ccs_cleanup_blocked,
+    ccs_operation_lock,
     edit_session_config,
+    release_ccs_deployment_lease,
     session_operation_lock,
 )
 
@@ -46,6 +48,7 @@ def main() -> int:
                 str(SCRIPT_DIR / "restore-remote-cluster.py"),
                 "--session-dir",
                 str(session_dir),
+                "--keep-lease",
             ],
             check=False,
         )
@@ -77,10 +80,22 @@ def main() -> int:
             if args.dry_run:
                 cleanup_args.append("--dry-run")
             cleanup_result = subprocess.run(cleanup_args, check=False)
-            return cleanup_result.returncode
     except (OSError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
+
+    if cleanup_result.returncode != 0:
+        return cleanup_result.returncode
+
+    try:
+        with ccs_operation_lock(config_path):
+            with edit_session_config(config_path, persist=False) as config:
+                release_ccs_deployment_lease(config)
+    except (OSError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":

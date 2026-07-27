@@ -12,6 +12,7 @@ import re
 import secrets
 import subprocess
 import tempfile
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator, Mapping
@@ -19,6 +20,8 @@ from typing import Any, Iterator, Mapping
 DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS = 10.0
 DEFAULT_CURL_MAX_TIME_SECONDS = 30.0
 CCS_LOCK_DIR_ENV = "EXPLORATORY_TESTER_CCS_LOCK_DIR"
+CURL_CONNECT_TIMEOUT_ENV = "EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT"
+CURL_MAX_TIME_ENV = "EXPLORATORY_TESTER_CURL_MAX_TIME"
 
 
 SESSION_ID_PATTERN = re.compile(r"^[a-z0-9]{8,32}$")
@@ -230,30 +233,61 @@ def _response_body(stdout: str) -> str:
     return "\n".join(lines[:-1]) if len(lines) > 1 else ""
 
 
+def _timeout_from_env(
+    *,
+    explicit: float | None,
+    env_name: str,
+    default: float,
+    environment: Mapping[str, str],
+) -> float:
+    if explicit is not None:
+        return explicit
+    raw = environment.get(env_name)
+    if raw is None or raw == "":
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise ValueError(f"{env_name} must be a positive number") from exc
+
+
 def run_curl(
     curl_args: list[str],
     *,
-    connect_timeout_seconds: float = DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS,
-    max_time_seconds: float = DEFAULT_CURL_MAX_TIME_SECONDS,
+    connect_timeout_seconds: float | None = None,
+    max_time_seconds: float | None = None,
     env: Mapping[str, str] | None = None,
 ) -> tuple[str, str]:
-    if connect_timeout_seconds <= 0 or max_time_seconds <= 0:
+    environment = env if env is not None else os.environ
+    resolved_connect = _timeout_from_env(
+        explicit=connect_timeout_seconds,
+        env_name=CURL_CONNECT_TIMEOUT_ENV,
+        default=DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS,
+        environment=environment,
+    )
+    resolved_max_time = _timeout_from_env(
+        explicit=max_time_seconds,
+        env_name=CURL_MAX_TIME_ENV,
+        default=DEFAULT_CURL_MAX_TIME_SECONDS,
+        environment=environment,
+    )
+    if resolved_connect <= 0 or resolved_max_time <= 0:
         raise ValueError("curl timeouts must be positive")
     if not curl_args:
         raise ValueError("curl args must not be empty")
 
     timeout_flags = [
         "--connect-timeout",
-        f"{connect_timeout_seconds:g}",
+        f"{resolved_connect:g}",
         "--max-time",
-        f"{max_time_seconds:g}",
+        f"{resolved_max_time:g}",
     ]
     if curl_args[0] == "curl":
         args = ["curl", *timeout_flags, *curl_args[1:]]
     else:
         args = ["curl", *timeout_flags, *curl_args]
 
-    subprocess_timeout = max_time_seconds + 1.0
+    subprocess_timeout = resolved_max_time + 1.0
     try:
         result = subprocess.run(
             args,
@@ -265,7 +299,7 @@ def run_curl(
         )
     except subprocess.TimeoutExpired as exc:
         raise TimeoutError(
-            f"curl exceeded max_time_seconds={max_time_seconds:g}"
+            f"curl exceeded max_time_seconds={resolved_max_time:g}"
         ) from exc
     return http_status(result.stdout), _response_body(result.stdout)
 
@@ -319,6 +353,105 @@ def ccs_operation_lock(config_path: Path) -> Iterator[None]:
     with ccs_deployment_lock(deployment_config):
         with session_operation_lock(config_path, "ccs-restore"):
             yield
+
+
+def ccs_deployment_lease_path(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> Path:
+    return ccs_deployment_lock_path(config, env=env).with_suffix(".lease")
+
+
+def read_ccs_deployment_lease(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> dict[str, Any] | None:
+    lease_path = ccs_deployment_lease_path(config, env=env)
+    if not lease_path.exists():
+        return None
+    try:
+        payload = json.loads(lease_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError("CCS deployment lease is malformed") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("session_id"), str):
+        raise ValueError("CCS deployment lease is malformed")
+    validate_session_id(payload["session_id"])
+    return payload
+
+
+def acquire_ccs_deployment_lease(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> None:
+    session_id = require_session_id(config)
+    existing = read_ccs_deployment_lease(config, env=env)
+    if existing is not None:
+        owner = existing["session_id"]
+        if owner != session_id:
+            raise ValueError(
+                f"CCS deployment lease is held by session {owner!r}"
+            )
+        return
+
+    lease_path = ccs_deployment_lease_path(config, env=env)
+    payload = {
+        "session_id": session_id,
+        "acquired_at": time.time(),
+    }
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=lease_path.parent,
+            prefix=f".{lease_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as lease_file:
+            temporary_path = Path(lease_file.name)
+            json.dump(payload, lease_file)
+            lease_file.write("\n")
+            lease_file.flush()
+            os.fsync(lease_file.fileno())
+        os.replace(temporary_path, lease_path)
+        temporary_path = None
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
+def assert_ccs_deployment_lease_allows_session(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> None:
+    session_id = require_session_id(config)
+    existing = read_ccs_deployment_lease(config, env=env)
+    if existing is None:
+        return
+    owner = existing["session_id"]
+    if owner != session_id:
+        raise ValueError(f"CCS deployment lease is held by session {owner!r}")
+
+
+def release_ccs_deployment_lease(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> None:
+    session_id = require_session_id(config)
+    existing = read_ccs_deployment_lease(config, env=env)
+    if existing is None:
+        return
+    owner = existing["session_id"]
+    if owner != session_id:
+        raise ValueError(
+            f"Cannot release CCS deployment lease held by session {owner!r}"
+        )
+    ccs_deployment_lease_path(config, env=env).unlink(missing_ok=True)
 
 
 def resource_state(resource: dict[str, Any]) -> str:

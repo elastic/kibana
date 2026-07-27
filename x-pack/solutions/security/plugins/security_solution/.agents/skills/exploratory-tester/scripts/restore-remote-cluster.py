@@ -11,9 +11,11 @@ from pathlib import Path
 
 from session_resources import (
     DEFAULT_CURL_MAX_TIME_SECONDS,
+    assert_ccs_deployment_lease_allows_session,
     build_auth_args,
     ccs_operation_lock,
     edit_session_config,
+    release_ccs_deployment_lease,
     resolve_resource_base_url,
     run_curl,
     validate_resource_endpoint,
@@ -36,6 +38,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--session-dir", required=True)
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
     parser.add_argument("--poll-interval-seconds", type=float, default=2.0)
+    parser.add_argument(
+        "--keep-lease",
+        action="store_true",
+        help=(
+            "Keep the deployment CCS lease after a successful restore so a "
+            "caller can release it after follow-up cleanup."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -391,6 +401,7 @@ def main() -> int:
     try:
         with ccs_operation_lock(config_path):
             with edit_session_config(config_path, persist=False) as config:
+                assert_ccs_deployment_lease_allows_session(config)
                 restore_snapshot = copy.deepcopy(config.get("ccs_restore"))
                 endpoint, alias, payload, provenance, settings = _validate_snapshot(
                     restore_snapshot
@@ -475,8 +486,11 @@ def main() -> int:
                         file=sys.stderr,
                     )
                     return 1
+                assert_ccs_deployment_lease_allows_session(config)
                 config["ccs_state"] = "restored"
                 config["ccs_restored"] = True
+                if not args.keep_lease:
+                    release_ccs_deployment_lease(config)
     except TimeoutError as exc:
         print(str(exc), file=sys.stderr)
         return 1

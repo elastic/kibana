@@ -46,6 +46,10 @@ else
   AUTH_HEADER="Authorization: Basic $(echo -n "$USERNAME:$PASSWORD" | base64)"
 fi
 
+CURL_CONNECT_TIMEOUT="${EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT:-10}"
+CURL_MAX_TIME="${EXPLORATORY_TESTER_CURL_MAX_TIME:-30}"
+CURL_TIMEOUT_ARGS=(--connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIME")
+
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 SCRIPT_DIR=""
@@ -119,7 +123,7 @@ PY
         --pending
     fi
   fi
-  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+  RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
     -H "$AUTH_HEADER" \
     -X PUT "$ES_URL/$INDEX" \
     -H 'Content-Type: application/json' \
@@ -153,7 +157,7 @@ PY
     break
   elif [[ "$RESPONSE" == "400" ]]; then
     # Could be "already exists" (fine) or data stream conflict (retry with fallback name)
-    BODY=$(curl -s -H "$AUTH_HEADER" -X GET "$ES_URL/$INDEX" 2>/dev/null || true)
+    BODY=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -H "$AUTH_HEADER" -X GET "$ES_URL/$INDEX" 2>/dev/null || true)
     if echo "$BODY" | grep -q '"mappings"'; then
       echo "Index already exists — reusing."
       INDEX_READY=true
@@ -226,7 +230,7 @@ if [[ "$INDEX_READY" != true ]]; then
 fi
 
 echo "Indexing noise documents into $INDEX ..."
-BULK_RESPONSE=$(curl -s -w "\n%{http_code}" \
+BULK_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w "\n%{http_code}" \
   -H "$AUTH_HEADER" \
   -X POST "$ES_URL/$INDEX/_bulk" \
   -H 'Content-Type: application/json' \

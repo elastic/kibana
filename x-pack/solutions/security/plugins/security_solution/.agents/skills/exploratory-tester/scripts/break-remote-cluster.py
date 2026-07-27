@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from session_resources import (
+    acquire_ccs_deployment_lease,
     build_auth_args,
     ccs_operation_lock,
     edit_session_config,
@@ -153,6 +154,7 @@ def main() -> int:
                 for header in request_headers:
                     header_args.extend(["-H", header])
 
+                acquire_ccs_deployment_lease(config)
                 config["ccs_state"] = "mutation_pending"
                 config["ccs_restored"] = False
 

@@ -60,12 +60,14 @@ TRANSIENT_CCS_SETTINGS = {
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_resources import (  # noqa: E402
+    acquire_ccs_deployment_lease,
     build_auth_args,
     ccs_cleanup_blocked,
     ccs_deployment_lock_path,
     cleanup_candidates,
     ensure_session_manifest,
     namespaced_flow_space_id,
+    read_ccs_deployment_lease,
     reconcile_pending_resource,
     register_resource,
     run_curl,
@@ -1024,6 +1026,377 @@ print("200")
                 timeout=5,
             )
             self.assertEqual(retry.returncode, 0, retry.stderr)
+
+    def test_ccs_break_lease_blocks_foreign_capture_until_restore(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            session_a = root / "sessiona"
+            session_b = root / "sessionb"
+            for session_dir, session_id in (
+                (session_a, "sessiona1"),
+                (session_b, "sessionb1"),
+            ):
+                session_dir.mkdir()
+                (session_dir / "config.json").write_text(
+                    json.dumps(
+                        {
+                            "session_id": session_id,
+                            "environment": {
+                                "url": "https://source.kibana.test",
+                                "es_url": "https://shared.es.test",
+                                "ccs": {"remote_cluster_alias": "remote"},
+                            },
+                            "credentials": {"api_key": "source-key"},
+                            "ccs_state": "captured",
+                            "ccs_restore": {
+                                "remote_cluster_alias": "remote",
+                                "endpoint": "/api/remote_clusters/remote",
+                                "payload": {
+                                    "skipUnavailable": False,
+                                    "mode": "proxy",
+                                    "seeds": None,
+                                    "nodeConnections": None,
+                                    "proxyAddress": "remote.example.test:9400",
+                                    "proxySocketConnections": 3,
+                                    "serverName": None,
+                                },
+                                "provenance": {
+                                    "is_configured_by_node": False,
+                                    "has_deprecated_proxy_setting": False,
+                                    "configuration_layer": "persistent",
+                                    "settings": PERSISTENT_CCS_SETTINGS,
+                                },
+                            },
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+if "PUT" in sys.argv:
+    print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": "remote.example.test:9400",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+elif "_remote/info" in " ".join(sys.argv):
+    print(json.dumps({"remote": {"connected": True}}))
+else:
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": "remote.example.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": False,
+        "isConfiguredByNode": False,
+    }]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+
+            break_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(BREAK_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_a),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(break_result.returncode, 0, break_result.stderr)
+            lease = read_ccs_deployment_lease(
+                {
+                    "session_id": "sessiona1",
+                    "environment": {"es_url": "https://shared.es.test"},
+                },
+                env=environment,
+            )
+            self.assertIsNotNone(lease)
+            self.assertEqual(lease["session_id"], "sessiona1")
+
+            capture_b = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_b),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertNotEqual(capture_b.returncode, 0, capture_b.stdout)
+            self.assertIn("lease", capture_b.stderr.lower())
+            self.assertIn("sessiona1", capture_b.stderr)
+
+            restore_a = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_a),
+                    "--timeout-seconds",
+                    "5",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(restore_a.returncode, 0, restore_a.stderr)
+            self.assertIsNone(
+                read_ccs_deployment_lease(
+                    {
+                        "session_id": "sessiona1",
+                        "environment": {"es_url": "https://shared.es.test"},
+                    },
+                    env=environment,
+                )
+            )
+
+            capture_b_retry = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_b),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(capture_b_retry.returncode, 0, capture_b_retry.stderr)
+
+    def test_restore_keep_lease_and_cleanup_wrapper_release(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config = {
+                "session_id": "abc12345",
+                "environment": {
+                    "url": "https://source.kibana.test",
+                    "es_url": "https://source.es.test",
+                    "ccs": {"remote_cluster_alias": "remote"},
+                },
+                "credentials": {"api_key": "source-key"},
+                "ccs_state": "modified",
+                "session_resources": [],
+                "ccs_restore": {
+                    "remote_cluster_alias": "remote",
+                    "endpoint": "/api/remote_clusters/remote",
+                    "payload": {
+                        "skipUnavailable": False,
+                        "mode": "proxy",
+                        "seeds": None,
+                        "nodeConnections": None,
+                        "proxyAddress": "remote.example.test:9400",
+                        "proxySocketConnections": 3,
+                        "serverName": None,
+                    },
+                    "provenance": {
+                        "is_configured_by_node": False,
+                        "has_deprecated_proxy_setting": False,
+                        "configuration_layer": "persistent",
+                        "settings": PERSISTENT_CCS_SETTINGS,
+                    },
+                },
+            }
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            environment = os.environ.copy()
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+            acquire_ccs_deployment_lease(config, env=environment)
+
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+if "PUT" in sys.argv:
+    print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": "remote.example.test:9400",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+elif "_remote/info" in " ".join(sys.argv):
+    print(json.dumps({"remote": {"connected": True}}))
+else:
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": "remote.example.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": False,
+        "isConfiguredByNode": False,
+    }]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            keep_lease = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--keep-lease",
+                    "--timeout-seconds",
+                    "5",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(keep_lease.returncode, 0, keep_lease.stderr)
+            self.assertEqual(
+                json.loads(config_path.read_text(encoding="utf-8"))["ccs_state"],
+                "restored",
+            )
+            self.assertIsNotNone(read_ccs_deployment_lease(config, env=environment))
+
+            # Reset to modified so the wrapper must restore again with --keep-lease.
+            refreshed = json.loads(config_path.read_text(encoding="utf-8"))
+            refreshed["ccs_state"] = "modified"
+            refreshed["ccs_restored"] = False
+            config_path.write_text(json.dumps(refreshed), encoding="utf-8")
+            acquire_ccs_deployment_lease(refreshed, env=environment)
+
+            wrapper = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(wrapper.returncode, 0, wrapper.stderr)
+            self.assertIn("--keep-lease", RESTORE_CLEANUP_SCRIPT.read_text(encoding="utf-8"))
+            self.assertIsNone(read_ccs_deployment_lease(config, env=environment))
+            self.assertEqual(
+                json.loads(config_path.read_text(encoding="utf-8"))["ccs_state"],
+                "restored",
+            )
+
+    def test_ensure_base_space_times_out_hung_curl(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://kibana.example.test",
+                            "space_id": "exploratory-testing",
+                        },
+                        "credentials": {"api_key": "test-key"},
+                        "session_resources": [],
+                        "created_flow_spaces": [],
+                        "reused_flow_spaces": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import time
+time.sleep(5)
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["EXPLORATORY_TESTER_CURL_MAX_TIME"] = "0.5"
+            environment["EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT"] = "0.5"
+            started = time.monotonic()
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(BASE_SPACE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+                timeout=8,
+            )
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertLess(time.monotonic() - started, 4)
+            self.assertIn("timed out", (result.stderr or result.stdout).lower())
 
     def test_reconcile_resource_cli_adopts_a_pending_remote_resource(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -2086,6 +2459,9 @@ print("200")
         self.assertIn("break-remote-cluster.py", break_remote)
         self.assertIn("deployment-scoped lock", break_remote)
         self.assertIn("EXPLORATORY_TESTER_CCS_LOCK_DIR", break_remote)
+        self.assertIn("lease", break_remote.lower())
+        self.assertIn("--max-time", noise)
+        self.assertIn("--connect-timeout", noise)
         self.assertIn('ccs_state="mutation_pending"', break_remote)
         self.assertIn("capture-remote-cluster.py", break_remote)
         self.assertIn("restore-remote-cluster.py", break_remote)

@@ -3,7 +3,6 @@
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -11,13 +10,13 @@ from session_resources import (
     build_auth_args,
     edit_session_config,
     ensure_session_manifest,
-    http_status,
     is_owned_resource,
     is_pending_resource,
     namespaced_flow_space_id,
     reconcile_pending_resource,
     register_resource,
     resource_state,
+    run_curl,
     write_session_config,
 )
 
@@ -100,30 +99,28 @@ def main() -> int:
                 }
             )
 
-            result = subprocess.run(
-                [
-                    "curl",
-                    "-s",
-                    "-w",
-                    "\n%{http_code}",
-                    *auth_args,
-                    "-X",
-                    "POST",
-                    f"{url}/api/spaces/space",
-                    "-H",
-                    "kbn-xsrf: true",
-                    "-H",
-                    "Content-Type: application/json",
-                    "-d",
-                    body,
-                ],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-
-            lines = result.stdout.strip().splitlines()
-            http_code = http_status(result.stdout)
+            try:
+                http_code, response_body = run_curl(
+                    [
+                        "curl",
+                        "-s",
+                        "-w",
+                        "\n%{http_code}",
+                        *auth_args,
+                        "-X",
+                        "POST",
+                        f"{url}/api/spaces/space",
+                        "-H",
+                        "kbn-xsrf: true",
+                        "-H",
+                        "Content-Type: application/json",
+                        "-d",
+                        body,
+                    ]
+                )
+            except TimeoutError as exc:
+                http_code = "000"
+                response_body = str(exc)
 
             if http_code == "200":
                 flow["space_id"] = space_id
@@ -156,24 +153,23 @@ def main() -> int:
                 )
             else:
                 if pending_reservation:
-                    probe = subprocess.run(
-                        [
-                            "curl",
-                            "-s",
-                            "-o",
-                            "/dev/null",
-                            "-w",
-                            "\n%{http_code}",
-                            *auth_args,
-                            "-X",
-                            "GET",
-                            f"{url}{endpoint}",
-                        ],
-                        capture_output=True,
-                        text=True,
-                        check=False,
-                    )
-                    probe_status = http_status(probe.stdout)
+                    try:
+                        probe_status, _ = run_curl(
+                            [
+                                "curl",
+                                "-s",
+                                "-o",
+                                "/dev/null",
+                                "-w",
+                                "\n%{http_code}",
+                                *auth_args,
+                                "-X",
+                                "GET",
+                                f"{url}{endpoint}",
+                            ]
+                        )
+                    except TimeoutError:
+                        probe_status = "000"
                     reconciliation = reconcile_pending_resource(
                         config,
                         kind="kibana_space",
@@ -201,7 +197,7 @@ def main() -> int:
                             "space": space_id,
                             "http_code": http_code,
                             "probe_status": probe_status,
-                            "body": lines[0] if lines else "",
+                            "body": response_body,
                         }
                     )
                     print(

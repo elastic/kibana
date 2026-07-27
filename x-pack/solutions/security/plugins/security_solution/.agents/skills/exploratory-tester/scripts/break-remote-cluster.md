@@ -84,6 +84,11 @@ treat a broken shared deployment as urgent.
   `environment.es_url` (override directory with
   `EXPLORATORY_TESTER_CCS_LOCK_DIR`) so concurrent exploratory sessions against
   the same SOURCE cluster cannot mutate CCS at the same time.
+- Break also writes a deployment lease for the current `session_id`. While that
+  lease exists, other sessions cannot capture or break the same SOURCE CCS
+  config (they would otherwise snapshot the already-broken cluster). Restore
+  releases the lease; `restore-and-cleanup-session.py` keeps it across restore
+  and releases it only after cleanup succeeds.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
 - If the session cap fires or the browser dies mid-scenario, run step 6 first
   from the persisted `SESSION_DIR`, then handle the timeout/loss. Restoration
