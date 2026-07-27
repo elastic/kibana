@@ -302,6 +302,7 @@ const actionsColumn: EuiBasicTableColumn<TransactionGroup> = {
 
 export const MaxCountExceeded: StoryFn = () => (
   <TransactionsTable
+    data-test-subj="transactions-table-max-count-exceeded"
     items={items}
     isLoading={false}
     maxCountExceeded={true}
@@ -313,6 +314,7 @@ export const MaxCountExceeded: StoryFn = () => (
 
 export const Default: StoryFn = () => (
   <TransactionsTable
+    data-test-subj="transactions-table-default"
     items={items}
     isLoading={false}
     maxCountExceeded={false}
@@ -322,6 +324,7 @@ export const Default: StoryFn = () => (
 
 export const WithHeaderActions: StoryFn = () => (
   <TransactionsTable
+    data-test-subj="transactions-table-with-header-actions"
     items={items}
     isLoading={false}
     maxCountExceeded={false}
@@ -336,8 +339,30 @@ export const WithHeaderActions: StoryFn = () => (
   />
 );
 
+export const WithError: StoryFn = () => (
+  <EuiPanel style={{ maxWidth: 768 }}>
+    <TransactionsTable
+      data-test-subj="transactions-table-with-error"
+      items={[]}
+      isLoading={false}
+      maxCountExceeded={false}
+      latencyAggregationType={LatencyAggregationType.p95}
+      showSparklines={false}
+      headerActions={[
+        {
+          label: 'Open in APM',
+          href: '#',
+          ebt: { action: 'openInApm', element: 'transactionsTableHeader' },
+        },
+      ]}
+      errorMessage="Failed to load transaction data"
+    />
+  </EuiPanel>
+);
+
 export const Loading: StoryFn = () => (
   <TransactionsTable
+    data-test-subj="transactions-table-loading"
     items={[]}
     isLoading={true}
     maxCountExceeded={false}
@@ -347,6 +372,7 @@ export const Loading: StoryFn = () => (
 
 export const Empty: StoryFn = () => (
   <TransactionsTable
+    data-test-subj="transactions-table-empty"
     items={[]}
     isLoading={false}
     maxCountExceeded={false}
@@ -357,6 +383,7 @@ export const Empty: StoryFn = () => (
 export const Compact: StoryFn = () => (
   <EuiPanel style={{ maxWidth: 768 }}>
     <TransactionsTable
+      data-test-subj="transactions-table-compact"
       items={items}
       isLoading={false}
       maxCountExceeded={false}
@@ -378,6 +405,7 @@ export const Compact: StoryFn = () => (
 
 export const Complete: StoryFn = () => (
   <TransactionsTable
+    data-test-subj="transactions-table-complete"
     items={itemsWithComparison}
     isLoading={false}
     maxCountExceeded={false}

@@ -1,5 +1,9 @@
 {
-  "sha1": "dfb3c830cfc4dae464ff0c796692ffec69d61a51",
+  "sha1": "ae9e85c064d4469458da9371ed2e0156ee9ff561",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -24,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 52,
+        "line": 55,
         "column": 14
       }
     },
@@ -40,7 +44,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 14
       }
     },
@@ -89,6 +93,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
         "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "97e35cdc4d140e2-47e4d3edab4532d",
+      "title": "Attacks page filters filters attacks by type and persists selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 56,
         "column": 14
       }
     },

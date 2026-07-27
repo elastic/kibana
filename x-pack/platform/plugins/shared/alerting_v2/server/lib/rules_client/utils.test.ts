@@ -28,7 +28,7 @@ const baseCreateData: CreateRuleData = {
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 describe('utils', () => {
@@ -166,7 +166,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        evaluation: { query: { base: 'FROM new-index | LIMIT 1' } },
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -182,7 +182,7 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        evaluation: { query: { base: 'FROM new-index | LIMIT 1' } },
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
         metadata: { builder_type: 'threshold' },
       };
 
@@ -213,10 +213,10 @@ describe('utils', () => {
     it('does not auto-clear metadata.builder_type when same query is sent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
       });
       const updateData: UpdateRuleData = {
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {

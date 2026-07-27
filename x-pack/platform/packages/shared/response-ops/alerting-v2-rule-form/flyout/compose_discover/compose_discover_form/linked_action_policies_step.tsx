@@ -20,7 +20,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useWatch } from 'react-hook-form';
-import type { ComposeFormValues } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 
 const actionPoliciesTitle = i18n.translate(
@@ -73,16 +73,6 @@ const SECTION_CONFIG: Array<{
       { defaultMessage: 'Matching this rule' }
     ),
   },
-  {
-    category: 'direct',
-    title: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directTitle', {
-      defaultMessage: 'Linked policies',
-    }),
-    description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directDescription',
-      { defaultMessage: 'Matching this rule only' }
-    ),
-  },
 ];
 
 interface Props {
@@ -91,7 +81,7 @@ interface Props {
 }
 
 export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
-  const metadata = useWatch<ComposeFormValues, 'metadata'>({ name: 'metadata' });
+  const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
   const name = metadata?.name;
   const tags = metadata?.tags;
 

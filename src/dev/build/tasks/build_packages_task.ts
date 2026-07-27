@@ -76,6 +76,9 @@ function excludeDirsByRel(rel: string) {
  */
 function excludeDirsByName(name: string) {
   return (
+    name === '.agents' ||
+    name === '.claude' ||
+    name === '.opencode' ||
     name === '__fixtures__' ||
     name === '__jest__' ||
     name === '__mocks__' ||

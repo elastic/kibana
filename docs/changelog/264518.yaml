@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/264518
+issues:
+- https://github.com/elastic/kibana/issues/262246
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: Preserve table state during auto-refresh with grouping

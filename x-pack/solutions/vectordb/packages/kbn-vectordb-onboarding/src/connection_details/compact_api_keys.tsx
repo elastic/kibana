@@ -18,14 +18,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 
-export const CompactApiKeys = () => {
+interface CompactApiKeysProps {
+  telemetryPage: string;
+}
+
+export const CompactApiKeys = ({ telemetryPage }: CompactApiKeysProps) => {
+  const telemetryPrefix = `vectordbOnboarding-${telemetryPage}`;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiShowFor sizes={['xl']}>
         <EuiFlexItem>
           <EuiButton
             data-test-subj="vectordbConnectToProjectApiKeysButton"
-            data-telemetry-id="vectordbOnboarding-connectToProject-apiKeys-btn"
+            data-telemetry-id={`${telemetryPrefix}-apiKeys-btn`}
             color="text"
             iconType="plusCircle"
             size="s"
@@ -55,7 +61,7 @@ export const CompactApiKeys = () => {
             iconType="plugs"
             onClick={() => openWiredConnectionDetails()}
             data-test-subj="vectordbConnectToProjectConnectionDetailsButton"
-            data-telemetry-id="vectordbOnboarding-connectToProject-connectionDetails-btn"
+            data-telemetry-id={`${telemetryPrefix}-connectionDetails-btn`}
             color="text"
             aria-label={i18n.translate(
               'vectordbOnboarding.connectToProject.connectionDetailsAriaLabel',

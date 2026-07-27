@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-visualizations'
+  - '@kbn/agent-builder-visualizations-common'
   - '@kbn/core-http-server'
   - '@kbn/agent-builder-common'
   - '@kbn/ebt-click'
@@ -58,7 +60,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
   - '@kbn/esql'
-  - '@kbn/field-types'
   - '@kbn/monaco'
   - '@kbn/safer-lodash-set'
   - '@kbn/core-http-server-mocks'
@@ -71,7 +72,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/visualization-utils'
   - '@kbn/data-views-plugin'
-  - '@kbn/expressions-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/scout'
@@ -86,9 +86,10 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
-  - '@kbn/lens-embeddable-utils'
   - '@kbn/elastic-assistant'
   - '@kbn/inference-connectors'
   - '@kbn/react-query'
@@ -96,7 +97,6 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
   - '@kbn/ai-assistant-common'
-  - '@kbn/elastic-assistant-common'
   - '@kbn/ui-theme'
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/inference-endpoint-ui-common'
@@ -118,17 +118,15 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/evals-plugin'
   - '@kbn/usage-api-plugin'
-  - '@kbn/es-query'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/security-plugin-types-server'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/fs'
   - '@kbn/react-hooks'
   - '@kbn/search-inference-endpoints'
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
-  - '@kbn/core-user-profile-browser'
   - '@kbn/security-plugin-types-public'
   - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
@@ -137,11 +135,11 @@ dependsOn:
   - '@kbn/test-subj-selector'
   - '@kbn/gen-ai-functional-testing'
   - '@kbn/repo-info'
-  - '@kbn/test'
+  - '@kbn/es'
   - '@kbn/test-es-server'
-  - '@kbn/react-kibana-mount'
   - '@kbn/user-profile-components'
   - '@kbn/telemetry'
+  - '@kbn/embeddable-plugin'
 tags:
   - plugin
   - prod
@@ -153,6 +151,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - server/**/*.json
     - test/scout_agent_builder/**/*
     - test/scout_agent_builder_smoke/**/*
     - test/scout_agent_builder_shared/**/*

@@ -27,7 +27,7 @@ mockedCreateAiNavigationTree.mockReturnValue(mockedAiNavTree);
 
 describe('Security Side Nav', () => {
   const services = mockServices;
-  const initNavigationSpy = jest.spyOn(services.serverless, 'initNavigation');
+  const initNavigationSpy = jest.spyOn(services.navigation, 'initNavigation');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,6 +71,7 @@ describe('Security Side Nav', () => {
 
     expect(initNavigationSpy).toHaveBeenCalled();
     expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
+      services,
       AIChatExperience.Classic,
       false,
       false
@@ -117,6 +118,7 @@ describe('Security Side Nav', () => {
     ]);
 
     expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
+      services,
       AIChatExperience.Classic,
       true,
       false

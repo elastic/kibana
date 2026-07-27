@@ -23,7 +23,7 @@ import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { FieldManager } from './field_manager';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { createMockGraphStore } from '../../state_management/mocks';
 
 describe('field_manager', () => {

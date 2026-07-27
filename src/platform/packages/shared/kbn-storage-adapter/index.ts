@@ -61,9 +61,20 @@ export type StorageClientSearchResponse<
   TSearchRequest extends Omit<SearchRequest, 'index'>
 > = InferSearchResponseOf<TDocument, TSearchRequest>;
 
+/**
+ * Optimistic concurrency metadata for bulk `index` actions.
+ * elasticsearch requires `if_seq_no` and `if_primary_term` together — omit both for unconditional writes.
+ */
+export type StorageClientBulkIndexOccMetadata =
+  | { if_seq_no?: never; if_primary_term?: never }
+  | { if_seq_no: number; if_primary_term: number };
+
 export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
-      index: { document: Omit<TDocument, '_id'>; _id?: string };
+      index: {
+        document: Omit<TDocument, '_id'>;
+        _id?: string;
+      } & StorageClientBulkIndexOccMetadata;
     }
   | {
       /**
@@ -200,6 +211,11 @@ export interface InternalIStorageClient<TDocumentType extends { _id?: string } =
   get: StorageClientGet<TDocumentType>;
   existsIndex: StorageClientExistsIndex;
   esql: StorageClientEsql;
+  /**
+   * Applies any pending mapping changes to the current write index via putMapping.
+   * Throws if the schema has incompatible structural changes that require a full rebuild.
+   */
+  reconcileMappings: () => Promise<void>;
 }
 
 type UnionKeys<T> = T extends T ? keyof T : never;

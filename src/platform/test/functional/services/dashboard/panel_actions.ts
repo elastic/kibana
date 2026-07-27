@@ -394,16 +394,16 @@ export class DashboardPanelActionsService extends FtrService {
     throw new Error(`No action matching text "${text}"`);
   }
 
-  async canConvertToLens(wrapper?: WebElementWrapper) {
+  async canConvertToLens(wrapper?: WebElementWrapper, { timeout = 500 } = {}) {
     this.log.debug('canConvertToLens');
     await this.openContextMenu(wrapper);
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout });
   }
 
-  async canConvertToLensByTitle(title = '') {
+  async canConvertToLensByTitle(title = '', options?: { timeout?: number }) {
     this.log.debug(`canConvertToLens(${title})`);
     const wrapper = await this.getPanelWrapper(title);
-    return await this.canConvertToLens(wrapper);
+    return await this.canConvertToLens(wrapper, options);
   }
 
   async convertToLens(wrapper?: WebElementWrapper) {

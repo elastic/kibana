@@ -15,6 +15,7 @@ export {
   partitionByCcs,
   getFieldsFromFieldCaps,
   getIndexFields,
+  validateEsqlQuery,
   type IndexFieldsResult,
   type IndexFieldType,
   type MappingField,
@@ -29,6 +30,7 @@ export {
   type AliasSearchSource,
   type IndexSearchSource,
   type DataStreamSearchSource,
+  type DatasetSearchSource,
   type EsSearchSource,
   type ListSourcesResponse,
 } from './tools/steps';

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import { getApmInternalServices, type ApmPluginStartDeps } from '../../../plugin';
 import { Introduction } from './introduction';
 import { InstructionsSet } from './instructions_set';
 import { serverlessInstructions } from './serverless_instructions';
@@ -19,6 +18,7 @@ import { PrivilegeType } from '../../../../common/privilege_type';
 import type { AgentApiKey, Instruction } from './instruction_variants';
 
 export function Onboarding() {
+  const { callApmApi } = getApmInternalServices();
   const [instructions, setInstructions] = useState<Instruction[]>([]);
   const [agentApiKey, setAgentApiKey] = useState<AgentApiKey>({
     apiKey: null,
@@ -35,7 +35,7 @@ export function Onboarding() {
 
   const baseUrl = docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
 
-  const createAgentKey = async () => {
+  const createAgentKey = useCallback(async () => {
     try {
       setApiKeyLoading(true);
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
@@ -64,9 +64,9 @@ export function Onboarding() {
     } finally {
       setApiKeyLoading(false);
     }
-  };
+  }, [callApmApi]);
 
-  const checkAgentStatus = async () => {
+  const checkAgentStatus = useCallback(async () => {
     try {
       setAgentStatusLoading(true);
       const agentStatusCheck = await callApmApi(
@@ -81,7 +81,7 @@ export function Onboarding() {
     } finally {
       setAgentStatusLoading(false);
     }
-  };
+  }, [callApmApi]);
 
   const instructionsExists = instructions.length > 0;
 
@@ -102,7 +102,16 @@ export function Onboarding() {
         createAgentKey
       )
     );
-  }, [agentApiKey, baseUrl, config, apiKeyLoading, agentStatus, agentStatusLoading]);
+  }, [
+    agentApiKey,
+    baseUrl,
+    config,
+    apiKeyLoading,
+    agentStatus,
+    agentStatusLoading,
+    checkAgentStatus,
+    createAgentKey,
+  ]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

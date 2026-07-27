@@ -90,25 +90,32 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               color="text"
               size="s"
               onClick={onToggleCondensed}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+                detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.EXPAND,
+              })}
             />
           </EuiToolTip>
         </EuiFlexItem>
         {sidebarView === 'conversation' && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="plus"
-              display="base"
-              color="text"
-              size="s"
-              aria-label={labels.newConversation}
-              onClick={() => {
-                navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
-              }}
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
-              })}
-            />
+            <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plus"
+                display="base"
+                color="text"
+                size="s"
+                aria-label={labels.newConversation}
+                onClick={() => {
+                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+                }}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -153,6 +160,11 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 color="text"
                 size="s"
                 onClick={onToggleCondensed}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.CONDENSE,
+                })}
               />
             </EuiToolTip>
           </EuiFlexItem>

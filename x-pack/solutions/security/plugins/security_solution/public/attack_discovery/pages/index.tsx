@@ -9,27 +9,22 @@ import { EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  SecurityPageName,
-} from '../../../common/constants';
+import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
-import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Actions } from './header/actions';
+import { WorkflowsMissingPrivilegesCallOut } from './workflows_missing_privileges_callout';
+import { useHasWorkflowsPrivileges } from './hooks/use_has_workflows_privileges';
 import { PageTitle } from './page_title';
 import { History } from './results/history';
 import { MovingAttacksCallout } from './moving_attacks_callout';
 
 import { useAttackDiscoveryControls } from './use_attack_discovery_controls';
+import { useIsAlertsAndAttacksAlignmentEnabled } from '../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
 
 export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
-  const {
-    services: { uiSettings },
-  } = useKibana();
-
   const {
     aiConnectors,
     connectorId,
@@ -40,6 +35,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     settingsFlyout,
   } = useAttackDiscoveryControls();
 
+  const { hasWorkflowsExecute, missingPrivileges } = useHasWorkflowsPrivileges();
+
   // for showing / hiding anonymized data:
   const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
 
@@ -47,10 +44,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const enableAlertsAndAttacksAlignment = uiSettings.get(
-    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    false
-  );
+  const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
 
   return (
     <div
@@ -64,6 +58,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
           <Actions
+            hasWorkflowsExecute={hasWorkflowsExecute}
             isLoading={isLoading}
             onGenerate={onGenerate}
             openFlyout={openFlyout}
@@ -73,6 +68,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         </HeaderPage>
 
         <EuiSpacer size="s" />
+
+        <WorkflowsMissingPrivilegesCallOut missingPrivileges={missingPrivileges} />
 
         {enableAlertsAndAttacksAlignment && (
           <>

@@ -136,6 +136,35 @@ describe('Transform: Common', () => {
     });
   });
 
+  test('getPreviewTransformRequestBody() with project routing', () => {
+    const query = getTransformConfigQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      },
+      undefined,
+      undefined,
+      '_alias:*'
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-data-view-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+        project_routing: '_alias:*',
+      },
+    });
+  });
+
   test('getMissingBucketConfig()', () => {
     expect(getMissingBucketConfig(groupByTerms)).toEqual({});
     expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: true } })).toEqual({
@@ -341,7 +370,8 @@ describe('Transform: Common', () => {
     const request = getCreateTransformRequestBody(
       { getIndexPattern: () => 'the-data-view-title' } as DataView,
       pivotState,
-      transformDetailsState
+      transformDetailsState,
+      '_alias:*'
     );
 
     expect(request).toEqual({
@@ -360,6 +390,7 @@ describe('Transform: Common', () => {
       source: {
         index: ['the-data-view-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+        project_routing: '_alias:*',
         runtime_mappings: runtimeMappings,
       },
       sync: {

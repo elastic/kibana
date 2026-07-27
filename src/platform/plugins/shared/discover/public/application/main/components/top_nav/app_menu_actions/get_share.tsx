@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionId } from '@kbn/discover-utils';
+import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
 import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/types';
 import type { IntlShape } from '@kbn/i18n-react';
@@ -68,13 +68,21 @@ export const buildShareOptions = async ({
     services,
   });
 
-  const searchSourceSharingData = await getSharingData(searchSource, currentTab.appState, services);
-
   const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
   const timeRange = timefilter.getTime();
-  const absoluteTimeRange = timefilter.getAbsoluteTime();
+  // Use the absolute time range captured at the most recent on-screen fetch so the export
+  // covers the exact window the user saw, rather than re-resolving "now" at click time.
+  const absoluteTimeRange =
+    currentTab.dataRequestParams.timeRangeAbsolute ?? timefilter.getAbsoluteTime();
   const refreshInterval = timefilter.getRefreshInterval();
+
+  const searchSourceSharingData = await getSharingData(
+    searchSource,
+    currentTab.appState,
+    services,
+    absoluteTimeRange
+  );
   const filters = services.filterManager.getFilters();
 
   // Share -> Get links -> Snapshot
@@ -167,6 +175,10 @@ export const buildShareOptions = async ({
                   uiSettings: services.uiSettings,
                   query: currentTab.appState.query,
                 }),
+                // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
+                ...(currentTab.esqlVariables?.length
+                  ? { esqlVariables: currentTab.esqlVariables }
+                  : {}),
               }
             : params,
         },
@@ -179,7 +191,7 @@ export const buildShareOptions = async ({
           defaultMessage: 'Untitled Discover session',
         }),
       totalHits: totalHitsState.result || 0,
-      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
+      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined, // used by ES|QL immediate export via toAbsoluteTimeRange
     },
     isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
   };
@@ -191,7 +203,7 @@ export const buildShareOptions = async ({
 const getExportItems = (
   buildShareOptionsParams: BuildShareOptionsParams,
   intl: IntlShape
-): AppMenuPopoverItem[] => {
+): DiscoverAppMenuPopoverItem[] => {
   const { services } = buildShareOptionsParams;
 
   if (!services.share) return [];
@@ -208,7 +220,7 @@ const getExportItems = (
       item.shareType === 'integration' && 'id' in item && item.id === 'scheduledReports'
   );
 
-  const exportItems: AppMenuPopoverItem[] = [];
+  const exportItems: DiscoverAppMenuPopoverItem[] = [];
 
   if (hasCsvReports) {
     exportItems.push({
@@ -268,7 +280,7 @@ export const getShareAppMenuItem = ({
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   intl: IntlShape;
-}): AppMenuItemType[] => {
+}): DiscoverAppMenuItemType[] => {
   if (!services.share) {
     return [];
   }
@@ -285,12 +297,15 @@ export const getShareAppMenuItem = ({
     services.share?.toggleShareContextMenu(shareOptions);
   };
 
-  const menuItems: AppMenuItemType[] = [
+  const menuItems: DiscoverAppMenuItemType[] = [
     {
       id: AppMenuActionId.share,
       order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
+      }),
+      tooltipContent: i18n.translate('discover.localMenu.shareTooltip', {
+        defaultMessage: 'Share session',
       }),
       iconType: 'share',
       testId: 'shareTopNavButton',

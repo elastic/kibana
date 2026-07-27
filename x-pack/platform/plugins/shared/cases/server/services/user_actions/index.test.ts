@@ -18,7 +18,12 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
 import type { UserActionEvent } from './types';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
+import { V2_NOOP_ACTIVITY_WRITER } from '../../cases_analytics_v2';
 import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
@@ -103,6 +108,7 @@ describe('CaseUserActionService', () => {
         log: mockLogger,
         auditLogger: mockAuditLogger,
         savedObjectsSerializer: soSerializerMock,
+        analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
       });
     });
 
@@ -143,76 +149,60 @@ describe('CaseUserActionService', () => {
           nonDeletedCommentUpdates: {
             doc_count: 2,
             comments: {
-              doc_count: 2,
-              byCommentId: {
-                buckets: [
-                  {
-                    key: 'deleted-comment',
-                    doc_count: 3,
-                    reverse: {
-                      doc_count: 3,
-                      hasDelete: { doc_count: 1 },
-                      updates: {
+              buckets: {
+                [CASE_COMMENT_SAVED_OBJECT]: {
+                  doc_count: 2,
+                  byCommentId: {
+                    buckets: [
+                      {
+                        key: 'deleted-comment',
                         doc_count: 3,
-                        byCommentType: {
-                          buckets: [
-                            { key: 'user', doc_count: 2 },
-                            { key: 'comment', doc_count: 4 },
-                            { key: 'alert', doc_count: 1 },
-                          ],
+                        reverse: {
+                          doc_count: 3,
+                          hasDelete: { doc_count: 1 },
+                          updates: {
+                            doc_count: 3,
+                            byCommentType: {
+                              buckets: [
+                                { key: 'user', doc_count: 2 },
+                                { key: 'comment', doc_count: 4 },
+                                { key: 'alert', doc_count: 1 },
+                              ],
+                            },
+                          },
                         },
                       },
-                    },
-                  },
-                  {
-                    key: 'active-comment',
-                    doc_count: 2,
-                    reverse: {
-                      doc_count: 2,
-                      hasDelete: { doc_count: 0 },
-                      updates: {
+                      {
+                        key: 'active-comment',
                         doc_count: 2,
-                        byCommentType: {
-                          buckets: [
-                            { key: 'user', doc_count: 5 },
-                            { key: 'comment', doc_count: 5 },
-                          ],
+                        reverse: {
+                          doc_count: 2,
+                          hasDelete: { doc_count: 0 },
+                          updates: {
+                            doc_count: 2,
+                            byCommentType: {
+                              buckets: [
+                                { key: 'user', doc_count: 5 },
+                                { key: 'comment', doc_count: 5 },
+                              ],
+                            },
+                          },
                         },
                       },
-                    },
+                    ],
                   },
-                ],
+                },
+                [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                  doc_count: 0,
+                  byCommentId: { buckets: [] },
+                },
               },
             },
           },
         },
       } as unknown as SavedObjectsFindResponse;
 
-      it('does not count unified comment type when attachments flag is off', async () => {
-        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
-
-        const stats = await service.getCaseUserActionStats({ caseId: '123' });
-
-        expect(stats).toEqual({
-          total: 20,
-          total_deletions: 4,
-          total_comments: 4,
-          total_comment_deletions: 1,
-          total_comment_creations: 2,
-          total_hidden_comment_updates: 2,
-          total_other_actions: 16,
-          total_other_action_deletions: 3,
-        });
-      });
-
-      it('counts unified comment type when attachments flag is on', async () => {
-        service = new CaseUserActionService({
-          unsecuredSavedObjectsClient,
-          log: mockLogger,
-          auditLogger: mockAuditLogger,
-          savedObjectsSerializer: soSerializerMock,
-          isCasesAttachmentsEnabled: true,
-        });
+      it('counts both legacy `user` and unified `comment` types as comments', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
 
         const stats = await service.getCaseUserActionStats({ caseId: '123' });
@@ -227,6 +217,39 @@ describe('CaseUserActionService', () => {
           total_other_actions: 10,
           total_other_action_deletions: 1,
         });
+      });
+
+      it('groups non-deleted comment updates by both attachment saved object types', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        await service.getCaseUserActionStats({ caseId: '123' });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            aggs: expect.objectContaining({
+              nonDeletedCommentUpdates: expect.objectContaining({
+                aggs: expect.objectContaining({
+                  comments: expect.objectContaining({
+                    filters: {
+                      filters: {
+                        [CASE_COMMENT_SAVED_OBJECT]: {
+                          term: {
+                            'cases-user-actions.references.type': CASE_COMMENT_SAVED_OBJECT,
+                          },
+                        },
+                        [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                          term: {
+                            'cases-user-actions.references.type': CASE_ATTACHMENT_SAVED_OBJECT,
+                          },
+                        },
+                      },
+                    },
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
       });
     });
 

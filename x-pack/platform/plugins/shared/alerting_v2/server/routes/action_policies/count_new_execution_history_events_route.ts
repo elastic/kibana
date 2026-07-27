@@ -67,11 +67,14 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { since } = this.request.query;
+    const { since, search, ruleIds, outcome } = this.request.query;
 
     const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,
       since,
+      search,
+      ruleIds,
+      outcome,
     });
 
     return this.ctx.response.ok({ body: result });

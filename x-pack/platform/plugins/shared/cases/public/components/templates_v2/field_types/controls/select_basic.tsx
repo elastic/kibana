@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
@@ -17,7 +17,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema> & ConditionRenderProps;
 
@@ -27,14 +27,21 @@ export const SelectBasic = ({
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
 }: SelectBasicProps) => {
   const { control, resetField } = useFormContext();
-  const [hasPendingChange, setHasPendingChange] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const options = useMemo(
-    () => metadata.options.map((option) => ({ value: option, text: option })),
+    // Drop nullish entries so a stray `null` in the YAML options never renders as a literal "null"
+    // choice.
+    () =>
+      metadata.options
+        .filter((option) => option != null)
+        .map((option) => ({ value: option, text: option })),
     [metadata.options]
   );
 
@@ -48,21 +55,23 @@ export const SelectBasic = ({
     };
   }, [isRequired]);
 
-  const showInlineActions = hasPendingChange && onConfirm != null;
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
   return (
-    <>
-      <Controller
-        key={name}
-        name={path}
-        control={control}
-        rules={rules}
-        defaultValue=""
-        render={({ field, fieldState }) => (
+    <Controller
+      key={name}
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue=""
+      render={({ field, fieldState }) => (
+        <>
           <EuiFormRow
             label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-            isInvalid={!!fieldState.error}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+            isInvalid={Boolean(fieldState.error)}
             error={fieldState.error?.message}
             fullWidth
           >
@@ -74,30 +83,26 @@ export const SelectBasic = ({
               onChange={(e) => {
                 field.onChange(e.target.value);
                 field.onBlur();
-                setHasPendingChange(true);
               }}
               onBlur={field.onBlur}
               hasNoInitialSelection={!field.value}
-              isInvalid={!!fieldState.error}
+              isInvalid={Boolean(fieldState.error)}
+              disabled={isSaving}
               fullWidth
             />
           </EuiFormRow>
-        )}
-      />
-      {showInlineActions && (
-        <InlineFieldActions
-          name={name}
-          onConfirm={() => {
-            setHasPendingChange(false);
-            onConfirm();
-          }}
-          onCancel={() => {
-            setHasPendingChange(false);
-            resetField(path);
-          }}
-        />
+          {fieldState.isDirty && onConfirm && (
+            <InlineFieldActions
+              name={name}
+              onConfirm={onConfirm}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+              isDisabled={isSaveDisabled}
+            />
+          )}
+        </>
       )}
-    </>
+    />
   );
 };
 SelectBasic.displayName = 'SelectBasic';

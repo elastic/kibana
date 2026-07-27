@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276174
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- AI and machine Learning
+title: Enable traces for all users
+description: Enable OpenTelemetry trace collection in Agent Builder for all users. You can view trace waterfalls for each conversation response, use the built-in traces skill to query token usage and latency, and monitor agent activity in the overview dashboard. Sensitive data such as prompts and tool parameters is excluded by default. To adjust tracing behavior, go to Management > Gen AI Settings > Agent Builder Tracing.

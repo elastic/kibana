@@ -44,6 +44,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const parentApi = {
   getSerializedStateForChild: jest.fn().mockReturnValue({ type: OPTIONS_LIST_CONTROL }),
   viewMode$: new BehaviorSubject('view'),
+  children$: new BehaviorSubject({}),
   registerChildApi: jest.fn(),
 } as unknown as ControlsRendererParentApi;
 
@@ -65,7 +66,8 @@ const mockOptionsListFactory: EmbeddablePublicDefinition<{ type: typeof OPTIONS_
   },
 };
 
-describe('render', () => {
+// Failing: See https://github.com/elastic/kibana/issues/273761
+describe.skip('render', () => {
   beforeAll(() => {
     registerEmbeddablePublicDefinition(
       'options_list_control',

@@ -7,16 +7,18 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntities, fetchEntityRelationships } from './fetch_entity_relationships_graph';
 import {
-  fetchEntities,
-  fetchEntityRelationships,
+  regroupEvents,
+  enrichEventDocData,
   regroupRelationships,
   enrichRelationshipDocData,
   enrichEntityRecords,
-} from './fetch_entity_relationships_graph';
+} from './parse_records';
 import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
-import { checkIfEntitiesIndexExists } from './utils';
+import { checkIfEntitiesIndexExists, addValuesToSet } from './utils';
 import type {
   EsQuery,
   EntityId,
@@ -40,6 +42,8 @@ export interface FetchGraphParams {
   esQuery?: EsQuery;
   entityIds?: EntityId[];
   pinnedIds?: string[];
+  projectRouting?: ProjectRouting;
+  integrationRuntimeEvalsEnabled?: boolean;
 }
 
 export interface FetchGraphResult {
@@ -70,6 +74,8 @@ export const fetchGraph = async ({
   esQuery,
   entityIds,
   pinnedIds,
+  projectRouting,
+  integrationRuntimeEvalsEnabled,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -97,6 +103,8 @@ export const fetchGraph = async ({
           spaceId,
           esQuery,
           pinnedIds,
+          projectRouting,
+          integrationRuntimeEvalsEnabled,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;
@@ -113,6 +121,7 @@ export const fetchGraph = async ({
         entityIds,
         spaceId,
         entityStoreIndexExists,
+        pinnedIds,
       }).catch((error) => {
         logger.error(`Failed to fetch entity relationships: ${error.message}`);
         throw error;
@@ -146,12 +155,14 @@ export const fetchGraph = async ({
   // Collect all entity IDs for a single consolidated enrichment query
   const allEntityIds = new Set<string>();
   for (const r of eventsResult.records) {
-    if (r.actorEntityId) allEntityIds.add(r.actorEntityId);
-    if (r.targetEntityId) allEntityIds.add(r.targetEntityId);
+    addValuesToSet(allEntityIds, r.actorEntityId, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetEntityId, { dropEmpty: true });
   }
   for (const r of relationshipsResult.records) {
-    if (r.actorId) allEntityIds.add(r.actorId);
-    if (r.targetId) allEntityIds.add(r.targetId);
+    // actorIds / targetIds are the multi-value sets of same-type actors/targets merged in the
+    // ES|QL STATS (targetId is no longer a STATS group key — see fetch_entity_relationships_graph).
+    addValuesToSet(allEntityIds, r.actorIds, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetIds, { dropEmpty: true });
   }
   for (const r of entitiesResult.records) {
     if (r.id) allEntityIds.add(r.id);

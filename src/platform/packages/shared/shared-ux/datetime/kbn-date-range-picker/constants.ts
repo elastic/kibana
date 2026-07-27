@@ -19,6 +19,12 @@ export const DATE_TYPE_NOW = 'NOW' as const;
 /** Keyword users type to refer to the current moment in input and display text. */
 export const NOW_KEYWORD = 'now';
 
+/** ArrowUp on a selected part: step its value up. */
+export const MODIFICATION_INCREASE = 'increase' as const;
+
+/** ArrowDown on a selected part: step its value down. */
+export const MODIFICATION_DECREASE = 'decrease' as const;
+
 /** Default Moment.js format for displaying dates at full precision (e.g. "Feb 3, 2025, 14:30:07.801") */
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY, HH:mm:ss.SSS';
 
@@ -64,15 +70,15 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
 /**
  * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
  *
- * Sub-day units promote one step up (`ms→s`, `s→m`, `m→h`), except `h→h`
- * which keeps the hour boundary. Day-and-above units all normalise to `/d`.
+ * Minutes up to a week round to the next finer unit.
+ * Seconds and milliseconds round to `/s`, while months and years normalise to `/d`.
  */
 export const ROUND_UNIT_MAP: Record<string, string> = {
   ms: 's',
-  s: 'm',
-  m: 'm',
-  h: 'h',
-  d: 'd',
+  s: 's',
+  m: 's',
+  h: 'm',
+  d: 'h',
   w: 'd',
   M: 'd',
   y: 'd',

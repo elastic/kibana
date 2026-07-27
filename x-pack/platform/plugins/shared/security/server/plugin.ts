@@ -337,6 +337,7 @@ export class SecurityPlugin
         getSession: this.getSession,
         audit: this.auditSetup,
         config,
+        logger: this.logger,
       })
     );
     core.userProfile.registerUserProfileDelegate(
@@ -363,6 +364,7 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       serverlessProjectId: cloud?.serverless?.projectId,
+      serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       docLinks: core.docLinks,
@@ -418,6 +420,7 @@ export class SecurityPlugin
     this.userProfileStart = this.userProfileService.start({
       clusterClient,
       session,
+      getCurrentUser: core.security.authc.getCurrentUser,
     });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
@@ -489,6 +492,7 @@ export class SecurityPlugin
       },
       userProfiles: {
         getCurrent: this.userProfileStart.getCurrent,
+        getCurrentProfileId: this.userProfileStart.getCurrentProfileId,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },

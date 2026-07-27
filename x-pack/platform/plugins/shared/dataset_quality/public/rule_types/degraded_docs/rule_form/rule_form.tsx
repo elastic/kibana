@@ -50,7 +50,11 @@ export const RuleForm: React.FunctionComponent<
   RuleTypeParamsExpressionProps<DegradedDocsRuleParams, { adHocDataViewList: DataView[] }>
 > = (props) => {
   const {
-    services: { dataViews, dataViewEditor },
+    services: {
+      dataViews,
+      dataViewEditor,
+      notifications: { toasts },
+    },
   } = useKibanaContextForPlugin();
 
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
@@ -211,7 +215,7 @@ export const RuleForm: React.FunctionComponent<
       <EuiSpacer size="s" />
 
       <DataViewSelectPopover
-        dependencies={{ dataViews, dataViewEditor }}
+        dependencies={{ dataViews, dataViewEditor, toasts }}
         dataView={dataView}
         metadata={{ adHocDataViewList: adHocDataViews }}
         onSelectDataView={onSelectDataView}

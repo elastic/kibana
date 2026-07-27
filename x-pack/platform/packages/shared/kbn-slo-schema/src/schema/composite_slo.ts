@@ -90,10 +90,11 @@ const compositeSloDefinitionSchema = compositeSloBaseDefinitionSchema.extend({
 
 const storedCompositeSloDefinitionSchema = compositeSloDefinitionSchema;
 
-const compositeSloMemberSummarySchema = z.object({
-  id: z.string(),
+// A member summary extends the plain definition member (`sloId`, `weight`, `instanceId`)
+// with the computed per-member health, so a `CompositeSLOMemberWithSummary` is assignable to
+// a `CompositeSLOMember`.
+const compositeSloMemberWithSummarySchema = compositeSloMemberSchema.extend({
   name: z.string(),
-  weight: z.number(),
   normalisedWeight: z.number(),
   sliValue: z.number(),
   status: compositeStatusSchema,
@@ -101,7 +102,6 @@ const compositeSloMemberSummarySchema = z.object({
   fiveMinuteBurnRate: z.number().optional(),
   oneHourBurnRate: z.number().optional(),
   oneDayBurnRate: z.number().optional(),
-  instanceId: z.string().optional(),
 });
 
 const compositeSloSummarySchema = z.object({
@@ -115,21 +115,23 @@ const compositeSloSummarySchema = z.object({
 
 const compositeSloDefinitionResponseSchema = compositeSloDefinitionSchema;
 
-const compositeSloSummaryResponseSchema = compositeSloBaseDefinitionSchema.extend({
+// The summary response strictly extends the definition response: it keeps every definition
+// field (including `members`, now widened to member summaries) and adds the composite `summary`.
+const compositeSloWithSummaryResponseSchema = compositeSloDefinitionSchema.extend({
   summary: compositeSloSummarySchema,
-  members: z.array(compositeSloMemberSummarySchema),
+  members: z.array(compositeSloMemberWithSummarySchema),
 });
 
-type CompositeSLOMemberSummary = z.infer<typeof compositeSloMemberSummarySchema>;
+type CompositeSLOMemberWithSummary = z.infer<typeof compositeSloMemberWithSummarySchema>;
 type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
 type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
-type CompositeSLOSummaryResponse = z.infer<typeof compositeSloSummaryResponseSchema>;
+type CompositeSLOWithSummaryResponse = z.infer<typeof compositeSloWithSummaryResponseSchema>;
 
 export type {
-  CompositeSLOMemberSummary,
+  CompositeSLOMemberWithSummary,
   CompositeSLOSummary,
   CompositeSLODefinitionResponse,
-  CompositeSLOSummaryResponse,
+  CompositeSLOWithSummaryResponse,
 };
 
 export {
@@ -148,8 +150,8 @@ export {
   compositeSloBaseDefinitionSchema,
   compositeSloDefinitionSchema,
   storedCompositeSloDefinitionSchema,
-  compositeSloMemberSummarySchema,
+  compositeSloMemberWithSummarySchema,
   compositeSloSummarySchema,
   compositeSloDefinitionResponseSchema,
-  compositeSloSummaryResponseSchema,
+  compositeSloWithSummaryResponseSchema,
 };

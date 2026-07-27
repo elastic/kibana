@@ -248,10 +248,14 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    const breadcrumbLink = this.config.get('serverless')
-      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
-      : 'breadcrumb dashboardListingBreadcrumb first';
-    await this.testSubjects.click(breadcrumbLink);
+    if (await this.globalNav.isNextProjectChrome()) {
+      await this.testSubjects.click('appHeaderBack');
+    } else {
+      const breadcrumbLink = this.config.get('serverless')
+        ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+        : 'breadcrumb dashboardListingBreadcrumb first';
+      await this.testSubjects.click(breadcrumbLink);
+    }
     await this.expectExistsDashboardLandingPage();
   }
 
@@ -903,6 +907,11 @@ export class DashboardPageObject extends FtrService {
 
   public async waitForRenderComplete() {
     this.log.debug('waitForRenderComplete');
+    await this.find.waitForAttributeToChange(
+      '[data-dashboard-controls-ready]',
+      'data-dashboard-controls-ready',
+      'true'
+    );
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));

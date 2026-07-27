@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 144
- * Metric groups: 534
+ * Registry groups: 145
+ * Metric groups: 537
  * Hardcoded fields: 34
- * Total fields: 1201
+ * Total fields: 1202
  *
  * @internal
  *
- * WARNING: This object contains 1201+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1202+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -687,6 +687,13 @@ export const semconvFlat = {
     type: 'long',
     example: '1000',
   },
+  'azure.resource_group.name': {
+    name: 'azure.resource_group.name',
+    description:
+      'The name of the Azure [resource group](https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal) the resource belongs to.',
+    type: 'keyword',
+    example: 'my-resource-group',
+  },
   'azure.resource_provider.namespace': {
     name: 'azure.resource_provider.namespace',
     description:
@@ -870,7 +877,7 @@ export const semconvFlat = {
     name: 'cicd.worker.state',
     description: 'The state of a CI/CD worker / agent.',
     type: 'keyword',
-    example: 'idle',
+    example: 'available',
   },
   'cicd.worker.url.full': {
     name: 'cicd.worker.url.full',
@@ -1207,7 +1214,7 @@ export const semconvFlat = {
   },
   'db.operation.batch.size': {
     name: 'db.operation.batch.size',
-    description: 'The number of queries included in a batch operation.',
+    description: 'The number of database operations included in a batch operation.',
     type: 'long',
     example: '2',
   },
@@ -3112,6 +3119,13 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'o',
   },
+  'messaging.kafka.cluster.id': {
+    name: 'messaging.kafka.cluster.id',
+    description:
+      'The Kafka cluster id, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.',
+    type: 'keyword',
+    example: 'MkU3OEVBNTcwNTJENDM2Qk',
+  },
   'messaging.kafka.message.key': {
     name: 'messaging.kafka.message.key',
     description:
@@ -3470,11 +3484,6 @@ export const semconvFlat = {
     description: 'Container memory available.',
     type: 'double',
   },
-  'metrics.container.memory.paging.faults': {
-    name: 'metrics.container.memory.paging.faults',
-    description: 'Container memory paging faults.',
-    type: 'double',
-  },
   'metrics.container.memory.rss': {
     name: 'metrics.container.memory.rss',
     description: 'Container memory RSS.',
@@ -3493,6 +3502,11 @@ export const semconvFlat = {
   'metrics.container.network.io': {
     name: 'metrics.container.network.io',
     description: 'Network bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.paging.faults': {
+    name: 'metrics.container.paging.faults',
+    description: 'Container memory paging faults.',
     type: 'double',
   },
   'metrics.container.uptime': {
@@ -4414,11 +4428,6 @@ export const semconvFlat = {
     description: 'Node memory available.',
     type: 'double',
   },
-  'metrics.k8s.node.memory.paging.faults': {
-    name: 'metrics.k8s.node.memory.paging.faults',
-    description: 'Node memory paging faults.',
-    type: 'double',
-  },
   'metrics.k8s.node.memory.rss': {
     name: 'metrics.k8s.node.memory.rss',
     description: 'Node memory RSS.',
@@ -4442,6 +4451,11 @@ export const semconvFlat = {
   'metrics.k8s.node.network.io': {
     name: 'metrics.k8s.node.network.io',
     description: 'Network bytes for the Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.paging.faults': {
+    name: 'metrics.k8s.node.paging.faults',
+    description: 'Node memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.node.pod.allocatable': {
@@ -4530,11 +4544,6 @@ export const semconvFlat = {
     description: 'Pod memory available.',
     type: 'double',
   },
-  'metrics.k8s.pod.memory.paging.faults': {
-    name: 'metrics.k8s.pod.memory.paging.faults',
-    description: 'Pod memory paging faults.',
-    type: 'double',
-  },
   'metrics.k8s.pod.memory.rss': {
     name: 'metrics.k8s.pod.memory.rss',
     description: 'Pod memory RSS.',
@@ -4558,6 +4567,11 @@ export const semconvFlat = {
   'metrics.k8s.pod.network.io': {
     name: 'metrics.k8s.pod.network.io',
     description: 'Network bytes for the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.paging.faults': {
+    name: 'metrics.k8s.pod.paging.faults',
+    description: 'Pod memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.pod.status.phase': {
@@ -5462,11 +5476,6 @@ export const semconvFlat = {
     description: 'Garbage collection duration.',
     type: 'double',
   },
-  'metrics.v8js.memory.heap.limit': {
-    name: 'metrics.v8js.memory.heap.limit',
-    description: 'Maximum heap size allowed by the V8 engine.',
-    type: 'double',
-  },
   'metrics.v8js.memory.heap.space.available_size': {
     name: 'metrics.v8js.memory.heap.space.available_size',
     description: 'Heap space available size.',
@@ -5606,7 +5615,8 @@ export const semconvFlat = {
   },
   'network.io.direction': {
     name: 'network.io.direction',
-    description: 'The network IO operation direction.',
+    description:
+      "The direction of traffic from the perspective of the observing host's physical or virtual network interface. It should not be used to represent the logical direction of a stateful connection or network flow.",
     type: 'keyword',
     example: 'transmit',
   },

@@ -48,11 +48,14 @@ function buildRelationshipEsql(
   const userIdFilter = config.customActor
     ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
     : euid.esql.getEuidDocumentsContainsIdFilter('user');
-  const actorEval =
-    config.customActor?.evalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
-  const targetEval =
-    config.targetEvalOverride ??
-    euid.esql.getEuidEvaluation(config.targetEntityType, { withTypeId: true });
+  const actorEvalClause = config.customActor?.evalOverride
+    ? `| EVAL ${ENGINE_COLUMNS.actor} = ${config.customActor.evalOverride}`
+    : `| EVAL ${euid.esql.getEuidEvaluation('user', ENGINE_COLUMNS.actor, { withTypeId: true })}`;
+  const targetEvalClause = config.targetEvalOverride
+    ? `| EVAL targetEntityId = ${config.targetEvalOverride}`
+    : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
+        withTypeId: true,
+      })}`;
   const additionalTargetFilter = config.additionalTargetFilter
     ? `\n    ${config.additionalTargetFilter}`
     : '';
@@ -96,9 +99,9 @@ function buildRelationshipEsql(
   return `FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
     AND (${userIdFilter})
-${targetIdFilterLine}${userFieldEvalsLine}| EVAL ${ENGINE_COLUMNS.actor} = ${actorEval}
+${targetIdFilterLine}${userFieldEvalsLine}${actorEvalClause}
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
-| EVAL targetEntityId = ${targetEval}
+${targetEvalClause}
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, "") != ""${additionalTargetFilter}
 ${statsClause}

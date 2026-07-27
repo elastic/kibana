@@ -124,7 +124,8 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      ['default'],
+      'default',
+      undefined,
       false
     );
   });
@@ -165,7 +166,8 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1', 'query-2'],
-      ['default'],
+      'default',
+      undefined,
       false
     );
   });
@@ -189,6 +191,7 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
+      'production',
       ['prod'],
       true
     );
