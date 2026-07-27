@@ -134,8 +134,8 @@ interface EntityMaintainerRunSummarySource {
   scanned: number;
   /** Records that qualified from this source */
   qualified: number;
-  /** Source outcome: index_missing | empty | partial | producing | error */
-  outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  /** Source outcome: index_missing | empty | aborted | partial | producing | error */
+  outcome: 'index_missing' | 'empty' | 'aborted' | 'partial' | 'producing' | 'error';
 }
 
 interface EntityMaintainerRunSummaryBreakdown {
