@@ -19,6 +19,14 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -29,6 +37,7 @@ const mockDocumentHeader = jest.fn((props: unknown) => {
     </button>
   );
 });
+const mockReportEvent = jest.fn();
 
 jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -82,7 +91,10 @@ describe('AlertFlyoutHeader', () => {
   });
 
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    overlays: {
+      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+    },
+    telemetry: { reportEvent: mockReportEvent },
     uiActions: {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
@@ -272,6 +284,13 @@ describe('AlertFlyoutHeader', () => {
         size: 'm',
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: FLYOUT_TOOL.NOTES,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+    });
   });
 
   it('uses Security history key when opened inside Security app', async () => {
