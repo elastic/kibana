@@ -1,0 +1,15 @@
+prs:
+- https://github.com/elastic/kibana/pull/278874
+issues:
+- https://github.com/elastic/kibana/issues/276883
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Add tag name filtering to dashboard and link list APIs
+description: Dashboard and link list APIs now accept `tag_names` and `excluded_tag_names`
+  query parameters to filter results by tag name, in addition to filtering by tag
+  ID.

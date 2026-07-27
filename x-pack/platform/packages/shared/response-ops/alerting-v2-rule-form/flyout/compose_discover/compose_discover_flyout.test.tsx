@@ -159,7 +159,7 @@ jest.mock('../../form/hooks/use_data_fields', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../form/utils/yaml_form_utils', () => ({
