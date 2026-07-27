@@ -48,3 +48,4 @@ export * from './specs/box/box';
 export * from './specs/dropbox/dropbox';
 export * from './specs/one_drive/one_drive';
 export * from './specs/sublime_security/sublime_security';
+export * from './specs/kubernetes/kubernetes';
