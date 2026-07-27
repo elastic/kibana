@@ -305,9 +305,10 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     if (hasBars && viz.minBarHeight == null) viz.minBarHeight = 1;
     if (!hasBars) {
       delete viz.valueLabels;
-    } else if (viz.valueLabels == null || viz.valueLabels === 'inside') {
-      // Transform always emits 'hide' for bars; 'inside' is not a valid API value
+    } else if (viz.valueLabels == null || viz.valueLabels === 'hide') {
       viz.valueLabels = 'hide';
+    } else {
+      viz.valueLabels = 'show';
     }
     if (hasLinesOrAreas) {
       if (viz.pointVisibility == null) viz.pointVisibility = 'auto';
