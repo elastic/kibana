@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCard,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,20 +20,25 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RELAY_APP_CONNECTION_STATUS } from '@kbn/significant-events-plugin/common';
+import {
+  RELAY_APP_CONNECTION_STATUS,
+  type RelayAppConnectionStatus,
+} from '@kbn/significant-events-plugin/common';
 import { useRelayAppConnection } from './use_relay_app_connection';
+import { SlackConnectionBindings } from './slack_connection_bindings';
 
 interface AppsSectionProps {
   canEdit: boolean;
 }
 
 /**
- * "Apps" section under Significant Events settings. Currently surfaces the Elastic
- * Slack App connect/disconnect flow; the section is structured to hold additional
- * external apps (GitHub, Teams) in the future. Only rendered by the caller (`tab.tsx`)
- * when the `streams.significantEventsAppsEnabled` feature flag is on; additionally
+ * "Apps" section under Significant Events settings. Surfaces the Elastic
+ * Slack App connect/disconnect flow for a single workspace.
+ * Only rendered by the caller (`tab.tsx`) when the
+ * `streams.significantEventsAppsEnabled` feature flag is on; additionally
  * renders nothing here when the Slack App is not available on this deployment
  * (`xpack.actions.relay` unset, or Agent Builder absent).
  */
@@ -44,9 +50,6 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
     return null;
   }
 
-  const isConnected = status === RELAY_APP_CONNECTION_STATUS.connected;
-  const isInProgress = status === RELAY_APP_CONNECTION_STATUS.oauthInProgress;
-
   return (
     <>
       <EuiSpacer />
@@ -56,23 +59,21 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
             <h3>
               {i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.apps.sectionTitle',
-                {
-                  defaultMessage: 'Apps',
-                }
+                { defaultMessage: 'Apps' }
               )}
             </h3>
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiFlexGroup gutterSize="l" wrap>
-            <EuiFlexItem grow={false} css={{ minWidth: 320 }}>
+            <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
               <EuiCard
                 display="subdued"
                 textAlign="left"
-                icon={<EuiIcon type="logoSlack" size="xl" />}
+                icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
                 data-test-subj="streamsSlackAppCard"
                 title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackCardTitle',
+                  'xpack.streams.significantEventsDiscovery.settings.apps.slackWorkspaceTitle',
                   { defaultMessage: 'Elastic Slack App' }
                 )}
                 description={i18n.translate(
@@ -84,11 +85,10 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
                 )}
                 footer={
                   <SlackCardFooter
-                    canEdit={canEdit}
-                    isConnected={isConnected}
-                    isInProgress={isInProgress}
-                    isMutating={isMutating}
+                    status={status}
                     error={error}
+                    canEdit={canEdit}
+                    isMutating={isMutating}
                     onConnect={connect}
                     onDisconnect={disconnect}
                   />
@@ -103,25 +103,25 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
 }
 
 interface SlackCardFooterProps {
-  canEdit: boolean;
-  isConnected: boolean;
-  isInProgress: boolean;
-  isMutating: boolean;
+  status: RelayAppConnectionStatus;
   error?: string;
+  canEdit: boolean;
+  isMutating: boolean;
   onConnect: () => void;
-  onDisconnect: () => void;
+  onDisconnect: () => Promise<void>;
 }
 
 function SlackCardFooter({
-  canEdit,
-  isConnected,
-  isInProgress,
-  isMutating,
+  status,
   error,
+  canEdit,
+  isMutating,
   onConnect,
   onDisconnect,
 }: SlackCardFooterProps) {
-  if (isInProgress) {
+  const [showChannels, setShowChannels] = useState(false);
+
+  if (status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
@@ -133,7 +133,7 @@ function SlackCardFooter({
               <EuiText size="s" color="subdued">
                 {i18n.translate(
                   'xpack.streams.significantEventsDiscovery.settings.apps.slackAwaitingAuth',
-                  { defaultMessage: 'Waiting for Slack authorization…' }
+                  { defaultMessage: 'Waiting for authorization…' }
                 )}
               </EuiText>
             </EuiFlexItem>
@@ -156,43 +156,71 @@ function SlackCardFooter({
     );
   }
 
-  if (isConnected) {
+  if (status === RELAY_APP_CONNECTION_STATUS.connected) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="success" iconType="check">
-            {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackConnected',
-              {
-                defaultMessage: 'Connected',
-              }
-            )}
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="danger"
-            onClick={onDisconnect}
-            isLoading={isMutating}
-            isDisabled={!canEdit || isMutating}
-            data-test-subj="streamsSlackAppDisconnectButton"
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
+          <EuiFlexGroup
+            responsive={false}
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="s"
           >
-            {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnect',
-              { defaultMessage: 'Disconnect' }
-            )}
-          </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="success" iconType="check">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.apps.slackConnected',
+                      { defaultMessage: 'Connected' }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DisconnectWorkspaceButton
+                    canEdit={canEdit}
+                    isMutating={isMutating}
+                    onDisconnect={onDisconnect}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType={showChannels ? 'arrowDown' : 'arrowRight'}
+                onClick={() => setShowChannels((value) => !value)}
+                aria-expanded={showChannels}
+                data-test-subj="streamsSlackAppToggleChannelsButton"
+              >
+                {showChannels
+                  ? i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.apps.slackHideChannels',
+                      { defaultMessage: 'Hide channels' }
+                    )
+                  : i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.apps.slackShowChannels',
+                      { defaultMessage: 'Show channels' }
+                    )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
+        {showChannels && (
+          <EuiFlexItem grow={false} css={{ width: '100%' }}>
+            <SlackConnectionBindings canEdit={canEdit} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
 
+  // not_connected or error
   return (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       {error && (
         <EuiFlexItem grow={false}>
-          <EuiCallOut size="s" color="danger" title={error} />
+          <EuiCallOut announceOnMount size="s" color="danger" title={error} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
@@ -210,5 +238,75 @@ function SlackCardFooter({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+interface DisconnectWorkspaceButtonProps {
+  canEdit: boolean;
+  isMutating: boolean;
+  onDisconnect: () => Promise<void>;
+}
+
+function DisconnectWorkspaceButton({
+  canEdit,
+  isMutating,
+  onDisconnect,
+}: DisconnectWorkspaceButtonProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <>
+      <EuiButtonEmpty
+        size="s"
+        color="danger"
+        onClick={() => setConfirmOpen(true)}
+        isLoading={isMutating}
+        isDisabled={!canEdit || isMutating}
+        data-test-subj="streamsSlackAppDisconnectButton"
+      >
+        {i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnect', {
+          defaultMessage: 'Disconnect workspace',
+        })}
+      </EuiButtonEmpty>
+      {confirmOpen && (
+        <EuiConfirmModal
+          title={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmTitle',
+            { defaultMessage: 'Disconnect Slack App?' }
+          )}
+          onCancel={() => setConfirmOpen(false)}
+          onConfirm={() => {
+            // Failure is surfaced via a toast in useRelayAppConnection; swallow here so the
+            // modal still closes without an unhandled rejection.
+            void onDisconnect()
+              .catch(() => undefined)
+              .finally(() => setConfirmOpen(false));
+          }}
+          cancelButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmConfirm',
+            { defaultMessage: 'Disconnect workspace' }
+          )}
+          buttonColor="danger"
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
+          data-test-subj="streamsSlackAppDisconnectConfirmModal"
+        >
+          <EuiText size="s">
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmBody',
+              {
+                defaultMessage:
+                  'This removes all Slack channel connections for this deployment. You can reconnect later.',
+              }
+            )}
+          </EuiText>
+        </EuiConfirmModal>
+      )}
+    </>
   );
 }

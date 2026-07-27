@@ -26,6 +26,26 @@ export const eventsMappings = {
     severity: mappings.keyword(),
     title: mappings.text(),
     summary: mappings.text(),
+    symptom_hypothesis: mappings.text(),
+    causal_features: mappings.object({
+      properties: {
+        feature_id: mappings.keyword(),
+      },
+    }),
+    blast_radius: mappings.object({
+      properties: {
+        feature_id: mappings.keyword(),
+      },
+    }),
+    signals: mappings.object({
+      properties: {
+        metadata: mappings.object({
+          properties: {
+            rule_uuid: mappings.keyword(),
+          },
+        }),
+      },
+    }),
     // Mapped so triage can gate re-investigation with a server-side `exists` filter.
     // `exists` on this object matches only when at least one sub-field has a value, so an
     // empty investigations array does not count as "investigated".
@@ -55,8 +75,7 @@ export const storedEventSchema = significantEventSchema.transform((doc) => ({
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  // v8: map `investigations` so triage can gate re-investigation with an `exists` filter.
-  version: 8,
+  version: 10,
   hidden: true,
   template: {
     priority: 500,
