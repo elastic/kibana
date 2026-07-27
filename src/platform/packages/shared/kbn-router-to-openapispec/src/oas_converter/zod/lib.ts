@@ -8,6 +8,7 @@
  */
 
 import { z, isZod } from '@kbn/zod';
+import type { OasMetaExtensions } from '@kbn/zod';
 import { isPassThroughAny } from '@kbn/zod-helpers/v4';
 import type { OpenAPIV3 } from 'openapi-types';
 
@@ -434,34 +435,6 @@ const COMPONENT_ID_MARKER = 'x-kbn-oas-component-id';
 const zodV4OasComponentRegistry = new WeakMap<object, string>();
 
 const OAS_EXTENSIONS_MARKER = 'x-kbn-oas-extensions';
-
-/**
- * Register a Zod schema so that the OAS converter emits it as a named
- * component (`$ref: '#/components/schemas/<name>'`) instead of inlining it.
- *
- * These fields are merged verbatim into the generated OAS component schema,
- * filling the gap where Zod/JSON Schema cannot express OAS-native concepts.
- *
- * Example:
- * ```ts
- * export const StreamDefinition = z.union([...]).meta({
- *   id: 'StreamDefinition',
- *   openapi: {
- *     discriminator: {
- *       propertyName: 'type',
- *       mapping: { wired: '#/components/schemas/WiredStreamDefinition' },
- *     },
- *   },
- * });
- * ```
- */
-export interface OasMetaExtensions {
-  discriminator?: OpenAPIV3.DiscriminatorObject;
-  availability?: {
-    stability?: 'experimental' | 'stable' | 'tech_preview';
-    since?: string;
-  };
-}
 
 type NormalizedOasMetaExtensions = Omit<OasMetaExtensions, 'availability'> & {
   'x-state'?: string;
