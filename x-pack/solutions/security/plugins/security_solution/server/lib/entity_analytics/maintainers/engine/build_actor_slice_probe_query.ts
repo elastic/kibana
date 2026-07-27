@@ -9,7 +9,7 @@ import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { getFieldEvaluationsEsql } from '@kbn/entity-store/common/domain/euid';
 
 import type { RelationshipIntegrationConfig } from './types';
-import { ESQL_ENGINE_PREAMBLE, SLICE_SAMPLE_PROBABILITY } from './constants';
+import { COMPOSITE_PAGE_SIZE, ESQL_ENGINE_PREAMBLE, SLICE_SAMPLE_PROBABILITY } from './constants';
 
 /**
  * "At least one of these fields exists and is non-empty" ES|QL fragment.
@@ -47,7 +47,7 @@ export const buildActorSliceProbeQuery = (
   useSample: boolean = true
 ): string => {
   const index = config.indexPattern(namespace);
-  const maxActors = config.maxActorsPerSlice ?? 2;
+  const maxActors = config.maxActorsPerSlice ?? COMPOSITE_PAGE_SIZE;
 
   // Actor-presence gate: mirrors the same logic as `build_targets_per_actor_query.ts`
   // so the probe and main query narrow on the same actor population.
