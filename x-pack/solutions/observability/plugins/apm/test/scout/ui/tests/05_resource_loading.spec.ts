@@ -34,11 +34,27 @@ test.describe(
         return () => count;
       };
 
-      const hasDataRequests = countRequests(/\/internal\/apm\/has_data/);
-      const serviceIconsRequests = countRequests(
-        /\/internal\/apm\/services\/opbeans-java\/metadata\/icons/
-      );
-      const apmPoliciesRequests = countRequests(/\/apm\/fleet\/has_apm_policies/);
+      const hasDataPattern = /\/internal\/apm\/has_data/;
+      const serviceIconsPattern = /\/internal\/apm\/services\/opbeans-java\/metadata\/icons/;
+      const apmPoliciesPattern = /\/apm\/fleet\/has_apm_policies/;
+
+      const hasDataRequests = countRequests(hasDataPattern);
+      const serviceIconsRequests = countRequests(serviceIconsPattern);
+      const apmPoliciesRequests = countRequests(apmPoliciesPattern);
+
+      // Set the response waiters up before navigating so an early response can't
+      // be missed; awaiting them lets the counters settle before we assert.
+      const sharedResourceResponses = Promise.all([
+        page.waitForResponse((response) => hasDataPattern.test(response.url()), {
+          timeout: EXTENDED_TIMEOUT,
+        }),
+        page.waitForResponse((response) => serviceIconsPattern.test(response.url()), {
+          timeout: EXTENDED_TIMEOUT,
+        }),
+        page.waitForResponse((response) => apmPoliciesPattern.test(response.url()), {
+          timeout: EXTENDED_TIMEOUT,
+        }),
+      ]);
 
       await navigationPage.gotoServiceOverview(testData.SERVICE_OPBEANS_JAVA, {
         comparisonEnabled: 'true',
@@ -55,6 +71,7 @@ test.describe(
       });
 
       await test.step('shared resources loaded once', async () => {
+        await sharedResourceResponses;
         expect(hasDataRequests()).toBe(1);
         expect(serviceIconsRequests()).toBe(1);
         expect(apmPoliciesRequests()).toBe(1);

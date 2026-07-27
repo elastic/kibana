@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
@@ -44,6 +45,7 @@ export interface InternalChromeStart extends ChromeStart {
   componentDeps: {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+    readonly capabilities: Capabilities;
   };
 
   sideNav: ChromeStart['sideNav'] & {
