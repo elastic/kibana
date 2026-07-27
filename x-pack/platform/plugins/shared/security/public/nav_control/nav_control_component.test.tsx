@@ -11,18 +11,29 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { SecurityNavControl } from './nav_control_component';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
+import { useSecurityApiClients } from '../components';
 import * as UseCurrentUserImports from '../components/use_current_user';
 
 jest.mock('../components/use_current_user');
+jest.mock('../components/security_api_clients_provider');
 jest.mock('react-use/lib/useObservable');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
 
 const useObservableMock = useObservable as jest.Mock;
+const useKibanaMock = useKibana as jest.Mock;
+const useSecurityApiClientsMock = useSecurityApiClients as jest.Mock;
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
+
+const partialUpdateMock = jest.fn().mockResolvedValue(undefined);
+const setDarkModeMock = jest.fn();
 
 const userProfileWithSecurity = userProfileMock.createWithSecurity();
 const userProfile = {
@@ -54,6 +65,28 @@ describe('SecurityNavControl', () => {
     useObservableMock.mockImplementation(
       (observable: BehaviorSubject<any>, initialValue = {}) => observable.value ?? initialValue
     );
+
+    partialUpdateMock.mockClear();
+    setDarkModeMock.mockClear();
+
+    useKibanaMock.mockReset();
+    useKibanaMock.mockReturnValue({
+      services: {
+        theme: {
+          theme$: new BehaviorSubject({ darkMode: false, name: 'borealis' }),
+          getTheme: () => ({ darkMode: false, name: 'borealis' }),
+          setDarkMode: setDarkModeMock,
+        },
+        uiSettings: {
+          isOverridden: () => false,
+        },
+      },
+    });
+
+    useSecurityApiClientsMock.mockReset();
+    useSecurityApiClientsMock.mockReturnValue({
+      userProfiles: { partialUpdate: partialUpdateMock },
+    });
   });
 
   it('should render an avatar when user profile has loaded', async () => {
@@ -209,27 +242,33 @@ describe('SecurityNavControl', () => {
       <div
         class="euiContextMenu chrNavControl__userMenu emotion-euiContextMenu"
         data-test-subj="userMenu"
-        style="height: 0px;"
+        style="width: 256px; height: 0px;"
       >
         <div
           class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
           tabindex="-1"
         >
           <div
-            class="euiContextMenuPanelTitle euiContextMenuPanel__title emotion-euiContextMenuPanelTitle"
-            data-test-subj="contextMenuPanelTitle"
-          >
-            <h2
-              class="euiContextMenuPanelTitle__text css-8u7lys-text"
-              id="generated-id_euiContextMenuPanelTitle"
-            >
-              full name
-            </h2>
-          </div>
-          <div
-            aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
+            <div
+              class="css-32vwyw-menuContent"
+              data-test-subj="userMenuHeader"
+            >
+              <div
+                class="euiText emotion-euiText-s-menuContent"
+              >
+                full name
+              </div>
+              <div
+                class="euiText emotion-euiText-xs-euiTextColor-subdued"
+              >
+                email
+              </div>
+            </div>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
             <a
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
               data-test-subj="profileLink"
@@ -333,8 +372,71 @@ describe('SecurityNavControl', () => {
             <div>
               Dummy Component
             </div>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
             <div
-              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+              class="css-14ensjm-menuContent"
+            >
+              <div
+                class="euiText emotion-euiText-xs-euiTextColor-subdued-menuContent"
+              >
+                Theme
+              </div>
+            </div>
+            <button
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuThemeLight"
+              type="button"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="check"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Light
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuThemeDark"
+              type="button"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Dark
+                </span>
+              </span>
+            </button>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
+            <div
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center-menuContent"
               data-test-subj="logoutLink"
             >
               <span
@@ -346,6 +448,7 @@ describe('SecurityNavControl', () => {
                   <span
                     aria-hidden="true"
                     class="emotion-euiContextMenu__icon"
+                    color="danger"
                     data-euiicon-type="logOut"
                   />
                 </span>
@@ -389,27 +492,33 @@ describe('SecurityNavControl', () => {
       <div
         class="euiContextMenu chrNavControl__userMenu emotion-euiContextMenu"
         data-test-subj="userMenu"
-        style="height: 0px;"
+        style="width: 256px; height: 0px;"
       >
         <div
           class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
           tabindex="-1"
         >
           <div
-            class="euiContextMenuPanelTitle euiContextMenuPanel__title emotion-euiContextMenuPanelTitle"
-            data-test-subj="contextMenuPanelTitle"
-          >
-            <h2
-              class="euiContextMenuPanelTitle__text css-8u7lys-text"
-              id="generated-id_euiContextMenuPanelTitle"
-            >
-              full name
-            </h2>
-          </div>
-          <div
-            aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
+            <div
+              class="css-32vwyw-menuContent"
+              data-test-subj="userMenuHeader"
+            >
+              <div
+                class="euiText emotion-euiText-s-menuContent"
+              >
+                full name
+              </div>
+              <div
+                class="euiText emotion-euiText-xs-euiTextColor-subdued"
+              >
+                email
+              </div>
+            </div>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
             <a
               class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
               data-test-subj="userMenuLink__link1"
@@ -485,8 +594,71 @@ describe('SecurityNavControl', () => {
                 </span>
               </span>
             </a>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
             <div
-              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+              class="css-14ensjm-menuContent"
+            >
+              <div
+                class="euiText emotion-euiText-xs-euiTextColor-subdued-menuContent"
+              >
+                Theme
+              </div>
+            </div>
+            <button
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuThemeLight"
+              type="button"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="check"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Light
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuThemeDark"
+              type="button"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Dark
+                </span>
+              </span>
+            </button>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
+            <div
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center-menuContent"
               data-test-subj="logoutLink"
             >
               <span
@@ -498,6 +670,7 @@ describe('SecurityNavControl', () => {
                   <span
                     aria-hidden="true"
                     class="emotion-euiContextMenu__icon"
+                    color="danger"
                     data-euiicon-type="logOut"
                   />
                 </span>
@@ -538,29 +711,38 @@ describe('SecurityNavControl', () => {
       <div
         class="euiContextMenu chrNavControl__userMenu emotion-euiContextMenu"
         data-test-subj="userMenu"
-        style="height: 0px;"
+        style="width: 256px; height: 0px;"
       >
         <div
           class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
           tabindex="-1"
         >
           <div
-            class="euiContextMenuPanelTitle euiContextMenuPanel__title emotion-euiContextMenuPanelTitle"
-            data-test-subj="contextMenuPanelTitle"
-          >
-            <h2
-              class="euiContextMenuPanelTitle__text css-8u7lys-text"
-              id="generated-id_euiContextMenuPanelTitle"
-            >
-              full name
-            </h2>
-          </div>
-          <div
-            aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
             <div
-              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+              class="css-32vwyw-menuContent"
+              data-test-subj="userMenuHeader"
+            >
+              <div
+                class="euiText emotion-euiText-s-menuContent"
+              >
+                full name
+              </div>
+              <div
+                class="euiText emotion-euiText-xs-euiTextColor-subdued"
+              >
+                email
+              </div>
+            </div>
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
+            <hr
+              class="euiHorizontalRule emotion-euiHorizontalRule-full"
+            />
+            <div
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center-menuContent"
               data-test-subj="logoutLink"
             >
               <span
@@ -572,6 +754,7 @@ describe('SecurityNavControl', () => {
                   <span
                     aria-hidden="true"
                     class="emotion-euiContextMenu__icon"
+                    color="danger"
                     data-euiicon-type="logOut"
                   />
                 </span>

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -15,7 +13,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import * as connectionDetails from '@kbn/cloud/connection_details';
 import type { BuildFlavor } from '@kbn/config';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
-import { AppearanceToggle } from './maybe_add_cloud_links/appearance_selector/appearance_toggle';
 
 interface CloudLinksDepsSetup {
   cloud?: CloudSetup;
@@ -115,14 +112,6 @@ export class CloudLinksPlugin
           isServerless: this.offering === 'serverless',
         });
       }
-    } else if (security && !isAnonymous) {
-      // Outside of Cloud (self-managed / dev) the Cloud user-menu links aren't added, but users
-      // should still be able to switch between light and dark appearance. Surface it as a toggle
-      // at the far right of the header (order above the user menu's 4000 so it sits rightmost).
-      core.chrome.navControls.registerRight({
-        order: 9000,
-        content: <AppearanceToggle core={core} security={security} />,
-      });
     }
 
     connectionDetails.setGlobalDependencies({

@@ -22,8 +22,6 @@ interface StreamsMarketingToastProps {
   onClose: () => void;
   /** Link the "Explore streams" CTA points at (the interactive canvas tab). */
   exploreHref?: string;
-  /** Whether the bottom prototype callout banner is showing, so we can sit above it. */
-  isCalloutVisible?: boolean;
 }
 
 // The illustration is laid out on the design's own 288x64 grid (the toast's 336px
@@ -178,11 +176,7 @@ function ToastIllustration() {
  * bottom-right like a regular EUI toast and features an animated illustration of
  * data flowing from source nodes, through routing, into a destination.
  */
-export function StreamsMarketingToast({
-  onClose,
-  exploreHref,
-  isCalloutVisible = false,
-}: StreamsMarketingToastProps) {
+export function StreamsMarketingToast({ onClose, exploreHref }: StreamsMarketingToastProps) {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('l');
 
@@ -212,7 +206,7 @@ export function StreamsMarketingToast({
         className={css`
           position: fixed;
           right: ${euiTheme.size.base};
-          bottom: ${isCalloutVisible ? 60 : 24}px;
+          bottom: 24px;
           z-index: 1000;
           width: 336px;
           max-width: calc(100vw - ${euiTheme.size.xl});
