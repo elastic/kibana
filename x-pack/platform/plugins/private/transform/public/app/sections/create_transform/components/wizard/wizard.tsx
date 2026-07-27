@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  type FC,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
@@ -33,12 +25,7 @@ import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
-import {
-  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
-  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
-  TRANSFORM_FUNCTION,
-  type TransformFunction,
-} from '../../../../../../common/constants';
+import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { isLatestTransform } from '../../../../../../common/types/transform';
 
@@ -115,7 +102,6 @@ export const Wizard: FC<WizardProps> = React.memo(
       cloneConfig,
       initialTransformFunction
     );
-    const transformFunctionRef = useRef(defaultTransformFunction);
 
     const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
     const [stepDefineState, setStepDefineState] = useState<StepDefineExposedState>();
@@ -140,7 +126,6 @@ export const Wizard: FC<WizardProps> = React.memo(
           nextSearchItems.dataView
         );
 
-        transformFunctionRef.current = nextStepDefineState.transformFunction;
         setStepDefineState(nextStepDefineState);
         setStepDetailsState(
           applyTransformConfigToDetailsState(
@@ -156,15 +141,9 @@ export const Wizard: FC<WizardProps> = React.memo(
 
     useEffect(() => {
       if (searchItems) {
-        resetWizardState(searchItems, transformFunctionRef.current);
+        resetWizardState(searchItems, defaultTransformFunction);
       }
-    }, [resetWizardState, searchItems]);
-
-    useEffect(() => {
-      if (stepDefineState) {
-        transformFunctionRef.current = stepDefineState.transformFunction;
-      }
-    }, [stepDefineState]);
+    }, [defaultTransformFunction, resetWizardState, searchItems]);
 
     const refreshSavedDataViews = useCallback(() => {
       data.dataViews.getIdsWithTitle().then(setSavedDataViews);
@@ -192,15 +171,14 @@ export const Wizard: FC<WizardProps> = React.memo(
 
     const confirmDataViewChange = useCallback(() => {
       if (pendingDataViewId) {
-        const transformFunction = transformFunctionRef.current;
         setStepDefineState(undefined);
-        setStepDetailsState(getDefaultStepDetailsState(transformFunction));
+        setStepDetailsState(getDefaultStepDetailsState(defaultTransformFunction));
         setStepCreateState(getDefaultStepCreateState());
         setCurrentStep(WIZARD_STEPS.DEFINE);
         setSavedObjectId?.(pendingDataViewId);
       }
       setPendingDataViewId(undefined);
-    }, [pendingDataViewId, setSavedObjectId]);
+    }, [defaultTransformFunction, pendingDataViewId, setSavedObjectId]);
 
     const cancelDataViewChange = useCallback(() => setPendingDataViewId(undefined), []);
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
@@ -240,31 +218,6 @@ export const Wizard: FC<WizardProps> = React.memo(
       </EuiFormRow>
     );
 
-    const prevTransformFunctionRef = useRef(defaultTransformFunction);
-    useEffect(() => {
-      if (!stepDefineState) return;
-
-      const prev = prevTransformFunctionRef.current;
-      const next = stepDefineState.transformFunction;
-      if (prev === next) return;
-      prevTransformFunctionRef.current = next;
-
-      const oldDefault =
-        prev === TRANSFORM_FUNCTION.LATEST
-          ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
-          : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE;
-      const newDefault =
-        next === TRANSFORM_FUNCTION.LATEST
-          ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
-          : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE;
-
-      setStepDetailsState((s) =>
-        s.transformSettingsMaxPageSearchSize === oldDefault
-          ? { ...s, transformSettingsMaxPageSearchSize: newDefault }
-          : s
-      );
-    }, [stepDefineState]);
-
     const transformConfig =
       dataView && stepDefineState
         ? getCreateTransformRequestBody(dataView, stepDefineState, stepDetailsState)
@@ -277,7 +230,7 @@ export const Wizard: FC<WizardProps> = React.memo(
       children: (
         <StepDefine
           dataViewPicker={dataViewPicker}
-          initialTransformFunction={transformFunctionRef.current}
+          initialTransformFunction={defaultTransformFunction}
           isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
           onNext={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
           stepDefineState={stepDefineState}

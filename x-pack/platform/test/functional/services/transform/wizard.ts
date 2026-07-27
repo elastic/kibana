@@ -369,12 +369,13 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
     async assertSelectedTransformFunction(transformFunction: 'pivot' | 'latest') {
       await testSubjects.existOrFail(
-        `transformCreation-${transformFunction}-option selectedFunction`
+        transformFunction === 'latest'
+          ? 'transformWizardUniqueKeysSelector'
+          : 'transformGroupBySelection'
       );
     },
 
     async selectTransformFunction(transformFunction: 'pivot' | 'latest') {
-      await testSubjects.click(`transformCreation-${transformFunction}-option`);
       await this.assertSelectedTransformFunction(transformFunction);
     },
 

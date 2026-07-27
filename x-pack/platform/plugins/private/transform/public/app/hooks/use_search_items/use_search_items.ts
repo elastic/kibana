@@ -23,13 +23,14 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
 
   const isMounted = useRef(true);
+  const requestId = useRef(0);
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
 
-  async function fetchSavedObject(id: string) {
+  async function fetchSavedObject(id: string, currentRequestId: number) {
     let fetchedDataView;
     let fetchedSavedSearch;
 
@@ -48,7 +49,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
 
-    if (isMounted.current) {
+    if (isMounted.current && requestId.current === currentRequestId) {
       if (!isDataView(fetchedDataView) && fetchedSavedSearch === undefined) {
         setError(
           i18n.translate('xpack.transform.searchItems.errorInitializationTitle', {
@@ -65,9 +66,11 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
 
   useEffect(() => {
     if (savedObjectId !== undefined) {
+      const currentRequestId = requestId.current + 1;
+      requestId.current = currentRequestId;
       setSearchItems(undefined);
       setError(undefined);
-      fetchSavedObject(savedObjectId);
+      fetchSavedObject(savedObjectId, currentRequestId);
     }
     // Run this only when savedObjectId changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps

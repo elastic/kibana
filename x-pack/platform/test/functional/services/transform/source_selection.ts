@@ -13,11 +13,14 @@ export function TransformSourceSelectionProvider({ getService }: FtrProviderCont
 
   return {
     async assertSourceListContainsEntry(sourceName: string) {
-      await testSubjects.existOrFail(`savedObjectTitle${sourceName}`);
+      const dataViewSwitcher = await testSubjects.find('indexPattern-switcher');
+      await dataViewSwitcher.findByCssSelector(`[data-test-subj="dataView-${sourceName}"]`);
     },
 
     async filterSourceSelection(sourceName: string) {
-      await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
+      await testSubjects.click('transformDataViewPicker');
+      await testSubjects.existOrFail('indexPattern-switcher', { timeout: 10 * 1000 });
+      await testSubjects.setValue('indexPattern-switcher--input', sourceName, {
         clearWithKeyboard: true,
       });
       await this.assertSourceListContainsEntry(sourceName);
@@ -26,7 +29,11 @@ export function TransformSourceSelectionProvider({ getService }: FtrProviderCont
     async selectSource(sourceName: string) {
       await this.filterSourceSelection(sourceName);
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
+        const dataViewSwitcher = await testSubjects.find('indexPattern-switcher');
+        await (
+          await dataViewSwitcher.findByCssSelector(`[data-test-subj="dataView-${sourceName}"]`)
+        ).click();
+        await testSubjects.missingOrFail('indexPattern-switcher', { timeout: 10 * 1000 });
         await testSubjects.existOrFail('transformPageCreateTransform', { timeout: 10 * 1000 });
       });
     },
