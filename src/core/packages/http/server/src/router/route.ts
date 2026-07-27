@@ -251,8 +251,9 @@ export type Privileges = Array<Privilege | PrivilegeSet>;
  * Describes the authorization requirements when authorization is enabled.
  *
  * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
- * - `extendedPrivileges`: Privileges checked and surfaced in `request.authzResult` but not enforced.
- *   Missing extended privileges never produce a 403.
+ * - `extendedPrivileges`: A flat list of privilege name strings checked and surfaced in
+ *   `request.authzResult` but not enforced. Missing extended privileges never produce a 403.
+ *   Privilege sets (`anyRequired` / `allRequired`) are not supported here — only string names.
  */
 export interface AuthzEnabled {
   requiredPrivileges: Privileges;

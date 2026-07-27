@@ -334,7 +334,8 @@ router.get({
 ```
 
 A few rules are enforced at route registration:
-- `extendedPrivileges` requires `requiredPrivileges` to be present — a route cannot be protected by optional privileges alone.
+- When authz is enabled, `requiredPrivileges` is required by the schema — a route cannot rely on `extendedPrivileges` alone (optional privileges never grant access).
+- `extendedPrivileges` is a flat list of privilege name strings; privilege sets (`anyRequired` / `allRequired`) are not supported.
 - `extendedPrivileges` cannot overlap with `requiredPrivileges` (including privileges nested in `allRequired`/`anyRequired`).
 - `ReservedPrivilegesSet.superuser` and `ReservedPrivilegesSet.operator` are not allowed in `extendedPrivileges`.
 

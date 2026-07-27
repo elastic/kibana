@@ -528,6 +528,19 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation when extendedPrivileges contains a privilege set', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: [{ anyRequired: ['readExecution', 'readManaged'] } as any],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported"`
+    );
+  });
+
   it('should fail validation when extendedPrivileges contains duplicates', () => {
     expect(() =>
       validRouteSecurity({

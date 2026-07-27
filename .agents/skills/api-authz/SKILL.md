@@ -45,6 +45,8 @@ When a route handler branches logic based on user privileges (returns different 
 
 When a privilege **gates access** and another privilege only **extends** what the route returns or allows, declare the gate in `requiredPrivileges` and the optional checks in `extendedPrivileges`. Extended privileges are checked and surfaced in `authzResult` but never produce a 403.
 
+`extendedPrivileges` is a **flat list of privilege name strings** only. Privilege sets (`anyRequired` / `allRequired`) are not supported there. When authz is enabled, `requiredPrivileges` is always required by the schema — optional privileges alone cannot protect a route.
+
 **Correct — required gate + optional extension:**
 ```ts
 router.get({

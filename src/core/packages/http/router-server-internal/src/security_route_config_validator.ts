@@ -109,20 +109,26 @@ const requiredPrivilegesSchema = schema.arrayOf(
   }
 );
 
-const extendedPrivilegesSchema = schema.arrayOf(schema.string(), {
+const extendedPrivilegesSchema = schema.arrayOf(schema.any(), {
   minSize: 1,
   maxSize: 100,
   validate: (value) => {
-    if (value.includes(ReservedPrivilegesSet.superuser)) {
+    if (value.some((privilege) => typeof privilege !== 'string')) {
+      return 'extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported';
+    }
+
+    const privileges = value as string[];
+
+    if (privileges.includes(ReservedPrivilegesSet.superuser)) {
       return 'Using superuser privileges in extendedPrivileges is not allowed';
     }
 
-    if (value.includes(ReservedPrivilegesSet.operator)) {
+    if (privileges.includes(ReservedPrivilegesSet.operator)) {
       return 'Using operator privileges in extendedPrivileges is not allowed';
     }
 
-    const uniquePrivileges = new Set(value);
-    if (value.length !== uniquePrivileges.size) {
+    const uniquePrivileges = new Set(privileges);
+    if (privileges.length !== uniquePrivileges.size) {
       return 'extendedPrivileges must contain unique values';
     }
   },
@@ -152,12 +158,9 @@ const authzSchema = schema.object(
   },
   {
     validate: (value) => {
-      if (!value.extendedPrivileges) {
+      // When authz is enabled, requiredPrivileges is already required by the base schema.
+      if (!value.extendedPrivileges || !value.requiredPrivileges) {
         return undefined;
-      }
-
-      if (!value.requiredPrivileges) {
-        return 'requiredPrivileges must be specified when extendedPrivileges is present';
       }
 
       const requiredPrivileges = flattenSecurityPrivileges(value.requiredPrivileges);
