@@ -6,7 +6,10 @@
  */
 
 import type { DetectedPiiEntity, PiiTextRecord } from '@kbn/inference-plugin/server';
-import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import {
+  createServerStepDefinition,
+  type WorkflowExecutionCapabilities,
+} from '@kbn/workflows-extensions/server';
 import {
   aiPiiCommonDefinition,
   type AiPiiInput,
@@ -121,7 +124,7 @@ export const executePiiProtection = async ({
   logger,
 }: {
   input: AiPiiInput;
-  capabilities: Parameters<typeof getPiiTokenizationContext>[0];
+  capabilities: WorkflowExecutionCapabilities | undefined;
   abortSignal: AbortSignal;
   logger: PiiProtectionLogger;
 }): Promise<AnonymizedCompletion> => {

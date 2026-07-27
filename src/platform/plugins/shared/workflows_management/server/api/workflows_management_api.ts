@@ -132,6 +132,12 @@ export interface ResolveWorkflowTriggerMatchesResult {
 
 export interface ExecuteWorkflowSynchronouslyParams {
   workflowId: string;
+  /**
+   * Pre-fetched workflow DTO (e.g. from trigger resolution). When supplied, the ES re-fetch
+   * inside `executeWorkflowSynchronously` is skipped — eliminates a redundant read on the
+   * inference hot path. The DTO is still validated (enabled, valid, definition) before execution.
+   */
+  workflow?: WorkflowDetailDto;
   context: Record<string, unknown>;
   spaceId: string;
   request: KibanaRequest;
@@ -350,15 +356,18 @@ export class WorkflowsManagementApi {
 
   public async executeWorkflowSynchronously({
     workflowId,
+    workflow: prefetchedWorkflow,
     context,
     spaceId,
     request,
     capabilities,
     abortSignal,
   }: ExecuteWorkflowSynchronouslyParams): Promise<ExecuteWorkflowResponse> {
-    const workflow = await this.getSavedWorkflowExecutionModel(workflowId, spaceId);
+    const model = prefetchedWorkflow
+      ? this.validateAndBuildWorkflowModel(prefetchedWorkflow)
+      : await this.getSavedWorkflowExecutionModel(workflowId, spaceId);
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.executeWorkflow(workflow, context, request, {
+    return workflowsExecutionEngine.executeWorkflow(model, context, request, {
       executionMode: 'sync',
       capabilities,
       abortSignal,
@@ -627,26 +636,33 @@ export class WorkflowsManagementApi {
     };
   }
 
+  /**
+   * Validates an already-fetched workflow DTO and converts it to an execution model.
+   * Used by `executeWorkflowSynchronously` when the caller passes a pre-fetched workflow,
+   * and by `getSavedWorkflowExecutionModel` after the ES fetch.
+   */
+  private validateAndBuildWorkflowModel(workflow: WorkflowDetailDto): WorkflowExecutionEngineModel {
+    if (!workflow.enabled) {
+      throw new Error(`Workflow '${workflow.id}' is disabled and cannot be executed.`);
+    }
+    if (!workflow.valid) {
+      throw new Error(`Workflow '${workflow.id}' has validation errors and cannot be executed.`);
+    }
+    if (!workflow.definition) {
+      throw new Error(`Workflow '${workflow.id}' has no definition and cannot be executed.`);
+    }
+    return toWorkflowExecutionEngineModel(workflow);
+  }
+
   private async getSavedWorkflowExecutionModel(
     workflowId: string,
     spaceId: string
   ): Promise<WorkflowExecutionEngineModel> {
     const workflow = await this.getWorkflow(workflowId, spaceId);
-
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
     }
-    if (!workflow.enabled) {
-      throw new Error(`Workflow '${workflowId}' is disabled and cannot be executed.`);
-    }
-    if (!workflow.valid) {
-      throw new Error(`Workflow '${workflowId}' has validation errors and cannot be executed.`);
-    }
-    if (!workflow.definition) {
-      throw new Error(`Workflow '${workflowId}' has no definition and cannot be executed.`);
-    }
-
-    return toWorkflowExecutionEngineModel(workflow);
+    return this.validateAndBuildWorkflowModel(workflow);
   }
 
   private async waitForWorkflowExecution({

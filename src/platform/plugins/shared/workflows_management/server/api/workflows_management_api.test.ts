@@ -176,6 +176,67 @@ describe('WorkflowsManagementApi', () => {
         }
       );
     });
+
+    it('skips the ES re-fetch when a pre-fetched workflow DTO is provided', async () => {
+      const workflow = createTriggeredWorkflow({ id: 'workflow-1' });
+      mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
+        workflowExecutionId: 'execution-1',
+        result: { status: ExecutionStatus.COMPLETED, output: { content: 'restored' } },
+      });
+
+      await api.executeWorkflowSynchronously({
+        workflowId: workflow.id,
+        workflow,
+        context: { event: { messages: [] }, spaceId: 'space-a' },
+        spaceId: 'space-a',
+        request: mockRequest,
+      });
+
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: workflow.id }),
+        expect.any(Object),
+        mockRequest,
+        expect.objectContaining({ executionMode: 'sync' })
+      );
+    });
+
+    it('validates the pre-fetched DTO and throws without an ES fetch when the workflow is disabled, invalid, or missing a definition', async () => {
+      const base = createTriggeredWorkflow({ id: 'wf-guard' });
+
+      await expect(
+        api.executeWorkflowSynchronously({
+          workflowId: base.id,
+          workflow: { ...base, enabled: false },
+          context: {},
+          spaceId: 'space-a',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('disabled');
+
+      await expect(
+        api.executeWorkflowSynchronously({
+          workflowId: base.id,
+          workflow: { ...base, valid: false },
+          context: {},
+          spaceId: 'space-a',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('validation errors');
+
+      await expect(
+        api.executeWorkflowSynchronously({
+          workflowId: base.id,
+          workflow: { ...base, definition: null },
+          context: {},
+          spaceId: 'space-a',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('no definition');
+
+      // All three guard paths use the supplied DTO — no ES re-fetch
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+    });
   });
 
   describe('cloneWorkflow', () => {
