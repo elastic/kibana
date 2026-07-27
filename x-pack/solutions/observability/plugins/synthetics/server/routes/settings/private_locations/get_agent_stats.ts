@@ -62,9 +62,10 @@ export interface LocationAgentStats {
   locationId: string;
   agents: AgentStat[];
   /**
-   * Monitors with no host condition yet (created before any agent enrolled).
-   * They run on every agent until a rebalance assigns them, so we surface them
-   * separately rather than hiding them.
+   * Monitors not pinned to a specific enrolled host (e.g. created before any
+   * agent enrolled, or their pinned agent left). They carry the never-match
+   * UNASSIGNED sentinel condition and so run on NO agent until a rebalance
+   * assigns them — surfaced separately rather than hidden.
    */
   unassignedMonitors: number;
 }
@@ -105,41 +106,55 @@ const getEnrolledAgentHosts = async (
 ): Promise<Map<string, AgentHostMeta>> => {
   const byHost = new Map<string, AgentHostMeta>();
 
-  const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
-    showInactive: false,
-    perPage: 1000,
-    kuery: `policy_id:"${agentPolicyId}"`,
-  });
-
-  for (const agent of agents) {
-    const meta = agent.local_metadata as AgentLocalMetadata | undefined;
-    const host = meta?.host;
-    const name = (host?.name ?? host?.hostname)?.toLowerCase();
-    if (!name) {
-      continue;
-    }
-    const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
-    const lastCheckin = Number.isNaN(last) ? null : last;
-    const memoryMib =
-      typeof host?.memory === 'number' && host.memory > 0
-        ? Math.round(host.memory / BYTES_PER_MIB)
-        : null;
-    const prev = byHost.get(name);
-    // Keep the freshest agent's identity when several share a host name.
-    const isFresher = (lastCheckin ?? 0) >= (prev?.lastCheckin ?? -1);
-    byHost.set(name, {
-      lastCheckin: Math.max(prev?.lastCheckin ?? 0, lastCheckin ?? 0) || lastCheckin,
-      memoryMib: Math.max(prev?.memoryMib ?? 0, memoryMib ?? 0) || null,
-      agentId: isFresher ? agent.id : prev?.agentId ?? null,
-      agentVersion: isFresher ? meta?.elastic?.agent?.version ?? null : prev?.agentVersion ?? null,
-      agentStatus: isFresher ? agent.status ?? null : prev?.agentStatus ?? null,
-      policyRevision: isFresher ? agent.policy_revision ?? null : prev?.policyRevision ?? null,
-      lastCheckinMessage: isFresher
-        ? agent.last_checkin_message ?? null
-        : prev?.lastCheckinMessage ?? null,
-      platform: isFresher ? meta?.os?.platform ?? meta?.os?.name ?? null : prev?.platform ?? null,
-      tags: isFresher ? agent.tags ?? [] : prev?.tags ?? [],
+  const perPage = 1000;
+  let page = 1;
+  let hasMore = true;
+  // Paginate: a location's single agent policy can hold more than one page of
+  // agents, and dropping the overflow would make the UI's per-agent stats,
+  // counts and health disagree with the rebalancer at scale.
+  while (hasMore) {
+    const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
+      showInactive: false,
+      perPage,
+      page,
+      kuery: `policy_id:"${agentPolicyId}"`,
     });
+
+    for (const agent of agents) {
+      const meta = agent.local_metadata as AgentLocalMetadata | undefined;
+      const host = meta?.host;
+      const name = (host?.name ?? host?.hostname)?.toLowerCase();
+      if (!name) {
+        continue;
+      }
+      const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
+      const lastCheckin = Number.isNaN(last) ? null : last;
+      const memoryMib =
+        typeof host?.memory === 'number' && host.memory > 0
+          ? Math.round(host.memory / BYTES_PER_MIB)
+          : null;
+      const prev = byHost.get(name);
+      // Keep the freshest agent's identity when several share a host name.
+      const isFresher = (lastCheckin ?? 0) >= (prev?.lastCheckin ?? -1);
+      byHost.set(name, {
+        lastCheckin: Math.max(prev?.lastCheckin ?? 0, lastCheckin ?? 0) || lastCheckin,
+        memoryMib: Math.max(prev?.memoryMib ?? 0, memoryMib ?? 0) || null,
+        agentId: isFresher ? agent.id : prev?.agentId ?? null,
+        agentVersion: isFresher
+          ? meta?.elastic?.agent?.version ?? null
+          : prev?.agentVersion ?? null,
+        agentStatus: isFresher ? agent.status ?? null : prev?.agentStatus ?? null,
+        policyRevision: isFresher ? agent.policy_revision ?? null : prev?.policyRevision ?? null,
+        lastCheckinMessage: isFresher
+          ? agent.last_checkin_message ?? null
+          : prev?.lastCheckinMessage ?? null,
+        platform: isFresher ? meta?.os?.platform ?? meta?.os?.name ?? null : prev?.platform ?? null,
+        tags: isFresher ? agent.tags ?? [] : prev?.tags ?? [],
+      });
+    }
+
+    hasMore = agents.length === perPage;
+    page += 1;
   }
 
   return byHost;

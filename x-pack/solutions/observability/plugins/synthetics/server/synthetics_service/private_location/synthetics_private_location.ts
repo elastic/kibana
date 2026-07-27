@@ -323,7 +323,7 @@ export class SyntheticsPrivateLocation {
    * skipped (they can't be a shard target without corrupting the condition).
    */
   private async getEnrolledAgentHosts(agentPolicyId: string): Promise<EnrolledAgentHosts> {
-    const names = new Set<string>();
+    const seenNames = new Set<string>();
     const idByHost = new Map<string, string>();
 
     const perPage = 1000;
@@ -344,22 +344,40 @@ export class SyntheticsPrivateLocation {
             | undefined
         )?.host;
         const name = (host?.name ?? host?.hostname)?.toLowerCase();
-        if (name && isEqlSafeLiteral(name)) {
-          names.add(name);
-          if (host?.id && !idByHost.has(name)) {
-            idByHost.set(name, host.id);
-          }
-        } else if (name) {
+        if (!name) {
+          continue;
+        }
+        if (!isEqlSafeLiteral(name)) {
           this.server.logger.warn(
             `[PrivateLocation] Skipping agent host "${name}" on policy ${agentPolicyId}: not representable in an Elastic Agent condition.`
           );
+          continue;
+        }
+        seenNames.add(name);
+        if (host?.id && isEqlSafeLiteral(host.id) && !idByHost.has(name)) {
+          idByHost.set(name, host.id);
         }
       }
       hasMore = agents.length === perPage;
       page += 1;
     }
 
-    return { names: [...names], idByHost };
+    // Composite shard key: a host is only an assignable target when we have BOTH
+    // a safe host.name and a safe host.id, so two agents sharing a hostname can
+    // never both match a monitor's condition (at-most-once). Drop hosts missing a
+    // usable host.id rather than emit a host.name-only condition.
+    const names: string[] = [];
+    for (const name of seenNames) {
+      if (idByHost.has(name)) {
+        names.push(name);
+      } else {
+        this.server.logger.warn(
+          `[PrivateLocation] Skipping agent host "${name}" on policy ${agentPolicyId}: no usable host.id for a composite shard condition.`
+        );
+      }
+    }
+
+    return { names, idByHost };
   }
 
   /**
@@ -742,19 +760,27 @@ export class SyntheticsPrivateLocation {
     // the package-policy condition). A single minimal-churn pass then computes
     // the target host per monitor — failing over stale-host monitors and load-
     // balancing onto recovery hosts, moving nothing else.
-    const monitors = pkgPolicies.flatMap((pp) => {
+    //
+    // A monitor can have both a new-format (`${configId}-${locationId}`) and a
+    // legacy space-suffixed (`${configId}-${locationId}-${spaceId}`) package
+    // policy; dedupe by config id so its cost isn't counted twice and the
+    // balancer isn't skewed.
+    const monitorsById = new Map<string, { id: string; cost: number; currentHost?: string }>();
+    for (const pp of pkgPolicies) {
       const id = configIdOf(pp.id);
-      return id
-        ? [
-            {
-              id,
-              cost: getMonitorCostMib(monitorTypeOfPolicy(pp)),
-              currentHost: hostFromCondition(pp.condition),
-            },
-          ]
-        : [];
+      if (!id || monitorsById.has(id)) {
+        continue;
+      }
+      monitorsById.set(id, {
+        id,
+        cost: getMonitorCostMib(monitorTypeOfPolicy(pp)),
+        currentHost: hostFromCondition(pp.condition),
+      });
+    }
+    const assignment = rebalanceByCost([...monitorsById.values()], healthyHosts, {
+      capacities,
+      recoveryHosts,
     });
-    const assignment = rebalanceByCost(monitors, healthyHosts, { capacities, recoveryHosts });
 
     const updatesBySpace = new Map<string, UpdatePackagePolicyWithId[]>();
 
@@ -765,15 +791,21 @@ export class SyntheticsPrivateLocation {
       }
 
       const desiredHost = assignment.get(monitorId);
-      if (!desiredHost || hostFromCondition(pp.condition) === desiredHost) {
-        continue; // unplaceable, or already on the right host → no write
+      if (!desiredHost) {
+        continue; // unplaceable → no write
+      }
+      // Compare the full condition (host.name AND host.id): if the assigned
+      // agent kept its hostname but got a new host.id (e.g. a rebuilt VM/
+      // container reusing the name), the name alone is unchanged but the pin is
+      // stale and must be rewritten — otherwise the monitor runs on no agent.
+      const desiredCondition = hostNameCondition(desiredHost, hostIds?.get(desiredHost));
+      if (pp.condition === desiredCondition) {
+        continue; // already pinned to the right agent → no write
       }
 
       const spaceId = pp.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
       const updates = updatesBySpace.get(spaceId) ?? [];
-      updates.push(
-        toConditionUpdate(pp, hostNameCondition(desiredHost, hostIds?.get(desiredHost)))
-      );
+      updates.push(toConditionUpdate(pp, desiredCondition));
       updatesBySpace.set(spaceId, updates);
     }
 

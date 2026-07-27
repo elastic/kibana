@@ -28,8 +28,9 @@ export interface MonitorAgentAssignment {
   agentPolicyName: string;
   /**
    * Assigned agent `host.name` (lowercased), read from the monitor's package-policy
-   * `${host.name}` condition. Null when not yet pinned — the monitor then runs on
-   * every agent until the next rebalance assigns it a host.
+   * `${host.name}` condition. Null when not yet pinned — the monitor carries the
+   * never-match UNASSIGNED sentinel and runs on NO agent until the next rebalance
+   * assigns it a host.
    */
   host: string | null;
   /** Assigned host is currently checking in within the stale window. */

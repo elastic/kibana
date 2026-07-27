@@ -378,10 +378,12 @@ export class AddEditMonitorAPI {
    *  1. delete the monitor SO (and its service/package deployment) — but only when
    *     *this* call created it (`soCreated`), so a create that failed with a
    *     conflict against a pre-existing SO of the same id never tears that SO down;
-   *  2. unconditionally force-delete the deterministic private-location package
-   *     policy ids, so a package policy created while the SO write lost the race
-   *     can't survive as an orphan (which would inflate the location's assignment
-   *     count and never get GC'd except by the one-shot `_cleanup`).
+   *  2. force-delete the deterministic private-location package policy ids, so a
+   *     package policy created while the SO write lost the race can't survive as an
+   *     orphan (which would inflate the location's assignment count and never get
+   *     GC'd except by the one-shot `_cleanup`) — but skip this when a pre-existing
+   *     monitor owns that id (a `version_conflict`), since those package policies
+   *     belong to it and must not be deleted.
    * Each step is isolated so one failure doesn't skip the other.
    */
   async revertMonitorIfCreated({
@@ -416,21 +418,29 @@ export class AddEditMonitorAPI {
       );
     }
 
-    // Safety net for the orphan case: force-delete by deterministic id regardless of
-    // whether the SO existed. Idempotent — missing package policies are ignored.
+    // Safety net for the orphan case: force-delete this monitor's deterministic
+    // package-policy ids so a package policy created while the SO write lost the
+    // race can't survive unreferenced. But a `version_conflict` means an SO — and
+    // its same-id package policies — already existed and belong to ANOTHER
+    // monitor; force-deleting those would break it. So when we didn't create the
+    // SO, only clean up if no monitor currently owns that id.
     if (packagePolicyIds.length > 0) {
-      try {
-        await new PackagePolicyService(server).bulkDelete({
-          policyIdsToDelete: packagePolicyIds,
-          spaceId,
-        });
-      } catch (error) {
-        server.logger.error(
-          `Unable to revert package policies [${packagePolicyIds.join(
-            ', '
-          )}] for monitor with id ${newMonitorId}, Error: ${error.message}`,
-          { error }
-        );
+      const ownedByExistingMonitor =
+        !soCreated && Boolean(await monitorConfigRepository.get(newMonitorId).catch(() => null));
+      if (!ownedByExistingMonitor) {
+        try {
+          await new PackagePolicyService(server).bulkDelete({
+            policyIdsToDelete: packagePolicyIds,
+            spaceId,
+          });
+        } catch (error) {
+          server.logger.error(
+            `Unable to revert package policies [${packagePolicyIds.join(
+              ', '
+            )}] for monitor with id ${newMonitorId}, Error: ${error.message}`,
+            { error }
+          );
+        }
       }
     }
   }
