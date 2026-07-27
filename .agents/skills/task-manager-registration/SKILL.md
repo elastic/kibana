@@ -72,7 +72,7 @@ The validator only checks the format (`{number}{m|s|h|d}`); it does NOT check th
 
 `RunContext` hands the task a `signal` directly — Task Manager owns the underlying `AbortController` internally and never exposes it. Task Manager aborts the signal on timeout or shutdown but never reads `signal.aborted` itself. The signal is the only channel Task Manager has to ask a task to stop — it is the task code's responsibility to comply by passing it to I/O and checking `signal.aborted` in loops. Ignoring it lets in-flight work run past the timeout, hold ES connections open, and block clean shutdown.
 
-**A task cannot make itself exit via the signal.** The task receives only the `AbortSignal`, not the controller, so there is no `abort()` it can call — and Task Manager never reads `signal.aborted` for you. To exit early, return from the top-level task function, or throw an error (Task Manager catches it; classify with the helpers in §4).
+**A task cannot make itself exit via the signal.** To exit early, return from the top-level task function, or throw an error (Task Manager catches it; classify with the helpers in §4).
 
 ### Pass the signal to ES clients
 
@@ -280,10 +280,12 @@ The memory budgets are the assumption capacity planning is built on; if the task
 These are distinct enums for distinct contexts — confusing them is a recurring review finding (see [PR #260373](https://github.com/elastic/kibana/pull/260373)):
 
 - **`TaskCost`** — integer enum (`Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`). Use for the **task type definition's** `cost` field and for the **per-instance `cost` override** in `TaskInstance.cost` *when the value is set in code* against the `TaskInstance` type. This is the value the capacity pool reads.
-- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` before comparing or feeding it back to capacity logic. (Task Manager has an internal `getTaskCostFromInstance` helper for this, but it is **not** exported from `@kbn/task-manager-plugin/server`, so map it yourself.)
+- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` with `getTaskCostFromInstance(...)` before comparing or feeding it back to capacity logic — it isn't re-exported from the public `@kbn/task-manager-plugin/server` barrel, so import it directly from `@kbn/task-manager-plugin/server/task`.
 
 ```ts
 import { TaskCost, InstanceTaskCost } from '@kbn/task-manager-plugin/server';
+// `getTaskCostFromInstance` isn't re-exported from the public barrel — import it from the source file
+import { getTaskCostFromInstance } from '@kbn/task-manager-plugin/server/task';
 
 // Task type registration — integer enum
 { cost: TaskCost.ExtraLarge }
@@ -298,15 +300,8 @@ const paramsSchema = schema.object({
   ]),
 });
 
-// Reading params back at run time — map the string enum to the numeric enum yourself,
-// since `getTaskCostFromInstance` is internal and not exported from the plugin's public API
-const INSTANCE_COST_TO_TASK_COST: Record<InstanceTaskCost, TaskCost> = {
-  [InstanceTaskCost.Tiny]: TaskCost.Tiny,
-  [InstanceTaskCost.Normal]: TaskCost.Normal,
-  [InstanceTaskCost.Large]: TaskCost.Large,
-  [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
-};
-const numericCost = INSTANCE_COST_TO_TASK_COST[taskInstance.params.cost];
+// Reading params back at run time
+const numericCost = getTaskCostFromInstance(taskInstance.params.cost);
 ```
 
 ## 9. Scheduling — `ensureScheduled` vs `schedule` vs `bulkSchedule`
@@ -424,7 +419,7 @@ When registering a new task type:
 4. **Cost type discipline**
    - [ ] `TaskCost` is used for `definition.cost` and in-code `TaskInstance.cost`
    - [ ] `InstanceTaskCost` is used in any persisted/serialised cost field
-   - [ ] The string cost is mapped to the numeric `TaskCost` before comparing (no reliance on the non-exported `getTaskCostFromInstance`)
+   - [ ] The string cost is converted with `getTaskCostFromInstance(...)` before comparing to `TaskCost`
 
 5. **Scheduling**
    - [ ] Recurring tasks scheduled on plugin start use `ensureScheduled` with a stable `id`
