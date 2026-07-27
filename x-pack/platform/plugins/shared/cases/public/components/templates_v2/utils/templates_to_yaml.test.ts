@@ -120,7 +120,7 @@ describe('templatesToYaml', () => {
     expect(yaml).toContain('        timezone: local');
   });
 
-  it('serializes DATE_PICKER default when js-yaml parses it as a Date object (unquoted ISO)', () => {
+  it('serializes DATE_PICKER default when a native Date object is passed as the default value (e.g. from unquoted ISO)', () => {
     const templates: ParsedTemplate[] = [
       {
         templateId: 'template-dp',
@@ -137,7 +137,7 @@ describe('templatesToYaml', () => {
               name: 'due_date',
               control: 'DATE_PICKER',
               type: 'date',
-              // js-yaml parses unquoted ISO timestamps as native Date objects
+              // The yaml package (like js-yaml) can produce native Date objects for unquoted ISO timestamps
               metadata: { default: new Date('2024-06-01T00:00:00.000Z') } as unknown as {
                 show_time?: boolean;
                 timezone?: 'utc' | 'local';

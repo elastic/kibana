@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml, parseDocument, isMap, isSeq, isScalar } from 'yaml';
 
 export type FieldDefaultValue = string | number | string[];
 
@@ -35,7 +34,7 @@ export const updateYamlFieldDefault = (
   }
 
   try {
-    // First validate with js-yaml that the field exists
+    // First validate that the field exists
     const parsed = parseYaml(yaml) as ParsedDefinition;
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.fields)) {
       return yaml;
