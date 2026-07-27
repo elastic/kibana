@@ -64,13 +64,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       return;
     }
 
-    // A PR whose diff is exclusively Scout test files (specs, page objects,
-    // fixtures, playwright configs, generated `.meta` manifests) is derived from
-    // test code only — it cannot affect the OpenAPI snapshot, API contracts, or
-    // Saved Objects registrations, which all come from production source. Detect
-    // it once here and skip those checks below. This reuses the same classifier
-    // (`isScoutTestsOnlyDiff`) the Jest/FTR orchestrator uses for its own
-    // scout-tests-only fast path, so the definition stays single-sourced.
+    // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
     const scoutTestsOnly = isScoutTestsOnlyDiff(
       prChanges.flatMap((change) =>
