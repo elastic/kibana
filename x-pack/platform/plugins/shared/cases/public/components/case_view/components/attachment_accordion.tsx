@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
+import { useAttachmentsSubTabClickedEBT } from '../../../analytics/use_attachments_tab_ebt';
 
 interface AttachmentAccordionProps {
   id: string;
@@ -29,7 +30,16 @@ export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAc
   const accordionId = useGeneratedHtmlId({ prefix: `case-view-attachment-${id}` });
   // Controlled isOpen so we can fully unmount children when collapsed
   const [isOpen, setIsOpen] = useState(true);
-  const onToggle = useCallback((nextIsOpen: boolean) => setIsOpen(nextIsOpen), []);
+  const trackAttachmentsSubTabClick = useAttachmentsSubTabClickedEBT();
+  const onToggle = useCallback(
+    (nextIsOpen: boolean) => {
+      setIsOpen(nextIsOpen);
+      if (nextIsOpen) {
+        trackAttachmentsSubTabClick(id);
+      }
+    },
+    [id, trackAttachmentsSubTabClick]
+  );
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasBorder>

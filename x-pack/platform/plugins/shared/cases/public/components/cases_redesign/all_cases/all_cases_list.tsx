@@ -40,6 +40,10 @@ import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import { CasesTableUtilityBar } from './components/utility_bar';
 import { useCheckDocumentAttachments } from '../../../containers/use_check_alert_attachments';
 import { type GetAttachments } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import {
+  useCasesListPageViewEBT,
+  useCasesListViewModeChangedEBT,
+} from '../../../analytics/use_cases_list_ebt';
 
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
@@ -167,11 +171,22 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { viewMode: storedViewMode, setViewMode } = useViewMode();
     const viewMode = isSelectorView ? VIEW_TOGGLE_TABLE_ID : storedViewMode;
 
+    const trackViewModeChanged = useCasesListViewModeChangedEBT();
     const onViewModeChange = useCallback(
       (mode: ViewToggleId) => {
         setViewMode(mode);
+        trackViewModeChanged(mode);
       },
-      [setViewMode]
+      [setViewMode, trackViewModeChanged]
+    );
+
+    const selectedColumnFields = useMemo(
+      () =>
+        (viewMode === VIEW_TOGGLE_TABLE_ID ? selectedColumns : selectedFields).reduce<string[]>(
+          (fields, { field, isChecked }) => (isChecked ? [...fields, field] : fields),
+          []
+        ),
+      [viewMode, selectedColumns, selectedFields]
     );
 
     const onSortOrderChange = useCallback(
@@ -191,6 +206,14 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
       selectedColumns,
       disabledCases,
+    });
+
+    useCasesListPageViewEBT({
+      viewMode,
+      selectedColumns: selectedColumnFields,
+      perPage: queryParams.perPage,
+      isReady: !isLoadingColumns,
+      enabled: !isSelectorView,
     });
 
     const pagination = useMemo(

@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { CoreStart } from '@kbn/core/public';
 
 import { AttachmentAccordion } from './attachment_accordion';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../../common/mock';
+import { CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE } from '../../../../common/constants';
 
 describe('AttachmentAccordion', () => {
   it('renders the title, count badge, and children', () => {
@@ -46,6 +49,32 @@ describe('AttachmentAccordion', () => {
     expect(screen.getByTestId('case-view-attachment-accordion-toggle-observables')).toHaveAttribute(
       'aria-expanded',
       'true'
+    );
+  });
+
+  it('reports a case_view_attachments_sub_tab_clicked EBT event when the accordion is opened', () => {
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+
+    renderWithTestingProviders(
+      <AttachmentAccordion id="alerts" title="Alerts" count={5}>
+        <div />
+      </AttachmentAccordion>,
+      { wrapperProps: { coreStart } }
+    );
+
+    const toggleButton = screen.getByTestId('case-view-attachment-accordion-toggle-alerts');
+
+    // Collapse it first (already open by default) so the next click reports the "opened" event.
+    fireEvent.click(toggleButton);
+    expect(coreStart.analytics.reportEvent).not.toHaveBeenCalledWith(
+      CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
+      expect.anything()
+    );
+
+    fireEvent.click(toggleButton);
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
+      { owner: mockedTestProvidersOwner[0], attachment_type: 'alerts' }
     );
   });
 });
