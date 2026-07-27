@@ -37,11 +37,15 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 
 ## High — Likely to cause issues
 
-### `cy.intercept()` + `cy.wait('@alias')` as sync points
+### `cy.intercept()` and `cy.wait('@alias')`
 
-- **Look for:** `cy.intercept('GET|POST', '/api/...').as('alias')` followed by `cy.wait('@alias')`
-- **Why:** Playwright doesn't have Cypress-style request interception for synchronization. Direct ports using `page.waitForResponse()` are fragile.
-- **Scout approach:** Wait for UI state instead: `expect(locator).toBeVisible()`, `expect.poll()`, or data-loading indicators.
+- **Look for:** `cy.intercept('GET|POST', '/api/...').as('alias')` followed by `cy.wait('@alias')`.
+- **Why:** The Cypress pair can represent three different concerns that need different Scout replacements: mocking a route, synchronizing with UI work, or asserting an API contract.
+- **Scout approach:**
+  - Route mock or stub: use `page.route()` in a dedicated `fixtures/mocks.ts` helper.
+  - Synchronization only: wait for the resulting UI state with a locator assertion, component-specific loaded signal, or `expect.poll()`.
+  - API request/response contract: move the assertion to a Scout API test.
+  - Response-driven UI behavior with no stable UI signal: use `page.waitForResponse()` narrowly and start the wait before the triggering action.
 
 ### `recurse()` or retry loops
 

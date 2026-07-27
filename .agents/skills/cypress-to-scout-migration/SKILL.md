@@ -153,7 +153,9 @@ Use the solution-specific skill's page object and API service templates as start
 |---------|-------|
 | `cy.visit()` | `page.gotoApp()` or page object `goto()` |
 | `cy.get('[data-test-subj="x"]')` | `page.testSubj.locator('x')` |
-| `cy.intercept() + cy.wait()` | Playwright auto-waiting or `expect.poll()` |
+| `cy.intercept()` for stubbing/mocking | `page.route()` in a dedicated `fixtures/mocks.ts` helper |
+| `cy.wait('@alias')` for synchronization | Wait for the resulting UI readiness signal with a locator assertion or `expect.poll()` |
+| `cy.intercept()` for API contract assertions | Move the contract check to a Scout API test; use `page.waitForResponse()` only when the response itself is part of the UI behavior |
 | `cy.request()` (setup/teardown) | `apiServices` / `kbnClient` in `beforeAll` |
 | `cy.wait(ms)` | **Forbidden** — use `expect.poll()` or locator assertions |
 | Screens files (selectors) | Page object class with locators |
