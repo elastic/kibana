@@ -69,6 +69,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointCancel: false,
 
   /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
+
+  /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
    * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
    * we test impact on other features.
@@ -198,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -280,7 +286,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -308,7 +314,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
