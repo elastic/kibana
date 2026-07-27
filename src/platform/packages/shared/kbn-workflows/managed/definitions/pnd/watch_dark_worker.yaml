@@ -27,11 +27,11 @@ steps:
     type: ai.agent
     timeout: '10m'
     with:
-      # Option 2 runtime override — STAGED. Un-comment once the ai.agent step accepts
-      # configuration_overrides.skill_ids (Ying's platform PR; POC spong/kibana#22). Until then the
-      # skill:// mention in `message` is the interim, functional-but-not-hard allowlist.
-      # configuration_overrides:
-      #   skill_ids: "{{ steps.watch_policy.watch.skill_allowlist | json }}"
+      # Option 2 runtime override — LIVE (elastic/kibana#280617, straight-replace semantics
+      # confirmed in review + on this branch: no intersection with the agent's stored
+      # skill_ids, since the type-base merge downstream re-adds those regardless).
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
       message: >
         Use the [/threat-intelligence](skill://threat-intelligence) skill to
         perform a threat-intelligence hunt sweep. You already have the escalation
