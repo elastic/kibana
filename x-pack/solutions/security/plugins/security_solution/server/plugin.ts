@@ -458,7 +458,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
-      getOsqueryResponseActionsAuthzChecker
+      getOsqueryResponseActionsAuthzChecker,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
