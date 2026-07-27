@@ -61,10 +61,14 @@ describe('useWatchlistsTableData', () => {
         expect.arrayContaining([
           expect.objectContaining({ id: 'manual-only', source: 'Manual' }),
           expect.objectContaining({ id: 'manual-and-source', source: 'Manual, Entity Store' }),
-          expect.objectContaining({ id: 'empty', source: undefined }),
+          expect.objectContaining({ id: 'empty' }),
         ])
       );
     });
+
+    expect(result.current.visibleRecords.find(({ id }) => id === 'empty')).not.toHaveProperty(
+      'source'
+    );
 
     expect(mockListWatchlistEntitySources).toHaveBeenCalledTimes(1);
     expect(mockListWatchlistEntitySources).toHaveBeenCalledWith(
