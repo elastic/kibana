@@ -419,16 +419,6 @@ export class UnifiedTabs {
       .waitFor({ state: 'visible' });
   }
 
-  private async clickActiveTabMenuItem(menuItemTestSubj: string) {
-    const activeTabTestSubj = await this.getActiveTabTestSubj();
-    const tabId = activeTabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
-
-    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
-    const menuItem = this.page.testSubj.locator(menuItemTestSubj);
-    await menuItem.waitFor({ state: 'visible' });
-    await menuItem.click();
-  }
-
   async openInspectorForActiveTab() {
     await this.clickActiveTabMenuItem(UNIFIED_TABS_TEST_SUBJ.inspectMenuItem);
   }
@@ -449,6 +439,25 @@ export class UnifiedTabs {
         `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]:not([data-test-subj="${originalTestSubj}"])`
       )
       .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Opens the active tab's menu and clicks the given menu item test subject
+   * (e.g. `unifiedTabs_tabMenuItem_inspect`). Generic building block for
+   * per-tab menu actions beyond the dedicated helpers above.
+   */
+  async clickActiveTabMenuItem(menuItemTestSubj: string) {
+    const activeTabTestSubj = await this.getActiveTabTestSubj();
+    const tabId = activeTabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+
+    // Close any menu/popover that might already be open so opening this
+    // tab's menu is deterministic regardless of the page's prior state.
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+
+    const menuItem = this.page.testSubj.locator(menuItemTestSubj);
+    await menuItem.waitFor({ state: 'visible' });
+    await menuItem.click();
   }
 
   /**
