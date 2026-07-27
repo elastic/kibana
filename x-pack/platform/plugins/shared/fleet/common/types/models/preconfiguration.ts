@@ -15,6 +15,7 @@ import type {
 } from './package_policy';
 import type { NewAgentPolicy } from './agent_policy';
 import type { Output } from './output';
+import type { DownloadSourceBase } from './download_sources';
 
 // TODO: This type is not usable directly, and instead we typically use a type assertion
 // e.g. `NewPackagePolicyInput as InputsOverride[]`. This type should be altered so that it's
@@ -60,5 +61,10 @@ export interface PreconfiguredPackage extends Omit<PackagePolicyPackage, 'title'
 
 export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
   config?: Record<string, unknown>;
+  allow_edit?: string[];
+}
+
+export interface PreconfiguredDownloadSource extends DownloadSourceBase {
+  id: string;
   allow_edit?: string[];
 }
