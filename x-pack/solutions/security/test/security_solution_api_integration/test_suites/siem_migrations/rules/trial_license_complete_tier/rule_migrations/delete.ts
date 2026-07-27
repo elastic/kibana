@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import pRetry from 'p-retry';
 import {
   createLookupsForMigrationId,
   createMacrosForMigrationId,
@@ -25,13 +26,16 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/228826
-  describe.skip('@ess @serverless @serverlessQA Delete API', () => {
+  describe('@ess @serverless @serverlessQA Delete API', () => {
     let migrationId: string;
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
       const response = await ruleMigrationRoutes.create({});
       migrationId = response.body.migration_id;
+    });
+
+    afterEach(async () => {
+      await ruleMigrationRoutes.stop({ migrationId });
     });
 
     describe('Happy path', () => {
@@ -112,10 +116,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('Error handling', () => {
         it('should return 409 if migration is already running', async () => {
-          // start a migration
           await ruleMigrationRoutes.addRulesToMigration({
             migrationId,
-            payload: [splunkRuleWithResources],
+            /** enough rules to keep the migration running while delete is attempted */
+            payload: Array.from({ length: 40 }, () => splunkRuleWithResources),
           });
 
           const response = await ruleMigrationRoutes.start({
@@ -128,6 +132,16 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           expect(response.body).toMatchObject({ started: true });
+
+          await pRetry(
+            async () => {
+              const statsResponse = await ruleMigrationRoutes.stats({ migrationId });
+              if (statsResponse.body.status !== 'running') {
+                throw new Error('Retry until migration is running');
+              }
+            },
+            { retries: 5 }
+          );
 
           const deleteResponse = await ruleMigrationRoutes.delete({
             migrationId,
