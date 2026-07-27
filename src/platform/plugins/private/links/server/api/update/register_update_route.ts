@@ -71,7 +71,7 @@ export function registerUpdateRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           const { body, operation } = await update(ctx, req.params.id, req.body);
           if (operation === 'create') {

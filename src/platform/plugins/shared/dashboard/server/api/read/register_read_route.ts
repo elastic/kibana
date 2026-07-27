@@ -79,7 +79,7 @@ export function registerReadRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { core } = await ctx.resolve(['core']);
           const useGASchemas = await getUseGASchemas(core);

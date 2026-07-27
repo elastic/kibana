@@ -85,7 +85,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const { core } = await ctx.resolve(['core']);
         // Fallback is `true` so on-prem stacks (which have no remote feature-flag service)
         // enforce GA schemas by default. Serverless sets the flag explicitly via phased rollout.

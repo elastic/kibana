@@ -15,7 +15,7 @@ import {
 
 export const tagsSearchRequestQuerySchema = z
   .object({
-    query: z.string().optional().meta({
+    query: z.string().max(2048).optional().meta({
       description:
         'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
     }),
@@ -25,7 +25,7 @@ export const tagsSearchRequestQuerySchema = z
 
 export const tagIdParamSchema = z
   .object({
-    id: z.string().meta({
+    id: z.string().min(1).max(256).meta({
       description: 'The tag ID, as returned by the create or search endpoints.',
     }),
   })
@@ -33,13 +33,13 @@ export const tagIdParamSchema = z
 
 export const tagAttributesSchema = z
   .object({
-    name: z.string().meta({
+    name: z.string().min(1).max(256).meta({
       description: 'The display name of the tag.',
     }),
-    description: z.string().optional().meta({
+    description: z.string().max(2048).optional().meta({
       description: 'Optional description of the tag.',
     }),
-    color: z.string().meta({
+    color: z.string().min(1).max(256).meta({
       description:
         'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
     }),
@@ -63,6 +63,7 @@ export const tagRequestAttributesSchema = tagAttributesSchema
 
 export const tagResponseItemSchema = z
   .object({
+    // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
     id: z.string().meta({ description: 'The tag ID.' }),
     data: tagAttributesSchema,
     meta: asCodeMetaSchema,
