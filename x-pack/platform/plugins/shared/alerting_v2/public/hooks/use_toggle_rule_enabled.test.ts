@@ -49,7 +49,8 @@ const createWrapper = () => {
 };
 
 describe('useToggleRuleEnabled', () => {
-  const mockUpdateRule = jest.fn();
+  const mockEnableRule = jest.fn();
+  const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddDanger = jest.fn();
 
@@ -60,7 +61,7 @@ describe('useToggleRuleEnabled', () => {
 
     mockUseService.mockImplementation((service: unknown) => {
       if (service === RulesApi) {
-        return { updateRule: mockUpdateRule } as any;
+        return { enableRule: mockEnableRule, disableRule: mockDisableRule } as any;
       }
       if (service === 'notifications') {
         return { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } } as any;
@@ -69,34 +70,36 @@ describe('useToggleRuleEnabled', () => {
     });
   });
 
-  it('should show an enabled toast with the rule name when enabling', async () => {
-    mockUpdateRule.mockResolvedValue(mockEnabledRuleResponse);
+  it('should enable the rule and show an enabled toast with the rule name', async () => {
+    mockEnableRule.mockResolvedValue(mockEnabledRuleResponse);
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: true });
 
     await waitFor(() => {
-      expect(mockUpdateRule).toHaveBeenCalledWith('rule-1', { enabled: true });
+      expect(mockEnableRule).toHaveBeenCalledWith('rule-1');
+      expect(mockDisableRule).not.toHaveBeenCalled();
       expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" enabled');
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
 
-  it('should show a disabled toast with the rule name when disabling', async () => {
-    mockUpdateRule.mockResolvedValue({ ...mockEnabledRuleResponse, enabled: false });
+  it('should disable the rule and show a disabled toast with the rule name', async () => {
+    mockDisableRule.mockResolvedValue({ ...mockEnabledRuleResponse, enabled: false });
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: false });
 
     await waitFor(() => {
-      expect(mockUpdateRule).toHaveBeenCalledWith('rule-1', { enabled: false });
+      expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
+      expect(mockEnableRule).not.toHaveBeenCalled();
       expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" disabled');
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
 
   it('should show a danger toast when the toggle fails', async () => {
-    mockUpdateRule.mockRejectedValue(new Error('toggle failed'));
+    mockEnableRule.mockRejectedValue(new Error('toggle failed'));
     const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', enabled: true });
@@ -108,7 +111,7 @@ describe('useToggleRuleEnabled', () => {
   });
 
   it('stays in a loading state until the invalidated queries have refetched', async () => {
-    mockUpdateRule.mockResolvedValue(mockEnabledRuleResponse);
+    mockEnableRule.mockResolvedValue(mockEnabledRuleResponse);
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },

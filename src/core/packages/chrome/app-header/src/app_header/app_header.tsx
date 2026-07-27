@@ -55,15 +55,11 @@ export interface AppHeaderViewProps {
   spacing?: AppHeaderSpacing;
   docLink?: string;
   showAddIntegrations?: boolean;
-  /**
-   * Omits the header's bottom border. Used when the content rendered below the header owns the
-   * separating line instead (e.g. Discover using UnifiedTabs).
-   */
-  borderless?: boolean;
 }
 
 interface AppHeaderViewInternalProps extends AppHeaderViewProps {
   titleAppend?: ReactNode;
+  borderless?: boolean;
 }
 
 const getPublicAppHeaderViewProps = ({
@@ -78,7 +74,6 @@ const getPublicAppHeaderViewProps = ({
   spacing,
   docLink,
   showAddIntegrations,
-  borderless,
 }: AppHeaderViewProps): AppHeaderViewProps => ({
   title,
   back,
@@ -91,7 +86,6 @@ const getPublicAppHeaderViewProps = ({
   spacing,
   docLink,
   showAddIntegrations,
-  borderless,
 });
 
 const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
@@ -212,6 +206,7 @@ export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, 
     {...getPublicAppHeaderViewProps(props)}
     title={props.title}
     titleAppend={tabsBar}
+    borderless={tabsBar != null}
   />
 ));
 
