@@ -23,7 +23,7 @@ type WorkflowAnonymizationManagement = Pick<
   'resolveWorkflowTriggerMatches' | 'executeWorkflowSynchronously'
 >;
 
-export const countWorkflowStepType = (steps: WorkflowYaml['steps'], stepType: string): number => {
+const countWorkflowStepType = (steps: WorkflowYaml['steps'], stepType: string): number => {
   let count = 0;
   visitNestedSteps(steps, ({ step }) => {
     if (step.type === stepType) {
@@ -41,6 +41,9 @@ export const createWorkflowAnonymizationProvider = ({
   supportsSynchronousExecution: true,
   execute: async ({ event, namespace, request, pii, proceed, abortSignal }) => {
     const parsedEvent = aroundCompletionEventSchema.parse(event);
+    // NOTE: getWorkflowsSubscribedToTrigger is unbounded (PIT + search_after), but for the
+    // around-completion trigger the effective matched set is enforced by the >1 throw below.
+    // Do not add a hard cap to the shared method — it also serves the event-driven execution path.
     const resolution = await management.resolveWorkflowTriggerMatches(
       INFERENCE_AROUND_COMPLETION_TRIGGER_ID,
       parsedEvent,
@@ -76,6 +79,9 @@ export const createWorkflowAnonymizationProvider = ({
 
     const response = await management.executeWorkflowSynchronously({
       workflowId: workflow.id,
+      // Pass the already-fetched DTO to avoid a second ES read on the inference hot path.
+      // executeWorkflowSynchronously validates the DTO (enabled/valid/definition) before executing.
+      workflow,
       context: {
         event: parsedEvent,
         spaceId: namespace,

@@ -10,14 +10,31 @@ import type { PiiTextRecord } from '@kbn/inference-plugin/server';
 
 type RecordValues = ReadonlyMap<string, string>;
 
-const collectStructuredStrings = (value: unknown, path: string, records: PiiTextRecord[]): void => {
+// Fail-closed guard: tool-call arguments are user-influenced and could be arbitrarily nested.
+// Exceeding this depth throws rather than silently truncating or OOM-ing.
+const MAX_STRUCTURED_DEPTH = 100;
+
+const collectStructuredStrings = (
+  value: unknown,
+  path: string,
+  records: PiiTextRecord[],
+  depth = 0
+): void => {
+  if (depth > MAX_STRUCTURED_DEPTH) {
+    throw new Error(
+      `PII scanner exceeded maximum nesting depth (${MAX_STRUCTURED_DEPTH}) at path "${path}"`
+    );
+  }
+
   if (typeof value === 'string') {
     records.push({ id: path, text: value });
     return;
   }
 
   if (Array.isArray(value)) {
-    value.forEach((item, index) => collectStructuredStrings(item, `${path}/${index}`, records));
+    value.forEach((item, index) =>
+      collectStructuredStrings(item, `${path}/${index}`, records, depth + 1)
+    );
     return;
   }
 
@@ -31,18 +48,29 @@ const collectStructuredStrings = (value: unknown, path: string, records: PiiText
   }
 
   Object.entries(objectValue).forEach(([key, entry]) =>
-    collectStructuredStrings(entry, `${path}/${key}`, records)
+    collectStructuredStrings(entry, `${path}/${key}`, records, depth + 1)
   );
 };
 
-const replaceStructuredStrings = <T>(value: T, path: string, values: RecordValues): T => {
+const replaceStructuredStrings = <T>(
+  value: T,
+  path: string,
+  values: RecordValues,
+  depth = 0
+): T => {
+  if (depth > MAX_STRUCTURED_DEPTH) {
+    throw new Error(
+      `PII scanner exceeded maximum nesting depth (${MAX_STRUCTURED_DEPTH}) at path "${path}"`
+    );
+  }
+
   if (typeof value === 'string') {
     return (values.get(path) ?? value) as T;
   }
 
   if (Array.isArray(value)) {
     return value.map((item, index) =>
-      replaceStructuredStrings(item, `${path}/${index}`, values)
+      replaceStructuredStrings(item, `${path}/${index}`, values, depth + 1)
     ) as T;
   }
 
@@ -58,7 +86,7 @@ const replaceStructuredStrings = <T>(value: T, path: string, values: RecordValue
   return Object.fromEntries(
     Object.entries(objectValue).map(([key, entry]) => [
       key,
-      replaceStructuredStrings(entry, `${path}/${key}`, values),
+      replaceStructuredStrings(entry, `${path}/${key}`, values, depth + 1),
     ])
   ) as T;
 };

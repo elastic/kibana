@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import {
-  executePiiRestore,
-  piiRestoreStepDefinition,
-  piiRestoreStepHandler,
-} from './pii_restore_step';
+import { executePiiRestore, piiRestoreStepDefinition } from './pii_restore_step';
 
 describe('piiRestoreStepDefinition', () => {
-  it('wires the tested restoration handler into the step definition', () => {
-    expect(piiRestoreStepDefinition.handler).toBe(piiRestoreStepHandler);
+  it('restores protected values through the step definition handler', async () => {
+    const result = await piiRestoreStepDefinition.handler({
+      input: {
+        rawContent: 'Contact EMAIL_TOKEN',
+        tokenMap: {
+          EMAIL_TOKEN: { original: 'person@example.com', entityClass: 'EMAIL' },
+        },
+      },
+    });
+    expect(result).toEqual({ output: { content: 'Contact person@example.com' } });
   });
 
   it('restores protected values in final response content', () => {
