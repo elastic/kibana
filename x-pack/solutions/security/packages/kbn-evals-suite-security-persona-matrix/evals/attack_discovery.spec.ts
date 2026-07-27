@@ -10,15 +10,19 @@ import { restoreAlertsSnapshot } from '@kbn/security-evals-alerts-snapshot';
 import { evaluate } from '@kbn/evals-suite-attack-discovery/src/evaluate';
 
 const CHRYSALIS_95_SNAPSHOT = {
-  bucket: process.env.ATTACK_DISCOVERY_95_SNAPSHOT_BUCKET ?? 'security-ai-datasets',
-  basePath:
-    process.env.ATTACK_DISCOVERY_95_SNAPSHOT_BASE_PATH ??
-    'attack-discovery/oh-my-malware-95-deduped/2026-07-24',
-  snapshotName: process.env.ATTACK_DISCOVERY_95_SNAPSHOT_NAME ?? 'alerts-snapshot',
+  bucket: 'security-ai-datasets',
+  basePath: 'attack-discovery/oh-my-malware-95-deduped/2026-07-24',
+  snapshotName: 'alerts-snapshot',
 };
 
 // AD `_generate` exposes no temperature/seed, so the discovery count varies
 // run-to-run on identical input. The alert corpus is byte-reproducible.
+// The window below matches the SOURCE alerts' real @timestamp range
+// (2026-03-19..26, from the original oh-my-malware/2026-03-26 snapshot) —
+// the "2026-07-24" in the bucket path is only the dedup snapshot's creation
+// date, not the alert data's timestamp. Don't "fix" this to a recent date;
+// that would silently zero out the corpus (generateApi defaults to
+// start:'now-24h', which selects nothing outside this window).
 const CORPUS_WINDOW = { start: '2026-03-01T00:00:00.000Z', end: '2026-04-01T00:00:00.000Z' };
 
 evaluate.describe(

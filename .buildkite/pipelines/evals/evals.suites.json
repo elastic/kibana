@@ -146,11 +146,7 @@
       "ciLabels": [
         "evals:security-persona-matrix"
       ],
-      "serverConfigSet": "evals_security_persona_matrix",
-      "weeklyEisModelGroups": [
-        "eis/anthropic-claude-4.6-sonnet",
-        "eis/anthropic-claude-4.5-haiku"
-      ]
+      "serverConfigSet": "evals_security_persona_matrix"
     },
     {
       "id": "security-persona-matrix-attack-discovery",
@@ -165,11 +161,7 @@
       "ciLabels": [
         "evals:security-persona-matrix-attack-discovery"
       ],
-      "serverConfigSet": "evals_tracing",
-      "weeklyEisModelGroups": [
-        "eis/anthropic-claude-4.6-sonnet",
-        "eis/anthropic-claude-4.5-haiku"
-      ]
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "endpoint",

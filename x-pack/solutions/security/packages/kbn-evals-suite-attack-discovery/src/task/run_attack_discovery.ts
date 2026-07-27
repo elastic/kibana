@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import Fs from 'fs/promises';
 import Path from 'path';
+import { getCurrentTraceId } from '@kbn/evals';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type { AttackDiscoveryGenerateApiClient } from '../clients/attack_discovery_generate_api_client';
 import type {
@@ -91,10 +92,7 @@ const generateInsights = async ({
 
   return {
     ...(toolCall.function.arguments as { insights: AttackDiscovery[] }),
-    // `traceId` is not surfaced on the executeUntilValid response type; the capture
-    // side-channel treats it as optional (`?? null`), so omit it rather than read a
-    // non-existent property.
-    traceId: undefined,
+    traceId: getCurrentTraceId() ?? undefined,
   };
 };
 
@@ -178,17 +176,21 @@ export const runAttackDiscovery = async ({
         end: input.end,
       });
 
+      const traceId = getCurrentTraceId() ?? undefined;
+
       captureAdRun(log, {
         status: result.status,
         discoveries: result.discoveries,
         alertsContextCount: result.alertsContextCount,
         latencyMs: result.latencyMs,
+        traceId,
         error: result.error,
       });
 
       return {
         insights: result.discoveries.length > 0 ? result.discoveries : null,
         errors: result.error ? [result.error] : undefined,
+        traceId,
         raw: {
           execution_uuid: result.executionUuid,
           status: result.status,
