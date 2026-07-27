@@ -2317,10 +2317,10 @@
     cssstyle "^4.2.1"
     micromatch "^4.0.8"
 
-"@elastic/esql-definitions@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.14.0.tgz#0b80896c49d08abb27be0307a981038beac466eb"
-  integrity sha512-vIEPBDtLFhVrg9+HlZqJvDnOusmqXIRXqQ0ZXjxz5hwgHk/xoRyx0DhIWuAdzdFQyZf2Jk+aHkjjXn8ixcxnMQ==
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.15.0":
+  version "4.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.15.0.tgz#5977edd04cd1508c85f9c35662778fa858307778"
+  integrity sha512-fwg30m9U+6/JnlLGCIHJ7ETqi3vijy6SYIxfCpyqgsSwKk2NfvXXqfg0+OZkMOc5tsBHwzZb7UhI1CZi48xA/g==
 
 "@elastic/esql-grammar@^4.14.0":
   version "4.14.0"
@@ -2448,12 +2448,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-1.9.0.tgz#a0adec77326c8e4aa948000c9c883afea1708e35"
   integrity sha512-r5Lfs8Y1bcVfzPGze2H1LohgpP5NyneIxFmcJ2V00/CCSUtG3o+bw9IS3xaZ3dC1ewgXa3YRweEPYG8fG2LiBg==
 
-"@elastic/monaco-esql@4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.14.0.tgz#a911695784254e25cbb713d2a3ff9959d2526f89"
-  integrity sha512-EU+Lil7g92aDlHCAlxg/Qw7Uhp99xSjK3KOnDZ0Ax40ofwgjWkCnKTSPd55cuXg+bk/rZGQME/qj85Y4z99ASg==
+"@elastic/monaco-esql@4.15.0":
+  version "4.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.15.0.tgz#e79ee8a0b2f7f1110a060d2880c877d6be134c5e"
+  integrity sha512-awJEPh5Qi+icm1cgRBQPAvth2oi070vAQUHGRBLpUXW0/vBUm6SSd9jgIbBzr0/5hF9bmEKMSetepFZaHxVRpg==
   dependencies:
-    "@elastic/esql-definitions" "^4.14.0"
+    "@elastic/esql-definitions" "^4.15.0"
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -6654,6 +6654,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-context-engine@link:src/platform/packages/shared/deeplinks/context-engine":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-devtools@link:src/platform/packages/shared/deeplinks/devtools":
   version "0.0.0"
   uid ""
@@ -8703,6 +8707,10 @@
   uid ""
 
 "@kbn/response-ops-rules-apis@link:x-pack/platform/packages/shared/response-ops/rules-apis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-schedule-schema@link:x-pack/platform/packages/shared/response-ops/schedule-schema":
   version "0.0.0"
   uid ""
 
@@ -35154,10 +35162,10 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@11.1.0, uuid@^11.1.0:
-  version "11.1.0"
-  resolved "https://registry.npmjs.org/uuid/-/uuid-11.1.0.tgz"
-  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
+uuid@11.1.1, uuid@^11.1.0:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.1.tgz#f6d81d2e1c65d00762e5e29b16c5d2d995e208ad"
+  integrity sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==
 
 uuid@^10.0.0:
   version "10.0.0"
@@ -35165,14 +35173,14 @@ uuid@^10.0.0:
   integrity sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==
 
 uuid@^13.0.0:
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-13.0.0.tgz#263dc341b19b4d755eb8fe36b78d95a6b65707e8"
-  integrity sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==
+  version "13.0.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-13.0.2.tgz#41bc9c07b12f665089c205f6507976adbdf84ff8"
+  integrity sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==
 
 uuid@^14.0.0:
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-14.0.0.tgz#0af883220163d264ffe0c084f6b8a89b9666966d"
-  integrity sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-14.0.1.tgz#8a5975b3e038902bfd169a10b5202f5ec0cf3faf"
+  integrity sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==
 
 uuid@^8.3.2:
   version "8.3.2"

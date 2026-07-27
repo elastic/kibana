@@ -389,11 +389,18 @@ export class RulesClient {
       checkLimit: existingAttrs.enabled,
     });
 
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
+    // updateRule NEVER changes whether a rule runs — it only re-syncs the
+    // schedule interval of an already-enabled rule (Task Manager's
+    // `ensureScheduled` updates the interval of the existing task on conflict).
+    // Turning the run loop on/off stays exclusively with enableRule/disableRule,
+    // so a disabled rule is never resurrected by an unrelated property edit.
+    if (existingAttrs.enabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: nextAttrs.schedule.every,
+      });
+    }
 
     const { version: newVersion } = await this.writeRuleAttrs({
       id,

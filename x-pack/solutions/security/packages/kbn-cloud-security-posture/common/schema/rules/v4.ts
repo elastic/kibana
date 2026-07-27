@@ -8,7 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { BenchmarksCisId } from '../../types/benchmark';
-import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
+import {
+  BENCHMARK_VERSION_MAX_LENGTH,
+  DEFAULT_BENCHMARK_RULES_PER_PAGE,
+  RULE_FIELD_NAME_MAX_LENGTH,
+  RULE_ID_MAX_LENGTH,
+  RULE_NUMBER_MAX_LENGTH,
+  RULE_SEARCH_MAX_LENGTH,
+  RULE_SECTION_MAX_LENGTH,
+} from './v3';
 export type {
   cspBenchmarkRuleMetadataSchema,
   CspBenchmarkRuleMetadata,
@@ -35,7 +43,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ maxLength: RULE_SEARCH_MAX_LENGTH })),
 
   /**
    * The page of objects to return
@@ -51,7 +59,9 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
-  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+  fields: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: RULE_FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
+  ),
 
   /**
    *  The fields to perform the parsed query against.
@@ -106,13 +116,13 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * benchmark version
    */
-  benchmarkVersion: schema.maybe(schema.string()),
+  benchmarkVersion: schema.maybe(schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH })),
 
   /**
    * rule section
    */
-  section: schema.maybe(schema.string()),
-  ruleNumber: schema.maybe(schema.string()),
+  section: schema.maybe(schema.string({ maxLength: RULE_SECTION_MAX_LENGTH })),
+  ruleNumber: schema.maybe(schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH })),
 });
 
 export interface BenchmarkRuleSelectParams {
@@ -129,10 +139,10 @@ export interface PageUrlParams {
 // maxSize is set to 500 as there are usually no more than 100 rules per benchmark
 export const rulesToUpdate = schema.arrayOf(
   schema.object({
-    rule_id: schema.string(),
-    benchmark_id: schema.string(),
-    benchmark_version: schema.string(),
-    rule_number: schema.string(),
+    rule_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+    benchmark_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+    benchmark_version: schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH }),
+    rule_number: schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }),
   }),
   { maxSize: 500 }
 );

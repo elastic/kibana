@@ -131,6 +131,7 @@ describe('MetricsExperienceGridContent', () => {
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
@@ -198,6 +199,7 @@ describe('MetricsExperienceGridContent', () => {
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 

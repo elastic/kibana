@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-context-engine",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared"
+}

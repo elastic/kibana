@@ -15,6 +15,12 @@ import { ALERTS_READER_V2 } from './alerts_reader';
 export interface SignificantEventsAlertingContext {
   readonly alertsReader: ISignificantEventsAlertsReader;
   readonly rulesClient: IRulesManagementClient;
+  /**
+   * The raw alerting v2 rules client. Exposed for the maintenance (pause/resume)
+   * flow, which toggles `enabled` directly on v2 signal rules; regular rule CRUD
+   * goes through `rulesClient`.
+   */
+  readonly alertingV2RulesClient: RulesClientApi;
 }
 
 export interface ResolveSignificantEventsAlertingContextParams {
@@ -42,6 +48,7 @@ export function createSignificantEventsAlertingContextResolver(
       return {
         alertsReader: ALERTS_READER_V2,
         rulesClient: new RulesAdapterV2(alertingV2RulesClient),
+        alertingV2RulesClient,
       };
     })();
     return promise;
