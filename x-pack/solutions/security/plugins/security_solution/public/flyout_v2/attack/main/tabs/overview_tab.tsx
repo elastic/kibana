@@ -14,6 +14,7 @@ import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import { InsightsSection } from '../components/insights_section';
 import { useAttackAlertIds } from '../hooks/use_attack_alert_ids';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export interface OverviewTabProps {
   /**
@@ -43,23 +44,31 @@ export const OverviewTab = memo(({ hit, onAttackUpdated, renderCellActions }: Ov
   const alertIds = useAttackAlertIds(hit);
 
   const onShowAlert = useCallback(
-    (id: string, indexName: string) =>
+    (id: string, indexName: string, title?: string) =>
       openDocumentFlyoutFromIndexAsChild({
         documentId: id,
         indexName,
         renderCellActions,
         onAlertUpdated: onAttackUpdated,
+        origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
+        title,
       }),
     [openDocumentFlyoutFromIndexAsChild, onAttackUpdated, renderCellActions]
   );
 
   const onShowCorrelations = useCallback(
-    () => openAttackCorrelations({ hit, alertIds, onShowAlert }),
+    () =>
+      openAttackCorrelations({
+        hit,
+        alertIds,
+        onShowAlert,
+        origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
+      }),
     [openAttackCorrelations, hit, alertIds, onShowAlert]
   );
 
   const onShowEntities = useCallback(
-    () => openAttackEntities({ hit, alertIds }),
+    () => openAttackEntities({ hit, alertIds, origin: FLYOUT_ORIGIN.INSIGHTS_ENTITIES }),
     [openAttackEntities, hit, alertIds]
   );
 

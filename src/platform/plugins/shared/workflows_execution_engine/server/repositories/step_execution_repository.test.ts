@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
@@ -30,7 +31,7 @@ describe('StepExecutionRepository', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    underTest = new StepExecutionRepository(esClient as any);
+    underTest = new StepExecutionRepository(esClient as any, loggerMock.create());
   });
 
   describe('bulkUpsert', () => {

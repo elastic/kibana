@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadWorkflowThunk } from './load_workflow_thunk';

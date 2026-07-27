@@ -75,13 +75,13 @@ export interface TimeRangeTransformOptions {
    */
   dateFormat?: string;
   /**
-   * Controls rounding of the start bound for relative time ranges.
-   * Only affects relative `start` bounds (strings containing `now`);
-   * future ranges where start is bare `now` are unaffected.
-   * - `true`: keep existing rounding; if absent, infer it from the offset
-   *   unit (`/d` for day-and-above, next-unit-up for sub-day units).
-   * - `false`: strip any rounding suffix.
-   * - `undefined`: leave the start string as-is.
+   * Controls rounding of relative time range bounds (strings containing
+   * `now`); bare `now` bounds are unaffected.
+   * - `true`: keep existing rounding; if absent, infer it for each bound
+   *   from its own offset unit (`/d` for week-and-above, next finer unit
+   *   otherwise).
+   * - `false` / `undefined`: leave the bounds as-is, preserving any
+   *   rounding the user or a preset provided.
    * @default undefined
    */
   roundRelativeTime?: boolean;
@@ -129,9 +129,9 @@ export type TimePrecision = 's' | 'ms' | 'none';
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
   /**
-   * When true, relative time ranges round to the nearest full unit
-   * (e.g. minute, hour, day).
-   * @default true
+   * When true, relative time range bounds round to a full unit one step
+   * finer than their offset unit (e.g. `now-1h` → `now-1h/m`).
+   * @default false
    */
   roundRelativeTime: boolean;
   /**

@@ -26,6 +26,7 @@ import type {
   RuleExecutionMetricsSnapshot,
 } from './metrics/types';
 import { MetricCollectorFactoryToken } from './metrics/tokens';
+import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
 import {
   RuleExecutorEventPublisher,
   type RuleExecutorEventPublisherContract,
@@ -39,6 +40,7 @@ export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
+  readonly executionUuid: string;
   readonly abortSignal: AbortSignal;
 }
 
@@ -68,7 +70,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
     const executionContext = createExecutionContext(rawInput.abortSignal);
-    const collector = this.metricCollectorFactory.create();
+    const collector = this.metricCollectorFactory.create({ executionId: rawInput.executionUuid });
 
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
@@ -87,7 +89,6 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       stream = this.runMiddlewareChain({ step, collector }, stream);
     }
 
-    let snapshot: RuleExecutionMetricsSnapshot | undefined;
     try {
       for await (const result of stream) {
         pipelineState = result.state;
@@ -97,27 +98,27 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
             message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
           });
 
-          snapshot = collector.finalize();
           return {
             completed: false,
             haltReason: result.reason,
             finalState: pipelineState,
-            metrics: snapshot,
+            metrics: collector.finalize(),
           };
         }
       }
 
-      snapshot = collector.finalize();
+      const snapshot = collector.finalize();
+      this.publishExecutionSucceeded(rawInput, collector, pipelineState, snapshot);
       return {
         completed: true,
         finalState: pipelineState,
         metrics: snapshot,
       };
+    } catch (error) {
+      this.publishExecutionFailed(rawInput, error);
+      throw error;
     } finally {
-      if (!snapshot) {
-        snapshot = collector.finalize();
-      }
-      this.publishExecutionCompleted(rawInput, collector, snapshot);
+      collector.finalize();
     }
   }
 
@@ -143,26 +144,52 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     return chain(input);
   }
 
-  private publishExecutionCompleted(
+  private publishExecutionSucceeded(
     rawInput: RuleExecutionPipelineInput,
     collector: MetricCollector,
+    finalState: RulePipelineState,
     snapshot: RuleExecutionMetricsSnapshot
   ): void {
+    const { rule } = finalState;
+
+    if (!rule) {
+      this.logger.warn({
+        message: `[rule_executor] Skipping rule.execution.succeeded for rule "${rawInput.ruleId}": no rule in final state.`,
+      });
+      return;
+    }
+
     try {
-      this.eventPublisher.publishExecutionCompleted({
+      this.eventPublisher.publishExecutionSucceeded({
         executionId: collector.executionId,
-        ruleId: rawInput.ruleId,
-        spaceId: rawInput.spaceId,
         scheduledAt: rawInput.scheduledAt,
-        startedAt: snapshot.startedAt,
-        endedAt: snapshot.endedAt,
-        durationMs: snapshot.durationMs,
-        counters: snapshot.counters,
+        ruleEventsGenerated: snapshot.counters[RULE_EXECUTION_COUNTERS.ruleEventsGenerated] ?? 0,
+        rule: {
+          ruleId: rawInput.ruleId,
+          spaceId: rawInput.spaceId,
+          kind: rule.kind,
+          tags: rule.metadata.tags ?? [],
+        },
       });
     } catch (error) {
       this.logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.completed event: ${
+        message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${
           error instanceof Error ? error.message : String(error)
+        }`,
+      });
+    }
+  }
+
+  private publishExecutionFailed(rawInput: RuleExecutionPipelineInput, error: unknown): void {
+    try {
+      this.eventPublisher.publishExecutionFailed({
+        rule: { id: rawInput.ruleId, spaceId: rawInput.spaceId },
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } catch (publishError) {
+      this.logger.warn({
+        message: `[rule_executor] Failed to publish rule.execution.failed event: ${
+          publishError instanceof Error ? publishError.message : String(publishError)
         }`,
       });
     }

@@ -36,6 +36,8 @@ type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
  * tests that craft pathological ids.
  */
 export const getRuleUrl = (id: string) => `${RULE_API_PATH}/${encodeURIComponent(id)}`;
+export const getEnableRuleUrl = (id: string) => `${getRuleUrl(id)}/_enable`;
+export const getDisableRuleUrl = (id: string) => `${getRuleUrl(id)}/_disable`;
 
 /**
  * URL for a single action policy resource:

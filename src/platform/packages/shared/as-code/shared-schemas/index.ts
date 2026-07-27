@@ -16,7 +16,6 @@ export {
   asCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   getMeta,
-  getTagsSearchRequest,
   type AsCodeMeta,
   type AsCodeQuery,
 } from './src/schemas';

@@ -357,6 +357,34 @@ export class SampleTaskManagerFixturePlugin
           };
         },
       },
+      sampleRecurringTaskWhichOverrunsRetryAt: {
+        title: 'Sample Recurring Task that overruns its retryAt',
+        description:
+          'A recurring task that records each run start, has a short timeout, and runs longer than its retryAt so Task Manager reclaims and re-runs it while the original run is still in flight. It intentionally does not support cancellation.',
+        timeout: '3s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+            await new Promise((resolve) => setTimeout(resolve, 10000)); // 10 seconds
+
+            return {
+              state: {},
+            };
+          },
+        }),
+      },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that requests deletion.',

@@ -23,6 +23,7 @@ import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
+import { OSQUERY_SEARCH_STRATEGY } from './search_strategy/constants';
 import { initSavedObjects } from './saved_objects';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
@@ -100,10 +101,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       .then(([{ elasticsearch }, depsStart]) => {
         const osquerySearchStrategy = osquerySearchStrategyProvider(
           depsStart.data,
-          elasticsearch.client
+          elasticsearch.client,
+          osqueryContext
         );
 
-        plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+        plugins.data.search.registerSearchStrategy(OSQUERY_SEARCH_STRATEGY, osquerySearchStrategy);
         defineRoutes(router, osqueryContext, this.schemaService);
       })
       .catch(() => {
@@ -117,13 +119,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         title: 'Reconcile osquery pack schedule IDs onto the Fleet wire',
         timeout: '5m',
         maxAttempts: 3,
-        createTaskRunner: ({ abortController, taskInstance }) => ({
+        createTaskRunner: ({ signal, taskInstance }) => ({
           run: async () =>
             runReconcileTask({
               coreStart: this.coreStart,
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
-              abortController,
+              signal,
               isRruleFeatureEnabled: this.rruleSchedulingEnabled,
               taskState: taskInstance?.state,
             }),

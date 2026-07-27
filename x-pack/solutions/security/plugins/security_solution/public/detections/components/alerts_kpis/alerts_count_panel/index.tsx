@@ -47,6 +47,7 @@ interface AlertsCountPanelProps {
   signalIndexName: string | null;
 }
 const CHART_HEIGHT = 218; // px
+const COLLAPSED_HEIGHT = 64; // px
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -89,7 +90,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           $toggleStatus={Boolean(isExpanded)}
           data-test-subj="alertsCountPanel"
           hasBorder
-          height={panelHeight}
+          height={isExpanded ? panelHeight : COLLAPSED_HEIGHT}
         >
           <HeaderSection
             alignHeader={alignHeader}

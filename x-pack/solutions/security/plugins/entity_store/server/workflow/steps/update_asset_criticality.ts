@@ -74,6 +74,21 @@ export const getUpdateAssetCriticalityStepDefinition = (
             : undefined
         );
 
+        const { entities } = await crudClient.listEntities({
+          filter: [
+            { term: { 'entity.id': entityId } },
+            { term: { 'entity.EngineMetadata.Type': entityType } },
+          ],
+          size: 1,
+        });
+
+        if (entities.length === 0) {
+          throw new ExecutionError({
+            type: 'NotFoundError',
+            message: `Entity with type "${entityType}" and id "${entityId}" does not exist in the entity store.`,
+          });
+        }
+
         // `force: true` is required because `asset.criticality` is not marked
         // `allowAPIUpdate` in the Entity Store field retention definitions.
         await crudClient.updateEntity(

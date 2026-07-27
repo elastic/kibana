@@ -39,12 +39,85 @@ describe('useScheduleApi', () => {
     jest.clearAllMocks();
   });
 
+  describe('when the feature flag is ON but the per-space uiSetting is OFF', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(true),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    });
+
+    it('returns isWorkflowsEnabled as false (FF on, setting off → legacy)', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.isWorkflowsEnabled).toBe(false);
+    });
+
+    it('returns public API create hook when the uiSetting is off', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useCreateSchedule).toBe(useCreateAttackDiscoverySchedule);
+    });
+
+    it('does NOT return any workflow hooks when the uiSetting is off', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useCreateSchedule).not.toBe(useCreateWorkflowSchedule);
+      expect(result.current.useDeleteSchedule).not.toBe(useDeleteWorkflowSchedule);
+      expect(result.current.useEnableSchedule).not.toBe(useEnableWorkflowSchedule);
+    });
+  });
+
+  describe('when the feature flag is OFF but the per-space uiSetting is ON', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(false),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    });
+
+    it('returns isWorkflowsEnabled as false (FF off, setting on → legacy)', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.isWorkflowsEnabled).toBe(false);
+    });
+
+    it('returns public API create hook when the feature flag is off', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useCreateSchedule).toBe(useCreateAttackDiscoverySchedule);
+    });
+
+    it('does NOT return any workflow hooks when the feature flag is off', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useCreateSchedule).not.toBe(useCreateWorkflowSchedule);
+      expect(result.current.useDeleteSchedule).not.toBe(useDeleteWorkflowSchedule);
+      expect(result.current.useEnableSchedule).not.toBe(useEnableWorkflowSchedule);
+    });
+  });
+
   describe('when attackDiscoveryWorkflowsEnabled is ON', () => {
     beforeEach(() => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
             getBooleanValue: jest.fn().mockReturnValue(true),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
           },
         },
       } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
@@ -134,6 +207,9 @@ describe('useScheduleApi', () => {
           featureFlags: {
             getBooleanValue: jest.fn().mockReturnValue(false),
           },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
         },
       } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
     });
@@ -219,14 +295,14 @@ describe('useScheduleApi', () => {
       expect(result.current.useBulkDeleteSchedules).not.toBe(useBulkDeleteWorkflowSchedules);
     });
 
-    it('reads the feature flag with the correct key and default', () => {
+    it('reads the feature flag with the correct key and a true default (ON by default)', () => {
       renderHook(() => useScheduleApi());
 
       const { getBooleanValue } = mockUseKibana().services.featureFlags;
 
       expect(getBooleanValue).toHaveBeenCalledWith(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
+        true
       );
     });
   });

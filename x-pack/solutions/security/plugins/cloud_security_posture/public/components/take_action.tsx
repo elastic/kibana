@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  focusTrapPubSub,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -44,6 +45,59 @@ export interface TakeActionProps {
   isCreateDetectionRuleDisabled?: boolean;
   isDataGridControlColumn?: boolean;
 }
+
+/**
+ * a11y: After rule creation the trigger (popover item / create-rule link) unmounts, so focus would
+ * fall to document.body and the next Tab would land on "Skip to main content". Moving focus to
+ * this toast button keeps the only actionable follow-up reachable for keyboard users. EUI pauses
+ * the toast dismiss timer while the toast has focus, so the existing auto-dismiss UX is unchanged.
+ *
+ * When the findings flyout is open, EuiFocusTrap still traps focus inside the flyout (even with
+ * ownFocus={false}). Marking this toast content with data-eui-includes-in-flyout-focus-trap and
+ * publishing via focusTrapPubSub registers it as a focus-trap shard (Kibana EuiProvider default)
+ * so focus can leave the flyout and land on "View rule".
+ */
+export const ViewRuleToastButton = ({ href }: { href: string }) => {
+  const buttonRef = useRef<HTMLAnchorElement | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    focusTrapPubSub.publish();
+    // Double rAF: wait until the flyout applies updated focus-trap shards from publish().
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!cancelled) {
+          buttonRef.current?.focus();
+        }
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      focusTrapPubSub.publish();
+    };
+  }, []);
+
+  return (
+    <div data-eui-includes-in-flyout-focus-trap="true">
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            buttonRef={buttonRef}
+            data-test-subj="csp:toast-success-link"
+            size="s"
+            href={href}
+          >
+            <FormattedMessage
+              id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
+              defaultMessage="View rule"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+};
 
 export const showCreateDetectionRuleErrorToast = (
   cloudSecurityStartServices: CloudSecurityPostureStartServices,
@@ -94,22 +148,7 @@ export const showCreateDetectionRuleSuccessToast = (
       startServices
     ),
     text: toMountPoint(
-      <div>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="csp:toast-success-link"
-              size="s"
-              href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}
-            >
-              <FormattedMessage
-                id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
-                defaultMessage="View rule"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>,
+      <ViewRuleToastButton href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)} />,
       startServices
     ),
   });
@@ -143,6 +182,7 @@ export const TakeAction = ({
       fill
       iconType="chevronSingleDown"
       iconSide="right"
+      aria-haspopup="menu"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
       <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
@@ -158,6 +198,7 @@ export const TakeAction = ({
         aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
           defaultMessage: 'More actions',
         })}
+        aria-haspopup="menu"
         iconType="boxesVertical"
         color="primary"
         isLoading={isLoading}
@@ -206,6 +247,10 @@ export const TakeAction = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
       data-test-subj={TAKE_ACTION_SUBJ}
+      aria-label={kbnI18n.translate('xpack.csp.flyout.actionsPopoverAriaLabel', {
+        defaultMessage: 'Actions',
+      })}
+      panelProps={{ role: 'none' }}
     >
       <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>

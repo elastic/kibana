@@ -73,6 +73,15 @@ export interface UseAlertPrevalenceFromProcessTreeParams {
    * The indices to search for alerts
    */
   indices: string[];
+  /**
+   * Optional time range to bound the resolver tree query.
+   * When omitted, the query is unbounded (e.g. for the Analyzer preview, which must keep
+   * scanning the full data set regardless of any date picker).
+   */
+  interval?: {
+    from: string;
+    to: string;
+  };
 }
 
 export interface UserAlertPrevalenceFromProcessTreeResult {
@@ -92,6 +101,12 @@ export interface UserAlertPrevalenceFromProcessTreeResult {
    * Whether or not the query errored
    */
   error: boolean;
+  /**
+   * Refetches the process tree query, bypassing the cache.
+   * Used to wire up the date picker's refresh button, since clicking it while the
+   * range is unchanged does not trigger a new query key (and thus no automatic refetch).
+   */
+  refetch: () => void;
 }
 
 /**
@@ -100,6 +115,7 @@ export interface UserAlertPrevalenceFromProcessTreeResult {
 export function useAlertPrevalenceFromProcessTree({
   documentId,
   indices,
+  interval,
 }: UseAlertPrevalenceFromProcessTreeParams): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
@@ -121,7 +137,7 @@ export function useAlertPrevalenceFromProcessTree({
   });
 
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
-    ['getAlertPrevalenceFromProcessTree', id, indexPatternsKey],
+    ['getAlertPrevalenceFromProcessTree', id, indexPatternsKey, interval?.from, interval?.to],
     () => {
       return http.post<TreeResponse>(`/api/endpoint/resolver/tree`, {
         body: JSON.stringify({
@@ -132,11 +148,16 @@ export function useAlertPrevalenceFromProcessTree({
           nodes: [id],
           includeHits: true,
           agentId,
+          ...(interval ? { timeRange: { from: interval.from, to: interval.to } } : {}),
         }),
       });
     },
     { enabled: schema !== null && id !== null }
   );
+
+  const refetch = () => {
+    query.refetch();
+  };
 
   if (query.isLoading || loading) {
     return {
@@ -144,6 +165,7 @@ export function useAlertPrevalenceFromProcessTree({
       error: false,
       alertIds: undefined,
       statsNodes: undefined,
+      refetch,
     };
   } else if (query.data) {
     return {
@@ -151,6 +173,7 @@ export function useAlertPrevalenceFromProcessTree({
       error: false,
       alertIds: query.data.alertIds,
       statsNodes: query.data.statsNodes,
+      refetch,
     };
   } else {
     return {
@@ -158,6 +181,7 @@ export function useAlertPrevalenceFromProcessTree({
       error: true,
       alertIds: undefined,
       statsNodes: undefined,
+      refetch,
     };
   }
 }

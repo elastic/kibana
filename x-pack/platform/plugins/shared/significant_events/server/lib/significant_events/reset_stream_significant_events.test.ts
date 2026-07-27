@@ -19,11 +19,13 @@ describe('resetSignificantEvents', () => {
   const logger = loggerMock.create();
   const request = httpServerMock.createKibanaRequest();
   let esClient: ElasticsearchClient;
+  let deleteLegacyRules: jest.MockedFunction<(ruleIds: string[]) => Promise<void>>;
 
   beforeEach(() => {
     esClient = {
       deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     } as unknown as ElasticsearchClient;
+    deleteLegacyRules = jest.fn().mockResolvedValue(undefined);
   });
 
   it('cancels onboarding, deletes KIs and rules per stream, then wipes v1 alerts', async () => {
@@ -64,9 +66,11 @@ describe('resetSignificantEvents', () => {
       logger,
       request,
       streamsKIsOnboardingClient,
+      deleteLegacyRules,
     });
 
     expect(streamsKIsOnboardingClient.cancelAllRunning).toHaveBeenCalledWith({ request });
+    expect(deleteLegacyRules).toHaveBeenCalledWith(['rule-a']);
     expect(kiClient.deleteAllQueries).toHaveBeenCalledTimes(2);
     expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(2);
     // Query count must mirror `deleteAllQueries`, which deletes expired queries too.
@@ -113,6 +117,44 @@ describe('resetSignificantEvents', () => {
     });
   });
 
+  it('preserves KI links when legacy rule cleanup fails so the reset can be retried', async () => {
+    const kiClient = {
+      getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue(['logs.nginx']),
+      getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
+        'logs.nginx': [
+          {
+            stream_name: 'logs.nginx',
+            rule_backed: true,
+            rule_id: 'legacy-rule',
+            query: { id: 'q-1' },
+          },
+        ],
+      }),
+      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      deleteAllQueries: jest.fn(),
+      deleteIndicators: jest.fn(),
+    } as unknown as KnowledgeIndicatorClient;
+    const streamsKIsOnboardingClient = {
+      cancelAllRunning: jest.fn().mockResolvedValue(0),
+    } as unknown as SignificantEventsKIsOnboardingClient;
+    deleteLegacyRules.mockRejectedValue(new Error('legacy cleanup failed'));
+
+    await expect(
+      resetSignificantEvents({
+        kiClient,
+        esClient,
+        logger,
+        request,
+        streamsKIsOnboardingClient,
+        deleteLegacyRules,
+      })
+    ).rejects.toThrow('legacy cleanup failed');
+
+    expect(kiClient.deleteAllQueries).not.toHaveBeenCalled();
+    expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
   it('still wipes v1 alerts when no knowledge indicators exist', async () => {
     const kiClient = {
       getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
@@ -128,6 +170,7 @@ describe('resetSignificantEvents', () => {
       logger,
       request,
       streamsKIsOnboardingClient,
+      deleteLegacyRules,
     });
 
     expect(result.streams).toEqual([]);
@@ -151,9 +194,10 @@ describe('resetSignificantEvents', () => {
       logger,
       request,
       streamsKIsOnboardingClient,
+      deleteLegacyRules,
     });
 
-    // The reset is a cluster-level alerting-v1 -> v2 migration tool: it must delete alerts
+    // The reset is a cluster-level v1 orphan cleanup tool: it must delete alerts
     // across every space, so the query is match_all with no `kibana.space_ids` scoping.
     const [deleteArgs] = (esClient.deleteByQuery as jest.Mock).mock.calls[0];
     expect(deleteArgs.query).toEqual({ match_all: {} });
@@ -177,6 +221,7 @@ describe('resetSignificantEvents', () => {
       logger,
       request,
       streamsKIsOnboardingClient,
+      deleteLegacyRules,
     });
 
     expect(result.deleted.alerts_v1).toBe(0);

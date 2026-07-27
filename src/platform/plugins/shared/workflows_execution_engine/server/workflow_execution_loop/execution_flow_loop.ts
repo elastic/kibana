@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import apm from 'elastic-apm-node';
 import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
@@ -25,7 +25,14 @@ import type { WorkflowExecutionLoopParams } from './types';
  * Each iteration processes a single node execution.
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
-  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+  while (params.workflowExecutionCursor.isExecuting) {
     await runNode(params);
+    params.workflowExecutionCursor.commitPendingNavigation();
+    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
+    await params.workflowRuntime.saveState();
+    saveStateSpan?.end();
+    if (!params.workflowExecutionCursor.currentNode) {
+      params.workflowExecutionCursor.stop();
+    }
   }
 }

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -18,8 +19,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
+import { FieldSchema, isRefField } from '../../../../common/types/domain/template/fields';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
@@ -33,6 +37,24 @@ import { CasesAppHeader } from '../../app/cases_app_header';
 import { CasesPageBody } from '../../app/cases_page_body';
 
 export type AllFieldDefinitionsPageProps = Record<string, never>;
+
+/**
+ * The field library table stores each field's `label` and validation flags inside its `definition`
+ * YAML (a single FieldSchema entry), not as top-level attributes. Parse the inline field out for
+ * the Label and Required columns, tolerating malformed/legacy definitions (and `$ref` entries,
+ * which carry neither) by returning `undefined` so the row still renders.
+ */
+const parseInlineFieldDefinition = (definition: string): InlineField | undefined => {
+  try {
+    const result = FieldSchema.safeParse(parseYaml(definition));
+    if (!result.success || isRefField(result.data)) {
+      return undefined;
+    }
+    return result.data;
+  } catch {
+    return undefined;
+  }
+};
 
 export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = () => {
   const { owner } = useCasesContext();
@@ -113,6 +135,19 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       'data-test-subj': 'fieldDefinitionNameCell',
     },
     {
+      name: i18n.LABEL_COLUMN,
+      truncateText: true,
+      'data-test-subj': 'fieldDefinitionLabelCell',
+      render: (fd: FieldDefinition) => {
+        const label = parseInlineFieldDefinition(fd.definition)?.label;
+        return (
+          <EuiText size="s" color={label ? 'default' : 'subdued'}>
+            {label ?? '—'}
+          </EuiText>
+        );
+      },
+    },
+    {
       field: 'description',
       name: i18n.DESCRIPTION_COLUMN,
       render: (description: string | undefined) => (
@@ -120,6 +155,40 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
           {description ?? '—'}
         </EuiText>
       ),
+    },
+    {
+      name: i18n.REQUIRED_COLUMN,
+      'data-test-subj': 'fieldDefinitionRequiredCell',
+      render: (fd: FieldDefinition) => {
+        const validation = parseInlineFieldDefinition(fd.definition)?.validation;
+        const isRequired = validation?.required === true;
+        const isRequiredOnClose = validation?.required_on_close === true;
+        if (!isRequired && !isRequiredOnClose) {
+          return (
+            <EuiText size="s" color="subdued">
+              {'—'}
+            </EuiText>
+          );
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {isRequired && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj="fieldDefinitionRequiredBadge">
+                  {i18n.REQUIRED_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isRequiredOnClose && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj="fieldDefinitionRequiredOnCloseBadge">
+                  {i18n.REQUIRED_ON_CLOSE_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'isGlobal',
@@ -198,10 +267,6 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         title={i18n.FIELD_LIBRARY_TITLE}
         back={fieldLibraryBack}
         menu={fieldLibraryMenu}
-        // This route can render under the legacy layout (templates enabled, settings redesign
-        // off), where CasesAppHeader doesn't force padding; pin it to the pre-existing 'none' so
-        // making the header sticky doesn't also change its padding there.
-        padding="none"
       />
       <CasesPageBody>
         <EuiText size="s" color="subdued">
@@ -213,6 +278,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         ) : (
           <EuiBasicTable
             items={fieldDefinitions}
+            tableCaption={i18n.FIELD_DEFINITIONS_TABLE_CAPTION}
             rowHeader="name"
             columns={columns}
             data-test-subj="fieldDefinitionsTable"

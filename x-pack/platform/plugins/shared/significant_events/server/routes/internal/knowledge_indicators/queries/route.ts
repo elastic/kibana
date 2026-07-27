@@ -22,6 +22,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
@@ -41,6 +42,21 @@ import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_in
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
+
+/**
+ * `findQueries` / `findIndicators` early-return on an empty stream list, while
+ * `getQueryLinks` treats empty as "all streams". Resolve accessible stream names
+ * (same pattern as `listAllFeaturesRoute`) so search and list stay aligned.
+ */
+const resolveStreamNames = async (
+  streamNames: string[] | undefined,
+  listStreams: () => Promise<Array<{ name: string }>>
+): Promise<string[]> => {
+  if (streamNames?.length) {
+    return streamNames;
+  }
+  return (await listStreams()).map((stream) => stream.name);
+};
 
 const dateFromString = z
   .string()
@@ -104,11 +120,13 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    maintenanceService,
   }): Promise<{ promoted: number; skipped_stats: number }> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamDefinitions = new Map(
@@ -146,12 +164,14 @@ export const demoteBackedQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    maintenanceService,
     logger,
   }): Promise<{ demoted: number }> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     // Only rule-backed queries can be demoted; unbacked queries have no rule to remove.
@@ -222,6 +242,9 @@ export const bulkDeleteQueriesRoute = createServerRoute({
     const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    // Intentionally not guarded by assertNotPaused: bulk delete is teardown
+    // (removes queries/rules), which stays allowed while paused — same as
+    // disabling scheduled discovery / continuous onboarding.
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
@@ -325,6 +348,7 @@ const reconcileQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    maintenanceService,
     logger,
   }): Promise<{
     reconciled: number;
@@ -345,6 +369,7 @@ const reconcileQueriesRoute = createServerRoute({
     const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { streamNames } = params.body;
@@ -449,13 +474,17 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
+    );
+
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
     const queryLinks = await fetchQueryLinks(
       {
-        streamNames,
+        streamNames: resolvedStreamNames,
         query,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
@@ -522,6 +551,10 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
+      scopedClients.streamsClient.listStreams()
+    );
+
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
@@ -536,7 +569,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames,
+        streamNames: resolvedStreamNames,
         alertsReader,
         spaceId: await getSpaceId(request),
       },
@@ -604,6 +637,7 @@ const generateQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    maintenanceService,
     logger,
     telemetry,
   }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
@@ -618,6 +652,7 @@ const generateQueriesRoute = createServerRoute({
     } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
     const {
@@ -675,7 +710,13 @@ const persistQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  handler: async ({ params, request, getScopedClients, server }): Promise<PersistQueriesResult> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    maintenanceService,
+  }): Promise<PersistQueriesResult> => {
     const authUser = server.core.security.authc.getCurrentUser(request);
     const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
     const scopedClients = await getScopedClients({
@@ -685,6 +726,7 @@ const persistQueriesRoute = createServerRoute({
     const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
     const { queries } = params.body;

@@ -76,7 +76,7 @@ export function getPreconfiguredFleetServerHostFromConfig(
       ? [
           {
             id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
-            name: 'Internal Fleet Server for agentless',
+            name: 'Internal Fleet Server for managed integrations',
             host_urls: cloudServerHosts,
             is_default: false,
             is_preconfigured: true,

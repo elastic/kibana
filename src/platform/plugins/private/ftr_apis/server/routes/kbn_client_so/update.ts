@@ -22,18 +22,25 @@ export const registerUpdateRoute = (router: IRouter) => {
       },
       validate: {
         params: schema.object({
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           type: schema.string(),
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           id: schema.string(),
         }),
         body: schema.object({
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           attributes: schema.recordOf(schema.string(), schema.any()),
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           migrationVersion: schema.maybe(schema.string()),
           references: schema.maybe(
             // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
             schema.arrayOf(
               schema.object({
+                // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
                 name: schema.string(),
+                // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
                 type: schema.string(),
+                // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
                 id: schema.string(),
               })
             )
