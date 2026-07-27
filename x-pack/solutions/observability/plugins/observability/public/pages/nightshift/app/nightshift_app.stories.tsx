@@ -12,7 +12,9 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { checkoutEvent } from '../__storybook__/nightshift_fixtures';
 import {
   NightshiftStorybookProvider,
+  type NightshiftLifecycleScenario,
   type NightshiftStorybookScenario,
+  type NightshiftStreamFeaturesScenario,
 } from '../__storybook__/nightshift_storybook_provider';
 import { NightshiftApp } from './nightshift_app';
 import { NightshiftAppHeader } from './nightshift_app_header';
@@ -21,14 +23,23 @@ const noop = () => undefined;
 
 interface NightshiftLandingStoryProps {
   initialEntry?: string;
+  lifecycleScenario?: NightshiftLifecycleScenario;
   scenario: NightshiftStorybookScenario;
+  streamFeaturesScenario?: NightshiftStreamFeaturesScenario;
 }
 
 const NightshiftLandingStory = ({
   initialEntry,
+  lifecycleScenario,
   scenario,
+  streamFeaturesScenario,
 }: NightshiftLandingStoryProps): React.ReactElement => (
-  <NightshiftStorybookProvider initialEntry={initialEntry} scenario={scenario}>
+  <NightshiftStorybookProvider
+    initialEntry={initialEntry}
+    lifecycleScenario={lifecycleScenario}
+    scenario={scenario}
+    streamFeaturesScenario={streamFeaturesScenario}
+  >
     <MockAppHeaderProvider>
       <EuiPageTemplate restrictWidth={false}>
         <NightshiftAppHeader
@@ -99,6 +110,38 @@ export const RequestError: Story = {
   },
 };
 
+export const CachedResultsWithRefreshError: Story = {
+  args: {
+    scenario: 'cachedError',
+  },
+};
+
+export const OpenEventsOnly: Story = {
+  args: {
+    scenario: 'openOnly',
+  },
+};
+
+export const DismissedEventInResolvedSection: Story = {
+  args: {
+    scenario: 'dismissed',
+  },
+};
+
+export const BlastRadiusFilterActive: Story = {
+  args: {
+    initialEntry: '/?blastRadius=entity%3Acheckout-api%3Acheckout-api',
+    scenario: 'populated',
+  },
+};
+
+export const EventNotFound: Story = {
+  args: {
+    initialEntry: '/?eventUuid=unknown-event',
+    scenario: 'populated',
+  },
+};
+
 export const EventFlyoutOpen: Story = {
   args: {
     initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
@@ -111,5 +154,29 @@ export const EventFlyoutOpen: Story = {
           'The event flyout is restored from the URL. Select its detection card to inspect the nested detection flyout and its entity chip.',
       },
     },
+  },
+};
+
+export const EventFlyoutDetectionsLoading: Story = {
+  args: {
+    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    lifecycleScenario: 'loading',
+    scenario: 'populated',
+  },
+};
+
+export const EventFlyoutDetectionsError: Story = {
+  args: {
+    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    lifecycleScenario: 'error',
+    scenario: 'populated',
+  },
+};
+
+export const EventFlyoutWithoutDetections: Story = {
+  args: {
+    initialEntry: `/?eventUuid=${checkoutEvent.event_uuid}`,
+    lifecycleScenario: 'empty',
+    scenario: 'populated',
   },
 };

@@ -20,6 +20,6 @@
       "navigation"
     ],
     "optionalPlugins": ["cases", "streams", "observabilityAIAssistant", "workflowsManagement"],
-    "requiredBundles": []
+    "requiredBundles": ["streams"]
   }
 }

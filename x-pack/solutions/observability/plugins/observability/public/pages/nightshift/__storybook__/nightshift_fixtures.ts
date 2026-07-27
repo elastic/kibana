@@ -89,6 +89,18 @@ export const resolvedPaymentEvent: SignificantEvent = {
   ],
 };
 
+export const dismissedShippingEvent: SignificantEvent = {
+  '@timestamp': '2026-07-23T19:20:00.000Z',
+  event_id: 'shipping-queue-depth',
+  event_uuid: 'shipping-queue-depth-v1',
+  status: 'dismissed',
+  stream_names: ['logs.shipping-service'],
+  title: 'Shipping queue depth briefly increased',
+  summary: 'The queue increase was caused by a planned batch import and requires no action.',
+  severity: '20-low',
+  confidence: 0.65,
+};
+
 export const nightshiftEvents: SignificantEvent[] = [
   checkoutEvent,
   inventoryEvent,
@@ -158,6 +170,11 @@ export const completedInvestigation = {
   completed_at: '2026-07-24T09:51:00.000Z',
 } satisfies NonNullable<SignificantEvent['investigations']>[number];
 
+export const runningInvestigation = {
+  workflow_execution_id: 'checkout-investigation-running',
+  started_at: '2026-07-24T09:45:00.000Z',
+} satisfies NonNullable<SignificantEvent['investigations']>[number];
+
 export const completedInvestigationState: InvestigationState = {
   summary: 'Investigate the latency spike affecting checkout requests.',
   hypotheses: [
@@ -185,4 +202,44 @@ The latest checkout deployment introduced a synchronous inventory lookup that in
     'Missing database spans · The slow inventory query is not represented in distributed traces.',
     'Limited deployment metadata · Commit identifiers are not included in checkout logs.',
   ],
+};
+
+export const runningInvestigationState: InvestigationState = {
+  summary: 'Determine what caused checkout latency to increase after the latest deployment.',
+  hypotheses: [
+    {
+      candidate: 'The latest checkout deployment introduced a database lookup regression',
+      confidence: 0.78,
+      status: 'investigating',
+      reason: 'Comparing database spans before and after the deployment.',
+    },
+    {
+      candidate: 'Payment gateway latency is slowing checkout requests',
+      confidence: 0.31,
+      status: 'investigating',
+      reason: 'Checking payment gateway response-time distributions.',
+    },
+  ],
+};
+
+export const entityWithoutEvidence: Feature = {
+  ...checkoutFeature,
+  uuid: 'checkout-host',
+  id: 'checkout-host',
+  subtype: 'host',
+  title: 'checkout-host-01',
+  description: 'A checkout host with no supporting evidence attached.',
+  confidence: 48,
+  evidence: [],
+};
+
+export const streamOnlyEntity: Feature = {
+  ...checkoutFeature,
+  uuid: 'logs-checkout-api',
+  id: 'logs.checkout-api',
+  subtype: 'stream',
+  title: 'logs.checkout-api',
+  description: 'The source stream associated with the checkout latency detection.',
+  confidence: 0,
+  evidence: [],
 };
