@@ -1,10 +1,38 @@
 {
-  "sha1": "e3ae3bba4fc9205db08eaab5f895fc936232c19b",
+  "sha1": "1e5094cab3c7b2417c0e87ae14e69e6d736771ec",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
+    {
+      "id": "812af1a47e79982-29da12839afd386",
+      "title": "chrome navigation mechanics renders the side navigation and chrome layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/chrome_navigation.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "812af1a47e79982-0f9e47ea106efeb",
+      "title": "chrome navigation mechanics breadcrumbs update on navigation and the logo navigates home",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/chrome_navigation.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
     {
       "id": "56a87b3c042792d-0f151a046a326da",
       "title": "Scenario B — Customize navigation link is hidden in the default (classic) space hides the \"Customize navigation\" link in the user menu",
@@ -34,100 +62,16 @@
       }
     },
     {
-      "id": "9d36407f6b29998-c5ea838e311eff6",
-      "title": "navigation has security serverless side nav",
-      "expectedStatus": "skipped",
+      "id": "3062dc2ecefce96-1f9111e774c722b",
+      "title": "nav search reveal, fill, select and conceal",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 16,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d36407f6b29998-50f436bf186356b",
-      "title": "navigation breadcrumbs reflect navigation state",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 22,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d36407f6b29998-8b0cf971e47353f",
-      "title": "navigation navigate using search",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 38,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d36407f6b29998-b43c4bfc123407e",
-      "title": "navigation shows cases in sidebar navigation",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 53,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d36407f6b29998-6fca0a62e4a1daa",
-      "title": "navigation navigates to cases app",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 64,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d36407f6b29998-c32ec49ee4034cb",
-      "title": "navigation navigates to maintenance windows",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 77,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d36407f6b29998-1a35a08787a51e1",
-      "title": "navigation opens panel on legacy management landing page",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/navigation.spec.ts",
-        "line": 88,
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/nav_search.spec.ts",
+        "line": 48,
         "column": 7
       }
     }
