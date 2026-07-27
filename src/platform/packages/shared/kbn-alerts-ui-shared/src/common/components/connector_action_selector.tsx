@@ -52,19 +52,8 @@ export interface ConnectorActionSelectorProps {
   readOnly?: boolean;
 }
 
-/**
- * Renders a radio + table selector letting users restrict which connector actions
- * are permitted to execute.
- *
- * Internally uses `null` as the "all actions" sentinel because the es-ui-shared
- * form library substitutes '' for undefined, breaking array operations.
- * The serializer in action_type_model_utils strips null before the API call so
- * the saved config has no selectedActions key (all allowed) or a string array
- * (restricted list).
- *
- * Cross-page select-all is handled with isSelectAllActiveRef, mirroring the
- * approach in agent_builder's McpToolsSelectionTable.
- */
+// null is the "all actions" sentinel — the es-ui-shared form library substitutes
+// '' for undefined, and the serializer strips null before saving.
 export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = ({
   actions,
   readOnly = false,
@@ -120,8 +109,6 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Mirror EUI's filtering/sorting externally so we can compute which items are
-  // on the current page and preserve off-page selections when the user paginates.
   const filteredActions = useMemo(() => {
     if (!searchQuery) return actions;
     const q = searchQuery.toLowerCase();
@@ -144,14 +131,10 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
     [sortedFilteredActions, pageIndex, pageSize]
   );
 
-  // EUI fires onSelectionChange twice after a select-all: first with all items,
-  // then again clamped to the current page. The ref lets us ignore the second
-  // call so cross-page selections aren't silently reduced.
+  // After select-all, EUI fires onSelectionChange twice (all items, then page-clamped). Skip the second.
   const isSelectAllActiveRef = useRef(false);
 
-  // Refs so handleSelectionChange can read current values without being
-  // recreated on every state change (a new function → new selection object →
-  // EUI's class-component componentDidUpdate fires onSelectionChange → loop).
+  // Refs keep callbacks stable; recreating them triggers EUI's componentDidUpdate → loop.
   const rawSelectedRef = useRef(rawSelected);
   rawSelectedRef.current = rawSelected;
   const currentPageActionsRef = useRef(currentPageActions);
@@ -177,21 +160,15 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
         return;
       }
       isSelectAllActiveRef.current = false;
-      // Merge: keep selections from pages not currently visible, then apply
-      // what the user just changed on the current page.
       const currentPageNames = new Set(currentPageActionsRef.current.map((a) => a.name));
       const offPageSelected = (rawSelectedRef.current ?? []).filter(
         (n) => !currentPageNames.has(n)
       );
       field.setValue([...offPageSelected, ...newItems.map((a) => a.name)]);
     },
-    // rawSelected and currentPageActions are read via refs so this callback
-    // stays stable and doesn't recreate the selection object on every render,
-    // which would cause EUI's class-component to loop via componentDidUpdate.
     [actions.length, field]
   );
 
-  // Select all actions regardless of search filter or current page.
   const handleSelectAll = useCallback(() => {
     isSelectAllActiveRef.current = true;
     field.setValue([...allActionNames]);
@@ -201,12 +178,8 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
     field.setValue([]);
   }, [field]);
 
-  // Only pass the CURRENT PAGE's selected items to EUI's controlled selection.
-  // EuiBasicTable.getDerivedStateFromProps fires onSelectionChange whenever
-  // `selected` contains items absent from the current `items` list. By keeping
-  // `selected` restricted to the current page, we avoid that render-phase side
-  // effect entirely; cross-page selection is tracked via rawSelected in the
-  // form field and merged in handleSelectionChange on user interaction only.
+  // Restrict to current page: getDerivedStateFromProps fires onSelectionChange for
+  // any selected item absent from items, which would wipe off-page selections.
   const selectedCurrentPageItems = useMemo(() => {
     const selectedSet = new Set(rawSelected ?? []);
     return currentPageActions.filter((a) => selectedSet.has(a.name));
