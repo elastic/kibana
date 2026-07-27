@@ -232,7 +232,9 @@ describe('NotesTabContentComponent', () => {
       },
     };
 
-    it('should dispatch fetchNotesBySavedObjectIds with all source ids', () => {
+    it('should NOT dispatch a notes fetch on mount (parent fetches eagerly for the badge)', () => {
+      // WHY: TabsContentComponent fetches super-timeline notes eagerly so the Notes tab badge is
+      // populated immediately. A second fetch here is redundant — the data is already in the store.
       const mockStore = createMockStore(mockGlobalStateWithSuperTimeline);
 
       render(
@@ -241,7 +243,7 @@ describe('NotesTabContentComponent', () => {
         </TestProviders>
       );
 
-      expect(mockDispatch).toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
     });
 
     it('should hide the add-note input', () => {

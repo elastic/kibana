@@ -26,7 +26,11 @@ import type { CellValueElementProps } from '../cell_rendering';
 import { getActiveTabSelector, getPinnedEventSelector, getShowTimelineSelector } from './selectors';
 import * as i18n from './translations';
 import { initializeTimelineSettings } from '../../../store/actions';
-import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
+import {
+  selectIsSuperTimeline,
+  selectTimelineById,
+  selectTimelineESQLSavedSearchId,
+} from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, makeSelectNotesBySavedObjectId } from '../../../../notes';
 import { makeSelectNotesBySavedObjectIds } from '../../../../notes/store/notes.slice';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -99,8 +103,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
       selectTimelineESQLSavedSearchId(state, timelineId)
     );
-    const isSuperTimeline = useShallowEqualSelector(
-      (state) => selectTimelineById(state, timelineId)?.isSuperTimeline ?? false
+    const isSuperTimeline = useShallowEqualSelector((state: State) =>
+      selectIsSuperTimeline(state, timelineId)
     );
     const shouldShowESQLTab = useMemo(
       () => !isSuperTimeline && (isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null),
@@ -213,7 +217,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
   const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
-  const isSuperTimeline = timeline?.isSuperTimeline ?? false;
+  const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
 
   const shouldShowESQLTab = useMemo(
     () => !isSuperTimeline && (isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null),

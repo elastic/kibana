@@ -32,7 +32,7 @@ import {
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { ADDED_A_DESCRIPTION } from '../../../open_timeline/note_previews/translations';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../../common/components/empty_value';
-import { selectTimelineById } from '../../../../store/selectors';
+import { selectIsSuperTimeline, selectTimelineById } from '../../../../store/selectors';
 import {
   fetchNotesBySavedObjectIds,
   makeSelectNotesBySavedObjectId,
@@ -90,7 +90,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   const timeline: TimelineModel = useSelector((state: State) =>
     selectTimelineById(state, timelineId)
   );
-  const isSuperTimeline = timeline?.isSuperTimeline ?? false;
+  const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
   const superTimelineSourceIds = useMemo(
     () => timeline?.superTimelineSourceIds ?? [],
     [timeline?.superTimelineSourceIds]
@@ -105,18 +105,15 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
     [timeline.status]
   );
 
-  // Super Timeline: fetch notes for all source timelines in one call.
   // Normal timeline: fetch notes for the single saved object.
+  // Super Timeline: notes are fetched eagerly by the parent TabsContentComponent when the
+  // Super Timeline opens (to populate the Notes tab badge immediately). No second fetch here.
   const fetchNotes = useCallback(() => {
-    if (isSuperTimeline) {
-      dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: superTimelineSourceIds }));
-    } else {
-      dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] }));
-    }
-  }, [dispatch, isSuperTimeline, superTimelineSourceIds, timelineSavedObjectId]);
+    dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] }));
+  }, [dispatch, timelineSavedObjectId]);
 
   useEffect(() => {
-    if (isSuperTimeline || isTimelineSaved) {
+    if (!isSuperTimeline && isTimelineSaved) {
       fetchNotes();
     }
   }, [fetchNotes, isSuperTimeline, isTimelineSaved]);
