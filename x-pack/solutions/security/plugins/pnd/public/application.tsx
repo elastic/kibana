@@ -17,7 +17,6 @@ import { PND_PLUGIN_NAME } from '@kbn/pnd-common';
 import { AppChromeLayout } from './components/app_chrome';
 import { PlaceholderPage } from './components/placeholder_page';
 import {
-  NAV_DASHBOARDS,
   NAV_ALERTS,
   NAV_ATTACKS,
   NAV_RECORDS,
@@ -74,10 +73,6 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
                 <Routes>
                   <Route path="/" exact component={BriefPage} />
                   <Route path="/chats" component={ChatsPage} />
-                  <Route
-                    path="/dashboards"
-                    render={() => <PlaceholderPage title={NAV_DASHBOARDS} />}
-                  />
                   <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
                   <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
                   <Route path="/records" render={() => <PlaceholderPage title={NAV_RECORDS} />} />

@@ -54,7 +54,8 @@ export class SampleTaskManagerFixturePlugin
       //    failOn: number - If specified, the task will only throw the `failWith` error when `count` equals to the failOn value
       //    waitForParams : boolean - should the task stall ands wait to receive params asynchronously before using the default params
       //    waitForEvent : string - if provided, the task will stall (after completing the run) and wait for an asyn event before completing
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+      //    addEventFields : object - if provided, the task will attach these fields to its task-run event log document
+      createTaskRunner: ({ taskInstance, setCustomTaskRunEventFields }: RunContext) => ({
         async run() {
           const { params, state, id } = taskInstance;
           const prevState = state || { count: 0 };
@@ -66,6 +67,10 @@ export class SampleTaskManagerFixturePlugin
             // if this task requires custom params provided async - wait for them
             ...(params.waitForParams ? await once(taskTestingEvents, id) : {}),
           };
+
+          if (runParams.addEventFields) {
+            setCustomTaskRunEventFields(runParams.addEventFields);
+          }
 
           if (runParams.failWith) {
             if (!runParams.failOn || (runParams.failOn && count === runParams.failOn)) {
@@ -356,6 +361,34 @@ export class SampleTaskManagerFixturePlugin
             },
           };
         },
+      },
+      sampleRecurringTaskWhichOverrunsRetryAt: {
+        title: 'Sample Recurring Task that overruns its retryAt',
+        description:
+          'A recurring task that records each run start, has a short timeout, and runs longer than its retryAt so Task Manager reclaims and re-runs it while the original run is still in flight. It intentionally does not support cancellation.',
+        timeout: '3s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+            await new Promise((resolve) => setTimeout(resolve, 10000)); // 10 seconds
+
+            return {
+              state: {},
+            };
+          },
+        }),
       },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',

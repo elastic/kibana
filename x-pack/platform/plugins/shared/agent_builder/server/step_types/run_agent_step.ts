@@ -7,6 +7,7 @@
 
 import {
   agentBuilderDefaultAgentId,
+  ConversationAccessControlMode,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
@@ -77,6 +78,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'inference-id': inferenceIdRaw,
           'connector-id-by-feature': connectorIdByFeatureRaw,
           'create-conversation': createConversation,
+          'public-conversation': publicConversation,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
           'max-step-size': maxStepSize,
@@ -115,6 +117,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const storeConversation = createConversation || Boolean(conversationId);
+        const accessControl = publicConversation
+          ? { access_mode: ConversationAccessControlMode.Public }
+          : undefined;
 
         const executionService = serviceManager.internalStart?.execution;
         if (!executionService) {
@@ -136,6 +141,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             conversationId,
             autoCreateConversationWithId: createConversation,
             storeConversation,
+            accessControl,
             structuredOutput: !!schema,
             outputSchema: schema,
             configurationOverrides,

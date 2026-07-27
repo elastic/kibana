@@ -38,7 +38,7 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         usesAdHocDataView: true,
         kibanaSavedObjectMeta: {
           searchSourceJSON:
-            '{"query":{"language":"kuery","query":""},"index":{"id":"6972ccae5b7ff51c24c1129b58e8dc6d56649983d2bb717806063e2da57e0c20","title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","sourceFilters":[],"type":"esql","fieldFormats":{},"runtimeFieldMap":{},"allowNoIndex":false,"name":"logs*,-logstash*,filebeat-*","allowHidden":false,"managed":false},"filter":[]}',
+            '{"query":{"language":"kuery","query":""},"index":{"id":"6972ccae5b7ff51c24c1129b58e8dc6d56649983d2bb717806063e2da57e0c20","title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","sourceFilters":[],"fieldFormats":{},"runtimeFieldMap":{},"allowNoIndex":false,"name":"logs*,-logstash*,filebeat-*","allowHidden":false,"managed":false},"filter":[]}',
         },
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
         hideAggregatedPreview: false,
@@ -290,6 +290,7 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
         type: 'data_view_spec',
         index_pattern: 'logs*,-logstash*,filebeat-*',
         time_field: '@timestamp',
+        allow_hidden_indices: false,
       },
       view_mode: VIEW_MODE.DOCUMENT_LEVEL,
       hide_chart: false,

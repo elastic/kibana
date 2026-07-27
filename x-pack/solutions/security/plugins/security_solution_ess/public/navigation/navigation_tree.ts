@@ -93,6 +93,32 @@ export const createNavigationTree = (
           pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
       },
       defaultNavigationTree.dashboards(),
+      {
+        link: 'pnd:alerts' as AppDeepLinkId,
+        icon: 'bell',
+      },
+      {
+        link: 'pnd:attacks' as AppDeepLinkId,
+        icon: 'warning',
+      },
+      {
+        link: 'pnd:records' as AppDeepLinkId,
+        icon: 'documents',
+      },
+      {
+        link: 'pnd:threat_hunt' as AppDeepLinkId,
+        icon: 'inspect',
+      },
+      {
+        link: 'pnd:streams' as AppDeepLinkId,
+        icon: 'aggregate',
+      },
+      {
+        link: 'pnd:watches' as AppDeepLinkId,
+        icon: 'eye',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
+      },
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -252,7 +278,6 @@ export const createNavigationTree = (
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
           ...getAlertingV2ManagementNavPanel(services),

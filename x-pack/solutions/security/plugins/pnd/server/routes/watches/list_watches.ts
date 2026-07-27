@@ -8,8 +8,8 @@
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCHES_URL } from '@kbn/pnd-common';
 import type { ListWatchesResponse } from '@kbn/pnd-common';
 import { MOCK_MANAGED_WATCHES } from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { getWatchRoutePrivileges } from './watch_route_security';
 
 export const registerListWatchesRoute = ({
   router,
@@ -24,7 +24,9 @@ export const registerListWatchesRoute = ({
       path: PND_WATCHES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PND_API_PRIVILEGE_READ] },
+        authz: {
+          requiredPrivileges: getWatchRoutePrivileges(config.ui.useMockData),
+        },
       },
       summary: 'List PND watches',
     })

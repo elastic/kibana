@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0".
- */
-
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATIONS_URL } from '@kbn/pnd-common';
 import type { ListInvestigationsResponse } from '@kbn/pnd-common';
 import { MOCK_INVESTIGATIONS } from '@kbn/pnd-common';

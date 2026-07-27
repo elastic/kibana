@@ -40,6 +40,7 @@ const BUCKET_COLORS: Record<Exclude<i18n.BriefBucket, 'all'>, string> = {
   escalate: 'warning',
   investigate: 'primary',
   tune: 'accent',
+  create: 'success',
 };
 
 const isQueueRow = (investigation: Investigation): boolean =>
@@ -105,6 +106,13 @@ const BriefCard: React.FC<{
             {inMotion ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">{i18n.IN_MOTION}</EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {investigation.pendingProposalCount > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  {i18n.pendingProposalsLabel(investigation.pendingProposalCount)}
+                </EuiBadge>
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow />
@@ -189,6 +197,7 @@ export const BriefPage: React.FC = () => {
       escalate: 0,
       investigate: 0,
       tune: 0,
+      create: 0,
     };
     for (const investigation of queueRows) {
       const action = investigation.recommendedAction;

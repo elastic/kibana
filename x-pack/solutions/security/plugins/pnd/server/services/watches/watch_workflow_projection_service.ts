@@ -8,15 +8,17 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
 import { WATCH_TAG } from '@kbn/pnd-common';
-import type { GetWatchResponse } from '@kbn/pnd-common';
-import type { ListWatchesResponse } from '@kbn/pnd-common';
-import { compareWatchesForDisplay } from '@kbn/pnd-common';
+import { compareWatchesForDisplay, GetWatchResponse, ListWatchesResponse } from '@kbn/pnd-common';
 
 export interface CreateWatchRequest {
   name: string;
   description?: string;
 }
-import { buildCustomWatchYaml, projectWorkflowToWatch } from './project_watch';
+import {
+  buildCustomWatchYaml,
+  normalizeWorkflowTriggerType,
+  projectWorkflowToWatch,
+} from './project_watch';
 import { createWatchDeleteForbiddenError, createWatchNotFoundError } from './watch_errors';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
 
@@ -25,7 +27,8 @@ const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('wa
 export class WatchWorkflowProjectionService {
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly installationReady: Promise<void> = Promise.resolve()
   ) {}
 
   private requireManagement(): WatchWorkflowsManagementClient {
@@ -36,6 +39,7 @@ export class WatchWorkflowProjectionService {
   }
 
   async list(spaceId: string): Promise<ListWatchesResponse> {
+    await this.installationReady;
     const management = this.requireManagement();
     // Managed catalog watches opt into `selector:watch` visibility; custom
     // unmanaged watches still match via tag `watch` under managedFilter `all`.
@@ -61,10 +65,11 @@ export class WatchWorkflowProjectionService {
       .map(projectWorkflowToWatch)
       .sort(compareWatchesForDisplay);
 
-    return { watches };
+    return ListWatchesResponse.parse({ watches });
   }
 
   async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
+    await this.installationReady;
     const management = this.requireManagement();
     const detail = await management.getWorkflow(watchId, spaceId);
     if (!detail) {
@@ -115,7 +120,7 @@ export class WatchWorkflowProjectionService {
             if (!full?.stepExecutions?.length) return run;
             return {
               ...run,
-              triggerType: full.triggeredBy,
+              triggerType: normalizeWorkflowTriggerType(full.triggeredBy),
               steps: full.stepExecutions.map((step) => ({
                 name: step.stepId ?? step.id,
                 type: step.stepType,
@@ -129,14 +134,20 @@ export class WatchWorkflowProjectionService {
         })
       );
 
-      return { watch: { ...watch, recentRuns: enrichedRuns } };
+      return GetWatchResponse.parse({
+        watch: {
+          ...watch,
+          // Enrich the latest 5 with step detail; keep any additional projected runs.
+          recentRuns: [...enrichedRuns, ...watch.recentRuns.slice(5)],
+        },
+      });
     } catch (error) {
       this.logger.debug(
         `Failed to load executions for watch ${watchId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return { watch: projectWorkflowToWatch(listItem) };
+      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem) });
     }
   }
 

@@ -7,7 +7,8 @@
 
 import { encode } from '@kbn/rison';
 import { AttackDetailsRightPanelKey } from '../../../flyout/attack_details/constants/panel_keys';
-import { resolveAttackFlyoutParams } from './utils';
+import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { resolveAttackFlyoutParams, resolveAttackFlyoutV2Params } from './utils';
 
 describe('resolveAttackFlyoutParams', () => {
   it('preserves existing flyout query string', () => {
@@ -25,5 +26,19 @@ describe('resolveAttackFlyoutParams', () => {
       preview: [],
     });
     expect(resolveAttackFlyoutParams({ index: '.idx', attackId: 'a1' }, null)).toBe(expected);
+  });
+});
+
+describe('resolveAttackFlyoutV2Params', () => {
+  it('preserves existing flyoutV2 query string', () => {
+    const existing = '!((kind:attack,attackId:a1,indexName:.idx))';
+    expect(resolveAttackFlyoutV2Params({ index: '.idx', attackId: 'a1' }, existing)).toBe(existing);
+  });
+
+  it('encodes an attack descriptor when no current params', () => {
+    const expected = encodeFlyoutV2UrlParam([
+      { kind: 'attack', attackId: 'a1', indexName: '.idx' },
+    ]);
+    expect(resolveAttackFlyoutV2Params({ index: '.idx', attackId: 'a1' }, null)).toBe(expected);
   });
 });

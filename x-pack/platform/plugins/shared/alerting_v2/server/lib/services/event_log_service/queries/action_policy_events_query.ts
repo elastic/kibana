@@ -41,6 +41,12 @@ export interface BuildActionPolicyEventsQueryParams {
    * `policyIds` for free-text search discovery.
    */
   mandatoryRuleIds?: string[];
+  /**
+   * Episode filter. Applied as an AND clause: the event must reference at
+   * least one of these episode ids in the top-level
+   * `kibana.alerting_v2.dispatcher.episode_ids` keyword array.
+   */
+  episodeIds?: string[];
 }
 
 /**
@@ -121,6 +127,10 @@ const buildBaseActionPolicyEventsQuery = (
 
   if (params.mandatoryRuleIds && params.mandatoryRuleIds.length > 0) {
     filters.push(buildMandatoryRuleClause(params.mandatoryRuleIds));
+  }
+
+  if (params.episodeIds && params.episodeIds.length > 0) {
+    filters.push({ terms: { 'kibana.alerting_v2.dispatcher.episode_ids': params.episodeIds } });
   }
 
   return {

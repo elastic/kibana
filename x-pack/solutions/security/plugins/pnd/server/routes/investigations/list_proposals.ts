@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATION_URL_TEMPLATE } from '@kbn/pnd-common';
 import type { ListInvestigationProposalsResponse } from '@kbn/pnd-common';
+import { getMockProposalsByInvestigationId } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -48,7 +49,7 @@ export const registerListInvestigationProposalsRoute = ({
           const { id } = request.params;
 
           if (config.ui.useMockData) {
-            const proposals = realProposals[id] ?? [];
+            const proposals = getMockProposalsByInvestigationId(id);
             const body: ListInvestigationProposalsResponse = {
               proposals,
               total: proposals.length,

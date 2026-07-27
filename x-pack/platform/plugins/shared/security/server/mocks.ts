@@ -56,6 +56,7 @@ function createStartMock() {
     }),
     userProfiles: lazyObject({
       getCurrent: mockUserProfiles.getCurrent,
+      getCurrentProfileId: mockUserProfiles.getCurrentProfileId,
       suggest: mockUserProfiles.suggest,
       bulkGet: mockUserProfiles.bulkGet,
     }),

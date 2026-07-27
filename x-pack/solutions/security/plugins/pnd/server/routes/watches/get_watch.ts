@@ -10,8 +10,8 @@ import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCH_URL_TEMPLATE } from '@kbn/
 import type { GetWatchResponse } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { getMockWatchById } from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { getWatchRoutePrivileges } from './watch_route_security';
 
 const GetWatchRequestParams = z.object({
   watchId: z.string().min(1).max(128),
@@ -30,7 +30,9 @@ export const registerGetWatchRoute = ({
       path: PND_WATCH_URL_TEMPLATE,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PND_API_PRIVILEGE_READ] },
+        authz: {
+          requiredPrivileges: getWatchRoutePrivileges(config.ui.useMockData),
+        },
       },
       summary: 'Get a PND watch by id',
     })

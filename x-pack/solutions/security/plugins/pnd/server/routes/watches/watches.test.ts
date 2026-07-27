@@ -58,7 +58,6 @@ const createLogger = (): jest.Mocked<Logger> =>
 const createMockConfig = (overrides: Partial<PndConfig> = {}): PndConfig => ({
   enabled: true,
   ui: { useMockData: true, ...overrides.ui },
-  conversationShadowWrite: false,
   ...overrides,
 });
 

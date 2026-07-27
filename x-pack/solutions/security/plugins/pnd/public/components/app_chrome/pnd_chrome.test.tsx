@@ -19,13 +19,12 @@ const renderWithPath = (path: string, ui: React.ReactElement) => {
 };
 
 describe('PND chrome', () => {
-  it('registers Throughline deep links without a Discover stub', () => {
+  it('registers Throughline deep links without Discover or Dashboards stubs', () => {
     const deepLinks = getPndDeepLinks();
     const ids = deepLinks.map((link) => link.id);
 
     expect(ids).toEqual([
       PND_DEEP_LINK.chats,
-      PND_DEEP_LINK.dashboards,
       PND_DEEP_LINK.alerts,
       PND_DEEP_LINK.attacks,
       PND_DEEP_LINK.records,
@@ -34,6 +33,7 @@ describe('PND chrome', () => {
       PND_DEEP_LINK.watches,
     ]);
     expect(ids).not.toContain('discover');
+    expect(ids).not.toContain('dashboards');
     expect(ids).not.toContain('more');
   });
 

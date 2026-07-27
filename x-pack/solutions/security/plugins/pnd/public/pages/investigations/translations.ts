@@ -43,10 +43,42 @@ export const NOT_FOUND = i18n.translate('xpack.pnd.investigation.notFound', {
   defaultMessage: 'Investigation not found',
 });
 
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.pnd.investigation.loadError.title', {
+  defaultMessage: 'Unable to load investigation',
+});
+
+export const LOAD_ERROR_BODY = i18n.translate('xpack.pnd.investigation.loadError.body', {
+  defaultMessage: 'Something went wrong while fetching this investigation.',
+});
+
 export const LOADING = i18n.translate('xpack.pnd.investigation.loading', {
   defaultMessage: 'Loading investigation…',
 });
 
 export const STATUS_UPDATED = i18n.translate('xpack.pnd.investigation.statusUpdated', {
   defaultMessage: 'Proposal status updated (mock)',
+});
+
+export const DECISIONS_UNAVAILABLE = i18n.translate(
+  'xpack.pnd.investigation.decisionsUnavailable',
+  {
+    defaultMessage:
+      'Proposal decisions are disabled until durable approval workflows are connected.',
+  }
+);
+
+export const LOADING_PROPOSALS = i18n.translate('xpack.pnd.investigation.loadingProposals', {
+  defaultMessage: 'Loading proposals…',
+});
+
+export const PROPOSALS_LOAD_ERROR = i18n.translate('xpack.pnd.investigation.proposalsLoadError', {
+  defaultMessage: 'Unable to load proposals',
+});
+
+export const PROPOSAL_NOT_FOUND = i18n.translate('xpack.pnd.investigation.proposalNotFound', {
+  defaultMessage: 'Proposal not found',
+});
+
+export const RETRY = i18n.translate('xpack.pnd.investigation.retry', {
+  defaultMessage: 'Retry',
 });

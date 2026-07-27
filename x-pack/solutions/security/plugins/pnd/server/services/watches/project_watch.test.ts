@@ -7,8 +7,10 @@
 
 import {
   extractWatchPolicy,
+  normalizeWorkflowTriggerType,
   projectTriggers,
   projectSchedule,
+  projectCallablesFromDefinition,
   projectWorkflowToWatch,
   projectRecentRunsFromHistory,
   buildCustomWatchYaml,
@@ -170,6 +172,22 @@ steps: []
   });
 });
 
+// ── normalizeWorkflowTriggerType ───────────────────────────────────────────
+
+describe('normalizeWorkflowTriggerType', () => {
+  it.each([
+    ['scheduled', 'schedule'],
+    ['schedule', 'schedule'],
+    ['manual', 'manual'],
+    [undefined, 'manual'],
+    ['alert', 'event'],
+    ['cases.caseCreated', 'event'],
+    ['workflow-step', 'event'],
+  ] as const)('maps %s to %s', (source, expected) => {
+    expect(normalizeWorkflowTriggerType(source)).toBe(expected);
+  });
+});
+
 // ── projectSchedule ───────────────────────────────────────────────────────
 
 describe('projectSchedule', () => {
@@ -190,6 +208,26 @@ describe('projectSchedule', () => {
     const schedule = projectSchedule([{ type: 'event', summary: 'e' }], undefined);
     expect(schedule.mode).toBe('always');
     expect(schedule.set).toBe(true);
+  });
+
+  it('uses actual manual-only triggers instead of an incompatible policy mode', () => {
+    expect(
+      projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }], {
+        mode: 'always',
+        cadence: 'stream',
+        onDemand: false,
+      } as any)
+    ).toMatchObject({ mode: 'demand', cadence: 'manual', set: false, onDemand: true });
+  });
+
+  it('preserves a configured window for scheduled watches', () => {
+    expect(
+      projectSchedule([{ type: 'schedule', summary: 'Scheduled' }], {
+        mode: 'window',
+        from: 22,
+        to: 6,
+      } as any)
+    ).toMatchObject({ mode: 'window', set: true, from: 22, to: 6 });
   });
 
   it('respects policy.onDemand override', () => {
@@ -331,6 +369,37 @@ steps:
     expect(watch.callables[0].summary).toBe('Correlates IoCs');
     expect(watch.callables[0].gated).toBe(true);
     expect(watch.callables[0].enabled).toBe(false);
+  });
+
+  it('discovers workflow callables nested in branch containers', () => {
+    const definition = {
+      version: '1',
+      name: 'Nested callables',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'parallel_work',
+          type: 'parallel',
+          branches: [
+            {
+              name: 'worker_branch',
+              steps: [
+                {
+                  name: 'run_worker',
+                  type: 'workflow.executeAsync',
+                  with: { workflowId: 'system-security-worker' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(projectCallablesFromDefinition(definition, undefined)).toEqual([
+      expect.objectContaining({ id: 'system-security-worker', kind: 'workflow' }),
+    ]);
   });
 });
 

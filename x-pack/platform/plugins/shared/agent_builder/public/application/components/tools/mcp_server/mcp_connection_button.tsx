@@ -21,7 +21,6 @@ import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useIsUIAMEnabled } from '../../../hooks/use_is_uiam_enabled';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
-import { useUiamOAuthClientManagement } from '../../../hooks/use_uiam_oauth_client_management';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
@@ -31,8 +30,7 @@ export const McpConnectionButton = () => {
   const { kibanaUrl } = useKibanaUrl();
   const { docLinksService } = useAgentBuilderServices();
   const isUIAMEnabled = useIsUIAMEnabled();
-  const isUiamOAuthClientManagementEnabled = useUiamOAuthClientManagement();
-  const showMcpClientManagement = isUIAMEnabled && isUiamOAuthClientManagementEnabled;
+  const showMcpClientManagement = isUIAMEnabled;
 
   const [isContextOpen, toggleContextOpen] = useToggle(false);
 

@@ -7,6 +7,6 @@
 
 /**
  * Re-exports sample catalog data for tests and dev tooling.
- * Production code should import from `@kbn/pnd-common` or `@kbn/pnd-common/impl/samples`.
+ * Prefer importing samples from `@kbn/pnd-common` (explicit barrel allow-list).
  */
 export * from '../samples';

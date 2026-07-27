@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,11 +17,11 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiTabs,
-  EuiTab,
+  EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Proposal, ProposalStatus } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
@@ -37,8 +38,9 @@ import * as i18n from './translations';
 const ProposalRow: React.FC<{
   proposal: Proposal;
   investigationId: string;
+  isSelected: boolean;
   onStatusChange: (proposalId: string, status: ProposalStatus) => void;
-}> = ({ proposal, investigationId, onStatusChange }) => {
+}> = ({ proposal, investigationId, isSelected, onStatusChange }) => {
   const { http, notifications } = useKibana().services;
   const [isLoading, setIsLoading] = useState(false);
 
@@ -94,12 +96,15 @@ const ProposalRow: React.FC<{
     dismissed: '#F5F5F5',
     modified: '#E3F2FD',
     executed: '#C8E6C9',
+    escalated: '#FFF3E0',
+    deferred: '#F5F5F5',
   };
 
   return (
     <EuiPanel
       paddingSize="m"
-      style={{ backgroundColor: statusColors[proposal.status] }}
+      color={isSelected ? 'primary' : undefined}
+      style={isSelected ? undefined : { backgroundColor: statusColors[proposal.status] }}
       data-test-subj={`pndProposalRow-${proposal.id}`}
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
@@ -177,7 +182,7 @@ const ProposalRow: React.FC<{
 export const InvestigationDetailPage: React.FC = () => {
   const { services } = useKibana();
   const { id, proposalId } = useParams<{ id: string; proposalId?: string }>();
-  const { data, isLoading, error } = useInvestigation(id);
+  const { data, isLoading, error, refetch } = useInvestigation(id);
   const proposalsQuery = useInvestigationProposals(id);
   const [localStatuses, setLocalStatuses] = useState<Record<string, ProposalStatus>>({});
   const [selectedTabId, setSelectedTabId] = useState('overview');
@@ -197,6 +202,9 @@ export const InvestigationDetailPage: React.FC = () => {
       status: localStatuses[proposal.id] ?? proposal.status,
     }));
   }, [localStatuses, proposalsQuery.data?.proposals]);
+
+  const hasRequestedProposal =
+    !proposalId || proposals.some((proposal) => proposal.id === proposalId);
 
   useEffect(() => {
     if (!proposalId) {
@@ -238,7 +246,10 @@ export const InvestigationDetailPage: React.FC = () => {
     );
   }
 
-  if (error || !data?.investigation) {
+  const isNotFound =
+    (isHttpFetchError(error) && error.response?.status === 404) || (!error && !data?.investigation);
+
+  if (isNotFound) {
     return (
       <PndPageSection>
         <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
@@ -247,99 +258,153 @@ export const InvestigationDetailPage: React.FC = () => {
     );
   }
 
+  if (error || !data?.investigation) {
+    return (
+      <PndPageSection>
+        <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
+        <EuiEmptyPrompt
+          iconType="error"
+          color="danger"
+          title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.LOAD_ERROR_BODY}</p>}
+          actions={<EuiButton onClick={() => refetch()}>{i18n.RETRY}</EuiButton>}
+        />
+      </PndPageSection>
+    );
+  }
+
   const { investigation } = data;
 
-  const overviewContent = (
-    <EuiText>
-      <p>{investigation.summary}</p>
-      <p>
-        <strong>{investigation.affectedSurface}</strong>
-      </p>
-    </EuiText>
-  );
-
-  const proposalsContent = (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>Analyst proposals</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="sparkles"
-            fill
-            isLoading={generateProposal.isLoading}
-            onClick={onGenerateProposal}
-            data-test-subj="pndGenerateProposalButton"
-          >
-            Generate with LLM
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-
-      {generatedProposal && provenance ? (
+  const tabs: EuiTabbedContentTab[] = [
+    {
+      id: 'overview',
+      name: i18n.TAB_OVERVIEW,
+      content: (
         <>
-          <EuiCallOut
-            announceOnMount
-            title={`Watch workflow · ${provenance.stepType} step · ${provenance.latencyMs}ms${
-              provenance.tokenUsage ? ` · ${provenance.tokenUsage.totalTokens} tokens` : ''
-            }`}
-            color="primary"
-            iconType="sparkles"
-            size="s"
-            data-test-subj="pndLlmProvenance"
-          >
-            <EuiText size="xs">
-              This proposal was produced by a live Watch workflow (ai.agent reasoning step), not
-              seed data. Execution: {provenance.workflowExecutionId}
-            </EuiText>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-          <ProposalRow
-            proposal={generatedProposal}
-            investigationId={id}
-            onStatusChange={onStatusChange}
-          />
           <EuiSpacer size="m" />
+          <EuiText>
+            <p>{investigation.summary}</p>
+            <p>
+              <strong>{investigation.affectedSurface}</strong>
+            </p>
+          </EuiText>
         </>
-      ) : null}
+      ),
+    },
+    {
+      id: 'proposals',
+      name: i18n.TAB_PROPOSALS,
+      content: (
+        <>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="m" />
+              <EuiText size="s">
+                <strong>Analyst proposals</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="m" />
+              <EuiButton
+                size="s"
+                iconType="sparkles"
+                fill
+                isLoading={generateProposal.isLoading}
+                onClick={onGenerateProposal}
+                data-test-subj="pndGenerateProposalButton"
+              >
+                Generate with LLM
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
 
-      {proposals.length === 0 ? (
-        <EuiText>No proposals available</EuiText>
-      ) : (
-        proposals.map((proposal) => (
-          <React.Fragment key={proposal.id}>
-            <ProposalRow proposal={proposal} investigationId={id} onStatusChange={onStatusChange} />
-            <EuiSpacer size="m" />
-          </React.Fragment>
-        ))
-      )}
-    </>
-  );
+          {generatedProposal && provenance ? (
+            <>
+              <EuiCallOut
+                announceOnMount
+                title={`Watch workflow · ${provenance.stepType} step · ${provenance.latencyMs}ms${
+                  provenance.tokenUsage ? ` · ${provenance.tokenUsage.totalTokens} tokens` : ''
+                }`}
+                color="primary"
+                iconType="sparkles"
+                size="s"
+                data-test-subj="pndLlmProvenance"
+              >
+                <EuiText size="xs">
+                  This proposal was produced by a live Watch workflow (ai.agent reasoning step), not
+                  seed data. Execution: {provenance.workflowExecutionId}
+                </EuiText>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+              <ProposalRow
+                proposal={generatedProposal}
+                investigationId={id!}
+                isSelected={false}
+                onStatusChange={onStatusChange}
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
 
-  const timelineContent = (
-    <EuiText size="s">
-      <ul>
-        {investigation.events.map((event) => (
-          <li key={event.id}>
-            {event.timestamp}: {event.summary}
-          </li>
-        ))}
-      </ul>
-    </EuiText>
-  );
-
-  const tabs = [
-    { id: 'overview', name: i18n.TAB_OVERVIEW, content: overviewContent },
-    { id: 'proposals', name: i18n.TAB_PROPOSALS, content: proposalsContent },
-    { id: 'timeline', name: i18n.TAB_TIMELINE, content: timelineContent },
+          {proposalsQuery.isLoading ? (
+            <EuiLoadingSpinner size="l" aria-label={i18n.LOADING_PROPOSALS} />
+          ) : null}
+          {proposalsQuery.error ? (
+            <EuiEmptyPrompt
+              iconType="error"
+              color="danger"
+              title={<h3>{i18n.PROPOSALS_LOAD_ERROR}</h3>}
+              actions={<EuiButton onClick={() => proposalsQuery.refetch()}>{i18n.RETRY}</EuiButton>}
+            />
+          ) : null}
+          {!proposalsQuery.isLoading && !proposalsQuery.error && !hasRequestedProposal ? (
+            <EuiEmptyPrompt iconType="alert" title={<h3>{i18n.PROPOSAL_NOT_FOUND}</h3>} />
+          ) : null}
+          {!proposalsQuery.isLoading && !proposalsQuery.error && hasRequestedProposal ? (
+            proposals.length === 0 ? (
+              <EuiText>No proposals available</EuiText>
+            ) : (
+              proposals.map((proposal) => (
+                <React.Fragment key={proposal.id}>
+                  <ProposalRow
+                    proposal={proposal}
+                    investigationId={id!}
+                    isSelected={proposal.id === proposalId}
+                    onStatusChange={onStatusChange}
+                  />
+                  <EuiSpacer size="m" />
+                </React.Fragment>
+              ))
+            )
+          ) : null}
+        </>
+      ),
+    },
+    {
+      id: 'timeline',
+      name: i18n.TAB_TIMELINE,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <ul>
+              {(investigation.events ?? []).map((event) => (
+                <li key={event.id}>
+                  {event.timestamp}: {event.summary}
+                </li>
+              ))}
+            </ul>
+          </EuiText>
+        </>
+      ),
+    },
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+  // Keep EuiTabbedContent uncontrolled. Controlled `selectedTab` + `autoFocus="selected"`
+  // leaves internal selectedTabId undefined, so focusTab() crashes with
+  // "Cannot read properties of null (reading 'focus')" on tab click.
+  const initialTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
 
   return (
     <PndPageSection>
@@ -348,19 +413,12 @@ export const InvestigationDetailPage: React.FC = () => {
         subtitle={investigation.affectedSurface}
         backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }}
       />
-      <EuiTabs>
-        {tabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            isSelected={tab.id === selectedTab.id}
-            onClick={() => setSelectedTabId(tab.id)}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer size="m" />
-      {selectedTab.content}
+      <EuiTabbedContent
+        key={`${id}:${proposalId ?? 'overview'}`}
+        tabs={tabs}
+        initialSelectedTab={initialTab}
+        onTabClick={(tab) => setSelectedTabId(tab.id)}
+      />
     </PndPageSection>
   );
 };

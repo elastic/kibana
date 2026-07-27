@@ -16,10 +16,6 @@ export const NAV_CHATS = i18n.translate('xpack.pnd.chrome.nav.chats', {
   defaultMessage: 'Chats',
 });
 
-export const NAV_DASHBOARDS = i18n.translate('xpack.pnd.chrome.nav.dashboards', {
-  defaultMessage: 'Dashboards',
-});
-
 export const NAV_ALERTS = i18n.translate('xpack.pnd.chrome.nav.alerts', {
   defaultMessage: 'Alerts',
 });
@@ -48,10 +44,9 @@ export const ASK_PND_LABEL = i18n.translate('xpack.pnd.chrome.askPnd', {
   defaultMessage: 'Ask PND',
 });
 
-/** Deep link ids registered on the PND app (excludes platform Discover). */
+/** Deep link ids registered on the PND app (excludes platform Discover + Security dashboards). */
 export const PND_DEEP_LINK = {
   chats: 'chats',
-  dashboards: 'dashboards',
   alerts: 'alerts',
   attacks: 'attacks',
   records: 'records',

@@ -784,6 +784,55 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Prevents table sorting when toggling the workflow enable state [#252724]({{kib-pull}}252724).
 * Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
 
+## 9.3.8 [kibana-9.3.8-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+### Features and enhancements [kibana-9.3.8-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Adds an optional `dryRun` flag to {{fleet}} bulk agent API endpoints so callers can preview how many agents would be affected without writing changes [#276377]({{kib-pull}}276377).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+
+### Fixes [kibana-9.3.8-fixes]
+
+**Alerting**:
+* Prevents the Task Manager invalidate task from invalidating an API key that is still shared by other live tasks, which caused those tasks to fail with a security exception [#275157]({{kib-pull}}275157).
+* Defaults a missing reporting job `version` parameter to the current {{kib}} version instead of showing a hardcoded `7.14.0` value [#275469]({{kib-pull}}275469).
+* Fixes **Save and return** for Lens visualizations embedded from the Cases editor so the comment updates correctly [#275117]({{kib-pull}}275117).
+* Preserves `context.sourceFields` from the active alert in {{es}} query rule recovery actions so recovery templates can still reference those field values [#274686]({{kib-pull}}274686).
+
+**Dashboards and Visualizations**:
+* Limits the Canvas `createTable` expression `rowCount` to a maximum of `10000`, matching the default {{es}} `index.max_result_window` [#276502]({{kib-pull}}276502).
+
+**Data ingestion and Fleet**:
+* Fixes `escape_string` values that contain double quotes from corrupting surrounding agent policy YAML [#279391]({{kib-pull}}279391).
+* Fixes resetting preconfigured agent policies aborting with a 404 on deployments where space awareness is disabled [#276742]({{kib-pull}}276742).
+* Deletes orphaned `multiple-isolated` saved objects before package import to prevent `ambiguous_conflict` errors that blocked integration install or upgrade [#275552]({{kib-pull}}275552).
+
+**Developer tools**:
+* Fixes Console autocomplete so nested object fields and multi-fields in index mapping bodies suggest mapping options again [#278508]({{kib-pull}}278508).
+* Fixes Console requests that combine comments with triple-quote strings failing with `x_content_e_o_f_exception` [#277259]({{kib-pull}}277259).
+* Fixes a Windows-specific code editor issue that could corrupt multi-line edited text after refresh [#277007]({{kib-pull}}277007).
+* Fixes the Console **Copy** button silently failing to copy response output [#276365]({{kib-pull}}276365).
+* Fixes Console autocomplete matching an incorrect API endpoint when a URL matches both a literal path and a parameterized path [#276239]({{kib-pull}}276239).
+* Improves Console {{esql}} source autocomplete by reusing a fresh source list instead of refetching it on every keystroke [#275535]({{kib-pull}}275535).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.8 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Prevents removing all spaces from a {{ml}} job or trained model through the spaces update APIs [#276490]({{kib-pull}}276490).
+* Restricts the clear audit messages API so users can only clear messages for jobs they can access, and only against valid notification indices [#276419]({{kib-pull}}276419).
+* Fixes a crash in {{esql}} query correction when an LLM generates a multi-line `WHERE` clause [#277153]({{kib-pull}}277153).
+
 ## 9.3.7 [kibana-9.3.7-release-notes]
 
 ### Fixes [kibana-9.3.7-fixes]

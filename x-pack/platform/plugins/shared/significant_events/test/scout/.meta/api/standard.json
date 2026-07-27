@@ -1,5 +1,5 @@
 {
-  "sha1": "1dde17f53cf39b1883a2036917bdbad48a385c04",
+  "sha1": "67cbbb93ee8b1bf8b93fca2ddad29e4426d4a9b4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -188,7 +188,7 @@
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-bd7a1e3fc467957",
+      "id": "0d69f0f4d0e3e1c-d95aa7602c1aaa1",
       "title": "Managed workflows system-significant-events-memory-synthesis: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
@@ -204,7 +204,7 @@
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-95274bd98778fe9",
+      "id": "0d69f0f4d0e3e1c-1d51e462f457f17",
       "title": "Managed workflows system-significant-events-memory-consolidation: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
@@ -220,7 +220,7 @@
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-2bf3bba1a03f16b",
+      "id": "0d69f0f4d0e3e1c-ab74f08d1843e2e",
       "title": "Managed workflows system-significant-events-memory-conversation-scraper: is installed and valid",
       "expectedStatus": "passed",
       "tags": [

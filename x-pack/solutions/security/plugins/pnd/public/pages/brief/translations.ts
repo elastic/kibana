@@ -51,6 +51,10 @@ export const BUCKET_TUNE = i18n.translate('xpack.pnd.brief.bucket.tune', {
   defaultMessage: 'Tune',
 });
 
+export const BUCKET_CREATE = i18n.translate('xpack.pnd.brief.bucket.create', {
+  defaultMessage: 'Create',
+});
+
 export const ALL_BUCKET = i18n.translate('xpack.pnd.brief.bucket.all', {
   defaultMessage: 'All',
 });
@@ -62,6 +66,12 @@ export const WATCHED_BY = i18n.translate('xpack.pnd.brief.watchedBy', {
 export const IN_MOTION = i18n.translate('xpack.pnd.brief.inMotion', {
   defaultMessage: 'In motion',
 });
+
+export const pendingProposalsLabel = (count: number) =>
+  i18n.translate('xpack.pnd.brief.pendingProposals', {
+    defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
+    values: { count },
+  });
 
 export const OPEN_CHAT = i18n.translate('xpack.pnd.brief.openChat', {
   defaultMessage: 'Open in chat',
@@ -118,6 +128,7 @@ export const BRIEF_BUCKETS: Array<{ id: Exclude<BriefBucket, 'all'>; label: stri
   { id: 'escalate', label: BUCKET_ESCALATE },
   { id: 'investigate', label: BUCKET_INVESTIGATE },
   { id: 'tune', label: BUCKET_TUNE },
+  { id: 'create', label: BUCKET_CREATE },
 ];
 
 export const watchTierLabel = (tier?: string): string => {

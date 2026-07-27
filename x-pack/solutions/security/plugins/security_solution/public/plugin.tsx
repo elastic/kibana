@@ -150,7 +150,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
+      registerWorkflowSteps(workflowsExtensions);
     }
 
     // Lazily instantiate subPlugins and initialize services

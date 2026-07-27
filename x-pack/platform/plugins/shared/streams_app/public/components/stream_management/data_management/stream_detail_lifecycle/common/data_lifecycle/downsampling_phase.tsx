@@ -232,7 +232,7 @@ export const DownsamplingPhase = ({
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <div
-        style={{ width: '300px' }}
+        style={{ width: '360px' }}
         data-test-subj={`downsamplingPopover-step${stepNumber}-content`}
       >
         <EuiSpacer size="s" />

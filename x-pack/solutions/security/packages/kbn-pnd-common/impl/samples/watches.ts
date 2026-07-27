@@ -77,7 +77,6 @@ const floorWatchBase: Watch = {
       status: 'completed',
       triggerType: 'alert',
       steps: [
-        { name: 'watch_policy', type: 'data.set', status: 'completed' },
         { name: 'triage_alerts', type: 'ai.agent', status: 'completed' },
         { name: 'record_reasoning', type: 'data.set', status: 'completed' },
       ],
@@ -89,10 +88,7 @@ const floorWatchBase: Watch = {
       startedAt: '2026-07-20T13:58:00Z',
       status: 'completed',
       triggerType: 'alert',
-      steps: [
-        { name: 'watch_policy', type: 'data.set', status: 'completed' },
-        { name: 'triage_alerts', type: 'ai.agent', status: 'completed' },
-      ],
+      steps: [{ name: 'triage_alerts', type: 'ai.agent', status: 'completed' }],
       summary: 'false_positive · confidence 0.94',
       action: 'read',
     },
@@ -145,7 +141,6 @@ const officerWatchBase: Watch = {
       status: 'waiting',
       triggerType: 'manual',
       steps: [
-        { name: 'watch_policy', type: 'data.set', status: 'completed' },
         { name: 'draft_proposal', type: 'data.set', status: 'completed' },
         { name: 'await_approval', type: 'waitForInput', status: 'waiting' },
       ],
@@ -165,21 +160,21 @@ const darkWatchBase: Watch = {
   draft: false,
   managed: true,
   sortOrder: 30,
-  mandate: 'Overnight autonomous response',
+  mandate: 'Continuous, technology-aware hunting for relevant threats and coverage gaps',
   description:
-    'Dark Watch skeleton. Overnight / continuous hunt-style sweeps with allow-listed autonomous actions.',
+    'Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC sweeps and reviewable findings.',
   schedule: {
     set: true,
     mode: 'window',
     from: 22,
     to: 6,
-    onDemand: false,
+    onDemand: true,
     cadence: 'sweep',
     every: 60,
     handoff: 'brief',
   },
   triggers: [
-    { type: 'schedule', summary: 'Schedule · every 60m' },
+    { type: 'schedule', summary: 'Schedule · hourly from 22:00–06:00 UTC' },
     { type: 'manual', summary: 'Manual / on demand' },
   ],
   coverage: [
@@ -188,12 +183,12 @@ const darkWatchBase: Watch = {
   ],
   scopeSummary: 'Mail · IdP · edge / VPN',
   scopes: [
-    { name: 'Mail · IdP', access: 'full', label: 'Read + act' },
-    { name: 'Edge / VPN', access: 'full', label: 'Read + act' },
+    { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
+    { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
     { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
   callables: [],
-  autonomyLevel: 5,
+  autonomyLevel: 2,
   metrics: {
     runs7d: 56,
     acceptedPct: 65,
@@ -206,12 +201,9 @@ const darkWatchBase: Watch = {
       startedAt: '2026-07-20T03:00:00Z',
       status: 'completed',
       triggerType: 'schedule',
-      steps: [
-        { name: 'watch_policy', type: 'data.set', status: 'completed' },
-        { name: 'hunt_stub', type: 'console', status: 'completed' },
-      ],
+      steps: [{ name: 'hunt_stub', type: 'console', status: 'completed' }],
       summary: 'Beacon correlation · 2 hosts flagged',
-      action: 'auto',
+      action: 'read',
     },
   ],
 };
@@ -261,10 +253,7 @@ const deepWatchBase: Watch = {
       startedAt: '2026-07-19T16:45:00Z',
       status: 'completed',
       triggerType: 'manual',
-      steps: [
-        { name: 'watch_policy', type: 'data.set', status: 'completed' },
-        { name: 'specialist_stub', type: 'console', status: 'completed' },
-      ],
+      steps: [{ name: 'specialist_stub', type: 'console', status: 'completed' }],
       summary: 'Forensic timeline draft · pending review',
       action: 'draft',
     },

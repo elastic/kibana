@@ -7,7 +7,9 @@
   "plugin": {
     "id": "contextEngine",
     "server": true,
-    "browser": false,
-    "requiredPlugins": ["features"]
+    "browser": true,
+    "requiredPlugins": ["features", "share", "esql"],
+    "optionalPlugins": ["console"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

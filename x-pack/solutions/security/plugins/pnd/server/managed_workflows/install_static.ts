@@ -29,21 +29,29 @@ export const installStatic = async ({
   logger.info(`PND installStatic: installing ${PND_WATCH_WORKFLOW_IDS.length} watch workflows`);
   const client = await workflowsExtensions.initManagedWorkflowsClient('pnd');
   logger.info('PND installStatic: got managed workflows client');
-  const failedIds: string[] = [];
 
-  for (const id of PND_WATCH_WORKFLOW_IDS) {
-    try {
-      logger.info(`PND installStatic: installing ${id}`);
-      await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
-      logger.info(`PND installStatic: installed ${id} successfully`);
-    } catch (error) {
-      failedIds.push(id);
-      logger.error(
-        `Failed to install managed PND watch workflow "${id}": ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+  const results = await Promise.allSettled(
+    PND_WATCH_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+  );
+  const failedIds = results.flatMap((result, index) => {
+    if (result.status === 'fulfilled') {
+      logger.info(`PND installStatic: installed ${PND_WATCH_WORKFLOW_IDS[index]} successfully`);
+      return [];
     }
+    const id = PND_WATCH_WORKFLOW_IDS[index];
+    logger.error(
+      `Failed to install managed PND watch workflow "${id}": ${
+        result.reason instanceof Error ? result.reason.message : String(result.reason)
+      }`
+    );
+    return [id];
+  });
+
+  if (failedIds.length > 0) {
+    // Reconcile only after the complete owner set is installed. Calling
+    // ready() after a partial install can prune previously installed
+    // workflows as orphans, so skip it and surface the failures instead.
+    return { failedIds };
   }
 
   logger.info('PND installStatic: calling client.ready()');

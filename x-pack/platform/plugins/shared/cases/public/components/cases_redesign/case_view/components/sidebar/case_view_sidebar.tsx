@@ -12,6 +12,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -39,6 +40,9 @@ import { useGetCaseConfiguration } from '../../../../../containers/configure/use
 import { useGetSupportedActionConnectors } from '../../../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
 import { KibanaServices } from '../../../../../common/lib/kibana';
+import { useShowLegacyCustomFields } from '../../../../../common/use_show_old_custom_fields';
+import { CustomFieldsDeprecationCallout } from '../../../../case_form_fields/custom_fields_deprecation_callout';
+import * as configureCasesI18n from '../../../../configure_cases/translations';
 
 export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
   const { euiTheme } = useEuiTheme();
@@ -53,6 +57,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
   const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
     useGetSupportedActionConnectors();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+  const { showLegacyCustomFields } = useShowLegacyCustomFields(
+    casesConfiguration?.customFields ?? []
+  );
 
   const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version, {
     includeDeleted: true,
@@ -81,6 +88,13 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
     [isLoadingAllAvailableConnectors, isConnectorFieldUpdating, connectorLoadingKey]
   );
 
+  const hasConfiguredCustomFields = (casesConfiguration?.customFields?.length ?? 0) > 0;
+
+  // Templates v2 off: always show configured legacy custom fields (they are the only system).
+  // Templates v2 on: gate on the Settings local-storage switch.
+  const showLegacyCustomFieldsAccordion =
+    hasConfiguredCustomFields && (!isTemplatesV2Enabled || showLegacyCustomFields);
+
   return (
     <EuiFlexItem grow={2}>
       <EuiSpacer size="s" />
@@ -103,6 +117,52 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
         >
           <AttributesFields caseData={caseData} />
         </SidebarAccordionSection>
+        {showLegacyCustomFieldsAccordion ? (
+          <>
+            <EuiSpacer size="m" />
+            <SidebarAccordionSection
+              id="legacyCustomFields"
+              title={
+                isTemplatesV2Enabled ? (
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      {redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge
+                        color="warning"
+                        data-test-subj="legacy-custom-fields-deprecated-badge"
+                      >
+                        {configureCasesI18n.DEPRECATED_BADGE}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE
+                )
+              }
+              isOpen={isOpen('legacyCustomFields')}
+              onToggle={onToggle}
+              data-test-subj="case-view-sidebar-legacy-custom-fields"
+            >
+              {isTemplatesV2Enabled ? (
+                <>
+                  <CustomFieldsDeprecationCallout title={redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE} />
+                  <EuiSpacer size="m" />
+                </>
+              ) : null}
+              <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
+                <CustomFields
+                  isLoading={isCustomFieldsLoading}
+                  customFields={caseData.customFields}
+                  customFieldsConfiguration={casesConfiguration.customFields}
+                  onSubmit={onSubmitCustomField}
+                  editVariant="inline"
+                />
+              </EuiFlexGroup>
+            </SidebarAccordionSection>
+          </>
+        ) : null}
         {isTemplatesV2Enabled ? (
           <>
             <EuiSpacer size="m" />
@@ -122,15 +182,13 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
               data-test-subj="case-view-sidebar-template-fields"
             >
               <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
-                <CustomFields
-                  isLoading={isCustomFieldsLoading}
-                  customFields={caseData.customFields}
-                  customFieldsConfiguration={casesConfiguration.customFields}
-                  onSubmit={onSubmitCustomField}
+                {/* Global (isGlobal) fields apply to every case regardless of the template.
+                    Redesign accordion already labels this section — hide Extended fields heading. */}
+                <GlobalCaseFields
+                  caseData={caseData}
+                  onUpdateField={onUpdateField}
+                  showSectionTitle={false}
                 />
-                {/* Global (isGlobal) fields apply to every case regardless of the template. Renders
-                    nothing when there are none; self-labels when no template owns the heading. */}
-                <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
                 {caseData.template?.id ? (
                   <TemplateFields
                     caseData={caseData}

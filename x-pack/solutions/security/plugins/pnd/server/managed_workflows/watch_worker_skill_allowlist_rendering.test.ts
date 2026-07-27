@@ -31,9 +31,11 @@ const WORKER_YAML_FILES = [
   'watch_dark_worker.yaml',
   'watch_deep_worker.yaml',
   'watch_floor_worker.yaml',
-  'watch_detection_rule_creation_worker.yaml',
-  'watch_detection_rule_tuning_worker.yaml',
-  'watch_ad_continuation_worker.yaml',
+  // TODO: watch_detection_rule_creation_worker.yaml, watch_detection_rule_tuning_worker.yaml,
+  // and watch_ad_continuation_worker.yaml are not yet authored (Ying Mao's open question #2 on
+  // skill_ids subset restriction has no decision-log entry; no
+  // watch_ad_continuation_orchestrator.yaml despite daybreak D11/D12). Add them here once they
+  // land instead of asserting against files that don't exist.
 ] as const;
 
 describe('watch worker skill_ids override rendering', () => {

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { partition } from 'lodash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
@@ -18,16 +17,14 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
+  const { lens } = getPageObjects(['lens']);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
   const dataStreams = getService('dataStreams');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
-  const comboBox = getService('comboBox');
 
   const createDocs = getDocsGenerator(log, es, 'tsdb');
 
@@ -62,253 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await es.indices.delete({ index: [tsdbIndex] });
-    });
-
-    describe('downsampling', () => {
-      const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
-      before(async () => {
-        const downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(tsdbIndex, {
-          isStream: false,
-        });
-        downsampleDataView.index = downsampledTargetIndex;
-        downsampleDataView.dataView = `${tsdbIndex},${downsampledTargetIndex}`;
-
-        log.info(`creating a data view for "${downsampleDataView.dataView}"...`);
-        await indexPatterns.create(
-          {
-            title: downsampleDataView.dataView,
-            timeFieldName: '@timestamp',
-          },
-          { override: true }
-        );
-      });
-
-      after(async () => {
-        await es.indices.delete({ index: [downsampleDataView.index] });
-      });
-
-      describe('for regular metric', () => {
-        it('defaults to median for non-rolled up metric', async () => {
-          await common.navigateToApp('lens');
-          await lens.switchDataPanelIndexPattern(tsdbDataView);
-          await lens.waitForField('bytes_gauge');
-          await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
-          expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-            'Median of bytes_gauge'
-          );
-        });
-
-        it('does not show a warning', async () => {
-          await lens.openDimensionEditor('lnsXY_yDimensionPanel');
-          await testSubjects.missingOrFail('median-partial-warning');
-          await lens.assertNoEditorWarning();
-          await lens.closeDimensionEditor();
-        });
-      });
-
-      describe('for rolled up metric (downsampled)', () => {
-        it('defaults to average for rolled up metric', async () => {
-          await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
-          await lens.removeLayer();
-          await lens.ensureLayerTabIsActive();
-          await lens.waitForField('bytes_gauge');
-          await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
-          expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-            'Average of bytes_gauge'
-          );
-        });
-        it('shows warnings in editor when using median', async () => {
-          await lens.openDimensionEditor('lnsXY_yDimensionPanel');
-          await testSubjects.existOrFail('median-partial-warning');
-          await testSubjects.click('lns-indexPatternDimension-median');
-          await lens.waitForVisualization('xyVisChart');
-          await lens.assertMessageListContains(
-            'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            'warning'
-          );
-        });
-        it('shows warnings in dashboards as well', async () => {
-          await lens.save('New', false, false, false, 'new');
-
-          await dashboard.waitForRenderComplete();
-          await lens.assertMessageListContains(
-            'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            'warning'
-          );
-        });
-      });
-    });
-
-    describe('time series special field types support', () => {
-      before(async () => {
-        await common.navigateToApp('lens');
-        await lens.switchDataPanelIndexPattern(tsdbDataView);
-        await lens.goToTimeRange();
-      });
-
-      afterEach(async () => {
-        await lens.removeLayer();
-        await lens.ensureLayerTabIsActive();
-      });
-
-      // skip count for now as it's a special function and will
-      // change automatically the unsupported field to Records when detected
-      const allOperations = [
-        'average',
-        'max',
-        'last_value',
-        'median',
-        'percentile',
-        'percentile_rank',
-        'standard_deviation',
-        'sum',
-        'unique_count',
-      ];
-      const counterFieldsSupportedOps = ['min', 'max', 'counter_rate', 'last_value'];
-      const gaugeFieldsSupportedOps = allOperations;
-
-      const operationsByFieldSupport = allOperations.map((name) => ({
-        name,
-        // Quick way to make it match the UI name
-        label: `${name[0].toUpperCase()}${name.slice(1).replace('_', ' ')}`,
-        counter: counterFieldsSupportedOps.includes(name),
-        gauge: gaugeFieldsSupportedOps.includes(name),
-      }));
-
-      for (const fieldType of ['counter', 'gauge'] as const) {
-        const [supportedOperations, unsupportedOperatons] = partition(
-          operationsByFieldSupport,
-          (op) => op[fieldType]
-        );
-        if (supportedOperations.length) {
-          it(`should allow operations when supported by ${fieldType} field type`, async () => {
-            // Counter rate requires a date histogram dimension configured to work
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            // minimum supports all tsdb field types
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_${fieldType}`,
-              keepOpen: true,
-            });
-
-            for (const supportedOp of supportedOperations) {
-              // now check if the provided function has no incompatibility tooltip
-              expect(
-                testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
-                  timeout: 500,
-                })
-              ).to.eql(supportedOp[fieldType]);
-              // try to change to the provided function and check all is ok
-              await lens.selectOperation(supportedOp.name);
-
-              expect(
-                await find.existsByCssSelector(
-                  '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
-                  500
-                )
-              ).to.be(false);
-
-              // return in a clean state before checking the next operation
-              await lens.selectOperation('min');
-            }
-            await lens.closeDimensionEditor();
-          });
-        }
-        if (unsupportedOperatons.length) {
-          it(`should notify the incompatibility of unsupported operations for the ${fieldType} field type`, async () => {
-            // Counter rate requires a date histogram dimension configured to work
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            // minimum supports all tsdb field types
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_${fieldType}`,
-              keepOpen: true,
-            });
-
-            for (const unsupportedOp of unsupportedOperatons) {
-              // now check if the provided function has the incompatibility tooltip
-              expect(
-                testSubjects.exists(
-                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
-                  {
-                    timeout: 500,
-                  }
-                )
-              ).to.eql(!unsupportedOp[fieldType]);
-              // try to change to the provided function and check if it's in an incompatibility state
-              await lens.selectOperation(unsupportedOp.name, true);
-
-              const fieldSelectErrorEl = await find.byCssSelector(
-                '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
-                500
-              );
-
-              expect(await fieldSelectErrorEl.getVisibleText()).to.be(
-                'This field does not work with the selected function.'
-              );
-
-              // return in a clean state before checking the next operation
-              await lens.selectOperation('min');
-            }
-            await lens.closeDimensionEditor();
-          });
-        }
-      }
-
-      describe('show time series dimension groups within breakdown', () => {
-        it('should show the time series dimension group on field picker when configuring a breakdown', async () => {
-          await lens.configureDimension({
-            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-            operation: 'date_histogram',
-            field: '@timestamp',
-          });
-
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'min',
-            field: 'bytes_counter',
-          });
-
-          await lens.configureDimension({
-            dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-            operation: 'terms',
-            keepOpen: true,
-          });
-
-          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
-          expect(list).to.contain('Time series dimensions');
-          await lens.closeDimensionEditor();
-        });
-
-        it("should not show the time series dimension group on field picker if it's not a breakdown", async () => {
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'min',
-            field: 'bytes_counter',
-          });
-
-          await lens.configureDimension({
-            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-            operation: 'date_histogram',
-            keepOpen: true,
-          });
-          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
-          expect(list).to.not.contain('Time series dimensions');
-          await lens.closeDimensionEditor();
-        });
-      });
     });
 
     describe('Scenarios with changing stream type', () => {

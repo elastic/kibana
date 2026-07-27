@@ -14,31 +14,32 @@ interface NodeCardStyleOptions {
   dragging?: boolean;
 }
 
-/**
- * Shared interactive styling for canvas node cards, matching the Figma node
- * states: grab cursor, subtle raise-on-hover, a primary ring when selected,
- * This might change once we have more EUI components for the canvas.
- */
+// The selected card's shadow: an on-brand primary ring plus a soft primary glow.
+const selectedShadow = (euiTheme: UseEuiTheme['euiTheme']) =>
+  `0 0 0 2px ${euiTheme.colors.primary}, 0 2px 8px 0 color-mix(in srgb, ${euiTheme.colors.primary} 25%, transparent)`;
+
+const raisedShadow = (euiTheme: UseEuiTheme['euiTheme']) =>
+  `0 4px 8px 0 color-mix(in srgb, ${euiTheme.colors.shadow} 16%, transparent), 0 8px 16px 0 color-mix(in srgb, ${euiTheme.colors.shadow} 8%, transparent)`;
+
 export const getNodeCardStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
   { width, selected, dragging }: NodeCardStyleOptions
 ) => css`
   width: ${width}px;
   cursor: ${dragging ? 'grabbing' : 'grab'};
-  border-color: ${selected
-    ? euiTheme.colors.borderStrongPrimary
-    : euiTheme.colors.borderBaseSubdued};
-  transition: transform ${euiTheme.animation.fast} ease, box-shadow ${euiTheme.animation.fast} ease,
-    border-color ${euiTheme.animation.fast} ease;
-  ${selected ? `box-shadow: 0 0 0 1px ${euiTheme.colors.borderStrongPrimary};` : ''}
-  ${dragging
-    ? `transform: translateY(-2px);
-       box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} rgba(43, 57, 79, 0.15);`
-    : ''}
+  border-color: ${selected ? euiTheme.colors.primary : euiTheme.colors.borderBaseSubdued};
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out, border-color 120ms ease-out;
+  // Resting depth: every card carries a subtle shadow so it lifts off the canvas
+  // surface, matching the prototype. euiTheme.colors.shadow is EUI's ink base,
+  // so this adapts to light/dark themes.
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, ${euiTheme.colors.shadow} 12%, transparent);
+  // An unmistakable, on-brand primary ring marks the selected node(s).
+  ${selected ? `box-shadow: ${selectedShadow(euiTheme)};` : ''}
+  ${dragging ? `transform: translateY(-2px); box-shadow: ${raisedShadow(euiTheme)};` : ''}
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.xs} rgba(43, 57, 79, 0.12);
+    transform: translateY(-2px);
+    box-shadow: ${selected ? selectedShadow(euiTheme) : raisedShadow(euiTheme)};
     ${!selected ? `border-color: ${euiTheme.colors.borderBasePlain};` : ''}
   }
 `;

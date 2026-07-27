@@ -844,7 +844,7 @@ describe('reconcileScheduleIdsToWire', () => {
         coreStart: core,
         osqueryContext,
         logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
-        abortController,
+        signal: abortController.signal,
       });
 
       expect(result).toEqual({ hadFailures: true });

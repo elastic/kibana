@@ -7,10 +7,11 @@ This file contains the Gherkin templates for optional test plan sections, and th
 ## Contents
 
 - [Coverage guidance](#coverage-guidance)
+- [Always-evaluated coverage](#always-evaluated-coverage)
+  - [Upgrade scenarios](#upgrade-scenarios)
 - [Optional section templates](#optional-section-templates)
   - [Multi-space scenarios](#multi-space-scenarios)
   - [Multi-tenant scenarios](#multi-tenant-scenarios)
-  - [Upgrade scenarios](#upgrade-scenarios)
   - [Cross-cluster Search (CCS) scenarios](#cross-cluster-search-ccs-scenarios)
 - [Gherkin rules](#gherkin-rules-strictly-enforced)
 - [Tags](#tags)
@@ -48,6 +49,63 @@ If a required testing type has no applicable scenario for a given feature area �
 
 ---
 
+## Always-evaluated coverage
+
+These coverage areas are **evaluated on every generation run**, not included on a per-feature "should I add this?" basis. They either produce scenarios or produce an explicit *Out of scope* bullet with a one-clause reason. Never omit them silently.
+
+| Coverage | Trigger | Scope decision |
+|---|---|---|
+| **Upgrade / migration** | Feature ships changes to Elasticsearch mappings, saved-object types or migrations, Kibana config keys, or navigation — **regardless of feature-flag state, default availability, or milestone in which the flag is expected to flip on** | In scope. Use the Upgrade template below. If genuinely out of scope, state the reason under *Out of scope* (a flag being off is **not** a valid reason — the underlying change ships anyway). |
+| **CRUD per persisted object** | Every persisted object the feature touches — including objects reachable only through the platform's generic Cases / SO / Fleet / Alerts endpoints, and objects the PR narrative did not exercise | In scope. Walk `Create` / `Read` / `Update` / `Delete` for each persisted object. If an op is genuinely unreachable, state under *Out of scope* which object and which op, with the reason. |
+| **Dependency data lifecycle** | Feature references, snapshots, caches, or otherwise reads data owned by another feature / store / index / service — even when the feature itself has no delete or update action | In scope. Cover: dangling reference (the referenced object is deleted by its owner), drift (the referenced value changes after snapshot), and dependency unavailability (the owning store / service is disabled or unreachable). Or state per case under *Out of scope*. |
+
+**Invalid reasons for omitting any of the above**:
+
+- *"Feature is behind an off-by-default flag."* — A flag hides the feature; it does not stop schema, SO, config, or navigation changes from shipping.
+- *"The PR does not narrate this."* — The PR is a starting point, not the scope boundary. Persisted objects reached via inherited platform behaviour are still in scope.
+- *"Assumed not needed."* — Assumption without evidence. Apply the Core rule.
+
+---
+
+### Upgrade scenarios
+
+Use `TARGET_VERSION` (detected in Step 2) as the target version.
+
+**Resolve source versions from `elastic/kibana`'s `versions.json`** — the authoritative list of currently-supported release branches, updated as the release train advances. At generation time, fetch the file from:
+
+```
+https://raw.githubusercontent.com/elastic/kibana/main/versions.json
+```
+
+Fetching from `main` guarantees the values are current regardless of which branch the agent is invoked from. If the remote fetch fails (offline, network error, GitHub unavailable), fall back to reading `<repo-root>/versions.json` from the local checkout. Never hardcode version numbers.
+
+Resolve the two placeholders below from the fetched file:
+
+- `PREVIOUS_MAJOR_LAST_MINOR` — the `version` of the highest-numbered entry with `branchType: "release"` whose major is exactly one less than `TARGET_VERSION`'s major (e.g. `8.19.19` when `TARGET_VERSION` is on the `9.x` line).
+- `CURRENT_MAJOR_LAST_MINOR` — the `version` of the highest-numbered entry with `branchType: "release"` whose major equals `TARGET_VERSION`'s major and whose minor is strictly less than `TARGET_VERSION`'s minor (e.g. `9.5.0` when `TARGET_VERSION` is `9.6`).
+
+If both remote and local fetches fail, or if either placeholder has no eligible entry in the file (e.g. `TARGET_VERSION` is the first minor of a new major cycle, so no `CURRENT_MAJOR_LAST_MINOR` exists yet), record the affected placeholder under *Assumptions* with a `⚠️` and ask the user to confirm before publishing — do not drop the scenario.
+
+```gherkin
+@upgrade
+Scenario: Feature works correctly after upgrading from PREVIOUS_MAJOR_LAST_MINOR to TARGET_VERSION
+  Given a Kibana instance running PREVIOUS_MAJOR_LAST_MINOR with existing data relevant to this feature
+  When the instance is upgraded to TARGET_VERSION
+  Then the feature is accessible and behaves as expected
+  And existing data or configuration is preserved without errors
+
+@upgrade
+Scenario: Feature works correctly after upgrading from CURRENT_MAJOR_LAST_MINOR to TARGET_VERSION
+  Given a Kibana instance running CURRENT_MAJOR_LAST_MINOR with existing data relevant to this feature
+  When the instance is upgraded to TARGET_VERSION
+  Then the feature is accessible and behaves as expected
+  And existing data or configuration is preserved without errors
+```
+
+CRUD and dependency-lifecycle scenarios do not have dedicated templates — they are written inline in the feature area they belong to, using the same Gherkin conventions as any other scenario.
+
+---
+
 ## Optional section templates
 
 Include each optional section only when the evidence clearly supports it. If it is not clear whether a section applies, ask the user before including — do not include sections speculatively.
@@ -57,7 +115,6 @@ Include each optional section only when the evidence clearly supports it. If it 
 | **RBAC** | Issue explicitly mentions roles, permissions, or access control |
 | **Multi-space** | Feature involves entities that are space-aware in Kibana — rules, cases, alerts, dashboards, saved objects, actions, or any configuration scoped to a Kibana space |
 | **Multi-tenant** | Feature involves data ingestion, index patterns, or configuration in a Serverless or ECH deployment |
-| **Upgrade** | Feature modifies stored data, index mappings, saved objects, configuration, or navigation structure |
 | **CCS** | Feature queries Elasticsearch indices — especially Alerts index or detection rules |
 
 For RBAC: no template — write scenarios manually based on the roles described in the issue.
@@ -99,32 +156,6 @@ Scenario: Feature data is isolated between tenants
   Given two separate tenants with independent deployments
   When Tenant A configures the feature
   Then Tenant B cannot access or see Tenant A's configuration
-```
-
----
-
-### Upgrade scenarios
-
-Use `TARGET_VERSION` (detected in Step 2) as the target version. Run upgrade scenarios from each of the following source versions:
-- The last minor of the previous major series (currently `8.19.x`)
-- The last minor of the current major cycle (currently `9.3`)
-
-Check with the team if you are unsure which versions are current — these values change with each release cycle.
-
-```gherkin
-@upgrade
-Scenario: Feature works correctly after upgrading from the last minor of the previous major to TARGET_VERSION
-  Given a Kibana instance running the last minor of the previous major series with existing data relevant to this feature
-  When the instance is upgraded to TARGET_VERSION
-  Then the feature is accessible and behaves as expected
-  And existing data or configuration is preserved without errors
-
-@upgrade
-Scenario: Feature works correctly after upgrading from the last minor of the current major cycle to TARGET_VERSION
-  Given a Kibana instance running the last minor of the current major cycle with existing data relevant to this feature
-  When the instance is upgraded to TARGET_VERSION
-  Then the feature is accessible and behaves as expected
-  And existing data or configuration is preserved without errors
 ```
 
 ---
