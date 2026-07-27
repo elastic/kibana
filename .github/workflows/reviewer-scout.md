@@ -115,7 +115,7 @@ safe-outputs:
   noop:
     report-as-issue: false
   create-pull-request-review-comment:
-    max: 10
+    max: 15
     target: ${{ env.PR_NUMBER }}
   submit-pull-request-review:
     max: 5
@@ -143,6 +143,15 @@ Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id and event type from the Reviewer Comment Dispatcher.
 - This reviewer's own gh-aw workflow id is `reviewer-scout`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
+
+## Critical checks
+
+Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings, and prefix each Critical-check finding with a GitHub `> [!IMPORTANT]` alert containing exactly this line (the finding details follow after the alert):
+
+```
+> [!IMPORTANT]
+> The Applications DX team marked this comment as high-priority.
+```
 
 For dispatched follow-up runs, use this context:
 - PR number: `${{ github.event.inputs.pr_number }}`

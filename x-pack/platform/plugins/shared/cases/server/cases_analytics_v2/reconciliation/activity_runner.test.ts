@@ -126,6 +126,30 @@ describe('runActivityReconciliation', () => {
     expect(cursorMs).toBeLessThanOrEqual(after);
   });
 
+  it('throws before fetching a page when the abort signal is already tripped, leaving the cursor to be pinned by the caller', async () => {
+    const { client, activityWriter } = setup([
+      makeUserAction('ua-A', { createdAt: '2026-05-05T00:00:00.000Z' }),
+    ]);
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      runActivityReconciliation({
+        savedObjectsClient: client,
+        activityWriter,
+        logger,
+        lastRunAt: undefined,
+        signal: controller.signal,
+      })
+    ).rejects.toThrow(/aborted/);
+
+    // Bailed before the page read + bulk dispatch — no user actions mirrored.
+    expect(client.find).not.toHaveBeenCalled();
+    expect(activityWriter.bulkUpsertActionsAwait).not.toHaveBeenCalled();
+    // PIT is opened before the loop; the finally-close must still run.
+    expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+  });
+
   it('closes the PIT even if find throws', async () => {
     const client = savedObjectsClientMock.create();
     const activityWriter = makeActivityWriterMock();
