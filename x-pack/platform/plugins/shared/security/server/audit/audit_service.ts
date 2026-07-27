@@ -94,11 +94,13 @@ export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
   'service.type': 'kibana',
 };
 
-// project.id arrives as a resource attribute — buildOtelResources() promotes the
-// `elastic.apm.globalLabels.project.id` APM global label to the OTel resource. It belongs on each
-// record (a single Kibana instance can serve multiple projects), so promote it into per-record
-// attributes; includeResources then keeps it out of the resource. Absent when there is no such
-// global label (e.g. non-Cloud), in which case nothing is promoted.
+// project.id arrives as a resource attribute (buildOtelResources() promotes the
+// `elastic.apm.globalLabels.project.id` APM global label to the OTel resource, and deployments may
+// also set it via the appender's `attributes`). It belongs on each record too — a single Kibana
+// instance can serve multiple projects — so copy it into per-record attributes. It is deliberately
+// kept in BOTH places: the log-delivery pipeline reads project.id from the resource (removing it
+// breaks delivery), so we keep it there (via includeResources below) and also promote a per-record
+// copy. Absent when there is no such source (e.g. non-Cloud), in which case nothing is promoted.
 export const AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES: string[] = ['project.id'];
 
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
@@ -270,13 +272,13 @@ export const createLoggingConfig = (config: ConfigType['audit'], isServerless = 
             fieldAdditions: { ...baseAppender.fieldAdditions, ...AUDIT_OTEL_FIELD_ADDITIONS },
             // Slim the resource to the configured attributes — the appender's own `attributes` plus
             // the audit service.name/service.type — dropping the detectors' host/OS/process/env
-            // fields. The allowlist is derived from the attribute keys (not just
-            // AUDIT_OTEL_RESOURCE_ATTRIBUTES) so deployment-provided resource attributes such as
-            // project.id survive; stripping them breaks log delivery.
-            includeResources: Object.keys({
-              ...baseAppender.attributes,
-              ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
-            }),
+            // fields. The allowlist also keeps the promoted keys (AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            // e.g. project.id): they must survive in the resource because log delivery reads them
+            // there, in addition to being copied into per-record attributes below.
+            includeResources: [
+              ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
+              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            ],
             promoteResourceAttributes: [
               ...(baseAppender.promoteResourceAttributes ?? []),
               ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,

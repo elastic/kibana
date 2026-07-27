@@ -820,10 +820,14 @@ describe('#createLoggingConfig', () => {
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
-    // includeResources keeps only the audit resource attribute keys; attributes supply the values.
-    expect(otelAppender.includeResources).toEqual(Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES));
+    // includeResources keeps the audit resource attribute keys plus the promoted keys (so project.id
+    // stays in the resource for log delivery); attributes supply the service.name/service.type values.
+    expect(otelAppender.includeResources).toEqual([
+      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+    ]);
     expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
-    // project.id is promoted from the resource to per-record attributes.
+    // project.id is also copied into per-record attributes (kept in both places).
     expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
   });
 
@@ -854,11 +858,12 @@ describe('#createLoggingConfig', () => {
       'custom.attr': 'value',
       ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
     });
-    // includeResources must cover ALL configured attribute keys — not just the audit two — so a
-    // deployment-provided resource attribute (e.g. project.id) is not stripped from the resource.
+    // includeResources must cover ALL configured attribute keys — not just the audit two — plus the
+    // promoted keys, so a deployment-provided resource attribute (e.g. project.id) is not stripped.
     expect(otelAppender.includeResources).toEqual([
       'custom.attr',
       ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
     ]);
   });
 

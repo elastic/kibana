@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { apiTest, OTEL_RECEIVER_PORT, tags } from '@kbn/scout';
+import { apiTest, OTEL_RECEIVER_PORT, OTEL_TEST_PROJECT_ID, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
   type FlatAttributes,
+  getLogAttributes,
   getResourceAttributes,
   OtlpLogReceiver,
 } from '../lib/otlp_log_receiver';
@@ -22,26 +23,36 @@ const receiver = new OtlpLogReceiver();
 /**
  * Asserts the OTel envelope and resource-level fields that are identical across all audit events.
  * The audit appender ships a deliberately minimal resource (includeResources allowlist) carrying
- * only service.name + service.type — the auto-detected host/OS/process/env attributes are excluded.
+ * only service.name + service.type + project.id — the auto-detected host/OS/process/env attributes
+ * are excluded.
  */
 const expectOtelEnvelope = (e: FlatAttributes) => {
   // OTLP envelope fields — top-level log record fields, not logRecord.attributes.
   expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
   expect(e.severityText).toBe('INFO');
 
-  // Minimal-resource contract: Kibana emits EXACTLY service.name + service.type at the resource
-  // level. The exact-key assertion proves nothing else is present — no project.id, no auto-detected
-  // host/OS/process/env fields — so anything seen in production comes from downstream (gateway /
-  // ingest), not Kibana.
+  // Minimal-resource contract: the resource carries EXACTLY service.name + service.type + project.id.
+  // The exact-key assertion proves the detectors' host/OS/process/env attributes are all filtered
+  // out. project.id arrives as a resource attribute (OTEL_RESOURCE_ATTRIBUTES=project.id=… in the
+  // config, standing in for the APM global label) and is deliberately KEPT in the resource because
+  // the log-delivery pipeline reads it there.
   const resource = getResourceAttributes(e);
-  expect(Object.keys(resource).sort()).toStrictEqual(['service.name', 'service.type']);
+  expect(Object.keys(resource).sort()).toStrictEqual([
+    'project.id',
+    'service.name',
+    'service.type',
+  ]);
   expect(resource['service.name']).toBe('serverless-kibana');
   expect(resource['service.type']).toBe('kibana');
+  expect(resource['project.id']).toBe(OTEL_TEST_PROJECT_ID);
 
   // Per-record guarantees on every audit record.
   expect(e['log.type']).toBe('audit'); // AUDIT_OTEL_FIELD_DEFAULTS
   expect(e['log.logger']).toBeUndefined(); // dropped from per-record attributes
-  expect(e['project.id']).toBeUndefined(); // never emitted by Kibana (resource or per-record)
+  // project.id is ALSO promoted onto each record (promoteResourceAttributes) — it lives in both the
+  // resource (above) and the per-record attributes. getLogAttributes reads the per-record attributes
+  // specifically (the merged view can't distinguish them since project.id is in both).
+  expect(getLogAttributes(e)['project.id']).toBe(OTEL_TEST_PROJECT_ID);
 };
 
 apiTest.describe(

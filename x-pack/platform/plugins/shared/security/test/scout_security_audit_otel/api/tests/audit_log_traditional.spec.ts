@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { apiTest, OTEL_RECEIVER_PORT, tags } from '@kbn/scout';
+import { apiTest, OTEL_RECEIVER_PORT, OTEL_TEST_PROJECT_ID, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
   type FlatAttributes,
+  getLogAttributes,
   getResourceAttributes,
   OtlpLogReceiver,
 } from '../lib/otlp_log_receiver';
@@ -31,6 +32,11 @@ const expectTraditionalEnvelope = (e: FlatAttributes) => {
   const resource = getResourceAttributes(e);
   expect(resource['telemetry.sdk.language']).toBe('nodejs');
   expect(resource['service.name']).not.toBe('serverless-kibana');
+  // project.id stays in the resource on traditional — promoteResourceAttributes is not applied off
+  // Serverless, so it is NOT copied to per-record attributes (contrast with the Serverless spec,
+  // where it appears in both).
+  expect(resource['project.id']).toBe(OTEL_TEST_PROJECT_ID);
+  expect(getLogAttributes(e)['project.id']).toBeUndefined();
 
   // Serverless-only per-record transforms are not applied on traditional.
   expect(e['log.type']).toBeUndefined(); // fieldDefaults not injected
