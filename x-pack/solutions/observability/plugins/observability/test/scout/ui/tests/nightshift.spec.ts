@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { test } from '../fixtures';
 
@@ -51,7 +52,7 @@ test.describe(
       });
     });
 
-    test('navigates to Nightshift page from Streams discovery', async ({ page }) => {
+    test('navigates between Streams discovery, Nightshift, and settings', async ({ page }) => {
       await page.gotoApp('streams/_discovery/streams');
 
       const nightshiftButton = page.getByRole('link', { name: /nightshift/i });
@@ -60,6 +61,17 @@ test.describe(
 
       await expect(page).toHaveURL(/\/app\/observability\/nightshift/, { timeout: 60_000 });
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
+
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
+
+      const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
+      if (!(await settingsLink.isVisible())) {
+        await page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton).click();
+      }
+      await expect(settingsLink).toBeVisible();
+      await settingsLink.click();
+      await expect(page).toHaveURL(/\/app\/streams\/_discovery\/settings/);
     });
   }
 );

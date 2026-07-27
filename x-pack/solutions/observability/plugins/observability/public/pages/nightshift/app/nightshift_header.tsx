@@ -107,7 +107,7 @@ export function NightshiftHeader({
           <EuiFlexGroup
             alignItems="center"
             direction={isEmptyState ? 'column' : 'row'}
-            gutterSize="m"
+            gutterSize={isEmptyState ? 's' : 'm'}
             responsive={false}
           >
             <EuiFlexItem grow={false}>

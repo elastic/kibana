@@ -8,13 +8,16 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { checkoutEvent } from '../__storybook__/nightshift_fixtures';
 import {
   NightshiftStorybookProvider,
   type NightshiftStorybookScenario,
 } from '../__storybook__/nightshift_storybook_provider';
 import { NightshiftApp } from './nightshift_app';
-import { NightshiftPageHeader } from './nightshift_page_header';
+import { NightshiftAppHeader } from './nightshift_app_header';
+
+const noop = () => undefined;
 
 interface NightshiftLandingStoryProps {
   initialEntry?: string;
@@ -26,14 +29,17 @@ const NightshiftLandingStory = ({
   scenario,
 }: NightshiftLandingStoryProps): React.ReactElement => (
   <NightshiftStorybookProvider initialEntry={initialEntry} scenario={scenario}>
-    <EuiPageTemplate restrictWidth="900px">
-      <EuiPageTemplate.Header paddingSize="s" responsive={false} restrictWidth={false}>
-        <NightshiftPageHeader settingsHref="/app/streams/_discovery/settings" />
-      </EuiPageTemplate.Header>
-      <EuiPageTemplate.Section component="div" color="subdued">
-        <NightshiftApp />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+    <MockAppHeaderProvider>
+      <EuiPageTemplate restrictWidth={false}>
+        <NightshiftAppHeader
+          onSettingsClick={noop}
+          settingsHref="/app/streams/_discovery/settings"
+        />
+        <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
+          <NightshiftApp />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </MockAppHeaderProvider>
   </NightshiftStorybookProvider>
 );
 

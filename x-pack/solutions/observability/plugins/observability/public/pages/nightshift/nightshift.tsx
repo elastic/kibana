@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiPageTemplate } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { NightshiftApp } from './app/nightshift_app';
-import { NightshiftPageHeader } from './app/nightshift_page_header';
+import { NightshiftAppHeader } from './app/nightshift_app_header';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
@@ -28,6 +29,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const settingsHref = application.getUrlForApp('streams', {
     path: '/_discovery/settings',
   });
+  const navigateToSettings = useCallback(
+    () => application.navigateToUrl(settingsHref),
+    [application, settingsHref]
+  );
 
   // Availability is owned by this flag alone — the /available endpoint is the same
   // gate on the server, so a second client probe would only duplicate it.
@@ -59,18 +64,16 @@ export function NightshiftPage(): React.ReactElement | null {
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
-      pageHeader={{
-        children: <NightshiftPageHeader settingsHref={settingsHref} />,
-        paddingSize: 's',
-        responsive: false,
-        restrictWidth: false,
-      }}
-      restrictWidth="900px"
+      restrictWidth={false}
       pageSectionProps={{
         color: 'subdued',
+        paddingSize: 'none',
       }}
     >
-      <NightshiftApp />
+      <NightshiftAppHeader onSettingsClick={navigateToSettings} settingsHref={settingsHref} />
+      <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
+        <NightshiftApp />
+      </EuiPageTemplate.Section>
     </ObservabilityPageTemplate>
   );
 }

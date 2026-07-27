@@ -60,9 +60,9 @@ const recommendationChatTooltip = i18n.translate(
 );
 
 const completedStatusLabel = i18n.translate(
-  'xpack.observability.nightshift.investigation.summaryCompletedStatusLabel',
+  'xpack.observability.nightshift.investigation.summaryCompleteStatusLabel',
   {
-    defaultMessage: 'Completed',
+    defaultMessage: 'Complete',
   }
 );
 

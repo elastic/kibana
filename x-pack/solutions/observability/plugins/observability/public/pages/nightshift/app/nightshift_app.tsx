@@ -44,6 +44,7 @@ import { NIGHTSHIFT_EVENT_UUID_QUERY_PARAM } from '../common/nightshift_url_para
 // Kept in the URL so a refresh or a shared link restores the open flyout.
 const BLAST_RADIUS_QUERY_PARAM = 'blastRadius';
 const HAPPY_PATH_TRANSITION_MS = 400;
+const COMPACT_APP_HEADER_HEIGHT_PX = 48;
 
 const loadingStateExitAnimation = keyframes`
   from {
@@ -257,6 +258,15 @@ export function NightshiftApp(): React.ReactElement {
   const hasEvents = shownEvents.length > 0;
   const hasNeedsAction = needsActionEvents.length > 0;
   const isEmptyState = isLoading || !hasEvents;
+  const contentTopMargin = isEmptyState && !isLoading ? euiTheme.size.m : euiTheme.size.l;
+  const constrainContentToViewport = isEmptyState || isTransitioningFromLoading;
+  const viewportContentHeight = `calc(
+    var(--kbn-application--content-height, 100vh) -
+    ${COMPACT_APP_HEADER_HEIGHT_PX}px -
+    ${euiTheme.size.l} -
+    ${euiTheme.size.l} -
+    ${contentTopMargin}
+  )`;
 
   useLayoutEffect(() => {
     const shouldTransitionToHappyPath =
@@ -320,10 +330,11 @@ export function NightshiftApp(): React.ReactElement {
         background: ${euiTheme.colors.backgroundBaseSubdued};
         box-sizing: border-box;
         gap: ${isEmptyState ? euiTheme.size.xl : 0};
+        height: ${constrainContentToViewport ? viewportContentHeight : 'auto'};
         justify-content: ${isEmptyState ? 'center' : 'flex-start'};
-        /* The page section contributes 24px; non-loading states add 12px for a 36px gap. */
-        margin-top: ${isLoading ? euiTheme.size.l : euiTheme.size.m};
-        min-height: ${isEmptyState || isTransitioningFromLoading ? 'calc(100vh - 140px)' : 'auto'};
+        margin-top: ${contentTopMargin};
+        min-height: 0;
+        overflow-y: ${constrainContentToViewport ? 'clip' : 'visible'};
         padding: ${isEmptyState ? euiTheme.size.xxl : 0} ${isEmptyState ? euiTheme.size.xl : 0}
           calc(${euiTheme.size.xxl} * 1.5);
         position: relative;
