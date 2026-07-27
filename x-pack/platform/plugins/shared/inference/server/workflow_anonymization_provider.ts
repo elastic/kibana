@@ -24,8 +24,12 @@ export type WorkflowAroundCompletionResult =
   | { matched: true; content: string };
 
 export interface WorkflowAnonymizationProvider {
-  /** Compatibility marker aligned with the workflow engine's synchronous execution support. */
-  readonly supportsSynchronousExecution: true;
+  /**
+   * Whether this provider supports synchronous (within-request) workflow execution.
+   * Checked at runtime before the hook path is entered; must be `true` for
+   * providers that implement the around-completion flow.
+   */
+  readonly supportsSynchronousExecution: boolean;
   execute(options: {
     event: AroundCompletionEvent;
     namespace: string;

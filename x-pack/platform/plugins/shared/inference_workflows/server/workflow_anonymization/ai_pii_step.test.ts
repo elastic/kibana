@@ -150,7 +150,7 @@ describe('executePiiProtection', () => {
     ).rejects.toThrow('PII detector returned an invalid range');
   });
 
-  it('honors cancellation that occurs while detection is running', async () => {
+  it('honors abort signal that fires during detection and before entity application', async () => {
     const abortController = new AbortController();
     const capabilities = createCapabilities({
       detectEntities: jest.fn().mockImplementation(async () => {
@@ -168,6 +168,44 @@ describe('executePiiProtection', () => {
         logger: createLogger(),
       })
     ).rejects.toMatchObject({ name: 'AbortError' });
+  });
+
+  it('deduplicates the same detected value into a single token-map entry', async () => {
+    // Regression guard for the tokenize-determinism contract on PiiTokenizationContext.
+    // If tokenize() were non-deterministic, repeated occurrences would produce different tokens,
+    // triggering a false collision error or leaving orphaned token-map entries.
+    const detectEntities = jest.fn(({ records }) => Promise.resolve(detectEmailEntities(records)));
+    const capabilities = createCapabilities({
+      detectEntities,
+      tokenize: () => 'EMAIL_TOKEN',
+    });
+
+    const output = await executePiiProtection({
+      input: {
+        messages: [
+          { role: MessageRole.User, content: 'First person@example.com mention' },
+          { role: MessageRole.User, content: 'Second person@example.com mention' },
+        ],
+        rules: [rule],
+      },
+      capabilities,
+      abortSignal: new AbortController().signal,
+      logger: createLogger(),
+    });
+
+    expect(output.messages[0]).toEqual({
+      role: MessageRole.User,
+      content: 'First EMAIL_TOKEN mention',
+    });
+    expect(output.messages[1]).toEqual({
+      role: MessageRole.User,
+      content: 'Second EMAIL_TOKEN mention',
+    });
+    // Both occurrences share one entry — not two separate entries
+    expect(Object.keys(output.tokenMap)).toHaveLength(1);
+    expect(output.tokenMap).toEqual({
+      EMAIL_TOKEN: { original: 'person@example.com', entityClass: 'EMAIL' },
+    });
   });
 
   it('requires a valid request-local PII capability', async () => {
