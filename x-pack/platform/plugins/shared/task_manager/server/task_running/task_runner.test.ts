@@ -3392,6 +3392,38 @@ describe('TaskManagerRunner', () => {
         expect(runEvent.kibana.task.data.big).toBeUndefined();
       });
 
+      test('silently drops custom fields that cannot be serialized to JSON and logs a warning', async () => {
+        const id = _.random(1, 20).toString();
+        const circular: Record<string, unknown> = {};
+        circular.self = circular;
+        const { runner, logger } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields(circular);
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent.event.action).toBe('task-run');
+        expect(runEvent.event.outcome).toBe('success');
+        expect(runEvent.kibana.task.data).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Dropping custom task run event fields for task bar because they could not be serialized to JSON'
+          )
+        );
+      });
+
       test('adds custom fields set before cancellation onto the task-cancel event', async () => {
         jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();

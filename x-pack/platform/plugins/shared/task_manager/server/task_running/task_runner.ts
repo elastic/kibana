@@ -1143,13 +1143,19 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private setCustomTaskRunEventFields = (fields: Record<string, unknown>): void => {
-    const serializedSize = JSON.stringify(fields).length;
-    if (serializedSize > MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE) {
+    try {
+      const serializedSize = JSON.stringify(fields).length;
+      if (serializedSize > MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE) {
+        this.logger.warn(
+          `Dropping custom task run event fields for task ${this.taskType} because the serialized size (${serializedSize} bytes) exceeds the ${MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE} byte limit.`
+        );
+      } else {
+        this.taskRunEventCustomFields = fields;
+      }
+    } catch (error) {
       this.logger.warn(
-        `Dropping custom task run event fields for task ${this.taskType} because the serialized size (${serializedSize} bytes) exceeds the ${MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE} byte limit.`
+        `Dropping custom task run event fields for task ${this.taskType} because they could not be serialized to JSON.`
       );
-    } else {
-      this.taskRunEventCustomFields = fields;
     }
   };
 
