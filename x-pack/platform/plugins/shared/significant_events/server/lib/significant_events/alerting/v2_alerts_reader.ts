@@ -35,6 +35,14 @@ import {
 
 const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
 
+/**
+ * Returned when the series is too short to judge — most often a rule that has
+ * not been reporting long enough to fill the window. Carries `reason` instead
+ * of `p_value`, and must not reach the Detection workflow, which would treat it
+ * as an observed type and write it as a transition.
+ */
+const INDETERMINABLE_CHANGE_POINT_TYPE = 'indeterminable';
+
 interface RawRuleBucket {
   key: string;
   doc_count: number;
@@ -187,9 +195,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     const meta = ruleMetadata.get(bucket.key);
     const ruleName = meta?.ruleName ?? 'unknown';
     const streamName = meta?.streamName ?? 'unknown';
-    const changePoints = bucket.change_points?.type
-      ? { type: bucket.change_points.type }
-      : { type: EMPTY_CHANGE_POINT_TYPE };
+    const verdict = bucket.change_points?.type ?? EMPTY_CHANGE_POINT_TYPE;
 
     return {
       key: bucket.key,
@@ -197,7 +203,9 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       doc_count: bucket.doc_count,
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
       stream: { buckets: [{ key: streamName }] },
-      change_points: changePoints,
+      change_points: {
+        type: INDETERMINABLE_CHANGE_POINT_TYPE in verdict ? EMPTY_CHANGE_POINT_TYPE : verdict,
+      },
     };
   }
 }

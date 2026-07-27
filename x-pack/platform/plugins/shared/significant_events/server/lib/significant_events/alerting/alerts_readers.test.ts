@@ -207,4 +207,40 @@ describe('SignificantEventsAlertsReaderV2', () => {
       },
     ]);
   });
+
+  // A rule without history for the whole window gets a series under
+  // change_point's floor. `indeterminable` must not reach the workflow, which
+  // reads the single key of `change_points.type` and would write it as a
+  // transition with a bogus p_value of 0.
+  it('drops an indeterminable verdict to the empty type', async () => {
+    const { client, search } = createEsClient();
+    search.mockResolvedValue({
+      aggregations: {
+        by_rule: {
+          buckets: [
+            {
+              key: RULE_UUID,
+              doc_count: 66,
+              change_points: {
+                type: {
+                  indeterminable: {
+                    reason:
+                      'not enough buckets to calculate change_point. Requires at least [22]; found [11]',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await reader.runChangePointScan(
+      client,
+      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
+      [makeQueryLink()]
+    );
+
+    expect(result.by_rule.buckets[0].change_points).toEqual({ type: {} });
+  });
 });

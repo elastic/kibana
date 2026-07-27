@@ -34,7 +34,7 @@ export {
 } from './rule_events_metric_series';
 
 export interface ChangePointHistogramWindow {
-  /** Source-bucket bounds (extended + hard). Ends at the reliable write horizon. */
+  /** Source-bucket window. Ends at the reliable write horizon. */
   bounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   /** Write-time `@timestamp` prune that covers every source minute in `bounds`. */
   writeTimeLookback: string;
@@ -45,9 +45,11 @@ export interface ChangePointHistogramWindow {
  *
  * `lookback` (`now-40m`) is the analysis *duration*. The series ends at
  * `now - MAX_WRITE_DELAY` so not-yet-written closed minutes are excluded, and
- * starts `duration` earlier. Identical `extended_bounds` + `hard_bounds` keep
- * empty minutes zero-filled without letting out-of-window docs stretch the
- * histogram. The write-time filter is widened to the same source span.
+ * starts `duration` earlier. This is the `hard_bounds` span, which keeps
+ * out-of-window docs from stretching the histogram; only the upper edge is
+ * also used as an `extended_bounds` (see
+ * {@link buildChangePointTimeSeriesAggs}). The write-time filter is widened to
+ * the same source span.
  */
 export function buildChangePointHistogramWindow(lookback: string): ChangePointHistogramWindow {
   const lookbackMinutes = parseLookbackMinutes(lookback);
@@ -74,8 +76,22 @@ export function buildChangePointHistogramWindow(lookback: string): ChangePointHi
  *
  * Outer interval is the configured analysis bucket size. Overlapping rule
  * re-emits are collapsed with per-minute MAX before SUM into the outer bucket.
- * Empty outer buckets are zero-filled (`extended_bounds` + `_count` script) so
- * change_point always sees a dense numeric series (needs ≥22 non-null points).
+ *
+ * `min_doc_count: 0` already gives every empty outer bucket a `sum_bucket` of
+ * `0.0`, so no scripted zero-fill is needed. What the series needs is for
+ * `change_point` to read those buckets: under the default `skip`,
+ * `BucketHelpers.GapPolicy.SKIP.processValue` maps any bucket with
+ * `doc_count == 0` to NaN *before* looking at its value, so the gaps are
+ * dropped and only doc-bearing buckets are analysed. `keep_values` ignores
+ * `doc_count` and takes the value as-is. Requires the `gap_policy` option on
+ * the `change_point` agg (elastic/elasticsearch#154973).
+ *
+ * `extended_bounds` carries only `max`. Pinning the upper edge keeps the
+ * trailing zeros of a rule that has gone silent so a drop stays detectable;
+ * leaving the lower edge open starts each rule's series at its own first
+ * observed bucket, so a rule without history for the whole window gets a short
+ * series and an honest `indeterminable` instead of a step up from fabricated
+ * zeros that reads as a spike.
  */
 export function buildChangePointTimeSeriesAggs({
   bucketInterval,
@@ -90,7 +106,7 @@ export function buildChangePointTimeSeriesAggs({
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
         fixed_interval: bucketInterval,
         min_doc_count: 0,
-        extended_bounds: bounds,
+        extended_bounds: { max: bounds.max },
         hard_bounds: bounds,
       },
       aggs: {
@@ -107,24 +123,9 @@ export function buildChangePointTimeSeriesAggs({
             },
           },
         },
-        metric_value_raw: {
+        metric_value: {
           sum_bucket: {
             buckets_path: 'per_minute>minute_value',
-          },
-        },
-        // `_count` is always present (0 on empty extended_bounds buckets). Use it
-        // to force a numeric series — null sum_bucket alone is skipped by
-        // change_point and yields `indeterminable` when fewer than
-        // MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS non-null points remain.
-        metric_value: {
-          bucket_script: {
-            buckets_path: {
-              docs: '_count',
-              val: 'metric_value_raw',
-            },
-            script:
-              'params.docs == 0 || params.val == null || Double.isNaN(params.val) ? 0.0 : params.val',
-            gap_policy: 'insert_zeros',
           },
         },
       },
@@ -132,6 +133,7 @@ export function buildChangePointTimeSeriesAggs({
     change_points: {
       change_point: {
         buckets_path: 'over_time>metric_value',
+        gap_policy: 'keep_values',
       },
     },
   };

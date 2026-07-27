@@ -19,7 +19,12 @@ export interface ChangePointScanParams {
   ruleIds?: string[];
 }
 
-export type ChangePointTypeMap = Record<string, { p_value: number }>;
+/**
+ * Single-entry map of the detector's verdict, keyed by change type. `stationary`
+ * carries `{}`; the rest carry `p_value` and `change_point`. Empty when the rule
+ * had no verdict or the reader dropped an `indeterminable` one.
+ */
+export type ChangePointTypeMap = Record<string, { p_value?: number; change_point?: number }>;
 
 export interface ChangePointRuleBucket {
   key: string;

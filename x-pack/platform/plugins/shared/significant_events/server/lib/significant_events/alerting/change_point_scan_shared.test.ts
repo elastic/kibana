@@ -41,7 +41,11 @@ describe('buildChangePointTimeSeriesAggs', () => {
         field: METRIC_SERIES_BUCKET_RUNTIME_FIELD,
         fixed_interval: '5m',
         min_doc_count: 0,
-        extended_bounds: bounds,
+        // Upper edge only. Pinning `max` keeps the trailing zeros of a rule
+        // that went silent; leaving `min` open starts the series at the rule's
+        // first observed bucket instead of fabricating history back to the
+        // window edge.
+        extended_bounds: { max: bounds.max },
         hard_bounds: bounds,
       },
       aggs: {
@@ -57,27 +61,22 @@ describe('buildChangePointTimeSeriesAggs', () => {
             },
           },
         },
-        metric_value_raw: {
+        // `sum_bucket` yields 0.0 on an empty outer bucket by itself, so the
+        // series needs no scripted zero-fill — only a gap policy that reads it.
+        metric_value: {
           sum_bucket: {
             buckets_path: 'per_minute>minute_value',
           },
         },
-        metric_value: {
-          bucket_script: {
-            buckets_path: {
-              docs: '_count',
-              val: 'metric_value_raw',
-            },
-            script:
-              'params.docs == 0 || params.val == null || Double.isNaN(params.val) ? 0.0 : params.val',
-            gap_policy: 'insert_zeros',
-          },
-        },
       },
     });
+    // `keep_values` is load-bearing: the default `skip` policy discards every
+    // bucket with `doc_count == 0` before reading its value, which would drop
+    // every gap and leave change_point `indeterminable`.
     expect(aggs.change_points).toEqual({
       change_point: {
         buckets_path: 'over_time>metric_value',
+        gap_policy: 'keep_values',
       },
     });
   });
