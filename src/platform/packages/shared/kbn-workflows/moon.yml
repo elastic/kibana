@@ -25,8 +25,6 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/human-readable-id'
   - '@kbn/std'
-  - '@kbn/logging-mocks'
-  - '@kbn/es-mappings'
 tags:
   - shared-common
   - package
