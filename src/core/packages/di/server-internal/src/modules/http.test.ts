@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Container, ContainerModule } from 'inversify';
+import { type Container } from 'inversify';
 import { inject, injectable, optional } from 'inversify';
-import { createToken, OnSetup } from '@kbn/core-di';
+import { createToken, KibanaContainerModule, OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
@@ -70,7 +70,7 @@ describe('http', () => {
     router = { post: jest.fn(), handleLegacyErrors: jest.fn() } as unknown as typeof router;
     http = { createRouter: jest.fn().mockReturnValue(router) } as unknown as typeof http;
     container = injection.getContainer();
-    container.load(new ContainerModule(loadHttp));
+    container.load(new KibanaContainerModule(loadHttp));
     container.bind(CoreSetup('http')).toConstantValue(http);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(Route).toConstantValue(TestRoute);
