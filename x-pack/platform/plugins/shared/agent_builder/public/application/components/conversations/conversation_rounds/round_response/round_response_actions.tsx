@@ -20,6 +20,12 @@ import { useExperimentalFeatures } from '../../../../hooks/use_experimental_feat
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
 import { RoundMetadataPopover } from './round_metadata_popover';
 import { RoundTraceButton } from './round_trace_button';
+import { useFeedback } from './feedback_controls/use_feedback';
+import { ThumbButton } from './feedback_controls/thumb_button';
+import { ChipRow } from './feedback_controls/chip_row';
+import { CommentBox } from './feedback_controls/comment_box';
+import { UpInvite } from './feedback_controls/up_invite';
+import { FeedbackSubmitted } from './feedback_controls/feedback_submitted';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
@@ -53,6 +59,21 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const { services } = useKibana();
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
+
+  const {
+    vote,
+    chips,
+    commentOpen,
+    inviteVisible,
+    submitted,
+    isSubmitting,
+    setVote,
+    toggleChip,
+    openComment,
+    closeComment,
+    dismissInvite,
+    submit,
+  } = useFeedback(rawRound?.id ?? '');
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -94,78 +115,130 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
+  const showFeedback = isExperimentalEnabled && Boolean(rawRound);
+
+  const showChips = vote !== null && !submitted && (vote === 'down' || commentOpen);
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-      css={css`
-        opacity: ${isVisible ? 1 : 0};
-        transition: opacity 0.2s ease;
-      `}
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={labels.copy} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="copy"
-            aria-label={labels.copy}
-            onClick={handleCopy}
-            color="text"
-            data-test-subj="roundResponseCopyButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
-              detail: 'conversation',
-            })}
-          />
-        </EuiToolTip>
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          css={css`
+            opacity: ${isVisible ? 1 : 0};
+            transition: opacity 0.2s ease;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={labels.copy} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="copy"
+                aria-label={labels.copy}
+                onClick={handleCopy}
+                color="text"
+                data-test-subj="roundResponseCopyButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
+                  detail: 'conversation',
+                })}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          {isLastRound && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={labels.regenerate} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="refresh"
+                  aria-label={labels.regenerate}
+                  onClick={handleResend}
+                  color="text"
+                  isDisabled={isRegenerateDisabled}
+                  isLoading={isRegenerating}
+                  data-test-subj="roundResponseRegenerateButton"
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
+                    detail: 'conversation',
+                  })}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          {showTraceButton && traceId && (
+            <EuiFlexItem grow={false}>
+              <RoundTraceButton traceId={traceId} />
+            </EuiFlexItem>
+          )}
+          {showAddToDatasetButton && addToDatasetAction && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType={addToDatasetAction.iconType}
+                color="text"
+                aria-label={addToDatasetAction.label}
+                onClick={addToDatasetAction.onClick}
+                data-test-subj="roundAddToDatasetButton"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
+                  detail: 'conversation',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+          {rawRound && (
+            <EuiFlexItem grow={false}>
+              <RoundMetadataPopover rawRound={rawRound} />
+            </EuiFlexItem>
+          )}
+
+          {showFeedback && <EuiFlexItem grow />}
+
+          {showFeedback && (
+            <>
+              <EuiFlexItem grow={false}>
+                <ThumbButton
+                  direction="up"
+                  isActive={vote === 'up'}
+                  onClick={() => setVote('up')}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ThumbButton
+                  direction="down"
+                  isActive={vote === 'down'}
+                  onClick={() => setVote('down')}
+                />
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      {isLastRound && (
+
+      {showFeedback && submitted && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={labels.regenerate} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="refresh"
-              aria-label={labels.regenerate}
-              onClick={handleResend}
-              color="text"
-              isDisabled={isRegenerateDisabled}
-              isLoading={isRegenerating}
-              data-test-subj="roundResponseRegenerateButton"
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
-                detail: 'conversation',
-              })}
-            />
-          </EuiToolTip>
+          <FeedbackSubmitted />
         </EuiFlexItem>
       )}
-      {showTraceButton && traceId && (
+
+      {showFeedback && vote === 'up' && inviteVisible && !submitted && (
         <EuiFlexItem grow={false}>
-          <RoundTraceButton traceId={traceId} />
+          <UpInvite onTellUsMore={openComment} onDismiss={dismissInvite} />
         </EuiFlexItem>
       )}
-      {showAddToDatasetButton && addToDatasetAction && (
+
+      {showFeedback && showChips && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={addToDatasetAction.iconType}
-            color="text"
-            aria-label={addToDatasetAction.label}
-            onClick={addToDatasetAction.onClick}
-            data-test-subj="roundAddToDatasetButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
-              detail: 'conversation',
-            })}
-          />
+          <ChipRow vote={vote!} selected={chips} onToggle={toggleChip} />
         </EuiFlexItem>
       )}
-      {rawRound && (
+
+      {showFeedback && vote !== null && commentOpen && !submitted && (
         <EuiFlexItem grow={false}>
-          <RoundMetadataPopover rawRound={rawRound} />
+          <CommentBox onSubmit={submit} onCancel={closeComment} isSubmitting={isSubmitting} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
