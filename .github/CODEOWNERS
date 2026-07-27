@@ -1864,7 +1864,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/utils @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/observability_shared/common/locators/infra @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/infra @elastic/obs-signals-metrics-team
-/x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ation-team # Assigned to this team since it mostly uses infra/APM components
+/x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-signals-logs-team # Assigned to this team since it mostly uses infra/APM components
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-exploration-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic @elastic/obs-exploration-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-exploration-team
