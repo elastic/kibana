@@ -90,9 +90,30 @@ describe('Assets - Real API for integration with ML and transforms', () => {
 
     cleanupAgentPolicies();
     deleteIntegrations();
+
+    // lmd 3.3.0+ changed the transform source from `logs-*` to
+    // `logs-endpoint.events.process-*`. Without a matching index, Fleet silently
+    // skips starting the transform and the destination index is never created.
+    // Create a minimal index here so the transform can start during installation.
+    request({
+      method: 'POST',
+      url: `/api/console/proxy?method=PUT&path=${encodeURIComponent(
+        '/logs-endpoint.events.process-default'
+      )}`,
+      body: {},
+      failOnStatusCode: false,
+    });
   });
 
-  after(() => {});
+  after(() => {
+    request({
+      method: 'POST',
+      url: `/api/console/proxy?method=DELETE&path=${encodeURIComponent(
+        '/logs-endpoint.events.process-default'
+      )}`,
+      failOnStatusCode: false,
+    });
+  });
 
   const expandAssetPanelIfNeeded = (asset: Asset) => {
     cy.get(`[aria-controls="${asset.type}"]`)

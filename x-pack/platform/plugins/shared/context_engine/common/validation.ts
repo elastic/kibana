@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 // Starts with a lowercase letter or number, then lowercase letters, numbers, hyphens, or underscores.
 export const AI_INDEX_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
 
-/** Returns an error message for an invalid AI index id, or `undefined` when valid. */
+/** Returns a translated error message for an invalid AI index id, or `undefined` when valid. */
 export const validateAiIndexId = (value: string): string | undefined =>
   AI_INDEX_ID_PATTERN.test(value)
     ? undefined
-    : 'must start with a lowercase letter or number, then lowercase letters, numbers, hyphens, or underscores';
+    : i18n.translate('xpack.contextEngine.aiIndexId.error.invalidFormat', {
+        defaultMessage:
+          'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.',
+      });

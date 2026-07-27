@@ -498,6 +498,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     esClient,
     spaceId,
     force: request.body?.force,
+    allowOutdatedVersion: request.body?.allow_outdated_version,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     request,
@@ -636,6 +637,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
+    allowOutdatedVersion: request.body.allow_outdated_version,
     request,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
