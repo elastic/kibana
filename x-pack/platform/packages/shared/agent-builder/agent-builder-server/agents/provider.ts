@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
+  ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
@@ -272,6 +273,11 @@ export interface AgentParams {
    * External origin that initiated this execution, when it originated outside Kibana.
    */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external system author, or the Kibana user for
+   * public conversations). Stamped onto the completed round.
+   */
+  author?: ConversationRoundAuthor;
   /**
    * Agent capabilities to enable.
    */

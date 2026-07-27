@@ -82,7 +82,7 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
 
 export interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EntityState, SerializedError } from '@reduxjs/toolkit';
-import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
-import { createSelector } from 'reselect';
+import type { EntityState, SerializedError } from 'redux-toolkit-v1';
+import { createAsyncThunk, createEntityAdapter, createSlice } from 'redux-toolkit-v1';
+import { createSelector } from 'reselect-v4';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import type { State } from '../../common/store';
 import {

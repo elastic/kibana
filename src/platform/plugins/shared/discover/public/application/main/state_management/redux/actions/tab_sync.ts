@@ -20,7 +20,11 @@ import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
 import { type DiscoverAppState } from '../types';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
@@ -50,12 +54,15 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, createAppStateContainer, globalStateContainer } = createUrlSyncObservables({
-      tabId,
-      dispatch,
-      getState,
-      internalState$: getInternalState$(),
-    });
+    const { appState$, createAppStateContainer, globalStateContainer, profileStateContainer } =
+      createUrlSyncObservables({
+        tabId,
+        dispatch,
+        getState,
+        internalState$: getInternalState$(),
+        runtimeStateManager,
+        services,
+      });
 
     const getCurrentTab = () => selectTab(getState(), tabId);
     const getAppState = (): DiscoverAppState => {
@@ -187,10 +194,18 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           stateStorage: urlStateStorage,
         });
 
+      const { start: startSyncingProfileStateWithUrl, stop: stopSyncingProfileStateWithUrl } =
+        syncState({
+          storageKey: PROFILE_STATE_URL_KEY,
+          stateContainer: profileStateContainer,
+          stateStorage: urlStateStorage,
+        });
+
       // current state needs to be pushed to url
       dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId })).then(() => {
         startSyncingAppStateWithUrl();
         startSyncingGlobalStateWithUrl();
+        startSyncingProfileStateWithUrl();
       });
 
       return () => {
@@ -198,6 +213,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         stopSyncingQueryGlobalStateWithStateContainer();
         stopSyncingAppStateWithUrl();
         stopSyncingGlobalStateWithUrl();
+        stopSyncingProfileStateWithUrl();
         cpsProjectRoutingSubscription?.unsubscribe();
       };
     };

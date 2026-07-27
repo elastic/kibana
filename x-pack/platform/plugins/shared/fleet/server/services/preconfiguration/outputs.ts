@@ -30,13 +30,18 @@ import {
   DEFAULT_OUTPUT_ID,
   DEFAULT_OUTPUT,
   ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { isAgentlessEnabled } from '../utils/agentless';
+import {
+  isAgentlessEnabled,
+  isManagedBulkEnabled,
+  getManagedBulkEndpoint,
+} from '../utils/agentless';
 
 import { applyAllowEditOverrides, isDifferent } from './utils';
 
@@ -50,6 +55,7 @@ const PRIVATELINK_OUTPUT_IDS = new Set([
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
+  const managedBulkEndpoint = getManagedBulkEndpoint();
 
   const outputs: PreconfiguredOutput[] = (outputsOrUndefined || []).concat([
     ...(config?.agents.elasticsearch.hosts
@@ -80,6 +86,25 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             is_default_monitoring: false,
             is_preconfigured: true,
             allow_edit: ['hosts', 'ca_sha256'],
+          } as PreconfiguredOutput,
+        ]
+      : []),
+    // Include agentless managed bulk output in ECH.
+    // Serverless: the equivalent output is injected by project-controller (see SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID).
+    ...(isManagedBulkEnabled() &&
+    !appContextService.getCloud()?.isServerlessEnabled &&
+    managedBulkEndpoint
+      ? [
+          {
+            id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+            name: 'Bulk output for managed integrations',
+            type: 'elasticsearch' as const,
+            hosts: [managedBulkEndpoint],
+            // No ca_sha256 — the managed bulk endpoint uses a public cert trusted by system CAs.
+            is_default: false,
+            is_default_monitoring: false,
+            is_internal: true,
+            is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
       : []),

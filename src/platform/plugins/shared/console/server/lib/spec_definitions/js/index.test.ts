@@ -10,6 +10,10 @@
 import { SpecDefinitionsService } from '../../../services';
 import type { EndpointDefinition } from '../../../../common/types';
 
+interface NameOrDefinitionAutocompleteRules {
+  __any_of: Array<string | { type: { __one_of: string[] } }>;
+}
+
 describe('console query DSL autocomplete globals', () => {
   // `globals` holds the recursive autocomplete rule tree, which the service
   // itself types as `Record<string, any>`; `endpoints` keeps its real type.
@@ -23,6 +27,23 @@ describe('console query DSL autocomplete globals', () => {
     globals = json.globals;
     endpoints = json.endpoints;
   });
+
+  const getAnalyzeRules = () => {
+    const rules = endpoints.analyze.data_autocomplete_rules;
+
+    if (!rules) {
+      throw new Error('Expected the analyze endpoint to define data_autocomplete_rules');
+    }
+
+    return rules;
+  };
+
+  const getNameSuggestions = ({ __any_of }: NameOrDefinitionAutocompleteRules) =>
+    __any_of.filter((rule): rule is string => typeof rule === 'string');
+
+  const getDefinitionTypeSuggestions = ({ __any_of }: NameOrDefinitionAutocompleteRules) =>
+    __any_of.find((rule): rule is { type: { __one_of: string[] } } => typeof rule !== 'string')
+      ?.type.__one_of ?? [];
 
   // Regression test for https://github.com/elastic/kibana/issues/188264:
   // filter context accepts the same query DSL as query context, so every
@@ -167,6 +188,67 @@ describe('console query DSL autocomplete globals', () => {
       expect(endpoints['indices.put_mapping'].data_autocomplete_rules).toEqual({
         __scope_link: 'put_mapping',
       });
+    });
+  });
+
+  describe('WHEN registering the analyze endpoint autocomplete rules', () => {
+    it('SHOULD include every analyze request body field', () => {
+      expect(Object.keys(getAnalyzeRules()).sort()).toEqual([
+        'analyzer',
+        'attributes',
+        'char_filter',
+        'explain',
+        'field',
+        'filter',
+        'normalizer',
+        'text',
+        'tokenizer',
+      ]);
+    });
+
+    it('SHOULD suggest configured token filters only as object definitions', () => {
+      const filterRules = getAnalyzeRules().filter as NameOrDefinitionAutocompleteRules;
+      const definitionOnlyTypes = [
+        'condition',
+        'dictionary_decompounder',
+        'hunspell',
+        'hyphenation_decompounder',
+        'keep',
+        'keep_types',
+        'keyword_marker',
+        'pattern_capture',
+        'pattern_replace',
+        'predicate_token_filter',
+        'stemmer_override',
+        'synonym',
+        'synonym_graph',
+      ];
+
+      expect(getNameSuggestions(filterRules)).not.toEqual(
+        expect.arrayContaining(definitionOnlyTypes)
+      );
+      expect(getDefinitionTypeSuggestions(filterRules)).toEqual(
+        expect.arrayContaining(definitionOnlyTypes)
+      );
+      expect(filterRules.__any_of).not.toContain('conditional');
+      expect(getDefinitionTypeSuggestions(filterRules)).not.toContain('conditional');
+    });
+
+    it('SHOULD suggest configured char filters only as object definitions', () => {
+      const charFilterRules = getAnalyzeRules().char_filter as NameOrDefinitionAutocompleteRules;
+
+      expect(getNameSuggestions(charFilterRules)).toEqual(['html_strip']);
+      expect(getDefinitionTypeSuggestions(charFilterRules)).toEqual([
+        'html_strip',
+        'mapping',
+        'pattern_replace',
+      ]);
+    });
+
+    it('SHOULD omit analyzer types that are not global analyzer names', () => {
+      const analyzerRules = getAnalyzeRules().analyzer as { __one_of: string[] };
+
+      expect(analyzerRules.__one_of).not.toEqual(expect.arrayContaining(['custom', 'nori']));
     });
   });
 });

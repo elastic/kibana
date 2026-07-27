@@ -200,6 +200,11 @@ Add GitHub labels to trigger evals in PR CI:
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
 
+When the labels match, PR CI triggers the dedicated
+[`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
+surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
+results and triage.
+
 ---
 
 ### 1.3 On-demand evals (Buildkite)

@@ -74,7 +74,7 @@ const combineKeywordClauses = (clauses: KeywordClause[]): KeywordExpressions => 
   const score = clauses
     .map(
       ({ condition: clause, boost }) =>
-        `CASE(${BasicPrettyPrinter.expression(clause)}, ${boost}, 0.0)`
+        `CASE(${BasicPrettyPrinter.expression(clause)}, ${boost.toFixed(1)}, 0.0)`
     )
     .join(' + ');
 

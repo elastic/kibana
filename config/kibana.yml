@@ -122,6 +122,17 @@
 #  - name: elasticsearch.query
 #    level: debug
 
+# Enable verbose logging for a subset of traffic via meta filters (requires
+# matching labels.* on the log call site). See logging.loggers[].filters.
+#logging.loggers:
+#  - name: plugins.alerting
+#    level: warn
+#    filters:
+#      - type: meta
+#        match:
+#          labels.ruleType: esql
+#        level: debug
+
 # Logs http responses.
 #logging.loggers:
 #  - name: http.server.response

@@ -199,7 +199,7 @@ export const formatReferenceExamples = (examples: LoadedVegaReferenceExample[]):
 
   return `
 REFERENCE EXAMPLES:
-Adapt the structural pattern(s) below to the request. Do NOT copy their data source, fields, or query — bind the columns listed above. They illustrate correct structure only.
+Adapt the structural pattern(s) below to the request. Do NOT copy their data source, fields, or query — bind the columns listed above. They illustrate correct Vega-Lite structure for the response "spec" field (set the panel title on response "title").
 
 ${blocks}`;
 };

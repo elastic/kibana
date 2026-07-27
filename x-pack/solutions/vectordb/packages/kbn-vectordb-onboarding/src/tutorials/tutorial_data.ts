@@ -5,23 +5,8 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocLinksStart } from '@kbn/core/public';
-
-export interface TutorialContent {
-  /** Stable id used for localStorage progress tracking. */
-  id: string;
-  title: string;
-  description: string;
-  /** Topic category label (e.g. Documentation, Article, Notebook). */
-  topic: string;
-  /** EUI icon shown inside the topic badge. */
-  icon: IconType;
-  href: string;
-  /** Set to `'_blank'` for external URLs; omit for in-app routes. */
-  target?: '_blank';
-}
 
 const ELASTIC_SEARCH_LABS_URL = 'https://www.elastic.co/search-labs/';
 
@@ -46,15 +31,45 @@ const NOTEBOOK_LABEL = i18n.translate('vectordbOnboarding.tutorials.topic.notebo
   defaultMessage: 'Notebook',
 });
 
+export const TUTORIAL_TOPICS = {
+  documentation: {
+    tag: DOCUMENTATION_LABEL,
+    filter: DOCUMENTATION_LABEL,
+    icon: 'documents',
+  },
+  article: {
+    tag: ARTICLE_LABEL,
+    filter: i18n.translate('vectordbOnboarding.tutorials.topic.article.filterLabel', {
+      defaultMessage: 'Articles',
+    }),
+    icon: 'globe',
+  },
+  notebook: {
+    tag: NOTEBOOK_LABEL,
+    filter: i18n.translate('vectordbOnboarding.tutorials.topic.notebook.filterLabel', {
+      defaultMessage: 'Notebooks',
+    }),
+    icon: 'training',
+  },
+};
+
+type TutorialTopicId = keyof typeof TUTORIAL_TOPICS;
+
+export interface TutorialContent {
+  id: string;
+  title: string;
+  description: string;
+  topic: TutorialTopicId;
+  href: string;
+}
+
 export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] => [
   {
     id: 'vector-search-documentation',
-    topic: DOCUMENTATION_LABEL,
-    icon: 'documents',
+    topic: 'documentation',
     href: docLinks.links.enterpriseSearch.vectorSearch,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.vectorSearch.title', {
-      defaultMessage: 'Vector Search in Elasticsearch',
+      defaultMessage: 'Vector search in Elasticsearch',
     }),
     description: i18n.translate('vectordbOnboarding.tutorials.vectorSearch.description', {
       defaultMessage:
@@ -63,12 +78,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'bring-your-own-vectors-documentation',
-    topic: DOCUMENTATION_LABEL,
-    icon: 'documents',
+    topic: 'documentation',
     href: docLinks.links.enterpriseSearch.vectorSearchBringOwnVectors,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.bringYourOwnVectors.title', {
-      defaultMessage: 'Bring Your Own Vectors',
+      defaultMessage: 'Bring your own vectors',
     }),
     description: i18n.translate('vectordbOnboarding.tutorials.bringYourOwnVectors.description', {
       defaultMessage:
@@ -77,12 +90,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'semantic-search-overview-documentation',
-    topic: DOCUMENTATION_LABEL,
-    icon: 'documents',
+    topic: 'documentation',
     href: docLinks.links.enterpriseSearch.semanticSearch,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.semanticSearchOverview.title', {
-      defaultMessage: 'Semantic Search Overview',
+      defaultMessage: 'Semantic search overview',
     }),
     description: i18n.translate('vectordbOnboarding.tutorials.semanticSearchOverview.description', {
       defaultMessage:
@@ -91,12 +102,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'get-started-semantic-search-documentation',
-    topic: DOCUMENTATION_LABEL,
-    icon: 'documents',
+    topic: 'documentation',
     href: docLinks.links.enterpriseSearch.semanticSearchGetStarted,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.getStartedSemanticSearch.title', {
-      defaultMessage: 'Get Started with Semantic Search',
+      defaultMessage: 'Get started with semantic search',
     }),
     description: i18n.translate(
       'vectordbOnboarding.tutorials.getStartedSemanticSearch.description',
@@ -108,12 +117,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'semantic-search-sentence-transformers-notebook',
-    topic: NOTEBOOK_LABEL,
-    icon: 'training',
+    topic: 'notebook',
     href: SEARCH_LABS_SENTENCE_TRANSFORMERS_EXAMPLE_URL,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.semanticSearchSentenceTransformers.title', {
-      defaultMessage: 'Semantic Search with Sentence Transformers',
+      defaultMessage: 'Semantic search with sentence transformers',
     }),
     description: i18n.translate(
       'vectordbOnboarding.tutorials.semanticSearchSentenceTransformers.description',
@@ -125,12 +132,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'chatbot-rag-app-notebook',
-    topic: NOTEBOOK_LABEL,
-    icon: 'globe',
+    topic: 'notebook',
     href: SEARCH_LABS_CHATBOT_RAG_APP_EXAMPLE_URL,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.chatbotRagApp.title', {
-      defaultMessage: 'Build a RAG Chatbot Tutorial',
+      defaultMessage: 'Build a RAG chatbot tutorial',
     }),
     description: i18n.translate('vectordbOnboarding.tutorials.chatbotRagApp.description', {
       defaultMessage:
@@ -139,12 +144,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'load-embedding-model-notebook',
-    topic: NOTEBOOK_LABEL,
-    icon: 'training',
+    topic: 'notebook',
     href: SEARCH_LABS_NLP_MODEL_VECTOR_SEARCH_EXAMPLE_URL,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.loadEmbeddingModel.title', {
-      defaultMessage: 'Load an Embedding Model into Elasticsearch',
+      defaultMessage: 'Load an embedding model into Elasticsearch',
     }),
     description: i18n.translate('vectordbOnboarding.tutorials.loadEmbeddingModel.description', {
       defaultMessage:
@@ -153,12 +156,10 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'preconditioning-vectors-bbq-article',
-    topic: ARTICLE_LABEL,
-    icon: 'globe',
+    topic: 'article',
     href: SEARCH_LABS_BBQ_PRECONDITIONING_VECTORS_BLOG_URL,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.preconditioningVectorsBbq.title', {
-      defaultMessage: 'Preconditioning Vectors for BBQ',
+      defaultMessage: 'Preconditioning vectors for BBQ',
     }),
     description: i18n.translate(
       'vectordbOnboarding.tutorials.preconditioningVectorsBbq.description',
@@ -170,10 +171,8 @@ export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] =
   },
   {
     id: 'diskbbq-filter-search-article',
-    topic: ARTICLE_LABEL,
-    icon: 'globe',
+    topic: 'article',
     href: SEARCH_LABS_DISKBBQ_QUERY_QUANTIZATION_BLOG_URL,
-    target: '_blank',
     title: i18n.translate('vectordbOnboarding.tutorials.diskBbqFilterSearch.title', {
       defaultMessage: 'Cutting Elasticsearch DiskBBQ query quantization time by 5x',
     }),

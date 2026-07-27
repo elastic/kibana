@@ -16,7 +16,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
