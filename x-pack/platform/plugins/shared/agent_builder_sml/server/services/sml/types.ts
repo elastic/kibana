@@ -229,6 +229,12 @@ export interface SmlDocument {
    * on stored documents; the inner privileges array may be empty.
    */
   permissions: SmlPermissions;
+  /**
+   * Number of required Kibana privileges on this document. Stored alongside
+   * `permissions` so that Elasticsearch's `terms_set` query can use
+   * `minimum_should_match_field` for AND-semantics privilege enforcement in DLS.
+   */
+  permissions_count: number;
   /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
 }

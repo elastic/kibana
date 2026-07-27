@@ -194,6 +194,7 @@ describe('createSmlIndexer', () => {
         permissions: {
           kibana: { privileges: [{ name: 'perm1' }] },
         },
+        permissions_count: 1,
         ingestion_method: 'crawled',
         discovery_labels: [
           { value: 'My Viz', kind: 'title' },
@@ -273,6 +274,7 @@ describe('createSmlIndexer', () => {
         permissions: {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
         },
+        permissions_count: 1,
         ingestion_method: 'crawled',
       });
     });

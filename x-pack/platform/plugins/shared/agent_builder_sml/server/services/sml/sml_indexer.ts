@@ -300,6 +300,7 @@ class SmlIndexerImpl implements SmlIndexer {
       permissions: {
         kibana: { privileges: resolvedPermissions.kibana?.privileges ?? [] },
       },
+      permissions_count: resolvedPermissions.kibana?.privileges?.length ?? 0,
       ingestion_method: ingestionMethod,
     };
     if (entry.description !== undefined) {
