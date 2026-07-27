@@ -71,7 +71,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
 
   public readonly setTimeRange = (params: DashboardLocatorParams, timeRange?: TimeRange) => ({
     ...params,
-    time_range: timeRange
+    time_range: timeRange,
   });
 
   /**

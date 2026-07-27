@@ -88,9 +88,12 @@ export class IndexDataVisualizerLocatorDefinition
   constructor() {}
 
   public readonly getTimeRange = (params: IndexDataVisualizerLocatorParams) => params.timeRange;
-  public readonly setTimeRange = (params: IndexDataVisualizerLocatorParams, timeRange?: TimeRange) => ({
+  public readonly setTimeRange = (
+    params: IndexDataVisualizerLocatorParams,
+    timeRange?: TimeRange
+  ) => ({
     ...params,
-    timeRange
+    timeRange,
   });
 
   public readonly getLocation = async (params: IndexDataVisualizerLocatorParams) => {

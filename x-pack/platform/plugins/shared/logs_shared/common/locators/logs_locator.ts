@@ -37,7 +37,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
 
   public readonly setTimeRange = (params: LogsLocatorParams, timeRange?: TimeRange) => ({
     ...params,
-    timeRange
+    timeRange,
   });
 
   public readonly getLocation = async (params: LogsLocatorParams) => {

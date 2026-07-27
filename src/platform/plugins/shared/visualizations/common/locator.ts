@@ -78,7 +78,7 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
 
   setTimeRange = (params: VisualizeLocatorParams, timeRange?: TimeRange) => ({
     ...params,
-    timeRange
+    timeRange,
   });
 
   public async getLocation(params: VisualizeLocatorParams) {
