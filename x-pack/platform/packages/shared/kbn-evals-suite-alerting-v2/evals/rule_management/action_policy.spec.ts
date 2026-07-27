@@ -96,8 +96,8 @@ evaluate.describe(
                     expect(workflowId).toEqual(expect.any(String));
                     expect(workflow?.yaml).toEqual(expect.any(String));
                     expect(actionPolicy).toBeDefined();
-                    expect(actionPolicy.matcher).toBe(`rule.id: "${ruleId}"`);
-                    expect(actionPolicy.destinations).toEqual([
+                    expect(actionPolicy!.matcher).toBe(`rule.id: "${ruleId}"`);
+                    expect(actionPolicy!.destinations).toEqual([
                       { type: 'workflow', id: workflowId },
                     ]);
 

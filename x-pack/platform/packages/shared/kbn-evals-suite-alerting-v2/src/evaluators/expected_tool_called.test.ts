@@ -26,7 +26,7 @@ const outputWithToolCalls = (toolIds: string[]): TaskOutput =>
 describe('createExpectedToolCalledEvaluator', () => {
   const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
     createExpectedToolCalledEvaluator().evaluate({
-      input: {},
+      input: { turns: [] },
       output,
       expected: expected ?? {},
       metadata: null,
@@ -82,7 +82,7 @@ describe('createExpectedToolCalledEvaluator', () => {
 describe('createExpectedAnyOfToolIdsEvaluator', () => {
   const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
     createExpectedAnyOfToolIdsEvaluator().evaluate({
-      input: {},
+      input: { turns: [] },
       output,
       expected: expected ?? {},
       metadata: null,

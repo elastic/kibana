@@ -52,7 +52,7 @@ const conversation = (
 
 const runRender = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedRenderAttachmentEvaluator().evaluate({
-    input: {},
+    input: { turns: [] },
     output,
     expected: expected ?? {},
     metadata: null,
@@ -60,7 +60,7 @@ const runRender = (output: TaskOutput, expected: Record<string, unknown> | null)
 
 const runAttachmentData = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedAttachmentDataEvaluator().evaluate({
-    input: {},
+    input: { turns: [] },
     output,
     expected: expected ?? {},
     metadata: null,

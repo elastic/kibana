@@ -20,7 +20,7 @@ const outputWithLoadedSkills = (skillNames: string[]): TaskOutput =>
 
 const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
   createExpectedSkillEvaluator().evaluate({
-    input: {},
+    input: { turns: [] },
     output,
     expected: expected ?? {},
     metadata: null,
