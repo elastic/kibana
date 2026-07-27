@@ -141,7 +141,7 @@ describe('WatchlistConfigClient', () => {
   });
 
   describe('list', () => {
-    it('should return watchlists enriched with entityCounts', async () => {
+    it('should return watchlists enriched with entity counts and manual assignment state', async () => {
       soClientMock.find.mockResolvedValue({
         saved_objects: [
           {
@@ -164,10 +164,24 @@ describe('WatchlistConfigClient', () => {
         per_page: 20,
       });
 
-      jest.spyOn(client, 'getEntityCounts').mockResolvedValue({
-        'wl-1': 42,
-        'wl-2': 7,
-      });
+      esClientMock.search.mockResolvedValue({
+        aggregations: {
+          watchlist_counts: {
+            buckets: [
+              {
+                key: 'wl-1',
+                doc_count: 42,
+                manual_entities: { doc_count: 2 },
+              },
+              {
+                key: 'wl-2',
+                doc_count: 7,
+                manual_entities: { doc_count: 0 },
+              },
+            ],
+          },
+        },
+      } as unknown as Awaited<ReturnType<typeof esClientMock.search>>);
 
       const result = await client.list();
 
@@ -176,6 +190,7 @@ describe('WatchlistConfigClient', () => {
           id: 'wl-1',
           name: 'Watchlist 1',
           entityCount: 42,
+          hasManualEntities: true,
           createdAt: undefined,
           updatedAt: undefined,
           entitySourceIds: [],
@@ -184,12 +199,39 @@ describe('WatchlistConfigClient', () => {
           id: 'wl-2',
           name: 'Watchlist 2',
           entityCount: 7,
+          hasManualEntities: false,
           createdAt: undefined,
           updatedAt: undefined,
           entitySourceIds: [],
         },
       ]);
-      expect(client.getEntityCounts).toHaveBeenCalledWith(['wl-1', 'wl-2']);
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        index: 'mock-watchlist-index',
+        size: 0,
+        query: {
+          terms: {
+            'watchlist.id': ['wl-1', 'wl-2'],
+          },
+        },
+        aggs: {
+          watchlist_counts: {
+            terms: {
+              field: 'watchlist.id',
+              size: 2,
+            },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': 'manual',
+                  },
+                },
+              },
+            },
+          },
+        },
+        ignore_unavailable: true,
+      });
     });
 
     it('should not call getEntityCounts if no watchlists are found', async () => {

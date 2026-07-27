@@ -16,6 +16,7 @@ import type {
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SetOptional } from 'type-fest';
 import type {
+  AggregationsFilterAggregate,
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -28,6 +29,7 @@ import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 import { invalidateEntitySourceApiKey } from '../entity_sources/entity_source_api_key';
+import { MANUAL_SOURCE_ID } from '../entity_sources/manual/constants';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -45,9 +47,17 @@ interface WatchlistConfigClientDeps {
   logger: Logger;
 }
 
-type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
+type WatchlistSavedObjectAttributes = Omit<
+  WatchlistObject,
+  'id' | 'createdAt' | 'updatedAt' | 'hasManualEntities'
+>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
 type WatchlistObjectWithId = WatchlistObject & { id: string };
+
+interface WatchlistEntityMetadata {
+  entityCount: number;
+  hasManualEntities: boolean;
+}
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -56,6 +66,7 @@ const omitWatchlistMeta = (
     id: _ignoredId,
     createdAt: _ignoredCreatedAt,
     updatedAt: _ignoredUpdatedAt,
+    hasManualEntities: _ignoredHasManualEntities,
     ...attrs
   } = watchlist;
   return attrs;
@@ -156,9 +167,11 @@ export class WatchlistConfigClient {
     );
     const watchlistIds = watchlists.map((w) => w.id);
     if (watchlistIds.length > 0) {
-      const countsMap = await this.getEntityCounts(watchlistIds);
+      const entityMetadata = await this.getEntityMetadata(watchlistIds);
       for (const w of watchlists) {
-        w.entityCount = countsMap[w.id] ?? 0;
+        const metadata = entityMetadata[w.id];
+        w.entityCount = metadata?.entityCount ?? 0;
+        w.hasManualEntities = metadata?.hasManualEntities ?? false;
       }
     }
     return watchlists;
@@ -368,5 +381,65 @@ export class WatchlistConfigClient {
     }
 
     return counts;
+  }
+
+  /**
+   * Bulk fetch entity counts and manual-assignment state for a list of watchlists.
+   */
+  private async getEntityMetadata(ids: string[]): Promise<Record<string, WatchlistEntityMetadata>> {
+    if (ids.length === 0) return {};
+
+    const index = getIndexForWatchlist(this.deps.namespace);
+    const metadata: Record<string, WatchlistEntityMetadata> = {};
+
+    for (const id of ids) {
+      metadata[id] = { entityCount: 0, hasManualEntities: false };
+    }
+
+    try {
+      const response = await this.deps.esClient.search({
+        index,
+        ignore_unavailable: true,
+        size: 0,
+        query: {
+          terms: {
+            'watchlist.id': ids,
+          },
+        },
+        aggs: {
+          watchlist_counts: {
+            terms: {
+              field: 'watchlist.id',
+              size: ids.length,
+            },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': MANUAL_SOURCE_ID,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const watchlistCountsAgg = response.aggregations?.watchlist_counts as
+        | AggregationsStringTermsAggregate
+        | undefined;
+      const buckets = (watchlistCountsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
+      for (const bucket of buckets) {
+        const manualEntities = bucket.manual_entities as AggregationsFilterAggregate | undefined;
+        metadata[String(bucket.key)] = {
+          entityCount: bucket.doc_count,
+          hasManualEntities: (manualEntities?.doc_count ?? 0) > 0,
+        };
+      }
+    } catch (err) {
+      this.deps.logger.warn(`Failed to fetch watchlist entity metadata: ${(err as Error).message}`);
+    }
+
+    return metadata;
   }
 }
