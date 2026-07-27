@@ -122,12 +122,25 @@ export const POST_CHECKOUT_SCRIPT_SOURCE = `#!/usr/bin/env bash
 # worktree with build caches (node_modules, optimizer & TS target/ dirs, jest &
 # babel caches) cloned from the main worktree. Best-effort: it must never fail
 # the git command that triggered it, and it no-ops on ordinary branch switches.
+#
+# The seed runs detached in the background so it never blocks \`git worktree add\`.
+# It clones each cache tree atomically (temp + rename), so a concurrent
+# \`yarn kbn bootstrap\` is safe. Set KBN_WORKTREE_SEED_FOREGROUND=1 to run inline
+# (e.g. for debugging), or KBN_SKIP_WORKTREE_SEED=1 to disable entirely.
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 SEED_SCRIPT="\${REPO_ROOT}/scripts/seed_worktree_caches.sh"
 
 if [ -n "\${REPO_ROOT}" ] && [ -f "\${SEED_SCRIPT}" ]; then
-  bash "\${SEED_SCRIPT}" "$@" || true
+  if [ "\${KBN_WORKTREE_SEED_FOREGROUND:-}" = "1" ]; then
+    bash "\${SEED_SCRIPT}" "$@" || true
+  else
+    SEED_LOG="$(git rev-parse --git-path worktree-seed.log 2>/dev/null || true)"
+    [ -n "\${SEED_LOG}" ] || SEED_LOG="\${TMPDIR:-/tmp}/kbn-worktree-seed.log"
+    nohup bash "\${SEED_SCRIPT}" "$@" >"\${SEED_LOG}" 2>&1 </dev/null &
+    echo "[seed-worktree] cloning build caches in the background -> \${SEED_LOG}"
+    echo "[seed-worktree] let it finish, then run: yarn kbn bootstrap"
+  fi
 fi
 
 # Allow a developer-local post-checkout hook to run too.

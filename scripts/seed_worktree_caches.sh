@@ -10,14 +10,15 @@
 #   - <pkg>/target/types/*.tsbuildinfo              (TypeScript incremental cache)
 #
 # We clone these from the main worktree using copy-on-write where the filesystem
-# supports it (APFS clonefile on macOS, reflinks on Btrfs/XFS on Linux), so it's
-# near-instant and consumes almost no extra disk. The optimizer/TS caches are
-# content-hash keyed, so a clone stays valid on the same commit; anything that
-# differs is simply rebuilt incrementally instead of from scratch.
+# supports it (APFS clonefile on macOS, reflinks on Btrfs/XFS on Linux) so it
+# consumes almost no extra disk. The optimizer/TS caches are content-hash keyed,
+# so a clone stays valid on the same commit; anything that differs is simply
+# rebuilt incrementally instead of from scratch.
 #
 # Invoked automatically by the `post-checkout` git hook installed via
 #   node scripts/register_git_hook
-# and can also be run manually from inside a new worktree:
+# The hook runs this detached in the background so it never blocks
+# `git worktree add`; it can also be run manually from inside a new worktree:
 #   bash scripts/seed_worktree_caches.sh
 #
 # Set KBN_SKIP_WORKTREE_SEED=1 to disable. This script is best-effort and always
@@ -106,10 +107,14 @@ emit_pairs() {
 PAIRS="$(emit_pairs)"
 [ -n "$PAIRS" ] || { echo "[seed-worktree] nothing to seed."; exit 0; }
 
+# Each tree is cloned to a temp sibling and then atomically renamed into place,
+# so a given cache dir is only ever absent or complete — never half-written.
+# This keeps the seed safe to run in the background (the post-checkout hook does)
+# even if `yarn kbn bootstrap` starts concurrently.
 cloned_via_clonefile=0
 if [ "$(uname)" = "Darwin" ] && command -v python3 >/dev/null 2>&1; then
   if printf '%s\n' "$PAIRS" | python3 -c '
-import ctypes, os, sys
+import ctypes, os, shutil, sys
 libc = ctypes.CDLL("/usr/lib/libSystem.dylib", use_errno=True)
 clonefile = libc.clonefile
 clonefile.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint32]
@@ -119,13 +124,27 @@ for line in sys.stdin:
     if not line or "\t" not in line:
         continue
     src, dst = line.split("\t", 1)
+    if os.path.lexists(dst):
+        continue
     try:
         os.makedirs(os.path.dirname(dst), exist_ok=True)
     except OSError:
         pass
-    if clonefile(src.encode(), dst.encode(), 0) == 0:
-        ok += 1
-    else:
+    tmp = "%s.seeding.%d" % (dst, os.getpid())
+    shutil.rmtree(tmp, ignore_errors=True)
+    # clonefile(2) requires the destination path not to exist.
+    if clonefile(src.encode(), tmp.encode(), 0) != 0:
+        shutil.rmtree(tmp, ignore_errors=True)
+        fail += 1
+        continue
+    try:
+        if os.path.lexists(dst):  # someone (bootstrap) created it meanwhile
+            shutil.rmtree(tmp, ignore_errors=True)
+        else:
+            os.rename(tmp, dst)  # atomic publish within the same filesystem
+            ok += 1
+    except OSError:
+        shutil.rmtree(tmp, ignore_errors=True)
         fail += 1
 print(f"[seed-worktree] cloned {ok} tree(s) via clonefile, {fail} skipped", file=sys.stderr)
 sys.exit(0 if ok else 1)
@@ -136,13 +155,21 @@ fi
 
 if [ "$cloned_via_clonefile" != "1" ]; then
   # Portable fallback: reflink where supported, otherwise a plain recursive copy.
+  # Same temp-then-rename dance to keep publishes atomic.
   echo "[seed-worktree] clonefile unavailable; falling back to cp (this may be slow)"
   while IFS="$(printf '\t')" read -r src dst; do
     [ -n "${src:-}" ] && [ -n "${dst:-}" ] || continue
+    [ -e "$dst" ] && continue
     mkdir -p "$(dirname "$dst")" 2>/dev/null || continue
-    cp -a --reflink=auto "$src" "$dst" 2>/dev/null && continue # GNU coreutils CoW (Linux)
-    cp -Rc "$src" "$dst" 2>/dev/null && continue               # BSD/macOS per-file clone
-    cp -R "$src" "$dst" 2>/dev/null || true                    # plain copy
+    tmp="$dst.seeding.$$"
+    rm -rf "$tmp" 2>/dev/null
+    if cp -a --reflink=auto "$src" "$tmp" 2>/dev/null || # GNU coreutils CoW (Linux)
+      cp -Rc "$src" "$tmp" 2>/dev/null ||                # BSD/macOS per-file clone
+      cp -R "$src" "$tmp" 2>/dev/null; then              # plain copy
+      if [ -e "$dst" ]; then rm -rf "$tmp" 2>/dev/null; else mv "$tmp" "$dst" 2>/dev/null || rm -rf "$tmp" 2>/dev/null; fi
+    else
+      rm -rf "$tmp" 2>/dev/null
+    fi
   done <<EOF
 $PAIRS
 EOF
