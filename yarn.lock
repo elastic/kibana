@@ -7186,6 +7186,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-bus-plugin@link:x-pack/platform/plugins/shared/event_bus":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-log-fixture-plugin@link:x-pack/platform/test/plugin_api_integration/plugins/event_log":
   version "0.0.0"
   uid ""
