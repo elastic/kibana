@@ -49,7 +49,10 @@ const isVariableWithEbtProps = (
   }
 
   return EBT_REQUIRED_ATTRS.every((attr) =>
-    properties.some((prop: TSESTree.Property) => 'value' in prop.key && prop.key.value === attr)
+    properties.some(
+      (prop) =>
+        prop.type === AST_NODE_TYPES.Property && 'value' in prop.key && prop.key.value === attr
+    )
   );
 };
 

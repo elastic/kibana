@@ -101,6 +101,16 @@ for (const [name, tester] of [tsTester, babelTester]) {
             },
           ],
         },
+        // Variable initializer with a spread inside — must not crash (TypeError guard)
+        {
+          filename: 'foo.tsx',
+          code: `function Foo() { const base = {}; const props = { ...base, 'data-ebt-action': 'a' }; return <EuiButton {...props}>Click</EuiButton>; }`,
+          errors: [
+            {
+              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
       ],
     });
   });
