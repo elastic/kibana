@@ -176,7 +176,7 @@ export const Workday: ConnectorSpec = {
       description:
         'Search for workers (employees and contingent workers) in Workday by name. ' +
         'Returns a list of matching worker summaries including IDs, names, and titles. ' +
-        'Pass the name (or partial name) in the `search` field (e.g. search: "Erik" or search: "Currin") — Workday matches substrings. ' +
+        'Pass the name (or partial name) in the `search` field  — Workday matches substrings. ' +
         'Use the returned id (WID) with getWorker to retrieve the full worker profile.',
       input: SearchWorkersInputSchema,
       handler: async (ctx, input: SearchWorkersInput) => {
