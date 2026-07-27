@@ -106,6 +106,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
     const lensConfig = buildCall[0];
     const esqlQuery = lensConfig.dataset.esql;
 
+    expect(esqlQuery.startsWith('SET unmapped_fields="nullify";')).toBe(true);
     expect(esqlQuery).toContain('FROM logs-*');
     expect(esqlQuery).toContain('STATS');
     expect(esqlQuery).toContain('occurrences = COUNT(*)');
