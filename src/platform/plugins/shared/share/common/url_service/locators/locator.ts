@@ -158,6 +158,6 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   }
 
   public setTimeRange(params: P, timeRange?: TimeRange): P {
-    return this.definition.setTimeRange ? this.definition.setTimeRange(params) : params;
+    return this.definition.setTimeRange ? this.definition.setTimeRange(params, timeRange) : params;
   }
 }
