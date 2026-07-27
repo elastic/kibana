@@ -20,6 +20,7 @@ import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
 import {
+  continuationRoutingEvaluator,
   continuationStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
@@ -60,4 +61,8 @@ export const createDiscoveryEvaluators = (
  * scenario-criteria variant; the continuation output has no `expected` criteria to score against).
  */
 export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
-  selectEvaluators([continuationStabilityEvaluator, continuationTrajectoryEvaluator]);
+  selectEvaluators([
+    continuationStabilityEvaluator,
+    continuationRoutingEvaluator,
+    continuationTrajectoryEvaluator,
+  ]);
