@@ -47,7 +47,7 @@ describe('extract_iocs osquery live-state guidance', () => {
     mockEsqlQuery.mockResolvedValue({ columns: [], values: [] });
   });
 
-  it('returns all four osquery_*_guidance blocks alongside the ES|QL-derived iocs', async () => {
+  it('returns all seven osquery_*_guidance blocks alongside the ES|QL-derived iocs', async () => {
     const tool = await getExtractIocsTool();
     const results = await runExtractIocs(tool);
 
@@ -60,6 +60,9 @@ describe('extract_iocs osquery live-state guidance', () => {
       'osquery_processes_guidance',
       'osquery_network_guidance',
       'osquery_persistence_guidance',
+      'osquery_wmi_persistence_guidance',
+      'osquery_execution_history_guidance',
+      'osquery_logged_in_users_guidance',
     ]) {
       expect(data).toHaveProperty(key);
       const block = data[key] as Record<string, unknown>;
@@ -80,12 +83,20 @@ describe('extract_iocs osquery live-state guidance', () => {
       'process_open_sockets',
       'scheduled_tasks',
       'services',
+      'wmi_cli_event_consumers',
+      'wmi_event_filters',
+      'shimcache',
+      'prefetch',
+      'logged_in_users',
     ];
     const guidanceKeys = [
       'osquery_mutex_guidance',
       'osquery_processes_guidance',
       'osquery_network_guidance',
       'osquery_persistence_guidance',
+      'osquery_wmi_persistence_guidance',
+      'osquery_execution_history_guidance',
+      'osquery_logged_in_users_guidance',
     ];
     for (const key of guidanceKeys) {
       const block = data[key] as { query: string; secondary_query?: string };
@@ -110,5 +121,44 @@ describe('extract_iocs osquery live-state guidance', () => {
 
     expect(persistence.query).toMatch(/FROM scheduled_tasks/i);
     expect(persistence.secondary_query).toMatch(/FROM services/i);
+  });
+
+  it('wmi persistence guidance covers both event consumers and event filters', async () => {
+    const tool = await getExtractIocsTool();
+    const results = await runExtractIocs(tool);
+    const data = results[0].data as Record<string, unknown>;
+    const wmi = data.osquery_wmi_persistence_guidance as {
+      query: string;
+      secondary_query: string;
+    };
+
+    expect(wmi.query).toMatch(/FROM wmi_cli_event_consumers/i);
+    expect(wmi.secondary_query).toMatch(/FROM wmi_event_filters/i);
+  });
+
+  it('execution history guidance covers both shimcache and prefetch', async () => {
+    const tool = await getExtractIocsTool();
+    const results = await runExtractIocs(tool);
+    const data = results[0].data as Record<string, unknown>;
+    const execHistory = data.osquery_execution_history_guidance as {
+      query: string;
+      secondary_query: string;
+    };
+
+    expect(execHistory.query).toMatch(/FROM shimcache/i);
+    expect(execHistory.secondary_query).toMatch(/FROM prefetch/i);
+  });
+
+  it('network guidance excludes the GCP metadata server and classifies the IAP range', async () => {
+    const tool = await getExtractIocsTool();
+    const results = await runExtractIocs(tool);
+    const data = results[0].data as Record<string, unknown>;
+    const network = data.osquery_network_guidance as {
+      query: string;
+      gcp_noise_classification: string;
+    };
+
+    expect(network.query).toContain('169.254.169.254');
+    expect(network.gcp_noise_classification).toMatch(/35\.235\.240\.0\/20/);
   });
 });
