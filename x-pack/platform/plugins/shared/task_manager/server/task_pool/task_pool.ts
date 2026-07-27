@@ -135,7 +135,13 @@ export class TaskPool {
     // cancel expired task whenever a call is made to check for capacity
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
-    this.cancelExpiredTasks();
+    try {
+      this.cancelExpiredTasks();
+    } catch (err) {
+      // cancelling expired tasks is a best-effort side effect; it must never prevent
+      // capacity from being calculated and tasks from being claimed
+      this.logger.error(`Failed to cancel expired tasks: ${getErrorMessage(err)}`);
+    }
 
     return this.capacityCalculator.availableCapacity(
       this.tasksInPool,
@@ -249,19 +255,31 @@ export class TaskPool {
 
   private cancelExpiredTasks() {
     for (const taskRunner of this.tasksInPool.values()) {
-      if (taskRunner.isExpired) {
-        this.logger.warn(
-          `Cancelling task ${taskRunner.toString()} as it expired at ${taskRunner.expiration.toISOString()}${
-            taskRunner.startedAt
-              ? ` after running for ${durationAsString(
-                  moment.duration(moment(new Date()).utc().diff(taskRunner.startedAt))
-                )}`
-              : ``
-          }${
-            taskRunner.definition?.timeout
-              ? ` (with timeout set at ${taskRunner.definition.timeout})`
-              : ``
-          }.`
+      try {
+        if (taskRunner.isExpired) {
+          this.logger.warn(
+            `Cancelling task ${taskRunner.toString()} as it expired at ${taskRunner.expiration.toISOString()}${
+              taskRunner.startedAt
+                ? ` after running for ${durationAsString(
+                    moment.duration(moment(new Date()).utc().diff(taskRunner.startedAt))
+                  )}`
+                : ``
+            }${
+              taskRunner.definition?.timeout
+                ? ` (with timeout set at ${taskRunner.definition.timeout})`
+                : ``
+            }.`
+          );
+          this.cancelTask(taskRunner);
+        }
+      } catch (err) {
+        // A single broken runner (e.g. an invariant violation while computing its
+        // expiration) must not abort cancellation for the rest of the pool. Remove it
+        // so it can't wedge capacity or keep throwing on every poll.
+        this.logger.error(
+          `Failed to cancel expired task ${taskRunner.toString()}; removing it from the pool: ${getErrorMessage(
+            err
+          )}`
         );
         this.cancelTask(taskRunner);
       }
