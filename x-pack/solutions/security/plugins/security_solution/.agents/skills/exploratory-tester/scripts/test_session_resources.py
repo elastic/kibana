@@ -17,6 +17,7 @@ REGISTER_SCRIPT = SCRIPT_DIR / "register-session-resource.py"
 DELETE_SCRIPT = SCRIPT_DIR / "delete-flow-spaces.py"
 NOISE_SCRIPT = SCRIPT_DIR / "create-noise-index.sh"
 POSITIVE_CONTROL = SCRIPT_DIR / "positive-control-alert.md"
+BREAK_REMOTE = SCRIPT_DIR / "break-remote-cluster.md"
 FIXTURES_DIR = SCRIPT_DIR / "__tests__" / "fixtures"
 OWNED_REUSED_FIXTURE = FIXTURES_DIR / "session-resources-owned-reused.json"
 EARLY_EXIT_FIXTURE = FIXTURES_DIR / "session-resources-early-exit.json"
@@ -111,11 +112,12 @@ class SessionResourceContractTests(unittest.TestCase):
         login = (PHASES_DIR / "1-wait-and-login.md").read_text(encoding="utf-8")
         report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
         positive_control = POSITIVE_CONTROL.read_text(encoding="utf-8")
+        break_remote = BREAK_REMOTE.read_text(encoding="utf-8")
         session_template = (
             TEMPLATE_DIR / "session.example.yaml"
         ).read_text(encoding="utf-8")
         validation_section = setup[
-            setup.index("Skip Scout startup. Verify connectivity and API key")
+            setup.index("Skip Scout startup.")
             : setup.index("**No API key available?**")
         ]
 
@@ -130,20 +132,37 @@ class SessionResourceContractTests(unittest.TestCase):
             'SPACE_ID="${ENVIRONMENT_SPACE:-exploratory-testing}"',
             validation_section,
         )
+        self.assertIn(
+            'KIBANA_URL="${ENVIRONMENT_URL:?',
+            validation_section,
+        )
+        self.assertIn('API_KEY="${ENVIRONMENT_API_KEY:-}"', validation_section)
+        self.assertIn('if [[ -z "$API_KEY" ]]', validation_section)
+        self.assertIn("Authorization: ApiKey $API_KEY", validation_section)
+        self.assertNotIn("$APIKEY", validation_section)
+        self.assertNotIn('"<url>', validation_section)
         self.assertIn("ensure-base-space.py", login)
         self.assertIn("register-session-resource.py", login)
         self.assertIn(
             "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID",
             login,
         )
+        self.assertIn('--base-url es_url', login)
+        self.assertIn('--endpoint "/_security/user/exploratory-tester"', login)
         self.assertIn("NOISE_INDEX_NAME", login)
         self.assertIn("cleanup-session-resources.py", report)
+        self.assertIn('"ccs_state": "unchanged"', setup)
+        self.assertIn("ccs_state", report)
+        self.assertIn('config["ccs_state"] = "modified"', break_remote)
+        self.assertIn('config["ccs_state"] = "restored"', break_remote)
         self.assertIn("session_id", session_template)
         self.assertIn("ccs_restored", session_template)
         self.assertIn("<SESSION_ID>", positive_control)
         self.assertIn("ccs_remote_es_url", positive_control)
         self.assertIn("--reused", positive_control)
         self.assertIn('RULE_INDEX="${REMOTE_CLUSTER_ALIAS}:$SOURCE_INDEX"', positive_control)
+        self.assertIn('RULE_OWNERSHIP_FLAG="--owned"', positive_control)
+        self.assertIn("RULE_HTTP_STATUS", positive_control)
         self.assertIn('DATA_API_KEY="<REMOTE_API_KEY>"', positive_control)
         self.assertIn("Authorization: ApiKey $DATA_API_KEY", positive_control)
         self.assertIn("Authorization: ApiKey $SOURCE_API_KEY", positive_control)
@@ -153,6 +172,11 @@ class SessionResourceContractTests(unittest.TestCase):
         self.assertIn("--kind es_alerts", positive_control)
         self.assertIn("--method POST", positive_control)
         self.assertIn("kibana.alert.rule.uuid", positive_control)
+        self.assertNotIn(
+            "uses SOURCE `SOURCE_ES_URL`.\n"
+            "`<remote_cluster_alias>:logs-testing.",
+            positive_control,
+        )
 
     def test_cleanup_candidates_only_include_owned_resources_with_matching_marker(self):
         config = {"session_id": "abc12345", "session_resources": []}
@@ -796,6 +820,7 @@ else:
                                 }
                             },
                         },
+                        "ccs_state": "restored",
                         "ccs_restored": True,
                         "credentials": {
                             "username": "elastic",
@@ -952,6 +977,8 @@ print("200")
                                 },
                             },
                         },
+                        "ccs_state": "modified",
+                        "ccs_restored": True,
                         "credentials": {
                             "username": "elastic",
                             "password": "changeme",
@@ -1005,6 +1032,84 @@ print("204")
             self.assertIn("CCS", result.stderr)
             self.assertFalse(log_path.exists())
 
+    def test_cleanup_allows_ccs_session_before_any_ccs_mutation(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {
+                                "remote_cluster_alias": "remote",
+                                "remote": {
+                                    "es_url": "https://remote.es.test",
+                                    "credentials": {
+                                        "username": "remote-user",
+                                        "password": "remote-password",
+                                    },
+                                },
+                            },
+                        },
+                        "ccs_state": "unchanged",
+                        "ccs_restored": False,
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "source-index",
+                                "owned": True,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": "/source-index",
+                                "base_url": "es_url",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
+    log.write(" ".join(sys.argv[1:]))
+print("204")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("source-index", log_path.read_text(encoding="utf-8"))
+
     def test_cleanup_reports_pending_resources_instead_of_succeeding(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             session_dir = Path(raw_dir)
@@ -1052,6 +1157,93 @@ print("204")
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("pending", result.stderr.lower())
+
+    def test_cleanup_still_deletes_owned_resources_when_pending_remains(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://kibana.example.test",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "kibana_space",
+                                "id": "exploratory-testing-abc12345-flow-1",
+                                "state": "pending",
+                                "owned": False,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": (
+                                    "/api/spaces/space/"
+                                    "exploratory-testing-abc12345-flow-1"
+                                ),
+                            },
+                            {
+                                "kind": "es_index",
+                                "id": "owned-index",
+                                "state": "owned",
+                                "owned": True,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": "/owned-index",
+                                "base_url": "es_url",
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
+    log.write(" ".join(sys.argv[1:]))
+print("204")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("pending", result.stderr.lower())
+            self.assertIn("owned-index", log_path.read_text(encoding="utf-8"))
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            owned_resource = next(
+                resource
+                for resource in config["session_resources"]
+                if resource["id"] == "owned-index"
+            )
+            self.assertEqual(owned_resource["cleanup_status"], "deleted")
 
     def test_legacy_space_cleanup_refuses_without_an_ownership_manifest(self):
         with tempfile.TemporaryDirectory() as raw_dir:

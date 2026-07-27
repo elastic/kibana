@@ -162,8 +162,8 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 ## Step 3e — Clean up session resources
 
 Run cleanup regardless of whether the user accepted or refused the knowledge
-file update, and regardless of whether earlier report steps failed. If the
-session used CCS:
+file update, and regardless of whether earlier report steps failed. If
+`config.json → ccs_state` is `"modified"`:
 
 1. Restore the remote-cluster state using the recorded CCS procedure.
 2. Verify the expected alias and connection state with
@@ -178,11 +178,13 @@ session used CCS:
    from session_resources import edit_session_config
 
    with edit_session_config(Path(sys.argv[1]) / "config.json") as config:
+       config["ccs_state"] = "restored"
        config["ccs_restored"] = True
    PY
    ```
 
-Cleanup fails closed and deletes nothing until `ccs_restored` is true.
+Cleanup fails closed only while the CCS state is `"modified"`; a state of
+`"unchanged"` means no shared-cluster mutation occurred and is safe to clean.
 
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \

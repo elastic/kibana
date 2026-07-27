@@ -12,6 +12,7 @@ from typing import Any
 
 from session_resources import (
     build_auth_args,
+    ccs_cleanup_blocked,
     cleanup_candidates,
     edit_session_config,
     http_status,
@@ -88,22 +89,20 @@ def cleanup_session(
     resource_kind: str | None = None,
 ) -> tuple[int, list[str]]:
     require_session_id(config)
-    environment = config.get("environment", {})
-    ccs = environment.get("ccs") if isinstance(environment, dict) else None
-    if isinstance(ccs, dict) and ccs and config.get("ccs_restored") is not True:
+    if ccs_cleanup_blocked(config):
         return 1, [
             "CCS cleanup blocked until the remote-cluster state is restored "
-            "and ccs_restored is verified in config.json."
+            "and ccs_state is restored in config.json."
         ]
 
     pending = pending_resources(config)
+    pending_message: str | None = None
     if pending:
         pending_ids = ", ".join(repr(resource["id"]) for resource in pending)
-        message = (
+        pending_message = (
             f"Pending session resources require reconciliation before cleanup: "
             f"{pending_ids}"
         )
-        return (0 if dry_run else 1), [message]
 
     resources = sorted(
         (
@@ -113,10 +112,12 @@ def cleanup_session(
         ),
         key=_cleanup_order,
     )
+    messages = [pending_message] if pending_message else []
     if not resources:
+        if pending_message:
+            return (0 if dry_run else 1), messages
         return 0, ["No owned session resources to clean up."]
 
-    messages: list[str] = []
     errors: list[str] = []
     for resource in resources:
         resource_id = resource["id"]
@@ -197,7 +198,10 @@ def cleanup_session(
 
     if not dry_run:
         messages.extend(errors)
-    return (1 if errors else 0), messages
+    return (
+        1 if errors or (pending_message is not None and not dry_run) else 0,
+        messages,
+    )
 
 
 def main() -> int:

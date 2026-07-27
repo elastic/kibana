@@ -83,4 +83,5 @@ session-timeout: 90
 #
 # CCS cleanup is blocked until the session verifies that the remote-cluster
 # state has been restored. The generated config.json tracks this as:
+#   ccs_state: unchanged
 #   ccs_restored: false

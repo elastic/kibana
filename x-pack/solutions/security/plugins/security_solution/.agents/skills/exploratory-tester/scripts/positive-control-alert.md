@@ -83,9 +83,24 @@ curl -s -X POST -H "Authorization: ApiKey $DATA_API_KEY" -H "Content-Type: appli
 
 ### 2. Create a real query detection rule against it
 ```bash
-curl -s -X POST -H "Authorization: ApiKey $SOURCE_API_KEY" -H "Content-Type: application/json" -H "kbn-xsrf: true" \
-  "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
-  -d '{ "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$RULE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
+RULE_RESPONSE=$(
+  curl -s -w '\n%{http_code}' -X POST \
+    -H "Authorization: ApiKey $SOURCE_API_KEY" \
+    -H "Content-Type: application/json" \
+    -H "kbn-xsrf: true" \
+    "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
+    -d '{ "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$RULE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
+)
+RULE_HTTP_STATUS="${RULE_RESPONSE##*$'\n'}"
+RULE_BODY="${RULE_RESPONSE%$'\n'*}"
+case "$RULE_HTTP_STATUS" in
+  200|201) RULE_OWNERSHIP_FLAG="--owned" ;;
+  409) RULE_OWNERSHIP_FLAG="--reused" ;;
+  *) echo "Rule creation failed (HTTP $RULE_HTTP_STATUS)." >&2; exit 1 ;;
+esac
+RULE_ID=$(printf '%s' "$RULE_BODY" | python3 -c \
+  'import json,sys; p=json.load(sys.stdin); print(p.get("id") or p.get("rule_id") or "")')
+: "${RULE_ID:?Rule response did not contain a rule id}"
 ```
 Register the returned rule only after checking its response. Use `--owned`
 for a 200/201 response and `--reused` for a 409/conflict:
@@ -131,10 +146,8 @@ A real alert has `kibana.alert.status`,
 `kibana.alert.rule.uuid`. If those fields are present, the local pipeline
 genuinely produced an alert — so if the feature under test still shows
 nothing, the gap is the feature, not the data. For CCS, the data was indexed
-on REMOTE, the rule queried the CCS pattern, and the alert verification still
-uses SOURCE `SOURCE_ES_URL`.
-`<remote_cluster_alias>:logs-testing.<SLUG>-<SESSION_ID>-default` in the rule
-index.
+on REMOTE, the rule queried the remote-prefixed pattern, and the alert
+verification uses the SOURCE `SOURCE_ES_URL`.
 
 The central session cleanup deletes only resources marked `--owned` with the
 current session marker. Never manually delete a reused index or rule.

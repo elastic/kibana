@@ -27,7 +27,22 @@ Show the user the captured config and ask, verbatim:
 
 Wait for an explicit yes. On anything else, skip the scenario and log the affected checklist step as `skipped: user declined remote-cluster break`.
 
-### 3. Break it — invalid proxyAddress, everything else unchanged
+### 3. Mark the session state before breaking the shared cluster
+```bash
+PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+python3 - "$SESSION_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+from session_resources import edit_session_config
+
+with edit_session_config(Path(sys.argv[1]) / "config.json") as config:
+    config["ccs_state"] = "modified"
+    config["ccs_restored"] = False
+PY
+```
+
+### 4. Break it — invalid proxyAddress, everything else unchanged
 
 Keep `mode`, `serverName`, and `skipUnavailable` exactly as captured; change only the address to something that cannot resolve:
 ```bash
@@ -37,31 +52,46 @@ curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: applicatio
 ```
 (For a `sniff`-mode cluster, replace `proxyAddress` with `"seeds": ["invalid.broken.example:9300"]`.)
 
-### 4. Verify it is actually broken
+### 5. Verify it is actually broken
 ```bash
 curl -s -H "Authorization: ApiKey <API_KEY>" "<SOURCE_ES_URL>/_remote/info?pretty"
 ```
 Confirm `<REMOTE_ALIAS>.connected` is `false` before running any test flow. If it still shows `connected: true`, the change has not propagated — wait a few seconds and re-check; do not start the flow against a still-connected cluster.
 
-### 5. Run the affected flows
+### 6. Run the affected flows
 
 Run the CCS "unreachable remote" flows now. Capture evidence exactly as for any finding (`scripts/record-evidence.md`).
 
-### 6. Restore the exact original config
+### 7. Restore the exact original config
 ```bash
 curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
   "<SOURCE_KIBANA_URL>/api/remote_clusters/<REMOTE_ALIAS>" \
   -d '<the exact object captured in step 1>'
 ```
 
-### 7. Verify reconnection before continuing
+### 8. Verify reconnection before continuing
 ```bash
 curl -s -H "Authorization: ApiKey <API_KEY>" "<SOURCE_ES_URL>/_remote/info?pretty"
 ```
 Confirm `connected: true` again and that the socket/connection count matches what step 1 showed. **Do not proceed to the next flow, and do not end the session, until reconnection is verified.** If restore fails, tell the user immediately with the captured original config so they can restore it manually — treat a broken shared deployment as urgent.
 
+After reconnection is verified, mark the session state as restored:
+```bash
+PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+python3 - "$SESSION_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+from session_resources import edit_session_config
+
+with edit_session_config(Path(sys.argv[1]) / "config.json") as config:
+    config["ccs_state"] = "restored"
+    config["ccs_restored"] = True
+PY
+```
+
 ## Notes
 
 - Only the SOURCE deployment holds the remote-cluster definition; run every command here against the SOURCE URLs, never the REMOTE cluster's.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
-- If the session cap fires or the browser dies mid-scenario, restore first (steps 6-7), then handle the timeout/loss. Restoration takes priority over logging.
+- If the session cap fires or the browser dies mid-scenario, restore first (steps 7-8), then handle the timeout/loss. Restoration takes priority over logging.

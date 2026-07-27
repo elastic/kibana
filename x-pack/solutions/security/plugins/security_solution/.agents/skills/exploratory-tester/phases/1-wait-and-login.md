@@ -3,7 +3,8 @@
 ---
 
 If any setup step aborts after `config.json` exists, restore CCS first when
-applicable and run:
+`config.json → ccs_state` is `"modified"`. When it is `"unchanged"`, no CCS
+mutation occurred and cleanup can proceed immediately:
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
   --session-dir "$SESSION_DIR"
@@ -81,7 +82,7 @@ This creates `exploratory-testing-<session_id>-flow-<N>` for each flow where `is
 
 **Connectors** (if required by Setup):
 ```bash
-# Set AUTH_ARGS from config: user-provided → (-H "Authorization: ApiKey $APIKEY");
+# Set AUTH_ARGS from config: user-provided → (-H "Authorization: ApiKey $API_KEY");
 # agent-managed → (-u "$USERNAME:$PASSWORD"). Use the configured base space.
 curl -s "${AUTH_ARGS[@]}" -X POST "$KIBANA_URL/s/$SPACE_ID/api/actions/connector" \
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
@@ -109,10 +110,10 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 **Non-ECS noise index** (all environment types):
 ```bash
 # Set one auth form from config:
-# user-provided/serverless → NOISE_AUTH_ARGS=(--api-key "$APIKEY")
+# user-provided/serverless → NOISE_AUTH_ARGS=(--api-key "$API_KEY")
 # agent-managed stateful → NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
 if [[ "${ENV_TYPE:-}" == "user-provided" || "${ENV_TYPE:-}" == "serverless" ]]; then
-  NOISE_AUTH_ARGS=(--api-key "$APIKEY")
+  NOISE_AUTH_ARGS=(--api-key "$API_KEY")
 else
   NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
 fi
@@ -182,7 +183,8 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   --session-dir "$SESSION_DIR" \
   --kind kibana_user \
   --id exploratory-tester \
-  --endpoint "/internal/security/users/exploratory-tester" \
+  --endpoint "/_security/user/exploratory-tester" \
+  --base-url es_url \
   --owned
 ```
 Never register a user or role as owned when the response was 409 or when the

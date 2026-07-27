@@ -79,30 +79,39 @@ Environment:
 
 > **API key format:** the key must be a **Kibana-native** API key, not an Elasticsearch API key — they are different and Kibana rejects ES-origin keys on most endpoints. Create one via: `POST <kibana-url>/api/security/api_key` (authenticated as the admin user in the browser, or via the Kibana UI at **Stack Management → API Keys**). The encoded value (`encoded` field in the response) is what goes in `api-key:`. On ECH and ESS, basic auth is blocked for external HTTP clients — `username`/`password` are used **only** for the browser login step.
 
-Skip Scout startup. Verify connectivity and API key in one step:
+Skip Scout startup. Resolve the `Environment` fields into
+`ENVIRONMENT_URL`, optional `ENVIRONMENT_API_KEY`, and optional
+`ENVIRONMENT_SPACE`, then verify connectivity and the API key in one step:
 ```bash
-# Set ENVIRONMENT_SPACE from Environment.space when one was provided.
+# Step 0a resolves Environment fields into these canonical variables.
+KIBANA_URL="${ENVIRONMENT_URL:?Set ENVIRONMENT_URL to Environment.url}"
+# API_KEY is optional here so the browser-only fallback below remains reachable.
+API_KEY="${ENVIRONMENT_API_KEY:-}"
 SPACE_ID="${ENVIRONMENT_SPACE:-exploratory-testing}"
 # Check Kibana is reachable (public endpoint, no auth needed)
-curl -s "<url>/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
+curl -s "$KIBANA_URL/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
   exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)"
 
 # Validate the API key with a read-only request before any setup work begins.
 # 200 means the key can read the configured space; 404 means the key is valid
 # but the space will need provisioning in Phase 1; 401 means the key is wrong
 # or is an Elasticsearch-origin key.
-VALIDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-  -H "Authorization: ApiKey $APIKEY" \
-  -X GET "$KIBANA_URL/api/spaces/space/$SPACE_ID")
-
-if [[ "$VALIDATE_STATUS" == "401" ]]; then
-  echo "API key rejected (401). Ensure you are using a Kibana-native key, not an ES key." >&2
-  exit 1
-elif [[ "$VALIDATE_STATUS" == "200" || "$VALIDATE_STATUS" == "404" ]]; then
-  echo "API key accepted (HTTP $VALIDATE_STATUS). Proceeding."
+if [[ -z "$API_KEY" ]]; then
+  echo "No API key supplied; continue with browser-only setup below."
 else
-  echo "Unexpected response $VALIDATE_STATUS when validating the API key." >&2
-  exit 1
+  VALIDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: ApiKey $API_KEY" \
+    -X GET "$KIBANA_URL/api/spaces/space/$SPACE_ID")
+
+  if [[ "$VALIDATE_STATUS" == "401" ]]; then
+    echo "API key rejected (401). Ensure you are using a Kibana-native key, not an ES key." >&2
+    exit 1
+  elif [[ "$VALIDATE_STATUS" == "200" || "$VALIDATE_STATUS" == "404" ]]; then
+    echo "API key accepted (HTTP $VALIDATE_STATUS). Proceeding."
+  else
+    echo "Unexpected response $VALIDATE_STATUS when validating the API key." >&2
+    exit 1
+  fi
 fi
 ```
 
@@ -324,6 +333,7 @@ Write `$SESSION_DIR/config.json`:
     "space_id": "<resolved Environment.space or exploratory-testing>",
     "ccs": null
   },
+  "ccs_state": "unchanged",
   "ccs_restored": false,
   "test_user": {
     "username": "exploratory-tester",
@@ -420,9 +430,10 @@ When testing CCS, replace `null` with:
 }
 ```
 Set `data_view_verified` to `true` only after confirming the tested data view's index pattern includes `<remote_cluster_alias>:*`.
-Keep `ccs_restored` false until the remote-cluster configuration has been
-restored and verified at the end of the session. Cleanup fails closed while it
-is false.
+Keep `ccs_state` as `"unchanged"` unless a flow temporarily modifies the
+remote-cluster configuration. Set it to `"modified"` before that mutation and
+to `"restored"` only after the original configuration and connection have been
+verified. Cleanup fails closed while the state is `"modified"`.
 
 ---
 

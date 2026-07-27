@@ -31,6 +31,7 @@ RESOURCE_KINDS = frozenset(
     }
 )
 RESOURCE_STATES = frozenset({"pending", "owned", "reused"})
+CCS_STATES = frozenset({"unchanged", "modified", "restored"})
 
 
 def load_session_config(config_path: Path) -> dict[str, Any]:
@@ -280,6 +281,17 @@ def pending_resources(config: dict[str, Any]) -> list[dict[str, Any]]:
         if resource_state(resource) == "pending"
         and resource.get("marker") == expected_marker
     ]
+
+
+def ccs_cleanup_blocked(config: dict[str, Any]) -> bool:
+    environment = config.get("environment", {})
+    ccs = environment.get("ccs") if isinstance(environment, dict) else None
+    if not isinstance(ccs, dict) or not ccs:
+        return False
+    state = config.get("ccs_state")
+    if state is not None:
+        return state not in CCS_STATES or state == "modified"
+    return config.get("ccs_restored") is not True
 
 
 def register_resource(
