@@ -49,6 +49,7 @@ const expectOtelEnvelope = (e: FlatAttributes) => {
   // Per-record guarantees on every audit record.
   expect(e['log.type']).toBe('audit'); // AUDIT_OTEL_FIELD_DEFAULTS
   expect(e['log.logger']).toBeUndefined(); // dropped from per-record attributes
+  expect(e['service.version']).toBeUndefined(); // dropped per-record (resource copy filtered too)
   // project.id is ALSO promoted onto each record (promoteResourceAttributes) — it lives in both the
   // resource (above) and the per-record attributes. getLogAttributes reads the per-record attributes
   // specifically (the merged view can't distinguish them since project.id is in both).

@@ -40,14 +40,16 @@ export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
 };
 
 // Per-record log attributes stripped from the OTLP output on Serverless. (Resource-level exclusions
-// — service.version, host.name, project_name, the detector/env fields — are handled by the
-// appender's includeResources allowlist, not here, so they are not repeated in this list.)
-// - kibana.lookup_realm / kibana.authentication_provider / kibana.authentication_realm:
-//   fixed values on Serverless (always cloud-saml-kibana), so they carry no signal.
-// - url.* component fields: replaced by url.original (built via fieldAdditions), which the
-//   ingest pipeline parses back into components.
-// - log.logger / service.id / service.node.roles / service.state / service.type:
-//   belong in resource.attributes, not per-record attributes, on Serverless.
+// — host.name, project_name, detector/env fields — are handled by the includeResources allowlist,
+// not here.)
+// - service.version: also carried per-record, so includeResources drops the resource copy and this
+//   list drops the per-record copy.
+// - kibana.lookup_realm / authentication_provider / authentication_realm: fixed values on Serverless
+//   (always cloud-saml-kibana), so they carry no signal.
+// - url.* components: replaced by url.original (built via fieldAdditions), which the ingest pipeline
+//   reparses.
+// - log.logger / service.id / service.node.roles / service.state / service.type: belong in the
+//   resource, not per-record attributes.
 export const AUDIT_OTEL_FIELD_DROPS: string[] = [
   'kibana.lookup_realm',
   'kibana.authentication_provider',
@@ -62,6 +64,7 @@ export const AUDIT_OTEL_FIELD_DROPS: string[] = [
   'service.node.roles',
   'service.state',
   'service.type',
+  'service.version',
 ];
 
 // event.type is required on every audit log. Authentication events omit it; default to 'access'.
@@ -80,15 +83,16 @@ export const AUDIT_OTEL_FIELD_UPPERCASE: string[] = ['http.request.method'];
 // url.original is required by the log-delivery convention; the ingest pipeline's url processor
 // parses it back into components. Built OTel-only from the split url.* fields (which are then
 // dropped) so the upstream AuditEvent — and non-OTel appenders — are unaffected. Port and query
-// are intentionally omitted; the template is skipped entirely for events without url.* fields.
+// are intentionally omitted.
 export const AUDIT_OTEL_FIELD_ADDITIONS: Record<string, string> = {
   'url.original': '{url.scheme}://{url.domain}{url.path}',
 };
 
-// Audit logs ship a deliberately minimal OTel resource: only these keys survive the appender's
-// `includeResources` allowlist, and these values are supplied via the appender's `attributes`.
-// service.name identifies the audit signal; service.type identifies the product. Everything else
-// the resource detectors produce (host/OS/process/env) is filtered out.
+// Audit logs ship a deliberately minimal OTel resource. These two keys supply their values via the
+// appender's `attributes` and survive its `includeResources` allowlist: service.name identifies the
+// audit signal, service.type identifies the product. project.id also survives (see
+// AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES); everything else the detectors produce (host/OS/process/
+// env) is filtered out.
 export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
   'service.name': 'serverless-kibana',
   'service.type': 'kibana',

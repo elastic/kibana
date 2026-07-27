@@ -41,6 +41,7 @@ const expectTraditionalEnvelope = (e: FlatAttributes) => {
   // Serverless-only per-record transforms are not applied on traditional.
   expect(e['log.type']).toBeUndefined(); // fieldDefaults not injected
   expect(e['log.logger']).toBe('plugins.security.audit.ecs'); // not dropped
+  expect(getLogAttributes(e)['service.version']).toBeDefined(); // not dropped per-record
 };
 
 apiTest.describe(
