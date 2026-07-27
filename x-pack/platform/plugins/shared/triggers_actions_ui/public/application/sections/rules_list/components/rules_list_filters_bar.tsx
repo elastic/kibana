@@ -170,7 +170,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
         />
       )}
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" wrap>
         <EuiFlexItem>
           <EuiFieldSearch
             data-test-subj="ruleSearchField"

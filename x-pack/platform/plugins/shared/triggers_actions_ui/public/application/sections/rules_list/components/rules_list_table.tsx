@@ -975,7 +975,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         gutterSize="none"
         alignItems="center"
         responsive={false}
-        wrap={false}
+        wrap
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
@@ -983,7 +983,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             gutterSize="s"
             alignItems="center"
             responsive={false}
-            wrap={false}
+            wrap
           >
             <EuiFlexItem grow={false}>
               {numberOfSelectedRules > 0 ? (
@@ -1038,6 +1038,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         grow={true}
         css={css`
           overflow-x: auto;
+          min-width: 0;
         `}
       >
         <EuiBasicTable
