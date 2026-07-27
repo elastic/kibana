@@ -95,6 +95,8 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
+        // Wait for flyout to be ready before switching to line chart
+        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
         await lens.switchToVisualization('line', { search: 'Line' });
         await dashboard.waitForPanelsToLoad(1);
 
