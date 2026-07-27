@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.findSignificantEventsLabel',
@@ -14,6 +14,53 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
     defaultMessage: 'Find Significant Events',
   }
 );
+
+/** Tooltip for controls disabled while Significant Events activity is paused. */
+export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.activityPausedTooltip',
+  {
+    defaultMessage: 'Significant Events activity is paused. Resume it in Settings.',
+  }
+);
+
+/** Tooltip while maintenance status is still loading. */
+export const ACTIVITY_STATUS_LOADING_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.activityStatusLoadingTooltip',
+  {
+    defaultMessage: 'Checking Significant Events activity status…',
+  }
+);
+
+/** Tooltip when maintenance status could not be loaded. */
+export const ACTIVITY_STATUS_ERROR_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.activityStatusErrorTooltip',
+  {
+    defaultMessage:
+      'Could not load Significant Events activity status. New activity stays blocked until status is available.',
+  }
+);
+
+/** Tooltip explaining why activity controls are disabled (loading, error, or paused). */
+export const getActivityBlockTooltip = ({
+  isLoading,
+  isError,
+  isBlocked,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  isBlocked: boolean;
+}): string | undefined => {
+  if (isLoading) {
+    return ACTIVITY_STATUS_LOADING_TOOLTIP;
+  }
+  if (isError) {
+    return ACTIVITY_STATUS_ERROR_TOOLTIP;
+  }
+  if (isBlocked) {
+    return ACTIVITY_PAUSED_TOOLTIP;
+  }
+  return undefined;
+};
 
 export const CANCEL_DISCOVERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
@@ -119,18 +166,6 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
-
-export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
-  discovery: i18n.translate('xpack.streams.discovery.kind.discovery', {
-    defaultMessage: 'Discovery',
-  }),
-  clearance: i18n.translate('xpack.streams.discovery.kind.clearance', {
-    defaultMessage: 'Cleared',
-  }),
-  handled: i18n.translate('xpack.streams.discovery.kind.handled', {
-    defaultMessage: 'Processed',
-  }),
-};
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
   open: i18n.translate('xpack.streams.significantEvent.status.open', {
