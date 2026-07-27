@@ -891,14 +891,10 @@ export class WorkflowsExecutionEnginePlugin
           coreStart.security,
           coreStart.elasticsearch.client
         );
-        const syncContext = {
-          ...context,
-          ...(options.metadata ? { metadata: options.metadata } : {}),
-        };
         const workflowExecution = await buildExecutionDocument({
           workflow,
           executionId: options.executionId,
-          context: syncContext,
+          context,
           defaultTriggeredBy: 'manual',
           authenticatedUser,
           now: new Date(),
@@ -910,7 +906,7 @@ export class WorkflowsExecutionEnginePlugin
           ...workflowExecution,
           isTestRun: workflowExecution.isTestRun ?? false,
           status: workflowExecution.status ?? ExecutionStatus.PENDING,
-          context: workflowExecution.context ?? syncContext,
+          context: workflowExecution.context ?? context,
           workflowDefinition: workflowExecution.workflowDefinition,
           yaml: workflowExecution.yaml ?? workflow.yaml,
           scopeStack: workflowExecution.scopeStack ?? [],
