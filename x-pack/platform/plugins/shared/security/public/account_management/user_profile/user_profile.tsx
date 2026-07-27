@@ -927,7 +927,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   )}
                   {/* Cloud users change language via the Language modal in the user menu */}
                   {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
-                  <UserSpaceConfigEditor formik={formik} />
+                  {/* Cloud users modify space configuration via the space configuration modal in the user menu */}
+                  {isCloudUser ? null : <UserSpaceConfigEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
