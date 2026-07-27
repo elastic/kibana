@@ -1,5 +1,5 @@
 {
-  "sha1": "12e591fa6a697dd889d98e11d686fb93352bdc1c",
+  "sha1": "22e4694ea09761bfcc2c367b5dc83e5855d909c4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -425,7 +425,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 9
       }
     },
@@ -443,8 +443,116 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-c4c083e0976f05e",
+      "title": "Sanity tests for workflows should render \"console\" step type icon styled via mask-image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "02966260206ed5b-18a9b2ea0bd01f9",
+      "title": "Sanity tests for workflows should render \"if\" step type icon styled via mask-image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "02966260206ed5b-deaf864c8e913aa",
+      "title": "Sanity tests for workflows should render \"foreach\" step type icon styled via mask-image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "02966260206ed5b-e01ca91455c1a7b",
+      "title": "Sanity tests for workflows should render \"http\" step type icon styled via mask-image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "02966260206ed5b-6b35c868f86ce6c",
+      "title": "Sanity tests for workflows should render \"loop.continue\" step type icon styled via mask-image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "02966260206ed5b-c8e4185679b827e",
+      "title": "Sanity tests for workflows should render \"workflow.fail\" step type icon styled via mask-image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 105,
+        "column": 11
       }
     },
     {
@@ -461,7 +569,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 95,
+        "line": 120,
         "column": 9
       }
     },
@@ -479,7 +587,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 137,
+        "line": 162,
         "column": 9
       }
     },
@@ -497,7 +605,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 155,
+        "line": 180,
         "column": 9
       }
     },

@@ -59,7 +59,7 @@ describe('discovery_write tool', () => {
       }).success
     ).toBe(false);
     const parsed = discoveryWriteSchema.parse({ items: [input] });
-    expect(parsed.items[0].dedup_window).toBe('now-1h');
+    expect(parsed.items[0].dedup_window).toBe('now-24h');
   });
 
   it('tracks writes, duplicates, and failures with their distinct outcomes', async () => {
