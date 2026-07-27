@@ -79,6 +79,42 @@ export const eisHttpRequest = (
 export const createBasicAuth = (username: string, password: string): string =>
   Buffer.from(`${username}:${password}`).toString('base64');
 
+/**
+ * Extracts a human-readable message from an EIS/ES error response body.
+ * Most error responses are JSON with an `error` field (either a string or
+ * `{ type, reason }`); falls back to the raw body (truncated) for anything
+ * else, e.g. an HTML error page from a proxy in front of the real service.
+ */
+export const extractErrorMessage = (data: string): string | undefined => {
+  const trimmed = data.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    const err = parsed?.error;
+    if (typeof err === 'string') {
+      return err;
+    }
+    if (err && typeof err === 'object') {
+      if (typeof err.reason === 'string') {
+        return err.reason;
+      }
+      if (typeof err.type === 'string') {
+        return err.type;
+      }
+    }
+    if (typeof parsed?.message === 'string') {
+      return parsed.message;
+    }
+  } catch {
+    // Not JSON — fall through to the raw-text case below.
+  }
+
+  return trimmed.length > 500 ? `${trimmed.slice(0, 500)}…` : trimmed;
+};
+
 const VAULT_NOT_INSTALLED_MESSAGE = [
   'Vault is not installed or not in PATH.',
   'Install it from https://developer.hashicorp.com/vault/install or follow the Elastic guide:',
@@ -303,7 +339,7 @@ export const setCcmApiKey = async (
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const { statusCode } = await eisHttpRequest(
+      const { statusCode, data } = await eisHttpRequest(
         esUrl,
         {
           method: 'PUT',
@@ -322,11 +358,14 @@ export const setCcmApiKey = async (
         return;
       }
 
+      const responseMessage = extractErrorMessage(data);
+      const suffix = responseMessage ? ` Response: ${responseMessage}` : '';
+
       if (statusCode === 401 || statusCode === 403) {
-        throw new Error(`HTTP ${statusCode} — Elasticsearch rejected the CCM request.`);
+        throw new Error(`HTTP ${statusCode} — Elasticsearch rejected the CCM request.${suffix}`);
       }
 
-      throw new Error(`HTTP ${statusCode}`);
+      throw new Error(`HTTP ${statusCode}${suffix}`);
     } catch (error) {
       if (
         attempt < maxRetries &&
