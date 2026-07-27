@@ -9,6 +9,7 @@ import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/e
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import dateMath from '@kbn/datemath';
 import { getSourceColumnIndex, toEsqlRequest } from '../streams/esql';
 import {
   type CommonSearchOptions,
@@ -148,6 +149,16 @@ export const fromIndexForSpace = ({
   )} IS NULL`;
 };
 
+/**
+ * Resolve a time bound to ISO. Only date-math expressions (`now-7d`, `2026-07-01||/d`) go through
+ * `dateMath.parse` — plain ISO/date strings pass through verbatim so Elasticsearch parses them as
+ * UTC; routing them through moment would reinterpret date-only values in server-local time.
+ */
+export const resolveTimeBound = (expr: string, { roundUp = false } = {}): string =>
+  expr.includes('now') || expr.includes('||')
+    ? dateMath.parse(expr, { roundUp })?.toISOString() ?? expr
+    : expr;
+
 export const applyTimeRange = ({
   query,
   from,
@@ -157,16 +168,16 @@ export const applyTimeRange = ({
   from?: string;
   to?: string;
 }): ComposerQuery => {
-  let q = query;
+  let timeRangeQuery = query;
   if (from !== undefined) {
-    const fromIso = from;
-    q = q.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
+    const fromIso = resolveTimeBound(from);
+    timeRangeQuery = timeRangeQuery.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
   }
   if (to !== undefined) {
-    const toIso = to;
-    q = q.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
+    const toIso = resolveTimeBound(to, { roundUp: true });
+    timeRangeQuery = timeRangeQuery.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
   }
-  return q;
+  return timeRangeQuery;
 };
 
 interface BuildLatestSourceBaseQueryArgs {
