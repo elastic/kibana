@@ -50,8 +50,8 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
-  const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient, logger);
+  const stepExecutionRepository = new StepExecutionRepository(internalEsClient, logger);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,

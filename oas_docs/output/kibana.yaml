@@ -87840,6 +87840,10 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -97955,6 +97959,10 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -123463,9 +123471,20 @@ components:
                       minimum: 1
                       nullable: true
                       type: number
+                    docsCountPercentage:
+                      default: null
+                      maximum: 100
+                      minimum: 1
+                      nullable: true
+                      type: number
                     enabled:
                       default: true
                       type: boolean
+                    thresholdType:
+                      enum:
+                        - count
+                        - percentage
+                      type: string
                     timeInterval:
                       default: null
                       nullable: true

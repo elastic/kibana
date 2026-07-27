@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278949
+issues:
+- https://github.com/elastic/kibana/issues/278006
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Fix risk score Inspect in Agent Builder entity preview
+description: Fixes the Inspect modal showing "Couldn't render this attachment" and
+  Inspect staying disabled after you close the Entity Analytics flyout from the preview.

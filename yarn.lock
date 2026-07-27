@@ -2317,10 +2317,10 @@
     cssstyle "^4.2.1"
     micromatch "^4.0.8"
 
-"@elastic/esql-definitions@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.14.0.tgz#0b80896c49d08abb27be0307a981038beac466eb"
-  integrity sha512-vIEPBDtLFhVrg9+HlZqJvDnOusmqXIRXqQ0ZXjxz5hwgHk/xoRyx0DhIWuAdzdFQyZf2Jk+aHkjjXn8ixcxnMQ==
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.15.0":
+  version "4.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.15.0.tgz#5977edd04cd1508c85f9c35662778fa858307778"
+  integrity sha512-fwg30m9U+6/JnlLGCIHJ7ETqi3vijy6SYIxfCpyqgsSwKk2NfvXXqfg0+OZkMOc5tsBHwzZb7UhI1CZi48xA/g==
 
 "@elastic/esql-grammar@^4.14.0":
   version "4.14.0"
@@ -2448,12 +2448,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-1.9.0.tgz#a0adec77326c8e4aa948000c9c883afea1708e35"
   integrity sha512-r5Lfs8Y1bcVfzPGze2H1LohgpP5NyneIxFmcJ2V00/CCSUtG3o+bw9IS3xaZ3dC1ewgXa3YRweEPYG8fG2LiBg==
 
-"@elastic/monaco-esql@4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.14.0.tgz#a911695784254e25cbb713d2a3ff9959d2526f89"
-  integrity sha512-EU+Lil7g92aDlHCAlxg/Qw7Uhp99xSjK3KOnDZ0Ax40ofwgjWkCnKTSPd55cuXg+bk/rZGQME/qj85Y4z99ASg==
+"@elastic/monaco-esql@4.15.0":
+  version "4.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.15.0.tgz#e79ee8a0b2f7f1110a060d2880c877d6be134c5e"
+  integrity sha512-awJEPh5Qi+icm1cgRBQPAvth2oi070vAQUHGRBLpUXW0/vBUm6SSd9jgIbBzr0/5hF9bmEKMSetepFZaHxVRpg==
   dependencies:
-    "@elastic/esql-definitions" "^4.14.0"
+    "@elastic/esql-definitions" "^4.15.0"
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
