@@ -9,7 +9,6 @@ import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizati
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
