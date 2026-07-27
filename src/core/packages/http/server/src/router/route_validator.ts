@@ -214,7 +214,8 @@ export interface RequestValidationError {
  * Maps a request validation failure to a Kibana response.
  *
  * The callback receives usable request metadata, but `request.params`, `request.query`, and
- * `request.body` are fallback, unvalidated values after a validation failure.
+ * `request.body` are always empty objects (`{}`) after a validation failure — not the raw
+ * request input. Use `error.message` / `error.rawError` to inspect what failed validation.
  * @public
  */
 export type RequestValidationErrorHandler = (
