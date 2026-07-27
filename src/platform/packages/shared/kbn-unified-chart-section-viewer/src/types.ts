@@ -85,6 +85,15 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * (e.g. Discover's persistent profile state).
    */
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  /**
+   * Loads the list of recently explored metrics, falls back to A->Z.
+   */
+  getRecentlyExploredMetrics?: () => readonly string[];
+  /**
+   * Records a metric as recently explored (host persists it), keyed by `getMetricUniqueKey`.
+   * Called when the user interacts with a metric chart. Recorded on click action, hover is ignored.
+   */
+  onMetricExplored?: (metricUniqueKey: string) => void;
 }
 
 export interface Dimension {
