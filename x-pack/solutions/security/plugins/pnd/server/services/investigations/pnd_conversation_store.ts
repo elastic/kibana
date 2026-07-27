@@ -66,6 +66,10 @@ export class PndConversationStore implements PndStore {
     return this.legacy.listProposals(esClient, investigationId);
   }
 
+  async getWatchActivityMetrics(esClient: ElasticsearchClient, watchIds: string[]) {
+    return this.legacy.getWatchActivityMetrics(esClient, watchIds);
+  }
+
   async updateProposalStatus(
     esClient: ElasticsearchClient,
     proposalId: string,
@@ -102,6 +106,15 @@ export class PndConversationStore implements PndStore {
       }
     }
     return result;
+  }
+
+  async reconcileInvestigationAfterDecision(
+    ...args: Parameters<PndStore['reconcileInvestigationAfterDecision']>
+  ): Promise<void> {
+    // Legacy-only concern: recomputes the ES-backed investigation document's
+    // `pendingProposalCount`. The platform Conversation store has no
+    // equivalent denormalised counter to reconcile.
+    return this.legacy.reconcileInvestigationAfterDecision(...args);
   }
 
   async saveProposal(

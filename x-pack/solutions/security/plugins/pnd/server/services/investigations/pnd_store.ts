@@ -55,6 +55,18 @@ export interface PndStore {
     update: ProposalStatusUpdate,
     request?: KibanaRequest
   ): Promise<ProposalStatusUpdate | null>;
+  /**
+   * Refresh the parent Investigation's denormalised decision fields (currently
+   * `pendingProposalCount`) after one of its proposals changed status.
+   *
+   * Required because `updateProposalStatus` only writes the proposal document,
+   * while the Brief queue derives its primary CTA from the investigation — so
+   * without this the list and the detail page disagree about the same record.
+   */
+  reconcileInvestigationAfterDecision(
+    esClient: ElasticsearchClient,
+    investigationId: string
+  ): Promise<void>;
   saveProposal(
     esClient: ElasticsearchClient,
     proposal: CanonicalProposal,
@@ -82,6 +94,26 @@ export interface PndStore {
     esClient: ElasticsearchClient,
     args: { investigationId: string; signal: DetectionChangeSignal; event: TimelineEvent }
   ): Promise<void>;
+  /**
+   * Real per-watch activity metrics derived from Investigation/Proposal
+   * documents — the actual event stream Watches produce — rather than raw
+   * workflow-execution telemetry (`.workflows-executions`), which is empty
+   * on any stack where workflows are installed but have never fired.
+   *
+   * `timeSaved` is intentionally omitted: no field in the Investigation or
+   * Proposal schema captures analyst time-per-decision, so there is no
+   * honest way to compute it. Watch.metrics.timeSaved stays `null`.
+   */
+  getWatchActivityMetrics(
+    esClient: ElasticsearchClient,
+    watchIds: string[]
+  ): Promise<Record<string, WatchActivityMetrics>>;
+}
+
+export interface WatchActivityMetrics {
+  runs7d: number | null;
+  acceptedPct: number | null;
+  lastRun: string | null;
 }
 
 /**

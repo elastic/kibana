@@ -107,3 +107,221 @@ describe('InvestigationStore index migration', () => {
     expect(es.indices.create).toHaveBeenCalled();
   });
 });
+
+/**
+ * `reconcileInvestigationAfterDecision` closes the gap where
+ * `updateProposalStatus` only writes the proposal document: the Brief queue
+ * card's primary CTA is driven by the investigation's own
+ * `pendingProposalCount`, so without this reconciliation an investigation
+ * whose only proposal was just decided keeps advertising a stale
+ * pre-decision action (bug: "Isolate endpoint" shown next to a proposal
+ * already marked "Escalated").
+ */
+describe('InvestigationStore#reconcileInvestigationAfterDecision', () => {
+  const makeReadyEsClient = (pendingCount: number) => {
+    const update = jest.fn().mockResolvedValue({});
+    const count = jest.fn().mockResolvedValue({ count: pendingCount });
+    return {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        create: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
+        getMapping: jest.fn().mockResolvedValue({
+          'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-proposals': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-evidence': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-worker-evaluations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-canonical-proposals': {
+            mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } },
+          },
+        }),
+      },
+      bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+      count,
+      update,
+    } as unknown as Parameters<InvestigationStore['ensureReady']>[0] & {
+      count: jest.Mock;
+      update: jest.Mock;
+    };
+  };
+
+  it('recounts pending proposals from the proposal index rather than decrementing', async () => {
+    const esClient = makeReadyEsClient(0);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    await store.reconcileInvestigationAfterDecision(esClient, 'inv-floor-ransom-008');
+
+    expect(esClient.count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'pnd-proposals',
+        query: {
+          bool: {
+            filter: [
+              { term: { investigationId: 'inv-floor-ransom-008' } },
+              { term: { status: 'pending' } },
+            ],
+          },
+        },
+      })
+    );
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'pnd-investigations',
+        id: 'inv-floor-ransom-008',
+        doc: expect.objectContaining({ pendingProposalCount: 0 }),
+      })
+    );
+  });
+
+  it('reflects an outstanding pending proposal instead of clearing to zero unconditionally', async () => {
+    const esClient = makeReadyEsClient(2);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    await store.reconcileInvestigationAfterDecision(esClient, 'inv-multi-proposal');
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({ pendingProposalCount: 2 }),
+      })
+    );
+  });
+
+  it('swallows a 404 (investigation not found) rather than failing the decision request', async () => {
+    const esClient = makeReadyEsClient(0);
+    (esClient.update as jest.Mock).mockRejectedValue({ meta: { statusCode: 404 } });
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    await expect(
+      store.reconcileInvestigationAfterDecision(esClient, 'inv-missing')
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe('InvestigationStore#getWatchActivityMetrics', () => {
+  const makeReadyEsClient = (opts: {
+    investigationBuckets?: Array<{ key: string; runs7d: number; lastRun: string | null }>;
+    proposalBuckets?: Array<{ key: string; statuses: Record<string, number> }>;
+  }) => {
+    const search = jest.fn().mockImplementation(({ index }: { index: string }) => {
+      if (index === 'pnd-investigations') {
+        return Promise.resolve({
+          aggregations: {
+            by_watch: {
+              buckets: (opts.investigationBuckets ?? []).map((b) => ({
+                key: b.key,
+                runs_7d: { doc_count: b.runs7d },
+                last_run: { value_as_string: b.lastRun },
+              })),
+            },
+          },
+        });
+      }
+      return Promise.resolve({
+        aggregations: {
+          by_watch: {
+            buckets: (opts.proposalBuckets ?? []).map((b) => ({
+              key: b.key,
+              by_status: {
+                buckets: Object.entries(b.statuses).map(([key, doc_count]) => ({
+                  key,
+                  doc_count,
+                })),
+              },
+            })),
+          },
+        },
+      });
+    });
+    return {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        create: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
+        getMapping: jest.fn().mockResolvedValue({
+          'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-proposals': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-evidence': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-worker-evaluations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-canonical-proposals': {
+            mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } },
+          },
+        }),
+      },
+      bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+      count: jest.fn().mockResolvedValue({ count: 0 }),
+      search,
+    } as unknown as Parameters<InvestigationStore['ensureReady']>[0] & { search: jest.Mock };
+  };
+
+  it('computes runs7d and lastRun from real investigation aggregations', async () => {
+    const esClient = makeReadyEsClient({
+      investigationBuckets: [
+        { key: 'system-security-watch-floor', runs7d: 12, lastRun: '2026-07-27T10:00:00.000Z' },
+      ],
+    });
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.getWatchActivityMetrics(esClient, ['system-security-watch-floor']);
+
+    expect(result['system-security-watch-floor']).toEqual({
+      runs7d: 12,
+      acceptedPct: null,
+      lastRun: '2026-07-27T10:00:00.000Z',
+    });
+  });
+
+  it('computes acceptedPct as approved+executed over decided (excluding pending/escalated/deferred)', async () => {
+    const esClient = makeReadyEsClient({
+      proposalBuckets: [
+        {
+          key: 'system-security-watch-deep',
+          statuses: { approved: 6, executed: 2, dismissed: 2, pending: 5, escalated: 3 },
+        },
+      ],
+    });
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.getWatchActivityMetrics(esClient, ['system-security-watch-deep']);
+
+    // decided = approved(6) + executed(2) + dismissed(2) = 10; accepted = 8 -> 80%
+    expect(result['system-security-watch-deep'].acceptedPct).toBe(80);
+  });
+
+  it('reports null (not 0%) acceptedPct when a watch has zero decided proposals', async () => {
+    const esClient = makeReadyEsClient({
+      proposalBuckets: [
+        { key: 'system-security-watch-officer', statuses: { pending: 4, escalated: 1 } },
+      ],
+    });
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.getWatchActivityMetrics(esClient, ['system-security-watch-officer']);
+
+    expect(result['system-security-watch-officer'].acceptedPct).toBeNull();
+  });
+
+  it('defaults every requested watch id to all-null metrics before merging aggregation results', async () => {
+    const esClient = makeReadyEsClient({});
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.getWatchActivityMetrics(esClient, [
+      'system-security-watch-ad',
+      'system-security-watch-dark',
+    ]);
+
+    expect(result).toEqual({
+      'system-security-watch-ad': { runs7d: null, acceptedPct: null, lastRun: null },
+      'system-security-watch-dark': { runs7d: null, acceptedPct: null, lastRun: null },
+    });
+  });
+
+  it('short-circuits with an empty object and issues no ES calls for an empty watch id list', async () => {
+    const esClient = makeReadyEsClient({});
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.getWatchActivityMetrics(esClient, []);
+
+    expect(result).toEqual({});
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+});

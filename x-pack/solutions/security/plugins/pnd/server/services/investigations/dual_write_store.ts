@@ -53,6 +53,10 @@ export class DualWriteStore implements PndStore {
     return this.primary.listProposals(esClient, investigationId);
   }
 
+  async getWatchActivityMetrics(esClient: ElasticsearchClient, watchIds: string[]) {
+    return this.primary.getWatchActivityMetrics(esClient, watchIds);
+  }
+
   // -- Write methods: primary first, then shadow (best-effort) --
 
   async createInvestigationIfMissing(
@@ -66,6 +70,13 @@ export class DualWriteStore implements PndStore {
     const result = await this.primary.updateProposalStatus(...args);
     this.fanOutWrite('updateProposalStatus', args);
     return result;
+  }
+
+  async reconcileInvestigationAfterDecision(
+    ...args: Parameters<PndStore['reconcileInvestigationAfterDecision']>
+  ): Promise<void> {
+    await this.primary.reconcileInvestigationAfterDecision(...args);
+    this.fanOutWrite('reconcileInvestigationAfterDecision', args);
   }
 
   async saveProposal(...args: Parameters<PndStore['saveProposal']>): Promise<void> {

@@ -30,6 +30,7 @@ import type {
 } from '../../common/schemas';
 import type { DetectionChangeSignal } from '../../common/schemas/detection_change';
 import type { PndStore } from './pnd_store';
+import type { WatchActivityMetrics } from './pnd_store';
 import { canonicalProposalToUiProposalDoc } from './template_mapping';
 
 type Investigation = ListInvestigationsResponse['investigations'][number];
@@ -345,6 +346,58 @@ export class InvestigationStore implements PndStore {
   }
 
   /**
+   * Recompute the parent Investigation's decision-facing fields after one of its
+   * proposals changed status.
+   *
+   * Why this exists: `updateProposalStatus` writes the proposal document only.
+   * The Brief queue card, however, renders investigation-level fields
+   * (`pendingProposalCount`, and via it the primary CTA). Without this
+   * reconciliation the queue keeps advertising a pre-decision action — "Isolate
+   * endpoint" — for an investigation whose only proposal already reads
+   * "Escalated", i.e. the list and the detail page disagree about the same
+   * record.
+   *
+   * `pendingProposalCount` is recounted from the proposal index rather than
+   * decremented, so a re-run or an out-of-order decision converges on the
+   * truth instead of drifting.
+   *
+   * Best-effort by design: the analyst's decision is already durably recorded
+   * on the proposal document, so a failure to refresh the parent's denormalised
+   * counters must not fail the decision request.
+   */
+  public async reconcileInvestigationAfterDecision(
+    esClient: ElasticsearchClient,
+    investigationId: string
+  ): Promise<void> {
+    await this.ensureReady(esClient);
+    try {
+      const pending = await esClient.count({
+        index: PND_PROPOSALS_INDEX,
+        query: {
+          bool: {
+            filter: [{ term: { investigationId } }, { term: { status: 'pending' } }],
+          },
+        },
+      });
+
+      await esClient.update({
+        index: PND_INVESTIGATIONS_INDEX,
+        id: investigationId,
+        doc: {
+          pendingProposalCount: pending.count,
+          updatedAt: new Date().toISOString(),
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      if (error?.meta?.statusCode === 404) {
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Persist a canonical Daybreak Proposal produced by a Watch Worker run.
    * Overwrites by id so a re-run is idempotent.
    */
@@ -549,5 +602,107 @@ export class InvestigationStore implements PndStore {
         `PND: could not record detection-change signal for ${args.investigationId}: ${error?.message}`
       );
     }
+  }
+
+  /**
+   * Real per-watch activity metrics derived from Investigation/Proposal
+   * documents. Two batched aggs queries (never N+1 per watch):
+   *  - `runs7d` + `lastRun`: investigation count/max(createdAt) by `watch_id`
+   *    over the last 7 days.
+   *  - `acceptedPct`: proposal decision ratio by `sourceWatchId`. "Accepted"
+   *    = approved or executed; "decided" excludes `pending` (not yet
+   *    decided) and `escalated`/`deferred` (handed off, not accept/reject).
+   *    Ratio is null when a watch has zero decided proposals rather than
+   *    reporting a misleading 0%.
+   */
+  public async getWatchActivityMetrics(
+    esClient: ElasticsearchClient,
+    watchIds: string[]
+  ): Promise<Record<string, WatchActivityMetrics>> {
+    await this.ensureReady(esClient);
+
+    const result: Record<string, WatchActivityMetrics> = {};
+    for (const watchId of watchIds) {
+      result[watchId] = { runs7d: null, acceptedPct: null, lastRun: null };
+    }
+    if (watchIds.length === 0) {
+      return result;
+    }
+
+    const sevenDaysAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [investigationsAgg, proposalsAgg] = await Promise.all([
+      esClient.search({
+        index: PND_INVESTIGATIONS_INDEX,
+        size: 0,
+        query: { terms: { watch_id: watchIds } },
+        aggs: {
+          by_watch: {
+            terms: { field: 'watch_id', size: watchIds.length },
+            aggs: {
+              last_run: { max: { field: 'createdAt' } },
+              runs_7d: { filter: { range: { createdAt: { gte: sevenDaysAgoIso } } } },
+            },
+          },
+        },
+      }),
+      esClient.search({
+        index: PND_PROPOSALS_INDEX,
+        size: 0,
+        query: { terms: { sourceWatchId: watchIds } },
+        aggs: {
+          by_watch: {
+            terms: { field: 'sourceWatchId', size: watchIds.length },
+            aggs: {
+              by_status: { terms: { field: 'status', size: 10 } },
+            },
+          },
+        },
+      }),
+    ]);
+
+    interface WatchBucket {
+      key: string;
+      last_run: { value_as_string?: string | null };
+      runs_7d: { doc_count: number };
+    }
+    const investigationBuckets =
+      (investigationsAgg.aggregations?.by_watch as { buckets?: WatchBucket[] } | undefined)
+        ?.buckets ?? [];
+    for (const bucket of investigationBuckets) {
+      if (!(bucket.key in result)) continue;
+      result[bucket.key].runs7d = bucket.runs_7d.doc_count;
+      result[bucket.key].lastRun = bucket.last_run.value_as_string ?? null;
+    }
+
+    interface StatusBucket {
+      key: string;
+      doc_count: number;
+    }
+    interface ProposalWatchBucket {
+      key: string;
+      by_status: { buckets?: StatusBucket[] };
+    }
+    const proposalBuckets =
+      (proposalsAgg.aggregations?.by_watch as { buckets?: ProposalWatchBucket[] } | undefined)
+        ?.buckets ?? [];
+    const ACCEPTED_STATUSES = new Set(['approved', 'executed']);
+    const REJECTED_STATUSES = new Set(['dismissed']);
+    for (const bucket of proposalBuckets) {
+      if (!(bucket.key in result)) continue;
+      let accepted = 0;
+      let decided = 0;
+      for (const statusBucket of bucket.by_status.buckets ?? []) {
+        if (ACCEPTED_STATUSES.has(statusBucket.key)) {
+          accepted += statusBucket.doc_count;
+          decided += statusBucket.doc_count;
+        } else if (REJECTED_STATUSES.has(statusBucket.key)) {
+          decided += statusBucket.doc_count;
+        }
+      }
+      result[bucket.key].acceptedPct = decided > 0 ? Math.round((accepted / decided) * 100) : null;
+    }
+
+    return result;
   }
 }

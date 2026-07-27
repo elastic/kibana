@@ -17,6 +17,7 @@ export const registerListWatchesRoute = ({
   config,
   getSpaceId,
   getWatchProjection,
+  getInvestigationStore,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -34,7 +35,7 @@ export const registerListWatchesRoute = ({
           request: {},
         },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
           if (config.ui.useMockData) {
             const body: ListWatchesResponse = { watches: MOCK_MANAGED_WATCHES };
@@ -46,8 +47,44 @@ export const registerListWatchesRoute = ({
             return response.ok({ body: { watches: [] } });
           }
 
-          const body: ListWatchesResponse = await projection.list(getSpaceId(request));
-          return response.ok({ body });
+          const projected = await projection.list(getSpaceId(request));
+
+          // Enrich with real activity metrics derived from Investigation/Proposal
+          // documents (the actual event stream Watches produce). The workflow
+          // projection itself leaves runs7d/acceptedPct as null since raw
+          // workflow-execution telemetry is unavailable on stacks where
+          // workflows are installed but have never fired.
+          const store = getInvestigationStore?.();
+          if (store) {
+            try {
+              const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+              const metricsByWatch = await store.getWatchActivityMetrics(
+                esClient,
+                projected.watches.map((w) => w.id)
+              );
+              const enriched: ListWatchesResponse = {
+                watches: projected.watches.map((watch) => {
+                  const metrics = metricsByWatch[watch.id];
+                  if (!metrics) return watch;
+                  return {
+                    ...watch,
+                    metrics: {
+                      ...watch.metrics,
+                      runs7d: metrics.runs7d,
+                      acceptedPct: metrics.acceptedPct,
+                      lastRun: metrics.lastRun ?? watch.metrics.lastRun,
+                    },
+                  };
+                }),
+              };
+              return response.ok({ body: enriched });
+            } catch (error) {
+              logger.debug(`Failed to enrich watch activity metrics: ${error}`);
+              return response.ok({ body: projected });
+            }
+          }
+
+          return response.ok({ body: projected });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);
           return response.customError({
