@@ -64,17 +64,23 @@ const unwrapZodOptionalDefault = (
   defaultValue: unknown;
   isOptional: boolean;
   innerType: z.ZodTypeAny;
+  outerOpenApiMeta: OasMetaExtensions | undefined;
 } => {
   let description: z.ZodTypeAny['description'];
   let defaultValue: unknown;
   let isOptional = false;
   let innerType = type;
+  // Collect `openapi` meta declared on the wrapper(s) so that extensions like
+  // `availability` (→ `x-state`) are applied regardless of whether `.meta()`
+  // was chained before or after `.optional()` / `.default()`. Outer-most wins.
+  let outerOpenApiMeta: OasMetaExtensions | undefined;
 
   while (true) {
     const defType = getDefType(innerType);
     if (defType === 'optional') {
       isOptional = true;
       description = !description ? (innerType as any).description : description;
+      outerOpenApiMeta = outerOpenApiMeta ?? getZodMeta(innerType).openapi;
       innerType = (innerType as any)._zod.def.innerType;
     } else if (defType === 'default') {
       defaultValue = (innerType as any)._zod.def.defaultValue;
@@ -82,13 +88,14 @@ const unwrapZodOptionalDefault = (
         defaultValue = (defaultValue as () => unknown)();
       }
       description = !description ? (innerType as any).description : description;
+      outerOpenApiMeta = outerOpenApiMeta ?? getZodMeta(innerType).openapi;
       innerType = (innerType as any)._zod.def.innerType;
     } else {
       break;
     }
   }
 
-  return { description, defaultValue, isOptional, innerType };
+  return { description, defaultValue, isOptional, innerType, outerOpenApiMeta };
 };
 
 /**
@@ -206,7 +213,8 @@ const instanceofZodTypeLikeString = (_type: z.ZodTypeAny, allowMixedUnion: boole
 const convertObjectMembersToParameterObjects = (
   shape: z.ZodRawShape,
   isPathParameter = false,
-  knownParameters: KnownParameters = {}
+  knownParameters: KnownParameters = {},
+  env?: ConvertOptions['env']
 ): OpenAPIV3.ParameterObject[] => {
   return Object.entries(shape).map(([shapeKey, subShape]) => {
     const typeWithoutLazy = unwrapZodLazy(subShape as z.ZodTypeAny);
@@ -215,6 +223,7 @@ const convertObjectMembersToParameterObjects = (
       isOptional,
       defaultValue,
       innerType: typeWithoutOptionalDefault,
+      outerOpenApiMeta,
     } = unwrapZodOptionalDefault(typeWithoutLazy);
 
     // Except for path parameters, OpenAPI supports mixed unions with `anyOf` e.g. for query parameters
@@ -228,10 +237,19 @@ const convertObjectMembersToParameterObjects = (
 
     const {
       schema: { description: schemaDescription, ...openApiSchemaObject },
-    } = convert(typeWithoutOptionalDefault);
+    } = convert(typeWithoutOptionalDefault, { env });
 
     if (typeof defaultValue !== 'undefined') {
       openApiSchemaObject.default = defaultValue;
+    }
+
+    // Merge OAS extensions declared on the outer `.optional()` / `.default()`
+    // wrappers (e.g. `openapi.availability` → `x-state`) so modifier order does
+    // not matter. Applied before `collapseArrayUnion` so the extensions survive
+    // the union collapse (which spreads the remaining top-level keys).
+    const outerExtensions = normalizeRawOasMetaExtensions(outerOpenApiMeta, env);
+    if (outerExtensions) {
+      Object.assign(openApiSchemaObject, outerExtensions);
     }
 
     const finalSchema = !isPathParameter
@@ -257,13 +275,18 @@ const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter =
   return passThroughShape as z.ZodRawShape;
 };
 
-export const convertQuery = (schema: unknown) => {
+export const convertQuery = (schema: unknown, opts: ConvertOptions = {}) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
 
   if (isPassThroughAny(unwrappedSchema)) {
     return {
-      query: convertObjectMembersToParameterObjects(getPassThroughShape({}, false), true),
+      query: convertObjectMembersToParameterObjects(
+        getPassThroughShape({}, false),
+        true,
+        undefined,
+        opts.env
+      ),
       shared: {},
     };
   }
@@ -272,12 +295,21 @@ export const convertQuery = (schema: unknown) => {
     throw createError('Query schema must be an _object_ schema validator!');
   }
   return {
-    query: convertObjectMembersToParameterObjects(unwrappedSchema.shape, false),
+    query: convertObjectMembersToParameterObjects(
+      unwrappedSchema.shape,
+      false,
+      undefined,
+      opts.env
+    ),
     shared: {},
   };
 };
 
-export const convertPathParameters = (schema: unknown, knownParameters: KnownParameters) => {
+export const convertPathParameters = (
+  schema: unknown,
+  knownParameters: KnownParameters,
+  opts: ConvertOptions = {}
+) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
   const paramKeys = Object.keys(knownParameters);
@@ -291,7 +323,9 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
     return {
       params: convertObjectMembersToParameterObjects(
         getPassThroughShape(knownParameters, true),
-        true
+        true,
+        undefined,
+        opts.env
       ),
       shared: {},
     };
@@ -303,7 +337,12 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   const schemaKeys = Object.keys(unwrappedSchema.shape);
   validatePathParameters(paramKeys, schemaKeys);
   return {
-    params: convertObjectMembersToParameterObjects(unwrappedSchema.shape, true),
+    params: convertObjectMembersToParameterObjects(
+      unwrappedSchema.shape,
+      true,
+      undefined,
+      opts.env
+    ),
     shared: {},
   };
 };
@@ -450,6 +489,28 @@ const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
 const getStableComponentName = (schema: z.ZodType): string | undefined =>
   zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
 
+/**
+ * Normalize a raw `openapi` meta object (as supplied via `.meta({ openapi })`)
+ * into the OAS extensions we emit. Notably converts `availability` into the
+ * `x-state` string. This is intentionally schema-agnostic so it can be reused
+ * for metadata that lives on outer wrappers (e.g. `.optional()` / `.default()`)
+ * where we only have the raw meta, not a convertible schema node.
+ */
+function normalizeRawOasMetaExtensions(
+  meta: OasMetaExtensions | undefined,
+  env: ConvertOptions['env']
+): NormalizedOasMetaExtensions | undefined {
+  if (!meta) return undefined;
+  const { availability, ...rest } = meta;
+  const xState = getXState(availability, env ?? { serverless: false });
+  const extensions: NormalizedOasMetaExtensions = {
+    ...rest,
+    ...(xState !== undefined ? { 'x-state': xState } : {}),
+  };
+
+  return Object.keys(extensions).length > 0 ? extensions : undefined;
+}
+
 function normalizeOasMetaExtensions(
   schema: z.ZodType,
   env: ConvertOptions['env']
@@ -457,12 +518,10 @@ function normalizeOasMetaExtensions(
   const { openapi: meta } = getZodMeta(schema);
   const autoDisc = meta?.discriminator ? null : buildAutoDiscriminator(schema);
   const autoDiscriminator = autoDisc?.discriminator;
-  const { availability, ...rest } = meta ?? {};
-  const xState = getXState(availability, env ?? { serverless: false });
+  const base = normalizeRawOasMetaExtensions(meta, env);
   const extensions = {
-    ...rest,
+    ...(base ?? {}),
     ...(autoDiscriminator ? { discriminator: autoDiscriminator } : {}),
-    ...(xState !== undefined ? { 'x-state': xState } : {}),
   };
 
   return Object.keys(extensions).length > 0 ? extensions : undefined;

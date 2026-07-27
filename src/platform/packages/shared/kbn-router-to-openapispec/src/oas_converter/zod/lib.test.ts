@@ -329,6 +329,60 @@ describe('zod', () => {
       });
     });
 
+    test.each([
+      [
+        'meta after optional',
+        z
+          .union([z.string(), z.array(z.string())])
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.6.0' } } }),
+      ],
+      [
+        'meta before optional',
+        z
+          .union([z.string(), z.array(z.string())])
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.6.0' } } })
+          .optional(),
+      ],
+    ])('applies openapi availability x-state regardless of modifier order (%s)', (_name, tags) => {
+      const result = convertQuery(z.object({ tags }));
+      expect(result.query).toEqual([
+        {
+          in: 'query',
+          name: 'tags',
+          required: false,
+          schema: {
+            type: 'array',
+            items: { type: 'string' },
+            'x-state': 'Generally available; added in 9.6.0',
+          },
+        },
+      ]);
+    });
+
+    test('omits availability since from query param x-state in serverless mode', () => {
+      const result = convertQuery(
+        z.object({
+          tags: z
+            .string()
+            .optional()
+            .meta({ openapi: { availability: { stability: 'stable', since: '9.6.0' } } }),
+        }),
+        { env: { serverless: true } }
+      );
+      expect(result.query).toEqual([
+        {
+          in: 'query',
+          name: 'tags',
+          required: false,
+          schema: {
+            type: 'string',
+            'x-state': 'Generally available',
+          },
+        },
+      ]);
+    });
+
     test('handles transform schemas (like dateFromString)', () => {
       const dateFromString = z.string().transform((input) => new Date(input));
       const schema = z.object({ from: dateFromString, to: dateFromString });
