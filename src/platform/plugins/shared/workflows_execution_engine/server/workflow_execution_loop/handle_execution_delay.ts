@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
@@ -29,6 +29,7 @@ type IdleTimeoutHitlStep =
 function getIdleTimeoutResumeDeadlineMs(
   params: WorkflowExecutionLoopParams,
   workflowExecution: EsWorkflowExecution,
+  scopeStackFrames: StackFrame[],
   hitlStep: IdleTimeoutHitlStep
 ): number | undefined {
   const deadlineMs: number[] = [];
@@ -48,7 +49,6 @@ function getIdleTimeoutResumeDeadlineMs(
     );
   }
 
-  const scopeStackFrames = workflowExecution.scopeStack ?? [];
   for (const frame of scopeStackFrames) {
     for (const scope of frame.nestedScopes) {
       const graphNode = params.workflowExecutionGraph.getNode(scope.nodeId);
@@ -73,7 +73,12 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
   workflowExecution: EsWorkflowExecution,
   hitlStep: IdleTimeoutHitlStep
 ): Promise<void> {
-  const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution, hitlStep);
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    hitlStep
+  );
   if (deadlineMs === undefined) {
     return;
   }
@@ -116,10 +121,15 @@ export function getWorkflowIdleTimeoutResumeAtAfterLoop(
   }
 
   const stepExecution = params.workflowExecutionState.getLatestStepExecution(node.stepId);
-  const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution, {
-    node,
-    startedAt: stepExecution?.startedAt,
-  });
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    {
+      node,
+      startedAt: stepExecution?.startedAt,
+    }
+  );
   if (deadlineMs === undefined) {
     return undefined;
   }
@@ -173,6 +183,7 @@ export async function handleExecutionDelay(
 
     await scheduleWorkflowGlobalTimeoutResumeTask(params, workflowExecution, stepExecutionRuntime);
 
+    params.workflowExecutionCursor.stop();
     return;
   }
 
@@ -205,9 +216,7 @@ export async function handleExecutionDelay(
       await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
-        params.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.RUNNING,
-        });
+        // Delay was interrupted (e.g. by a timeout or cancellation).
         return;
       }
 
@@ -222,5 +231,7 @@ export async function handleExecutionDelay(
       resumeAt,
       fakeRequest: params.fakeRequest,
     });
+    // Execution loop should stop here so the workflow can be resumed later
+    params.workflowExecutionCursor.stop();
   }
 }
