@@ -30,7 +30,7 @@ const getRepresentationValue = async (
   data: CustomContentContextAttachmentData
 ): Promise<string> => {
   const definition = createCustomContentContextAttachmentType();
-  const formatted = definition.format(buildAttachment(data), formatContext);
+  const formatted = await definition.format(buildAttachment(data), formatContext);
   const repr = await formatted.getRepresentation!();
   return (repr as { type: 'text'; value: string }).value;
 };

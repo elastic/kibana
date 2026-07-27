@@ -20,12 +20,17 @@ import {
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 import { CustomContentComponent } from './components/custom_content_component';
-import { EditCustomContentFlyout } from './components/edit_custom_content_flyout';
+
+const EditCustomContentFlyout = lazy(() =>
+  import('./components/edit_custom_content_flyout').then((m) => ({
+    default: m.EditCustomContentFlyout,
+  }))
+);
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
@@ -168,16 +173,18 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               onTemplateChange={onTemplateChange}
             />
             {isFlyoutOpen && (
-              <EditCustomContentFlyout
-                embeddableId={uuid}
-                esqlQuery={esqlQuery}
-                template={savedTemplate}
-                timeRange={timeRange}
-                panelTitle={panelTitle ?? undefined}
-                onSave={handleFlyoutSave}
-                onAgentUpdate={handleAgentUpdate}
-                onClose={handleFlyoutClose}
-              />
+              <Suspense fallback={null}>
+                <EditCustomContentFlyout
+                  embeddableId={uuid}
+                  esqlQuery={esqlQuery}
+                  template={savedTemplate}
+                  timeRange={timeRange}
+                  panelTitle={panelTitle ?? undefined}
+                  onSave={handleFlyoutSave}
+                  onAgentUpdate={handleAgentUpdate}
+                  onClose={handleFlyoutClose}
+                />
+              </Suspense>
             )}
           </>
         );

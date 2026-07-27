@@ -59,7 +59,7 @@ describe('EsqlPreviewSection', () => {
     expect(screen.getByText('Preview data')).toBeInTheDocument();
   });
 
-  it('shows the time picker hint when query is non-empty and getESQLTimeField resolves to undefined', async () => {
+  it('shows the time picker hint when query is non-empty and no time field is detected', async () => {
     mockGetESQLTimeField.mockResolvedValue(undefined);
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
@@ -67,13 +67,12 @@ describe('EsqlPreviewSection', () => {
     act(() => {
       jest.advanceTimersByTime(300);
     });
-
     await act(async () => {});
 
     expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
   });
 
-  it('does not show the time picker hint when getESQLTimeField resolves to a field name', async () => {
+  it('does not show the time picker hint when a time field is detected', async () => {
     mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
@@ -81,7 +80,6 @@ describe('EsqlPreviewSection', () => {
     act(() => {
       jest.advanceTimersByTime(300);
     });
-
     await act(async () => {});
 
     expect(screen.queryByText(/connect to the dashboard time picker/i)).not.toBeInTheDocument();
