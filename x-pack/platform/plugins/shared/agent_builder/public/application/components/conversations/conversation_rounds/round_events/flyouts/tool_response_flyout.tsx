@@ -16,6 +16,7 @@ import {
   EuiSteps,
   EuiLoadingSpinner,
   useEuiTheme,
+  useGeneratedHtmlId,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -56,6 +57,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
+  const titleId = useGeneratedHtmlId({ prefix: 'toolResponseFlyout' });
   const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
 
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
@@ -126,7 +128,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      aria-labelledby="toolResponseFlyoutTitle"
+      aria-labelledby={titleId}
       size="m"
       ownFocus={!onBack}
       outsideClickCloses={onBack ? true : undefined}
@@ -142,7 +144,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       )}
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="toolResponseFlyoutTitle">
+          <h2 id={titleId}>
             {toolLabel}: {step.tool_id}
           </h2>
         </EuiTitle>

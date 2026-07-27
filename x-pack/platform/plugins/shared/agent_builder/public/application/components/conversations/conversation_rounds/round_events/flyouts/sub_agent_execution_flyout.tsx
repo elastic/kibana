@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -68,6 +69,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   } = useFollowExecution(executionId);
   const { euiTheme } = useEuiTheme();
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
+  const titleId = useGeneratedHtmlId({ prefix: 'subAgentExecutionFlyout' });
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
   const hasError = Boolean(error);
@@ -130,7 +132,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
     <FlyoutStackContext.Provider value={{ openToolStep: setNestedStep }}>
       <EuiFlyout
         onClose={onClose}
-        aria-labelledby="subAgentExecutionFlyoutTitle"
+        aria-labelledby={titleId}
         size="m"
         ownFocus={!onBack}
         outsideClickCloses={onBack ? true : undefined}
@@ -146,7 +148,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         )}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="l">
-            <h2 id="subAgentExecutionFlyoutTitle">{subAgentExecutionTitle}</h2>
+            <h2 id={titleId}>{subAgentExecutionTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="xs" />
           <EuiText size="s" color={euiTheme.colors.textSubdued}>
