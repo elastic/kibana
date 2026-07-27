@@ -12,7 +12,10 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { QueryClient } from '@kbn/react-query';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  type BulkCreateAlertActionBody,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
@@ -56,7 +59,7 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
     // `undefined` means cancelled; `null` means "clear assignee".
     if (result === undefined) return;
 
-    const items = episodes.map((ep) => ({
+    const items: BulkCreateAlertActionBody = episodes.map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
       episode_id: ep['episode.id'],
@@ -65,8 +68,8 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkCreateAlertActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
