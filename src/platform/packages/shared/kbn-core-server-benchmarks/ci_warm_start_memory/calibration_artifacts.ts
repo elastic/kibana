@@ -9,6 +9,12 @@
 
 export const KIBANA_ON_MERGE_PIPELINE_SLUG = 'kibana-on-merge';
 
+/**
+ * Initial Linux calibration pins for the first flaky-runner campaign. These
+ * immutable Buildkite artifact IDs reference on-merge distributables from
+ * builds 104029/104030; bytes expire per Buildkite artifact retention policy.
+ */
+
 export const KIBANA_DISTRIBUTABLE_ARTIFACT_FILENAME = 'kibana-default.tar.zst';
 
 export const CALIBRATION_WORK_DIR = 'target/ci-warm-start-memory-bench';
