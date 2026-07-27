@@ -138,7 +138,7 @@ export function CanvasControls({
         left: 50%;
         transform: translateX(-50%);
         z-index: 5;
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: 8px;
       `}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

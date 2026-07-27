@@ -488,7 +488,14 @@ export function SourceFlyout({
   const [configuredSourceType, setConfiguredSourceType] = useState(SOURCE_TYPE_OPTIONS[0].value);
 
   return (
-    <EuiFlyout size="s" onClose={onClose} aria-labelledby={titleId} data-test-subj="sourceFlyout">
+    <EuiFlyout
+      size="s"
+      type="push"
+      pushMinBreakpoint={800}
+      onClose={onClose}
+      aria-labelledby={titleId}
+      data-test-subj="sourceFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={titleId}>

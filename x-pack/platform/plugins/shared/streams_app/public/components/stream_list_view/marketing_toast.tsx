@@ -212,7 +212,7 @@ export function StreamsMarketingToast({ onClose, exploreHref }: StreamsMarketing
           max-width: calc(100vw - ${euiTheme.size.xl});
           box-sizing: border-box;
           overflow: hidden;
-          border-radius: ${euiTheme.border.radius.small};
+          border-radius: 12px;
           background-color: ${euiTheme.colors.backgroundBasePlain};
           ${shadow}
           animation: ${enterAnimation} 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) both;
@@ -224,7 +224,8 @@ export function StreamsMarketingToast({ onClose, exploreHref }: StreamsMarketing
             display: flex;
             flex-direction: column;
             gap: ${euiTheme.size.base};
-            padding: ${euiTheme.size.base} ${euiTheme.size.l};
+            padding: calc(${euiTheme.size.base} + ${euiTheme.size.s}) ${euiTheme.size.l}
+              ${euiTheme.size.base};
             background: linear-gradient(
               to top,
               ${euiTheme.colors.backgroundBasePlain} 24.5%,
@@ -251,6 +252,9 @@ export function StreamsMarketingToast({ onClose, exploreHref }: StreamsMarketing
               aria-label={closeLabel}
               onClick={onClose}
               data-test-subj="streamsMarketingToastClose"
+              className={css`
+                margin-right: -${euiTheme.size.s};
+              `}
             />
           </div>
           <ToastIllustration />

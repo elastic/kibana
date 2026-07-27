@@ -99,17 +99,17 @@ function PrototypeBanner({ onDismiss }: { onDismiss: () => void }) {
         height: 100%;
         width: 100%;
         padding-inline: ${euiTheme.size.xl};
-        background-color: ${euiTheme.colors.backgroundBasePrimary};
-        color: ${euiTheme.colors.textPrimary};
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHoverAssistance};
+        color: ${euiTheme.colors.textAssistance};
       `}
     >
-      <EuiIcon type="info" size="s" color="primary" />
-      <EuiText size="s" color="primary">
+      <EuiIcon type="info" size="s" color={euiTheme.colors.textAssistance} />
+      <EuiText size="s" color={euiTheme.colors.textAssistance}>
         {message}
       </EuiText>
       <EuiButtonIcon
         iconType="cross"
-        color="primary"
+        color="text"
         size="xs"
         aria-label={dismissLabel}
         onClick={onDismiss}
@@ -119,6 +119,10 @@ function PrototypeBanner({ onDismiss }: { onDismiss: () => void }) {
           inset-inline-end: ${euiTheme.size.s};
           top: 50%;
           transform: translateY(-50%);
+          color: ${euiTheme.colors.textAssistance};
+          svg {
+            fill: ${euiTheme.colors.textAssistance};
+          }
         `}
       />
     </div>
