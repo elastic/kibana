@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -41,11 +41,28 @@ export const OnboardingPathPanel = ({
   telemetryId,
 }: OnboardingPathPanelProps) => {
   const { euiTheme } = useEuiTheme();
+  const titleId = `${dataTestSubj}-title`;
+  const descriptionId = `${dataTestSubj}-description`;
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
 
   return (
     <EuiSplitPanel.Outer
       direction="row"
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       data-test-subj={dataTestSubj}
       data-telemetry-id={telemetryId}
       hasBorder
@@ -69,9 +86,9 @@ export const OnboardingPathPanel = ({
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
           <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart" responsive={false}>
             <EuiTitle size="s">
-              <h2>{title}</h2>
+              <h2 id={titleId}>{title}</h2>
             </EuiTitle>
-            <EuiText color="subdued" size="s">
+            <EuiText color="subdued" size="s" id={descriptionId}>
               {description}
             </EuiText>
           </EuiFlexGroup>
