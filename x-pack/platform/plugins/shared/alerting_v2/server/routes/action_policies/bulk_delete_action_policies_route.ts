@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  bulkActionActionPoliciesBodySchema,
-  bulkActionActionPoliciesResponseSchema,
-  errorResponseSchema,
-  type BulkActionActionPoliciesBody,
-} from '@kbn/alerting-v2-schemas';
+import { bulkByIdsSchema, bulkResponseSchema, errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
@@ -21,51 +17,48 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 @injectable()
-export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
+export class BulkDeleteActionPoliciesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk`;
+  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk_delete`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
     },
   };
   static routeOptions = {
-    summary: 'Bulk action action policies',
-    description: 'Perform bulk actions on action policies.',
+    summary: 'Delete action policies in bulk by ID',
   } as const;
   static schemas = {
     request: {
-      body: bulkActionActionPoliciesBodySchema,
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
-        body: () => bulkActionActionPoliciesResponseSchema,
-        description: 'Returns the result of the bulk action on action policies.',
+        body: () => bulkResponseSchema,
+        description: 'Returns the result of the bulk delete operation.',
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request body.',
+        description: 'Indicates an invalid schema or parameters.',
       },
     },
   };
 
-  protected readonly routeName = 'bulk action action policies';
+  protected readonly routeName = 'bulk delete action policies';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkActionActionPoliciesBody>,
-    @inject(ActionPolicyClient)
-    private readonly actionPolicyClient: ActionPolicyClient
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
+    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const result = await this.actionPolicyClient.bulkActionActionPolicies({
-      actions: this.request.body.actions,
+    const result = await this.actionPolicyClient.bulkDeleteActionPolicies({
+      ids: this.request.body.ids,
     });
-
     return this.ctx.response.ok({ body: result });
   }
 }
