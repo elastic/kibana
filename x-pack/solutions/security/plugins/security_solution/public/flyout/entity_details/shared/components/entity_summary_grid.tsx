@@ -28,6 +28,7 @@ import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
+import { ManageEntityWatchlistsModal } from './manage_entity_watchlists_modal';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
@@ -38,10 +39,18 @@ interface EntitySummaryGridProps {
   entityRecord: Entity;
   criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
+  enableWatchlistManagement?: boolean;
+  onWatchlistsChanged?: () => Promise<unknown> | void;
 }
 
 export const EntitySummaryGrid = memo(
-  ({ entityRecord, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
+  ({
+    entityRecord,
+    criticalityLevel,
+    onCriticalitySave,
+    enableWatchlistManagement = false,
+    onWatchlistsChanged,
+  }: EntitySummaryGridProps) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     const entityId = entityRecord.entity?.id;
@@ -150,6 +159,13 @@ export const EntitySummaryGrid = memo(
             )}
           >
             <WatchlistsCell watchlistIds={watchlistIds} />
+            {enableWatchlistManagement && entityId && onWatchlistsChanged && (
+              <WatchlistManagement
+                entityId={entityId}
+                assignedWatchlistIds={watchlistIds}
+                onWatchlistsChanged={onWatchlistsChanged}
+              />
+            )}
           </SummaryPanel>
         </EuiFlexGrid>
         <EuiSpacer size="s" />
@@ -250,12 +266,39 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
   }, [watchlistIds, watchlistNamesById]);
 
   return (
-    <TruncatedBadgeList
-      values={resolvedNames}
-      overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
-      data-test-subj="entityWatchlistsCell"
-      textSize="xs"
-    />
+    <>
+      <TruncatedBadgeList
+        values={resolvedNames}
+        overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
+        data-test-subj="entityWatchlistsCell"
+        textSize="xs"
+      />
+    </>
   );
 });
 WatchlistsCell.displayName = 'WatchlistsCell';
+
+const WatchlistManagement = ({
+  entityId,
+  assignedWatchlistIds,
+  onWatchlistsChanged,
+}: {
+  entityId: string;
+  assignedWatchlistIds: string[];
+  onWatchlistsChanged: () => Promise<unknown> | void;
+}) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  return (
+    <>
+      <ManageEntityWatchlistsModal
+        entityId={entityId}
+        assignedWatchlistIds={assignedWatchlistIds}
+        isOpen={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onOpen={() => setIsModalVisible(true)}
+        onWatchlistsChanged={onWatchlistsChanged}
+      />
+    </>
+  );
+};

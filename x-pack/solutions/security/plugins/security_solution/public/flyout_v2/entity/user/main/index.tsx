@@ -443,6 +443,8 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={observedUser.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            enableWatchlistManagement
+            onWatchlistsChanged={entityFromStoreResult.refetch}
           />
         )}
         {tabsNode}

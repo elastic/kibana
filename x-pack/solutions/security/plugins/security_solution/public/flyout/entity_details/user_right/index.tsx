@@ -307,6 +307,8 @@ export const UserPanel = memo(function UserPanel({
             entityRecord={entityFromStoreResult.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            enableWatchlistManagement
+            onWatchlistsChanged={entityFromStoreResult.refetch}
           />
         )}
         {tabsNode}

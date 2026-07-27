@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EntitySummaryGrid } from './entity_summary_grid';
 import { mockEntityRecord } from '../../mocks';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { useWatchlistsPrivileges } from '../../../../entity_analytics/api/hooks/use_watchlists_privileges';
 
 jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
   useGetWatchlists: jest.fn().mockReturnValue({
@@ -19,6 +20,16 @@ jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
       { id: 'watchlist-2', name: 'Second Watchlist' },
     ],
   }),
+}));
+
+jest.mock('../../../../entity_analytics/api/hooks/use_watchlists_privileges', () => ({
+  useWatchlistsPrivileges: jest.fn().mockReturnValue({
+    data: { has_all_required: true },
+  }),
+}));
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
 const entityWithSource: Entity = {
@@ -163,5 +174,29 @@ describe('EntitySummaryGrid', () => {
     );
 
     expect(getByTestId('entityWatchlistsCell-more')).toHaveTextContent('+1');
+  });
+
+  it('only shows watchlist management when the containing flyout opts in', () => {
+    const { queryByTestId, rerender } = render(
+      <TestProviders>
+        <EntitySummaryGrid entityRecord={entityWithWatchlists} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('manageEntityWatchlistsButton')).not.toBeInTheDocument();
+    expect(useWatchlistsPrivileges).not.toHaveBeenCalled();
+
+    rerender(
+      <TestProviders>
+        <EntitySummaryGrid
+          entityRecord={entityWithWatchlists}
+          enableWatchlistManagement
+          onWatchlistsChanged={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('manageEntityWatchlistsButton')).toBeInTheDocument();
+    expect(useWatchlistsPrivileges).toHaveBeenCalledTimes(1);
   });
 });
