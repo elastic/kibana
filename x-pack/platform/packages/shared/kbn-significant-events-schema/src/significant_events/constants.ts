@@ -13,5 +13,4 @@ export const MAX_ARRAY_LENGTH = 100;
 
 /** Shared narrative-field rule: never let evidence-derived text reproduce a raw sensitive value. */
 export const NO_RAW_SENSITIVE_VALUES_RULE =
-  'No raw IDs, UUIDs, or metric values. Never quote a raw sensitive value (PII, PCI, CVV, SSN, ' +
-  'credential, secret, token)';
+  'No raw IDs, UUIDs, or metric values. Never quote a raw sensitive value (PII, PCI, CVV, SSN, credentials, secrets, tokens)';
