@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
 import type { CreateRuleParams } from './create_rule';
 import type { ConstructorOptions } from '../../../../rules_client';
@@ -72,6 +73,7 @@ const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -2746,6 +2748,72 @@ describe('create()', () => {
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('authorizes validated params via the rule type params authorizer with the request', async () => {
+    // No actions, so this test does not consume the shared generated-action uuid counter.
+    const data = getMockData({ actions: [] });
+    // Reject so we can assert the call arguments without exercising the full
+    // create pipeline (which needs additional per-test mocking).
+    const authorize = jest.fn().mockRejectedValue(new Error('stop'));
+    ruleTypeRegistry.get.mockReturnValue({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'test',
+      validLegacyConsumers: [],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      validate: {
+        params: schema.object({ bar: schema.boolean() }, { unknowns: 'allow' }),
+      },
+      authorize: { params: { authorize } },
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      solution: 'stack',
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrow('stop');
+
+    expect(authorize).toHaveBeenCalledTimes(1);
+    expect(authorize).toHaveBeenCalledWith(
+      { bar: true },
+      expect.objectContaining({ request: rulesClientParams.request })
+    );
+  });
+
+  test('propagates an error thrown by the rule type params authorizer', async () => {
+    const data = getMockData({ actions: [] });
+    ruleTypeRegistry.get.mockReturnValue({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'test',
+      validLegacyConsumers: [],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      validate: {
+        params: schema.object({}, { unknowns: 'allow' }),
+      },
+      authorize: {
+        params: { authorize: jest.fn().mockRejectedValue(new Error('not authorized')) },
+      },
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      solution: 'stack',
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"not authorized"`
     );
   });
 

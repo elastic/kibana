@@ -430,6 +430,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
+    const osquery = plugins.osquery;
+    const getOsqueryResponseActionsAuthzChecker: CreateSecurityRuleTypeWrapperProps['getOsqueryResponseActionsAuthzChecker'] =
+      osquery
+        ? (request) => (actionParams) =>
+            osquery?.checkResponseActionAuthz(request, actionParams) ?? Promise.resolve()
+        : undefined;
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -451,6 +458,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
+      getOsqueryResponseActionsAuthzChecker
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);

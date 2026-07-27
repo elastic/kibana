@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import type { AlertingAuthorization } from '../../../../../authorization';
@@ -40,6 +41,7 @@ const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
