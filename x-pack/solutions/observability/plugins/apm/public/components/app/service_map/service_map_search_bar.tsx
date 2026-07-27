@@ -156,9 +156,23 @@ export function ServiceMapSearchBar() {
     if (!hasControlsFired.current) return;
     const existing = toQuery(location.search);
     if (existing.environment === envFromControls) return;
+
+    // APM's typed router strips `_a` from location.search. Preserve it from the
+    // live browser URL so this replace doesn't drop controlSelections / filters.
+    const nextQuery: Record<string, string | undefined> = {
+      ...existing,
+      environment: envFromControls,
+    };
+    if (nextQuery._a === undefined) {
+      const match = window.location.href.match(/[?&]_a=([^&#]+)/);
+      if (match) {
+        nextQuery._a = decodeURIComponent(match[1]);
+      }
+    }
+
     history.replace({
       ...location,
-      search: fromQuery({ ...existing, environment: envFromControls }),
+      search: fromQuery(nextQuery),
     });
     // location.search as the dep (not the object) to avoid infinite loops.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -171,12 +185,38 @@ export function ServiceMapSearchBar() {
     [panelFilters]
   );
 
+  // Seed the Controls dropdowns from the URL on mount.
+  // Environment falls back to the dedicated `?environment=` URL param.
+  // Other controls restore from `_a.controlSelections`.
+  // Uses a ref so Controls don't re-initialise when the URL changes.
+  const [initialSelections] = useState<Record<string, string[]>>(() => {
+    const restored = getRestoredControlSelections() ?? {};
+    return {
+      ...restored,
+      'service.environment':
+        restored['service.environment'] ??
+        (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
+    };
+  });
+
+  // When the URL restores non-environment control selections (e.g. Explore →
+  // global map with service.name), wait for Controls to apply them before
+  // publishing esQuery. Otherwise we fetch the unfiltered map first, then
+  // refetch filtered — which flashes/reloads the graph.
+  const hasRestoredNonEnvControlSelections = useMemo(() => {
+    const { 'service.environment': _env, ...rest } = initialSelections;
+    return Object.values(rest).some((values) => values.length > 0);
+  }, [initialSelections]);
+
   // Rebuild esQuery whenever any input changes, but only propagate a new
   // reference when the serialized form actually differs (avoids refetches
   // from semantically identical object references).
   const prevEsQueryStringRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!dataView) return;
+    if (hasRestoredNonEnvControlSelections && !hasControlsFired.current) {
+      return;
+    }
     const built = buildEsQuery(
       dataView,
       [{ query: '', language: 'kuery' }],
@@ -188,21 +228,14 @@ export function ServiceMapSearchBar() {
       prevEsQueryStringRef.current = serialized;
       setEsQuery(built);
     }
-  }, [dataView, filterBarFilters, panelFiltersWithoutEnv, kibanaQuerySettings, setEsQuery]);
-
-  // Seed the Controls dropdowns from the URL on mount.
-  // Environment falls back to the dedicated `?environment=` URL param.
-  // Other controls restore from `_a.controlSelections`.
-  // Uses a ref so Controls don't re-initialise when the URL changes.
-  const [initialSelections] = useState(() => {
-    const restored = getRestoredControlSelections() ?? {};
-    return {
-      ...restored,
-      'service.environment':
-        restored['service.environment'] ??
-        (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
-    };
-  });
+  }, [
+    dataView,
+    filterBarFilters,
+    panelFiltersWithoutEnv,
+    kibanaQuerySettings,
+    setEsQuery,
+    hasRestoredNonEnvControlSelections,
+  ]);
 
   return (
     <>

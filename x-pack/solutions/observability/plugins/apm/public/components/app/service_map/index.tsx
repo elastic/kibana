@@ -78,7 +78,8 @@ export function ServiceMapHome() {
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
-      esQuery={esQuery ?? undefined}
+      // Pass `null` through — `esQuery ?? undefined` would defeat search-bar fetch gating.
+      esQuery={esQuery}
     />
   );
 }
@@ -101,7 +102,8 @@ export function ServiceMapServiceDetail() {
       end={end}
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
-      esQuery={esQuery ?? undefined}
+      // Pass `null` through — `esQuery ?? undefined` would defeat search-bar fetch gating.
+      esQuery={esQuery}
     />
   );
 }
@@ -124,7 +126,11 @@ export function ServiceMap({
   rangeFrom?: string;
   rangeTo?: string;
   serviceGroupId?: string;
-  esQuery?: { bool: BoolQuery };
+  /**
+   * `null` = search bar not ready yet (gate fetch).
+   * `undefined` = no search provider (embeddable).
+   */
+  esQuery?: { bool: BoolQuery } | null;
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
