@@ -9,7 +9,11 @@
   },
   "providers": {
     "docker": { "image": "buildpack-deps:bookworm" },
-    "computesdk": { "provider": "e2b" }
+    "computesdk": {
+      "provider": "e2b",
+      "providerOptions": {},
+      "createOptions": {}
+    }
   },
   "pricingPerHourUsd": {
     "docker": 0,

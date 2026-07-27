@@ -115,7 +115,7 @@ sandbox_bench/
 │   └── providers/             ← adapters: create / exec / destroy (+ snapshot / resume)
 │       ├── local.mjs          ← host exec, no isolation — harness development only
 │       ├── docker.mjs         ← reference adapter incl. snapshot via `docker commit`
-│       └── computesdk.mjs     ← template for any ComputeSDK-backed provider (e2b, Daytona, …)
+│       └── computesdk.mjs     ← any ComputeSDK-backed provider (e2b, Daytona, Modal, …)
 └── results/                   ← JSONL, one line per iteration (gitignored)
 ```
 
