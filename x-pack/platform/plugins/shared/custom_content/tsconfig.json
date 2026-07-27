@@ -14,7 +14,16 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/ui-theme",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-server",
+    "@kbn/sse-utils-client",
+    "@kbn/data-plugin",
+    "@kbn/esql-utils",
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/datemath",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

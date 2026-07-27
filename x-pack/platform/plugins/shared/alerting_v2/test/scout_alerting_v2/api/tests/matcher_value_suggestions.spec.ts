@@ -23,6 +23,30 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   });
 
   apiTest(
+    'returns a 200 with an array of suggested values for a static field',
+    async ({ apiClient }) => {
+      // `episode_status` is backed by static suggestions, so the result is
+      // deterministic without seeding any alert events or rules.
+      const response = await apiClient.post(
+        ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH,
+        {
+          headers: adminHeaders,
+          body: {
+            field: 'episode_status',
+            query: '',
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(
+        expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
+      );
+    }
+  );
+
+  apiTest(
     'validation: rejects body with unknown top-level keys (strict schema)',
     async ({ apiClient }) => {
       const response = await apiClient.post(
