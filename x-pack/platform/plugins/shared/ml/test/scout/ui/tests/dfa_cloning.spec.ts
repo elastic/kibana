@@ -18,7 +18,7 @@
  * depend on the DFA feature which is not yet verified on serverless.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
 import { cleanupDfaCloningTest } from '../fixtures/helpers/dfa';
@@ -149,6 +149,19 @@ const assertValidationCalloutCount = async (
   const validationCallouts = page.locator('.euiCallOut[data-test-subj~="mlValidationCallout"]');
   await expect(validationCallouts).not.toHaveCount(0);
   await expect(validationCallouts).toHaveCount(expectedCount);
+};
+
+const waitForTrainingDocs = async (
+  apiServices: ApiServicesFixture,
+  jobId: string
+): Promise<void> => {
+  // The job can briefly report as stopped before training starts.
+  await expect
+    .poll(async () => (await apiServices.ml.dataFrameAnalytics.getStats(jobId)).hasTrainingDocs, {
+      timeout: 60_000,
+      intervals: [3_000],
+    })
+    .toBe(true);
 };
 
 // ── Spec ──────────────────────────────────────────────────────────────────────
@@ -335,11 +348,8 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the clone job and verifies it in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
+      await waitForTrainingDocs(apiServices, CLASSIFICATION.cloneJobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(CLASSIFICATION.cloneJobId);
-      expect(
-        (await apiServices.ml.dataFrameAnalytics.getStats(CLASSIFICATION.cloneJobId))
-          .hasTrainingDocs
-      ).toBe(true);
 
       await dataFrameAnalytics.gotoJobList();
       await dataFrameAnalytics.filterByJobId(CLASSIFICATION.cloneJobId);
@@ -433,10 +443,8 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the clone job and verifies it in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
+      await waitForTrainingDocs(apiServices, OUTLIER.cloneJobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(OUTLIER.cloneJobId);
-      expect(
-        (await apiServices.ml.dataFrameAnalytics.getStats(OUTLIER.cloneJobId)).hasTrainingDocs
-      ).toBe(true);
 
       await dataFrameAnalytics.gotoJobList();
       await dataFrameAnalytics.filterByJobId(OUTLIER.cloneJobId);
@@ -548,10 +556,8 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the clone job and verifies it in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
+      await waitForTrainingDocs(apiServices, REGRESSION.cloneJobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(REGRESSION.cloneJobId);
-      expect(
-        (await apiServices.ml.dataFrameAnalytics.getStats(REGRESSION.cloneJobId)).hasTrainingDocs
-      ).toBe(true);
 
       await dataFrameAnalytics.gotoJobList();
       await dataFrameAnalytics.filterByJobId(REGRESSION.cloneJobId);

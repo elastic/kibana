@@ -109,7 +109,7 @@ export class DataFrameAnalyticsPage {
       .click();
     await this.page.testSubj
       .locator('mlAnalyticsCreateJobWizardAdvancedStep active')
-      .waitFor({ state: 'visible' });
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   // ── Additional options step ───────────────────────────────────────────────
