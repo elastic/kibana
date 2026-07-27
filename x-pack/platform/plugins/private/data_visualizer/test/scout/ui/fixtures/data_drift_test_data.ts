@@ -11,7 +11,8 @@ export const farequoteKQLFiltersDataDriftTestData = {
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
   chartClickCoordinates: [0, 0] as [number, number],
-  comparisonChartClickCoordinates: [2, 1] as [number, number],
+  // Keep in sync with FTR data_drift.ts — click must hit a bar (canvas center).
+  comparisonChartClickCoordinates: [0, 0] as [number, number],
   dataViewName: 'ft_farequote',
   totalDocCount: '5,674',
 };

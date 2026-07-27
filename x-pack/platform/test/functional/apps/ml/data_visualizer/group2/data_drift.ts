@@ -17,7 +17,9 @@ export const farequoteKQLFiltersSearchTestData = {
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
   chartClickCoordinates: [0, 0] as [number, number],
-  comparisonChartClickCoordinates: [2, 1] as [number, number],
+  // Click relative to canvas center (WebDriver Actions origin). Must hit a bar
+  // element to create the brush; [2, 1] can miss on the filtered farequote histogram.
+  comparisonChartClickCoordinates: [0, 0] as [number, number],
   dataViewName: 'ft_farequote',
   totalDocCount: '5,674',
 };

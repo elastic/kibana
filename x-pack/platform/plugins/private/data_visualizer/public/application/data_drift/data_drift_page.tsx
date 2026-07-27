@@ -175,7 +175,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const forceRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
+  const forcePageRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
 
   const randomSampler = useMemo(() => referenceStateManager.randomSampler, [referenceStateManager]);
 
@@ -227,7 +227,12 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     dataComparisonListState
   );
 
-  const { documentStats, documentStatsProd, timefilter } = useData(
+  const {
+    documentStats,
+    documentStatsProd,
+    timefilter,
+    forceRefresh: forceDocCountRefresh,
+  } = useData(
     initialSettings,
     dataView,
     'data_drift',
@@ -238,6 +243,32 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     setGlobalState,
     undefined
   );
+
+  // Hydrate saved-search filters into FilterManager after render so doc counts and the
+  // primary search bar include them. Do not call addFilters from getEsQueryFromSavedSearch
+  // (that helper can run during render); mirror index data visualizer hydration instead.
+  useEffect(() => {
+    const savedFilters = savedSearch?.searchSource?.getField('filter') as Filter[] | undefined;
+    if (!savedFilters?.length) {
+      return;
+    }
+
+    const filterManager = dataService.query.filterManager;
+    const existing = filterManager.getFilters();
+    const missing = savedFilters.filter(
+      (savedFilter) =>
+        !existing.some(
+          (existingFilter) =>
+            existingFilter.meta?.key === savedFilter.meta?.key &&
+            JSON.stringify(existingFilter.meta?.params) === JSON.stringify(savedFilter.meta?.params)
+        )
+    );
+
+    if (missing.length > 0) {
+      filterManager.addFilters(missing);
+      forceDocCountRefresh();
+    }
+  }, [savedSearch, dataService.query.filterManager, forceDocCountRefresh]);
 
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
@@ -431,7 +462,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 id={REFERENCE_LABEL}
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
-                reload={forceRefresh}
+                reload={forceDocCountRefresh}
                 brushSelectionUpdateHandler={referenceBrushSelectionUpdate}
                 documentCountStats={documentCountStats}
                 documentCountStatsSplit={documentCountStatsCompare}
@@ -458,7 +489,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 id={COMPARISON_LABEL}
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
-                reload={forceRefresh}
+                reload={forceDocCountRefresh}
                 brushSelectionUpdateHandler={comparisonBrushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
@@ -494,7 +525,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
-                onRefresh={forceRefresh}
+                onRefresh={forcePageRefresh}
                 hasValidTimeField={hasValidTimeField}
               />
             </EuiPanel>
