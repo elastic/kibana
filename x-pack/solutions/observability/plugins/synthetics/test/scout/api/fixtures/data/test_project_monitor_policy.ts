@@ -79,7 +79,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
           vars: {
             __ui: {
               type: 'yaml',
-              value: '{"is_tls_enabled":true}',
+              value: null,
             },
             'check.request.body': {
               type: 'yaml',
@@ -139,12 +139,12 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             max_redirects: {
               type: 'integer',
-              value: '0',
+              value: null,
             },
             ...commonVars,
             mode: {
               type: 'text',
-              value: 'any',
+              value: null,
             },
             name: {
               type: 'text',
@@ -251,9 +251,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
           },
           compiled_stream: {
-            __ui: {
-              is_tls_enabled: true,
-            },
+            __ui: null,
             type: 'http',
             name,
             id,
@@ -262,7 +260,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             urls: 'http://localhost:9200',
             schedule: '@every 60m',
             timeout: '80s',
-            max_redirects: 0,
+            max_redirects: null,
             max_attempts: 2,
             tags: ['tag2', 'tag2'],
             proxy_url: 'testGlobalParamOverwrite',
@@ -286,7 +284,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'check.request.body': 'testGlobalParamValue',
             ipv4: true,
             ipv6: true,
-            mode: 'any',
             processors: [
               {
                 add_fields: {

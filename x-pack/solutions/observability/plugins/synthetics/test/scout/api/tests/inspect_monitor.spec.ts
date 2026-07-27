@@ -134,7 +134,6 @@ apiTest.describe(
               'check.request.body': '********',
               'check.request.headers': '********',
               username: '********',
-              mode: 'any',
               'response.include_body_max_bytes': '1024',
               ipv4: true,
               ipv6: true,
@@ -201,7 +200,6 @@ apiTest.describe(
               },
               playwright_options: { headless: true, chromiumSandbox: false },
               'source.project.content': inspectBrowserMonitorFixture['source.project.content'],
-              screenshots: 'on',
               'filter_journeys.match': 'check if title is present',
               ignore_https_errors: false,
               throttling: { download: 5, upload: 3, latency: 20 },
@@ -262,7 +260,7 @@ apiTest.describe(
       assertNoRawSecret(apiResponse);
 
       expect(enabledStream?.compiled_stream).toStrictEqual({
-        __ui: { is_tls_enabled: false },
+        __ui: null,
         type: 'http',
         name: 'test-monitor-name',
         origin: 'ui',
@@ -285,7 +283,6 @@ apiTest.describe(
         'check.request.headers': '********',
         'check.request.body': '********',
         'check.response.status': ['200', '201'],
-        mode: 'any',
         ipv4: true,
         ipv6: true,
         processors: [
