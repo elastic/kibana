@@ -235,9 +235,7 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('runRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('runRule-rule-1'));
 

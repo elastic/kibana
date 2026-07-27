@@ -57,6 +57,12 @@ export const ALERTING_V2_ERROR_CODES = {
   RULE_ALREADY_RUNNING: 'RULE_ALREADY_RUNNING',
   /** A manual "run now" raced with another writer updating the executor task; retry. */
   RULE_RUN_CONFLICT: 'RULE_RUN_CONFLICT',
+  /**
+   * A manual "run now" failed for an unexpected reason (e.g. the executor task
+   * is missing despite the rule being enabled). Catch-all for `runSoon` errors
+   * that are not already-running or conflict.
+   */
+  RULE_RUN_ERROR: 'RULE_RUN_ERROR',
 
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */

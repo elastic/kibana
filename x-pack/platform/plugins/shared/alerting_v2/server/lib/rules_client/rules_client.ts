@@ -499,7 +499,18 @@ export class RulesClient {
           details: { rule_id: id },
         });
       }
-      throw e;
+
+      // Avoid leaking task-store / saved-object errors (e.g. a 404 when the
+      // rule is enabled but has no executor task). Prefer a code already on
+      // the Boom payload when present; otherwise use the generic run error.
+      const existingCode = Boom.isBoom(e)
+        ? (e.data as { code?: string } | undefined)?.code
+        : undefined;
+
+      throw Boom.internal(`Failed to run rule with id "${id}"`, {
+        code: existingCode ?? ALERTING_V2_ERROR_CODES.RULE_RUN_ERROR,
+        details: { rule_id: id },
+      });
     }
 
     if (conflict) {

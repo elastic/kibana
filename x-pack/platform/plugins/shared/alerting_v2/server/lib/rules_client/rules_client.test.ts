@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -1091,6 +1092,55 @@ describe('RulesClient', () => {
       await expect(client.runRuleNow({ id: 'rule-id-run-conflict' })).rejects.toMatchObject({
         output: { statusCode: 409 },
         data: { code: 'RULE_RUN_CONFLICT', details: { rule_id: 'rule-id-run-conflict' } },
+      });
+    });
+
+    it('throws 500 RULE_RUN_ERROR when runSoon fails with a saved-object not-found', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-missing-task',
+      });
+      taskManager.runSoon.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'task:run')
+      );
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-missing-task' })).rejects.toMatchObject({
+        output: { statusCode: 500 },
+        data: { code: 'RULE_RUN_ERROR', details: { rule_id: 'rule-id-run-missing-task' } },
+      });
+    });
+
+    it('throws 500 RULE_RUN_ERROR when runSoon fails with a non-Boom error', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-generic',
+      });
+      taskManager.runSoon.mockRejectedValueOnce(new Error('task store unavailable'));
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-generic' })).rejects.toMatchObject({
+        output: { statusCode: 500 },
+        data: { code: 'RULE_RUN_ERROR', details: { rule_id: 'rule-id-run-generic' } },
+      });
+    });
+
+    it('preserves an existing Boom error code when wrapping runSoon failures', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        id: 'rule-id-run-coded',
+      });
+      taskManager.runSoon.mockRejectedValueOnce(
+        Boom.badGateway('downstream offline', { code: 'DOWNSTREAM_UNAVAILABLE' })
+      );
+
+      await expect(client.runRuleNow({ id: 'rule-id-run-coded' })).rejects.toMatchObject({
+        output: { statusCode: 500 },
+        data: { code: 'DOWNSTREAM_UNAVAILABLE', details: { rule_id: 'rule-id-run-coded' } },
       });
     });
   });
