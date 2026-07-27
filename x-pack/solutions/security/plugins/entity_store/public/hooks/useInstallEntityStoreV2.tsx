@@ -48,6 +48,11 @@ const getPreferencesRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
+const getPrivilegesRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+  query: { apiVersion: '2' },
+};
+
 // Detects whether the legacy v1 Entity Store was installed in this space by
 // looking up the legacy `entity-engine-status` saved object. Used to decide
 // whether to auto-install v2 in non-default spaces (only for users who had v1).
@@ -57,6 +62,15 @@ export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean
     query: { type: LEGACY_ENTITY_ENGINE_SO_TYPE, per_page: 0 },
   });
   return response.total > 0;
+};
+
+// Gate auto-install / maintainers-init on the same privilege set the install and
+// entity_maintainers/init routes enforce server-side (read + manage on the target
+// alias, manage_index_templates cluster, saved-object create, and read/
+// view_index_metadata on source indices) — surfaced as `has_install_permissions`.
+const hasEntityStoreInstallPrivileges = async (http: HttpSetup): Promise<boolean> => {
+  const privileges = await http.get<{ has_install_permissions?: boolean }>(getPrivilegesRequest);
+  return privileges.has_install_permissions === true;
 };
 
 /**
@@ -75,6 +89,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
         // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
+          if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
@@ -85,6 +100,9 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           const hadV1 = await isEntityStoreV1Installed(services.http);
           if (!hadV1) return;
         }
+
+        // Skip preferences + install for users without install privileges
+        if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
 
         const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
           getPreferencesRequest
