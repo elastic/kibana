@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { smlIndexName } from './sml_storage';
-
-describe('smlIndexName', () => {
-  it('is the ai-index-idx-sml-data index', () => {
-    expect(smlIndexName).toBe('ai-index-idx-sml-data');
-  });
-});
+export class AiIndexIdConflictError extends Error {
+  constructor(aiIndexId: string) {
+    super(
+      `AI index '${aiIndexId}' is already registered as a user-owned index and cannot be managed`
+    );
+    this.name = 'AiIndexIdConflictError';
+  }
+}
