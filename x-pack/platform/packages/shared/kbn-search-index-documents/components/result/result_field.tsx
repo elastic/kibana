@@ -162,18 +162,10 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
-      <EuiTableRowCell
-        className="resultFieldRowCell"
-        valign="middle"
-        truncateText={!isExpanded}
-      >
+      <EuiTableRowCell className="resultFieldRowCell" valign="middle" truncateText={!isExpanded}>
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
-      <EuiTableRowCell
-        className="resultFieldRowCell"
-        truncateText={shouldTruncate}
-        valign="middle"
-      >
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
         <ResultFieldValue
           fieldValue={fieldValue}
           fieldType={fieldType}

@@ -133,7 +133,12 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
     );
   } else if (embeddings && embeddings.length > 0) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="spaceBetween" css={{ flex: 1 }}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        css={{ flex: 1 }}
+      >
         <EuiFlexItem>
           <EuiText size="s" color="default">
             {fieldValue}
