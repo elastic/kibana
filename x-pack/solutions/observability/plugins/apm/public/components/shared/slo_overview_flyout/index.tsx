@@ -112,11 +112,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
-  const { query } = useAnyOfApmParams(
-    '/services',
-    '/services/{serviceName}',
-    '/service-map'
-  );
+  const { query } = useAnyOfApmParams('/services', '/services/{serviceName}', '/service-map');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
