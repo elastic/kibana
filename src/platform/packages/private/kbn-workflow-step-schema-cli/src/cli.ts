@@ -12,12 +12,13 @@ import { run as runWithCli } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_CHANNEL, DEFAULT_KIBANA_URL } from './constants';
 import {
-  DEFAULT_CHANNEL,
-  DEFAULT_CHUNK_THRESHOLD_BYTES,
-  DEFAULT_KIBANA_URL,
-} from './constants';
-import { fetchBuildInfo, fetchComposedSchema, fetchConnectorTypes } from './fetch';
+  fetchBuildInfo,
+  fetchComposedSchema,
+  fetchConnectorTypes,
+  validateAuthFlags,
+} from './fetch';
 import type { KibanaConnection } from './fetch';
 import { transformToStrict, transformToTemplate } from './template_transform';
 import { extractStepTypes, extractTriggerTypes } from './introspect';
@@ -59,20 +60,7 @@ const runCli = () =>
       const outputDir = Path.resolve(String(flags['output-dir'] || DEFAULT_OUTPUT_DIR));
       const channel = String(flags.channel || DEFAULT_CHANNEL);
 
-      if (apiKey && (username || password)) {
-        throw createFlagError('Provide either --api-key or --username/--password, not both.');
-      }
-      if (!apiKey && (Boolean(username) !== Boolean(password))) {
-        throw createFlagError('Both --username and --password are required together.');
-      }
-
-      const thresholdFlag = asOptionalString(flags['chunk-threshold-bytes']);
-      const chunkThresholdBytes = thresholdFlag
-        ? Number.parseInt(thresholdFlag, 10)
-        : DEFAULT_CHUNK_THRESHOLD_BYTES;
-      if (!Number.isFinite(chunkThresholdBytes) || chunkThresholdBytes < 0) {
-        throw createFlagError('--chunk-threshold-bytes must be a non-negative integer.');
-      }
+      validateAuthFlags({ apiKey, username, password });
 
       const connection: KibanaConnection = { kibanaUrl, space, username, password, apiKey };
 
@@ -100,18 +88,8 @@ const runCli = () =>
       const strictDoc = transformToStrict(composedSchema);
       const templateDoc = transformToTemplate(composedSchema);
 
-      const strictManifest = writeVariant({
-        bundleDir,
-        variant: 'strict',
-        doc: strictDoc,
-        chunkThresholdBytes,
-      });
-      const templateManifest = writeVariant({
-        bundleDir,
-        variant: 'template',
-        doc: templateDoc,
-        chunkThresholdBytes,
-      });
+      const strictManifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
+      const templateManifest = writeVariant({ bundleDir, variant: 'template', doc: templateDoc });
 
       const manifest: IndexManifest = {
         kibanaVersion,
@@ -122,7 +100,6 @@ const runCli = () =>
         connectorTypes,
         stepTypes,
         triggerTypes,
-        chunkThresholdBytes,
         variants: {
           strict: strictManifest,
           template: templateManifest,
@@ -131,7 +108,7 @@ const runCli = () =>
 
       const indexPath = writeIndex(bundleDir, manifest);
 
-      reportSizes(log, strictManifest, templateManifest, chunkThresholdBytes);
+      reportSizes(log, strictManifest, templateManifest);
       log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
       log.info(`Index: ${indexPath}`);
 
@@ -167,7 +144,6 @@ const runCli = () =>
           'channel',
           'kibana-version',
           'build-hash',
-          'chunk-threshold-bytes',
           'fixtures-dir',
         ],
         boolean: ['list-types', 'skip-fixture-check', 'fail-on-fixture-deviation'],
@@ -181,8 +157,6 @@ const runCli = () =>
         --channel <name>               Artifact channel: release | serverless (default: ${DEFAULT_CHANNEL})
         --kibana-version <version>     Override version (default: from /api/status)
         --build-hash <hash>            Override build hash (default: from /api/status)
-        --chunk-threshold-bytes <n>    Gzip size at/above which a variant is chunked
-                                       (default: ${DEFAULT_CHUNK_THRESHOLD_BYTES})
         --list-types                   Log the full sorted connector/step/trigger type lists
         --skip-fixture-check           Skip comparing produced types against the approved fixtures
         --fixtures-dir <dir>           Override the approved-definitions fixtures directory
@@ -192,25 +166,19 @@ const runCli = () =>
     }
   );
 
-const reportSizes = (
-  log: ToolingLog,
-  strict: VariantManifest,
-  template: VariantManifest,
-  chunkThresholdBytes: number
-): void => {
+const reportSizes = (log: ToolingLog, strict: VariantManifest, template: VariantManifest): void => {
   log.info('--- Measured schema sizes (canonical minified) ---');
   for (const [name, manifest] of [
     ['strict', strict],
     ['template', template],
   ] as const) {
     log.info(
-      `  ${name.padEnd(9)} mode=${manifest.mode} ` +
+      `  ${name.padEnd(9)} ` +
         `raw=${formatKb(manifest.sizeBytes)} gzip=${formatKb(manifest.gzipBytes)} ` +
         `defs=${manifest.defsCount} branches=${manifest.unionBranchCount}`
     );
   }
-  log.info(`  chunk threshold (gzip): ${formatKb(chunkThresholdBytes)}`);
-  log.info('Use these sizes to calibrate --chunk-threshold-bytes.');
+  log.info('Use these sizes to gauge whether artifact chunking is worth re-introducing.');
 };
 
 const logTypeList = (log: ToolingLog, label: string, ids: string[]): void => {
@@ -264,9 +232,9 @@ const runFixtureCheck = ({
     log.info(`  steps: all ${approved.stepIds.length} approved step(s) present ✓`);
   } else {
     log.warning(
-      `  steps: ${stepMissing.length} approved step(s) MISSING from the artifact: ${stepMissing.join(
-        ', '
-      )}`
+      `  steps: ${
+        stepMissing.length
+      } approved step(s) MISSING from the artifact: ${stepMissing.join(', ')}`
     );
   }
 
@@ -274,9 +242,9 @@ const runFixtureCheck = ({
     log.info(`  triggers: all ${approved.triggerIds.length} approved trigger(s) present ✓`);
   } else {
     log.warning(
-      `  triggers: ${triggerMissing.length} approved trigger(s) MISSING from the artifact: ${triggerMissing.join(
-        ', '
-      )}`
+      `  triggers: ${
+        triggerMissing.length
+      } approved trigger(s) MISSING from the artifact: ${triggerMissing.join(', ')}`
     );
   }
 

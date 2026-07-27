@@ -21,46 +21,19 @@ export interface JsonObject {
 export const VARIANTS = ['strict', 'template'] as const;
 export type VariantName = (typeof VARIANTS)[number];
 
-/** How a variant is packaged on disk (see the "Measure first, chunk conditionally" section). */
-export type ArtifactMode = 'single' | 'chunked';
-
-/**
- * Role of a chunk within a variant:
- * - `root`: the top-level skeleton (whole document in `single` mode; document
- *   minus the definitions map in `chunked` mode).
- * - `def`: a shared subschema from the definitions map.
- * - `step`: a definition detected as a step/connector union branch (cosmetic
- *   routing for a browsable per-step view; reassembly treats it like `def`).
- */
-export type ChunkRole = 'root' | 'def' | 'step';
-
-export interface ChunkRef {
-  /** Path relative to the bundle root (the directory containing `index.json`). */
-  path: string;
-  role: ChunkRole;
-  /** Original definitions-map key; present for `def`/`step` chunks so reassembly is lossless. */
-  name?: string;
-  sha256: string;
-}
-
 export interface VariantManifest {
-  mode: ArtifactMode;
+  /** Path to the variant document, relative to the bundle root (dir with `index.json`). */
+  path: string;
   /** Byte length of the canonical (minified, key-sorted) document. */
   sizeBytes: number;
   /** Gzip-compressed byte length of the canonical document - what a CDN serves. */
   gzipBytes: number;
-  /** sha256 of the canonical document; identical whether stored single or chunked. */
+  /** sha256 of the canonical document, verified on load. */
   sha256: string;
   /** Best-effort count of step union branches (informational). */
   unionBranchCount: number;
   /** Number of entries in the definitions map (informational). */
   defsCount: number;
-  /** The definitions key used by this schema (`definitions` or `$defs`); set when chunked. */
-  defsKey?: string;
-  /** Ordered chunks; always present. In `single` mode this is a single `root` chunk. */
-  chunks: ChunkRef[];
-  /** Ordered chunk paths (root first) for reassembly convenience. */
-  reassemblyOrder: string[];
 }
 
 export interface IndexManifest {
@@ -75,6 +48,5 @@ export interface IndexManifest {
   stepTypes: string[];
   /** Sorted trigger `type` discriminators present in the produced schema. */
   triggerTypes: string[];
-  chunkThresholdBytes: number;
   variants: Record<VariantName, VariantManifest>;
 }

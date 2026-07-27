@@ -6,8 +6,7 @@ CI pipelines across Elastic can lint the shared workflow example library
 
 It fetches Kibana's already-composed schema over public HTTP routes, weaves in
 LiquidJS template tolerance, and writes two strictly-nested variants. Each
-variant is measured and written as a single self-contained document, and
-**chunked only when it exceeds a configurable gzip threshold**.
+variant is measured and written as a single self-contained document.
 
 ## Usage
 
@@ -36,7 +35,6 @@ Flags:
 | `--channel` | `release` or `serverless` | `release` |
 | `--kibana-version` | Override version | from `/api/status` |
 | `--build-hash` | Override build hash | from `/api/status` |
-| `--chunk-threshold-bytes` | Gzip size at/above which a variant is chunked | provisional; calibrate from the reported sizes |
 | `--list-types` | Log the full sorted connector/step/trigger type lists | off |
 | `--skip-fixture-check` | Skip comparing produced types against the approved fixtures | off |
 | `--fixtures-dir` | Override the approved-definitions fixtures directory | `workflows_extensions` Scout fixtures |
@@ -88,16 +86,15 @@ The LiquidJS/install alternatives are declared **once** in a shared definition
 it with a single `$ref`, rather than repeating the branches inline. This keeps
 the artifact small.
 
-## Measure first, chunk conditionally
+## Measured sizes
 
-Each variant is emitted as a single `schema.json` and its size recorded
-(minified + gzip). A variant is chunked **only** when its gzip size is at/above
-`--chunk-threshold-bytes` (and it has a definitions map to split). The tool logs
-the measured sizes — use them to calibrate the threshold.
+Each variant is emitted as a single `schema.json` and its size is recorded
+(minified + gzip) in `index.json` and logged. Chunking was removed while the
+artifact sits well under any practical size threshold; the measurement stays so
+it can be re-introduced from data if a variant ever grows large enough to
+warrant it.
 
 ## Output layout
-
-Single-file mode (below threshold):
 
 ```
 <output-dir>/<kibanaVersion>/<channel>/
@@ -106,33 +103,17 @@ Single-file mode (below threshold):
   template/schema.json
 ```
 
-Chunked mode (at/above threshold):
-
-```
-<output-dir>/<kibanaVersion>/<channel>/
-  index.json
-  strict/{ root.json, defs/<name>.json, steps/<id>.json }
-  template/{ root.json, defs/<name>.json, steps/<id>.json }
-```
-
 `index.json` is the entry point: `kibanaVersion`, `buildHash`,
 `profile: "superset"`, `channel`, `generatedAt`, `connectorTypes[]`,
-`stepTypes[]`, `triggerTypes[]`, `chunkThresholdBytes`, and per variant
-`{ mode, sizeBytes, gzipBytes, sha256, defsCount, unionBranchCount, chunks[],
-reassemblyOrder[] }`. Files use sorted keys for stable diffs.
+`stepTypes[]`, `triggerTypes[]`, and per variant
+`{ path, sizeBytes, gzipBytes, sha256, defsCount, unionBranchCount }`. Files use
+sorted keys for stable diffs.
 
-## Reassembly
+## Loading
 
 Consumers should use `loadVariantSchema(manifest, variant, reader)` (exported
-from this package). It reads `index.json`, verifies each chunk's `sha256`, and
-returns **one** JSON Schema document regardless of mode:
-
-- `single`: passthrough of `schema.json`.
-- `chunked`: the `root` chunk plus every `def`/`step` chunk merged back into the
-  definitions map under its original key.
-
-The reassembled document is byte-for-byte equivalent (canonical form) to the
-single-file document, so downstream ajv / monaco-yaml never branches on mode.
+from this package). It reads `index.json`, verifies the variant's `sha256`, and
+returns the JSON Schema document.
 
 ## Limitations (accepted)
 

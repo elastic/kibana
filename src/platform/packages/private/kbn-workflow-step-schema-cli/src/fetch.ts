@@ -8,6 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
 import type { JsonObject } from './types';
 
@@ -21,7 +22,24 @@ export interface KibanaConnection {
 
 const REQUEST_TIMEOUT_MS = 60_000;
 
-const buildAuthHeader = (connection: KibanaConnection): string | undefined => {
+/** Auth-flag subset of a connection. */
+export type AuthFlags = Pick<KibanaConnection, 'apiKey' | 'username' | 'password'>;
+
+/**
+ * Validate the mutually-exclusive auth flags, throwing a `FlagError` (so the CLI
+ * prints usage) on misuse: `--api-key` cannot be combined with basic auth, and
+ * `--username`/`--password` must be supplied together.
+ */
+export const validateAuthFlags = ({ apiKey, username, password }: AuthFlags): void => {
+  if (apiKey && (username || password)) {
+    throw createFlagError('Provide either --api-key or --username/--password, not both.');
+  }
+  if (!apiKey && Boolean(username) !== Boolean(password)) {
+    throw createFlagError('Both --username and --password are required together.');
+  }
+};
+
+export const buildAuthHeader = (connection: AuthFlags): string | undefined => {
   if (connection.apiKey) {
     return `ApiKey ${connection.apiKey}`;
   }
@@ -33,13 +51,10 @@ const buildAuthHeader = (connection: KibanaConnection): string | undefined => {
   return undefined;
 };
 
-const buildSpacePrefix = (space?: string): string =>
+export const buildSpacePrefix = (space?: string): string =>
   space && space !== 'default' ? `/s/${space}` : '';
 
-const kibanaGet = async (
-  connection: KibanaConnection,
-  path: string
-): Promise<JsonObject> => {
+const kibanaGet = async (connection: KibanaConnection, path: string): Promise<JsonObject> => {
   const base = connection.kibanaUrl.replace(/\/$/, '');
   const url = `${base}${buildSpacePrefix(connection.space)}${path}`;
 

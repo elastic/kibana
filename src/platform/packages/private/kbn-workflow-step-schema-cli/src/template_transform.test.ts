@@ -101,8 +101,18 @@ describe('template transform - strict variant (number leaf)', () => {
     expect(acceptsLeaf(root, count, '${{ steps.a.output }}')).toBe(true);
   });
 
-  it('accepts a {% %} liquid tag', () => {
+  it('accepts a whole-value {% %} liquid tag (including multi-tag)', () => {
     expect(acceptsLeaf(root, count, '{% if x %}1{% endif %}')).toBe(true);
+    expect(acceptsLeaf(root, count, '{%- assign y = 1 -%}')).toBe(true);
+  });
+
+  it('rejects template noise embedded in an otherwise concrete value', () => {
+    // JSON Schema `pattern` is a substring match; the emitted alternatives are
+    // anchored so a value is accepted only when it is a template as a whole.
+    expect(acceptsLeaf(root, count, 'prefix {% x %} suffix')).toBe(false);
+    expect(acceptsLeaf(root, count, '5 {% x %} garbage')).toBe(false);
+    expect(acceptsLeaf(root, count, '{{ a }} trailing')).toBe(false);
+    expect(acceptsLeaf(root, count, 'lead ${{ a }}')).toBe(false);
   });
 
   it('rejects an empty {{ }} (\\s*\\S guard)', () => {

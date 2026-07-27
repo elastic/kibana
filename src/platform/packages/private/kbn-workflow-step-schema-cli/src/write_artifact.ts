@@ -9,16 +9,13 @@
 
 import fs from 'fs';
 import Path from 'path';
-import type { ChunkRef, IndexManifest, JsonObject, VariantManifest, VariantName } from './types';
+import type { IndexManifest, JsonObject, VariantManifest, VariantName } from './types';
 import {
   countDefinitions,
   countStepUnionBranches,
-  getDefinitionsKey,
   measureDocument,
-  sha256Hex,
   stableStringify,
 } from './measure';
-import { chunkVariant } from './chunk';
 
 const writeJsonFile = (absolutePath: string, content: JsonObject): void => {
   fs.mkdirSync(Path.dirname(absolutePath), { recursive: true });
@@ -30,65 +27,29 @@ export interface WriteVariantOptions {
   bundleDir: string;
   variant: VariantName;
   doc: JsonObject;
-  /** Gzip threshold at/above which the variant is chunked. */
-  chunkThresholdBytes: number;
 }
 
 /**
- * Emit a single variant to disk and return its manifest entry. Single-file when
- * below the threshold (or when there is nothing to chunk), chunked otherwise.
+ * Emit a variant as a single self-contained `<variant>/schema.json` and return
+ * its manifest entry. (Chunking was removed while artifacts sit well under any
+ * practical size threshold; the measured sizes are still recorded so it can be
+ * re-introduced from data later.)
  */
-export const writeVariant = ({
-  bundleDir,
-  variant,
-  doc,
-  chunkThresholdBytes,
-}: WriteVariantOptions): VariantManifest => {
+export const writeVariant = ({ bundleDir, variant, doc }: WriteVariantOptions): VariantManifest => {
   const metrics = measureDocument(doc);
   const defsCount = countDefinitions(doc);
   const unionBranchCount = countStepUnionBranches(doc);
-  const defsKey = getDefinitionsKey(doc);
 
-  const shouldChunk = metrics.gzipBytes >= chunkThresholdBytes && !!defsKey && defsCount > 0;
-
-  if (!shouldChunk) {
-    const relativePath = `${variant}/schema.json`;
-    writeJsonFile(Path.join(bundleDir, relativePath), doc);
-    const rootChunk: ChunkRef = { path: relativePath, role: 'root', sha256: metrics.sha256 };
-    return {
-      mode: 'single',
-      sizeBytes: metrics.sizeBytes,
-      gzipBytes: metrics.gzipBytes,
-      sha256: metrics.sha256,
-      unionBranchCount,
-      defsCount,
-      chunks: [rootChunk],
-      reassemblyOrder: [relativePath],
-    };
-  }
-
-  const { defsKey: chunkDefsKey, pieces } = chunkVariant(doc);
-  const chunks: ChunkRef[] = pieces.map((piece) => {
-    const relativePath = `${variant}/${piece.relativePath}`;
-    writeJsonFile(Path.join(bundleDir, relativePath), piece.content);
-    return {
-      path: relativePath,
-      role: piece.role,
-      ...(piece.name ? { name: piece.name } : {}),
-      sha256: sha256Hex(stableStringify(piece.content, false)),
-    };
-  });
+  const relativePath = `${variant}/schema.json`;
+  writeJsonFile(Path.join(bundleDir, relativePath), doc);
 
   return {
-    mode: 'chunked',
+    path: relativePath,
     sizeBytes: metrics.sizeBytes,
     gzipBytes: metrics.gzipBytes,
     sha256: metrics.sha256,
     unionBranchCount,
     defsCount,
-    ...(chunkDefsKey ? { defsKey: chunkDefsKey } : {}),
-    chunks,
-    reassemblyOrder: chunks.map((chunk) => chunk.path),
   };
 };
 

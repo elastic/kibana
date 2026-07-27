@@ -29,16 +29,21 @@ export interface ApprovedDefinitions {
 
 /**
  * Parse the approved trigger ids out of `approved_trigger_definitions.ts`.
- * Comments are stripped first so the illustrative `id: 'cases.updated'` in the
- * file's docstring is not mistaken for an approved entry.
+ *
+ * The file is read from disk (not imported): it lives inside a plugin's Scout
+ * test fixtures, which a package cannot import through a public module entry.
+ * We only extract `id` values that are immediately followed by a `schemaHash`
+ * property - the shape of a real entry - so the illustrative `id` in the file's
+ * docstring, inline `// ... id: '...'` comments, and any other stray `id:`
+ * occurrences are ignored. This is more robust than stripping line comments,
+ * which could corrupt a string value that legitimately contains `//`.
  */
 export const parseApprovedTriggerIds = (source: string): string[] => {
   const withoutBlockComments = source.replace(/\/\*[\s\S]*?\*\//g, '');
-  const withoutLineComments = withoutBlockComments.replace(/\/\/.*$/gm, '');
   const ids = new Set<string>();
-  const idPattern = /\bid:\s*'([^']+)'/g;
+  const idPattern = /id:\s*'([^']+)'\s*,\s*schemaHash:/g;
   let match: RegExpExecArray | null;
-  while ((match = idPattern.exec(withoutLineComments)) !== null) {
+  while ((match = idPattern.exec(withoutBlockComments)) !== null) {
     ids.add(match[1]);
   }
   return [...ids].sort();

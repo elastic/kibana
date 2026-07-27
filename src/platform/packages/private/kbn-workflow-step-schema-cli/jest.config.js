@@ -11,4 +11,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-workflow-step-schema-cli'],
+  // This is a Node CLI package (fetch/fs/crypto/zlib, `AbortSignal.timeout`);
+  // run its tests under the Node environment rather than the default jsdom.
+  testEnvironment: 'node',
 };

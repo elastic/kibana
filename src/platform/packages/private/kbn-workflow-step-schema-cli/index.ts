@@ -12,9 +12,6 @@ export type {
   JsonValue,
   JsonObject,
   VariantName,
-  ArtifactMode,
-  ChunkRole,
-  ChunkRef,
   VariantManifest,
   IndexManifest,
 } from './src/types';
@@ -27,10 +24,6 @@ export {
   diffDefinitions,
   buildFixtureDeviationReport,
 } from './src/fixtures';
-export type {
-  ApprovedDefinitions,
-  DefinitionDiff,
-  FixtureDeviationReport,
-} from './src/fixtures';
+export type { ApprovedDefinitions, DefinitionDiff, FixtureDeviationReport } from './src/fixtures';
 export { loadVariantSchema } from './src/reassemble';
 export type { ArtifactReader } from './src/reassemble';

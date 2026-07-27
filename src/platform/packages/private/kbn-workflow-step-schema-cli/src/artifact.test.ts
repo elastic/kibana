@@ -57,7 +57,6 @@ const manifestFor = (variant: VariantManifest): IndexManifest => ({
   connectorTypes: [],
   stepTypes: [],
   triggerTypes: [],
-  chunkThresholdBytes: 0,
   variants: { strict: variant, template: variant },
 });
 
@@ -65,60 +64,24 @@ describe('writeVariant + loadVariantSchema round-trip', () => {
   const strictDoc = transformToStrict(baseDoc);
   const canonicalOriginal = stableStringify(strictDoc, false);
 
-  it('stays single below the threshold and reassembles to the original', async () => {
+  it('writes a single schema.json and loads back to the original', async () => {
     const bundleDir = makeTmpDir();
-    const manifest = writeVariant({
-      bundleDir,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 10 * 1024 * 1024,
-    });
+    const manifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
 
-    expect(manifest.mode).toBe('single');
-    expect(manifest.chunks).toHaveLength(1);
-    expect(manifest.chunks[0].path).toBe('strict/schema.json');
+    expect(manifest.path).toBe('strict/schema.json');
     expect(fs.existsSync(Path.join(bundleDir, 'strict/schema.json'))).toBe(true);
 
-    const reassembled = await loadVariantSchema(manifestFor(manifest), 'strict', fsReader(bundleDir));
-    expect(stableStringify(reassembled, false)).toBe(canonicalOriginal);
-  });
-
-  it('chunks at/above the threshold and reassembles to the original', async () => {
-    const bundleDir = makeTmpDir();
-    const manifest = writeVariant({
-      bundleDir,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 0,
-    });
-
-    expect(manifest.mode).toBe('chunked');
-    expect(manifest.defsKey).toBe('definitions');
-    expect(manifest.chunks.some((chunk) => chunk.role === 'root')).toBe(true);
-    // delayStep / httpStep are detected as step branches and routed under steps/.
-    const stepPaths = manifest.chunks.filter((chunk) => chunk.role === 'step').map((c) => c.path);
-    expect(stepPaths).toEqual(
-      expect.arrayContaining(['strict/steps/delay.json', 'strict/steps/http.json'])
+    const reassembled = await loadVariantSchema(
+      manifestFor(manifest),
+      'strict',
+      fsReader(bundleDir)
     );
-    // shared / step (the union) are ordinary defs.
-    expect(manifest.chunks.some((chunk) => chunk.path === 'strict/defs/shared.json')).toBe(true);
-    // The shared template-value definition is chunked like any other def.
-    expect(
-      manifest.chunks.some((chunk) => chunk.path === 'strict/defs/__workflowTemplateValue.json')
-    ).toBe(true);
-
-    const reassembled = await loadVariantSchema(manifestFor(manifest), 'strict', fsReader(bundleDir));
     expect(stableStringify(reassembled, false)).toBe(canonicalOriginal);
   });
 
   it('reports informational metrics', () => {
     const bundleDir = makeTmpDir();
-    const manifest = writeVariant({
-      bundleDir,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 0,
-    });
+    const manifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
     // 4 original defs + the injected shared template-value definition.
     expect(manifest.defsCount).toBe(5);
     expect(manifest.unionBranchCount).toBe(2);
@@ -126,17 +89,14 @@ describe('writeVariant + loadVariantSchema round-trip', () => {
     expect(manifest.sizeBytes).toBeGreaterThan(manifest.gzipBytes);
   });
 
-  it('verifies chunk integrity on reassembly', async () => {
+  it('verifies document integrity on load', async () => {
     const bundleDir = makeTmpDir();
-    const manifest = writeVariant({
-      bundleDir,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 0,
-    });
-    // Corrupt one chunk on disk.
-    const target = Path.join(bundleDir, 'strict/defs/shared.json');
-    fs.writeFileSync(target, JSON.stringify({ tampered: true }));
+    const manifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
+    // Corrupt the document on disk.
+    fs.writeFileSync(
+      Path.join(bundleDir, 'strict/schema.json'),
+      JSON.stringify({ tampered: true })
+    );
 
     await expect(
       loadVariantSchema(manifestFor(manifest), 'strict', fsReader(bundleDir))
@@ -149,18 +109,8 @@ describe('determinism', () => {
     const strictDoc = transformToStrict(baseDoc);
     const dirA = makeTmpDir();
     const dirB = makeTmpDir();
-    const manifestA = writeVariant({
-      bundleDir: dirA,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 10 * 1024 * 1024,
-    });
-    const manifestB = writeVariant({
-      bundleDir: dirB,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 10 * 1024 * 1024,
-    });
+    const manifestA = writeVariant({ bundleDir: dirA, variant: 'strict', doc: strictDoc });
+    const manifestB = writeVariant({ bundleDir: dirB, variant: 'strict', doc: strictDoc });
 
     expect(manifestA.sha256).toBe(manifestB.sha256);
     expect(fs.readFileSync(Path.join(dirA, 'strict/schema.json'), 'utf8')).toBe(
@@ -171,12 +121,7 @@ describe('determinism', () => {
   it('serializes index.json with deterministic key ordering', () => {
     const strictDoc = transformToStrict(baseDoc);
     const bundleDir = makeTmpDir();
-    const variant = writeVariant({
-      bundleDir,
-      variant: 'strict',
-      doc: strictDoc,
-      chunkThresholdBytes: 10 * 1024 * 1024,
-    });
+    const variant = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
     const manifest = manifestFor(variant);
     expect(stableStringify(JSON.parse(JSON.stringify(manifest)), true)).toBe(
       stableStringify(JSON.parse(JSON.stringify(manifest)), true)

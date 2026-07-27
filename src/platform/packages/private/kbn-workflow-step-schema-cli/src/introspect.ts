@@ -84,7 +84,10 @@ const collectTypeLiterals = (typeNode: JsonValue | undefined, out: Set<string>):
  * `$ref`s are resolved with a cycle guard; composition keywords are followed so
  * `allOf`/nested-union members are reached.
  */
-const collectUnionDiscriminators = (root: JsonObject, unionNode: JsonValue | undefined): string[] => {
+const collectUnionDiscriminators = (
+  root: JsonObject,
+  unionNode: JsonValue | undefined
+): string[] => {
   const out = new Set<string>();
   const seenRefs = new Set<string>();
 

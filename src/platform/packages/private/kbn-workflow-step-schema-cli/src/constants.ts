@@ -19,13 +19,6 @@ export const INSTALL_PLACEHOLDER_VALUE_REGEX = /^__install__\.[a-zA-Z0-9_-]+$/;
 
 export const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 
-/**
- * Gzip byte threshold that triggers chunking. Provisional starting point
- * pending calibration from the measurement reported by this tool (a variant
- * whose gzip size is at/above this becomes `chunked`; otherwise `single`).
- */
-export const DEFAULT_CHUNK_THRESHOLD_BYTES = 512 * 1024;
-
 export const DEFAULT_CHANNEL = 'release';
 
 /** Public API version required by the reused versioned routes. */

@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  VARIABLE_VALUE_REGEX,
-  DYNAMIC_VALUE_REGEX,
-  LIQUID_TAG_VALUE_REGEX,
-} from '@kbn/workflows-yaml';
+import { VARIABLE_VALUE_REGEX, DYNAMIC_VALUE_REGEX } from '@kbn/workflows-yaml';
 import { INSTALL_PLACEHOLDER_VALUE_REGEX } from './constants';
 import type { JsonObject, JsonValue } from './types';
 
@@ -84,28 +80,59 @@ interface TransformContext {
  * JSON Schema `pattern` values are ECMA-262 regexes, and many validators
  * (ajv, monaco-yaml) compile them with the unicode (`u`) flag, under which
  * identity escapes of non-syntax characters (e.g. `\%`) are a SyntaxError.
- * `@kbn/workflows-yaml` builds its regexes without the `u` flag, so
- * `LIQUID_TAG_VALUE_REGEX.source` contains `\%`. `\%` and `%` match identically,
- * so we drop the redundant backslash to keep the emitted pattern portable while
- * preserving the exact matching semantics.
+ * `@kbn/workflows-yaml` builds its regexes without the `u` flag, so a source may
+ * contain `\%`. `\%` and `%` match identically, so we drop the redundant
+ * backslash to keep the emitted pattern portable while preserving the exact
+ * matching semantics.
  */
 const toUnicodeSafePattern = (source: string): string => source.replace(/\\%/g, '%');
 
 /**
+ * Anchor a pattern so it matches a value *as a whole*. JSON Schema `pattern` is
+ * an unanchored (substring) match, so an un-anchored source would accept
+ * template noise embedded in an otherwise concrete value (e.g. `5 {% x %} junk`
+ * in a `number` position). Strips an existing leading `^` / trailing `$` first
+ * so already-anchored sources are not double-anchored.
+ */
+const anchorWholeValue = (source: string): string => {
+  const withoutStart = source.startsWith('^') ? source.slice(1) : source;
+  const withoutEnd =
+    withoutStart.endsWith('$') && !withoutStart.endsWith('\\$')
+      ? withoutStart.slice(0, -1)
+      : withoutStart;
+  return `^(?:${withoutEnd})$`;
+};
+
+/**
+ * Whole-value LiquidJS tag pattern. `LIQUID_TAG_VALUE_REGEX` from
+ * `@kbn/workflows-yaml` is a *substring* detector (its body is `[^%]*?`, so it
+ * cannot span the interior `%` of a multi-tag value), which makes it unsuitable
+ * to anchor directly. We keep its `{%`/`%}` delimiters (with the optional `-`
+ * whitespace-control dashes) but widen the body to a full template body so a
+ * genuine whole-value template like `{% if x %}1{% endif %}` is accepted while
+ * `prefix {% x %} suffix` is rejected.
+ */
+const WHOLE_VALUE_LIQUID_TAG_PATTERN = '^\\{%-?[\\s\\S]*-?%\\}$';
+
+/**
  * The template-string alternatives added alongside a concrete typed value.
- * Uses the regex sources exported from `@kbn/workflows-yaml` (unicode-normalized)
- * so the artifact stays faithful to Kibana's own tolerance semantics.
+ * Derived from the regex sources exported from `@kbn/workflows-yaml`
+ * (unicode-normalized) and anchored to whole-value so the artifact stays
+ * faithful to Kibana's tolerance semantics without accepting embedded noise.
  */
 export const templateStringAlternatives = (includeInstallPlaceholder: boolean): JsonObject[] => {
   const alternatives: JsonObject[] = [
-    { type: 'string', pattern: toUnicodeSafePattern(VARIABLE_VALUE_REGEX.source) },
-    { type: 'string', pattern: toUnicodeSafePattern(DYNAMIC_VALUE_REGEX.source) },
-    { type: 'string', pattern: toUnicodeSafePattern(LIQUID_TAG_VALUE_REGEX.source) },
+    {
+      type: 'string',
+      pattern: anchorWholeValue(toUnicodeSafePattern(VARIABLE_VALUE_REGEX.source)),
+    },
+    { type: 'string', pattern: anchorWholeValue(toUnicodeSafePattern(DYNAMIC_VALUE_REGEX.source)) },
+    { type: 'string', pattern: WHOLE_VALUE_LIQUID_TAG_PATTERN },
   ];
   if (includeInstallPlaceholder) {
     alternatives.push({
       type: 'string',
-      pattern: toUnicodeSafePattern(INSTALL_PLACEHOLDER_VALUE_REGEX.source),
+      pattern: anchorWholeValue(toUnicodeSafePattern(INSTALL_PLACEHOLDER_VALUE_REGEX.source)),
     });
   }
   return alternatives;
@@ -126,7 +153,12 @@ const shouldWrap = (node: JsonObject): boolean => {
 };
 
 const transformChild = (key: string, value: JsonValue, ctx: TransformContext): JsonValue => {
-  if (SCHEMA_MAP_KEYS.has(key) && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+  if (
+    SCHEMA_MAP_KEYS.has(key) &&
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value)
+  ) {
     const out: JsonObject = {};
     for (const [name, child] of Object.entries(value)) {
       out[name] = transformNode(child, ctx, false);
@@ -149,7 +181,12 @@ const transformChild = (key: string, value: JsonValue, ctx: TransformContext): J
     return cloneJson(value);
   }
 
-  if (key === 'dependencies' && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+  if (
+    key === 'dependencies' &&
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value)
+  ) {
     // Each entry is either a subschema (object) or a list of property names (array).
     const out: JsonObject = {};
     for (const [name, child] of Object.entries(value)) {
@@ -213,7 +250,9 @@ const buildVariant = (schema: JsonObject, includeInstallPlaceholder: boolean): J
     const existing = transformed[defsKey];
     const defs: JsonObject =
       existing !== null && typeof existing === 'object' && !Array.isArray(existing) ? existing : {};
-    defs[TEMPLATE_VALUE_DEF_NAME] = { anyOf: templateStringAlternatives(includeInstallPlaceholder) };
+    defs[TEMPLATE_VALUE_DEF_NAME] = {
+      anyOf: templateStringAlternatives(includeInstallPlaceholder),
+    };
     transformed[defsKey] = defs;
   }
 

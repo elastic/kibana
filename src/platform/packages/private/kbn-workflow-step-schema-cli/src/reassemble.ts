@@ -11,7 +11,7 @@ import type { IndexManifest, JsonObject, VariantName } from './types';
 import { sha256Hex, stableStringify } from './measure';
 
 /**
- * Reads chunk/document files by their path relative to the bundle root (the
+ * Reads a variant document by its path relative to the bundle root (the
  * directory that contains `index.json`). Consumers back this with `fs`, an HTTP
  * client, an in-memory map, etc.
  */
@@ -20,12 +20,8 @@ export interface ArtifactReader {
 }
 
 /**
- * Returns one JSON Schema document for a variant, regardless of storage mode.
- *
- * The merge logic is uniform: the `root` chunk is the base document; each
- * `def`/`step` chunk is reinserted into the definitions map under its original
- * key. In `single` mode there is only a `root` chunk (the whole self-contained
- * document), so the merge is a passthrough. Every chunk's `sha256` is verified.
+ * Returns the JSON Schema document for a variant, verifying its `sha256` against
+ * the manifest. Each variant is a single self-contained `schema.json`.
  */
 export const loadVariantSchema = async (
   manifest: IndexManifest,
@@ -37,38 +33,13 @@ export const loadVariantSchema = async (
     throw new Error(`Variant "${variant}" is not present in the manifest`);
   }
 
-  let root: JsonObject | undefined;
-  const definitions: JsonObject = {};
-  let sawDefinition = false;
-
-  for (const chunk of entry.chunks) {
-    const content = await reader.readJson(chunk.path);
-    const actualSha = sha256Hex(stableStringify(content, false));
-    if (actualSha !== chunk.sha256) {
-      throw new Error(
-        `Integrity check failed for chunk "${chunk.path}": expected ${chunk.sha256}, got ${actualSha}`
-      );
-    }
-
-    if (chunk.role === 'root') {
-      root = content;
-    } else {
-      if (!chunk.name) {
-        throw new Error(`Chunk "${chunk.path}" of role "${chunk.role}" is missing its name`);
-      }
-      definitions[chunk.name] = content;
-      sawDefinition = true;
-    }
+  const content = await reader.readJson(entry.path);
+  const actualSha = sha256Hex(stableStringify(content, false));
+  if (actualSha !== entry.sha256) {
+    throw new Error(
+      `Integrity check failed for "${entry.path}": expected ${entry.sha256}, got ${actualSha}`
+    );
   }
 
-  if (!root) {
-    throw new Error(`Variant "${variant}" has no root chunk`);
-  }
-
-  if (sawDefinition) {
-    const defsKey = entry.defsKey ?? 'definitions';
-    root[defsKey] = definitions;
-  }
-
-  return root;
+  return content;
 };

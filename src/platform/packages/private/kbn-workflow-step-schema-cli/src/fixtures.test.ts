@@ -39,6 +39,20 @@ describe('parseApprovedTriggerIds', () => {
       'workflows.failed',
     ]);
   });
+
+  it('only picks ids that are followed by a schemaHash, ignoring stray id: tokens', () => {
+    const source = `
+      export const APPROVED_TRIGGER_DEFINITIONS = [
+        {
+          id: 'multi.line',
+          schemaHash: 'aa',
+        },
+      ];
+      // a stray reference that must be ignored: id: 'not.approved'
+      const other = { id: 'unrelated.object', label: 'no schema hash here' };
+    `;
+    expect(parseApprovedTriggerIds(source)).toEqual(['multi.line']);
+  });
 });
 
 describe('diffDefinitions', () => {
@@ -58,8 +72,14 @@ describe('diffDefinitions', () => {
 describe('buildFixtureDeviationReport', () => {
   it('diffs steps and triggers independently', () => {
     const report = buildFixtureDeviationReport(
-      { stepIds: ['cases.createCase', 'contextEngine.addEntry'], triggerIds: ['cases.caseCreated'] },
-      { stepTypes: ['cases.createCase', 'slack', 'if'], triggerTypes: ['cases.caseCreated', 'manual'] }
+      {
+        stepIds: ['cases.createCase', 'contextEngine.addEntry'],
+        triggerIds: ['cases.caseCreated'],
+      },
+      {
+        stepTypes: ['cases.createCase', 'slack', 'if'],
+        triggerTypes: ['cases.caseCreated', 'manual'],
+      }
     );
     expect(report.steps.missing).toEqual(['contextEngine.addEntry']);
     expect(report.triggers.missing).toEqual([]);
