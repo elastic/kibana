@@ -18,6 +18,11 @@ import {
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
+export interface MaterializedPanelInput {
+  panelContent: PanelContent;
+  authoringNote?: string;
+}
+
 export type PanelCreationRequest =
   | {
       operationType: 'add_section';
@@ -177,7 +182,7 @@ export const createPanelInputMaterializer = ({
   operationIndex: number;
   operationType: DashboardOperation['operation'];
   failures: PanelFailure[];
-}): ((item: NewPanelInput, panelInputIndex: number) => PanelContent | undefined) => {
+}): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     getResolvedPanelCreationRequests({
       resolvedRequestsByOperationIndex: resolvedPanelCreationRequests,
@@ -187,7 +192,9 @@ export const createPanelInputMaterializer = ({
 
   return (item, panelInputIndex) => {
     if (item.source === 'config') {
-      return PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config);
+      return {
+        panelContent: PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config),
+      };
     }
 
     const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);
@@ -202,6 +209,11 @@ export const createPanelInputMaterializer = ({
       return undefined;
     }
 
-    return resolvedRequest.resolvedPanel.panelContent;
+    return {
+      panelContent: resolvedRequest.resolvedPanel.panelContent,
+      ...(resolvedRequest.resolvedPanel.authoringNote
+        ? { authoringNote: resolvedRequest.resolvedPanel.authoringNote }
+        : {}),
+    };
   };
 };
