@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import type {
   VersionedAttachment,
   Attachment,
@@ -17,6 +18,16 @@ import {
   ATTACHMENT_REF_OPERATION,
 } from '@kbn/agent-builder-common/attachments';
 import { RoundAttachmentReferences } from './round_attachment_references';
+
+// The pill styles read the theme from Emotion context, so renders need a provider.
+const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</EuiThemeProvider>);
+
+const mockGetAttachmentUiDefinition = jest.fn();
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({
+    attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
+  }),
+}));
 
 const makeVersioned = (
   id: string,
@@ -52,6 +63,11 @@ const makeFallback = (id: string, description?: string, groupId?: string): Attac
 });
 
 describe('RoundAttachmentReferences', () => {
+  beforeEach(() => {
+    mockGetAttachmentUiDefinition.mockReset();
+    mockGetAttachmentUiDefinition.mockReturnValue(undefined);
+  });
+
   it('renders nothing when there are no refs or attachments', () => {
     const { container } = render(<RoundAttachmentReferences />);
     expect(container.firstChild).toBeNull();
@@ -67,7 +83,7 @@ describe('RoundAttachmentReferences', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders one line per resolved attachment', () => {
+  it('renders the "Added" heading and one pill per resolved attachment', () => {
     render(
       <RoundAttachmentReferences
         attachmentRefs={[makeRef('a'), makeRef('b')]}
@@ -75,11 +91,94 @@ describe('RoundAttachmentReferences', () => {
       />
     );
 
-    expect(screen.getByText(/First/)).toBeInTheDocument();
-    expect(screen.getByText(/Second/)).toBeInTheDocument();
+    expect(screen.getByText('Added')).toBeInTheDocument();
+    expect(screen.getByText('First')).toBeInTheDocument();
+    expect(screen.getByText('Second')).toBeInTheDocument();
+    expect(screen.getAllByTestId('agentBuilderRoundAttachmentReferencePill')).toHaveLength(2);
   });
 
-  it('deduplicates by group_id — renders only one line for a group', () => {
+  it('uses the UI definition getLabel for the pill title when available', () => {
+    mockGetAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Registry Label',
+      getIcon: () => 'code',
+    });
+
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a')]}
+        conversationAttachments={[makeVersioned('a', 'Description Label')]}
+      />
+    );
+
+    expect(screen.getByText('Registry Label')).toBeInTheDocument();
+    expect(screen.queryByText('Description Label')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the description, then the type, when there is no UI definition', () => {
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a'), makeRef('b')]}
+        conversationAttachments={[makeVersioned('a', 'Description Label'), makeVersioned('b')]}
+      />
+    );
+
+    expect(screen.getByText('Description Label')).toBeInTheDocument();
+    expect(screen.getByText('text')).toBeInTheDocument();
+  });
+
+  it('renders the UI definition icon, defaulting to document when absent', () => {
+    mockGetAttachmentUiDefinition
+      .mockReturnValueOnce({ getLabel: () => 'With Icon', getIcon: () => 'code' })
+      .mockReturnValueOnce(undefined);
+
+    const { container } = render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a'), makeRef('b')]}
+        conversationAttachments={[makeVersioned('a'), makeVersioned('b', 'No Definition')]}
+      />
+    );
+
+    expect(container.querySelector('[data-euiicon-type="code"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+  });
+
+  it('falls back to description, then type, when the referenced version cannot be resolved', () => {
+    mockGetAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Registry Label',
+      getIcon: () => 'code',
+    });
+
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[
+          { attachment_id: 'a', version: 2, actor: ATTACHMENT_REF_ACTOR.user },
+          { attachment_id: 'b', version: 2, actor: ATTACHMENT_REF_ACTOR.user },
+        ]}
+        conversationAttachments={[makeVersioned('a', 'Description Label'), makeVersioned('b')]}
+      />
+    );
+
+    // With description: uses description (skips getLabel since version is wrong)
+    expect(screen.getByText('Description Label')).toBeInTheDocument();
+    // Without description: falls back to type
+    expect(screen.getByText('text')).toBeInTheDocument();
+    // getLabel is never used when the version can't be resolved
+    expect(screen.queryByText('Registry Label')).not.toBeInTheDocument();
+  });
+
+  it('keeps the full title in the DOM (truncation is CSS-only)', () => {
+    const longTitle = 'A very long attachment title that definitely exceeds the pill width';
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a')]}
+        conversationAttachments={[makeVersioned('a', longTitle)]}
+      />
+    );
+
+    expect(screen.getByText(longTitle)).toBeInTheDocument();
+  });
+
+  it('deduplicates by group_id — renders only one pill for a group', () => {
     render(
       <RoundAttachmentReferences
         attachmentRefs={[makeRef('a1'), makeRef('a2')]}
@@ -90,8 +189,8 @@ describe('RoundAttachmentReferences', () => {
       />
     );
 
-    const lines = screen.getAllByText(/27 Alerts/);
-    expect(lines).toHaveLength(1);
+    const pills = screen.getAllByText(/27 Alerts/);
+    expect(pills).toHaveLength(1);
   });
 
   it('actor filter applied before group dedup — matching actor ref renders even when preceded by non-matching actor ref for the same group', () => {
@@ -162,7 +261,7 @@ describe('RoundAttachmentReferences', () => {
       />
     );
 
-    const lines = screen.getAllByText(/27 Alerts/);
-    expect(lines).toHaveLength(1);
+    const pills = screen.getAllByText(/27 Alerts/);
+    expect(pills).toHaveLength(1);
   });
 });

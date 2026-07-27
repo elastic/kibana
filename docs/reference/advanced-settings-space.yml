@@ -2005,6 +2005,20 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: "securitySolution:excludeColdAndFrozenTiersInPrevalence"
+        id: security-solution-exclude-cold-frozen-tiers-prevalence
+        description: |
+          Skips cold and frozen tiers in Prevalence queries when activated.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.2
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: "securitySolution:enableGraphVisualization"
         id: security-solution-enable-graph-visualization
         description: |
@@ -2246,6 +2260,20 @@ groups:
         default: Elastic AI value report
         applies_to:
           stack: unavailable
+          security: ga
+
+      - setting: "securitySolution:enableNewFlyout"
+        id: security-solution-enable-new-flyout
+        description: |
+          Enables the new flyout system for document details in Security Solution.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.5
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           security: ga
 
   - group: Timelion
