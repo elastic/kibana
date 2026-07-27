@@ -21,10 +21,9 @@ import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_heade
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
   tabsBar?: ReactNode;
-  hasTabs?: boolean;
 }
 
-export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHeaderProps) => {
+export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
   const { embeddableEditor } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const persistedDiscoverSession = useInternalStateSelector(
@@ -60,7 +59,7 @@ export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHea
           return {
             ...item,
             overflow,
-            order: newSessionItem.order + 0.5,
+            order: (newSessionItem.order ?? 0) + 0.5,
           } as AppMenuItemType;
         }
 
@@ -86,7 +85,6 @@ export const ChromeAppHeader = ({ menu, tabsBar, hasTabs = false }: ChromeAppHea
         sticky={false}
         spacing="compact"
         tabsBar={tabsBar}
-        borderless={hasTabs}
       />
     </div>
   );

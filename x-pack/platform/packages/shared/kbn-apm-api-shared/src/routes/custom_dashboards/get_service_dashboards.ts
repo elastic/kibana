@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { SavedApmCustomDashboard } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
@@ -15,10 +15,12 @@ export interface GetServiceDashboardsResponse {
 
 export const getServiceDashboardsRoute = defineRoute<GetServiceDashboardsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/dashboards',
-  params: z.object({
-    path: z.object({
-      serviceName: z.string(),
-    }),
-    query: rangeSchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        serviceName: z.string(),
+      }),
+      query: rangeSchema,
+    })
+  ),
 });

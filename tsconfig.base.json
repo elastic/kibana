@@ -1077,6 +1077,8 @@
       "@kbn/deeplinks-agent-builder/*": ["./src/platform/packages/shared/deeplinks/agent_builder/*"],
       "@kbn/deeplinks-analytics": ["./src/platform/packages/shared/deeplinks/analytics"],
       "@kbn/deeplinks-analytics/*": ["./src/platform/packages/shared/deeplinks/analytics/*"],
+      "@kbn/deeplinks-context-engine": ["./src/platform/packages/shared/deeplinks/context-engine"],
+      "@kbn/deeplinks-context-engine/*": ["./src/platform/packages/shared/deeplinks/context-engine/*"],
       "@kbn/deeplinks-devtools": ["./src/platform/packages/shared/deeplinks/devtools"],
       "@kbn/deeplinks-devtools/*": ["./src/platform/packages/shared/deeplinks/devtools/*"],
       "@kbn/deeplinks-fleet": ["./src/platform/packages/shared/deeplinks/fleet"],
