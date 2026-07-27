@@ -7,6 +7,10 @@
 
 import { identifyKIQueries } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
+import {
+  createMemoryDiscoveryTools,
+  MemoryServiceImpl,
+} from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
@@ -218,6 +222,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               ])
             );
 
+            // Exercise the same memory grounding tools that production query
+            // generation wires in, so the eval covers the memory code path.
+            const memoryTools = createMemoryDiscoveryTools({
+              memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+            });
+
             const groundingModes = resolveGroundingModes();
             const codeIndex = resolveCodeIndexForDataset(dataset.id);
 
@@ -315,19 +325,24 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
+                const promptSnippet = [groundingTools?.promptSnippet, memoryTools.promptSnippet]
+                  .filter(Boolean)
+                  .join('\n');
+
                 const { queries, toolUsage } = await identifyKIQueries({
                   stream,
                   esClient,
                   inferenceClient,
                   logger,
                   signal: new AbortController().signal,
-                  systemPrompt: groundingTools
-                    ? `${significantEventsPrompt}\n${groundingTools.promptSnippet}`
-                    : significantEventsPrompt,
+                  systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
                   getFeatures: async () => kis,
-                  additionalTools: groundingTools?.additionalTools,
-                  additionalToolCallbacks: groundingTools?.additionalToolCallbacks,
-                  maxSteps: groundingTools ? 10 : undefined,
+                  additionalTools: { ...memoryTools.tools, ...groundingTools?.additionalTools },
+                  additionalToolCallbacks: {
+                    ...memoryTools.callbacks,
+                    ...groundingTools?.additionalToolCallbacks,
+                  },
+                  maxSteps: groundingTools ? 12 : 8,
                 });
 
                 logger.info(

@@ -155,12 +155,15 @@ export const createMemoryDiscoveryTools = ({
   };
 
   const promptSnippet = `
-You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, operational patterns, known-benign noise, and prior false positives. Pages are organized by categories (like Wikipedia). Before inventing or promoting new KI queries — especially anything that looks familiar or historically noisy — consult memory:
+You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, operational patterns, known-benign noise, and prior false positives. Pages are organized by categories (like Wikipedia).
+
+**Required grounding step:** before you finalize your output, you MUST call \`memory_search\` at least once — scoped to the services, symptoms, and patterns you are considering — to ground your work in prior learnings. Treat this as mandatory, never optional: finalizing without first consulting memory is an error. An empty memory result is acceptable and expected; skipping the search is not.
+
 - **memory_search** — Search by keyword to find relevant pages (supports category filter)
 - **memory_read** — Read the full content of a specific page by name or ID
 - **memory_list** — List all pages to discover what knowledge exists
 
-Use memory to avoid regenerating known-bad / demoted patterns and to prefer queries aligned with durable prior learnings. Still ground every proposed query in the current stream data; memory is prior context, not a substitute for evidence.`;
+Use memory to avoid regenerating known-bad / demoted patterns and to prefer outputs aligned with durable prior learnings. Still ground everything you propose in the current stream data; memory is prior context, not a substitute for evidence.`;
 
   return { tools, callbacks, promptSnippet };
 };

@@ -47,7 +47,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 
 <tools>
 
-- `significant-events-memory` (via `load_skill`) — prior learnings about services, known-benign patterns, past false positives, and known ongoing/background issues SREs already track. Load it early and consult it before promoting a discovery so already-known ongoing/background issues and known noise are recognized as such.
+- `significant-events-memory` (via `load_skill`) — prior learnings about services, known-benign patterns, past false positives, and known ongoing/background issues SREs already track. **You MUST load this skill and search memory before promoting any discovery** — treat consulting memory as a required grounding step, never optional. Writing a discovery without first checking memory is an error. An empty memory result is acceptable and expected; skipping the check is not. Use what memory returns so already-known ongoing/background issues and known noise are recognized as such.
 - `platform_sig_events_event_search` — retrieves existing significant events
 - `platform_sig_events_discovery_write` — final output step; submit every discovery in one `items` array.
 
@@ -189,6 +189,7 @@ Split when no conditions are affirmatively and fully met — the default — or 
 1. `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded.
 2. Complete the `significant-events-ki-grounding` protocol for the batch. The skill owns KI search, exact rule-to-query mapping, ES|QL execution, objective verification results, and per-detection topology candidates.
 3. Apply `<verification_lens>` to each KI grounding result. Retain the lens outcome for signal construction after routing.
+4. **Mandatory memory check.** `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`), then run at least one `platform_sig_events_memory_search` scoped to the batch's services, symptoms, and candidate mechanisms **before routing or promoting any discovery**. This step is required for every run — an empty result is acceptable and expected, but omitting the search is an error. Feed what memory returns into severity/known-issue handling per `<field_rules>`.
 
 ### Step 2: Form Symptom Hypotheses
 

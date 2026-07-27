@@ -33,7 +33,10 @@ import {
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
+import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
+import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
+import { createMemoryDiscoveryTools } from '../memory_discovery_tools';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 import {
@@ -453,6 +456,8 @@ interface RunInferredIterationOptions {
   signal: AbortSignal;
   tuning: IterationTuningParams;
   diverseOffset: number;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 type InferredIterationResult =
@@ -497,6 +502,8 @@ async function runInferredIteration({
   signal,
   tuning,
   diverseOffset,
+  additionalTools,
+  additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
     sample_size: sampleSize = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sample_size,
@@ -584,6 +591,8 @@ async function runInferredIteration({
       searchRecordsByCandidate.set(recordKey, searchRecord);
       return hits;
     },
+    additionalTools,
+    additionalToolCallbacks,
   });
 
   if (!inferResult.success) {
@@ -702,6 +711,14 @@ export async function identifyInferredFeatures({
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
 
+  // Expose the shared memory (prior learnings about services, known-benign
+  // patterns, past false positives) to feature extraction so it can ground new
+  // KI features in durable prior knowledge. Read-only tools only.
+  const memoryTools = createMemoryDiscoveryTools({
+    memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+  });
+  const combinedSystemPrompt = `${systemPrompt}\n${memoryTools.promptSnippet}`;
+
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
@@ -716,11 +733,13 @@ export async function identifyInferredFeatures({
     discoveredFeatures,
     excludedFeatures,
     inferenceClient,
-    systemPrompt,
+    systemPrompt: combinedSystemPrompt,
     logger,
     signal,
     tuning,
     diverseOffset,
+    additionalTools: memoryTools.tools,
+    additionalToolCallbacks: memoryTools.callbacks,
   });
 
   if (!iterationResult.hasDocuments) {

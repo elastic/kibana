@@ -7,6 +7,10 @@
 
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import {
+  createMemoryDiscoveryTools,
+  MemoryServiceImpl,
+} from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -98,13 +102,27 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+        async ({
+          esClient,
+          executorClient,
+          evaluators,
+          inferenceClient,
+          logger,
+          traceEsClient,
+          log,
+        }) => {
           const heavyDataByScenario = new Map(
             collectedExamples.map(({ scenario, sampleDocuments }) => [
               scenario.input.scenario_id,
               { sampleDocuments },
             ])
           );
+
+          // Exercise the same memory grounding tools that production feature
+          // extraction now wires in, so the eval covers the memory code path.
+          const memoryTools = createMemoryDiscoveryTools({
+            memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+          });
 
           await executorClient.runExperiment(
             {
@@ -134,10 +152,12 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 const { features } = await identifyFeatures({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: heavy.sampleDocuments,
-                  systemPrompt: featuresPrompt,
+                  systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}`,
                   inferenceClient,
                   logger,
                   signal: new AbortController().signal,
+                  additionalTools: memoryTools.tools,
+                  additionalToolCallbacks: memoryTools.callbacks,
                 });
 
                 return {
