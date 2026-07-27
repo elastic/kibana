@@ -69,8 +69,13 @@ export const RETENTION_TEST_IDS = {
 
   // ILM policy selector (inside the lifecycle method flyout when ILM is selected)
   ilmSearchInput: 'retentionSelectorSearchInput',
+  ilmManagedFilterToggle: 'retentionSelectorIncludeManagedFilter',
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
+
+  // Readiness signal: `-loading` while a stats (re)fetch is inflight, `-loaded` once it settles.
+  summaryStatsLoading: 'dataLifecycleSummary-stats-loading',
+  summaryStatsLoaded: 'dataLifecycleSummary-stats-loaded',
 
   // Display elements
   retentionMetric: 'retention-metric',
@@ -194,17 +199,33 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 }
 
 /**
+ * Waits for the summary's stats (re)fetch to settle so a following popover click isn't dismissed by
+ * the re-render. Waits for `-loading` first to avoid matching the stale `-loaded` state on screen.
+ */
+export async function waitForLifecycleSummaryStatsSettled(page: ScoutPage): Promise<void> {
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoading)).toBeVisible();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoaded)).toBeVisible();
+}
+
+/**
  * Saves the lifecycle method flyout changes (Apply) and waits for it to close.
  */
 export async function saveRetentionChanges(
   page: ScoutPage,
-  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+  {
+    expectOverrideConfirmation = false,
+    waitForIlmStats = false,
+  }: { expectOverrideConfirmation?: boolean; waitForIlmStats?: boolean } = {}
 ): Promise<void> {
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
   await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
+
+  if (waitForIlmStats) {
+    await waitForLifecycleSummaryStatsSettled(page);
+  }
 }
 
 /**
@@ -242,13 +263,26 @@ async function selectIlmMethod(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Selects an ILM policy by name in the ILM retention selector
- * (the lifecycle method flyout must already have ILM selected).
+ * Selects an ILM policy by name in the ILM retention selector.
+ * Pass `{ managed: true }` for managed/system policies — they are
+ * hidden behind a filter toggle by default. The helper then waits for the toggle to appear before
+ * clicking it, so the caller's intent is explicit and the wait is reliable.
  */
-export async function selectIlmPolicy(page: ScoutPage, policyName: string): Promise<void> {
+export async function selectIlmPolicy(
+  page: ScoutPage,
+  policyName: string,
+  { managed = false }: { managed?: boolean } = {}
+): Promise<void> {
   await selectIlmMethod(page);
   const search = page.getByTestId(RETENTION_TEST_IDS.ilmSearchInput);
   await search.waitFor({ state: 'visible' });
+
+  if (managed) {
+    const toggle = page.getByTestId(RETENTION_TEST_IDS.ilmManagedFilterToggle);
+    await toggle.waitFor({ state: 'visible' });
+    await toggle.click();
+  }
+
   await search.fill(policyName);
   await page.getByTestId(RETENTION_TEST_IDS.ilmPolicyRow(policyName)).click();
 }

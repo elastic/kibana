@@ -34,6 +34,7 @@
     "@kbn/usage-api-plugin",
     "@kbn/logging-mocks",
     "@kbn/crypto",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",

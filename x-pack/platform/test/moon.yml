@@ -15,6 +15,7 @@ project:
   channel: ''
   sourceRoot: x-pack/platform/test
 dependsOn:
+  - '@kbn/change-history'
   - '@kbn/test-suites-src'
   - '@kbn/telemetry-collection-manager-plugin'
   - '@kbn/features-plugin'
@@ -53,9 +54,6 @@ dependsOn:
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/utils'
   - '@kbn/core'
-  - '@kbn/entities-schema'
-  - '@kbn/data-forge'
-  - '@kbn/entityManager-plugin'
   - '@kbn/ml-is-populated-object'
   - '@kbn/ml-anomaly-utils'
   - '@kbn/ml-server-schemas'
@@ -116,6 +114,7 @@ dependsOn:
   - '@kbn/synthtrace'
   - '@kbn/streams-schema'
   - '@kbn/significant-events-schema'
+  - '@kbn/evals-common'
   - '@kbn/streams-plugin'
   - '@kbn/content-packs-schema'
   - '@kbn/utility-types'
