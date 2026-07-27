@@ -11,6 +11,7 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { MisconfigurationInsights } from '.';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const openMisconfigurationFindingAsChild = jest.fn();
 
@@ -51,7 +52,7 @@ jest.mock(
       value: string;
       entityId?: string;
       entityType?: string;
-      onShowFinding?: (resourceId: string, ruleId: string) => void;
+      onShowFinding?: (resourceId: string, ruleId: string, ruleName?: string) => void;
     }) => (
       <button
         type="button"
@@ -60,7 +61,7 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
-        onClick={() => onShowFinding?.('resource-1', 'rule-1')}
+        onClick={() => onShowFinding?.('resource-1', 'rule-1', 'My Rule')}
       >
         {'misconfiguration-table'}
       </button>
@@ -129,7 +130,7 @@ describe('<MisconfigurationInsights /> host', () => {
     expect(openMisconfigurationFindingAsChild).toHaveBeenCalledTimes(1);
     expect(openMisconfigurationFindingAsChild).toHaveBeenCalledWith(
       { resourceId: 'resource-1', ruleId: 'rule-1' },
-      { title: 'my-host' }
+      { title: 'Misconfiguration: My Rule', origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING }
     );
   });
 });

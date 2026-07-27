@@ -59,8 +59,11 @@ const mappings = {
     },
     // NOTE: deprecated in favor of `fieldDefinitions`, kept for forward-compatibility with
     // documents written before the fieldDefinitions migration (see model_version_2).
+    // `ignore_above` is safe to add in place (an updatable mapping parameter, unlike `type`
+    // or `index`) and keeps this deprecated keyword consistent with every other keyword field.
     fieldNames: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     fieldDefinitions: {
       type: 'nested',
@@ -107,6 +110,15 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
     1: modelVersion1,
     2: modelVersion2,
     3: modelVersion3,
+  },
+  management: {
+    // Ride along with case export/import; not listed/exported on their own in the SO Management UI.
+    // importableAndExportable must be a static property (SO types are registered unconditionally),
+    // so templates are always importable/exportable regardless of xpack.cases.templates.enabled.
+    importableAndExportable: true,
+    visibleInManagement: false,
+    getTitle: (so) => so.attributes.name,
+    icon: 'casesApp',
   },
 };
 
