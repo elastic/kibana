@@ -245,8 +245,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   );
 
   // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
-  // `git ls-tree` per suite on every kibana-pull-request pipeline generation. A skip label
-  // selects nothing on its own, so it must not defeat this bail.
+  // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
   const hasSelectionLabel = parsedLabels.some(
     (label) =>
       (label.startsWith('evals:') && !label.startsWith(EVALS_SKIP_LABEL_PREFIX)) ||
