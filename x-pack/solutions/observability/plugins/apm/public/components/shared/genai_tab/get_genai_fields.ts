@@ -120,6 +120,30 @@ export function parseGenAiMessages(raw: string[] | undefined): GenAiMessage[] {
   }
 }
 
+/**
+ * Returns the full text of a message suitable for copying to the clipboard.
+ * - Plain text / markdown messages: returns `content` verbatim.
+ * - Newer `parts` schema: text parts verbatim, structured parts as pretty JSON,
+ *   joined by a blank line so the result reads naturally.
+ * - Structured messages (tool_calls, null content, etc.): whole message as pretty JSON.
+ *
+ * This is intentionally decoupled from the ViewMore visual collapse — it always
+ * returns the complete message regardless of whether "View more" is expanded.
+ */
+export function getMessageCopyText(message: GenAiMessage): string {
+  if (typeof message.content === 'string' && message.content.length > 0) {
+    return message.content;
+  }
+  if (Array.isArray(message.parts) && message.parts.length > 0) {
+    return message.parts
+      .map((p) =>
+        p.type === 'text' && typeof p.content === 'string' ? p.content : JSON.stringify(p, null, 2)
+      )
+      .join('\n\n');
+  }
+  return JSON.stringify(message, null, 2);
+}
+
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
 

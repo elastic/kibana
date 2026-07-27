@@ -102,3 +102,44 @@ describe('GenAiMessages', () => {
     expect(screen.getByTestId('apmViewMoreLink')).toHaveTextContent('View more');
   });
 });
+
+describe('GenAiMessages — copy buttons', () => {
+  it('renders a copy button for each message', () => {
+    renderMessages(
+      [{ role: 'user', content: 'Hello' }],
+      [{ role: 'assistant', content: 'Hi there' }]
+    );
+    expect(screen.getByTestId('genAiMessageCopy-0')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiMessageCopy-1')).toBeInTheDocument();
+  });
+
+  it('does not render copy buttons when there are no messages', () => {
+    const { container } = renderMessages([], [], undefined);
+    expect(container.firstChild).toBeNull();
+    expect(screen.queryByTestId('genAiMessageCopy-0')).toBeNull();
+  });
+
+  it('sets data-highlighted on mouseEnter and clears it on mouseLeave', () => {
+    renderMessages([
+      { role: 'user', content: 'First message' },
+      { role: 'assistant', content: 'Second message' },
+    ]);
+
+    const copyBtn0 = screen.getByTestId('genAiMessageCopy-0');
+    const comment0 = screen.getByTestId('genAiMessage-0');
+    const comment1 = screen.getByTestId('genAiMessage-1');
+
+    // Before hover: neither comment is highlighted
+    expect(comment0).not.toHaveAttribute('data-highlighted', 'true');
+    expect(comment1).not.toHaveAttribute('data-highlighted', 'true');
+
+    // Hover the first message's copy button
+    fireEvent.mouseEnter(copyBtn0);
+    expect(comment0).toHaveAttribute('data-highlighted', 'true');
+    expect(comment1).not.toHaveAttribute('data-highlighted', 'true');
+
+    // Leave the button
+    fireEvent.mouseLeave(copyBtn0);
+    expect(comment0).not.toHaveAttribute('data-highlighted', 'true');
+  });
+});

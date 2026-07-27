@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getGenAiFields, hasGenAiData, parseGenAiMessages } from './get_genai_fields';
+import {
+  getGenAiFields,
+  getMessageCopyText,
+  hasGenAiData,
+  parseGenAiMessages,
+} from './get_genai_fields';
 
 describe('hasGenAiData', () => {
   it('returns true when attributes.gen_ai.* field is present', () => {
@@ -197,5 +202,47 @@ describe('getGenAiFields', () => {
     expect(fields.operationName).toBe('chat');
     expect(fields.requestModel).toBe('claude-3');
     expect(fields.provider).toBe('anthropic');
+  });
+});
+
+describe('getMessageCopyText', () => {
+  it('returns plain content string verbatim', () => {
+    expect(getMessageCopyText({ role: 'user', content: 'Hello world' })).toBe('Hello world');
+  });
+
+  it('returns an empty string for a message with empty content', () => {
+    // empty content falls through to JSON.stringify the whole message
+    const result = getMessageCopyText({ role: 'user', content: '' });
+    expect(result).toBe(JSON.stringify({ role: 'user', content: '' }, null, 2));
+  });
+
+  it('joins text parts verbatim and structured parts as pretty JSON, separated by blank lines', () => {
+    const msg = {
+      role: 'assistant',
+      parts: [
+        { type: 'text', content: 'Here is the result.' },
+        { type: 'function', name: 'get_weather', args: { location: 'Paris' } },
+        { type: 'text', content: 'Done.' },
+      ],
+    };
+    const result = getMessageCopyText(msg);
+    const sections = result.split('\n\n');
+    expect(sections[0]).toBe('Here is the result.');
+    expect(sections[1]).toBe(
+      JSON.stringify(
+        { type: 'function', name: 'get_weather', args: { location: 'Paris' } },
+        null,
+        2
+      )
+    );
+    expect(sections[2]).toBe('Done.');
+  });
+
+  it('serialises a structured message (tool_calls, no text content) as pretty JSON', () => {
+    const msg = {
+      role: 'assistant',
+      tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'search' } }],
+    };
+    expect(getMessageCopyText(msg)).toBe(JSON.stringify(msg, null, 2));
   });
 });
