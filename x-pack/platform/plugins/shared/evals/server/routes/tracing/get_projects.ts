@@ -15,8 +15,8 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard } from '../utils/escape_wildcard';
 import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
+import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS } from './utils';
 
 /**
  * Candidate projects the paging aggregation enumerates. `total` is clamped to
@@ -80,7 +80,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             bool: {
               must_not: [
                 { exists: { field: 'parent_span_id' } },
-                { exists: { field: 'attributes.evaluator.name' } },
+                EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS,
               ],
               filter: [
                 ...extraFilters,

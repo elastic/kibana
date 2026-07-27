@@ -16,7 +16,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard } from '../utils/escape_wildcard';
+import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS } from './utils';
 
 interface RootSpanSource {
   trace_id?: string;
@@ -117,7 +117,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
             bool: {
               must_not: [
                 { exists: { field: 'parent_span_id' } },
-                { exists: { field: 'attributes.evaluator.name' } },
+                EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS,
               ],
               filter: [
                 ...filters,
