@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export interface GenerateDescriptionResult {
-  description: string;
+export class AiIndexAlreadyExistsError extends Error {
+  constructor(aiIndexId: string) {
+    super(`AI index '${aiIndexId}' already exists`);
+    this.name = 'AiIndexAlreadyExistsError';
+  }
 }

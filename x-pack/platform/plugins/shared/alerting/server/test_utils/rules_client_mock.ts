@@ -13,6 +13,7 @@ import {
   uiSettingsServiceMock,
   coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -74,6 +75,7 @@ export const getRulesClientMockParams = (
     unsecuredSavedObjectsClient,
     authorization: authorization as unknown as AlertingAuthorization,
     actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+    request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     namespace: 'default',
     maxScheduledPerMinute: 10000,

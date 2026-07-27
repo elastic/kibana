@@ -2772,6 +2772,72 @@ describe('create()', () => {
     );
   });
 
+  test('authorizes validated params via the rule type params authorizer with the request', async () => {
+    // No actions, so this test does not consume the shared generated-action uuid counter.
+    const data = getMockData({ actions: [] });
+    // Reject so we can assert the call arguments without exercising the full
+    // create pipeline (which needs additional per-test mocking).
+    const authorize = jest.fn().mockRejectedValue(new Error('stop'));
+    ruleTypeRegistry.get.mockReturnValue({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'test',
+      validLegacyConsumers: [],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      validate: {
+        params: schema.object({ bar: schema.boolean() }, { unknowns: 'allow' }),
+      },
+      authorize: { params: { authorize } },
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      solution: 'stack',
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrow('stop');
+
+    expect(authorize).toHaveBeenCalledTimes(1);
+    expect(authorize).toHaveBeenCalledWith(
+      { bar: true },
+      expect.objectContaining({ request: rulesClientParams.request })
+    );
+  });
+
+  test('propagates an error thrown by the rule type params authorizer', async () => {
+    const data = getMockData({ actions: [] });
+    ruleTypeRegistry.get.mockReturnValue({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'test',
+      validLegacyConsumers: [],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      validate: {
+        params: schema.object({}, { unknowns: 'allow' }),
+      },
+      authorize: {
+        params: { authorize: jest.fn().mockRejectedValue(new Error('not authorized')) },
+      },
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      solution: 'stack',
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"not authorized"`
+    );
+  });
+
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
     // Reset from default behaviour
