@@ -161,7 +161,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: MAX_SUGGESTIONS,
       ...(query ? { search: `${getEscapedQuery(query)}*`, searchFields: [searchField] } : {}),
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -176,7 +176,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: 100,
       fields: ['metadata.tags'],
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -202,7 +202,7 @@ export class MatcherSuggestionsService {
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 

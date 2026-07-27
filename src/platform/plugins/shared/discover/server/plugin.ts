@@ -68,6 +68,7 @@ export class DiscoverServerPlugin
 
     registerRoutes(
       core.http,
+      core.userActivity,
       this.logger,
       plugins.usageCollection?.createUsageCounter('discover_sessions_api')
     );
