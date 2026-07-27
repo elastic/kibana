@@ -51,7 +51,7 @@ function getEmbeddings(embeddings: string): { embeddings: string[] | string[][];
   }
 }
 
-const VectorFieldValue: React.FC<{ embeddings: string }> = ({ embeddings }) => {
+export const VectorFieldValue: React.FC<{ embeddings: string }> = ({ embeddings }) => {
   const { embeddings: jsonEmbeddings, chunks } = getEmbeddings(embeddings);
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
@@ -133,11 +133,11 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
     );
   } else if (embeddings && embeddings.length > 0) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="spaceBetween" css={{ flex: 1 }}>
         <EuiFlexItem>
-          <EuiCodeBlock language="json" transparentBackground fontSize="s" paddingSize="none">
+          <EuiText size="s" color="default">
             {fieldValue}
-          </EuiCodeBlock>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <VectorFieldValue embeddings={embeddings} />

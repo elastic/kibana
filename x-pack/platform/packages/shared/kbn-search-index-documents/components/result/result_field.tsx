@@ -9,20 +9,21 @@ import React, { useState } from 'react';
 
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
+  EuiToken,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { ResultFieldProps } from './result_types';
 import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
-import { ResultFieldValue } from './result_field_value';
+import { ResultFieldValue, VectorFieldValue } from './result_field_value';
 import * as Styles from './styles';
 
 const iconMap: Record<string, string> = {
@@ -71,7 +72,8 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const iconButton = (
-    <EuiButtonIcon
+    <EuiButtonEmpty
+      size="s"
       aria-label={
         fieldTypeLabel ??
         i18n.translate('xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel', {
@@ -79,8 +81,9 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
         })
       }
       onClick={fieldTypeLabel ? () => setIsPopoverOpen(!isPopoverOpen) : undefined}
-      iconType={iconType}
-    />
+    >
+      <EuiToken iconType={iconType} size="s" />
+    </EuiButtonEmpty>
   );
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
@@ -127,42 +130,50 @@ export const ResultField: React.FC<ResultFieldProps> = ({
     values: { fieldType },
   });
 
+  if (isSemanticVector) {
+    return (
+      <EuiTableRow css={Styles.resultFieldSemanticVector(euiTheme)}>
+        <EuiTableRowCell colSpan={2} className="resultFieldRowCell" truncateText={false}>
+          <Styles.SemanticVectorGrid $padding={euiTheme.size.s}>
+            <TypeLine iconType="tokenString" label={fieldName} fieldTypeLabel={fieldTypeLabel} />
+            <EuiText size="s" color="default">
+              {fieldValue}
+            </EuiText>
+            <TypeLine
+              iconType="tokenVectorDense"
+              label={i18n.translate(
+                'xpack.searchIndexDocuments.result.value.semanticText.embeddingsLabel',
+                { defaultMessage: 'embeddings' }
+              )}
+              fieldTypeLabel={i18n.translate(
+                'xpack.searchIndexDocuments.result.embeddingsFieldTypeAriaLabel',
+                {
+                  defaultMessage:
+                    'This semantic text field contains embeddings as well as the original text',
+                }
+              )}
+            />
+            <VectorFieldValue embeddings={embeddings} />
+          </Styles.SemanticVectorGrid>
+        </EuiTableRowCell>
+      </EuiTableRow>
+    );
+  }
+
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
       <EuiTableRowCell
         className="resultFieldRowCell"
         valign="middle"
-        truncateText={!isExpanded && !isSemanticVector}
+        truncateText={!isExpanded}
       >
-        {isSemanticVector ? (
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <TypeLine iconType="tokenString" label={fieldName} fieldTypeLabel={fieldTypeLabel} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <TypeLine
-                iconType="tokenVectorDense"
-                label={i18n.translate(
-                  'xpack.searchIndexDocuments.result.value.semanticText.embeddingsLabel',
-                  {
-                    defaultMessage: 'embeddings',
-                  }
-                )}
-                fieldTypeLabel={i18n.translate(
-                  'xpack.searchIndexDocuments.result.embeddingsFieldTypeAriaLabel',
-                  {
-                    defaultMessage:
-                      'This semantic text field contains embeddings as well as the original text',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
-        )}
+        <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+      <EuiTableRowCell
+        className="resultFieldRowCell"
+        truncateText={shouldTruncate}
+        valign="middle"
+      >
         <ResultFieldValue
           fieldValue={fieldValue}
           fieldType={fieldType}
