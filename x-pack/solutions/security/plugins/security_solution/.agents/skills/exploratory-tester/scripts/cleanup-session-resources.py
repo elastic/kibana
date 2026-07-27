@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -14,13 +15,14 @@ from session_resources import (
     cleanup_candidates,
     edit_session_config,
     http_status,
+    pending_resources,
     require_session_id,
     resolve_resource_base_url,
     validate_resource_endpoint,
 )
 
 
-SUCCESSFUL_DELETE_STATUSES = {"200", "204", "404"}
+SUCCESSFUL_CLEANUP_STATUSES = {"200", "202", "204", "404"}
 CCS_RESOURCE_KINDS = {"ccs_remote_cluster_snapshot", "ccs_remote_cluster"}
 
 
@@ -45,6 +47,7 @@ def parse_args() -> argparse.Namespace:
             "kibana_role",
             "connector",
             "detection_rule",
+            "es_alerts",
             "ccs_remote_cluster",
             "ccs_remote_cluster_snapshot",
         ),
@@ -85,6 +88,23 @@ def cleanup_session(
     resource_kind: str | None = None,
 ) -> tuple[int, list[str]]:
     require_session_id(config)
+    environment = config.get("environment", {})
+    ccs = environment.get("ccs") if isinstance(environment, dict) else None
+    if isinstance(ccs, dict) and ccs and config.get("ccs_restored") is not True:
+        return 1, [
+            "CCS cleanup blocked until the remote-cluster state is restored "
+            "and ccs_restored is verified in config.json."
+        ]
+
+    pending = pending_resources(config)
+    if pending:
+        pending_ids = ", ".join(repr(resource["id"]) for resource in pending)
+        message = (
+            f"Pending session resources require reconciliation before cleanup: "
+            f"{pending_ids}"
+        )
+        return (0 if dry_run else 1), [message]
+
     resources = sorted(
         (
             resource
@@ -95,11 +115,6 @@ def cleanup_session(
     )
     if not resources:
         return 0, ["No owned session resources to clean up."]
-
-    try:
-        auth_args = build_auth_args(config)
-    except ValueError as exc:
-        return 1, [str(exc)]
 
     messages: list[str] = []
     errors: list[str] = []
@@ -120,8 +135,18 @@ def cleanup_session(
             errors.append(str(exc))
             continue
 
+        base_url_key = resource.get("base_url", "url")
+        if not isinstance(base_url_key, str):
+            errors.append(f"Invalid base URL key for resource {resource_id!r}")
+            continue
+        try:
+            auth_args = build_auth_args(config, base_url_key=base_url_key)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
+
         method = resource.get("method", "DELETE")
-        if method != "DELETE":
+        if method not in {"DELETE", "POST"}:
             errors.append(f"Unsupported cleanup method {method!r} for {resource_id!r}")
             continue
 
@@ -135,7 +160,20 @@ def cleanup_session(
             method,
             target_url,
         ]
-        if resource.get("base_url", "url") == "url":
+        if method == "POST":
+            body = resource.get("body")
+            if not isinstance(body, str):
+                errors.append(f"Missing JSON cleanup body for {resource_id!r}")
+                continue
+            try:
+                json.loads(body)
+            except json.JSONDecodeError as exc:
+                errors.append(
+                    f"Invalid JSON cleanup body for {resource_id!r}: {exc}"
+                )
+                continue
+            curl_args.extend(["-H", "Content-Type: application/json", "-d", body])
+        if base_url_key == "url":
             curl_args.extend(["-H", "kbn-xsrf: true"])
         result = subprocess.run(
             curl_args,
@@ -144,7 +182,7 @@ def cleanup_session(
             check=False,
         )
         status = http_status(result.stdout)
-        if status in SUCCESSFUL_DELETE_STATUSES:
+        if status in SUCCESSFUL_CLEANUP_STATUSES:
             resource["cleanup_status"] = (
                 "already_gone" if status == "404" else "deleted"
             )

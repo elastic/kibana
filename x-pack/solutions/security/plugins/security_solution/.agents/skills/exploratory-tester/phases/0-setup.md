@@ -324,6 +324,7 @@ Write `$SESSION_DIR/config.json`:
     "space_id": "<resolved Environment.space or exploratory-testing>",
     "ccs": null
   },
+  "ccs_restored": false,
   "test_user": {
     "username": "exploratory-tester",
     "password": "Exploratory123!"
@@ -403,13 +404,25 @@ When testing CCS, replace `null` with:
 "ccs": {
   "note": "SOURCE runs Kibana and issues cross-cluster queries; REMOTE holds the remote data",
   "source": { "role": "SOURCE", "url": "<SOURCE Kibana url — same as environment.url>" },
-  "remote": { "role": "REMOTE", "url": "<REMOTE Kibana url>", "es_url": "<REMOTE elasticsearch url>" },
+  "remote": {
+    "role": "REMOTE",
+    "url": "<REMOTE Kibana url>",
+    "es_url": "<REMOTE elasticsearch url>",
+    "credentials": {
+      "api_key": "<REMOTE API key>",
+      "username": "<REMOTE username for managed environments>",
+      "password": "<REMOTE password for managed environments>"
+    }
+  },
   "remote_cluster_alias": "<alias configured on SOURCE — from GET /api/remote_clusters>",
   "remote_cluster_status_at_session_start": "<connected | not connected — from GET _remote/info>",
   "data_view_verified": false
 }
 ```
 Set `data_view_verified` to `true` only after confirming the tested data view's index pattern includes `<remote_cluster_alias>:*`.
+Keep `ccs_restored` false until the remote-cluster configuration has been
+restored and verified at the end of the session. Cleanup fails closed while it
+is false.
 
 ---
 

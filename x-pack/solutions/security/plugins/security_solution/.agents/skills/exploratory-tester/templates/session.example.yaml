@@ -80,3 +80,7 @@ session-timeout: 90
 #
 #   # [optional] Skip data setup if the environment is already seeded.
 #   # data-setup: skip
+#
+# CCS cleanup is blocked until the session verifies that the remote-cluster
+# state has been restored. The generated config.json tracks this as:
+#   ccs_restored: false

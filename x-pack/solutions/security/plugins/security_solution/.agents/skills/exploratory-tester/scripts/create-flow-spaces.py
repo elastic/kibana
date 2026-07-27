@@ -13,8 +13,10 @@ from session_resources import (
     ensure_session_manifest,
     http_status,
     is_owned_resource,
+    is_pending_resource,
     namespaced_flow_space_id,
     register_resource,
+    resource_state,
     write_session_config,
 )
 
@@ -60,6 +62,34 @@ def main() -> int:
                 continue
 
             space_id = namespaced_flow_space_id(session_id, flow_number)
+            endpoint = f"/api/spaces/space/{space_id}"
+            existing_resource = next(
+                (
+                    resource
+                    for resource in config["session_resources"]
+                    if resource.get("kind") == "kibana_space"
+                    and resource.get("id") == space_id
+                ),
+                None,
+            )
+            pending_before_remote = is_pending_resource(
+                config,
+                kind="kibana_space",
+                resource_id=space_id,
+            )
+            if existing_resource is None:
+                register_resource(
+                    config,
+                    kind="kibana_space",
+                    resource_id=space_id,
+                    owned=False,
+                    endpoint=endpoint,
+                    track_flow_space=False,
+                    state="pending",
+                )
+                write_session_config(config_path, config)
+            elif resource_state(existing_resource) == "pending":
+                write_session_config(config_path, config)
             body = json.dumps(
                 {
                     "id": space_id,
@@ -92,7 +122,6 @@ def main() -> int:
 
             lines = result.stdout.strip().splitlines()
             http_code = http_status(result.stdout)
-            endpoint = f"/api/spaces/space/{space_id}"
 
             if http_code == "200":
                 flow["space_id"] = space_id
@@ -114,10 +143,9 @@ def main() -> int:
                     kind="kibana_space",
                     resource_id=space_id,
                     owned=is_owned_resource(
-                        config,
-                        kind="kibana_space",
-                        resource_id=space_id,
-                    ),
+                        config, kind="kibana_space", resource_id=space_id
+                    )
+                    or pending_before_remote,
                     endpoint=endpoint,
                 )
                 print(

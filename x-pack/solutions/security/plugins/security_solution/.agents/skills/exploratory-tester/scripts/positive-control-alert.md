@@ -2,7 +2,10 @@
 
 Used from `phases/2-explore.md` → "Confirm before logging" (absent-element path) and → "CCS-specific techniques", when you need to prove real data *exists* before concluding a feature is broken — i.e. to tell "the feature genuinely can't show this data" apart from "there is simply no data to show."
 
-**Requires:** an admin API key (`config.json → credentials.api_key`). Creates a temporary detection rule and a temporary source index — clean both up at the end of the session (step 5).
+**Requires:** a source-cluster API key (`config.json → credentials.api_key`).
+CCS also requires the remote credentials in `environment.ccs.remote`. Creates
+a temporary detection rule and a temporary source index — clean both up at the
+end of the session.
 
 ## Why a real fired alert, not an injected document
 
@@ -11,7 +14,8 @@ The cheap shortcut is to write a fake document straight into `.alerts-security.a
 ## Template
 
 Fill in `<SLUG>` (use `config.json → area_slug`), `<SESSION_ID>`,
-`<KIBANA_URL>`, `<ES_URL>`, `<SPACE_ID>` (the flow's space), and `<API_KEY>`.
+`<KIBANA_URL>`, `<ES_URL>`, `<SPACE_ID>` (the flow's space), and
+`<SOURCE_API_KEY>`. For CCS, also fill in `<REMOTE_API_KEY>`.
 The session suffix is required: it prevents repeated or parallel sessions
 from sharing a source index or rule name.
 
@@ -19,23 +23,45 @@ from sharing a source index or rule name.
 SOURCE_INDEX="logs-testing.<SLUG>-<SESSION_ID>-default"
 RULE_NAME="positive-control-<SLUG>-<SESSION_ID>"
 SOURCE_ES_URL="<ES_URL>"
+SOURCE_API_KEY="<SOURCE_API_KEY>"
+DATA_API_KEY="$SOURCE_API_KEY"
+DATA_ES_URL="$SOURCE_ES_URL"
 SOURCE_BASE_URL="es_url"
+RULE_INDEX="$SOURCE_INDEX"
 ```
 
 For CCS, the positive-control source is on REMOTE, not SOURCE:
 ```bash
-SOURCE_ES_URL="<REMOTE_ES_URL>"
+DATA_ES_URL="<REMOTE_ES_URL>"
+DATA_API_KEY="<REMOTE_API_KEY>"
 SOURCE_BASE_URL="ccs_remote_es_url"
+REMOTE_CLUSTER_ALIAS="<remote_cluster_alias>"
+RULE_INDEX="${REMOTE_CLUSTER_ALIAS}:$SOURCE_INDEX"
 ```
 The `environment.ccs.remote.es_url` value must be present in `config.json`;
 `ccs_remote_es_url` makes cleanup target REMOTE rather than SOURCE.
 
 ### 1. Ensure an owned or reused source index, then index a real document
 
-Check whether `"$SOURCE_INDEX"` exists before creating it. If the `HEAD`
-request returns 200, set `SOURCE_OWNERSHIP_FLAG=--reused`. If it returns 404,
-create the index and set the flag to `--owned` only after a 200/201 create
-response. Treat any other response as a setup failure.
+Check the manifest for a matching `pending` reservation, then check whether
+`"$SOURCE_INDEX"` exists. If the `HEAD` request returns 200, set
+`SOURCE_OWNERSHIP_FLAG=--owned` when the pending reservation belongs to this
+session, otherwise set it to `--reused`. If the request returns 404 and there
+is no pending reservation, reserve the resource before issuing the create
+request:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind es_index \
+  --id "$SOURCE_INDEX" \
+  --endpoint "/$SOURCE_INDEX" \
+  --base-url "$SOURCE_BASE_URL" \
+  --pending
+```
+Create the index and set the flag to `--owned` only after a 200/201 response.
+If a pending reservation existed before this attempt and the create responds
+409, reconcile it as `--owned`; otherwise use `--reused`. Treat any other
+response as a setup failure.
 
 Register the physical source index before indexing the document:
 ```bash
@@ -50,16 +76,16 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 Then index the document:
 ```bash
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
-  "$SOURCE_ES_URL/$SOURCE_INDEX/_doc?refresh=wait_for" \
+curl -s -X POST -H "Authorization: ApiKey $DATA_API_KEY" -H "Content-Type: application/json" \
+  "$DATA_ES_URL/$SOURCE_INDEX/_doc?refresh=wait_for" \
   -d "{ \"@timestamp\": \"$NOW\", \"host\": { \"name\": \"positive-control-host\" }, \"event\": { \"category\": \"process\", \"action\": \"positive-control\" }, \"message\": \"exploratory-tester positive control\" }"
 ```
 
 ### 2. Create a real query detection rule against it
 ```bash
-curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" -H "kbn-xsrf: true" \
+curl -s -X POST -H "Authorization: ApiKey $SOURCE_API_KEY" -H "Content-Type: application/json" -H "kbn-xsrf: true" \
   "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
-  -d '{ "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$SOURCE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
+  -d '{ "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$RULE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
 ```
 Register the returned rule only after checking its response. Use `--owned`
 for a 200/201 response and `--reused` for a 409/conflict:
@@ -72,15 +98,31 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   "$RULE_OWNERSHIP_FLAG"
 ```
 
+Register targeted cleanup for alerts produced by this rule. This deletes only
+documents with this rule UUID from the shared alerts index:
+```bash
+ALERT_DELETE_BODY=$(printf \
+  '{"query":{"term":{"kibana.alert.rule.uuid":"%s"}}}' "$RULE_ID")
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind es_alerts \
+  --id "positive-control-alerts-$RULE_ID" \
+  --endpoint "/.alerts-security.alerts-<SPACE_ID>/_delete_by_query" \
+  --base-url es_url \
+  --method POST \
+  --body-json "$ALERT_DELETE_BODY" \
+  "$RULE_OWNERSHIP_FLAG"
+```
+
 ### 3. Force immediate execution
 ```bash
-curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "kbn-xsrf: true" \
+curl -s -X POST -H "Authorization: ApiKey $SOURCE_API_KEY" -H "kbn-xsrf: true" \
   "<KIBANA_URL>/s/<SPACE_ID>/internal/alerting/rule/<RULE_ID>/_run_soon"
 ```
 
 ### 4. Confirm a genuine rule-fired alert appeared
 ```bash
-curl -s -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
+curl -s -H "Authorization: ApiKey $SOURCE_API_KEY" -H "Content-Type: application/json" \
   "$SOURCE_ES_URL/.alerts-security.alerts-<SPACE_ID>/_search?pretty" \
   -d '{ "size": 1, "query": { "term": { "kibana.alert.rule.name": "'"$RULE_NAME"'" } } }'
 ```
@@ -88,8 +130,9 @@ A real alert has `kibana.alert.status`,
 `kibana.alert.rule.rule_type_id: "siem.queryRule"`, and a populated
 `kibana.alert.rule.uuid`. If those fields are present, the local pipeline
 genuinely produced an alert — so if the feature under test still shows
-nothing, the gap is the feature, not the data. For CCS, use the remote
-`SOURCE_ES_URL` and the CCS pattern
+nothing, the gap is the feature, not the data. For CCS, the data was indexed
+on REMOTE, the rule queried the CCS pattern, and the alert verification still
+uses SOURCE `SOURCE_ES_URL`.
 `<remote_cluster_alias>:logs-testing.<SLUG>-<SESSION_ID>-default` in the rule
 index.
 

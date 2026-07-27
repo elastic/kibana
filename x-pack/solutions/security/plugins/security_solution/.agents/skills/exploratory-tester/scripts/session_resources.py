@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+# The exploratory-tester runtime is Unix-only; fcntl gives process-safe locks.
 import fcntl
 import json
 import os
@@ -24,10 +25,12 @@ RESOURCE_KINDS = frozenset(
         "kibana_role",
         "connector",
         "detection_rule",
+        "es_alerts",
         "ccs_remote_cluster",
         "ccs_remote_cluster_snapshot",
     }
 )
+RESOURCE_STATES = frozenset({"pending", "owned", "reused"})
 
 
 def load_session_config(config_path: Path) -> dict[str, Any]:
@@ -143,9 +146,22 @@ def validate_resource_endpoint(endpoint: str) -> str:
     return endpoint
 
 
-def build_auth_args(config: dict[str, Any]) -> list[str]:
+def build_auth_args(
+    config: dict[str, Any],
+    *,
+    base_url_key: str = "url",
+) -> list[str]:
     environment = config.get("environment", {})
-    credentials = config.get("credentials", {})
+    if base_url_key == "ccs_remote_es_url":
+        ccs = environment.get("ccs", {})
+        remote = ccs.get("remote", {}) if isinstance(ccs, dict) else {}
+        credentials = remote.get("credentials") if isinstance(remote, dict) else None
+        if not isinstance(credentials, dict):
+            raise ValueError(
+                "CCS remote credentials are required for remote cleanup"
+            )
+    else:
+        credentials = config.get("credentials", {})
     environment_type = environment.get("type")
     api_key = credentials.get("api_key")
 
@@ -183,6 +199,34 @@ def http_status(stdout: str) -> str:
     return lines[-1].strip() if lines else "000"
 
 
+def resource_state(resource: dict[str, Any]) -> str:
+    state = resource.get("state")
+    if state in RESOURCE_STATES:
+        return state
+    return "owned" if resource.get("owned") is True else "reused"
+
+
+def _find_resource(
+    config: dict[str, Any],
+    *,
+    kind: str,
+    resource_id: str,
+) -> dict[str, Any] | None:
+    resources = config.get("session_resources")
+    if not isinstance(resources, list):
+        return None
+    return next(
+        (
+            resource
+            for resource in resources
+            if isinstance(resource, dict)
+            and resource.get("kind") == kind
+            and resource.get("id") == resource_id
+        ),
+        None,
+    )
+
+
 def is_owned_resource(
     config: dict[str, Any],
     *,
@@ -198,10 +242,44 @@ def is_owned_resource(
         isinstance(resource, dict)
         and resource.get("kind") == kind
         and resource.get("id") == resource_id
+        and resource_state(resource) == "owned"
         and resource.get("owned") is True
         and resource.get("marker") == expected_marker
         for resource in resources
     )
+
+
+def is_pending_resource(
+    config: dict[str, Any],
+    *,
+    kind: str,
+    resource_id: str,
+) -> bool:
+    session_id = require_session_id(config)
+    resource = _find_resource(config, kind=kind, resource_id=resource_id)
+    return bool(
+        resource
+        and resource_state(resource) == "pending"
+        and resource.get("marker") == resource_marker(session_id)
+    )
+
+
+def pending_resources(config: dict[str, Any]) -> list[dict[str, Any]]:
+    session_id = require_session_id(config)
+    expected_marker = resource_marker(session_id)
+    resources = config.get("session_resources")
+    if not isinstance(resources, list) or not all(
+        isinstance(resource, dict) for resource in resources
+    ):
+        raise ValueError(
+            "Session config field 'session_resources' must be a list of objects"
+        )
+    return [
+        resource
+        for resource in resources
+        if resource_state(resource) == "pending"
+        and resource.get("marker") == expected_marker
+    ]
 
 
 def register_resource(
@@ -215,13 +293,32 @@ def register_resource(
     protected: bool = False,
     base_url: str = "url",
     track_flow_space: bool = True,
+    body: str | None = None,
+    state: str | None = None,
 ) -> dict[str, Any]:
     if kind not in RESOURCE_KINDS:
         raise ValueError(f"Unsupported session resource kind: {kind}")
     validate_resource_endpoint(endpoint)
     if not isinstance(resource_id, str) or not resource_id:
         raise ValueError("Session resource ids must be non-empty strings")
+    if method not in {"DELETE", "POST"}:
+        raise ValueError(f"Unsupported cleanup method: {method}")
+    if state is not None and state not in RESOURCE_STATES:
+        raise ValueError(f"Unsupported session resource state: {state}")
     session_id = ensure_session_manifest(config)
+    existing = _find_resource(config, kind=kind, resource_id=resource_id)
+    resolved_state = state or ("owned" if owned else "reused")
+    if (
+        resolved_state == "reused"
+        and existing
+        and existing.get("marker") == resource_marker(session_id)
+        and resource_state(existing) == "owned"
+    ):
+        resolved_state = "owned"
+    if resolved_state == "owned":
+        owned = True
+    elif resolved_state in {"pending", "reused"}:
+        owned = False
     if (
         kind == "kibana_space"
         and owned
@@ -231,23 +328,24 @@ def register_resource(
         raise ValueError(
             "Owned non-protected Kibana spaces must use the session namespace"
         )
-    if not owned and is_owned_resource(
-        config,
-        kind=kind,
-        resource_id=resource_id,
-    ):
-        owned = True
-    marker = resource_marker(session_id) if owned else None
+    marker = (
+        resource_marker(session_id)
+        if resolved_state in {"pending", "owned"}
+        else None
+    )
     resource = {
         "kind": kind,
         "id": resource_id,
         "owned": owned,
+        "state": resolved_state,
         "marker": marker,
         "endpoint": endpoint,
         "method": method,
         "protected": protected,
         "base_url": base_url,
     }
+    if body is not None:
+        resource["body"] = body
     resources = config["session_resources"]
     resources[:] = [
         existing
@@ -259,7 +357,11 @@ def register_resource(
     ]
     resources.append(resource)
 
-    if kind == "kibana_space" and track_flow_space:
+    if (
+        kind == "kibana_space"
+        and track_flow_space
+        and resolved_state in {"owned", "reused"}
+    ):
         target = config["created_flow_spaces"] if owned else config["reused_flow_spaces"]
         if resource_id not in target:
             target.append(resource_id)
@@ -270,6 +372,28 @@ def register_resource(
             other_target.remove(resource_id)
 
     return resource
+
+
+def remove_pending_resource(
+    config: dict[str, Any],
+    *,
+    kind: str,
+    resource_id: str,
+) -> bool:
+    resource = _find_resource(config, kind=kind, resource_id=resource_id)
+    if resource is None or resource_state(resource) != "pending":
+        return False
+    resources = config["session_resources"]
+    resources[:] = [
+        existing
+        for existing in resources
+        if not (
+            existing.get("kind") == kind
+            and existing.get("id") == resource_id
+            and resource_state(existing) == "pending"
+        )
+    ]
+    return True
 
 
 def cleanup_candidates(config: dict[str, Any]) -> list[dict[str, Any]]:
@@ -285,6 +409,7 @@ def cleanup_candidates(config: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         resource
         for resource in resources
+        if resource_state(resource) == "owned"
         if resource.get("owned") is True
         and resource.get("marker") == expected_marker
         and resource.get("protected") is not True
