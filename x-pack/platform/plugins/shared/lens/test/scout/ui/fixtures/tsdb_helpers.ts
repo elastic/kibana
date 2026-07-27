@@ -414,7 +414,9 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
       await use({ setup });
     } finally {
       await runCleanupActions('TSDB scenario fixture', [
-        ...dataViewIds.map((dataViewId) => async () => apiServices.dataViews.delete(dataViewId)),
+        ...dataViewIds.map((dataViewId) => async () => {
+          await apiServices.dataViews.delete(dataViewId);
+        }),
         async () => {
           await uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults');
         },
