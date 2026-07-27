@@ -28,6 +28,7 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import type { OpenAIRequest } from '../openai/types';
 
@@ -39,6 +40,9 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   functionCalling?: FunctionCallingMode;
   temperature?: number;
   modelName?: string;
+  // Endpoint identity is authoritative for provider-specific parameter support.
+  endpointProvider?: string;
+  endpointModelId?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
@@ -60,6 +64,8 @@ export const inferenceEndpointAdapter = {
       functionCalling,
       temperature = 0,
       modelName,
+      endpointProvider,
+      endpointModelId,
       logger,
       abortSignal,
       timeout,
@@ -76,6 +82,8 @@ export const inferenceEndpointAdapter = {
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
       modelName,
+      endpointProvider,
+      endpointModelId,
     });
 
     return defer(() =>
@@ -102,6 +110,8 @@ const createEndpointRequest = ({
   simulatedFunctionCalling,
   temperature = 0,
   modelName,
+  endpointProvider,
+  endpointModelId,
 }: {
   system?: string;
   messages: Message[];
@@ -110,7 +120,14 @@ const createEndpointRequest = ({
   simulatedFunctionCalling: boolean;
   temperature?: number;
   modelName?: string;
+  endpointProvider?: string;
+  endpointModelId?: string;
 }): OpenAIRequest => {
+  const temperatureOptions = getTemperatureIfValid(temperature, {
+    provider: endpointProvider,
+    modelId: endpointModelId,
+  });
+
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -119,7 +136,7 @@ const createEndpointRequest = ({
       tools,
     });
     return {
-      ...(temperature >= 0 ? { temperature } : {}),
+      ...temperatureOptions,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
@@ -129,7 +146,7 @@ const createEndpointRequest = ({
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
 
   return {
-    ...(temperature >= 0 ? { temperature } : {}),
+    ...temperatureOptions,
     model: modelName,
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools

@@ -355,7 +355,12 @@ function resolveAndCreatePipeline({
                     } as SpanModel)
                   : undefined,
               chatComplete: (options) =>
-                inferenceEndpointAdapter.chatComplete({ ...options, executor }),
+                inferenceEndpointAdapter.chatComplete({
+                  ...options,
+                  executor,
+                  endpointProvider: endpointMeta.provider,
+                  endpointModelId: endpointMeta.modelId,
+                }),
             };
           }
         : async () => {
@@ -392,7 +397,12 @@ function resolveAndCreatePipeline({
                       } as SpanModel)
                     : undefined,
                 chatComplete: (options) =>
-                  inferenceEndpointAdapter.chatComplete({ ...options, executor: endpointExecutor }),
+                  inferenceEndpointAdapter.chatComplete({
+                    ...options,
+                    executor: endpointExecutor,
+                    endpointProvider: endpointMeta.provider,
+                    endpointModelId: endpointMeta.modelId,
+                  }),
               };
             }
 
