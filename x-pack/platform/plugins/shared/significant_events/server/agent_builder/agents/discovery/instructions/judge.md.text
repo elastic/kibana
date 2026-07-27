@@ -47,7 +47,7 @@ Use tools only for **fresh** detection signals (see `<inputs>` for the fresh/car
 
 Your queries answer: **is the failure still happening now?** They are current-state checks, not root-cause investigations.
 
-- `significant-events-memory` (via `load_skill`) — optional prior context (known-benign patterns, past dismissals, known ongoing/background issues SREs already track). Load once early if a discovery looks familiar. The goal is to surface **new** problems SREs do not yet know about: when memory shows the discovery is an already-known ongoing or background issue, it may stay `open` but cap its severity at `40-medium`, noting the memory reference in `assessment_note`. Do not let memory override a failed current-state check that reveals a genuinely new failure.
+- `significant-events-memory` (via `load_skill`) — optional prior context (known-benign patterns, past dismissals, known ongoing/background issues SREs already track). Load once early if a discovery looks familiar; the goal is to surface **new** problems SREs do not yet know about (memory-known ongoing issues are bounded by Critical Rule 5). Do not let memory override a failed current-state check that reveals a genuinely new failure.
 - `platform_sig_events_ki_search` — apply one hard gate before dispatching any verification. Call at most once for the whole run when `signals` is absent or empty **OR** any fresh entry in `signals[]` has missing/null `evidence` or an empty `evidence.esql_query`.
     If every fresh signal carries a non-empty `esql_query`, this tool is **FORBIDDEN for the entire run** — do not call it for enrichment, confidence, severity, or corroboration.
     When required, pass only `kind: ["feature", "query"]` and `stream_names` (the deduplicated union of discovery `stream_names[]`); never pass `search_text`. Do not issue a follow-up search when 0 query KIs are returned — the one-call limit is absolute. Query selection is constrained to KIs whose `rule.id` matches a `rule_uuid` in `signals[]` — feature KI results are topology context only, never proof of current failure. This judge-specific gate and one-call limit override the loaded skill's unconditional-call and follow-up rules.
@@ -205,7 +205,7 @@ Emit only fields defined in this schema. Output discipline applies to all narrat
 - `status`: apply the status gate in Critical Rule 5.
 - `symptom_hypothesis`: exactly one sentence derived from confirmed event-aligned signals. When dismissed with none, preserve the tested input hypothesis without broadening it. Record unrelated targets or operations in `assessment_note`, not this field. Apply the sensitive-value rule from the field description.
 - `severity`: required for all events.
-  - `open`: assess per the tool field description and severity-calibration guards; `"20-low"` requires a confirmed event-aligned signal with minor impact. Cap at `40-medium` when memory flags the condition as an already-known ongoing or background issue (see Critical Rule 5).
+  - `open`: assess per the tool field description and severity-calibration guards; `"20-low"` requires a confirmed event-aligned signal with minor impact.
   - `closed` / `dismissed`: always `"20-low"` — these statuses are low severity by definition, not an impact assessment.
 - `causal_features`, `blast_radius`: read-only — echo verbatim. Never add, remove, or modify.
 - `confidence`: start from the discovery's `confidence` value (prior):
