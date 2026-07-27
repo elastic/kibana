@@ -24,12 +24,7 @@ import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 const DATA_VIEW = 'auditbeat-*';
 
-// The Hosts and Users pages in this suite are still individually flaky/skipped for reasons
-// tracked by their own issues below. Their root cause has not been verified as fixed, so they
-// stay skipped here. Do not remove these without separately verifying and closing those issues.
-// FLAKY (Hosts page): https://github.com/elastic/kibana/issues/178367
-// FLAKY (Users page): https://github.com/elastic/kibana/issues/199583
-const SKIPPED_PAGES = ['Hosts', 'Users'];
+const SKIPPED_PAGES: string[] = [];
 
 describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
