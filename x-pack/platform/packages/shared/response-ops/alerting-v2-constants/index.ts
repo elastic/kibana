@@ -17,7 +17,9 @@ export const ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH =
   '/api/alerting/v2/action_policies/execution_history/_count_since' as const;
 export const ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH =
   '/api/alerting/v2/execution_history/rules' as const;
-export const ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH =
-  '/internal/action_policies/suggestions/values' as const;
-export const ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH =
-  '/internal/alerting/v2/user_profiles/_suggest' as const;
+export const ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH =
+  '/api/alerting/v2/suggestions/rule_event_fields' as const;
+export const ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH =
+  '/internal/alerting/v2/suggestions/values' as const;
+export const ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH =
+  '/internal/alerting/v2/suggestions/user_profiles' as const;
