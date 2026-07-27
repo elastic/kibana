@@ -11,6 +11,8 @@ import type {
   SignificantEventsKIsOnboardingClient,
   SignificantEventsKIsOnboardingInputs,
 } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import { assertNotPaused } from '../../../routes/utils/assert_not_paused';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -22,6 +24,7 @@ interface StartKiIdentificationHandlerParams {
     queries?: string;
   };
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  maintenanceService: SignificantEventsMaintenanceService;
   request: KibanaRequest;
 }
 
@@ -34,8 +37,13 @@ export async function startKiIdentificationToolHandler({
   steps,
   connectors,
   streamsKIsOnboardingClient,
+  maintenanceService,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
+  // Agent Builder bypasses the HTTP onboarding route; enforce the same pause
+  // gate so Nightshift cannot start onboarding while activity is paused.
+  await assertNotPaused({ maintenanceService, request });
+
   const now = Date.now();
   const skipFeatures = !steps.includes(KIsOnboardingStep.FeaturesIdentification);
   const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
