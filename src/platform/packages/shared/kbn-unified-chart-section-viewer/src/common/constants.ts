@@ -81,6 +81,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
 // Metrics grid sort options
 export const METRICS_SORT_BY = {
   alphabetically: 'alphabetically',
+  recency: 'recency',
 } as const;
 
 // Metrics grid sort directions

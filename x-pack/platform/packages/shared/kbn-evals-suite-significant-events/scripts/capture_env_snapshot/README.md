@@ -1,6 +1,6 @@
 # Capture Environment Snapshot
 
-Captures the current Streams/Significant Events environment into a GCS snapshot. `.kibana` system indices are reindexed to snapshot-safe names with mappings preserved, then everything is snapshotted together.
+Captures the current Streams/Significant Events environment into a GCS snapshot. Significant Events data streams are reindexed to snapshot-safe names with mappings preserved, then everything is snapshotted together.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Captures the current Streams/Significant Events environment into a GCS snapshot.
 
 ## Why
 
-Elasticsearch system indices (`.kibana_*`) cannot be directly included in snapshots, and `_reindex` does not carry mappings. This script handles it: it fetches the live mapping, creates a regular index copy (`snapshot-*`), reindexes the data, then snapshots everything together with non-system indices.
+Significant Events data streams must be restored through their plugin-owned templates rather than as plain indices. This script fetches each stream's mapping, creates a regular `snapshot-*` copy, reindexes the data, and snapshots that copy together with the logs and alerts indices.
 
 ## Usage
 
@@ -43,16 +43,15 @@ node scripts/capture_sigevents_env_snapshot.js \
 
 1. Creates a temporary Elasticsearch user (`restore_sigevents_env_snapshot_tmp`) with the `system_indices_superuser` role. This user is deleted on script exit (success or failure).
 2. Resolves wildcard patterns to concrete index names via `GET _resolve/index`.
-3. For each fixed system index (`.kibana_streams_tasks-*`) and each SigEvents data stream, fetches the mapping, creates a `snapshot-*` copy, and reindexes the data. Discoveries and detections are skipped silently when absent — the user may not have run the discovery workflow. `--logs-index` and `--alert-indices` targets are included directly without reindexing.
+3. For each SigEvents data stream, fetches the mapping, creates a `snapshot-*` copy, and reindexes the data. Discoveries and detections are skipped silently when absent — the user may not have run the discovery workflow. `--logs-index` and `--alert-indices` targets are included directly without reindexing.
 4. Registers a GCS snapshot repository and creates the snapshot containing all captured indices.
 
 ### Naming convention
 
-System indices and SigEvents data streams are reindexed to a `snapshot-*` copy (leading `.` is replaced). Discoveries/detections are omitted entirely when not captured:
+SigEvents data streams are reindexed to a `snapshot-*` copy (leading `.` is replaced). Discoveries/detections are omitted entirely when not captured:
 
 | Source index | Snapshot index |
 | --- | --- |
-| `.kibana_streams_tasks-000001` | `snapshot-kibana_streams_tasks-000001` |
 | `.significant_events-knowledge_indicators` | `snapshot-significant_events-knowledge_indicators` |
 | `.significant_events-discoveries` | `snapshot-significant_events-discoveries` (if workflow was run) |
 | `.significant_events-detections` | `snapshot-significant_events-detections` (if workflow was run) |
@@ -75,7 +74,3 @@ See [`restore_env_snapshot/README.md`](../restore_env_snapshot/README.md) for th
 ## Required privileges
 
 The script automatically creates and deletes a temporary `system_indices_superuser` user. On self-managed Elasticsearch the `system_indices_superuser` role may not exist; the script creates it automatically on first run (it is a built-in on Elastic Cloud). The credentials you pass (`--es-username` / `--es-password`) only need the `manage_security` cluster privilege — the built-in `elastic` superuser works out of the box.
-
-## Why aliases can't be baked into the snapshot
-
-During capture, the source system indices (e.g. `.kibana_streams_tasks-000001`) still exist in the cluster with their aliases. Elasticsearch enforces that an alias cannot point to both a system and a non-system index simultaneously. Since the snapshot copies are regular (non-system) indices, adding the same alias name to them is rejected. This is a fundamental Elasticsearch limitation, not a script limitation.

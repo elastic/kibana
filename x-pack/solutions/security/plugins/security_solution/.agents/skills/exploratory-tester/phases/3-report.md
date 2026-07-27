@@ -29,6 +29,21 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/sess
 - If the script exits 0 and prints a line (e.g. `input=… output=… cache_create=… cache_read=… total=…`), reformat it into the token-usage line — replace `_` with `-` and `key=N` with `key N`, separated by `·`, and wrap the final `total N` in `**…**`. Example: `input=270 output=156097 … total=11512028` → `input 270 · output 156097 · … · **total 11512028**`.
 - If the script exits non-zero or prints nothing, write `**Token usage:** not available` — this is expected on non-Claude-Code harnesses (Cursor, Codex, etc.) or when the transcript is unavailable.
 
+**Structured session metrics:** after `$SESSION_DIR` is known, run the opt-in JSON mode:
+```bash
+METRICS_ARGS=(--json --session-dir "$SESSION_DIR")
+if [ -f "$SESSION_DIR/metrics-manifest.json" ]; then
+  METRICS_ARGS+=(--manifest "$SESSION_DIR/metrics-manifest.json")
+fi
+python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py \
+  "${METRICS_ARGS[@]}"
+```
+- The manifest is optional. It may identify orchestrator/worker transcripts, allowlisted artifacts, and sanitized payload counters. Never add arbitrary request or response bodies to it.
+- Read `tokens.aggregate` as model token counts, `payload_bytes` as browser/tool byte counts, and `artifacts.by_kind` as file counts and bytes. These are separate units; never add byte values to token values or estimate one from the other.
+- Write `**Browser/tool payload bytes:** not available` when `payload_bytes.status` is `not_available`; otherwise render `tool_input`, `tool_output`, and `browser_events` as bytes.
+- Write `**Session artifact bytes:** not available` when `artifacts.status` is `not_available`; otherwise render each reported artifact kind's file count and byte total.
+- Metrics are bookkeeping only. They must not suppress, merge, reclassify, downgrade, or otherwise alter findings or evidence.
+
 ---
 
 ## Step 3b — Filter known noise

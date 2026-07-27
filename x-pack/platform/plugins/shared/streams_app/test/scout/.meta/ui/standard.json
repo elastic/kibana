@@ -1,5 +1,5 @@
 {
-  "sha1": "5b439e132afd5402c64f7a44decee3697e1e9c7c",
+  "sha1": "39bbb2c828d0161c4f48d271a7640940387602c6",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -136,6 +136,22 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
         "line": 164,
+        "column": 9
+      }
+    },
+    {
+      "id": "e6fb15478212601-96951f3e43395ce",
+      "title": "Stream canvas - classic source to destination nodes shows a flyout for classic streams when a destination node is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
+        "line": 171,
         "column": 9
       }
     },
