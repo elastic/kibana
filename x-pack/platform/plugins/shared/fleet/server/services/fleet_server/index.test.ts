@@ -208,6 +208,52 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
     const kuery = mockedGetAgentsByKuery.mock.calls[0][2].kuery as string;
     expect(kuery).toContain('fleet-server-policy#*');
   });
+
+  it('should return true if a versioned-policy agent is offline but its base policy is managed', async () => {
+    // Regression: managedAgentPolicies contains base IDs (e.g. 'fleet-server-policy'),
+    // but an agent on a versioned policy has policy_id 'fleet-server-policy#9.4'.
+    // The comparison must strip the version suffix before matching.
+    const version = '10.0.0';
+
+    jest
+      .spyOn(mockedPackagePolicyService, 'list')
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: '1',
+            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
+            package: { name: 'fleet_server', version: '10.0.0' },
+          },
+        ],
+      } as any)
+      .mockResolvedValueOnce({ items: [] } as any);
+
+    mockedAgentPolicyService.getAllManagedAgentPolicies.mockResolvedValueOnce([
+      { id: 'fleet-server-policy', is_managed: true } as any,
+    ]);
+
+    mockedGetAgentsByKuery.mockResolvedValueOnce({
+      agents: [
+        {
+          id: 'agent-versioned',
+          policy_id: 'fleet-server-policy#9.4',
+          active: true,
+          local_metadata: { elastic: { agent: { version: '9.4.0' } } },
+        },
+      ],
+    } as any);
+
+    mockedGetAgentStatusById.mockResolvedValue('offline');
+
+    const result = await checkFleetServerVersionsForSecretsStorage(
+      esClientMock,
+      soClientMock,
+      version
+    );
+    // Offline managed versioned agent must not block secrets storage
+    expect(result).toBe(true);
+  });
 });
 
 describe('getFleetServerPolicies', () => {

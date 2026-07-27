@@ -20,6 +20,7 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 import {
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
+  removeVersionSuffixFromPolicyId,
 } from '../../../common/services/version_specific_policies_utils';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 import { packagePolicyService } from '../package_policy';
@@ -182,8 +183,9 @@ export async function checkFleetServerVersionsForSecretsStorage(
         continue;
       }
 
+      const agentPolicyBaseId = removeVersionSuffixFromPolicyId(fleetServerAgent.policy_id ?? '');
       const isManagedAgentPolicy = managedAgentPolicies.some(
-        (managedPolicy) => managedPolicy.id === fleetServerAgent.policy_id
+        (managedPolicy) => managedPolicy.id === agentPolicyBaseId
       );
 
       // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's
