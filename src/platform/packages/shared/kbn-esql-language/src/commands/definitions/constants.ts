@@ -12,6 +12,8 @@ import type { Literals } from './types';
 
 export const EDITOR_MARKER = 'marker_esql_editor';
 
+export const COORDINATOR_LOOKUP_JOIN_PREFIX = '_coordinator';
+
 // List for suggestions (human-friendly)
 export const timeUnitsToSuggest: Literals[] = [
   {

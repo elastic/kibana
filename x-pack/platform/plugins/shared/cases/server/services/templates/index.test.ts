@@ -1684,6 +1684,174 @@ describe('TemplatesService', () => {
     });
   });
 
+  describe('getActiveTemplatesReferencingField', () => {
+    const SO = CASE_TEMPLATE_SAVED_OBJECT;
+
+    const makeHit = (id: string) => ({ _id: id, _index: '.kibana_cases' });
+
+    const makeSO = (id: string, definition: string, name = 'Template'): SavedObject<Template> =>
+      createTemplateSO(id, { templateId: id, name, definition });
+
+    it('sends a search call with a match_phrase pre-filter on definition and the owner/isLatest/deletedAt filters', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      await service.getActiveTemplatesReferencingField('securitySolution', 'priority');
+
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: SO,
+          namespaces: ['default'],
+          from: 0,
+          size: 10000,
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                // owner filter
+                expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        match_phrase: expect.objectContaining({
+                          [`${SO}.owner`]: 'securitySolution',
+                        }),
+                      }),
+                    ]),
+                  }),
+                }),
+              ]),
+              must: [
+                {
+                  match_phrase: {
+                    [`${SO}.definition`]: '$ref: priority',
+                  },
+                },
+              ],
+            }),
+          }),
+        })
+      );
+
+      // Verify owner, isLatest, and NOT deletedAt are all in the filter
+      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+      const filterStr = JSON.stringify(searchCall?.query?.bool?.filter);
+      expect(filterStr).toContain('securitySolution');
+      expect(filterStr).toContain('isLatest');
+      expect(filterStr).toContain('deletedAt');
+    });
+
+    it('returns templates where YAML parse confirms $ref === fieldName', async () => {
+      // FAILURE SCENARIO: two ES hits returned by match_phrase; one is a genuine
+      // $ref: priority, the other is a false-positive (text that happens to
+      // tokenize as ref+priority but has no actual $ref key). Only the real one
+      // should appear in the result.
+      const service = createService();
+
+      const realRefDefinition = yamlStringify({
+        name: 'Incident Template',
+        fields: [{ $ref: 'priority' }],
+      });
+      const falsePositiveDefinition =
+        // "ref priority" appears as description text — same tokens, no YAML $ref key
+        'name: Other Template\ndescription: "This is a ref priority note"\nfields: []\n';
+
+      const soReal = makeSO('so-real', realRefDefinition, 'Incident Template');
+      const soFalse = makeSO('so-false', falsePositiveDefinition, 'Other Template');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-real'), makeHit('so-false')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject
+        .mockReturnValueOnce(soReal)
+        .mockReturnValueOnce(soFalse);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([{ name: 'Incident Template' }]);
+    });
+
+    it('returns an empty array when no hits are returned from ES', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('skips a template with unparseable YAML rather than blocking the delete', async () => {
+      // FAILURE SCENARIO: a corrupt definition is in ES — the guard must not
+      // throw; it should skip the corrupt template and return [] (unblocked).
+      const service = createService();
+
+      const soCorrupt = makeSO('so-corrupt', ': {not valid yaml', 'Corrupt Template');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-corrupt')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(soCorrupt);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('collects all referencing templates when multiple real references exist', async () => {
+      const service = createService();
+
+      const makeRefDef = (refName: string, templateName: string) =>
+        yamlStringify({ name: templateName, fields: [{ $ref: refName }] });
+
+      const soA = makeSO('so-a', makeRefDef('priority', 'Template A'), 'Template A');
+      const soB = makeSO('so-b', makeRefDef('priority', 'Template B'), 'Template B');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-a'), makeHit('so-b')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(soA).mockReturnValueOnce(soB);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([{ name: 'Template A' }, { name: 'Template B' }]);
+    });
+  });
+
   describe('cases-analytics v2 data view refresh hook', () => {
     // The templates service can't observe template SOs directly — it owns
     // them. So when fields land or change, it has to tell the v2 subsystem
