@@ -108,11 +108,11 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Result:');
-    expect(output).toContain('Process ID: 1234');
-    expect(output).toContain('Entity ID: entity-a');
-    expect(output).toContain('Process name: malware.exe');
-    expect(output).toContain('Process command: malware.exe --run');
+    expect(output).toContain('Action result:');
+    expect(output).toContain('PID 1234');
+    expect(output).toContain('Entity ID entity-a');
+    expect(output).toContain('Name malware.exe');
+    expect(output).toContain('Command malware.exe --run');
   });
 
   it('should only render the output fields that are present in the content', () => {
