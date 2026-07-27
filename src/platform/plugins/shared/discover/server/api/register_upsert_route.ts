@@ -11,14 +11,16 @@ import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { writeErrorHandler } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from './get_route_config';
 import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
 import { upsertDiscoverSession } from './session_upsert';
+import { trackDiscoverSessionAction } from './user_activity';
 
 export const registerUpsertRoute = (
   router: VersionedRouter<RequestHandlerContext>,
+  userActivity: CoreSetup['userActivity'],
   logger: Logger,
   usageCounter: UsageCounter | undefined
 ) => {
@@ -69,6 +71,7 @@ export const registerUpsertRoute = (
               request.params.id,
               request.body
             );
+            trackDiscoverSessionAction(userActivity, operation, body);
 
             return operation === 'create' ? response.created({ body }) : response.ok({ body });
           } catch (error) {
