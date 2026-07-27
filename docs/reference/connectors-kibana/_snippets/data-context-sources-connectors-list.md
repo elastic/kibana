@@ -34,6 +34,9 @@
 **Identity management**
 * [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
 
+**Email security**
+* [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
+
 **Threat intelligence**
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
 * [AlienVault OTX](/reference/connectors-kibana/alienvault-otx-action-type.md): Retrieve community-driven threat intelligence.
