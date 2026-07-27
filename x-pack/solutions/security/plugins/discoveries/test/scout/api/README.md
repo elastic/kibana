@@ -36,7 +36,7 @@ Stop any locally running Elasticsearch and Kibana instances before starting the 
 ### Start the server (stateful)
 
 ```sh
-node scripts/scout.js start-server --location local --arch stateful --domain classic
+node scripts/scout start-server --location local --arch stateful --domain classic
 ```
 
 ### Or serverless (security complete)

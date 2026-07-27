@@ -75,7 +75,7 @@ The generator **does not** create **`tsconfig.json`** files. Playwright runs wit
 
 ## TypeScript layout (`check_types`)
 
-Pick **one** pattern and wire it after `scout.js generate` completes:
+Pick **one** pattern and wire it after `node scripts/scout generate` completes:
 
 ### Pattern A — plugin root includes Scout (e.g. `discover_enhanced`)
 
