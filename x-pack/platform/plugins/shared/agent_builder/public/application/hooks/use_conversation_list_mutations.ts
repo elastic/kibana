@@ -8,12 +8,19 @@
 import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer-v9';
+import { i18n } from '@kbn/i18n';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useNavigation } from './use_navigation';
+import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
+
+const pinnedUpdateErrorTitle = i18n.translate(
+  'xpack.agentBuilder.conversations.pinnedUpdateError',
+  { defaultMessage: 'Failed to update pin status' }
+);
 
 interface UseConversationListMutationsParams {
   routeConversationId: string | undefined;
@@ -27,6 +34,7 @@ export const useConversationListMutations = ({
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const { addErrorToast } = useToasts();
 
   const deleteConversation = useCallback(
     async (conversationId: string) => {
@@ -66,6 +74,14 @@ export const useConversationListMutations = ({
 
   const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
 
+  const rollbackConversationCaches = useCallback(
+    (conversationId: string) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+      queryClient.invalidateQueries({ queryKey: listQueryKey });
+    },
+    [queryClient, listQueryKey]
+  );
+
   const updateReadStatus = useCallback(
     (conversationId: string, read: boolean) => {
       queryClient.setQueryData<Conversation>(
@@ -89,11 +105,10 @@ export const useConversationListMutations = ({
       });
 
       conversationsService.updateReadStatus({ conversationId, read }).catch(() => {
-        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
-        queryClient.invalidateQueries({ queryKey: listQueryKey });
+        rollbackConversationCaches(conversationId);
       });
     },
-    [conversationsService, queryClient, listQueryKey]
+    [conversationsService, queryClient, listQueryKey, rollbackConversationCaches]
   );
 
   const markAsRead = useCallback(
@@ -133,11 +148,11 @@ export const useConversationListMutations = ({
       });
 
       conversationsService.updatePinnedStatus({ conversationId, pinned }).catch(() => {
-        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
-        queryClient.invalidateQueries({ queryKey: listQueryKey });
+        rollbackConversationCaches(conversationId);
+        addErrorToast({ title: pinnedUpdateErrorTitle });
       });
     },
-    [conversationsService, queryClient, listQueryKey]
+    [conversationsService, queryClient, listQueryKey, rollbackConversationCaches, addErrorToast]
   );
 
   const markAsPinned = useCallback(

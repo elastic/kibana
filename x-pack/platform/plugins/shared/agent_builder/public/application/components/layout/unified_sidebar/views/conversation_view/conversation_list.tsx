@@ -16,6 +16,7 @@ import {
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
@@ -92,7 +93,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         spacing="none"
         grow={false}
         isDropDisabled={isDropDisabled}
-        style={{ backgroundColor: 'transparent' }}
+        css={css`
+          background-color: transparent;
+        `}
       >
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
@@ -115,14 +118,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       spacing="none"
       grow={false}
       isDropDisabled={isDropDisabled}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: euiTheme.size.xs,
-        borderRadius: euiTheme.border.radius.small,
-        backgroundColor,
-        transition: 'background-color 0.15s',
-      }}
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.xs};
+        border-radius: ${euiTheme.border.radius.small};
+        background-color: ${backgroundColor};
+        transition: background-color 0.15s;
+      `}
     >
       {sortedConversations.map((conversation, index) => (
         <DraggableConversationItem

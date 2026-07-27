@@ -41,7 +41,7 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
       draggableId={conversation.id}
       index={index}
       spacing="none"
-      isDragDisabled={isStreaming && conversation.status === undefined}
+      isDragDisabled={isStreaming}
     >
       <ConversationListItemRow
         agentId={agentId}
