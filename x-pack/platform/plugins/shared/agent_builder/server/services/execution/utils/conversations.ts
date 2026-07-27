@@ -118,19 +118,6 @@ export const updateConversation$ = ({
   );
 };
 
-/**
- * Check if a conversation exists
- */
-export const conversationExists = async ({
-  conversationId,
-  conversationClient,
-}: {
-  conversationId: string;
-  conversationClient: ConversationClient;
-}): Promise<boolean> => {
-  return conversationClient.exists(conversationId);
-};
-
 export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
@@ -184,7 +171,8 @@ export const getConversation = async ({
   }
 
   // Case 3: Conversation ID specified and autoCreate is true - check if exists
-  const exists = await conversationExists({ conversationId, conversationClient });
+  const exists = await conversationClient.exists(conversationId);
+
   if (exists) {
     return {
       ...(await conversationClient.get(conversationId)),
