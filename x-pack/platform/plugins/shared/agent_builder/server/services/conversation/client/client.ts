@@ -138,16 +138,9 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async exists(conversationId: string): Promise<boolean> {
-    try {
-      await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-      return true;
-    } catch (error) {
-      if (isConversationNotFoundError(error)) {
-        return false;
-      }
+    const document = await this._get(conversationId);
 
-      throw error;
-    }
+    return document !== undefined;
   }
 
   async getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined> {
@@ -193,10 +186,19 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
-    await this.storage.getClient().index({
-      id,
-      document: attributes,
-    });
+    try {
+      await this.storage.getClient().index({
+        id,
+        document: attributes,
+        op_type: 'create',
+      });
+    } catch (error) {
+      if (error?.statusCode === 409) {
+        throw createConversationNotFoundError({ conversationId: id });
+      }
+
+      throw error;
+    }
 
     return this.get(id);
   }

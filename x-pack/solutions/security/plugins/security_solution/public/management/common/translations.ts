@@ -184,6 +184,21 @@ export const CONSOLE_COMMANDS = {
           { defaultMessage: 'The process name to kill' }
         ),
       },
+      killDescendants: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.killDescendants.arg.comment',
+          {
+            defaultMessage: 'Also terminate all descendant (child) processes of the target process',
+          }
+        ),
+        notSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.killDescendants.notSupported',
+          {
+            defaultMessage:
+              'This version of the Endpoint does not support killing process descendants. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+      },
     },
   },
   suspendProcess: {

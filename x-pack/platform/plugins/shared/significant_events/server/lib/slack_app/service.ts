@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
 import type {
+  SlackAppBindingsResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
@@ -23,6 +24,14 @@ import {
 } from './saved_object';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
+
+/** Pagination options for a single page of connected channels. */
+export interface ListBindingsOptions {
+  /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
+  cursor?: string;
+  /** Max entries to return in this page. */
+  perPage?: number;
+}
 
 export class SlackAppService {
   private readonly logger: Logger;
@@ -189,9 +198,7 @@ export class SlackAppService {
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
-      // Do not leak an orphaned key if the Relay never took ownership of it. The
-      // existing connection (if any) is left untouched so a failed reconnect
-      // attempt never breaks an already-working one.
+      // Do not leak an orphaned key if the Relay never took ownership of it.
       await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
       throw error;
     }
@@ -259,8 +266,7 @@ export class SlackAppService {
     // OAuth callback lands on the Relay, not Kibana). The Relay resolves the pending
     // claim from the transport-level deployment identity.
     if (connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
-      // An in-progress install without a claim id cannot be polled (pre-fix
-      // documents, or a partial write): fail it terminally rather than spin.
+      // An in-progress install without a claim id cannot be polled: fail it terminally.
       if (!connection.claimId) {
         return this.failInProgressInstall(
           soClient,
@@ -271,6 +277,22 @@ export class SlackAppService {
       try {
         const claim = await relayClient.fetchClaim(connection.claimId);
         if (claim.status === 'complete') {
+          // A completed claim must carry a tenant key: it's what every connected
+          // operation (listBindings / bind / unbind / disconnect) keys off. Marking
+          // the connection `connected` without one would strand it in a permanently
+          // broken state that never self-heals (getStatus only polls while in
+          // progress). Treat a tenant-less completion as a terminal install failure.
+          if (!claim.tenant_key) {
+            return this.failInProgressInstall(
+              soClient,
+              connection,
+              new RelayRequestError(
+                '/v1/slack/install/claim',
+                502,
+                'completed claim has no tenant key'
+              )
+            );
+          }
           await this.writeConnection(soClient, {
             ...connection,
             tenantKey: claim.tenant_key,
@@ -292,8 +314,86 @@ export class SlackAppService {
     return {
       available: true,
       status: connection.status,
-      error: connection.error,
+      ...(connection.error ? { error: connection.error } : {}),
     };
+  }
+
+  async listBindings(
+    request: KibanaRequest,
+    options: ListBindingsOptions = {}
+  ): Promise<SlackAppBindingsResponse> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+
+    if (!relayClient) {
+      return { bindings: [] };
+    }
+
+    if (connection?.status !== RELAY_APP_CONNECTION_STATUS.connected || !connection.tenantKey) {
+      return { bindings: [] };
+    }
+
+    let page;
+    try {
+      page = await relayClient.listBindings(connection.tenantKey, {
+        cursor: options.cursor,
+        limit: options.perPage,
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to list bindings from Relay: ${this.toErrorMessage(error)}`);
+      throw error;
+    }
+
+    // The Relay returns only this deployment's own SUB bindings (the connected channels),
+    // each carrying its persisted display snapshot, so no additional Slack call is needed.
+    const bindings: SlackAppBindingsResponse['bindings'] = [];
+    for (const entry of page.bindings) {
+      if (entry.scope_id == null) {
+        continue;
+      }
+      const binding: SlackAppBindingsResponse['bindings'][number] = {
+        channel: entry.scope_id,
+        status: 'bound_to_self',
+      };
+      if (entry.display_name != null) {
+        binding.displayName = entry.display_name;
+      }
+      bindings.push(binding);
+    }
+
+    return { bindings, nextCursor: page.nextCursor };
+  }
+
+  private async requireConnectedTenant(
+    request: KibanaRequest
+  ): Promise<{ relayClient: RelayClientContract; tenantKey: string }> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+    if (!relayClient) {
+      throw new SlackAppUnavailableError(
+        'The Elastic Slack App is not available on this deployment'
+      );
+    }
+    if (connection?.status !== RELAY_APP_CONNECTION_STATUS.connected || !connection.tenantKey) {
+      throw new SlackAppUnavailableError('Connection is not in a connected state');
+    }
+    return { relayClient, tenantKey: connection.tenantKey };
+  }
+
+  async bindChannel(request: KibanaRequest, channelId: string): Promise<void> {
+    const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
+    await relayClient.bind(tenantKey, channelId);
+  }
+
+  async unbindChannel(request: KibanaRequest, channelId: string): Promise<void> {
+    const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
+    await relayClient.unbindChannel(tenantKey, channelId);
   }
 
   async disconnect(request: KibanaRequest): Promise<SlackAppDisconnectResponse> {
@@ -304,22 +404,23 @@ export class SlackAppService {
     ]);
 
     if (!connection) {
-      return { success: true };
+      return { status: 'disconnected' };
     }
 
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');
     }
 
-    if (relayClient) {
+    // Only ask the Relay to unbind if this connection has a tenantKey: an in-progress
+    // install (no tenantKey) has no Relay-side binding to tear down yet.
+    if (relayClient && connection.tenantKey) {
       try {
-        await relayClient.unbind();
+        await relayClient.unbind(connection.tenantKey);
       } catch (error) {
         // The Relay's own contract requires the caller never see success while a
         // binding survives (a partial teardown returns 502 and must be retried).
         // Keep the connection record in an `error` state instead of deleting it,
-        // so the settings UI surfaces the failure and the user can retry rather
-        // than believing they're disconnected while the workspace stays bound.
+        // so the settings UI surfaces the failure and the user can retry.
         const message = this.toErrorMessage(error);
         this.logger.warn(`Failed to unbind from Relay on disconnect: ${message}`);
         await this.writeConnection(soClient, {
@@ -328,7 +429,10 @@ export class SlackAppService {
           apiKeyId: null,
           error: message,
         });
-        return { success: false };
+        // Surface the failure to the caller instead of a misleading success: the
+        // route maps this to a retryable 5xx and the connection stays in `error`
+        // state so the settings UI shows it and the user can retry.
+        throw error;
       }
     }
 
@@ -340,6 +444,6 @@ export class SlackAppService {
         }
       });
 
-    return { success: true };
+    return { status: 'disconnected' };
   }
 }
