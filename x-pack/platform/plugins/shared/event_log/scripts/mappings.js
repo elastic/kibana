@@ -478,6 +478,10 @@ exports.EcsCustomPropertyMappings = {
         properties: {
           dispatcher: {
             properties: {
+              failure_reason: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               episode_count: {
                 type: 'long',
               },

@@ -335,8 +335,9 @@ describe('StoreExecutionHistoryStep', () => {
     ]);
     expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
       failure_reason: 'workflow_disabled',
-      action_group_id: 'group-1',
-      workflow_id: 'wf-a',
+      action_group_count: 1,
+      action_group_ids: ['group-1'],
+      workflow_ids: ['wf-a'],
       episode_count: 2,
       episode_ids: ['ep-1', 'ep-2'],
       rule_count: 2,

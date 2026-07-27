@@ -67,8 +67,9 @@ interface UnmatchedDispatcherFields {
 
 interface DispatchFailureDispatcherFields {
   failure_reason: DispatchFailureReason;
-  action_group_id: ActionGroupId;
-  workflow_id: string;
+  action_group_count: number;
+  action_group_ids: ActionGroupId[];
+  workflow_ids: string[];
   episode_count: number;
   episode_ids: string[];
   rule_count: number;
@@ -256,8 +257,9 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
         savedObjects: refs,
         dispatcherFields: {
           failure_reason: failure.reason,
-          action_group_id: failure.actionGroupId,
-          workflow_id: failure.workflowId,
+          action_group_count: 1,
+          action_group_ids: [failure.actionGroupId],
+          workflow_ids: [failure.workflowId],
           episode_count: episodeIds.length,
           episode_ids: episodeIds,
           rule_count: ruleIds.length,
