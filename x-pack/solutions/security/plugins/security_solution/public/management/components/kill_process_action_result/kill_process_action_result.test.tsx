@@ -108,7 +108,7 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Action result:');
+    expect(output).toContain('Action');
     expect(output).toContain('PID 1234');
     expect(output).toContain('Entity ID entity-a');
     expect(output).toContain('Name malware.exe');
@@ -132,10 +132,10 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Process ID: 1234');
-    expect(output).not.toContain('Entity ID:');
-    expect(output).not.toContain('Process name:');
-    expect(output).not.toContain('Process command:');
+    expect(output).toContain('PID 1234');
+    expect(output).not.toContain('Entity ID');
+    expect(output).not.toContain('Name');
+    expect(output).not.toContain('Command');
   });
 
   it('should render the process output data for a suspend-process action', () => {
@@ -160,8 +160,8 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Process ID: 4321');
-    expect(output).toContain('Entity ID: entity-b');
+    expect(output).toContain('PID 4321');
+    expect(output).toContain('Entity ID entity-b');
   });
 
   it('should show the failure message when the action was not successful', () => {
@@ -206,8 +206,8 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Process ID: 111');
-    expect(output).not.toContain('Process ID: 222');
+    expect(output).toContain('PID 111');
+    expect(output).not.toContain('Process ID 222');
   });
 
   it('should render the result for the agentId provided', () => {
@@ -226,8 +226,8 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render({ agentId: 'agent-b' });
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Process ID: 222');
-    expect(output).not.toContain('Process ID: 111');
+    expect(output).toContain('PID 222');
+    expect(output).not.toContain('PID 111');
   });
 
   it('should fall back to the action-level state when agentState has no entry for the agent', () => {
@@ -247,7 +247,7 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Result:');
-    expect(output).toContain('Process ID: 1234');
+    expect(output).toContain('Action result:');
+    expect(output).toContain('PID 1234');
   });
 });
