@@ -91,6 +91,21 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery
   });
 
 /**
+ * Extract only event IDs explicitly supplied by the agent to `discovery_write`.
+ * Unlike `extractDiscoveriesFromToolCall`, this intentionally ignores handler-generated IDs so
+ * evaluators can distinguish the agent's continuation routing from the final write outcome.
+ */
+export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): string[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.discoveryWrite).flatMap((step) => {
+    const items = Array.isArray(step.params?.items)
+      ? (step.params.items as Array<Partial<Discovery>>)
+      : [];
+    return items
+      .map((item) => item.event_id)
+      .filter((eventId): eventId is string => typeof eventId === 'string' && eventId.length > 0);
+  });
+
+/**
  * Extract significant events from `events_write` tool call steps.
  * Merges generated identifiers from successful tool results into their corresponding inputs.
  */
