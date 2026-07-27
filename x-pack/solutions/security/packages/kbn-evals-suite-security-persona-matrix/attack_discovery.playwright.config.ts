@@ -11,7 +11,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
  * Dedicated config for the co-located Attack Discovery (Chrysalis kill-chain) spec.
  * Isolated from the persona-matrix spec via testIgnore so it can run under the
  * evals_tracing server config (trace-based evaluators: Latency / Tool Calls /
- * tokens) while persona-matrix keeps evals_security_ai_rules.
+ * tokens) while persona-matrix keeps evals_security_persona_matrix.
  */
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,

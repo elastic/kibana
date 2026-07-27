@@ -8,7 +8,7 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 // Eval-harness capture side-channel: writes the verbatim model answer to a
-// local gitignored JSONL that feeds agent_eval_full.html.
+// local gitignored JSONL for offline report rendering.
 // eslint-disable-next-line @kbn/eslint/require_kbn_fs, import/no-nodejs-modules
 import { appendFileSync } from 'fs';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';

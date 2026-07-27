@@ -10,7 +10,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
   // The co-located Attack Discovery spec runs under its own config
-  // (playwright.attack_discovery.config.ts) with the evals_tracing server config.
+  // (attack_discovery.playwright.config.ts) with the evals_tracing server config.
   testIgnore: '**/attack_discovery.spec.ts',
   timeout: 30 * 60_000,
 });

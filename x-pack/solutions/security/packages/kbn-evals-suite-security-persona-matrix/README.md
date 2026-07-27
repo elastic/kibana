@@ -8,40 +8,23 @@ designed for multi-model comparison and persona-driven reporting.
 | Category | Prompts | Primary skills tested |
 |---|---|---|
 | Alert Analysis | 3 | alert-analysis |
-| Detection Rule Edit | 3 | detection-rule-creation |
+| Detection Rule Edit | 3 | detection-rule-edit |
 | Entity Analytics | 3 | entity-analytics |
-| Threat Hunting | 3 | threat-intel-hunt |
+| Threat Hunting | 3 | threat-hunting |
 | Workflow Authoring | 3 | workflow-authoring |
-| Workflow Execution | 3 | security-tools |
-| Multi-Step | 3 | alert-analysis, security-tools, workflow-authoring |
+| Workflow Execution | 3 | workflow-authoring, cases-management |
+| Multi-Step | 3 | security-multi-step |
 
 ## Evaluators
 
 - **Skill Invocation** — verifies the correct skill was activated via trace inspection
 - **ExpectedToolCalled** — checks the primary expected tool was invoked (from `expectedTools` metadata)
 - **Trajectory** — tool-call sequence similarity vs golden path
-- **CorrectnessAnalysis** — structured LLM judge (Factuality, Relevance, Completeness)
-- **AB Correctness** — Agent Builder correctness evaluators
+- **correctnessAnalysis** — structured LLM judge (Factuality, Relevance, Completeness)
+- **groundednessAnalysis** — structured LLM judge for response groundedness
 - **Criteria** — generic rubric (Relevance, Clarity, Accuracy, Completeness)
 - **Trace-based** — input tokens, output tokens, cached tokens, tool calls, latency
 
 ## Fixtures
 
 - **Chrysalis alerts** — seeds 3 sample alerts before evaluation, cleaned up after
-
-## Report generation
-
-The `scripts/` directory contains a TypeScript report generator that fetches score
-documents from Elasticsearch and produces persona matrix HTML reports.
-
-```bash
-# From the scripts/ directory
-KBN_EVALS_ES_URL=http://localhost:9222 npx tsx generate_reports.ts
-```
-
-Outputs:
-- `llm_persona_matrix.html` — role-based model selection matrix
-- `token_usage_overview_matrix.html` — per-category token efficiency
-- `attack_discovery_results.html` — attack discovery model comparison
-- `index.html` — report landing page
-- `agent_eval.jsonl` — raw per-prompt evaluation data

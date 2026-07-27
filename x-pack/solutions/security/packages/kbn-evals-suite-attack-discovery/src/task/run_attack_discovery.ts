@@ -97,14 +97,14 @@ const generateInsights = async ({
 };
 
 /**
- * Optional side-channel capture for the real-run attack_discovery_results.html.
+ * Optional side-channel capture for offline report rendering.
  * The golden `.evaluation-scores` export stores only evaluator scores, and the
  * inner generation LLM span is not reliably exported to the trace store, so we
  * capture the verbatim generated insights (Chrysalis single-generation shape) here.
  * Opt-in via PERSONA_MATRIX_CAPTURE_AD + gitignored output -> CI-safe (no effect
  * when the env var is unset). Fires on BOTH the success path and the caught-error
  * path so a model that errors (e.g. Opus JSON-parse failure) is faithfully
- * recorded as a red error row, exactly like the reference report.
+ * recorded as a red error row.
  */
 function captureAdRun(
   log: ToolingLog,

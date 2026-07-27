@@ -17,7 +17,7 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * breadth-first persona matrix always exercises the full skill surface, not just
  * the subset that happens to be on by default. Catching skill-routing/registration
  * regressions here (rather than only in each skill's own narrower eval suite) is
- * the point of this suite per the daybreak Evaluation & Trust review checklist.
+ * the point of this suite.
  *
  * Enabled via `xpack.securitySolution.enableExperimental`:
  * - automaticTroubleshootingSkill   (elastic-defend-configuration-troubleshooting)
