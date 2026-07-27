@@ -46,6 +46,7 @@ const baseConfig: RelationshipIntegrationConfig = {
 const probeColumns = [
   { name: 'sliceBoundary', type: 'date' },
   { name: 'actorCount', type: 'long' },
+  { name: 'actorIds', type: 'keyword' },
 ];
 
 const boundaryColumns = [{ name: 'extendedSliceEnd', type: 'date' }];
@@ -61,8 +62,9 @@ describe('runLogsIntegration', () => {
     const { crudClient, entityMetadataClient } = makeClients();
     const logger = loggerMock.create();
 
-    // Probe returns empty → isLastSlice=true, no actors
-    esql.mockResolvedValueOnce({ columns: probeColumns, values: [] });
+    // Sampled probe returns empty → fallback to full probe, also empty → no actors
+    esql.mockResolvedValueOnce({ columns: probeColumns, values: [] }); // sampled
+    esql.mockResolvedValueOnce({ columns: probeColumns, values: [] }); // full (fallback)
 
     const result = await runLogsIntegration(
       baseConfig,
@@ -77,7 +79,7 @@ describe('runLogsIntegration', () => {
 
     expect(result.outcome).toBe('empty');
     expect(result.slices).toBe(0);
-    expect(esql).toHaveBeenCalledTimes(1); // probe only, no boundary/extract
+    expect(esql).toHaveBeenCalledTimes(2); // sampled probe + full probe fallback
   });
 
   it('runs probe → extract → write for a single (last) slice', async () => {
@@ -88,7 +90,7 @@ describe('runLogsIntegration', () => {
     // Probe: 1 actor found (< COMPOSITE_PAGE_SIZE → isLastSlice=true, skip boundary)
     esql.mockResolvedValueOnce({
       columns: probeColumns,
-      values: [['2026-06-27T00:00:00.000Z', 1]],
+      values: [['2026-06-27T00:00:00.000Z', 1, ['user:alice@host-123@local']]],
     });
     // Extract: one actor with one target (no boundary call for last slice)
     esql.mockResolvedValueOnce({
@@ -123,7 +125,7 @@ describe('runLogsIntegration', () => {
     // Slice 1 probe: saturated (actorCount == COMPOSITE_PAGE_SIZE) → isLastSlice=false
     esql.mockResolvedValueOnce({
       columns: probeColumns,
-      values: [['2026-06-27T00:00:00.000Z', COMPOSITE_PAGE_SIZE]],
+      values: [['2026-06-27T00:00:00.000Z', COMPOSITE_PAGE_SIZE, ['user:alice@host-1@local']]],
     });
     // Slice 1 boundary
     esql.mockResolvedValueOnce({
@@ -136,7 +138,7 @@ describe('runLogsIntegration', () => {
     // Slice 2 probe: not saturated → isLastSlice=true (no boundary call)
     esql.mockResolvedValueOnce({
       columns: probeColumns,
-      values: [['2026-06-28T00:00:00.000Z', 10]],
+      values: [['2026-06-28T00:00:00.000Z', 10, ['user:bob@host-2@local']]],
     });
     // Slice 2 extract: empty (boundary skipped — last slice uses 'now')
     esql.mockResolvedValueOnce({ columns: extractColumns, values: [] });
@@ -187,7 +189,7 @@ describe('runLogsIntegration', () => {
     // Probe: 1 actor (< COMPOSITE_PAGE_SIZE → isLastSlice=true)
     esql.mockResolvedValueOnce({
       columns: probeColumns,
-      values: [['2026-06-27T00:00:00.000Z', 1]],
+      values: [['2026-06-27T00:00:00.000Z', 1, ['user:alice@host-1@local']]],
     });
     // No boundary call expected — last slice goes to 'now'
     // Extract

@@ -84,8 +84,8 @@ describe('buildActorSliceProbeQuery', () => {
       | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
       | STATS _firstEvent = MIN(@timestamp) BY actorUserId
       | SORT _firstEvent ASC
-      | LIMIT 3500
-      | STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*)"
+      | LIMIT 2
+      | STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*), actorIds = VALUES(actorUserId)"
     `);
   });
 
@@ -133,8 +133,8 @@ describe('buildActorSliceProbeQuery', () => {
       | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
       | STATS _firstEvent = MIN(@timestamp) BY actorUserId
       | SORT _firstEvent ASC
-      | LIMIT 3500
-      | STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*)"
+      | LIMIT 2
+      | STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*), actorIds = VALUES(actorUserId)"
     `);
   });
 
@@ -154,11 +154,12 @@ describe('parseActorSliceProbeResult', () => {
       [
         { name: 'sliceBoundary', type: 'date' },
         { name: 'actorCount', type: 'long' },
+        { name: 'actorIds', type: 'keyword' },
       ],
       [],
       COMPOSITE_PAGE_SIZE
     );
-    expect(result).toEqual({ sliceBoundary: null, isLastSlice: true });
+    expect(result).toEqual({ sliceBoundary: null, isLastSlice: true, actorIds: [] });
   });
 
   it('returns isLastSlice=true when actorCount < maxActors', () => {
@@ -166,11 +167,16 @@ describe('parseActorSliceProbeResult', () => {
       [
         { name: 'sliceBoundary', type: 'date' },
         { name: 'actorCount', type: 'long' },
+        { name: 'actorIds', type: 'keyword' },
       ],
-      [['2026-06-27T00:00:00.000Z', 42]],
+      [['2026-06-27T00:00:00.000Z', 42, ['alice', 'bob']]],
       COMPOSITE_PAGE_SIZE
     );
-    expect(result).toEqual({ sliceBoundary: '2026-06-27T00:00:00.000Z', isLastSlice: true });
+    expect(result).toEqual({
+      sliceBoundary: '2026-06-27T00:00:00.000Z',
+      isLastSlice: true,
+      actorIds: ['alice', 'bob'],
+    });
   });
 
   it('returns isLastSlice=false when actorCount == maxActors', () => {
@@ -178,10 +184,15 @@ describe('parseActorSliceProbeResult', () => {
       [
         { name: 'sliceBoundary', type: 'date' },
         { name: 'actorCount', type: 'long' },
+        { name: 'actorIds', type: 'keyword' },
       ],
-      [['2026-06-27T00:00:00.000Z', 3500]],
+      [['2026-06-27T00:00:00.000Z', 3500, 'single-actor']],
       COMPOSITE_PAGE_SIZE
     );
-    expect(result).toEqual({ sliceBoundary: '2026-06-27T00:00:00.000Z', isLastSlice: false });
+    expect(result).toEqual({
+      sliceBoundary: '2026-06-27T00:00:00.000Z',
+      isLastSlice: false,
+      actorIds: ['single-actor'],
+    });
   });
 });
