@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css, keyframes } from '@emotion/react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -14,8 +14,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -30,6 +28,7 @@ import {
   getResolvedEvents,
 } from '../event/significant_event_status';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import {
   buildBlastRadiusChips,
   filterEventsByBlastRadiusChip,
@@ -39,10 +38,38 @@ import { SignificantEventList } from '../landing/significant_event_list';
 import { SignificantEventStatuses } from '../landing/significant_event_statuses';
 import { EventFlyout } from '../event/event_flyout';
 import { NightshiftHeader } from './nightshift_header';
+import { NightshiftEmptyState } from './nightshift_empty_state';
 import { NIGHTSHIFT_EVENT_UUID_QUERY_PARAM } from '../common/nightshift_url_params';
 
 // Kept in the URL so a refresh or a shared link restores the open flyout.
 const BLAST_RADIUS_QUERY_PARAM = 'blastRadius';
+const HAPPY_PATH_TRANSITION_MS = 400;
+
+const loadingStateExitAnimation = keyframes`
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.985);
+  }
+`;
+
+const happyPathEntryAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const setElementInert = (element: HTMLDivElement | null): void => {
+  element?.setAttribute('inert', '');
+};
 
 interface SelectedEventIdentity {
   eventId: string;
@@ -56,8 +83,11 @@ export function NightshiftApp(): React.ReactElement {
   const { search } = useLocation();
   const needsActionSectionRef = useRef<HTMLElement>(null);
   const resolvedSectionRef = useRef<HTMLElement>(null);
+  const [isTransitioningFromLoading, setIsTransitioningFromLoading] = useState(false);
 
   const { data, error: eventsError, isLoading, refetch } = useFetchSignificantEvents();
+  const { closeEvent, closingEventUuid } = useCloseSignificantEvent();
+  const wasLoadingRef = useRef(isLoading);
 
   const events = useMemo(() => data?.hits ?? [], [data]);
 
@@ -86,6 +116,9 @@ export function NightshiftApp(): React.ReactElement {
   const showAllEventsHref = application.getUrlForApp('streams', {
     deepLinkId: 'significantEventsEvents',
   });
+  const emptyStateLogsHref = application.getUrlForApp('streams', {
+    path: '/_discovery/significant_events?rangeFrom=now-24h&rangeTo=now',
+  });
 
   const handleChatClick = useCallback(
     (event: SignificantEvent) => {
@@ -94,6 +127,10 @@ export function NightshiftApp(): React.ReactElement {
     [agentBuilder]
   );
   const onChatClick = agentBuilder ? handleChatClick : undefined;
+  const handleCloseEvent = useCallback(
+    (event: SignificantEvent) => closeEvent(event.event_uuid),
+    [closeEvent]
+  );
 
   const handleEventClick = useCallback(
     (event: SignificantEvent) => {
@@ -219,6 +256,35 @@ export function NightshiftApp(): React.ReactElement {
 
   const hasEvents = shownEvents.length > 0;
   const hasNeedsAction = needsActionEvents.length > 0;
+  const isEmptyState = isLoading || !hasEvents;
+
+  useLayoutEffect(() => {
+    const shouldTransitionToHappyPath =
+      wasLoadingRef.current && !isLoading && hasEvents && !eventsError;
+    wasLoadingRef.current = isLoading;
+
+    if (!shouldTransitionToHappyPath) {
+      if (isLoading) {
+        setIsTransitioningFromLoading(false);
+      }
+      return;
+    }
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    setIsTransitioningFromLoading(true);
+    const transitionTimeout = window.setTimeout(
+      () => setIsTransitioningFromLoading(false),
+      HAPPY_PATH_TRANSITION_MS
+    );
+
+    return () => window.clearTimeout(transitionTimeout);
+  }, [eventsError, hasEvents, isLoading]);
 
   usePageReady({
     isReady: !isLoading && !eventsError,
@@ -250,62 +316,45 @@ export function NightshiftApp(): React.ReactElement {
       gutterSize="none"
       responsive={false}
       css={css`
+        align-items: ${isEmptyState ? 'center' : 'stretch'};
         background: ${euiTheme.colors.backgroundBaseSubdued};
+        box-sizing: border-box;
+        gap: ${isEmptyState ? euiTheme.size.xl : 0};
+        justify-content: ${isEmptyState ? 'center' : 'flex-start'};
         margin-top: ${euiTheme.size.l};
-        padding: ${euiTheme.size.xxl} 0 calc(${euiTheme.size.xxl} * 1.5);
+        min-height: ${isEmptyState || isTransitioningFromLoading ? 'calc(100vh - 140px)' : 'auto'};
+        padding: ${euiTheme.size.xxl} ${isEmptyState ? euiTheme.size.xl : 0}
+          calc(${euiTheme.size.xxl} * 1.5);
+        position: relative;
       `}
     >
       <NightshiftHeader
+        isEmptyState={isEmptyState}
         isLoading={isLoading}
         hasNeedsAction={hasNeedsAction}
-        showAllEventsHref={showAllEventsHref}
+        showAllEventsHref={hasEvents ? showAllEventsHref : undefined}
       />
 
-      {isLoading ? (
-        <EuiFlexItem
-          css={css`
-            margin-top: ${euiTheme.size.l};
-          `}
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="center"
-            responsive={false}
-            css={css`
-              min-height: calc(${euiTheme.size.xxl} * 4);
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner
-                size="xl"
-                aria-label={i18n.translate('xpack.observability.nightshift.loadingLabel', {
-                  defaultMessage: 'Loading significant events',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ) : !hasEvents ? (
-        <>
-          <EuiFlexItem
-            css={css`
-              margin-top: ${euiTheme.size.l};
-            `}
-          >
-            <EuiPanel hasBorder hasShadow={false} paddingSize="l" color="subdued">
-              <EuiText textAlign="center" color="subdued" size="s">
-                <p>
-                  {i18n.translate('xpack.observability.nightshift.allClearDescription', {
-                    defaultMessage:
-                      'No significant events were detected. Nothing needs your attention.',
-                  })}
-                </p>
-              </EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        </>
+      {isEmptyState ? (
+        <NightshiftEmptyState isProcessing={isLoading} logsHref={emptyStateLogsHref} />
       ) : (
-        <>
+        <div
+          data-test-subj="nightshiftHappyPath"
+          css={[
+            css`
+              width: 100%;
+
+              @media (prefers-reduced-motion: reduce) {
+                animation: none;
+              }
+            `,
+            isTransitioningFromLoading &&
+              css`
+                animation: ${happyPathEntryAnimation} ${HAPPY_PATH_TRANSITION_MS}ms
+                  ${euiTheme.animation.resistance} both;
+              `,
+          ]}
+        >
           {eventsError && (
             <EuiFlexItem
               css={css`
@@ -392,7 +441,9 @@ export function NightshiftApp(): React.ReactElement {
                         : undefined
                     }
                     onChatClick={onChatClick}
+                    onCloseClick={handleCloseEvent}
                     onEventClick={handleEventClick}
+                    closingEventUuid={closingEventUuid}
                     sectionRef={needsActionSectionRef}
                     selectedEventUuid={selectedEventUuid}
                     statusColor="danger"
@@ -402,30 +453,60 @@ export function NightshiftApp(): React.ReactElement {
                   />
                 </EuiFlexItem>
               )}
-              {resolvedEvents.length > 0 && (
-                <EuiFlexItem>
-                  <SignificantEventList
-                    events={visibleResolvedEvents}
-                    filterActive={Boolean(activeBlastRadiusChip)}
-                    onClearFilter={
-                      activeBlastRadiusChip
-                        ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
-                        : undefined
-                    }
-                    onChatClick={onChatClick}
-                    onEventClick={handleEventClick}
-                    sectionRef={resolvedSectionRef}
-                    selectedEventUuid={selectedEventUuid}
-                    statusColor="success"
-                    title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
-                      defaultMessage: 'Resolved',
-                    })}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem>
+                <SignificantEventList
+                  events={visibleResolvedEvents}
+                  filterActive={Boolean(activeBlastRadiusChip && resolvedEvents.length > 0)}
+                  onClearFilter={
+                    activeBlastRadiusChip && resolvedEvents.length > 0
+                      ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
+                      : undefined
+                  }
+                  onChatClick={onChatClick}
+                  onCloseClick={handleCloseEvent}
+                  onEventClick={handleEventClick}
+                  closingEventUuid={closingEventUuid}
+                  sectionRef={resolvedSectionRef}
+                  selectedEventUuid={selectedEventUuid}
+                  statusColor="success"
+                  title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
+                    defaultMessage: 'Resolved',
+                  })}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        </>
+        </div>
+      )}
+
+      {isTransitioningFromLoading && (
+        <div
+          aria-hidden={true}
+          data-test-subj="nightshiftLoadingExitTransition"
+          ref={setElementInert}
+          css={css`
+            align-items: center;
+            animation: ${loadingStateExitAnimation} ${HAPPY_PATH_TRANSITION_MS}ms
+              ${euiTheme.animation.resistance} both;
+            background: ${euiTheme.colors.backgroundBaseSubdued};
+            display: flex;
+            flex-direction: column;
+            gap: ${euiTheme.size.xl};
+            inset: 0;
+            justify-content: center;
+            padding: ${euiTheme.size.xxl} ${euiTheme.size.xl} calc(${euiTheme.size.xxl} * 1.5);
+            pointer-events: none;
+            position: absolute;
+            z-index: 1;
+
+            @media (prefers-reduced-motion: reduce) {
+              animation: none;
+            }
+          `}
+        >
+          <NightshiftHeader isEmptyState isLoading />
+          <NightshiftEmptyState isProcessing logsHref={emptyStateLogsHref} />
+        </div>
       )}
 
       {selectedEvent && selectedEventVisible && (

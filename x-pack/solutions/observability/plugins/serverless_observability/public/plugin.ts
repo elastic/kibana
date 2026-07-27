@@ -12,6 +12,7 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
@@ -45,9 +46,14 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, navigation, management, security, workflowsManagement } = setupDeps;
+    const { observability, serverless, navigation, management, security, workflowsManagement } =
+      setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const significantEventsAvailable = core.featureFlags.getBooleanValue(
+      STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+      false
+    );
 
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
@@ -56,6 +62,8 @@ export class ServerlessObservabilityPlugin
       map(([{ status }, chatExperience]) => {
         return createNavigationTree({
           core,
+          significantEventsAvailable,
+          nightshiftNavigationIcon: observability.nightshift.navigationIcon,
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),

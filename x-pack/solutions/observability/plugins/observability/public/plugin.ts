@@ -72,11 +72,13 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -103,6 +105,12 @@ import {
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
 import { TelemetryService } from './services/telemetry/telemetry_service';
+import { createNightshiftGlobalSearchProvider } from './pages/nightshift/app/nightshift_global_search_provider';
+import { NightshiftNavigationIcon } from './pages/nightshift/app/nightshift_mark_icon';
+
+const nightshiftTitle = i18n.translate('xpack.observability.nightshiftLinkTitle', {
+  defaultMessage: 'Nightshift',
+});
 
 export interface ConfigSchema {
   unsafe: {
@@ -143,6 +151,7 @@ export interface ObservabilityPublicPluginsSetup {
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -206,6 +215,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private significantEventsAvailable = false;
   private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
@@ -223,9 +233,7 @@ export class Plugin
     },
     {
       id: 'nightshift',
-      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
-        defaultMessage: 'Nightshift',
-      }),
+      title: nightshiftTitle,
       order: 8002,
       path: NIGHTSHIFT_PATH,
       visibleIn: [],
@@ -365,6 +373,12 @@ export class Plugin
     };
 
     coreSetup.application.register(app);
+    pluginsSetup.globalSearch?.registerResultProvider(
+      createNightshiftGlobalSearchProvider({
+        isAvailable: () => this.significantEventsAvailable,
+        title: nightshiftTitle,
+      })
+    );
 
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
@@ -546,10 +560,22 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    this.significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
+      STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+      false
+    );
+    const deepLinks = this.deepLinks.map<AppDeepLink>((deepLink) =>
+      deepLink.id === 'nightshift'
+        ? {
+            ...deepLink,
+            visibleIn: this.significantEventsAvailable ? ['projectSideNav'] : [],
+          }
+        : deepLink
+    );
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
     });
@@ -575,6 +601,9 @@ export class Plugin
 
     return {
       config,
+      nightshift: {
+        navigationIcon: NightshiftNavigationIcon,
+      },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
     };

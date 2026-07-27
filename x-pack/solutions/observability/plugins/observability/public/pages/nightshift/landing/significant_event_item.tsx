@@ -7,7 +7,14 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
@@ -27,6 +34,8 @@ export interface SignificantEventItemProps {
   isSelected?: boolean;
   onClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
+  onCloseClick?: (event: SignificantEvent) => void;
+  isClosing?: boolean;
 }
 
 export function SignificantEventItem({
@@ -34,6 +43,8 @@ export function SignificantEventItem({
   isSelected = false,
   onClick,
   onChatClick,
+  onCloseClick,
+  isClosing = false,
 }: SignificantEventItemProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const statusColor = getStatusColor(event.status);
@@ -163,6 +174,42 @@ export function SignificantEventItem({
                           fill: currentColor !important;
                         }
                       `}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {onCloseClick && event.status !== 'closed' && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.observability.nightshift.event.closeEventTooltip',
+                      {
+                        defaultMessage: 'Close significant event',
+                      }
+                    )}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.observability.nightshift.event.closeEventButtonAriaLabel',
+                        {
+                          defaultMessage: 'Close {eventTitle}',
+                          values: { eventTitle: event.title },
+                        }
+                      )}
+                      color="text"
+                      data-prevent-row-click
+                      data-test-subj="nightshiftCloseSignificantEventButton"
+                      {...getEbtProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
+                        detail: event.status,
+                      })}
+                      iconType="cross"
+                      isDisabled={isClosing}
+                      isLoading={isClosing}
+                      onClick={() => onCloseClick(event)}
+                      size="s"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

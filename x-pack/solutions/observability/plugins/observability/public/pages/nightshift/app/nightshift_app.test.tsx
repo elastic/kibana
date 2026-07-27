@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { usePageReady } from '@kbn/ebt-tools';
@@ -13,9 +13,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './nightshift_app';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { useKibana } from '../../../utils/kibana_react';
 
 jest.mock('../hooks/use_fetch_significant_events');
+jest.mock('../hooks/use_close_significant_event');
 jest.mock('../../../utils/kibana_react');
 jest.mock('@kbn/ebt-tools');
 
@@ -32,6 +34,7 @@ jest.mock('../event/event_flyout', () => ({
 }));
 
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
+const mockUseCloseSignificantEvent = useCloseSignificantEvent as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 
@@ -102,6 +105,10 @@ describe('NightshiftApp', () => {
   beforeEach(() => {
     openChat.mockClear();
     mockUsePageReady.mockClear();
+    mockUseCloseSignificantEvent.mockReturnValue({
+      closeEvent: jest.fn(),
+      closingEventUuid: undefined,
+    });
     scrollIntoView.mockClear();
     Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
       configurable: true,
@@ -110,7 +117,10 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: { openChat },
-        application: { getUrlForApp: () => '/events' },
+        application: {
+          getUrlForApp: (_appId: string, options?: { path?: string }) =>
+            options?.path ? `/app/streams${options.path}` : '/events',
+        },
       },
     });
     setEvents();
@@ -149,13 +159,36 @@ describe('NightshiftApp', () => {
     );
   });
 
-  it('shows only the checking hero while loading', () => {
+  it('shows the processing empty state while loading', () => {
     setEvents({ isLoading: true });
     renderWithIntl();
-    expect(screen.getByText('Running a quick check')).toBeInTheDocument();
+    expect(screen.getByText('Looking into your data...')).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Checking streams, entities, and detections' })
+    ).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByText('Streams')).toBeInTheDocument();
+    expect(screen.getByText('Entities')).toBeInTheDocument();
+    expect(screen.getByText('Detections')).toBeInTheDocument();
     expect(screen.queryByText('Some significant events need action')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Need action:/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Resolved:/ })).not.toBeInTheDocument();
+  });
+
+  it('animates from the loading state into the populated landing page', () => {
+    setEvents({ isLoading: true });
+    const { rerender } = renderWithIntl();
+
+    setEvents({ events: [mockEvent()] });
+    rerender(
+      <I18nProvider>
+        <MemoryRouter>
+          <NightshiftApp />
+        </MemoryRouter>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftLoadingExitTransition')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftHappyPath')).toBeInTheDocument();
   });
 
   it('renders summary cards with correct counts', () => {
@@ -179,6 +212,19 @@ describe('NightshiftApp', () => {
     );
     expect(container.querySelector('[data-euiicon-type="faceNeutral"]')).toBeInTheDocument();
     expect(container.querySelector('[data-euiicon-type="faceHappy"]')).toBeInTheDocument();
+  });
+
+  it('renders the resolved section empty state when no events are resolved', () => {
+    setEvents({ events: [mockEvent({ status: 'open' })] });
+    renderWithIntl();
+
+    const resolvedHeading = screen.getByRole('heading', { name: 'Resolved' });
+    const resolvedSection = resolvedHeading.closest('section');
+
+    expect(resolvedSection).not.toBeNull();
+    expect(
+      within(resolvedSection as HTMLElement).getByText('No significant events found')
+    ).toBeInTheDocument();
   });
 
   it('scrolls to the event lists from the summary cards', () => {
@@ -316,15 +362,33 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: /service-a/i })).toBeInTheDocument();
   });
 
-  it('shows an all-clear hero and message when there are no events', () => {
+  it('shows the completed empty state when there are no events', () => {
     setEvents({ events: [] });
     renderWithIntl();
-    expect(screen.getByText("You're all caught up")).toBeInTheDocument();
+    expect(screen.getByText('No significant events found')).toBeInTheDocument();
     expect(
-      screen.getByText('No significant events were detected. Nothing needs your attention.')
+      screen.getByRole('group', { name: 'Streams, entities, and detections checked' })
+    ).toHaveAttribute('aria-busy', 'false');
+    expect(
+      screen.getByRole('link', { name: 'What do we know about your logs?' })
     ).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Need Action' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
+  });
+
+  it('links from the empty state to significant events discovery', () => {
+    setEvents({ events: [] });
+    renderWithIntl();
+
+    const logsLink = screen.getByRole('link', {
+      name: 'What do we know about your logs?',
+    });
+    expect(logsLink).toHaveAttribute(
+      'href',
+      '/app/streams/_discovery/significant_events?rangeFrom=now-24h&rangeTo=now'
+    );
+    expect(logsLink).toHaveAttribute('data-ebt-action', 'viewSignificantEvents');
+    expect(logsLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
   });
 
   it('shows the all-clear hero when only resolved events exist', () => {
@@ -356,9 +420,7 @@ describe('NightshiftApp', () => {
     renderWithIntl();
 
     expect(screen.getByText('Unable to load significant events')).toBeInTheDocument();
-    expect(
-      screen.queryByText('No significant events were detected. Nothing needs your attention.')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('No significant events found')).not.toBeInTheDocument();
   });
 
   it('links to all significant events', () => {
@@ -384,6 +446,22 @@ describe('NightshiftApp', () => {
         attachments: [expect.objectContaining({ id: event.event_uuid, origin: event.event_id })],
       })
     );
+  });
+
+  it('closes a significant event from its list action', () => {
+    const closeEvent = jest.fn();
+    const event = mockEvent();
+    mockUseCloseSignificantEvent.mockReturnValue({
+      closeEvent,
+      closingEventUuid: undefined,
+    });
+    setEvents({ events: [event] });
+    renderWithIntl();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Test significant event' }));
+
+    expect(closeEvent).toHaveBeenCalledWith(event.event_uuid);
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
   it('opens the event flyout when a row is clicked and closes it again', () => {

@@ -21,6 +21,7 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_c
 import { NightshiftMarkIcon } from './nightshift_mark_icon';
 
 export interface NightshiftHeaderProps {
+  isEmptyState?: boolean;
   isLoading?: boolean;
   hasNeedsAction?: boolean;
   showAllEventsHref?: string;
@@ -47,15 +48,23 @@ const getGreeting = (): string => {
 };
 
 const getHeroTitle = ({
+  isEmptyState,
   isLoading,
   hasNeedsAction,
 }: {
+  isEmptyState: boolean;
   isLoading: boolean;
   hasNeedsAction: boolean;
 }): string => {
   if (isLoading) {
     return i18n.translate('xpack.observability.nightshift.hero.checkingTitle', {
-      defaultMessage: 'Running a quick check',
+      defaultMessage: 'Looking into your data...',
+    });
+  }
+
+  if (isEmptyState) {
+    return i18n.translate('xpack.observability.nightshift.hero.noEventsTitle', {
+      defaultMessage: 'No significant events found',
     });
   }
 
@@ -71,23 +80,36 @@ const getHeroTitle = ({
 };
 
 export function NightshiftHeader({
+  isEmptyState = false,
   isLoading = false,
   hasNeedsAction = false,
   showAllEventsHref,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
-  const title = getHeroTitle({ isLoading, hasNeedsAction });
+  const title = getHeroTitle({ isEmptyState, isLoading, hasNeedsAction });
 
   return (
     <EuiFlexItem
+      grow={false}
       css={css`
         padding: ${euiTheme.size.m} 0;
       `}
     >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" responsive={false}>
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexGroup
+        alignItems={isEmptyState ? 'center' : 'flexEnd'}
+        direction={isEmptyState ? 'column' : 'row'}
+        gutterSize={isEmptyState ? 'none' : 'l'}
+        justifyContent={isEmptyState ? 'center' : 'spaceBetween'}
+        responsive={false}
+      >
+        <EuiFlexItem grow={!isEmptyState}>
+          <EuiFlexGroup
+            alignItems="center"
+            direction={isEmptyState ? 'column' : 'row'}
+            gutterSize="m"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <div
                 aria-label={i18n.translate(
@@ -102,10 +124,10 @@ export function NightshiftHeader({
                   background: linear-gradient(
                     99.4deg,
                     ${euiTheme.colors.backgroundLightPrimary} 3.97%,
-                    ${euiTheme.colors.backgroundLightAccent} 65.6%
+                    ${euiTheme.colors.backgroundLightAssistance} 65.6%
                   );
                   border-radius: 50%;
-                  color: ${euiTheme.colors.textAccent};
+                  color: ${euiTheme.colors.textAssistance};
                   display: inline-flex;
                   height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
                   justify-content: center;
@@ -116,7 +138,7 @@ export function NightshiftHeader({
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s" color="subdued">
+              <EuiText color="subdued" size="s" textAlign={isEmptyState ? 'center' : 'left'}>
                 <p>{getGreeting()}</p>
               </EuiText>
               <EuiTitle
@@ -125,15 +147,16 @@ export function NightshiftHeader({
                   font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
                   font-weight: ${euiTheme.font.weight.medium};
                   line-height: ${euiTheme.size.xl};
+                  text-align: ${isEmptyState ? 'center' : 'left'};
                   white-space: nowrap;
                 `}
               >
-                <h1>{title}</h1>
+                <h2>{title}</h2>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {showAllEventsHref && (
+        {!isEmptyState && showAllEventsHref && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="text"

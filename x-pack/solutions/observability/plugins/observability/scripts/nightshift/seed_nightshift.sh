@@ -3,7 +3,8 @@
 # One-command demo seed for the Nightshift landing page.
 #
 # Seeds significant events, discoveries, detections, backing stream data, and
-# Knowledge Indicator (KI) entity features so the full UI is populated:
+# Knowledge Indicator (KI) entity features, then triggers an investigation for
+# every event so the full UI is populated:
 #   - Landing page (Need action / Resolved, blast-radius stream chips)
 #   - Event flyout (summary, detections list, lifecycle)
 #   - Detection flyout (trend chart, ES|QL evidence, entity pills)
@@ -110,6 +111,39 @@ sys.path.insert(0, os.environ["SCRIPT_DIR"])
 from seed_nightshift_helpers import lengthen_significant_events_ndjson
 print(lengthen_significant_events_ndjson(os.environ["BODY"]), end="")
 '
+}
+
+trigger_investigation() {
+  local event_uuid="$1"
+  local response_file
+  local status
+  local execution_id
+
+  response_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_investigation.XXXXXX")
+  status=$(curl -s -o "$response_file" -w "%{http_code}" -u "$ES_AUTH" \
+    -X POST "${KIBANA_URL}/internal/significant_events/events/${event_uuid}/investigate" \
+    -H "kbn-xsrf: true" \
+    -H "x-elastic-internal-origin: Kibana")
+
+  if [[ "$status" != "200" ]]; then
+    echo "ERROR: Failed to trigger investigation for ${event_uuid} (HTTP ${status}):" >&2
+    while IFS= read -r line; do
+      echo "$line" >&2
+    done < "$response_file"
+    rm -f "$response_file"
+    return 1
+  fi
+
+  execution_id=$(python3 -c \
+    "import sys,json; print(json.load(sys.stdin).get('executionId', ''))" < "$response_file")
+  rm -f "$response_file"
+
+  if [[ -z "$execution_id" ]]; then
+    echo "ERROR: Investigation response for ${event_uuid} had no executionId." >&2
+    return 1
+  fi
+
+  echo "  ${event_uuid}: investigation ${execution_id} started"
 }
 
 if [[ "$CLEAN" == "true" ]]; then
@@ -260,6 +294,14 @@ echo "Seeding backing stream indices and KI entity features ..."
 ES_URL="$ES_URL" ES_AUTH="$ES_AUTH" KIBANA_URL="$KIBANA_URL" python3 "${SCRIPT_DIR}/seed_nightshift_helpers.py"
 
 echo ""
+echo "Triggering investigations for all seeded significant events ..."
+for event_uuid in \
+  evt-uuid-001 evt-uuid-002 evt-uuid-003 evt-uuid-004 evt-uuid-005 \
+  evt-uuid-006 evt-uuid-007 evt-uuid-008 evt-uuid-009; do
+  trigger_investigation "$event_uuid"
+done
+
+echo ""
 echo "Verifying ..."
 for idx in "$INDEX" "$DETECTIONS_INDEX" "$DISCOVERIES_INDEX"; do
   COUNT=$(curl -s -u "$ES_AUTH" "${ES_URL}/${idx}/_count" | python3 -c "import sys,json; print(json.load(sys.stdin).get('count', 0))")
@@ -270,6 +312,7 @@ echo ""
 echo "Done! Open Nightshift to explore:"
 echo "  - Need action: open critical events (evt-001, evt-002, evt-003, evt-006, evt-008, evt-009)"
 echo "  - Resolved: closed critical events (evt-004, evt-005) and dismissed evt-007"
+echo "  - Investigations: triggered for all 9 seeded events"
 echo "  - Event flyout → detection flyout → entity pill for KI-backed entities"
 echo ""
 echo "Tip: re-run with --clean to wipe and re-seed from scratch."

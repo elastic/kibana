@@ -112,6 +112,35 @@ describe('SignificantEventItem', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('closes the event without triggering the row click', () => {
+    const onClick = jest.fn();
+    const onCloseClick = jest.fn();
+    renderItem({ onClick, onCloseClick });
+
+    const closeButton = screen.getByTestId('nightshiftCloseSignificantEventButton');
+    expect(closeButton).toHaveAttribute('data-ebt-action', 'closeSignificantEvent');
+    expect(closeButton).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
+    expect(closeButton).toHaveAttribute('data-ebt-detail', 'open');
+
+    fireEvent.click(closeButton);
+    expect(onCloseClick).toHaveBeenCalledWith(mockEvent);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('shows progress while closing and hides the action for closed events', () => {
+    const { rerender } = renderItem({ onCloseClick: jest.fn(), isClosing: true });
+
+    expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
+
+    rerender(
+      <I18nProvider>
+        <SignificantEventItem event={{ ...mockEvent, status: 'closed' }} onCloseClick={jest.fn()} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
+  });
+
   it('marks the row as selected when isSelected is true', () => {
     renderItem({ onClick: jest.fn(), isSelected: true });
 

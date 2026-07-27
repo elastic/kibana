@@ -8,6 +8,7 @@
 export const NIGHTSHIFT_EBT_ACTIONS = {
   CLEAR_BLAST_RADIUS_FILTER: 'clearBlastRadiusFilter',
   CLOSE_FLYOUT: 'closeFlyout',
+  CLOSE_SIGNIFICANT_EVENT: 'closeSignificantEvent',
   COLLAPSE_BLAST_RADIUS: 'collapseBlastRadius',
   EXPAND_BLAST_RADIUS: 'expandBlastRadius',
   FILTER_BY_BLAST_RADIUS: 'filterByBlastRadius',

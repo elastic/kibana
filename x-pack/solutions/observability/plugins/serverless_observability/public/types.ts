@@ -7,7 +7,10 @@
 
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import type { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
+import type {
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+} from '@kbn/observability-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -35,6 +38,7 @@ export interface ServerlessObservabilityPublicSetupDependencies {
 }
 
 export interface ServerlessObservabilityPublicStartDependencies {
+  observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
   navigation: NavigationPublicPluginStart;

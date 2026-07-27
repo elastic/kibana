@@ -37,6 +37,8 @@ export interface SignificantEventListProps {
   onClearFilter?: () => void;
   onEventClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
+  onCloseClick?: (event: SignificantEvent) => void;
+  closingEventUuid?: string;
   sectionRef?: React.Ref<HTMLElement>;
 }
 
@@ -49,6 +51,8 @@ export function SignificantEventList({
   onClearFilter,
   onEventClick,
   onChatClick,
+  onCloseClick,
+  closingEventUuid,
   sectionRef,
 }: SignificantEventListProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -157,6 +161,8 @@ export function SignificantEventList({
                 isSelected={event.event_uuid === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
+                onCloseClick={onCloseClick}
+                isClosing={event.event_uuid === closingEventUuid}
               />
             </li>
           ))}

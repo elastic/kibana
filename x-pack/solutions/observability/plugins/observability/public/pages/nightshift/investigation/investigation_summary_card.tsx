@@ -59,6 +59,13 @@ const recommendationChatTooltip = i18n.translate(
   }
 );
 
+const completedStatusLabel = i18n.translate(
+  'xpack.observability.nightshift.investigation.summaryCompletedStatusLabel',
+  {
+    defaultMessage: 'Completed',
+  }
+);
+
 function InvestigationStatusRow({
   status,
   startedAt,
@@ -86,7 +93,7 @@ function InvestigationStatusRow({
           <EuiTitle size="xxs">
             <h4>
               <InvestigationCompleteStatus
-                label={statusLabel}
+                label={completedStatusLabel}
                 testSubj="nightshiftInvestigationStatusIcon"
               />
             </h4>

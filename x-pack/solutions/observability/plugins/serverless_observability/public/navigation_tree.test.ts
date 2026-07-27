@@ -42,6 +42,34 @@ describe('Navigation Tree', () => {
     });
   });
 
+  it('shows Nightshift first when significant events are available', () => {
+    const navigation = createNavigationTree({
+      core,
+      significantEventsAvailable: true,
+      nightshiftNavigationIcon: 'moon',
+    });
+
+    expect(navigation.body[0]).toMatchObject({
+      link: 'observability-overview:nightshift',
+      icon: 'moon',
+    });
+    expect(navigation.body[1]).toMatchObject({
+      link: 'observability-overview',
+    });
+  });
+
+  it('hides Nightshift when significant events are unavailable', () => {
+    const navigation = createNavigationTree({
+      core,
+      significantEventsAvailable: false,
+      nightshiftNavigationIcon: 'moon',
+    });
+
+    expect(
+      navigation.body.find((item) => item.link === 'observability-overview:nightshift')
+    ).toBeUndefined();
+  });
+
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const mlNode = body.find((item) => item.id === 'machine_learning-landing');
