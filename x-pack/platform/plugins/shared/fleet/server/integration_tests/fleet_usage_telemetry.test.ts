@@ -542,7 +542,11 @@ describe('fleet usage telemetry', () => {
   });
 
   it('should fetch usage telemetry', async () => {
-    const usage = await fetchFleetUsage(core, { agents: { enabled: true } }, new AbortController());
+    const usage = await fetchFleetUsage(
+      core,
+      { agents: { enabled: true } },
+      new AbortController().signal
+    );
 
     expect(usage).toEqual(
       expect.objectContaining({

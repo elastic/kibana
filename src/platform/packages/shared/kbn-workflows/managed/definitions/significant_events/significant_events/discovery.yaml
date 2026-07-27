@@ -99,7 +99,7 @@ steps:
   # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
-    agent-id: "platform.streams.sig-events.discovery"
+    agent-id: "significant_events.discovery"
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
@@ -107,6 +107,7 @@ steps:
     plugin-id: 'significant_events_discovery'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       message: |
         ## Detection batch
@@ -121,10 +122,10 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every entry across every signals[] array from every
-              discovery_write call made this cycle — including calls skipped by
-              discovery_write's own deduplication (written: false against an
-              existing episode still counts; the rule was accounted for). Used both
+              rule_uuid of every entry across signals[] whose final discovery_write
+              result was either written: true or skipped with
+              reason: duplicate_within_window. Failed or unattempted writes must not
+              be included. Used both
               as a hallucination guardrail (schema validation forces the agent to
               report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -137,7 +138,7 @@ steps:
     # Normalise the agent's self-reported summary into a plain array for the stamping gate below.
     type: data.set
     with:
-      written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] }}'
+      written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] | uniq }}'
 
   # Size must be computed separately — comparison operators cannot follow a filter chain.
   - name: count_written_rules

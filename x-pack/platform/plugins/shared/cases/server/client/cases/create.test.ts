@@ -794,8 +794,26 @@ describe('create', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
+    // The templates flag defaults to on, so create() expands the referenced template before
+    // bumping usage stats — mock the SO read so expansion resolves and the stats call is reached.
+    const usageTemplateSO = {
+      id: 'so-tmpl-1',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tmpl-1',
+        name: 'Usage Template',
+        owner: SECURITY_SOLUTION_OWNER,
+        definition: yamlStringify({ name: 'Usage Template', fields: [] }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(usageTemplateSO as never);
     });
 
     it('increments template usage stats when a case is created with a template', async () => {
@@ -1138,6 +1156,281 @@ describe('create', () => {
       expect(createArgs.attributes.extended_fields?.priority_as_keyword).toBe('crit');
       // count was submitted — it must still be mirrored.
       expect(createArgs.attributes.extended_fields?.count_as_integer).toBe('5');
+    });
+  });
+
+  describe('server-side template expansion', () => {
+    const templateDefinition = yamlStringify({
+      name: 'Template default title',
+      severity: 'high',
+      category: 'events',
+      tags: ['template-tag'],
+      assignees: [{ uid: 'template-assignee' }],
+      fields: [
+        {
+          name: 'priority',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          label: 'Priority',
+          metadata: { default: 'medium' },
+        },
+      ],
+    });
+
+    const templateSO = {
+      id: 'so-tpl',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tmpl-exp',
+        name: 'Expansion Template',
+        owner: SECURITY_SOLUTION_OWNER,
+        definition: templateDefinition,
+        templateVersion: 4,
+        deletedAt: null,
+        isLatest: true,
+      },
+    };
+
+    // theCase fixture pins severity/assignees; strip them so the template defaults apply.
+    const minimalRequest = omit(theCase, ['severity', 'assignees']);
+
+    const expansionCasesClientMock = createCasesClientMock();
+    expansionCasesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+    const createClientArgs = ({ templatesEnabled = true } = {}) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: templatesEnabled } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(templateSO);
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      return clientArgs;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('expands template defaults into the persisted case and pins the resolved version', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp' } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith(
+        'tmpl-exp',
+        undefined,
+        { includeDeleted: false }
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.template).toEqual({ id: 'tmpl-exp', version: 4 });
+      expect(createArgs.attributes.severity).toBe(CaseSeverity.HIGH);
+      expect(createArgs.attributes.category).toBe('events');
+      expect(createArgs.attributes.tags).toEqual(['template-tag']);
+      expect(createArgs.attributes.assignees).toEqual([{ uid: 'template-assignee' }]);
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'medium' });
+      // Required on the wire — the template's default title never applies.
+      expect(createArgs.attributes.title).toBe('My Case');
+    });
+
+    it('caller-sent values win over template defaults', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          severity: CaseSeverity.CRITICAL,
+          extended_fields: { priority_as_keyword: 'urgent' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.severity).toBe(CaseSeverity.CRITICAL);
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'urgent' });
+    });
+
+    it('records the expanded (not raw) request on the create_case user action', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp' } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[userActionArgs]] =
+        clientArgs.services.userActionService.creator.createUserAction.mock.calls;
+      // The create_case payload carries the expanded case defaults (severity here). It does NOT
+      // carry template / extended_fields — CreateCaseUserActionRt strips them — so those are
+      // audited via dedicated user actions (asserted below), not on this payload.
+      expect(userActionArgs.userAction.payload).toMatchObject({
+        severity: CaseSeverity.HIGH,
+      });
+    });
+
+    it('emits template and extended_fields user actions so the audit trail matches the persisted case', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp' } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      // The applied template is recorded with its resolved (point-in-time) name (the SO
+      // attribute name, not the definition's default case title).
+      expect(byType.template.payload).toEqual({
+        template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
+      });
+      // The initial extended_fields are recorded exactly as persisted on the case SO.
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: 'medium' },
+      });
+    });
+
+    it('checks the assignCase operation when the template introduces assignees', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp' } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      // First call: createCase only (raw request has no assignees). Second: assignCase for
+      // the template-introduced assignees.
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenLastCalledWith(
+        expect.objectContaining({ operation: expect.objectContaining({ name: 'assignCase' }) })
+      );
+    });
+
+    it('skips template assignees silently without a Platinum license', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp' } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.assignees).toEqual([]);
+      // Other template defaults still apply.
+      expect(createArgs.attributes.severity).toBe(CaseSeverity.HIGH);
+    });
+
+    it('rejects an unknown template', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        create(
+          { ...minimalRequest, template: { id: 'missing' } },
+          clientArgs,
+          expansionCasesClientMock
+        )
+      ).rejects.toThrow('Template missing not found');
+    });
+
+    it('rejects a cross-owner template with the same not-found error', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        ...templateSO,
+        attributes: { ...templateSO.attributes, owner: 'observability' },
+      });
+
+      await expect(
+        create(
+          { ...minimalRequest, template: { id: 'tmpl-exp' } },
+          clientArgs,
+          expansionCasesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-exp not found');
+    });
+
+    it('rejects a disabled template with the same not-found error', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        ...templateSO,
+        attributes: { ...templateSO.attributes, isEnabled: false },
+      });
+
+      await expect(
+        create(
+          { ...minimalRequest, template: { id: 'tmpl-exp' } },
+          clientArgs,
+          expansionCasesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-exp not found');
+    });
+
+    it('does not expand when the templates flag is disabled and rejects an unpinned version', async () => {
+      const clientArgs = createClientArgs({ templatesEnabled: false });
+
+      await expect(
+        create(
+          { ...minimalRequest, template: { id: 'tmpl-exp' } },
+          clientArgs,
+          expansionCasesClientMock
+        )
+      ).rejects.toThrow('template.version is required');
+      expect(clientArgs.services.templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+
+    it('stores a pinned template verbatim without expansion when the flag is disabled', async () => {
+      const clientArgs = createClientArgs({ templatesEnabled: false });
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-exp', version: 2 } },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.template).toEqual({ id: 'tmpl-exp', version: 2 });
+      // No expansion: template defaults must not appear.
+      expect(createArgs.attributes.extended_fields).toBeUndefined();
+      expect(createArgs.attributes.category).toBeNull();
+      // Flag-off creation must stay byte-for-byte as before this PR: a caller-pinned template is
+      // stored verbatim but the template/extended_fields user actions are NOT emitted (that path
+      // is gated on the templates flag).
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).not.toHaveBeenCalled();
+    });
+
+    it('validates the merged extended_fields (template fetched once)', async () => {
+      const clientArgs = createClientArgs();
+
+      await expect(
+        create(
+          {
+            ...minimalRequest,
+            template: { id: 'tmpl-exp' },
+            extended_fields: { unknown_key_as_keyword: 'x' },
+          },
+          clientArgs,
+          expansionCasesClientMock
+        )
+      ).rejects.toThrow('Unknown extended field key: "unknown_key_as_keyword"');
+      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      // Expansion resolved the template; validation reused it instead of fetching again.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
     });
   });
 });

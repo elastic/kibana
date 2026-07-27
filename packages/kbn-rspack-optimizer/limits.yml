@@ -19,6 +19,7 @@ pageLoadAssetSize:
   canvas: 6000
   cases: 2799
   charts: 1188
+  clientApps: 1017
   cloud: 8477
   cloudConnect: 4998
   cloudDataMigration: 1755

@@ -157,7 +157,7 @@ describe('discover session API transforms', () => {
               usesAdHocDataView: true,
               kibanaSavedObjectMeta: {
                 searchSourceJSON:
-                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp"}}',
+                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","allowHidden":false}}',
               },
               viewMode: VIEW_MODE.DOCUMENT_LEVEL,
               hideAggregatedPreview: false,

@@ -21,7 +21,7 @@ import { getExecutionStats } from './lib/get_execution_stats';
 import { getRuleStats } from './lib/get_rule_stats';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class TelemetryTaskRunner implements AlertingTaskRunner {
