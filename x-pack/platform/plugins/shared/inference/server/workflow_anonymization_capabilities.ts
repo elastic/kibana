@@ -30,6 +30,15 @@ export interface PiiTokenizationContext {
     abortSignal?: AbortSignal;
   }): Promise<readonly DetectedPiiEntity[]>;
 
+  /**
+   * Generates a replacement token for the given entity class and original value.
+   *
+   * **MUST be deterministic**: calling `tokenize` with the same `(entityClass, value)` pair
+   * within a single call MUST return the same token. The PII-application logic uses this
+   * guarantee to deduplicate repeated occurrences into a single token-map entry and to detect
+   * collisions. A non-deterministic implementation would silently corrupt the token map and
+   * break PII restoration.
+   */
   tokenize(entityClass: string, value: string): string;
 }
 

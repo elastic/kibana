@@ -19,10 +19,7 @@ import {
   PII_TOKENIZATION_CAPABILITY_ID,
 } from '@kbn/inference-plugin/server';
 import { aroundCompletionEventSchema } from '../../common/workflow_anonymization';
-import {
-  countWorkflowStepType,
-  createWorkflowAnonymizationProvider,
-} from './create_workflow_anonymization_provider';
+import { createWorkflowAnonymizationProvider } from './create_workflow_anonymization_provider';
 
 type Management = Pick<
   WorkflowsManagementApi,
@@ -77,24 +74,6 @@ const proceed: InferenceProceedCapability = {
   invoke: jest.fn().mockResolvedValue({ rawContent: 'protected' }),
 };
 
-describe('countWorkflowStepType', () => {
-  it('counts nested workflow steps without inspecting step configuration', () => {
-    const configuredStep: WorkflowYaml['steps'][number] = {
-      name: 'configured',
-      type: 'test.step',
-      with: { type: 'call_site.proceed' },
-    };
-    const conditionalStep: WorkflowYaml['steps'][number] = {
-      name: 'conditional',
-      type: 'if',
-      condition: 'true',
-      steps: [proceedStep],
-    };
-
-    expect(countWorkflowStepType([configuredStep, conditionalStep], 'call_site.proceed')).toBe(1);
-  });
-});
-
 describe('createWorkflowAnonymizationProvider', () => {
   it('returns without execution when no workflow matches', async () => {
     const management = createManagement();
@@ -136,6 +115,7 @@ describe('createWorkflowAnonymizationProvider', () => {
     ).resolves.toEqual({ matched: true, content: 'restored content' });
     expect(management.executeWorkflowSynchronously).toHaveBeenCalledWith({
       workflowId: 'workflow-1',
+      workflow: expect.objectContaining({ id: 'workflow-1' }),
       context: {
         event: parsedEvent,
         spaceId: 'space-a',
