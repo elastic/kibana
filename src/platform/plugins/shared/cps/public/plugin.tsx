@@ -48,6 +48,10 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
       // Register project picker only after the default project routing is known
       manager.whenReady().then(() =>
         import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
+          // register into solution-view chrome next header
+          core.chrome.next.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
+
+          // register into legacy chrome header
           core.chrome.navControls.registerLeft({
             mount: (element) => {
               ReactDOM.render(
