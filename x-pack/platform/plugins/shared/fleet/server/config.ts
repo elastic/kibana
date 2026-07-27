@@ -23,6 +23,7 @@ import {
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
   PreconfiguredSpaceSettingsSchema,
+  PreconfiguredDownloadSourcesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
@@ -281,6 +282,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerHosts: PreconfiguredFleetServerHostsSchema,
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
+      binaryDownloadSource: PreconfiguredDownloadSourcesSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
       eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(

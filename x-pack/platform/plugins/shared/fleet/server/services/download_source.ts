@@ -438,6 +438,11 @@ class DownloadSourceService {
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
+
+    if (targetDS.is_preconfigured) {
+      throw new DownloadSourceError(`Preconfigured Download source ${id} cannot be deleted.`);
+    }
+
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id

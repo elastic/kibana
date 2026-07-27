@@ -316,6 +316,7 @@ export interface DownloadSourceSOAttributes {
   name: string;
   host: string;
   is_default: boolean;
+  is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field
