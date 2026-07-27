@@ -145,16 +145,24 @@ export const buildSuperTimelineModel = (
       });
 
       if (combined?.filterQuery) {
-        subFilters.push({
-          meta: {
-            alias: title,
-            type: 'custom',
-            disabled: false,
-            negate: false,
-            key: 'query',
-          },
-          query: JSON.parse(combined.filterQuery),
-        });
+        let parsedQuery: object | null = null;
+        try {
+          parsedQuery = JSON.parse(combined.filterQuery);
+        } catch {
+          skippedQueryTimelines.push({ id, title, reason: 'eql' });
+        }
+        if (parsedQuery !== null) {
+          subFilters.push({
+            meta: {
+              alias: title,
+              type: 'custom',
+              disabled: false,
+              negate: false,
+              key: 'query',
+            },
+            query: parsedQuery,
+          });
+        }
       }
     }
   }

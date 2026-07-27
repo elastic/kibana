@@ -66,6 +66,21 @@ export const useOpenSuperTimeline = () => {
       }
 
       if (savedObjectIds.length < MIN_SUPER_TIMELINE_COUNT) {
+        // Caller is responsible for enforcing minimum — the batch action button is disabled for < 2.
+        // If somehow reached programmatically, warn rather than silently no-op.
+        notifications.toasts.addWarning({
+          title: i18n.translate(
+            'xpack.securitySolution.timeline.superTimeline.tooFewTimelinesTitle',
+            { defaultMessage: 'Select at least 2 timelines' }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.timeline.superTimeline.tooFewTimelinesText',
+            {
+              defaultMessage: 'A Super Timeline requires at least {min} source timelines.',
+              values: { min: MIN_SUPER_TIMELINE_COUNT },
+            }
+          ),
+        });
         return;
       }
 
@@ -96,10 +111,50 @@ export const useOpenSuperTimeline = () => {
 
       setIsLoading(true);
       try {
-        const results = await Promise.all(savedObjectIds.map((id) => resolveTimeline(id)));
-        const timelineModels = results.map(
-          (result) => formatTimelineResponseToModel(result.timeline).timeline
-        );
+        const settled = await Promise.allSettled(savedObjectIds.map((id) => resolveTimeline(id)));
+
+        const failedIds: string[] = [];
+        const timelineModels = settled
+          .map((result, idx) => {
+            if (result.status === 'rejected') {
+              failedIds.push(savedObjectIds[idx]);
+              return null;
+            }
+            return formatTimelineResponseToModel(result.value.timeline).timeline;
+          })
+          .filter((m): m is NonNullable<typeof m> => m !== null);
+
+        if (failedIds.length > 0) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.securitySolution.timeline.superTimeline.partialFetchTitle',
+              { defaultMessage: 'Some timelines could not be loaded' }
+            ),
+            text: i18n.translate('xpack.securitySolution.timeline.superTimeline.partialFetchText', {
+              defaultMessage:
+                'The following timelines could not be fetched and were skipped: {ids}.',
+              values: { ids: failedIds.join(', ') },
+            }),
+          });
+        }
+
+        if (timelineModels.length < MIN_SUPER_TIMELINE_COUNT) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.securitySolution.timeline.superTimeline.tooFewSucceededTitle',
+              { defaultMessage: 'Not enough timelines loaded' }
+            ),
+            text: i18n.translate(
+              'xpack.securitySolution.timeline.superTimeline.tooFewSucceededText',
+              {
+                defaultMessage:
+                  'At least {min} timelines must load successfully to build a Super Timeline.',
+                values: { min: MIN_SUPER_TIMELINE_COUNT },
+              }
+            ),
+          });
+          return;
+        }
 
         const esQueryConfig = getEsQueryConfig(uiSettings);
 

@@ -26,8 +26,8 @@ const mockBuildSuperTimelineModel = jest.fn();
 // The key 'timeline-1' is the literal value of TimelineId.active (enum checked in index.ts).
 let mockActiveTimeline: Partial<TimelineModel> = {};
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: (selector: (s: unknown) => unknown) =>
     selector({
       timeline: {
@@ -132,14 +132,14 @@ describe('useOpenSuperTimeline', () => {
       expect(mockResolveTimeline).not.toHaveBeenCalled();
     });
 
-    it('returns early without toast when fewer than 2 timelines are selected', async () => {
+    it('shows a warning toast when fewer than 2 timelines are selected', async () => {
       const { result } = renderHook(() => useOpenSuperTimeline());
 
       await act(async () => {
         await result.current.openSuperTimeline(['id-1']);
       });
 
-      expect(mockAddWarning).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledTimes(1);
       expect(mockResolveTimeline).not.toHaveBeenCalled();
     });
 
@@ -295,7 +295,9 @@ describe('useOpenSuperTimeline', () => {
   });
 
   describe('error handling', () => {
-    it('shows an error toast when resolveTimeline rejects', async () => {
+    it('shows warning toasts (not an error) when all resolveTimeline calls reject', async () => {
+      // WHY: with Promise.allSettled a single failure should not abort the whole batch.
+      // When all fail we surface which IDs failed and a "too few loaded" guard — not a generic error.
       mockResolveTimeline.mockRejectedValue(new Error('Network error'));
 
       const { result } = renderHook(() => useOpenSuperTimeline());
@@ -303,11 +305,37 @@ describe('useOpenSuperTimeline', () => {
         await result.current.openSuperTimeline(['id-1', 'id-2']);
       });
 
-      expect(mockAddError).toHaveBeenCalledTimes(1);
+      expect(mockAddError).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledTimes(2); // partial-fetch warning + too-few warning
       expect(mockUpdateTimeline).not.toHaveBeenCalled();
     });
 
-    it('resets isLoading to false after an error', async () => {
+    it('shows a partial-fetch warning but still opens when enough timelines succeed', async () => {
+      // WHY: one deleted/unavailable timeline should not block the rest from aggregating.
+      mockResolveTimeline.mockRejectedValueOnce(new Error('Not found'));
+      mockResolveTimeline.mockResolvedValueOnce({ timeline: makeRawTimeline('id-2') });
+      mockResolveTimeline.mockResolvedValueOnce({ timeline: makeRawTimeline('id-3') });
+      mockFormatTimelineResponseToModel.mockReturnValue({
+        timeline: { ...timelineDefaults, id: '', savedObjectId: 'id-2' } as TimelineModel,
+        notes: [],
+      });
+      mockBuildSuperTimelineModel.mockReturnValue({
+        model: makeMergedModel({ superTimelineSourceIds: ['id-2', 'id-3'] }),
+        skippedQueryTimelines: [],
+      });
+
+      const { result } = renderHook(() => useOpenSuperTimeline());
+      await act(async () => {
+        await result.current.openSuperTimeline(['id-1', 'id-2', 'id-3']);
+      });
+
+      expect(mockAddWarning).toHaveBeenCalledTimes(1);
+      const warningTitle = mockAddWarning.mock.calls[0][0].title as string;
+      expect(warningTitle).toContain('could not be loaded');
+      expect(mockUpdateTimeline).toHaveBeenCalledTimes(1);
+    });
+
+    it('resets isLoading to false when all fetches fail', async () => {
       mockResolveTimeline.mockRejectedValue(new Error('boom'));
 
       const { result } = renderHook(() => useOpenSuperTimeline());
