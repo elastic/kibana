@@ -2663,7 +2663,14 @@ describe('updatePackRoute', () => {
     it('updates a package policy shared by multiple agent policies exactly once', async () => {
       const currentSO = {
         ...basePackSO,
-        references: [],
+        // Both owning agent policies are referenced, so the pre-fix
+        // reference-driven loop resolved the same shared package policy twice
+        // and wrote it twice. Keep them populated or this asserts the wire scan
+        // rather than the dedup.
+        references: [
+          { id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' },
+          { id: 'policy-2', name: 'policy-2', type: 'ingest-agent-policies' },
+        ],
         attributes: { ...basePackSO.attributes, name: 'my-pack', enabled: true },
       };
 
@@ -2829,6 +2836,104 @@ describe('updatePackRoute', () => {
       expect(
         callsById.get('package-policy-2').inputs[0].config.osquery.value.packs
       ).not.toHaveProperty('default--my-pack');
+    });
+
+    it('keeps a global pack on the wire when the request omits policy_ids and shards', async () => {
+      // A global pack targets policies through its stored `*` shard, not
+      // through policy_ids. An edit-only PUT must not resolve to zero write
+      // targets and detach the pack from every agent.
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+          shards: [{ key: '*', value: 100 }],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-1', name: 'policy-1' },
+              { id: 'policy-2', name: 'policy-2' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only-global-pack-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const callsById = new Map(
+        packagePolicyUpdate.mock.calls.map((call) => [call[2] as string, call[3]])
+      );
+      expect([...callsById.keys()].sort()).toEqual(['package-policy-1', 'package-policy-2']);
+      callsById.forEach((updatedPackagePolicy) => {
+        expect(updatedPackagePolicy.inputs[0].config.osquery.value.packs).toHaveProperty(
+          'default--my-pack'
+        );
+      });
+
+      // The stored `*` shard must survive an edit that never mentions shards.
+      expect(mockClient.update.mock.calls[0][2].shards).toEqual([{ key: '*', value: 100 }]);
     });
   });
 });

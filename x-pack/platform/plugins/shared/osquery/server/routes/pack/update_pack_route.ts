@@ -280,10 +280,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
         const effectivePolicyIds = policy_ids ?? currentAgentPolicyIds;
 
+        // Same preserve rule for shards: an omitted `shards` must not clear the
+        // stored shard map, or a global (`*`) pack silently stops resolving to
+        // any policy and the wire detach below strips it from every agent.
+        // An explicit `{}` still clears.
+        const effectiveShards =
+          request.body.shards === undefined
+            ? convertShardsToObject(currentPackSO.attributes.shards ?? [])
+            : shards;
+
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
           effectivePolicyIds,
-          shards
+          effectiveShards
         );
 
         if (invalidPolicies?.length) {
@@ -294,7 +303,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, policiesList);
 
-        const policyShards = findMatchingShards(agentPolicies, shards);
+        const policyShards = findMatchingShards(agentPolicies, effectiveShards);
 
         const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
@@ -349,7 +358,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_at: moment().toISOString(),
             updated_by: username,
             updated_by_profile_uid: profileUid,
-            shards: convertShardsToArray(shards),
+            shards: convertShardsToArray(effectiveShards),
             ...scheduleSoPatch,
           },
           {
@@ -436,7 +445,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
             if (enabled) {
               const policyIds =
-                policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
+                policy_ids || !isEmpty(effectiveShards) ? policiesList : currentAgentPolicyIds;
               // Dedup by resolved package-policy id before writing: a
               // shared package policy must be written exactly once.
               const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
