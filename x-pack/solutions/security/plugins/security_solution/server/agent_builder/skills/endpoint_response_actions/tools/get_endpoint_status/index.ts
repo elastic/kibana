@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -31,12 +31,13 @@ const getEndpointStatusSchema = z.object({
 
 export const getEndpointStatusTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinToolDefinition<typeof getEndpointStatusSchema> => {
   return {
     id: GET_ENDPOINT_STATUS_TOOL_ID,
     type: ToolType.builtin,
     description: `Retrieves the current status of a host by its hostname, including whether it is isolated, its last seen time, and online/offline status.`,
     schema: getEndpointStatusSchema,
+    tags: ['security', 'endpoint', 'response-actions'],
     handler: async (params, { logger, request, spaceId }) => {
       try {
         const hostName = params.hostName as string;

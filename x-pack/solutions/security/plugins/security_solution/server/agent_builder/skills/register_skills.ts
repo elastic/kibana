@@ -130,9 +130,7 @@ export const registerSkills = async ({
   }
 
   if (experimentalFeatures.endpointResponseActionsSkill) {
-    agentBuilder.skills.register(
-      createEndpointResponseActionsSkill(options.endpointAppContextService)
-    );
+    agentBuilder.skills.register(createEndpointResponseActionsSkill());
   }
 
   if (experimentalFeatures.investigateRuleSkill) {

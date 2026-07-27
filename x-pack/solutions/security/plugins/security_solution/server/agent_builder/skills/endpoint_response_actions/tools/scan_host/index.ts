@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -52,12 +52,13 @@ const scanHostSchema = z.object({
  */
 export const scanHostTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinToolDefinition<typeof scanHostSchema> => {
   return {
     id: SCAN_TOOL_ID,
     type: ToolType.builtin,
     description: `Scans a file or folder path on a host for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
+    tags: ['security', 'endpoint', 'response-actions'],
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch.
     confirmation: {

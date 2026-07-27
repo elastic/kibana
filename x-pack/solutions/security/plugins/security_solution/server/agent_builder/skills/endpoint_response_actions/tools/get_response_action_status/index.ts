@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -32,13 +32,14 @@ const getResponseActionStatusSchema = z.object({
  */
 export const getResponseActionStatusTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinToolDefinition<typeof getResponseActionStatusSchema> => {
   return {
     id: GET_RESPONSE_ACTION_STATUS_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Retrieves the current status and outputs of a previously dispatched endpoint response action by its action ID. Use this read-only lookup when the analyst asks about a prior isolate, release, scan, or running-processes action — especially when the original dispatch returned pending.',
     schema: getResponseActionStatusSchema,
+    tags: ['security', 'endpoint', 'response-actions'],
     handler: async (params, { logger, request, spaceId }) => {
       try {
         const actionId = params.actionId as string;

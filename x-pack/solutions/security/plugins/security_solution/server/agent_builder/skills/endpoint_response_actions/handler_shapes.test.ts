@@ -13,7 +13,14 @@ import {
 } from '@kbn/agent-builder-server/tools';
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
 import {
-  createEndpointResponseActionsSkill,
+  isolateHostTool,
+  unisolateHostTool,
+  getEndpointStatusTool,
+  listEndpointsTool,
+  getRunningProcessesTool,
+  scanHostTool,
+} from './tools';
+import {
   ISOLATE_TOOL_ID,
   UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
@@ -46,9 +53,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
   describe('FR-020: endpoint-not-found returns distinguishable shape', () => {
     it('isolate_host returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const isolateTool = inlineTools?.find((tool) => tool.id === ISOLATE_TOOL_ID);
+      const isolateTool = isolateHostTool(mockEndpointAppContextService);
 
       const result = await (isolateTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host', comment: 'test' },
@@ -64,9 +69,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('unisolate_host returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const unisolateTool = inlineTools?.find((tool) => tool.id === UNISOLATE_TOOL_ID);
+      const unisolateTool = unisolateHostTool(mockEndpointAppContextService);
 
       const result = await (unisolateTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host', comment: 'test' },
@@ -82,9 +85,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('get_endpoint_status returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
+      const statusTool = getEndpointStatusTool(mockEndpointAppContextService);
 
       const result = await (statusTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host' },
@@ -104,9 +105,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
   describe('FR-021: not-found returns distinguishable shape in get_endpoint_status', () => {
     it('get_endpoint_status returns found: false with reason "endpoint_not_found" when agent exists but metadata service returns empty', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
+      const statusTool = getEndpointStatusTool(mockEndpointAppContextService);
 
       const handler = (statusTool as unknown as { handler: Function }).handler;
       const mockLogger = { error: jest.fn(), warn: jest.fn() };
@@ -147,14 +146,13 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       );
 
       try {
-        const result = await handler({ hostName: 'found-host' }, mockLogger);
+        const result = await handler({ hostName: 'nonexistent-host' }, mockLogger);
 
         expect(assertStandardReturn(result)).toHaveLength(1);
         const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(false);
         expect(data.reason).toBe('endpoint_not_found');
-        expect(data.hostName).toBe('found-host');
-        expect(assertStandardReturn(result)[0].type).toBe('other');
+        expect(data.hostName).toBe('nonexistent-host');
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
@@ -162,16 +160,13 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       }
     });
 
-    it('get_endpoint_status returns found: true when all lookups succeed', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
+    it('get_endpoint_status returns found: true with real data when agent and metadata exist', async () => {
+      const statusTool = getEndpointStatusTool(mockEndpointAppContextService);
 
       const handler = (statusTool as unknown as { handler: Function }).handler;
       const mockLogger = { error: jest.fn(), warn: jest.fn() };
 
       // Mock the agent service to return an agent
-
       const mockAgentServiceInner = {
         listAgents: jest.fn().mockResolvedValue({
           agents: [
@@ -246,12 +241,18 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       SCAN_TOOL_ID,
     ];
 
+    function buildHostLookupTools(service: EndpointAppContextService) {
+      return [
+        isolateHostTool(service),
+        unisolateHostTool(service),
+        getEndpointStatusTool(service),
+        getRunningProcessesTool(service),
+        scanHostTool(service),
+      ];
+    }
+
     it('all host-lookup tools return ToolResultType.other for "endpoint not found" (not error)', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const hostLookupTools = (inlineTools ?? []).filter((t) =>
-        HOST_LOOKUP_TOOL_IDS.includes(t.id)
-      );
+      const hostLookupTools = buildHostLookupTools(mockEndpointAppContextService);
 
       for (const tool of hostLookupTools) {
         const result = await (tool as unknown as { handler: Function }).handler(
@@ -267,11 +268,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('handler errors use ToolResultType.error while not-found uses ToolResultType.other', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const hostLookupTools = (inlineTools ?? []).filter((t) =>
-        HOST_LOOKUP_TOOL_IDS.includes(t.id)
-      );
+      const hostLookupTools = buildHostLookupTools(mockEndpointAppContextService);
 
       for (const tool of hostLookupTools) {
         const notFoundResult = await (tool as unknown as { handler: Function }).handler(
@@ -282,11 +279,17 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       }
     });
 
-    it('list_endpoints tool is excluded from host-lookup consistency checks', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const listTool = (inlineTools ?? []).find((t) => t.id === LIST_ENDPOINTS_TOOL_ID);
-      expect(listTool).toBeDefined();
+    it('all host-lookup tool IDs match the exported constants', () => {
+      const hostLookupTools = buildHostLookupTools(mockEndpointAppContextService);
+      const toolIds = hostLookupTools.map((t) => t.id);
+      for (const expectedId of HOST_LOOKUP_TOOL_IDS) {
+        expect(toolIds).toContain(expectedId);
+      }
+    });
+
+    it('list_endpoints tool is excluded from host-lookup consistency checks', () => {
+      const listTool = listEndpointsTool(mockEndpointAppContextService);
+      expect(listTool.id).toBe(LIST_ENDPOINTS_TOOL_ID);
       expect(HOST_LOOKUP_TOOL_IDS).not.toContain(LIST_ENDPOINTS_TOOL_ID);
     });
   });

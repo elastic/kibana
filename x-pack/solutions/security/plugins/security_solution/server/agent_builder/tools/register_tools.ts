@@ -45,6 +45,16 @@ import type {
 } from '../../plugin_contract';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import {
+  isolateHostTool,
+  unisolateHostTool,
+  getEndpointStatusTool,
+  listEndpointsTool,
+  getRunningProcessesTool,
+  scanHostTool,
+  getResponseActionStatusTool,
+} from '../skills/endpoint_response_actions/tools';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -63,7 +73,8 @@ export const registerTools = (
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
   kibanaVersion: string,
-  hasEncryptionKey: boolean = false
+  hasEncryptionKey: boolean = false,
+  endpointAppContextService?: EndpointAppContextService
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -123,5 +134,15 @@ export const registerTools = (
     experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
   ) {
     registerSiemMigrationTools(agentBuilder, core, productFeaturesService, logger);
+  }
+
+  if (experimentalFeatures.endpointResponseActionsSkill && endpointAppContextService) {
+    agentBuilder.tools.register(isolateHostTool(endpointAppContextService));
+    agentBuilder.tools.register(unisolateHostTool(endpointAppContextService));
+    agentBuilder.tools.register(getEndpointStatusTool(endpointAppContextService));
+    agentBuilder.tools.register(listEndpointsTool(endpointAppContextService));
+    agentBuilder.tools.register(getRunningProcessesTool(endpointAppContextService));
+    agentBuilder.tools.register(scanHostTool(endpointAppContextService));
+    agentBuilder.tools.register(getResponseActionStatusTool(endpointAppContextService));
   }
 };
