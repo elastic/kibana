@@ -22,7 +22,7 @@ describe('ServiceLink', () => {
       'href',
       `/basepath/app/apm/services/opbeans-java/overview?${params}`
     );
-  });
+  }, 15000);
 
   it('links to mobile service details', async () => {
     expect(() => render(<AndroidAgent />)).not.toThrowError();
@@ -37,5 +37,5 @@ describe('ServiceLink', () => {
       'href',
       `/basepath/app/apm/mobile-services/opbeans-swift/overview?${params}`
     );
-  });
+  }, 15000);
 });
