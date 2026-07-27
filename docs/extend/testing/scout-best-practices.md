@@ -6,6 +6,10 @@ navigation_title: Best practices
 
 For test-type-specific guidance, see [UI](./ui-best-practices.md) and [API](./api-best-practices.md) test best practices.
 
+:::::{tip}
+**New to Scout?** Start with our [Scout introduction page](../testing/scout.md).
+:::::
+
 ## Pick the right test type [pick-the-right-test-type]
 
 Pick the test type **before** writing the test:
@@ -32,6 +36,14 @@ await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
 ```ts
 await expect(page.testSubj.locator('row-0-col-count')).toHaveText('1,024');
 await expect(page.testSubj.locator('row-0-col-avg')).toHaveText('42.7');
+```
+
+❌ **Don't:** keep a UI test for a pure local UI state change (expand/collapse, show/hide, select/clear with **no API call**) when a Jest unit or React Testing Library test already covers it — the browser round-trip adds no integration value, so remove the UI test.
+
+```ts
+// already covered by settings_panel.test.tsx — a UI test here is redundant
+await page.testSubj.click('settingsPanelToggle');
+await expect(page.testSubj.locator('settingsPanelBody')).toBeVisible();
 ```
 
 ✔️ **Do:** use a Scout API test to validate an endpoint's contract.
@@ -96,8 +108,6 @@ How these tests work:
 
 See [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations) for the full set of examples, and [`group1/v2_migration.test.ts`](https://github.com/elastic/kibana/blob/main/src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts) for a representative archive-based test.
 
-:::::{tip}
-**New to Scout?** Start with our [Scout introduction page](../testing/scout.md).
 :::::
 
 ## Design tests with a cloud-first mindset [design-tests-with-a-cloud-first-mindset]
@@ -114,7 +124,7 @@ A test should live in the plugin or package that owns the code it exercises. Whe
 - **API tests**: the routes under test should be defined in this plugin's `/server` directory.
 - **UI tests**: the UI being driven should come from this plugin's `/public` directory — a quick look there is usually enough to understand what the plugin renders and whether the test fits.
 
-This also keeps Scout's selective testing effective: it runs only the tests for modules affected by a PR, so a test placed in the wrong plugin won't be triggered by changes to the code it actually covers. The full suite still runs post-merge on `kibana-on-merge`.
+This also keeps Scout's selective testing effective: on a PR it runs only the tests owned by the modules that PR affects, so a test placed outside the plugin that owns the code it covers may silently not run when that code changes — a coverage gap you won't notice until the full suite runs post-merge on `kibana-on-merge`.
 
 ## Prefer runtime feature flags [prefer-runtime-feature-flags]
 
@@ -196,7 +206,7 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 
 ## Organize test suites by role and user flow [organize-test-suites-by-role-and-user-flow]
 
-Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). The test runner balances work at the spec-file level, so oversized files become bottlenecks during [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
+Prefer “one role + one flow per file” and keep spec files small — roughly 4–5 short tests, or 2–3 when scenarios are longer (lean toward the lower end once any single scenario runs longer than ~30s). The test runner balances work at the spec-file level, so small files parallelize better (an oversized file becomes a single-worker bottleneck) and limit blast radius: skipping one flaky test drops only its small group rather than a whole large suite. See [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
 
 :::::{dropdown} Example
 
