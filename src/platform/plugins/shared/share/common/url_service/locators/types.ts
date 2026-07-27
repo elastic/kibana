@@ -55,8 +55,25 @@ export interface LocatorDefinition<P extends SerializableRecord>
    */
   getLocation(params: P): Promise<KibanaLocation>;
 
+  /**
+   * Extracts the time range from the locator's parameters.
+   * 
+   * Implement this alongside `setTimeRange` when the
+   * locator params support time-range.
+   *
+   * @param params URL locator parameters.
+   */
   getTimeRange?: (params: P) => TimeRange | undefined;
 
+  /**
+   * Returns a new copy of `params` with the supplied `timeRange` applied.
+   * 
+   * Implement this alongside `getTimeRange` when the
+   * locator params support time-range.
+   *
+   * @param params URL locator parameters.
+   * @param timeRange The time range to apply, or `undefined` to clear it.
+   */
   setTimeRange?: (params: P, timeRange?: TimeRange) => P;
 }
 
