@@ -8418,6 +8418,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/pnd-common@link:x-pack/solutions/security/packages/kbn-pnd-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/pnd-plugin@link:x-pack/solutions/security/plugins/pnd":
+  version "0.0.0"
+  uid ""
+
 "@kbn/portable-dashboards-example@link:examples/portable_dashboards_example":
   version "0.0.0"
   uid ""
