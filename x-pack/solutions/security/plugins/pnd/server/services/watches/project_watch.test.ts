@@ -44,10 +44,12 @@ const makeListItem = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowLis
   description: 'A test watch',
   enabled: true,
   managed: false,
-  managedBy: undefined,
-  definition: undefined,
+  managedBy: null,
+  definition: null,
+  createdAt: '2026-07-01T00:00:00.000Z',
   tags: ['watch'],
   history: [],
+  valid: true,
   ...overrides,
 });
 
@@ -115,7 +117,7 @@ describe('extractWatchPolicy', () => {
 
 describe('projectTriggers', () => {
   it('returns empty array when no triggers', () => {
-    expect(projectTriggers({ version: '1', name: 'x', steps: [] })).toEqual([]);
+    expect(projectTriggers(null)).toEqual([]);
   });
 
   it('maps scheduled trigger to schedule type', () => {

@@ -12,7 +12,7 @@ import type { PndSpaceIdResolver } from '../../types';
 import type { WatchWorkflowProjectionService } from '../../services/watches/watch_workflow_projection_service';
 import { registerListWatchesRoute } from './list_watches';
 import { registerGetWatchRoute } from './get_watch';
-import type { IRouter, Logger, RequestHandler } from '@kbn/core/server';
+import type { IRouter, Logger, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 
 // ── Fake router that captures the handler ─────────────────────────────────
 
@@ -58,6 +58,7 @@ const createLogger = (): jest.Mocked<Logger> =>
 const createMockConfig = (overrides: Partial<PndConfig> = {}): PndConfig => ({
   enabled: true,
   ui: { useMockData: true, ...overrides.ui },
+  conversationShadowWrite: false,
   ...overrides,
 });
 
@@ -87,6 +88,12 @@ const makeResponse = () => httpServerMock.createResponseFactory();
 const makeRequest = (path: string, params: Record<string, string> = {}) =>
   httpServerMock.createKibanaRequest({ method: 'get', path, params });
 
+// Route handlers only destructure `core`/`resolve` off the context in this
+// plugin's handlers today (neither is touched), so an empty object cast is
+// sufficient here — same convention used across the repo (see e.g.
+// x-pack/solutions/security/plugins/discoveries/server/lib/assert_workflows_enabled/index.test.ts).
+const EMPTY_CONTEXT = {} as unknown as RequestHandlerContext;
+
 // ── List Watches ──────────────────────────────────────────────────────────
 
 describe('GET /internal/pnd/watches — list watches', () => {
@@ -95,7 +102,7 @@ describe('GET /internal/pnd/watches — list watches', () => {
     const response = makeResponse();
     const handler = router.getHandler(PND_WATCHES_URL);
 
-    await handler({}, makeRequest(PND_WATCHES_URL), response);
+    await handler(EMPTY_CONTEXT, makeRequest(PND_WATCHES_URL), response);
 
     expect(response.ok).toHaveBeenCalled();
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
@@ -108,7 +115,7 @@ describe('GET /internal/pnd/watches — list watches', () => {
     const response = makeResponse();
     const handler = router.getHandler(PND_WATCHES_URL);
 
-    await handler({}, makeRequest(PND_WATCHES_URL), response);
+    await handler(EMPTY_CONTEXT, makeRequest(PND_WATCHES_URL), response);
 
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
     const ids = body.watches.map((w: any) => w.id);
@@ -124,7 +131,7 @@ describe('GET /internal/pnd/watches — list watches', () => {
     const response = makeResponse();
     const handler = router.getHandler(PND_WATCHES_URL);
 
-    await handler({}, makeRequest(PND_WATCHES_URL), response);
+    await handler(EMPTY_CONTEXT, makeRequest(PND_WATCHES_URL), response);
 
     expect(response.ok).toHaveBeenCalled();
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
@@ -132,7 +139,7 @@ describe('GET /internal/pnd/watches — list watches', () => {
   });
 
   it('returns 500 when projection throws', async () => {
-    const { router, config } = setupRouter(registerListWatchesRoute, {
+    const { config } = setupRouter(registerListWatchesRoute, {
       ui: { useMockData: false },
     });
     // Override projection to throw
@@ -155,7 +162,7 @@ describe('GET /internal/pnd/watches — list watches', () => {
     const response = makeResponse();
     const handler = throwingRouter.getHandler(PND_WATCHES_URL);
 
-    await handler({}, makeRequest(PND_WATCHES_URL), response);
+    await handler(EMPTY_CONTEXT, makeRequest(PND_WATCHES_URL), response);
 
     expect(response.customError).toHaveBeenCalled();
     expect((response.customError as jest.Mock).mock.calls[0][0].statusCode).toBe(500);
@@ -171,7 +178,7 @@ describe('GET /internal/pnd/watches/{watchId} — get watch', () => {
     const handler = router.getHandler(PND_WATCH_URL_TEMPLATE);
 
     await handler(
-      {},
+      EMPTY_CONTEXT,
       makeRequest(PND_WATCH_URL_TEMPLATE, { watchId: 'system-security-watch-deep' }),
       response
     );
@@ -188,7 +195,7 @@ describe('GET /internal/pnd/watches/{watchId} — get watch', () => {
     const handler = router.getHandler(PND_WATCH_URL_TEMPLATE);
 
     await handler(
-      {},
+      EMPTY_CONTEXT,
       makeRequest(PND_WATCH_URL_TEMPLATE, { watchId: 'nonexistent-watch' }),
       response
     );
@@ -204,7 +211,7 @@ describe('GET /internal/pnd/watches/{watchId} — get watch', () => {
     const handler = router.getHandler(PND_WATCH_URL_TEMPLATE);
 
     await handler(
-      {},
+      EMPTY_CONTEXT,
       makeRequest(PND_WATCH_URL_TEMPLATE, { watchId: 'system-security-watch-deep' }),
       response
     );
