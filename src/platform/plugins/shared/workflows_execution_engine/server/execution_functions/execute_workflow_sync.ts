@@ -93,7 +93,7 @@ export const executeWorkflowSync = async ({
     ...workflowExecution,
     isTestRun: workflowExecution.isTestRun ?? false,
     status: workflowExecution.status ?? ExecutionStatus.PENDING,
-    context: workflowExecution.context ?? syncContext,
+    context: workflowExecution.context ?? context,
     workflowDefinition: workflowExecution.workflowDefinition,
     yaml: workflowExecution.yaml ?? workflow.yaml,
     scopeStack: workflowExecution.scopeStack ?? [],

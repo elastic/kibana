@@ -28,6 +28,7 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
   collectQueueMetrics: false,
   hitlExternalResume: { enabled: true },
+  syncExecution: { enabled: false, maxDurationMs: 60_000 },
 });
 
 export const createMockLogger = (): Logger =>
