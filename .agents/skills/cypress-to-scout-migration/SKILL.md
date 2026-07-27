@@ -268,4 +268,4 @@ Open only what you need:
 
 Load the matching skill when migrating tests from that solution:
 
-- **Security Solution** (tests in `x-pack/solutions/security/`): `x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration/SKILL.md`
+- **Security Solution** (tests in `x-pack/solutions/security/`): `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/SKILL.md`

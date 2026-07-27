@@ -18,12 +18,12 @@ When guidance from different sources conflicts:
 
 1. **Security Solution conventions** (this skill) — highest weight
 2. **General migration skill** (cypress-to-scout-migration)
-3. **Scout framework skills** (scout-ui-testing, scout-api-testing, scout-best-practices-reviewer)
+3. **Scout framework skills** (scout-ui-testing, scout-api-testing, scout-best-practices-reviewer, security-scout-best-practices-reviewer)
 4. **General Kibana conventions** (AGENTS.md)
 
 ## Additional sub-skills
 
-- **REQUIRED:** scout-best-practices-reviewer — run against every migrated test before submitting the PR
+- **REQUIRED:** run `scout-best-practices-reviewer`, then `security-scout-best-practices-reviewer`, against every migrated test before submitting the PR
 - **ON FLAKY TESTS:** flaky-test-doctor (co-located in this plugin's `.agents/skills/`, when source test is flaky/skipped)
 
 ## Triage: flakiness risk assessment (Gate 4)
@@ -125,7 +125,7 @@ A different owning team reinforces the decision but is not required on its own.
 
 > **No `.buildkite/scout_ci_config.yml` edit is needed.** The `security_solution` plugin is already registered in the `enabled` plugins list in that file. CI auto-discovers all `playwright.config.ts` files within registered plugins — only entries under `excluded_configs` are skipped. New namespace configs are picked up automatically.
 
-**Then:** add the namespace to the source-scope table in `security-test-directories.md` (in this skill set) and the namespace table in `scout-best-practices-reviewer`.
+**Then:** add the namespace to the source-scope table in `security-test-directories.md` (in this skill set) and the namespace table in `security-scout-best-practices-reviewer`.
 
 > **Do not** create a namespace for a sub-component of an existing feature area — add those tests to the parent namespace (e.g., a new risk-score view → `entity_analytics`, not a new `risk_score` namespace).
 
@@ -223,7 +223,7 @@ Scout now runs on MKI. Cypress tests with `@serverless` tags no longer need to b
 
 ## Review checklist (Security-specific additions)
 
-After migration, run the `scout-best-practices-reviewer` skill against the new test. In addition to the general checklist, verify these Security Solution specifics:
+After migration, run the general `scout-best-practices-reviewer` skill and then the additive `security-scout-best-practices-reviewer` skill against the new test. In addition to the general checklist, verify these Security Solution specifics:
 
 - [ ] No `loginAsAdmin()` — uses least-privileged role (`loginAsPlatformEngineer`, `loginAsT1Analyst`, or `loginAsSecurityRole`)
 - [ ] Imports from `@kbn/scout-security` (not `@kbn/scout`)

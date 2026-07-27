@@ -21,7 +21,7 @@ Do not run this check on backport PRs (they usually have `backport` label and/or
 
 Follow `.claude/skills/scout-best-practices-reviewer/SKILL.md` for the **Critical checks** (highest-priority — do them first), the general checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use the GitHub tools and local file inspection to explore as needed.
 
-If any changed files match `x-pack/solutions/security/**/test/scout*/**` or `**/kbn-scout-security/**`, also apply `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md` for Security Solution-specific checks. Apply it after the general skill — do not run the general skill a second time.
+If any changed files match `x-pack/solutions/security/**/test/scout*/**` or `**/kbn-scout-security/**`, also apply `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer/SKILL.md` for Security Solution-specific checks. Apply it after the general skill — do not run the general skill a second time.
 
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 

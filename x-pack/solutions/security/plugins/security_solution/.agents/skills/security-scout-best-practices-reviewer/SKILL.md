@@ -9,6 +9,8 @@ description: >
 
 **Additive checks for Security Solution Scout tests.**
 
+Run the general `scout-best-practices-reviewer` first, then apply this Security-specific checklist. This skill supplements rather than replaces the general review.
+
 ## Security-specific checklist
 
 ### Page objects — Security-specific placement

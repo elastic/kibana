@@ -130,7 +130,7 @@ For Scout tests, use these skills before writing (REQUIRED):
 1. Invoke `scout-create-scaffold`
    (`Skill("scout-create-scaffold")` — skill at `.agents/skills/scout-create-scaffold/SKILL.md`)
 2. Invoke `security-scout-best-practices-reviewer`
-   (`Skill("security-scout-best-practices-reviewer")` — skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`)
+   (`Skill("security-scout-best-practices-reviewer")` — skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer/SKILL.md`)
    This skill internally runs the general `scout-best-practices-reviewer` (`.agents/skills/scout-best-practices-reviewer/SKILL.md`) first — do not invoke it separately.
 
 Run the test and expect it to fail:
