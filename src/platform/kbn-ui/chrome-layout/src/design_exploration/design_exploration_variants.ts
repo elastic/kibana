@@ -14,6 +14,15 @@ import {
   getDesignExplorationVariant,
   isDesignExplorationVariantId,
 } from '@kbn/core-chrome-feature-flags';
+import type { DesignExplorationKnobTokens } from './design_exploration_knobs';
+import {
+  ATTBANA_KNOB_TOKENS,
+  BASELINE_KNOB_TOKENS,
+  INTERBANA_KNOB_TOKENS,
+  LINBANA_KNOB_TOKENS,
+  VERBANA_KNOB_TOKENS,
+  getDesignExplorationKnobTokens,
+} from './design_exploration_knob_tokens';
 import { BASELINE_VARIANT_ID, createBaselineStyles } from './variant_baseline';
 import { ATTBANA_VARIANT_ID, createAttbanaStyles } from './variant_attbana';
 import { INTERBANA_VARIANT_ID, createInterbanaStyles } from './variant_interbana';
@@ -23,6 +32,7 @@ import { VERBANA_VARIANT_ID, createVerbanaStyles } from './variant_verbana';
 export interface DesignExplorationVariantDefinition {
   id: string;
   label: string;
+  knobTokens: DesignExplorationKnobTokens;
   createStyles: (euiTheme: UseEuiTheme) => SerializedStyles;
 }
 
@@ -30,26 +40,31 @@ export const DESIGN_EXPLORATION_VARIANTS: DesignExplorationVariantDefinition[] =
   {
     id: VERBANA_VARIANT_ID,
     label: 'Verbana',
+    knobTokens: VERBANA_KNOB_TOKENS,
     createStyles: createVerbanaStyles,
   },
   {
     id: BASELINE_VARIANT_ID,
     label: 'Baseline',
+    knobTokens: BASELINE_KNOB_TOKENS,
     createStyles: createBaselineStyles,
   },
   {
     id: LINBANA_VARIANT_ID,
     label: 'Linbana',
+    knobTokens: LINBANA_KNOB_TOKENS,
     createStyles: createLinbanaStyles,
   },
   {
     id: ATTBANA_VARIANT_ID,
     label: 'Attbana',
+    knobTokens: ATTBANA_KNOB_TOKENS,
     createStyles: createAttbanaStyles,
   },
   {
     id: INTERBANA_VARIANT_ID,
     label: 'Interbana',
+    knobTokens: INTERBANA_KNOB_TOKENS,
     createStyles: createInterbanaStyles,
   },
 ];
@@ -76,4 +91,4 @@ export const createActiveDesignExplorationStyles = (euiTheme: UseEuiTheme) => {
   return getActiveDesignExplorationVariant().createStyles(euiTheme);
 };
 
-export { isDesignExplorationVariantId };
+export { getDesignExplorationKnobTokens, isDesignExplorationVariantId };

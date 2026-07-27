@@ -112,6 +112,14 @@ export class DeveloperToolbarPlugin
           });
         }
       );
+
+      import('@kbn/ui-chrome-layout').then(({ DesignExplorationKnobsPanel }) => {
+        this.registerItem({
+          id: 'Design exploration knobs',
+          children: <DesignExplorationKnobsPanel />,
+          priority: 1,
+        });
+      });
     }
 
     return {

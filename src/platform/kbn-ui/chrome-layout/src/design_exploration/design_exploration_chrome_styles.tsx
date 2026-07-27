@@ -12,7 +12,14 @@ import { Global } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { getScrollContainer } from '@kbn/ui-chrome-layout-utils';
 import { getDesignExplorationVariant } from '@kbn/core-chrome-feature-flags';
-import { createActiveDesignExplorationStyles } from './design_exploration_variants';
+import {
+  applyDesignExplorationKnobCssVars,
+  DESIGN_EXPLORATION_KNOBS_CHANGED_EVENT,
+} from './design_exploration_knobs';
+import {
+  createActiveDesignExplorationStyles,
+  getActiveDesignExplorationVariant,
+} from './design_exploration_variants';
 import {
   DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR,
   DESIGN_EXPLORATION_BODY_ATTR,
@@ -43,6 +50,14 @@ export const DesignExplorationChromeGlobalStyles = () => {
     document.body.setAttribute(DESIGN_EXPLORATION_BODY_ATTR, 'true');
     document.body.setAttribute(DESIGN_EXPLORATION_VARIANT_ATTR, activeVariantId);
 
+    const syncKnobs = () => {
+      const variant = getActiveDesignExplorationVariant();
+      applyDesignExplorationKnobCssVars(variant.knobTokens, variant.id);
+    };
+
+    syncKnobs();
+    window.addEventListener(DESIGN_EXPLORATION_KNOBS_CHANGED_EVENT, syncKnobs);
+
     const scrollContainer = getScrollContainer();
     const scrollState = createDesignExplorationScrollState(scrollContainer.scrollTop);
     let frameId: number | undefined;
@@ -62,6 +77,7 @@ export const DesignExplorationChromeGlobalStyles = () => {
     scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
+      window.removeEventListener(DESIGN_EXPLORATION_KNOBS_CHANGED_EVENT, syncKnobs);
       if (frameId !== undefined) {
         window.cancelAnimationFrame(frameId);
       }

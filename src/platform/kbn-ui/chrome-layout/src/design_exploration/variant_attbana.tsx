@@ -19,6 +19,7 @@ import {
   DESIGN_EXPLORATION_SCROLLED_BODY_ATTR,
   designExplorationVariantScope,
 } from './design_exploration_shared';
+import { designExplorationKnobVar as knobVar } from './design_exploration_knobs';
 
 export const ATTBANA_VARIANT_ID = 'attbana';
 
@@ -26,15 +27,7 @@ export const ATTBANA_VARIANT_ID = 'attbana';
 // step (sidebar vs. content) rather than blur/shadow for elevation. Radii are
 // noticeably smaller and more uniform than Vercel's, and there is no
 // glassmorphism anywhere in the chrome.
-const LINEAR_RADIUS_CONTROL = 8; // inputs, nav selection pill
-const LINEAR_RADIUS_BUTTON = 16; // buttons
-const LINEAR_RADIUS_PANEL = 10; // cards, panels, code viewer
-const LINEAR_RADIUS_PANEL_COMPACT = 8; // compact single-stat / metric panels
 const LINEAR_ACCENT = '#5E6AD2'; // primary button / focus accent
-const LINEAR_SURFACE = 'lch(98.94 0.5 282)'; // content / header surface
-const LINEAR_SURFACE_NAV = 'lch(96.5 0.5 282)'; // nav step off content surface
-const LINEAR_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 4;
-const LINEAR_PADDING = 20;
 const LINEAR_TOP_BAR_HEIGHT = 57;
 const LINEAR_APP_HEADER_TRANSITION_MS = 200;
 const ATTBANA_NAV_EXPANDED_WIDTH = 220;
@@ -78,6 +71,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
   return css`
     ${scope} {
+      background-color: ${knobVar('canvas')} !important;
       ${layoutVarName('application.marginTop')}: 8px !important;
     }
 
@@ -86,14 +80,14 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
        does the work of separating regions, not a stroke. */
     ${scope} [class*='css-'][class*='-euiPageSection-grow-l-top-plain'],
     ${scope} [class*='css-'][class*='-euiPageInner-panelled'] {
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${knobVar('surface')} !important;
       box-shadow: none !important;
       border: none !important;
     }
 
     /* Sidebar / nav gets the cool, slightly darker step off white. */
     ${scope} .kbnChromeLayoutNavigation {
-      background-color: ${LINEAR_SURFACE_NAV} !important;
+      background-color: ${knobVar('surfaceNav')} !important;
       border-inline-end: none !important;
     }
 
@@ -161,7 +155,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       gap: ${DESIGN_EXPLORATION_GAP}px !important;
       width: 100% !important;
       padding: 6px 10px !important;
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       min-height: 32px !important;
     }
 
@@ -286,7 +280,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       gap: ${DESIGN_EXPLORATION_GAP}px !important;
       width: 100% !important;
       min-height: 32px !important;
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
@@ -455,7 +449,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope}
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     .kbnChromeNav-sidePanel {
-      background-color: ${LINEAR_SURFACE_NAV} !important;
+      background-color: ${knobVar('surfaceNav')} !important;
       border-radius: 0 !important;
       box-shadow: none !important;
       outline: none !important;
@@ -467,7 +461,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     .kbnChromeNav-sidePanel
     [data-test-subj^='kbnChromeNav-sidePanelItem-'] {
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       font-size: 14px !important;
       font-weight: 500 !important;
       padding-inline-start: 28px !important;
@@ -488,7 +482,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutHeader {
-      background-color: ${LINEAR_SURFACE_NAV} !important;
+      background-color: ${knobVar('surfaceNav')} !important;
       // border-block-end: ${LINEAR_HAIRLINE} !important;
       box-shadow: none !important;
       backdrop-filter: none !important;
@@ -517,19 +511,19 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
     /* ----- Dashboard grid & panels ----- */
     ${scope} [data-test-subj='kbnGridLayout'] {
-      --kbnGridGutterSize: 8 !important;
-      padding: ${DESIGN_EXPLORATION_PADDING}px 20px !important;
+      --kbnGridGutterSize: ${knobVar('gridGutter')} !important;
+      padding: ${knobVar('padding')} !important;
     }
 
     /* Flat border, small consistent radius, no shadow at all. */
     ${scope} [data-test-subj='embeddablePanel'] {
-      border-radius: ${LINEAR_RADIUS_PANEL}px !important;
+      border-radius: ${knobVar('radiusPanel')} !important;
       border: ${LINEAR_HAIRLINE} !important;
       box-shadow: none !important;
     }
 
     ${scope} [data-test-subj='embeddablePanel']:has(.echMetricText) {
-      border-radius: ${LINEAR_RADIUS_PANEL_COMPACT}px !important;
+      border-radius: ${knobVar('radiusPanelCompact')} !important;
     }
 
     ${scope}
@@ -553,12 +547,12 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer'],
     ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer'] {
-      padding: 0 ${LINEAR_PANEL_PADDING}px ${LINEAR_PANEL_PADDING}px !important;
+      padding: 0 ${knobVar('panelPadding')} ${knobVar('panelPadding')} !important;
     }
 
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
     ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:has(.echMetricText) {
-      padding: ${LINEAR_PANEL_PADDING}px ${DESIGN_EXPLORATION_GAP}px ${DESIGN_EXPLORATION_GAP}px !important;
+      padding: ${knobVar('panelPadding')} ${DESIGN_EXPLORATION_GAP}px ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     /* ----- Form controls ----- */
@@ -569,7 +563,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
@@ -604,15 +598,15 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']),
     ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
       // border: ${LINEAR_HAIRLINE} !important;
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} .euiFormControlLayout--group:not(:focus-within) {
       overflow: visible !important;
       border: ${LINEAR_HAIRLINE} !important;
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
     }
 
@@ -628,13 +622,13 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .euiSplitButtonActionPrimary {
-      border-radius: ${LINEAR_RADIUS_BUTTON}px 0 0 ${LINEAR_RADIUS_BUTTON}px !important;
+      border-radius: ${knobVar('radiusButton')} 0 0 ${knobVar('radiusButton')} !important;
       padding-left: 8px !important;
       padding-right: 0 !important;
     }
 
     ${scope} .euiSplitButtonActionSecondary {
-      border-radius: 0 ${LINEAR_RADIUS_BUTTON}px ${LINEAR_RADIUS_BUTTON}px 0 !important;
+      border-radius: 0 ${knobVar('radiusButton')} ${knobVar('radiusButton')} 0 !important;
       padding-right: 2px !important;
     }
 
@@ -642,19 +636,19 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     // ${scope} [class*='css-'][class*='-euiButtonDisplay']:not([class*='fill']) {
     //   // background-color: ${colors.backgroundBasePlain} !important;
     //   border: ${LINEAR_HAIRLINE} !important;
-    //   border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+    //   border-radius: ${knobVar('radiusControl')} !important;
     //   // box-shadow: none !important;
     // }
 
     ${scope} [data-test-subj='globalQueryBar'] {
-      padding: ${LINEAR_PADDING}px !important;
+      padding: ${knobVar('padding')} !important;
       padding-block-end: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
     ${scope}
     .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])) {
       border: ${LINEAR_HAIRLINE} !important;
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope}
@@ -663,7 +657,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
-      padding: ${LINEAR_PADDING}px !important;
+      padding: ${knobVar('padding')} !important;
       padding-block-start: 0 !important;
     }
 
@@ -676,7 +670,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
        the content, flat and static, no scroll-triggered elevation change. */
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
       [data-test-subj='appHeader'] {
-      padding-inline: ${LINEAR_PADDING}px !important;
+      padding-inline: ${knobVar('padding')} !important;
       padding-block: 4px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
@@ -684,7 +678,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-block-end: ${LINEAR_HAIRLINE} !important;
       box-shadow: none !important;
-      background-color: ${LINEAR_SURFACE} !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [data-test-subj='appHeaderTitle'],
@@ -711,7 +705,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
-      border-radius: ${LINEAR_RADIUS_BUTTON}px !important;
+      border-radius: ${knobVar('radiusButton')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:hover
@@ -719,12 +713,12 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:focus
       [class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
-      border-radius: ${LINEAR_RADIUS_BUTTON}px !important;
+      border-radius: ${knobVar('radiusButton')} !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
       --kbn-application--top-bar-height: ${LINEAR_TOP_BAR_HEIGHT}px !important;
-      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       border: ${LINEAR_HAIRLINE} !important;
     }
 
@@ -734,7 +728,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       min-height: 0 !important;
       opacity: 1 !important;
       overflow: hidden !important;
-      background-color: ${LINEAR_SURFACE} !important;
+      background-color: ${knobVar('surface')} !important;
       transition: height ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
 
@@ -759,8 +753,8 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication {
-      background-color: ${LINEAR_SURFACE} !important;
-      box-shadow: none !important;
+      background-color: ${knobVar('surface')} !important;
+      box-shadow: ${knobVar('shellShadow')} !important;
       outline: none !important;
       margin-right: 8px !important;
     }
@@ -817,7 +811,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       margin: 0 !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${knobVar('surface')} !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
     }

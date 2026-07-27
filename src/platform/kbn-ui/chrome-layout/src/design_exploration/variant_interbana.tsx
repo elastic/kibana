@@ -20,6 +20,7 @@ import {
   DESIGN_EXPLORATION_SCROLLED_BODY_ATTR,
   designExplorationVariantScope,
 } from './design_exploration_shared';
+import { designExplorationKnobVar as knobVar } from './design_exploration_knobs';
 
 export const INTERBANA_VARIANT_ID = 'interbana';
 
@@ -38,21 +39,8 @@ export const INTERBANA_VARIANT_ID = 'interbana';
 //   - canvas vs content contrast — blue-gray canvas (~Intercom #EFF0EB luminance)
 //     lifts a true-white app surface; secondary nav side panel gets a subtle shade
 //   - warm orange accent instead of Linear's cool indigo
-const INTERBANA_RADIUS_CONTROL = 8; // inputs, nav selection pill
-const INTERBANA_RADIUS_BUTTON = 999; // full capsule/pill buttons
-const INTERBANA_RADIUS_CONTAINER = 16; // application chrome container
-const INTERBANA_RADIUS_PANEL = 12; // cards, panels
-const INTERBANA_RADIUS_PANEL_COMPACT = 12; // compact single-stat / metric panels
 const INTERBANA_ACCENT = '#F26522'; // warm orange accent (est. from reference)
 const INTERBANA_MENU_ITEM_TEXT_COLOR = '#333333';
-const INTERBANA_SURFACE = '#FFFFFF'; // elevated app / content card
-/** Secondary nav side panel — whisper darker than app white. */
-const INTERBANA_SURFACE_NAV = '#F5F7FA';
-/** Blue-hue canvas at ~Intercom #EFF0EB luminance — visible step off white surface. */
-const INTERBANA_CANVAS = '#EBEEF4';
-const INTERBANA_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 12; // roomier than Linbana
-const INTERBANA_PADDING = 24; // airier outer padding than Linbana's 20
-const INTERBANA_GUTTER = 20; // more generous panel-to-panel gap than Linbana's 8
 const INTERBANA_TOP_BAR_HEIGHT = 80;
 const INTERBANA_APP_HEADER_TRANSITION_MS = 200;
 const INTERBANA_NAV_EXPANDED_WIDTH = 220;
@@ -86,11 +74,6 @@ const interbanaNavLayoutOverrides = (navWidth: number) => {
 const interbanaGridTemplateColumns = (navWidth: number) =>
   `${navWidth}px 1fr var(${layoutVarName('sidebar.width')}, 0px)`;
 
-const INTERBANA_TW_RING_OFFSET_SHADOW = '0 0 #0000';
-const INTERBANA_TW_RING_SHADOW = '0 0 #0000';
-const INTERBANA_TW_SHADOW = '0px 1px 4px 0px rgba(20, 20, 20, 0.15)';
-const INTERBANA_APPLICATION_BOX_SHADOW = `var(--tw-ring-offset-shadow, ${INTERBANA_TW_RING_OFFSET_SHADOW}), var(--tw-ring-shadow, ${INTERBANA_TW_RING_SHADOW}), var(--tw-shadow)`;
-
 export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationVariantScope(INTERBANA_VARIANT_ID);
   const { colors } = euiTheme.euiTheme;
@@ -103,14 +86,14 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
   return css`
     ${scope} {
-      background-color: ${INTERBANA_CANVAS} !important;
+      background-color: ${knobVar('canvas')} !important;
     }
 
     /* ----- Base surfaces ----- */
     /* Canvas (body) is blue-gray; app is white; side panel is a subtle step between them. */
     ${scope} [class*='css-'][class*='-euiPageSection-grow-l-top-plain'],
     ${scope} [class*='css-'][class*='-euiPageInner-'][class*='-panelled'] {
-      background-color: ${INTERBANA_SURFACE} !important;
+      background-color: ${knobVar('surface')} !important;
       box-shadow: none !important;
       border: none !important;
     }
@@ -202,7 +185,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       gap: ${DESIGN_EXPLORATION_GAP}px !important;
       width: 100% !important;
       padding: 6px 10px !important;
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       min-height: 32px !important;
     }
 
@@ -331,7 +314,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       gap: ${DESIGN_EXPLORATION_GAP}px !important;
       width: 100% !important;
       min-height: 32px !important;
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope}:has(${INTERBANA_NAV_EXPANDED_SELECTOR})
@@ -494,8 +477,8 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeNav-sidePanel,
     ${scope} [data-test-subj*='kbnChromeNav-sidePanel'],
     ${scope} [class*='getSidePanelWrapperStyles'] {
-      background-color: ${INTERBANA_SURFACE_NAV} !important;
-      border-radius: ${INTERBANA_RADIUS_CONTAINER}px !important;
+      background-color: ${knobVar('surfaceNav')} !important;
+      border-radius: ${knobVar('radiusContainer')} !important;
       box-shadow: none !important;
       outline: none !important;
       margin-top: 0 !important;
@@ -506,10 +489,10 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     [data-test-subj^='kbnChromeNav-sidePanelItem-'],
     ${scope} [data-test-subj*='kbnChromeNav-sidePanel']
       [data-test-subj^='kbnChromeNav-sidePanelItem-'] {
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       font-size: 14px !important;
       font-weight: 500 !important;
-      padding-inline-start: ${INTERBANA_PADDING}px !important;
+      padding-inline-start: ${knobVar('padding')} !important;
     }
 
     ${scope} [class*='css-'][class*='-secondary_menu--titleWithBadgeStyles'],
@@ -580,19 +563,19 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
        with generous air between them, rather than tightly packed regions of
        one continuous surface. */
     ${scope} [data-test-subj='kbnGridLayout'] {
-      --kbnGridGutterSize: ${INTERBANA_GUTTER} !important;
-      padding: ${INTERBANA_PADDING}px !important;
+      --kbnGridGutterSize: ${knobVar('gridGutter')} !important;
+      padding: ${knobVar('padding')} !important;
     }
 
     /* Larger, softer radius than Linbana; still flat/no-shadow. */
     ${scope} [data-test-subj='embeddablePanel'] {
-      border-radius: ${INTERBANA_RADIUS_PANEL}px !important;
+      border-radius: ${knobVar('radiusPanel')} !important;
       border: ${INTERBANA_HAIRLINE} !important;
       box-shadow: none !important;
     }
 
     ${scope} [data-test-subj='embeddablePanel']:has(.echMetricText) {
-      border-radius: ${INTERBANA_RADIUS_PANEL_COMPACT}px !important;
+      border-radius: ${knobVar('radiusPanelCompact')} !important;
     }
 
     ${scope} .dshLayout--editing .embPanel__header:hover {
@@ -625,7 +608,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
        against the panel border. */
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer'],
     ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer'] {
-      padding: 0 ${INTERBANA_PANEL_PADDING}px ${INTERBANA_PANEL_PADDING}px !important;
+      padding: 0 ${knobVar('panelPadding')} ${knobVar('panelPadding')} !important;
     }
 
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
@@ -672,7 +655,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']),
     ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
       background-color: ${colors.backgroundBasePlain} !important;
     }
@@ -680,7 +663,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .euiFormControlLayout--group:not(:focus-within) {
       overflow: visible !important;
       border: ${INTERBANA_HAIRLINE} !important;
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
     }
 
@@ -694,12 +677,12 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [class*='css-'][class*='-euiButtonDisplay'][class*='fill']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary) {
       border: none !important;
       box-shadow: none !important;
-      border-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-radius: ${knobVar('radiusButton')} !important;
     }
 
     ${scope} .euiSplitButtonActionPrimary {
-      border-start-start-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
-      border-end-start-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-start-start-radius: ${knobVar('radiusButton')} !important;
+      border-end-start-radius: ${knobVar('radiusButton')} !important;
       border-start-end-radius: 0 !important;
       border-end-end-radius: 0 !important;
       padding-left: 12px !important;
@@ -707,15 +690,15 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .euiSplitButtonActionSecondary {
-      border-start-end-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
-      border-end-end-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-start-end-radius: ${knobVar('radiusButton')} !important;
+      border-end-end-radius: ${knobVar('radiusButton')} !important;
       border-start-start-radius: 0 !important;
       border-end-start-radius: 0 !important;
       padding-right: 4px !important;
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
-      padding: ${INTERBANA_PADDING}px !important;
+      padding: ${knobVar('padding')} !important;
       padding-block-start: 16px !important;
       padding-block-end: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
@@ -723,7 +706,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope}
     .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])) {
       border: ${INTERBANA_HAIRLINE} !important;
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope}
@@ -732,7 +715,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
-      padding: ${INTERBANA_PADDING}px !important;
+      padding: ${knobVar('padding')} !important;
       padding-block-start: 0 !important;
       padding-block-end: 16px !important;
     }
@@ -762,7 +745,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     /* ----- App header ----- */
     /* Flat, static, no glass/blur — same philosophy as Linbana. */
     ${scope} [class*='css-'][class*='-app_header_shell--primaryRow'] {
-      padding-block-start: ${INTERBANA_PADDING}px !important;
+      padding-block-start: ${knobVar('padding')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] {
@@ -770,14 +753,14 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
-      padding-inline: ${INTERBANA_PADDING}px !important;
+      padding-inline: ${knobVar('padding')} !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: 0 !important;
       border-top: none !important;
       border-inline: none !important;
       box-shadow: none !important;
-      background-color: ${INTERBANA_SURFACE} !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     /* Title width is driven by a hidden sizer span in the same grid cell as
@@ -812,7 +795,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
-      border-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-radius: ${knobVar('radiusButton')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:hover
@@ -820,34 +803,34 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:focus
       [class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
-      border-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-radius: ${knobVar('radiusButton')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay-euiButtonEmpty'][class*='app_menu_item--buttonCss'] {
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonIcon']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary) {
-      border-radius: ${INTERBANA_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionPrimary {
-      border-start-start-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
-      border-end-start-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-start-start-radius: ${knobVar('radiusButton')} !important;
+      border-end-start-radius: ${knobVar('radiusButton')} !important;
       border-start-end-radius: 0 !important;
       border-end-end-radius: 0 !important;
     }
 
     ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionSecondary {
-      border-start-end-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
-      border-end-end-radius: ${INTERBANA_RADIUS_BUTTON}px !important;
+      border-start-end-radius: ${knobVar('radiusButton')} !important;
+      border-end-end-radius: ${knobVar('radiusButton')} !important;
       border-start-start-radius: 0 !important;
       border-end-start-radius: 0 !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
       --kbn-application--top-bar-height: ${INTERBANA_TOP_BAR_HEIGHT}px !important;
-      border-radius: ${INTERBANA_RADIUS_CONTAINER}px !important;
+      border-radius: ${knobVar('radiusContainer')} !important;
       // border: ${INTERBANA_HAIRLINE} !important;
     }
 
@@ -859,7 +842,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       min-height: 0 !important;
       opacity: 1 !important;
       overflow: hidden !important;
-      background-color: ${INTERBANA_SURFACE} !important;
+      background-color: ${knobVar('surface')} !important;
       border-block-end: ${INTERBANA_HAIRLINE} !important;
       transition: height ${INTERBANA_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
@@ -890,11 +873,8 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication {
-      --tw-ring-offset-shadow: ${INTERBANA_TW_RING_OFFSET_SHADOW};
-      --tw-ring-shadow: ${INTERBANA_TW_RING_SHADOW};
-      --tw-shadow: ${INTERBANA_TW_SHADOW};
-      background-color: ${INTERBANA_SURFACE} !important;
-      box-shadow: ${INTERBANA_APPLICATION_BOX_SHADOW} !important;
+      background-color: ${knobVar('surface')} !important;
+      box-shadow: ${knobVar('shellShadow')} !important;
       outline: none !important;
       margin-right: 8px !important;
     }

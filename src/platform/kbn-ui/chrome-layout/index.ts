@@ -38,3 +38,12 @@ export {
   designExplorationScope,
   designExplorationScopedInPanels,
 } from './src/design_exploration/design_exploration_chrome_styles';
+
+export { DesignExplorationKnobsPanel } from './src/design_exploration/design_exploration_knobs_panel';
+
+export {
+  DESIGN_EXPLORATION_KNOB_DEFINITIONS,
+  DESIGN_EXPLORATION_KNOBS_SESSION_KEY,
+  designExplorationKnobVar,
+  getDesignExplorationKnobValues,
+} from './src/design_exploration/design_exploration_knobs';
