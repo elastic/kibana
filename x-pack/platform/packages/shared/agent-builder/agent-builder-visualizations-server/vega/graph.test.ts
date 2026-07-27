@@ -35,14 +35,7 @@ const mockedExecuteEsql = jest.mocked(executeEsql);
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
 
-const DEFAULT_SUMMARY = 'Created a Vega chart using the requested data.';
-const asCodeBlock = (value: Record<string, unknown>) => {
-  const response =
-    'title' in value || 'summary' in value
-      ? { summary: DEFAULT_SUMMARY, ...value }
-      : { summary: DEFAULT_SUMMARY, spec: value };
-  return '```json\n' + JSON.stringify(response) + '\n```';
-};
+const asCodeBlock = (spec: object) => '```json\n' + JSON.stringify(spec) + '\n```';
 
 const GENERATED_ESQL = 'FROM logs-* | STATS count = COUNT() BY status';
 const PROVIDED_ESQL = 'FROM metrics-* | STATS avg = AVG(value) BY host';
@@ -128,7 +121,7 @@ describe('createVegaGraph', () => {
   });
 
   it('accepts a valid spec when the authoring summary is missing', async () => {
-    invoke.mockResolvedValue('```json\n' + JSON.stringify({ spec: { mark: 'bar' } }) + '\n```');
+    invoke.mockResolvedValue(asCodeBlock({ spec: { mark: 'bar' } }));
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
