@@ -47,7 +47,7 @@ pageLoadAssetSize:
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
-  dataViewManagement: 6250
+  dataViewManagement: 6500
   dataViews: 66000
   dataVisualizer: 32727
   developerToolbar: 6043
@@ -156,7 +156,7 @@ pageLoadAssetSize:
   sampleDataIngest: 2640
   savedObjects: 11735
   savedObjectsFinder: 4319
-  savedObjectsManagement: 22361
+  savedObjectsManagement: 23000
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
   savedSearch: 11000
