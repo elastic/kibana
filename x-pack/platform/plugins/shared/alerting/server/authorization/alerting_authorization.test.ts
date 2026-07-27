@@ -1290,6 +1290,54 @@ describe('AlertingAuthorization', () => {
           `"Unauthorized by \\"consumer-b\\" to get \\"rule-type-id-1\\" rule"`
         );
       });
+
+      it('throws when it is authorized in some of the requested namespaces but not all', async () => {
+        checkPrivileges.mockResolvedValueOnce({
+          username: 'some-user',
+          hasAllRequested: false,
+          privileges: {
+            kibana: [
+              {
+                privilege: mockAuthorizationAction('rule-type-id-1', 'alerts', 'rule', 'get'),
+                authorized: true,
+                resource: 'space1',
+              },
+              {
+                privilege: mockAuthorizationAction('rule-type-id-1', 'alerts', 'rule', 'get'),
+                authorized: false,
+                resource: 'space2',
+              },
+            ],
+          },
+        });
+
+        const auth = await AlertingAuthorization.create({
+          request,
+          ruleTypeRegistry,
+          getSpaceId,
+          features,
+          getSpace,
+          authorization: securityStart.authz,
+        });
+
+        const getAuthorizationFilter = auth.getAuthorizationFilter({
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          filterOpts: {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'ruleId',
+              consumer: 'consumer',
+            },
+            namespaces: ['space1', 'space2'],
+          },
+          operation: ReadOperations.Get,
+        });
+
+        await expect(getAuthorizationFilter).rejects.toThrow(
+          'Unauthorized to get rules for any rule types. Validate that you have permissions to access spaces: space1,space2'
+        );
+        expect(atSpacesMock).toHaveBeenCalledWith(['space1', 'space2'], expect.any(Object));
+      });
     });
   });
 
