@@ -17,9 +17,12 @@ export interface UiamOAuthClientLogo {
 export interface UiamOAuthConnectionsSummary {
   active?: string[];
   revoked?: string[];
+  expired?: string[];
 }
 
 export type UiamOAuthClientType = 'public' | 'confidential';
+
+export type UiamOAuthProjectType = 'elasticsearch' | 'observability' | 'security' | 'vectordb';
 
 export interface UiamOAuthClientResponse {
   id: string;
@@ -47,6 +50,8 @@ export interface UiamOAuthConnectionResponse {
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
+  expired?: boolean;
+  expiration?: string;
   scopes?: string[];
   user_id?: string;
 }
@@ -54,6 +59,7 @@ export interface UiamOAuthConnectionResponse {
 export interface CreateUiamOAuthClientParams {
   resource: string;
   project_id: string;
+  project_type?: UiamOAuthProjectType;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;

@@ -408,6 +408,7 @@ interface InstallRegistryPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
+  allowOutdatedVersion?: boolean;
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
@@ -496,6 +497,7 @@ async function installPackageFromRegistry({
   spaceId,
   request,
   force = false,
+  allowOutdatedVersion = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
   prerelease = false,
@@ -560,9 +562,9 @@ async function installPackageFromRegistry({
     telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
     telemetryEvent.automaticInstall = automaticInstall;
 
-    // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+    // let the user install if using the force flag, allow_outdated_version flag, or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
-      force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+      force || allowOutdatedVersion || ['reinstall', 'reupdate', 'rollback'].includes(installType);
 
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
@@ -574,7 +576,11 @@ async function installPackageFromRegistry({
       }
       logger.debug(
         `${pkgkey} is out-of-date, installing anyway due to ${
-          force ? 'force flag' : `install type ${installType}`
+          force
+            ? 'force flag'
+            : allowOutdatedVersion
+            ? 'allow_outdated_version flag'
+            : `install type ${installType}`
         }`
       );
     }
@@ -1020,6 +1026,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     const {
       pkgkey,
       force,
+      allowOutdatedVersion,
       ignoreConstraints,
       spaceId,
       neverIgnoreVerificationError,
@@ -1067,6 +1074,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       esClient,
       spaceId,
       force,
+      allowOutdatedVersion,
       neverIgnoreVerificationError,
       ignoreConstraints,
       prerelease,

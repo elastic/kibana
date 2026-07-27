@@ -20063,6 +20063,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -20198,6 +20201,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -20520,6 +20524,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -20673,6 +20680,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -20799,6 +20807,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -20877,6 +20888,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -22727,6 +22739,16 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         stability: development
+      - name: messaging.kafka.cluster.id
+        type: string
+        brief: |
+          The Kafka cluster id, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.
+        examples:
+          - MkU3OEVBNTcwNTJENDM2Qk
+        requirement_level: recommended
+        note: |
+          The cluster id is a unique identifier reported by the Kafka broker. It identifies the cluster independently of the individual brokers the client is configured to connect to, and remains stable even if broker host names, IP addresses, or ports change.
+        stability: development
       - name: messaging.kafka.message.key
         type: string
         brief: |
@@ -22916,6 +22938,15 @@ groups:
             - brief
             - requirement_level
             - sampling_relevant
+        messaging.kafka.cluster.id:
+          source_group: registry.messaging.kafka
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         messaging.kafka.message.key:
           source_group: registry.messaging.kafka
           inherited_fields:
@@ -31349,11 +31380,15 @@ groups:
         metric_value_type: int
   - id: metric.container.memory.paging.faults
     type: metric
-    brief: Container memory paging faults.
+    brief: Deprecated, use `container.paging.faults` instead.
     note: |
       In general, this metric can be derived from [cadvisor](https://github.com/google/cadvisor/blob/v0.53.0/docs/storage/prometheus.md#prometheus-container-metrics) and specifically the `container_memory_failures_total{failure_type=pgfault, scope=container}` and `container_memory_failures_total{failure_type=pgmajfault, scope=container}`metric.
       In K8s, this metric is derived from the [MemoryStats.PageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) and [MemoryStats.MajorPageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) field of the [PodStats.Memory](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the Kubelet's stats API.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: container.paging.faults
+      note: Replaced by `container.paging.faults`.
     attributes:
       - name: system.paging.fault.type
         type:
@@ -31375,7 +31410,7 @@ groups:
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
-        path: /home/weaver/source/container/metrics.yaml
+        path: /home/weaver/source/container/deprecated/metrics-deprecated.yaml
       attributes:
         system.paging.fault.type:
           source_group: registry.system.paging
@@ -31494,6 +31529,49 @@ groups:
             - stability
         network.io.direction:
           source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - container
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.container.paging.faults
+    type: metric
+    brief: Container memory paging faults.
+    note: |
+      In general, this metric can be derived from [cadvisor](https://github.com/google/cadvisor/blob/v0.53.0/docs/storage/prometheus.md#prometheus-container-metrics) and specifically the `container_memory_failures_total{failure_type=pgfault, scope=container}` and `container_memory_failures_total{failure_type=pgmajfault, scope=container}`metric.
+      In K8s, this metric is derived from the [MemoryStats.PageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) and [MemoryStats.MajorPageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) field of the [PodStats.Memory](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the Kubelet's stats API.
+    stability: development
+    attributes:
+      - name: system.paging.fault.type
+        type:
+          members:
+            - id: major
+              value: major
+              stability: release_candidate
+            - id: minor
+              value: minor
+              stability: release_candidate
+        brief: The paging fault type
+        examples:
+          - minor
+        requirement_level: recommended
+        stability: release_candidate
+    metric_name: container.paging.faults
+    instrument: counter
+    unit: "{fault}"
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
+        path: /home/weaver/source/container/metrics.yaml
+      attributes:
+        system.paging.fault.type:
+          source_group: registry.system.paging
           inherited_fields:
             - brief
             - examples
@@ -48336,11 +48414,15 @@ groups:
         metric_value_type: int
   - id: metric.k8s.node.memory.paging.faults
     type: metric
-    brief: Node memory paging faults.
+    brief: Deprecated, use `k8s.node.paging.faults` instead.
     note: |
       Cumulative number of major/minor page faults.
       This metric is derived from the [MemoryStats.PageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) and [MemoryStats.MajorPageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) fields of the [NodeStats.Memory](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats) of the Kubelet's stats API.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.node.paging.faults
+      note: Replaced by `k8s.node.paging.faults`.
     attributes:
       - name: system.paging.fault.type
         type:
@@ -48362,7 +48444,7 @@ groups:
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
       attributes:
         system.paging.fault.type:
           source_group: registry.system.paging
@@ -48536,6 +48618,49 @@ groups:
             - stability
         network.io.direction:
           source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - k8s.node
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.node.paging.faults
+    type: metric
+    brief: Node memory paging faults.
+    note: |
+      Cumulative number of major/minor page faults.
+      This metric is derived from the [MemoryStats.PageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) and [MemoryStats.MajorPageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) fields of the [NodeStats.Memory](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats) of the Kubelet's stats API.
+    stability: development
+    attributes:
+      - name: system.paging.fault.type
+        type:
+          members:
+            - id: major
+              value: major
+              stability: release_candidate
+            - id: minor
+              value: minor
+              stability: release_candidate
+        brief: The paging fault type
+        examples:
+          - minor
+        requirement_level: recommended
+        stability: release_candidate
+    metric_name: k8s.node.paging.faults
+    instrument: counter
+    unit: "{fault}"
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
+        path: /home/weaver/source/k8s/metrics.yaml
+      attributes:
+        system.paging.fault.type:
+          source_group: registry.system.paging
           inherited_fields:
             - brief
             - examples
@@ -48956,11 +49081,15 @@ groups:
         metric_value_type: int
   - id: metric.k8s.pod.memory.paging.faults
     type: metric
-    brief: Pod memory paging faults.
+    brief: Deprecated, use `k8s.pod.paging.faults` instead.
     note: |
       Cumulative number of major/minor page faults.
       This metric is derived from the [MemoryStats.PageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) and [MemoryStats.MajorPageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) field of the [PodStats.Memory](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the Kubelet's stats API.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.pod.paging.faults
+      note: Replaced by `k8s.pod.paging.faults`.
     attributes:
       - name: system.paging.fault.type
         type:
@@ -48982,7 +49111,7 @@ groups:
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
       attributes:
         system.paging.fault.type:
           source_group: registry.system.paging
@@ -49156,6 +49285,49 @@ groups:
             - stability
         network.io.direction:
           source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - k8s.pod
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.pod.paging.faults
+    type: metric
+    brief: Pod memory paging faults.
+    note: |
+      Cumulative number of major/minor page faults.
+      This metric is derived from the [MemoryStats.PageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) and [MemoryStats.MajorPageFaults](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#MemoryStats) field of the [PodStats.Memory](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the Kubelet's stats API.
+    stability: development
+    attributes:
+      - name: system.paging.fault.type
+        type:
+          members:
+            - id: major
+              value: major
+              stability: release_candidate
+            - id: minor
+              value: minor
+              stability: release_candidate
+        brief: The paging fault type
+        examples:
+          - minor
+        requirement_level: recommended
+        stability: release_candidate
+    metric_name: k8s.pod.paging.faults
+    instrument: counter
+    unit: "{fault}"
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
+        path: /home/weaver/source/k8s/metrics.yaml
+      attributes:
+        system.paging.fault.type:
+          source_group: registry.system.paging
           inherited_fields:
             - brief
             - examples
@@ -52479,6 +52651,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -52659,6 +52834,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -52807,6 +52983,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -52913,6 +53092,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -53249,6 +53429,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -53405,6 +53588,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -53535,6 +53719,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -53617,6 +53804,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -79678,6 +79866,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -79706,6 +79897,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.44.0-unreleased
@@ -80130,6 +80324,16 @@ groups:
     brief: |
       This group describes attributes specific to Apache Kafka.
     attributes:
+      - name: messaging.kafka.cluster.id
+        type: string
+        brief: |
+          The Kafka cluster id, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.
+        examples:
+          - MkU3OEVBNTcwNTJENDM2Qk
+        requirement_level: recommended
+        note: |
+          The cluster id is a unique identifier reported by the Kafka broker. It identifies the cluster independently of the individual brokers the client is configured to connect to, and remains stable even if broker host names, IP addresses, or ports change.
+        stability: development
       - name: messaging.kafka.message.key
         type: string
         brief: |
@@ -89593,7 +89797,7 @@ groups:
     note: |
       For all pipeline runs, a span with kind `SERVER` SHOULD be created corresponding to the execution of the pipeline run.
 
-      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.58.0/specification/trace/api.md#span).
+      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.59.0/specification/trace/api.md#span).
 
       The span name SHOULD be `{action} {pipeline}` if there is a (low-cardinality) pipeline name available.
       If the pipeline name is not available or is likely to have high cardinality, then the span name SHOULD be `{action}`.
@@ -100208,7 +100412,7 @@ groups:
     note: |
       **Span name** SHOULD be `{gen_ai.operation.name} {gen_ai.request.model}`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format
-      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.58.0/specification/trace/api.md#span).
+      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.59.0/specification/trace/api.md#span).
 
       **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
       call to models running in the same process. It's RECOMMENDED to use `CLIENT` kind
@@ -106082,6 +106286,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -106112,6 +106319,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -106304,6 +106514,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -106324,6 +106535,7 @@ groups:
         mcp.session.id:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -106722,6 +106934,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -106752,6 +106967,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -106916,6 +107134,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -106936,6 +107155,7 @@ groups:
         mcp.session.id:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -108816,7 +109036,7 @@ groups:
         requirement_level: required
         sampling_relevant: true
         note: |
-          When an IP address is provided instead of a domain name, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the provided IP address.
+          When an IP address is provided instead of a domain name, instrumentations SHOULD NOT do a reverse DNS lookup to obtain DNS name and SHOULD set `server.address` to the provided IP address.
         stability: stable
       - name: server.port
         type: int
@@ -110031,7 +110251,7 @@ groups:
           target string and SHOULD NOT set `server.port`.
 
           When the address is an IP address, instrumentations SHOULD NOT do a
-          reverse proxy lookup to obtain a DNS name and SHOULD set `server.address`
+          reverse DNS lookup to obtain a DNS name and SHOULD set `server.address`
           to the IP address provided.
 
           Examples:
@@ -112732,6 +112952,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: mcp.resource.uri
         type: string
         brief: The value of the resource uri.
@@ -112762,6 +112985,9 @@ groups:
           reason: uncategorized
           note: |
             Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).
+        annotations:
+          dependency_resolution:
+            exclude: true
       - name: network.protocol.name
         type: string
         brief: "[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent."
@@ -112907,6 +113133,7 @@ groups:
         mcp.protocol.version:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
@@ -112927,6 +113154,7 @@ groups:
         mcp.session.id:
           source_group: registry.mcp
           inherited_fields:
+            - annotations
             - brief
             - deprecated
             - examples
