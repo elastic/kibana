@@ -141,23 +141,27 @@ After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IO
 | Indicator type | Value | First seen | Source event |
 |---|---|---|---|
 
-Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, mutex, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
+Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, mutex, running processes, live network connections, persistence mechanisms, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
 
-**Mutex coverage (second-tier Osquery source — REQUIRED, not optional).** The \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` tool cannot return mutexes from Elastic Defend telemetry. After calling it, act on the \`osquery_mutex_guidance\` block in its result:
+**Live-host Osquery cross-check (second-tier source — REQUIRED, not optional, for all four categories below).** Elastic Defend telemetry is historical-only: it records that a process started, a connection opened, or a registry key changed, but not whether that process/connection/persistence mechanism is still active *right now*. The \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` tool returns four structured guidance blocks for this — \`osquery_mutex_guidance\`, \`osquery_processes_guidance\`, \`osquery_network_guidance\`, and \`osquery_persistence_guidance\` — each with a ready-to-run query against a real osquery schema-catalog table. Act on all four:
 
-1. Call \`osquery.check_integration\`. If unavailable/enrolled-less, render the mutex IoC row as \`— (requires Osquery integration)\` and note it in the summary.
-2. If available: resolve each host to its Elastic Agent ID by calling \`osquery.resolve_agent_ids\` (do NOT query the \`.fleet-agents\` index directly via ES|QL/search — that system index requires ES-level privileges most roles lack and fails with a security_exception), then call \`osquery.run_live_query\` with the winbaseobj Mutant query from the guidance block.
-3. Filter out benign system mutexes (\`SM0:*\`, \`WilStaging_*\`, \`_MSI*\`) and add surviving named-mutex values to the IoC table mutex row.
-4. Only after the mutex row is populated (or explicitly marked unavailable) is IoC extraction complete — proceed to the cross-environment hunt offer.
+1. Call \`osquery.check_integration\` once. If unavailable/enrolled-less, render all four rows (mutex, running processes, live network connections, persistence mechanisms) as \`— (requires Osquery integration)\` and note it in the summary.
+2. If available: resolve each host to its Elastic Agent ID by calling \`osquery.resolve_agent_ids\` (do NOT query the \`.fleet-agents\` index directly via ES|QL/search — that system index requires ES-level privileges most roles lack and fails with a security_exception). Reuse the resolved agent IDs across all four guidance blocks — don't re-resolve per category.
+3. Call \`osquery.run_live_query\` once per guidance block's \`query\` (and \`secondary_query\` for persistence — scheduled tasks and services are two independent vectors):
+   - **Mutex**: filter out benign system mutexes (\`SM0:*\`, \`WilStaging_*\`, \`_MSI*\`); surviving named mutexes go in the mutex row.
+   - **Running processes**: cross-reference returned names/paths against the \`process_chain\` IoC already extracted from Defend telemetry — a live match confirms the threat is still active, not just historical.
+   - **Live network connections**: cross-reference \`remote_address\` against the \`network_destinations\` IoC already extracted — a live socket to a known-bad destination means the beacon is still open right now.
+   - **Persistence mechanisms**: cross-reference scheduled-task/service \`action\`/\`path\` against \`file_hashes\`/\`process_chain\` and the registry run-key already extracted — a task or service pointing at the same dropped binary confirms durable persistence beyond a single registry key.
+4. Only after all four rows are populated (or explicitly marked unavailable) is IoC extraction complete — proceed to the cross-environment hunt offer.
 
-This makes the mutex a genuine second-tier IoC source read from the live host, not a documented gap.
+This makes all four categories genuine second-tier IoC sources read from the live host, not documented gaps — the mutex was never a special case, it was simply the first one implemented.
 
 ### 6. Lateral movement
-Trace outbound internal connections from source host; correlate with process creation on destinations.
+Trace outbound internal connections from source host; correlate with process creation on destinations. Cross-reference with the live \`osquery_network_guidance\` result (step 5) — an outbound connection still open right now is a stronger lateral-movement signal than a historical connection-start event alone.
 
 ### 7. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
-When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`startup_items\` tables.
+When Osquery is available, this is covered by \`osquery_persistence_guidance\` in step 5 (\`scheduled_tasks\` and \`services\` tables) — do not re-derive persistence findings separately; reuse that result.
 
 ## Cross-Skill Handoff (BlackHat three-phase flow)
 
@@ -176,7 +180,7 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
 - **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
 - **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured IoC table for downstream hunts.
-- **Always** execute the \`osquery_mutex_guidance\` block returned by \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` via \`osquery.run_live_query\` (winbaseobj Mutant query) to fill the mutex IoC row — mutexes have no Defend-telemetry source and cannot be skipped.
+- **Always** execute the four \`osquery_*_guidance\` blocks (mutex, processes, network, persistence) returned by \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` via \`osquery.run_live_query\` to cross-check every IoC category against live host state — these have no Defend-telemetry equivalent and cannot be skipped.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
@@ -239,8 +243,9 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
         'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions, ' +
-        'PLUS an osquery_mutex_guidance block — the executable Osquery winbaseobj query and host→agent_id resolution ' +
-        'needed to fill the mutex IoC row from the live host (Defend telemetry has no mutex field). ' +
+        'PLUS four osquery_*_guidance blocks (mutex, running processes, live network connections, persistence mechanisms) — ' +
+        'executable Osquery queries and host→agent_id resolution needed to cross-check each IoC category against live host state ' +
+        '(Defend telemetry is historical-only; these tables answer "is this still active right now"). ' +
         'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
@@ -350,6 +355,68 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
             'Before dispatching, call osquery.check_integration. If Osquery is not installed/enrolled, report mutex as "— (requires Osquery integration)" rather than skipping the indicator type.',
         };
 
+        // Live-state IoC categories beyond the mutex: current running processes, open
+        // network sockets, and persistence mechanisms. Defend telemetry only has
+        // *historical* events for these (process-start, network-connection-start,
+        // registry-change), so a live-host cross-check via Osquery genuinely adds a
+        // second, independent data source rather than duplicating the ES|QL result —
+        // e.g. a process still resident right now, vs. one that started and already
+        // exited. Same structured-guidance pattern as the mutex block: real tables from
+        // the v5.19.0 schema catalog, real columns, executable via osquery.run_live_query.
+        const osqueryProcessesGuidance = {
+          indicator_type: 'running_processes',
+          why_esql_cannot_cover:
+            'Defend telemetry only records process START/END events. It cannot answer "what is running on this host right now" — that is a live-state question only the endpoint itself can answer.',
+          required_tool: 'osquery.run_live_query',
+          query:
+            "SELECT pid, name, path, cmdline, parent FROM processes WHERE on_disk = 0 OR path NOT LIKE 'C:\\\\Windows\\\\%'",
+          query_explanation:
+            'processes lists every currently-running process. Filtering to on_disk = 0 (binary deleted from disk while still running — a classic evasion signal) OR a path outside C:\\Windows surfaces unsigned/non-system binaries worth cross-referencing against the process_chain IoCs already extracted from Defend telemetry.',
+          catalog_table: 'processes (cross-platform, in osquery v5.19.0 schema catalog)',
+          agent_resolution: 'Same agent_id resolution as the mutex block — reuse the resolved ids.',
+          after_query:
+            'Cross-reference returned process names/paths against the process_chain IoC row already extracted from Defend telemetry. A live process matching a historical IoC confirms the threat is still active on the host, not just historical.',
+          availability_gate:
+            'Before dispatching, call osquery.check_integration. If unavailable, report this row as "— (requires Osquery integration)".',
+        };
+
+        const osqueryNetworkGuidance = {
+          indicator_type: 'live_network_connections',
+          why_esql_cannot_cover:
+            'Defend telemetry only records connection START events, not the current state of a socket. A C2 channel established minutes ago may still be open — Osquery is the only source for "is this connection live right now".',
+          required_tool: 'osquery.run_live_query',
+          query:
+            'SELECT pid, local_address, local_port, remote_address, remote_port, state FROM process_open_sockets WHERE remote_port != 0',
+          query_explanation:
+            'process_open_sockets lists every open socket with its owning process. Filtering to remote_port != 0 excludes listening/local-only sockets and surfaces active outbound connections — cross-reference remote_address against the network_destinations IoC row already extracted from Defend telemetry.',
+          catalog_table: 'process_open_sockets (cross-platform, in osquery v5.19.0 schema catalog)',
+          agent_resolution: 'Same agent_id resolution as the mutex block — reuse the resolved ids.',
+          after_query:
+            'A live socket to a known-bad destination (e.g. the C2 IP already in network_destinations) means the beacon is still active, not just historical — escalate urgency accordingly in the summary.',
+          availability_gate:
+            'Before dispatching, call osquery.check_integration. If unavailable, report this row as "— (requires Osquery integration)".',
+        };
+
+        const osqueryPersistenceGuidance = {
+          indicator_type: 'persistence_mechanisms',
+          why_esql_cannot_cover:
+            'Defend telemetry only records a registry-key WRITE event, not the current state of scheduled tasks, services, or startup items host-wide. Osquery reads the live persistence configuration directly.',
+          required_tool: 'osquery.run_live_query',
+          query: 'SELECT name, action, path, enabled, state FROM scheduled_tasks WHERE enabled = 1',
+          query_explanation:
+            'scheduled_tasks (Windows-only) lists every enabled scheduled task with its action and path. Cross-reference the action/path against the registry_persistence_keys and process_chain IoC rows — a scheduled task pointing at the same dropped binary confirms durable persistence beyond a single registry run-key.',
+          catalog_table: 'scheduled_tasks (Windows-only, in osquery v5.19.0 schema catalog)',
+          secondary_query:
+            "SELECT name, path, status, user_account FROM services WHERE start_type = 'AUTO_START'",
+          secondary_query_explanation:
+            'services (Windows-only) lists installed Windows services. Auto-start services with an unfamiliar path/user_account are a second persistence vector alongside scheduled tasks — check both before concluding persistence is fully enumerated.',
+          agent_resolution: 'Same agent_id resolution as the mutex block — reuse the resolved ids.',
+          after_query:
+            'Add any task/service pointing at a path already flagged in file_hashes or process_chain to the persistence row of the IoC table, alongside the registry run-key already extracted from Defend telemetry.',
+          availability_gate:
+            'Before dispatching, call osquery.check_integration. If unavailable, report this row as "— (requires Osquery integration)".',
+        };
+
         return {
           results: [
             {
@@ -359,8 +426,11 @@ The forensic reconstruction is Phase 1 of a three-phase incident workflow. After
                 time_window_hours: timeWindowHours,
                 iocs,
                 osquery_mutex_guidance: osqueryMutexGuidance,
+                osquery_processes_guidance: osqueryProcessesGuidance,
+                osquery_network_guidance: osqueryNetworkGuidance,
+                osquery_persistence_guidance: osqueryPersistenceGuidance,
                 guidance:
-                  'Present as a markdown table (one row per indicator type, mutex row included). Then: (1) execute the osquery_mutex_guidance via osquery.run_live_query to fill the mutex row with real values; (2) offer the cross-environment hunt per the Cross-Skill Handoff section.',
+                  'Present as a markdown table (one row per indicator type, mutex row included). Then, when Osquery is available: (1) execute osquery_mutex_guidance, osquery_processes_guidance, osquery_network_guidance, and osquery_persistence_guidance via osquery.run_live_query to cross-check each IoC category against live host state, not just historical Defend telemetry; (2) offer the cross-environment hunt per the Cross-Skill Handoff section.',
               },
             },
           ],
