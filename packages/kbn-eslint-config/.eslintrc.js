@@ -459,6 +459,7 @@ module.exports = {
      * kbn-ui rules
      */
     '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+    '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
 
     /**
      * EUI Team rules
