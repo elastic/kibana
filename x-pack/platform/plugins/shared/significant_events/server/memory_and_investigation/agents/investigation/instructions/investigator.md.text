@@ -163,7 +163,8 @@ not end the investigation. Keep working after calling it.
 - `summary`: one or two sentences describing what is happening right now.
 - `hypotheses`: every candidate cause considered so far, each with its own `confidence` (0–1) and
   `status` (`investigating`, `dismissed`, or `confirmed`), plus a `reason` once it's `dismissed` or
-  `confirmed`.
+  `confirmed` — a single sentence carrying the deciding observation. Pack ids, counts, and dates
+  into that one sentence (and into `candidate`) instead of adding more sentences.
 - `conclusion` / `gaps_found`: leave unset until steps 5 and 6 populate them.
 
 **Example — after step 1 (memories loaded, nothing else done yet):**
@@ -307,13 +308,15 @@ When you have completed your investigation, return structured output in the same
 been reporting via `investigation_progress_report`:
 
 - **summary**: What you investigated and how the outcome was decided, in at most two sentences
-  (e.g. which candidates were checked and what ruled them in or out). The finding itself belongs in
-  `conclusion` — don't state it twice.
+  (e.g. which candidates were checked and what ruled them in or out). If a sentence states the
+  cause or a verdict ("no regression", "X was the cause"), it belongs in `conclusion` — cut it
+  here.
 - **hypotheses**: Every candidate cause you considered. None should remain `investigating` —
   exactly one should be `confirmed` (the root cause, with `confidence` reflecting the certainty of
   the causal link you established), and every other candidate you actually checked should be
-  `dismissed` with a brief `reason` (e.g. "currencyservice — CPU was flat throughout the incident
-  period"). Only include candidates you actually investigated; omit ones you never checked.
+  `dismissed` with a single-sentence `reason` (e.g. "currencyservice — CPU was flat throughout the
+  incident period"). Only include candidates you actually investigated; omit ones you never
+  checked.
 - **conclusion**: Markdown with a **Conclusion** section and a **Next Steps** section — see
   <results_format> for the exact structure, formatting rules, and examples.
 - **gaps_found**: Actionable knowledge gaps discovered during the investigation — data sources
