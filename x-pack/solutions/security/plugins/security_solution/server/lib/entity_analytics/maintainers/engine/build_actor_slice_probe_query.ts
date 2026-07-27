@@ -26,6 +26,8 @@ export interface ActorSliceProbeResult {
   sliceBoundary: string | null;
   /** true when actorCount < maxActors, meaning no more slices are needed. */
   isLastSlice: boolean;
+  /** Actor IDs (probe keys) found in this slice — used to filter the extract query. */
+  actorIds: string[];
 }
 
 /**
@@ -45,7 +47,7 @@ export const buildActorSliceProbeQuery = (
   useSample: boolean = true
 ): string => {
   const index = config.indexPattern(namespace);
-  const maxActors = config.maxActorsPerSlice ?? COMPOSITE_PAGE_SIZE;
+  const maxActors = config.maxActorsPerSlice ?? 2;
 
   // Actor-presence gate: mirrors the same logic as `build_targets_per_actor_query.ts`
   // so the probe and main query narrow on the same actor population.
@@ -94,7 +96,7 @@ export const buildActorSliceProbeQuery = (
     `| STATS _firstEvent = MIN(@timestamp) BY actorUserId`,
     `| SORT _firstEvent ASC`,
     `| LIMIT ${maxActors}`,
-    `| STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*)`,
+    `| STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*), actorIds = VALUES(actorUserId)`,
   ].filter((line): line is string => line !== undefined);
 
   return lines.join('\n');
@@ -114,16 +116,23 @@ export const parseActorSliceProbeResult = (
   maxActors: number
 ): ActorSliceProbeResult => {
   if (values.length === 0) {
-    return { sliceBoundary: null, isLastSlice: true };
+    return { sliceBoundary: null, isLastSlice: true, actorIds: [] };
   }
 
   const colIndex = (name: string): number => columns.findIndex((c) => c.name === name);
   const row = values[0];
   const sliceBoundary = row[colIndex('sliceBoundary')] as string | null;
   const actorCount = row[colIndex('actorCount')] as number;
+  const rawActorIds = row[colIndex('actorIds')];
+  const actorIds: string[] = Array.isArray(rawActorIds)
+    ? (rawActorIds as unknown[]).filter((v): v is string => typeof v === 'string')
+    : typeof rawActorIds === 'string'
+    ? [rawActorIds]
+    : [];
 
   return {
     sliceBoundary: sliceBoundary ?? null,
     isLastSlice: actorCount < maxActors,
+    actorIds,
   };
 };

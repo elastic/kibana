@@ -38,7 +38,8 @@ function buildAnyActorFieldNonEmptyEsql(fields: string[]): string {
 function buildRelationshipEsql(
   config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
   namespace: string,
-  timeWindow?: { fromDate: string; toDate: string }
+  timeWindow?: { fromDate: string; toDate: string },
+  actorIds?: string[]
 ): string {
   const indexPattern = config.indexPattern(namespace);
   // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
@@ -96,6 +97,15 @@ function buildRelationshipEsql(
 
   const limitClause = timeWindow ? '' : `\n| LIMIT ${COMPOSITE_PAGE_SIZE}`;
 
+  // When actorIds is provided (log-source path), add a post-EVAL IN filter to
+  // restrict the extract to only the actors discovered in the probe. This bounds
+  // the extract to at most maxActors actors regardless of the time window width,
+  // mirroring how the entity store's RemoteLogsExtractionClient works.
+  const actorIdFilter =
+    actorIds && actorIds.length > 0
+      ? `| WHERE ${ENGINE_COLUMNS.actor} IN (${actorIds.map((id) => `"${id}"`).join(', ')})\n`
+      : '';
+
   // NOTE: We use `COALESCE(col, "") != ""` rather than the more natural
   // `col IS NOT NULL AND col != ""` because ES|QL has a quirk where
   // `WHERE col IS NOT NULL` evaluates to FALSE for all rows when `col` is
@@ -108,7 +118,7 @@ function buildRelationshipEsql(
     AND (${userIdFilter})
 ${targetIdFilterLine}${userFieldEvalsLine}${actorEvalClause}
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
-${targetEvalClause}
+${actorIdFilter}${targetEvalClause}
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, "") != ""${additionalTargetFilter}
 ${statsClause}${limitClause}`;
@@ -132,11 +142,12 @@ ${statsClause}${limitClause}`;
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
   namespace: string,
-  timeWindow?: { fromDate: string; toDate: string }
+  timeWindow?: { fromDate: string; toDate: string },
+  actorIds?: string[]
 ): string => {
   const body =
     config.kind === 'override'
       ? config.esqlQueryOverride(namespace)
-      : buildRelationshipEsql(config, namespace, timeWindow);
+      : buildRelationshipEsql(config, namespace, timeWindow, actorIds);
   return `${ESQL_ENGINE_PREAMBLE}\n${body}`;
 };

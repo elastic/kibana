@@ -56,6 +56,22 @@ interface EsqlResponse {
 }
 
 /**
+ * Returns actor IDs to pass to the extract query, or undefined if the probe
+ * used a probeActorKey (raw field value) rather than the full EUID. When
+ * probeActorKey is set, the probe collects raw values like "backup_svc" while
+ * the extract produces full EUIDs like "user:backup_svc@local" — the formats
+ * differ, so the IN filter would never match and must be skipped.
+ */
+const extractActorIdsFilter = (
+  config: RelationshipIntegrationConfig,
+  actorIds: string[]
+): string[] | undefined => {
+  if (config.kind === 'override') return undefined;
+  if (config.customActor?.probeActorKey != null) return undefined;
+  return actorIds;
+};
+
+/**
  * Runs the probe query with SAMPLE first (cheap on large datasets). If SAMPLE
  * returns no actors — which happens on sparse indices where sampling misses all
  * docs — retries without SAMPLE to confirm there are genuinely no actors before
@@ -153,19 +169,17 @@ export const runLogsIntegration = async (
       );
 
       if (probeResult.sliceBoundary === null) {
-        // No actors found even without sampling — nothing left to process
+        // No actors found in probe — either nothing ever existed (slices === 0)
+        // or we've exhausted all remaining docs after advancing sliceStart past
+        // the previous slice. In both cases, stop the loop and fall through to
+        // the write step so accumulated records from prior slices are not lost.
         logger.info(`[${config.id}] No actors found in probe, finishing`);
-        return {
-          slices,
-          recordsCount,
-          write: totalWrite,
-          metadata: totalMetadata,
-          outcome: slices === 0 ? 'empty' : 'producing',
-          truncated: false,
-        };
+        break;
       }
 
-      // Step 2: Extend (boundary query) — skip for last slice, use 'now' as the upper bound
+      // Step 2: Extend (boundary query) — find the last event timestamp across
+      // all actors in this slice, so the extract query covers the full activity
+      // window for those actors without scanning all 30 days.
       let toDate: string;
       if (probeResult.isLastSlice) {
         toDate = new Date().toISOString();
@@ -190,11 +204,15 @@ export const runLogsIntegration = async (
         toDate = extendedEnd ?? probeResult.sliceBoundary;
       }
 
-      // Step 3: Extract — collect actor→target relationships within the slice window
-      const extractQuery = buildTargetsPerActorQuery(config, namespace, {
-        fromDate: sliceStart,
-        toDate,
-      });
+      // Step 3: Extract — collect actor→target relationships within the slice
+      // window. The actorIds filter is skipped when the probe used a probeActorKey
+      // (raw field values) because they don't match the extract's EUID format.
+      const extractQuery = buildTargetsPerActorQuery(
+        config,
+        namespace,
+        { fromDate: sliceStart, toDate },
+        extractActorIdsFilter(config, probeResult.actorIds)
+      );
       const extractResponse = (await esClient.esql.query(
         { query: extractQuery },
         { ...transportOpts, requestTimeout: EXTRACT_QUERY_TIMEOUT_MS }
@@ -234,12 +252,13 @@ export const runLogsIntegration = async (
 
       slices++;
       logger.info(
-        `[${config.id}] Slice ${slices} complete: ${pageRecords.length} records, toDate=${toDate}`
+        `[${config.id}] Slice ${slices} complete: ${pageRecords.length} records, actors=${probeResult.actorIds.length}, toDate=${toDate}`
       );
 
       if (probeResult.isLastSlice) break;
 
-      // Advance the window start by +1ms to avoid re-processing the boundary event
+      // Advance past the extract window end (+1ms) so the next probe starts
+      // after all events for this slice's actors have been covered.
       sliceStart = new Date(new Date(toDate).getTime() + 1).toISOString();
     }
 
