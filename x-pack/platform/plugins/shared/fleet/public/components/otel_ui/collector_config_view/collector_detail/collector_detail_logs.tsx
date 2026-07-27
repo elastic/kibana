@@ -12,11 +12,11 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { useStartServices } from '../../../../hooks';
 
+const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
+
 interface CollectorDetailLogsProps {
   agentId: string;
 }
-
-const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 
 export const CollectorDetailLogs: React.FC<CollectorDetailLogsProps> = ({ agentId }) => {
   const {

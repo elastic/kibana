@@ -19,6 +19,22 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 let mockScreenReaderAnnouncementValue = '';
 const mockSetScreenReaderAnnouncement = jest.fn();
 
@@ -30,6 +46,11 @@ jest.mock('./use_keyboard_navigation', () => ({
     setScreenReaderAnnouncement: mockSetScreenReaderAnnouncement,
   })),
 }));
+
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -46,11 +67,16 @@ jest.mock('@xyflow/react', () => {
     ),
     useNodesState: jest.fn((initialNodes) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges) => [initialEdges, jest.fn()]),
+    useStore: jest.fn((selector: (state: { width: number; height: number }) => unknown) =>
+      selector({ width: 1200, height: 600 })
+    ),
     useReactFlow: jest.fn(() => ({
       fitView: jest.fn(),
       zoomIn: jest.fn(),
       zoomOut: jest.fn(),
       setCenter: jest.fn(),
+      getNodes: jest.fn(() => []),
+      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
     })),
   };
 });
@@ -75,6 +101,7 @@ jest.mock('./popover', () => ({
 
 jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes) => nodes),
+  applyServiceMapLayout: jest.fn((nodes) => nodes),
 }));
 
 jest.mock('./service_map_minimap', () => ({

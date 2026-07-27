@@ -14,9 +14,19 @@ import { abortableTimeout, TimeoutAbortedError } from '../utils';
 
 export const FLUSH_INTERVAL_MS = 500;
 
-export async function flushState(params: WorkflowExecutionLoopParams) {
+export interface FlushStateOptions {
+  workflowLogFlushSignal?: AbortSignal;
+}
+
+export async function flushState(
+  params: WorkflowExecutionLoopParams,
+  options: FlushStateOptions = {}
+) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
-  await Promise.all([params.workflowExecutionState.flush(), params.workflowLogger.flushEvents()]);
+  await Promise.all([
+    params.stepIoService.flush(),
+    params.workflowLogger.flushEvents({ signal: options.workflowLogFlushSignal }),
+  ]);
   flushSpan?.end();
 }
 
@@ -49,12 +59,14 @@ export async function persistenceLoop(
       return;
     }
 
-    await flushState(params);
+    await flushState(params, {
+      workflowLogFlushSignal: params.signal,
+    });
 
     try {
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');
       await Promise.race([
-        abortableTimeout(FLUSH_INTERVAL_MS, params.taskAbortController.signal),
+        abortableTimeout(FLUSH_INTERVAL_MS, params.signal),
         persistenceAbortSignal
           ? new Promise<void>((_, reject) => {
               if (persistenceAbortSignal.aborted) {

@@ -16,6 +16,7 @@ import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
 const mockNavigateToUrl = jest.fn();
+const mockSetBreadcrumbs = jest.fn();
 
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
@@ -23,7 +24,7 @@ jest.mock('../kibana_services', () => ({
     tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
-      setBreadcrumbs: () => {},
+      setBreadcrumbs: mockSetBreadcrumbs,
     },
     application: {
       navigateToUrl: mockNavigateToUrl,
@@ -47,6 +48,7 @@ describe('home', () => {
 
   beforeEach(() => {
     mockHasIntegrationsPermission = true;
+    mockSetBreadcrumbs.mockClear();
     defaultProps = {
       directories: [],
       solutions: [],
@@ -265,6 +267,13 @@ describe('home', () => {
       expect(component.state().isNewKibanaInstance).toBe(false);
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('breadcrumbs', () => {
+    test('should set breadcrumbs to Home on mount', async () => {
+      await renderHome();
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ text: 'Home' }]);
     });
   });
 });

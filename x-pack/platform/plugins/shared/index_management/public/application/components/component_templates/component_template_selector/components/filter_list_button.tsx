@@ -112,7 +112,7 @@ export function FilterListButton({ onChange, filters }: Props) {
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         data-test-subj="filterList"
         aria-label="Filter component templates"
       >

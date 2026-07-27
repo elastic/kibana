@@ -18,6 +18,8 @@ import {
   normalizeFieldsToJsonSchema,
 } from './lib/field_conversion';
 import { WorkflowSchema } from './schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 // Note: getWorkflowContextSchema is in the plugin, not in the package
 // For this test, we'll test the schema parsing and normalization directly
 
@@ -41,123 +43,127 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
       name: 'JSON Schema Showcase Workflow',
       description: 'Workflow showcasing JSON Schema features',
       enabled: true,
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          // Email format validation
-          email: {
-            type: 'string',
-            format: 'email',
-            description: "User's email address",
-          },
-          // Regex pattern validation
-          zipCode: {
-            type: 'string',
-            pattern: '^\\d{5}(-\\d{4})?$',
-            description: 'US ZIP code (5 digits or 5+4 format)',
-          },
-          // Enum values
-          environment: {
-            type: 'string',
-            enum: ['dev', 'staging', 'prod'],
-            description: 'Deployment environment',
-            default: 'dev',
-          },
-          // Number with constraints
-          age: {
-            type: 'number',
-            minimum: 0,
-            maximum: 150,
-            description: "User's age",
-            default: 18,
-          },
-          // String with length constraints
-          username: {
-            type: 'string',
-            minLength: 3,
-            maxLength: 20,
-            description: "User's username",
-          },
-          // Array with constraints
-          tags: {
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-            minItems: 1,
-            maxItems: 10,
-            uniqueItems: true,
-            description: 'List of tags',
-          },
-          // Nested object with additionalProperties: false
-          customer: {
-            type: 'object',
-            description: 'Customer information',
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
             properties: {
-              name: {
-                type: 'string',
-                minLength: 1,
-              },
+              // Email format validation
               email: {
                 type: 'string',
                 format: 'email',
+                description: "User's email address",
               },
-              address: {
+              // Regex pattern validation
+              zipCode: {
+                type: 'string',
+                pattern: '^\\d{5}(-\\d{4})?$',
+                description: 'US ZIP code (5 digits or 5+4 format)',
+              },
+              // Enum values
+              environment: {
+                type: 'string',
+                enum: ['dev', 'staging', 'prod'],
+                description: 'Deployment environment',
+                default: 'dev',
+              },
+              // Number with constraints
+              age: {
+                type: 'number',
+                minimum: 0,
+                maximum: 150,
+                description: "User's age",
+                default: 18,
+              },
+              // String with length constraints
+              username: {
+                type: 'string',
+                minLength: 3,
+                maxLength: 20,
+                description: "User's username",
+              },
+              // Array with constraints
+              tags: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+                minItems: 1,
+                maxItems: 10,
+                uniqueItems: true,
+                description: 'List of tags',
+              },
+              // Nested object with additionalProperties: false
+              customer: {
                 type: 'object',
+                description: 'Customer information',
                 properties: {
-                  street: {
+                  name: {
                     type: 'string',
+                    minLength: 1,
                   },
-                  city: {
+                  email: {
                     type: 'string',
+                    format: 'email',
                   },
-                  zipCode: {
-                    type: 'string',
-                    pattern: '^\\d{5}(-\\d{4})?$',
+                  address: {
+                    type: 'object',
+                    properties: {
+                      street: {
+                        type: 'string',
+                      },
+                      city: {
+                        type: 'string',
+                      },
+                      zipCode: {
+                        type: 'string',
+                        pattern: '^\\d{5}(-\\d{4})?$',
+                      },
+                      country: {
+                        type: 'string',
+                        enum: ['US', 'CA', 'UK', 'DE', 'FR'],
+                      },
+                    },
+                    required: ['street', 'city', 'zipCode'],
+                    additionalProperties: false,
                   },
-                  country: {
-                    type: 'string',
-                    enum: ['US', 'CA', 'UK', 'DE', 'FR'],
+                  preferences: {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      newsletter: {
+                        type: 'boolean',
+                        default: false,
+                      },
+                      theme: {
+                        type: 'string',
+                        enum: ['light', 'dark', 'auto'],
+                        default: 'auto',
+                      },
+                    },
                   },
                 },
-                required: ['street', 'city', 'zipCode'],
+                required: ['name', 'email'],
                 additionalProperties: false,
               },
-              preferences: {
-                type: 'object',
-                additionalProperties: false,
-                properties: {
-                  newsletter: {
-                    type: 'boolean',
-                    default: false,
-                  },
-                  theme: {
-                    type: 'string',
-                    enum: ['light', 'dark', 'auto'],
-                    default: 'auto',
-                  },
-                },
+              // URI format
+              website: {
+                type: 'string',
+                format: 'uri',
+                description: 'Website URL',
+              },
+              // Date-time format
+              createdAt: {
+                type: 'string',
+                format: 'date-time',
+                description: 'Creation timestamp',
               },
             },
-            required: ['name', 'email'],
+            required: ['email', 'username', 'customer'],
             additionalProperties: false,
           },
-          // URI format
-          website: {
-            type: 'string',
-            format: 'uri',
-            description: 'Website URL',
-          },
-          // Date-time format
-          createdAt: {
-            type: 'string',
-            format: 'date-time',
-            description: 'Creation timestamp',
-          },
         },
-        required: ['email', 'username', 'customer'],
-        additionalProperties: false,
-      },
+      ],
       steps: [
         {
           name: 'validate-inputs',
@@ -186,19 +192,25 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     const parsedWorkflow = parseResult.data;
 
     // Test 2: Verify inputs structure
-    expect(parsedWorkflow.inputs).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties?.email).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties?.email.format).toBe('email');
-    expect(parsedWorkflow.inputs?.properties?.zipCode.pattern).toBe('^\\d{5}(-\\d{4})?$');
-    expect(parsedWorkflow.inputs?.properties?.environment.enum).toEqual(['dev', 'staging', 'prod']);
-    expect(parsedWorkflow.inputs?.required).toContain('email');
-    expect(parsedWorkflow.inputs?.required).toContain('username');
-    expect(parsedWorkflow.inputs?.required).toContain('customer');
+    const manualTrigger = parsedWorkflow.triggers?.find((trigger) => isManualTrigger(trigger));
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger.inputs);
+
+    expect(jsonSchemaInputs).toBeDefined();
+    expect(jsonSchemaInputs?.properties).toBeDefined();
+    expect(jsonSchemaInputs?.properties?.email).toBeDefined();
+    expect(jsonSchemaInputs?.properties?.email.format).toBe('email');
+    expect(jsonSchemaInputs?.properties?.zipCode.pattern).toBe('^\\d{5}(-\\d{4})?$');
+    expect(jsonSchemaInputs?.properties?.environment.enum).toEqual(['dev', 'staging', 'prod']);
+    expect(jsonSchemaInputs?.required).toContain('email');
+    expect(jsonSchemaInputs?.required).toContain('username');
+    expect(jsonSchemaInputs?.required).toContain('customer');
 
     // Test 3: Normalize inputs (should return as-is since already in new format)
     const normalizedInputs = normalizeFieldsToJsonSchema(
-      parsedWorkflow.inputs as NormalizableFieldSchema
+      jsonSchemaInputs as NormalizableFieldSchema
     );
     expect(normalizedInputs).toBeDefined();
     expect(normalizedInputs?.properties).toBeDefined();
@@ -230,26 +242,31 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     const workflow = {
       version: '1',
       name: 'Validation Test Workflow',
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          email: {
-            type: 'string',
-            format: 'email',
-          },
-          age: {
-            type: 'number',
-            minimum: 0,
-            maximum: 150,
-          },
-          username: {
-            type: 'string',
-            minLength: 3,
-            maxLength: 20,
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
+            properties: {
+              email: {
+                type: 'string',
+                format: 'email',
+              },
+              age: {
+                type: 'number',
+                minimum: 0,
+                maximum: 150,
+              },
+              username: {
+                type: 'string',
+                minLength: 3,
+                maxLength: 20,
+              },
+            },
+            required: ['email', 'age', 'username'],
           },
         },
-        required: ['email', 'age', 'username'],
-      },
+      ],
+
       steps: [{ name: 'step1', type: 'console' }],
     };
 
@@ -259,49 +276,59 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
 
     // Verify the schema structure is correct
     const parsedWorkflow = parseResult.data;
-    expect(parsedWorkflow.inputs?.properties?.email.format).toBe('email');
-    expect(parsedWorkflow.inputs?.properties?.age.minimum).toBe(0);
-    expect(parsedWorkflow.inputs?.properties?.age.maximum).toBe(150);
-    expect(parsedWorkflow.inputs?.properties?.username.minLength).toBe(3);
-    expect(parsedWorkflow.inputs?.properties?.username.maxLength).toBe(20);
-    expect(parsedWorkflow.inputs?.required).toContain('email');
-    expect(parsedWorkflow.inputs?.required).toContain('age');
-    expect(parsedWorkflow.inputs?.required).toContain('username');
+    const manualTrigger = parsedWorkflow.triggers?.find((trigger) => isManualTrigger(trigger));
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger.inputs);
+
+    expect(jsonSchemaInputs?.properties?.email.format).toBe('email');
+    expect(jsonSchemaInputs?.properties?.age.minimum).toBe(0);
+    expect(jsonSchemaInputs?.properties?.age.maximum).toBe(150);
+    expect(jsonSchemaInputs?.properties?.username.minLength).toBe(3);
+    expect(jsonSchemaInputs?.properties?.username.maxLength).toBe(20);
+    expect(jsonSchemaInputs?.required).toContain('email');
+    expect(jsonSchemaInputs?.required).toContain('age');
+    expect(jsonSchemaInputs?.required).toContain('username');
   });
 
   it('should handle workflow execution with JSON Schema inputs', () => {
     const workflow = {
       version: '1',
       name: 'Execution Test Workflow',
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          customer: {
-            type: 'object',
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
             properties: {
-              name: { type: 'string' },
-              email: { type: 'string', format: 'email' },
-              metadata: {
+              customer: {
                 type: 'object',
                 properties: {
-                  source: { type: 'string' },
-                  routing: {
+                  name: { type: 'string' },
+                  email: { type: 'string', format: 'email' },
+                  metadata: {
                     type: 'object',
                     properties: {
-                      shard: { type: 'number' },
-                      primary: { type: 'boolean' },
+                      source: { type: 'string' },
+                      routing: {
+                        type: 'object',
+                        properties: {
+                          shard: { type: 'number' },
+                          primary: { type: 'boolean' },
+                        },
+                      },
                     },
                   },
                 },
+                required: ['name', 'email'],
+                additionalProperties: false,
               },
             },
-            required: ['name', 'email'],
+            required: ['customer'],
             additionalProperties: false,
           },
         },
-        required: ['customer'],
-        additionalProperties: false,
-      },
+      ],
       steps: [
         {
           name: 'process-customer',
@@ -318,23 +345,28 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     if (!parseResult.success) return;
 
     const parsedWorkflow = parseResult.data;
+    const manualTrigger = parsedWorkflow.triggers?.find((trigger) => isManualTrigger(trigger));
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger.inputs);
 
     // Verify the workflow structure is correct
-    expect(parsedWorkflow.inputs?.properties?.customer).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties?.customer.properties?.email.format).toBe('email');
+    expect(jsonSchemaInputs?.properties?.customer).toBeDefined();
+    expect(jsonSchemaInputs?.properties?.customer.properties?.email.format).toBe('email');
     expect(
-      parsedWorkflow.inputs?.properties?.customer.properties?.metadata.properties?.routing
-        .properties?.shard.type
+      jsonSchemaInputs?.properties?.customer.properties?.metadata.properties?.routing.properties
+        ?.shard.type
     ).toBe('number');
     expect(
-      parsedWorkflow.inputs?.properties?.customer.properties?.metadata.properties?.routing
-        .properties?.primary.type
+      jsonSchemaInputs?.properties?.customer.properties?.metadata.properties?.routing.properties
+        ?.primary.type
     ).toBe('boolean');
-    expect(parsedWorkflow.inputs?.required).toContain('customer');
-    expect(parsedWorkflow.inputs?.additionalProperties).toBe(false);
+    expect(jsonSchemaInputs?.required).toContain('customer');
+    expect(jsonSchemaInputs?.additionalProperties).toBe(false);
 
     // Verify normalization preserves the structure
-    const normalizedInputs = normalizeFieldsToJsonSchema(parsedWorkflow.inputs);
+    const normalizedInputs = normalizeFieldsToJsonSchema(jsonSchemaInputs);
     expect(normalizedInputs?.properties?.customer.properties?.email.format).toBe('email');
     expect(normalizedInputs?.properties?.customer.additionalProperties).toBe(false);
   });
@@ -353,31 +385,34 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     }
 
     const parsedWorkflow = parseResult.data;
+    const manualTrigger = parsedWorkflow.triggers?.find((trigger) => isManualTrigger(trigger));
+    if (!manualTrigger) {
+      fail('Manual trigger should be defined');
+    }
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger.inputs);
 
     // Test 2: Verify the $ref reference exists in inputs
-    expect(parsedWorkflow.inputs).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties?.user).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties?.user.$ref).toBe('#/definitions/UserSchema');
+    expect(jsonSchemaInputs).toBeDefined();
+    expect(jsonSchemaInputs?.properties).toBeDefined();
+    expect(jsonSchemaInputs?.properties?.user).toBeDefined();
+    expect(jsonSchemaInputs?.properties?.user.$ref).toBe('#/definitions/UserSchema');
 
     // Test 3: Verify the definition exists
-    expect(parsedWorkflow.inputs?.definitions).toBeDefined();
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema).toBeDefined();
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.name).toBeDefined();
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.email).toBeDefined();
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.age).toBeDefined();
+    expect(jsonSchemaInputs?.definitions).toBeDefined();
+    expect(jsonSchemaInputs?.definitions?.UserSchema).toBeDefined();
+    expect(jsonSchemaInputs?.definitions?.UserSchema.properties?.name).toBeDefined();
+    expect(jsonSchemaInputs?.definitions?.UserSchema.properties?.email).toBeDefined();
+    expect(jsonSchemaInputs?.definitions?.UserSchema.properties?.age).toBeDefined();
 
     // Test 4: Verify defaults are defined in the schema
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.name.default).toBe(
-      'John Doe'
-    );
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.email.default).toBe(
+    expect(jsonSchemaInputs?.definitions?.UserSchema.properties?.name.default).toBe('John Doe');
+    expect(jsonSchemaInputs?.definitions?.UserSchema.properties?.email.default).toBe(
       'john.doe@example.com'
     );
-    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.age.default).toBe(30);
+    expect(jsonSchemaInputs?.definitions?.UserSchema.properties?.age.default).toBe(30);
 
     // Test 5: Normalize inputs (should preserve $ref and definitions)
-    const normalizedInputs = normalizeFieldsToJsonSchema(parsedWorkflow.inputs);
+    const normalizedInputs = normalizeFieldsToJsonSchema(jsonSchemaInputs);
     expect(normalizedInputs).toBeDefined();
     expect(normalizedInputs?.properties?.user.$ref).toBe('#/definitions/UserSchema');
     expect(normalizedInputs?.definitions?.UserSchema).toBeDefined();

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useSendMessageContext } from '../context/send_message/send_message_context';
+import { useStreamingContext } from '../context/streaming/streaming_context';
 
 /**
  * Returns true while ANY conversation is streaming. Derived from the lifted
  * `activeStreams` map — `size > 0` means at least one stream is in flight.
  */
 export const useIsAnyConversationStreaming = () => {
-  const { activeStreams } = useSendMessageContext();
+  const { activeStreams } = useStreamingContext();
   return activeStreams.size > 0;
 };

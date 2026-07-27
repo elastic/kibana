@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiAccordion, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
+import { EuiAccordion, EuiFormRow, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { hasIcon, IconSelect } from '@kbn/visualization-ui-components';
@@ -27,6 +27,7 @@ import { metricIconsSet } from '../../../shared_components/icon_set';
 import { AppearanceOption, AppearanceOptionGroup, SubtitleOption } from './appearance_option';
 import {
   alignmentOptions,
+  densityOptions,
   fontSizeOptions,
   iconPositionOptions,
   primaryMetricPositionOptions,
@@ -42,10 +43,12 @@ const getTemplateAppearanceDefaults = (
   | 'primaryAlign'
   | 'secondaryAlign'
   | 'valueFontMode'
+  | 'density'
   | 'iconAlign'
 > => ({
   ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition],
   valueFontMode: LENS_METRIC_STATE_DEFAULTS.valueFontMode,
+  density: LENS_METRIC_STATE_DEFAULTS.density,
   iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
 });
 
@@ -266,7 +269,20 @@ export function MetricAppearanceSettings({
               isDisabled={disabledStates.iconAlign}
               dataTestSubj="lens-metric-appearance-other-icon-position-btn"
             />
+            <AppearanceOption
+              label={i18n.translate('xpack.lens.metric.appearancePopover.density', {
+                defaultMessage: 'Density',
+              })}
+              value={state.density ?? LENS_METRIC_STATE_DEFAULTS.density}
+              options={densityOptions}
+              onChange={(id) => {
+                setIsCustomStyle(false);
+                setState({ ...state, density: id });
+              }}
+              dataTestSubj="lens-metric-appearance-other-density-btn"
+            />
           </AppearanceOptionGroup>
+          <EuiSpacer size="s" />
         </div>
       </EuiAccordion>
     </>

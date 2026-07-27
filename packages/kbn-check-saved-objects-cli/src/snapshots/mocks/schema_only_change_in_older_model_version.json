@@ -19,8 +19,21 @@
           "hasTransformation": false,
           "newMappings": [],
           "schemas": {
-            "forwardCompatibility": "bbb1000000000000000000000000000000000000000000000000000000000001",
-            "create": "ccc1000000000000000000000000000000000000000000000000000000000001"
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" }
+              }
+            }
           }
         },
         {
@@ -30,8 +43,29 @@
           "hasTransformation": false,
           "newMappings": ["partition.type"],
           "schemas": {
-            "forwardCompatibility": "bbb2999999999999999999999999999999999999999999999999999999999999",
-            "create": "ccc2999999999999999999999999999999999999999999999999999999999999"
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": {
+                  "type": "string",
+                  "rules": [{ "name": "max", "args": { "limit": 255 } }]
+                },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": {
+                  "type": "string",
+                  "rules": [{ "name": "max", "args": { "limit": 255 } }]
+                },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              }
+            }
           }
         },
         {
@@ -41,8 +75,23 @@
           "hasTransformation": false,
           "newMappings": [],
           "schemas": {
-            "forwardCompatibility": "bbb3000000000000000000000000000000000000000000000000000000000003",
-            "create": "ccc3000000000000000000000000000000000000000000000000000000000003"
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              }
+            }
           }
         }
       ],

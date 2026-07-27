@@ -28,7 +28,12 @@ import {
   PANEL_NONE,
   PANEL_ENTITY_TYPE,
   PANEL_RESOLUTION,
+  DATAGRID_HEADER,
+  FLYOUT_RIGHT_PANEL,
+  FLYOUT_TITLE_TEXT,
+  GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON,
 } from '../../../screens/entity_analytics/entity_analytics_home';
+import { fillKqlQueryBar } from '../../../tasks/search_bar';
 
 const ARCHIVE_NAME = 'entity_store_v2_home';
 
@@ -104,6 +109,58 @@ describe(
       it('standalone entities appear as individual groups', () => {
         cy.get(GROUPING_LEVEL_0).should('contain', 'Bob Smith');
         cy.get(GROUPING_LEVEL_0).should('contain', 'web-server-prod-1');
+      });
+
+      it('shows target entity name in resolution group header after filtering by alias', () => {
+        fillKqlQueryBar('entity.name: "dora.alias@example.test"{enter}');
+        cy.wait('@entityStoreSearch', { timeout: 20000 });
+        waitForGroupingTable();
+
+        cy.contains(GROUP_PANEL_TOGGLE, 'Dora Resolved')
+          .closest(GROUPING_ACCORDION)
+          .find(GROUP_STATS)
+          .should('exist');
+
+        cy.contains(GROUP_PANEL_TOGGLE, 'Dora Resolved').click();
+        cy.contains(GROUP_PANEL_TOGGLE, 'Dora Resolved')
+          .closest(GROUPING_ACCORDION)
+          .find(GROUPING_ACCORDION_CONTENT)
+          .should('contain', 'dora.alias@example.test');
+
+        cy.contains(GROUP_PANEL_TOGGLE, 'Dora Resolved')
+          .closest(GROUPING_ACCORDION)
+          .find(GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON)
+          .click();
+        cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
+        cy.get(FLYOUT_TITLE_TEXT).should('contain', 'Dora Resolved');
+      });
+
+      it('solo resolution group shows individual risk score when group resolution risk is missing', () => {
+        cy.contains(GROUP_PANEL_TOGGLE, 'Solo Risk Fallback Cy')
+          .closest(GROUPING_ACCORDION)
+          .find(GROUP_STATS)
+          .should('contain', '45.00')
+          .and('not.contain', 'N/A');
+      });
+
+      it('resolution group shows N/A for risk when neither group nor individual scores exist', () => {
+        cy.contains(GROUP_PANEL_TOGGLE, 'Na Risk Group Target Cy')
+          .closest(GROUPING_ACCORDION)
+          .find(GROUP_STATS)
+          .should('contain', 'N/A');
+      });
+
+      it('resolution group header shows primary entity ID subtitle and Entity ID column in the grid', () => {
+        cy.contains(GROUP_PANEL_TOGGLE, 'Alice Johnson')
+          .closest(GROUPING_ACCORDION)
+          .should('contain', 'Entity ID: user-alice');
+
+        cy.contains(GROUP_PANEL_TOGGLE, 'Alice Johnson').click();
+        cy.contains(GROUP_PANEL_TOGGLE, 'Alice Johnson')
+          .closest(GROUPING_ACCORDION)
+          .find(GROUPING_ACCORDION_CONTENT)
+          .find(DATAGRID_HEADER)
+          .should('contain', 'Entity ID');
       });
     });
 

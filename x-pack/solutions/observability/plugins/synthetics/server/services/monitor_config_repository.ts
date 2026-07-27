@@ -6,8 +6,10 @@
  */
 
 import type {
+  ISavedObjectsRepository,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
@@ -21,7 +23,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 import {
   legacyMonitorAttributes,
@@ -65,7 +67,53 @@ export class MonitorConfigRepository {
       { type: syntheticsMonitorSavedObjectType, id },
       { type: legacySyntheticsMonitorTypeSingle, id },
     ]);
-    const resolved = results.saved_objects.find((obj) => obj?.attributes);
+    const resolved = results.saved_objects.find(
+      (obj): obj is SavedObject<EncryptedSyntheticsMonitorAttributes> =>
+        !isSavedObjectErrorResult(obj)
+    );
+    if (!resolved) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        syntheticsMonitorSavedObjectType,
+        id
+      );
+    }
+    return resolved;
+  }
+
+  /**
+   * Look up a monitor by id across the supplied spaces.
+   *
+   * Required for cross-space callers (e.g. the monitor health API) because
+   * `get` is bound to the request-scoped saved objects client and therefore
+   * only ever sees the request's space — see Kibana issue #270477.
+   *
+   * The multi-space type (`syntheticsMonitorSavedObjectType`,
+   * `namespaceType: 'multiple'`) supports a per-object `namespaces` array, so
+   * a single entry covers all spaces. The legacy type
+   * (`legacySyntheticsMonitorTypeSingle`, `namespaceType: 'single'`) only
+   * accepts one namespace per object, so we add one entry per space.
+   */
+  async getAcrossSpaces(
+    id: string,
+    namespaces: string[],
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository = this.soClient
+  ): Promise<SavedObject<EncryptedSyntheticsMonitorAttributes>> {
+    const uniqueNamespaces = [...new Set(namespaces)];
+    const bulkObjects: SavedObjectsBulkGetObject[] = [
+      { type: syntheticsMonitorSavedObjectType, id, namespaces: uniqueNamespaces },
+      ...uniqueNamespaces.map((namespace) => ({
+        type: legacySyntheticsMonitorTypeSingle,
+        id,
+        namespaces: [namespace],
+      })),
+    ];
+    const { saved_objects: results } = await soClient.bulkGet<EncryptedSyntheticsMonitorAttributes>(
+      bulkObjects
+    );
+    const resolved = results.find(
+      (obj): obj is SavedObject<EncryptedSyntheticsMonitorAttributes> =>
+        !isSavedObjectErrorResult(obj)
+    );
     if (!resolved) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(
         syntheticsMonitorSavedObjectType,
@@ -189,7 +237,13 @@ export class MonitorConfigRepository {
     const spaces = (data.spaces || []).sort();
     // If the spaces have changed, we need to delete the saved object and recreate it
     if (isEqual(prevSpaces, spaces)) {
-      return this.soClient.update<MonitorFields>(soType, id, data, { references });
+      // `mergeAttributes: false` fully replaces the attributes. The default deep-merge
+      // keeps stale keys in top-level map fields that aren't mapped as `flattened`
+      // (notably `labels`), making it impossible to delete individual entries. See #274387.
+      return this.soClient.update<MonitorFields>(soType, id, data, {
+        references,
+        mergeAttributes: false,
+      });
     } else {
       await this.soClient.delete(soType, id, { force: true });
       return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
@@ -225,6 +279,7 @@ export class MonitorConfigRepository {
       attributes: MonitorFields;
       namespace?: string;
       references?: SavedObjectReference[];
+      mergeAttributes?: boolean;
     }> = [];
 
     for (const monitor of monitors) {
@@ -242,6 +297,8 @@ export class MonitorConfigRepository {
         attributes,
         namespace,
         references,
+        // See `update` above: avoid deep-merging so removed map-field keys are deleted.
+        mergeAttributes: false,
       });
     }
 
@@ -282,7 +339,7 @@ export class MonitorConfigRepository {
   async find<T>(
     options: Omit<SavedObjectsFindOptions, 'type'>,
     types: string[] = syntheticsMonitorSOTypes,
-    soClient: SavedObjectsClientContract = this.soClient
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
     const perPage = options.perPage ?? 5000;
     const page = options.page ?? 1;

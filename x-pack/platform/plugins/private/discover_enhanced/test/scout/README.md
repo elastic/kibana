@@ -14,10 +14,10 @@ Then you can run the tests multiple times in another terminal with:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/playwright.config.ts --project local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/playwright.config.ts --project local --grep stateful-classic
 
 // Serverless
-npx playwright test --config x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/playwright.config.ts --project local --grep serverless-search
+node scripts/playwright test --config x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/playwright.config.ts --project local --grep serverless-search
 
 // serverless-observability_complete, serverless-security_complete
 ```

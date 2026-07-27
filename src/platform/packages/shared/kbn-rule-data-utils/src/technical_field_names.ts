@@ -88,6 +88,7 @@ const EVENT_MODULE = 'event.module' as const;
 // Fields pertaining to the alert
 const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
+const ALERT_EVALUATION_TIME_RANGE = `${ALERT_NAMESPACE}.evaluation.time_range` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_CONTEXT = `${ALERT_NAMESPACE}.context` as const;
 const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
@@ -134,6 +135,7 @@ const fields = {
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUPING,
@@ -210,6 +212,7 @@ const fields = {
 export {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_EVALUATION_VALUE,
   ALERT_CONTEXT,
   ALERT_EVALUATION_VALUES,

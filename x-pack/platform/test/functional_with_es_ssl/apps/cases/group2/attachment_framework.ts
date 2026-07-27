@@ -381,6 +381,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
+        // Pin the default data view to logstash. `createAndAddLensFromDashboard`
+        // opens Lens against whatever data view is default and immediately
+        // configures dimensions on logstash fields (bytes / @timestamp / ip).
+        // With cases analytics v2 enabled, the managed "Case Analytics" data
+        // view can otherwise win the default slot (the data-views default
+        // resolver auto-selects the first view when none is set), leaving Lens
+        // pointed at a view without those fields and failing this hook.
+        await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
 
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
@@ -405,6 +413,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.unload(
           'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
+        await kibanaServer.uiSettings.unset('defaultIndex');
 
         await cases.api.deleteAllCases();
       });
@@ -429,8 +438,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(caseTitle);
+        await cases.common.waitForCaseViewToLoad();
+        if (await cases.common.isRedesignEnabled()) {
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
+        } else {
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          expect(await title.getVisibleText()).toEqual(caseTitle);
+        }
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -455,8 +470,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        await cases.common.waitForCaseViewToLoad();
+        if (await cases.common.isRedesignEnabled()) {
+          const redesignTitle = await testSubjects.find('appHeaderTitle');
+          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
+        } else {
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        }
 
         await testSubjects.existOrFail('comment-lens-lens');
       });

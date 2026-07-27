@@ -16,8 +16,16 @@ import type { MigrationSnapshot } from '../types';
 
 const SO_MIGRATIONS_BUCKET_PREFIX = 'https://storage.googleapis.com/kibana-so-types-snapshots';
 
+/**
+ * Returns the public GCS URL for a given snapshot rev, or `undefined` when
+ * the rev is empty/absent (e.g. in test mode where no real snapshot is used).
+ */
+export const gcsSnapshotUrl = (rev: string | undefined): string | undefined =>
+  rev ? `${SO_MIGRATIONS_BUCKET_PREFIX}/${rev}.json` : undefined;
+
 export async function fetchSnapshot(gitRev: string): Promise<MigrationSnapshot> {
-  const googleCloudUrl = `${SO_MIGRATIONS_BUCKET_PREFIX}/${gitRev}.json`;
+  // gcsSnapshotUrl always returns a string for a non-empty gitRev
+  const googleCloudUrl = gcsSnapshotUrl(gitRev)!;
   const path = await downloadToTemp(googleCloudUrl);
   return await loadSnapshotFromFile(path);
 }
@@ -28,14 +36,10 @@ async function downloadToTemp(googleCloudUrl: string): Promise<string> {
 
   if (existsSync(filePath)) {
     return filePath;
-  } else {
-    try {
-      await downloadFile(googleCloudUrl, filePath);
-      return filePath;
-    } catch (err) {
-      throw err;
-    }
   }
+
+  await downloadFile(googleCloudUrl, filePath);
+  return filePath;
 }
 
 async function loadSnapshotFromFile(filePath: string): Promise<MigrationSnapshot> {

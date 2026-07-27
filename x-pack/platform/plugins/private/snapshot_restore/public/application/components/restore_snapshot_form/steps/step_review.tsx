@@ -65,7 +65,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
             }
           >
             <EuiLink onClick={() => updateCurrentStep(1)}>
-              <EuiIcon type="pencil" />
+              <EuiIcon type="pencil" aria-hidden={true} />
             </EuiLink>
           </EuiToolTip>
         </h3>
@@ -208,7 +208,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
             }
           >
             <EuiLink onClick={() => updateCurrentStep(2)}>
-              <EuiIcon type="pencil" />
+              <EuiIcon type="pencil" aria-hidden={true} />
             </EuiLink>
           </EuiToolTip>
         </h3>

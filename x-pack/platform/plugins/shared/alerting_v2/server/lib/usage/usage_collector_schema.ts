@@ -22,6 +22,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'long',
     _meta: { description: 'Number of enabled alerting v2 rules.' },
   },
+  count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of alerting v2 rules currently tagged as created/edited via Agent Builder.',
+    },
+  },
   count_by_kind: {
     alert: {
       type: 'long',
@@ -44,20 +51,6 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     items: {
       name: { type: 'keyword', _meta: { description: 'Lookback duration string.' } },
       value: { type: 'long', _meta: { description: 'Number of rules with this lookback.' } },
-    },
-  },
-  count_with_recovery_policy: {
-    type: 'long',
-    _meta: { description: 'Number of rules with a recovery policy.' },
-  },
-  count_by_recovery_policy_type: {
-    query: {
-      type: 'long',
-      _meta: { description: 'Number of rules with recovery policy type query.' },
-    },
-    no_breach: {
-      type: 'long',
-      _meta: { description: 'Number of rules with recovery policy type no_breach.' },
     },
   },
   avg_pending_count: {
@@ -98,37 +91,51 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'float',
     _meta: { description: 'Average number of grouping fields per rule.' },
   },
-  count_with_no_data: {
-    type: 'long',
-    _meta: { description: 'Number of rules with no data handling configured.' },
-  },
-  count_by_no_data_behavior: {
-    no_data: {
-      type: 'long',
-      _meta: { description: 'Number of rules with no_data behavior.' },
-    },
-    last_status: {
-      type: 'long',
-      _meta: { description: 'Number of rules with last_status behavior.' },
-    },
-    recover: {
-      type: 'long',
-      _meta: { description: 'Number of rules with recover behavior.' },
-    },
-  },
-  count_by_no_data_timeframe: {
-    type: 'array',
-    items: {
-      name: { type: 'keyword', _meta: { description: 'No data timeframe duration string.' } },
-      value: {
-        type: 'long',
-        _meta: { description: 'Number of rules with this no data timeframe.' },
-      },
-    },
-  },
   min_created_at: {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
+  },
+  count_by_query_format: {
+    composed: {
+      type: 'long',
+      _meta: { description: 'Number of rules using the composed query format.' },
+    },
+    standalone: {
+      type: 'long',
+      _meta: { description: 'Number of rules using the standalone query format.' },
+    },
+  },
+  count_by_recovery_strategy: {
+    no_breach: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+    },
+    query: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy query.' },
+    },
+    none: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy none.' },
+    },
+  },
+  count_by_no_data_strategy: {
+    last_known_status: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy last_known_status.' },
+    },
+    emit: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy emit.' },
+    },
+    recover: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy recover.' },
+    },
+    none: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy none.' },
+    },
   },
 
   executions_count_24hr: {
@@ -183,6 +190,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
   action_policies_count_with_matcher: {
     type: 'long',
     _meta: { description: 'Number of action policies with a matcher.' },
+  },
+  action_policies_count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of action policies currently tagged as created/edited via Agent Builder.',
+    },
   },
   action_policies_count_with_group_by: {
     type: 'long',

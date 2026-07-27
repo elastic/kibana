@@ -22,8 +22,7 @@ export const getDiscoverSession = async (
     id: so.item.id,
     title: so.item.attributes.title,
     description: so.item.attributes.description,
-    // TODO: so.item.attributes.tabs shouldn't be nullable soon
-    tabs: so.item.attributes.tabs!.map((tab) => ({
+    tabs: so.item.attributes.tabs.map((tab) => ({
       id: tab.id,
       label: tab.label,
       sort: tab.attributes.sort as SortOrder[],

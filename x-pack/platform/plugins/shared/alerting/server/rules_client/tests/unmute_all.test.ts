@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions } from '../rules_client';
 import { RulesClient } from '../rules_client';
 import {
@@ -38,6 +39,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -157,7 +159,6 @@ describe('unmuteAll()', () => {
         operation: 'unmuteAll',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to unmuteAll this type of alert', async () => {

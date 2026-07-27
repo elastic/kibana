@@ -401,13 +401,9 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const confirmModal = useMemo(() => {
       if (formState.confirmModalLabels) {
-        const { title, body, confirmButton, cancelButton } = formState.confirmModalLabels;
         return (
           <ArtifactConfirmModal
-            title={title}
-            body={body}
-            confirmButton={confirmButton}
-            cancelButton={cancelButton}
+            labels={formState.confirmModalLabels}
             onSuccess={confirmModalOnSuccess}
             onCancel={() => setShowConfirmModal(false)}
             data-test-subj="artifactConfirmModal"

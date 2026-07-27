@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT, SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
 
 test.describe(
   'Service map - accessibility',
@@ -19,6 +19,9 @@ test.describe(
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
+      // Close the options menu by default so its expanded panel can't overlap nodes/badges;
+      // tests that need the panel (find-in-page) open it explicitly via the Ctrl+K shortcut.
+      await serviceMapPage.closeOptionsPanelIfOpen();
     });
 
     test('axe-core automated accessibility checks pass', async ({ page }) => {
@@ -43,10 +46,18 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await test.step('nodes have visible focus indicators when focused', async () => {
+        await serviceMapPage.settleServiceMapLayout();
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
-        await node.focus();
-        await expect(node).toBeFocused();
+        await expect
+          .poll(
+            async () => {
+              const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
+              await node.focus();
+              return node.evaluate((element) => element === document.activeElement);
+            },
+            { timeout: EXTENDED_TIMEOUT }
+          )
+          .toBe(true);
       });
 
       await test.step('find-in-page: highlight frame while focused, Enter centers match', async () => {
@@ -102,6 +113,9 @@ test.describe(
       });
 
       await test.step('polite live regions exist for keyboard announcements and find-in-page', async () => {
+        // The find-in-page input only renders when the options panel is open; beforeEach closes
+        // the panel to keep nodes clickable, so reopen it before asserting on its live regions.
+        await serviceMapPage.openOptionsPanelIfClosed();
         const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
         await expect(page.testSubj.locator('serviceMapControlsSearch')).toBeVisible();
         const politeLiveRegions = serviceMapContainer.locator('[aria-live="polite"]');

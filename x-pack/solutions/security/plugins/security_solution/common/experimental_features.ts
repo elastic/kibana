@@ -63,6 +63,25 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsScriptLibraryManagement: true,
 
   /**
+   * `cancel` response action for Elastic Defend Endpoint
+   * Release: 9.5
+   */
+  responseActionsEndpointCancel: false,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
+
+  /**
+   * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
+   * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
+   * we test impact on other features.
+   */
+  defendRemoteOutputCcs: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -84,14 +103,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new Entity Analytics home page experience.
    */
-  entityAnalyticsNewHomePageEnabled: false,
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -109,10 +128,11 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
-   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
-   * can be disabled if necessary in a given environment.
+   * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
+   * Entity Analytics surfaces such as the entity flyout, and registers the
+   * `security.entity` unified cases attachment type.
    */
-  entityStoreDisabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -141,9 +161,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
-
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
@@ -160,6 +177,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows users to manage trusted USB and external devices
    */
   trustedDevices: true,
+
+  /**
+   * Enables custom YARA signature management in Elastic Defend.
+   */
+  customYaraSignaturesEnabled: false,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -182,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -191,7 +213,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -222,7 +244,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
-  automaticTroubleshootingSkill: false,
+  automaticTroubleshootingSkill: true,
 
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
@@ -231,20 +253,74 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
-   * Enables the new flyout using the EUI flyout system
+   * Enables the investigate-rule Agent Builder skill.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
-  newFlyoutSystemEnabled: false,
+  investigateRuleSkill: false,
+
+  /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: true,
+
+  /**
+   * Enables the recommend-prebuilt-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillRecommendPrebuiltRules: true,
+
+  /**
+   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
+   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
+   * Turning this flag on unregisters that advanced setting, forcing the
+   * legacy flyout and effectively removing the new flyout option.
+   */
+  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: false,
+  entityAnalyticsEntityStoreV2: true,
+
+  /**
+   * Enables entity ML anomaly details API
+   */
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: true,
+
+  /**
+   * Enables the Detection Rule Changes History API endpoint
+   * (`GET /api/detection_engine/rules/_history`).
+   *
+   * Independent of the alerting framework's `xpack.alerting.ruleChangeTracking.enabled`
+   * config flag, which gates the underlying primitive that produces the history
+   * records. Both must be enabled for the API to return non-empty results.
+   */
+  ruleChangesHistoryEnabled: true,
+
+  /**
+   * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
+   * attachment (server type + client renderer). Gates registration so the feature can
+   * ship dark and be enabled per environment.
+   */
+  rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: true,
+
+  /**
+   * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
+   * from the locally stored kibana mappings after a MITRE version bump.
+   */
+  mitreAttackUpdatesUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

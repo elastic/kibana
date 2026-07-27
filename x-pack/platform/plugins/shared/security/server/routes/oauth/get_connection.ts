@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { OAUTH_MAX_STRING_FIELD_LENGTH } from './schemas';
 import type { RouteDefinitionParams } from '..';
+import { OAUTH_MAX_STRING_FIELD_LENGTH } from '../../../common/oauth/constants';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -52,7 +52,9 @@ export function defineGetOAuthConnectionRoute({
         );
         if (!result) {
           return response.notFound({
-            body: { message: 'OAuth management is not available: security features are disabled' },
+            body: {
+              message: 'OAuth management is not available: security features are disabled',
+            },
           });
         }
 

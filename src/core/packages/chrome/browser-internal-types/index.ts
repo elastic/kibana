@@ -9,20 +9,28 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
-  ChromeProjectNavigationNode,
-  ChromeSetProjectBreadcrumbsParams,
+  ChromeBreadcrumbsBadge,
+  ChromeNext,
+  GlobalHeaderAiButton,
   ChromeUserBanner,
-  AppDeepLinkId,
+  GlobalSearchConfig,
+  NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  ChromeProjectNavigationNode,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -30,6 +38,16 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  /**
+   * Dependencies used by Chrome-owned React components that live outside
+   * `browser-internal`, but still render under `ChromeServiceProvider`.
+   */
+  componentDeps: {
+    readonly basePath: IBasePath;
+    readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+    readonly capabilities: Capabilities;
+  };
+
   sideNav: ChromeStart['sideNav'] & {
     /**
      * Set the width of the side nav.
@@ -57,6 +75,11 @@ export interface InternalChromeStart extends ChromeStart {
    */
   getBreadcrumbsAppendExtensionsWithBadges$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
+  /**
+   * Get an observable of the current breadcrumbs badges set via setBreadcrumbsBadges().
+   */
+  getBreadcrumbsBadges$(): Observable<ChromeBreadcrumbsBadge[]>;
+
   /** Set global footer. Used by the developer toolbar. */
   setGlobalFooter(node: ReactNode): void;
 
@@ -72,13 +95,9 @@ export interface InternalChromeStart extends ChromeStart {
     setKibanaName(kibanaName: string): void;
 
     /** Initialise project navigation from a definition tree. */
-    initNavigation<
-      LinkId extends AppDeepLinkId = AppDeepLinkId,
-      Id extends string = string,
-      ChildrenId extends string = Id
-    >(
+    initNavigation<TTree extends NavigationTreeDefinition>(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<TTree>
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
@@ -86,6 +105,14 @@ export interface InternalChromeStart extends ChromeStart {
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
       activeNodes: ChromeProjectNavigationNode[][];
+      overflowItemIds: string[];
+      /** Default top-level item IDs before any user customization is applied. */
+      defaultItemIds: string[];
+      /**
+       * Top-level body nodes the sidebar will actually render: home node excluded,
+       * hidden nodes removed, and panel-openers with no visible descendants pruned.
+       */
+      renderableNodes: ChromeProjectNavigationNode[];
     }>;
 
     /** Get an observable of the current project breadcrumbs. */
@@ -103,5 +130,43 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Set navigation customization for live preview.
+     * Pass undefined to clear the customization and revert to the original order.
+     */
+    setNavigationCustomization(customization: NavigationCustomization | undefined): void;
+
+    /** Observable that emits the customize navigation handler when registered by the navigation plugin. */
+    getCustomizeNavigationHandler$(): Observable<(() => void) | null>;
+
+    /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
+    registerCustomizeNavigationHandler(handler: () => void): void;
+  };
+
+  /** @internal Extends public `next` with `get$` for Chrome layout components. */
+  next: InternalChromeNext;
+}
+
+/** @internal */
+export interface InternalChromeNext extends ChromeNext {
+  aiButton: ChromeNext['aiButton'] & {
+    get$(): Observable<GlobalHeaderAiButton[]>;
+  };
+  contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
+  };
+  globalSearch: ChromeNext['globalSearch'] & {
+    get$(): Observable<GlobalSearchConfig | undefined>;
+  };
+  inlineAppHeader: {
+    get$(): Observable<boolean>;
+    set(mounted: boolean): void;
+  };
+  appHeader: ChromeNext['appHeader'] & {
+    get$(): Observable<AppHeaderConfig | undefined>;
+  };
+  userMenu: ChromeNext['userMenu'] & {
+    get$(): Observable<ReactNode>;
   };
 }

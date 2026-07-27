@@ -34,16 +34,13 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
 
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./filter_panel'));
-      loadTestFile(require.resolve('./home'));
       loadTestFile(require.resolve('./discover'));
       loadTestFile(require.resolve('./visualize'));
-      loadTestFile(require.resolve('./kibana_overview_with_data'));
     });
 
     describe('not using sample data', function () {
       loadTestFile(require.resolve('./management'));
       loadTestFile(require.resolve('./console'));
-      loadTestFile(require.resolve('./kibana_overview_without_data'));
     });
   });
 }

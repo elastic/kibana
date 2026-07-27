@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
@@ -47,6 +48,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -148,6 +150,7 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -249,6 +252,7 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -339,6 +343,7 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -472,6 +477,7 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,

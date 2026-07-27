@@ -285,7 +285,7 @@ function escapeExpressionsInSort(sortCommand: string) {
 }
 
 function ensureEqualityOperators(whereCommand: string) {
-  const body = whereCommand.split(/^WHERE /)[1];
+  const body = whereCommand.split(/^WHERE\s+/)[1];
 
   const byChar = body.split('');
 

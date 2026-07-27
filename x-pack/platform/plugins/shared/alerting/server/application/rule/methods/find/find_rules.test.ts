@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
@@ -55,6 +56,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -203,6 +205,7 @@ describe('find()', () => {
                 "uuid": 100,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -216,6 +219,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "name": "fakeRuleName",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -324,6 +328,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -337,6 +342,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -435,6 +441,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -448,6 +455,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -509,7 +517,6 @@ describe('find()', () => {
         searchFields: ['params.risk_score', 'params.severity'],
         filter: 'alert.attributes.params.risk_score > 50',
       },
-      excludeFromPublicApi: true,
     });
 
     const findCallParams = unsecuredSavedObjectsClient.find.mock.calls[0][0];
@@ -729,6 +736,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -742,6 +750,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -765,6 +774,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "123",
             "artifacts": Object {
               "dashboards": Array [],
@@ -778,6 +788,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "2",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -1047,6 +1058,7 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "activeSnoozes": undefined,
               "artifacts": Object {
                 "dashboards": Array [],
                 "investigation_guide": Object {
@@ -1054,6 +1066,7 @@ describe('find()', () => {
                 },
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
@@ -1460,6 +1473,7 @@ describe('find()', () => {
                   "uuid": 100,
                 },
               ],
+              "activeSnoozes": undefined,
               "alertTypeId": "myType",
               "artifacts": Object {
                 "dashboards": Array [
@@ -1477,6 +1491,7 @@ describe('find()', () => {
                 "status": "pending",
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "name": "fakeRuleName",
               "notifyWhen": "onActiveAlert",
               "params": Object {

@@ -66,10 +66,7 @@ const groupTable = () => cy.get(RESOLUTION_GROUP_TAB_CONTENT).find(RESOLUTION_GR
 describe(
   'Entity flyout — Manual Entity Resolution',
   {
-    // Re-add `@serverless` once https://github.com/elastic/kibana/issues/266752
-    // (bulk `refresh: true` requires unauthorized `indices:admin/refresh/unpromotable`
-    // for the `platform_engineer` role) is resolved.
-    tags: ['@ess'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -82,15 +79,17 @@ describe(
     },
   },
   () => {
-    before(() => {
-      cy.task('esArchiverLoad', { archiveName: ARCHIVE_NAME });
-    });
-
     after(() => {
       cy.task('esArchiverUnload', { archiveName: ARCHIVE_NAME });
     });
 
+    // Reload the archive before every test (and on every Cypress retry) so each
+    // test starts from the seeded resolution state. The link / unlink tests
+    // mutate shared entities via the resolution API; without a per-test reset a
+    // retried test would observe leftover groups created during its own first
+    // attempt (e.g. a seeded group of 3 appearing as 4) and fail spuriously.
     beforeEach(() => {
+      cy.task('esArchiverLoad', { archiveName: ARCHIVE_NAME });
       interceptEntityStoreStatus('running');
       interceptResolutionGroup();
       interceptResolutionMutations();
@@ -107,6 +106,10 @@ describe(
         openEntityFlyoutFromHomeByName('Charlie Brown');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
+        // Scroll into view: with `entityAnalyticsAnomalyDetails` enabled, the
+        // Anomalies section renders above ResolutionSection and can push it
+        // below the flyout's initially-visible scroll area.
+        cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
         openResolutionTabFromRightPanel();
@@ -318,6 +321,10 @@ describe(
         openEntityFlyoutFromHomeByName('web-server-prod-1');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
+        // Scroll into view: with `entityAnalyticsAnomalyDetails` enabled, the
+        // Anomalies section renders above ResolutionSection and can push it
+        // below the flyout's initially-visible scroll area.
+        cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
         openResolutionTabFromRightPanel();
@@ -347,6 +354,10 @@ describe(
         openEntityFlyoutFromHomeByName('api-gateway-prod');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
+        // Scroll into view: with `entityAnalyticsAnomalyDetails` enabled, the
+        // Anomalies section renders above ResolutionSection and can push it
+        // below the flyout's initially-visible scroll area.
+        cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
         openResolutionTabFromRightPanel();

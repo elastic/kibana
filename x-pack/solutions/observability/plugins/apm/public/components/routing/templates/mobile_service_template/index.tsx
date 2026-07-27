@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -43,6 +44,7 @@ interface Props {
   children: React.ReactChild;
   selectedTabKey: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
@@ -62,6 +64,7 @@ function TemplateWithContext({
   children,
   selectedTabKey,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent: BottomHeaderContent,
   contentWrapper: ContentWrapper = React.Fragment,
 }: Props) {
@@ -72,6 +75,8 @@ function TemplateWithContext({
   } = useApmParams('/mobile-services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
 
   const router = useApmRouter();
 
@@ -118,7 +123,13 @@ function TemplateWithContext({
         searchBar={
           <>
             {BottomHeaderContent && <BottomHeaderContent />}
-            <MobileSearchBar {...searchBarOptions} />
+            {customSearchBar ?? (
+              <MobileSearchBar
+                {...searchBarOptions}
+                showEnvironmentFilter
+                showAnomalyThresholdSelector={shouldShowAnomalyUi}
+              />
+            )}
           </>
         }
         pageHeader={{

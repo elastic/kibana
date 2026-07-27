@@ -7,24 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findPackageForPath } from '@kbn/repo-packages';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Command } from '@kbn/dev-cli-runner';
-import type { ScoutTestConfig } from '@kbn/scout-reporting';
-import { ScoutTestConfigStats, testConfigs } from '@kbn/scout-reporting';
-import { ScoutTestTarget, testTargets } from '@kbn/scout-info';
-import { SCOUT_CI_CONFIG_PATH } from '@kbn/scout-info';
-import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import type { ScoutTestChannel } from '@kbn/scout-info';
+import {
+  ScoutTestTarget,
+  SCOUT_CI_CONFIG_PATH,
+  SCOUT_OUTPUT_ROOT,
+  SCOUT_TEST_CONFIG_STATS_PATH,
+  testTargets,
+  testChannel,
+  testChannels,
+} from '@kbn/scout-info';
+import { type ScoutTestConfig, ScoutTestConfigStats, testConfigs } from '@kbn/scout-reporting';
 import yaml from 'js-yaml';
-import { mkdirSync, readFileSync } from 'node:fs';
-import { createFlagError } from '@kbn/dev-cli-errors';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { writeFileSync } from 'node:fs';
-import path from 'path';
-import { findPackageForPath } from '@kbn/repo-packages';
-import { REPO_ROOT } from '@kbn/repo-info';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
+import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
+import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+
+/**
+ * Selects which Scout test configs are eligible for distribution into lanes.
+ *
+ * - `kind: 'modules'` → keep configs whose owning @kbn/ module ID is in `ids`
+ * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
+ * - `kind: 'channels'` → keep configs that match any of the test channels in `channels`
+ */
+export type TestLoadFilter =
+  | { kind: 'modules'; ids: ReadonlySet<string> }
+  | { kind: 'configs'; paths: ReadonlySet<string> }
+  | { kind: 'channels'; channels: ReadonlySet<ScoutTestChannel> };
 
 export interface ScoutCIConfig {
   plugins: {
@@ -66,7 +85,7 @@ export function identifyTestLoads(
   scoutCIConfig: ScoutCIConfig,
   testConfigStats: ScoutTestConfigStats,
   testTarget: ScoutTestTarget,
-  moduleIDs: Set<string>,
+  testLoadFilters: TestLoadFilter[],
   log: ToolingLog
 ): ScoutCITestLoad[] {
   const testLoads = testConfigs.all
@@ -76,11 +95,25 @@ export function identifyTestLoads(
         return test.tags.includes(testTarget.playwrightTag);
       })
     )
-    .filter((config) => {
-      if (moduleIDs.size === 0) return true;
-      const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
-      return resolvedModuleID ? moduleIDs.has(resolvedModuleID) : false;
-    })
+    .filter(
+      (config) =>
+        testLoadFilters.length === 0 ||
+        testLoadFilters.every((filter) => {
+          switch (filter.kind) {
+            case 'configs':
+              return filter.paths.has(config.path);
+            case 'modules':
+              if (filter.ids.size === 0) return false;
+              const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
+              return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
+            case 'channels':
+              if (filter.channels.size === 0) return true;
+              return filter.channels
+                .values()
+                .some((channel) => config.manifest.testChannels.includes(channel));
+          }
+        })
+    )
     .map((config) => {
       let enabled: boolean;
       switch (config.module.type) {
@@ -418,11 +451,12 @@ export const createTestTracks: Command<void> = {
   flags: {
     string: [
       'testTarget',
+      'testChannel',
       'serverConfigSet',
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
       'estimatedLaneSetupMinutes',
-      'moduleFilterPath',
+      'testing-scope',
     ],
     boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
@@ -430,39 +464,46 @@ export const createTestTracks: Command<void> = {
     },
     help: `
     --testTarget                    (required)  One or more test target in the {location}-{arch}-{domain} format
+    --testChannel                   (optional)  Limit the test selection to one or more test channels
+                                                Valid channels: ${testChannels.all.join(', ')}
     --outputPath                    (optional)  Where to write the test track specification [default: ${SCOUT_OUTPUT_ROOT}/test_tracks/{timestamp}.json]
     --targetRuntimeMinutes          (optional)  How long the test track should run [default: longest estimated load runtime]
     --minRuntimeMinutes             (optional)  Target runtime minutes shouldn't be lower than this
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
     --showIndividualTrackSummaries  (optional)  Display individual test track summaries
     --showMultiTrackSummary         (optional)  Display multi-track summary
-    --moduleFilterPath              (optional)  Path to a JSON file of @kbn/ module IDs; only configs belonging to those modules will be distributed
+    --testing-scope                 (optional)  Path to a 'testing_scope.json' produced by 'scout resolve-testing-scope'.
+                                                Distribution is restricted to:
+                                                  - tests-only      → only Playwright configs touched by the diff
+                                                  - dependency-tree → only configs whose @kbn/ module is affected
+                                                  - full            → no filter (all configs are distributed)
     `,
   },
   run: async ({ flagsReader, log }) => {
-    const moduleIds: Set<string> = new Set();
-    const moduleFilterPath = flagsReader.string('moduleFilterPath');
+    const testingScopePath = flagsReader.string('testing-scope');
+    const scope: SerializedScoutTestingScope = testingScopePath
+      ? readScoutTestingScope(testingScopePath)
+      : { kind: 'full', affectedModules: [] };
 
-    if (moduleFilterPath) {
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(readFileSync(moduleFilterPath, 'utf-8'));
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        throw createFlagError(
-          `Failed to read '${moduleFilterPath}': ${message}. ` +
-            `Ensure the file exists and is a valid JSON array of @kbn/ module IDs.`
+    const filters: TestLoadFilter[] = [];
+
+    switch (scope.kind) {
+      case 'tests-only':
+        const paths = new Set(scope.affectedConfigs ?? []);
+        filters.push({ kind: 'configs', paths });
+        log.info(
+          `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
         );
-      }
-
-      if (!Array.isArray(parsed)) {
-        throw createFlagError(`Expected '${moduleFilterPath}' to contain a JSON array.`);
-      }
-
-      parsed.forEach((id) => moduleIds.add(id));
-      log.info(
-        `Limiting test load selection to the following modules: ${Array.from(moduleIds).join(', ')}`
-      );
+        break;
+      case 'dependency-tree':
+        const ids = new Set(scope.affectedModules);
+        filters.push({ kind: 'modules', ids });
+        log.info(
+          `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
+        );
+        break;
+      default:
+        log.info('Distributing all eligible configs (full scope)');
     }
 
     const selectedTestTargets: ScoutTestTarget[] = flagsReader
@@ -484,13 +525,31 @@ export const createTestTracks: Command<void> = {
         selectedTestTargets.map((target) => target.tag).join(', ')
     );
 
+    const rawChannels: string[] = flagsReader.arrayOfStrings('testChannel') || [];
+
+    const selectedTestChannels: Set<ScoutTestChannel> = new Set(
+      (rawChannels.length > 0 ? rawChannels : testChannels.current()).map((channel) => {
+        try {
+          return testChannel.fromString(channel);
+        } catch (e) {
+          throw createFailError(String(e));
+        }
+      })
+    );
+
+    log.info(
+      'Only configs in the following test channels will be considered: ' +
+        `${Array.from(selectedTestChannels).join(', ')}`
+    );
+    filters.push({ kind: 'channels', channels: selectedTestChannels });
+
     const testConfigStats = loadTestConfigStats();
     const scoutCIConfig = loadScoutCIConfig();
 
     const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
       loadsByTarget.set(
         target,
-        identifyTestLoads(scoutCIConfig, testConfigStats, target, moduleIds, log)
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, filters, log)
       );
       return loadsByTarget;
     }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
@@ -549,19 +608,31 @@ export const createTestTracks: Command<void> = {
             : [...new Set(loads.map((load) => load.config.server.configSet))];
 
         // Each server config set gets its own track
-        return configSets.map((configSet) => {
+        return configSets.flatMap((configSet): TestTrack[] => {
           log.info(
             `Building test track for test target '${target.tag}' with server config set '${configSet}'`
           );
+
+          const enabledLoads = loads.filter(
+            (load) => load.enabled && load.config.server.configSet === configSet
+          );
+
+          if (enabledLoads.length === 0) {
+            log.warning(
+              `No enabled test loads found for test target '${target.tag}' and server config set '${configSet}'`
+            );
+            return [];
+          }
+
           const track = buildTrack(
             Math.max(minimumRuntime, runtimeTarget),
             estimatedLaneSetupDuration,
             target,
-            loads.filter((load) => load.enabled && load.config.server.configSet === configSet),
+            enabledLoads,
             log
           );
           track.metadata.server = { configSet };
-          return track;
+          return [track];
         });
       })
       .toArray();

@@ -24,6 +24,7 @@ export {
 
 // Column components.
 export {
+  createColumn,
   NameColumn,
   NameCell,
   NameCellTags,
@@ -55,10 +56,10 @@ export type { ColumnNamespace, ColumnProps } from './src/column';
 export {
   EditAction,
   DeleteAction,
-  InspectAction,
+  ContentEditorAction,
   type EditActionProps,
   type DeleteActionProps,
-  type InspectActionProps,
+  type ContentEditorActionProps,
 } from './src/action';
 export type { ActionNamespace, ActionProps } from './src/action';
 

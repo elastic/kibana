@@ -48,6 +48,7 @@ export interface MonitorStatusPanelProps {
   onBrushed?: (timeBounds: { from: number; to: number; fromUtc: string; toUtc: string }) => void;
   monitorId?: string;
   locationLabel?: string;
+  remoteName?: string;
 }
 
 export function getColorBands(euiTheme: EuiThemeComputed, colorMode: EuiThemeColorModeStandard) {

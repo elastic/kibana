@@ -7,11 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { gapFillStatus, gapStatus } from '../../../../../constants';
 import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
+import { MAX_ID_LENGTH, ISO_DATE_MAX_LENGTH } from '../../../../../constants';
 
 export const getRuleIdsWithGapBodySchema = schema.object(
   {
-    end: schema.string(),
-    start: schema.string(),
+    end: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+    start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
     // Filters the underlying gap documents before aggregation. Matches the raw
     // per-gap statuses.
     statuses: schema.maybe(
@@ -20,7 +21,8 @@ export const getRuleIdsWithGapBodySchema = schema.object(
           schema.literal(gapStatus.UNFILLED),
           schema.literal(gapStatus.PARTIALLY_FILLED),
           schema.literal(gapStatus.FILLED),
-        ])
+        ]),
+        { maxSize: 3 }
       )
     ),
     // Filters by the derived, per-rule status that is calculated from gap
@@ -32,7 +34,8 @@ export const getRuleIdsWithGapBodySchema = schema.object(
           schema.literal(gapFillStatus.IN_PROGRESS),
           schema.literal(gapFillStatus.FILLED),
           schema.literal(gapFillStatus.ERROR),
-        ])
+        ]),
+        { maxSize: 4 }
       )
     ),
     has_unfilled_intervals: schema.maybe(schema.boolean()),
@@ -40,7 +43,7 @@ export const getRuleIdsWithGapBodySchema = schema.object(
     has_filled_intervals: schema.maybe(schema.boolean()),
     sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     excluded_reasons: optionalExcludedGapReasonsSchema,
-    gap_auto_fill_scheduler_id: schema.maybe(schema.string()),
+    gap_auto_fill_scheduler_id: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
   },
   {
     validate({ start, end }) {
@@ -61,23 +64,29 @@ export const getRuleIdsWithGapBodySchema = schema.object(
   }
 );
 
-export const gapsSummarySchema = schema.object({
-  total_unfilled_duration_ms: schema.number(),
-  total_in_progress_duration_ms: schema.number(),
-  total_filled_duration_ms: schema.number(),
-  total_error_duration_ms: schema.number(),
-  total_duration_ms: schema.number(),
-  rules_by_gap_fill_status: schema.object({
-    unfilled: schema.number(),
-    in_progress: schema.number(),
-    filled: schema.number(),
-    error: schema.number(),
-  }),
-});
+export const gapsSummarySchema = schema.object(
+  {
+    total_unfilled_duration_ms: schema.number(),
+    total_in_progress_duration_ms: schema.number(),
+    total_filled_duration_ms: schema.number(),
+    total_error_duration_ms: schema.number(),
+    total_duration_ms: schema.number(),
+    rules_by_gap_fill_status: schema.object({
+      unfilled: schema.number(),
+      in_progress: schema.number(),
+      filled: schema.number(),
+      error: schema.number(),
+    }),
+  },
+  { meta: { id: 'gaps_summary' } }
+);
 
-export const getRuleIdsWithGapResponseSchema = schema.object({
-  total: schema.number(),
-  rule_ids: schema.arrayOf(schema.string()),
-  latest_gap_timestamp: schema.maybe(schema.number()),
-  summary: gapsSummarySchema,
-});
+export const getRuleIdsWithGapResponseSchema = schema.object(
+  {
+    total: schema.number(),
+    rule_ids: schema.arrayOf(schema.string()),
+    latest_gap_timestamp: schema.maybe(schema.number()),
+    summary: gapsSummarySchema,
+  },
+  { meta: { id: 'get_rules_with_gaps_response' } }
+);

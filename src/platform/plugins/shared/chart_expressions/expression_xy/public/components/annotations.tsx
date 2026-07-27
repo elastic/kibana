@@ -31,6 +31,7 @@ import type {
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { MergedAnnotation } from '../../common';
@@ -66,7 +67,7 @@ const TooltipAnnotationDetails = ({
         <EuiFlexGroup gutterSize="s" key={`${field.key}-${field.name}`}>
           <EuiFlexItem css={styles.tooltipExtraFieldsKey}>{field.name}:</EuiFlexItem>
           <EuiFlexItem css={styles.tooltipExtraFieldsValue}>
-            {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
+            {field.formatter ? field.formatter.convertToText(row[field.key]) : row[field.key]}
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
@@ -248,7 +249,7 @@ export const getAnnotationsGroupedByInterval = (
     const formatter = columnFormatter && formatFactory(columnFormatter);
     const label =
       textField && formatter && `field:${textField}` in firstRow
-        ? formatter.convert(firstRow[`field:${textField}`])
+        ? formatter.convertToText(firstRow[`field:${textField}`])
         : firstRow.label;
     const mergedAnnotation: MergedAnnotation = {
       ...firstRow,
@@ -268,12 +269,16 @@ export const getAnnotationsGroupedByInterval = (
     };
     if (rowsPerBucket.length > 1) {
       const commonStyles = getCommonStyles(rowsPerBucket, isDarkMode);
+      const count = rowsPerBucket.length;
       return {
         ...mergedAnnotation,
         ...commonStyles,
-        label: '',
+        label: i18n.translate('expressionXY.annotations.groupedMarkerAriaLabel', {
+          defaultMessage: '{count, plural, one {# event annotation} other {# event annotations}}',
+          values: { count },
+        }),
         isGrouped: true,
-        icon: String(rowsPerBucket.length),
+        icon: String(count),
       };
     }
     return mergedAnnotation;

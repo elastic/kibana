@@ -18,6 +18,25 @@ import {
   WorkflowExecutionTelemetryEventTypes,
 } from './types';
 
+/** Shared schema fragment for output size telemetry fields. */
+const outputSizeTelemetrySchema = {
+  totalOutputSizeBytes: {
+    type: 'long' as const,
+    _meta: {
+      description:
+        'Total output size in bytes across all steps with recorded sizes (atomic steps measured by Layer 2 enforcement)',
+      optional: true as const,
+    },
+  },
+  averageOutputSizeBytes: {
+    type: 'long' as const,
+    _meta: {
+      description: 'Average output size per step in bytes (only steps with recorded sizes)',
+      optional: true as const,
+    },
+  },
+};
+
 export const workflowExecutionEventNames = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]: 'Workflow execution completed',
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: 'Workflow execution failed',
@@ -34,11 +53,27 @@ const baseWorkflowExecutionSchema: RootSchema<{
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
   isTestRun: boolean;
+  isManaged: boolean;
+  managedBy?: string;
+  originManagedWorkflowId?: string;
+  managedVersion?: number;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
   eventChainDepth?: number;
+  inputTokensUsed?: number;
+  outputTokensUsed?: number;
+  cachedTokensUsed?: number;
+  totalTokensUsed?: number;
+  aiStepsUsage?: Array<{
+    stepId: string;
+    connectorId?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    totalTokens: number;
+  }>;
 }> = {
   workflowExecutionId: {
     type: 'keyword',
@@ -84,6 +119,35 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: false,
     },
   },
+  isManaged: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether this execution belongs to a managed workflow',
+      optional: false,
+    },
+  },
+  managedBy: {
+    type: 'keyword',
+    _meta: {
+      description: 'Owning plugin for managed workflow executions',
+      optional: true,
+    },
+  },
+  originManagedWorkflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Registered managed workflow definition ID, when this execution came from one',
+      optional: true,
+    },
+  },
+  managedVersion: {
+    type: 'long',
+    _meta: {
+      description:
+        'Registered managed workflow definition version, when this execution came from one',
+      optional: true,
+    },
+  },
   ruleId: {
     type: 'keyword',
     _meta: {
@@ -121,6 +185,53 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'Event-chain depth when this run was scheduled from event-driven emits. Distinct from compositionDepth.',
+      optional: true,
+    },
+  },
+  inputTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total LLM input (prompt) tokens used by token-reporting steps in this execution.',
+      optional: true,
+    },
+  },
+  outputTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total LLM output (completion) tokens used by token-reporting steps in this execution.',
+      optional: true,
+    },
+  },
+  cachedTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total cached input tokens reused by token-reporting steps in this execution. This is a subset of inputTokensUsed.',
+      optional: true,
+    },
+  },
+  totalTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total LLM tokens used by token-reporting steps in this execution. This is inputTokensUsed + outputTokensUsed.',
+      optional: true,
+    },
+  },
+  aiStepsUsage: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description:
+          'Per-step LLM usage entry: stepId, connectorId (optional), and inputTokens/outputTokens/cachedTokens/totalTokens.',
+      },
+    },
+    _meta: {
+      description:
+        'Per-step LLM usage broken down by step and resolved connector, in finish order. Complements the *TokensUsed totals. Omitted when no step reported usage.',
       optional: true,
     },
   },
@@ -372,6 +483,7 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> = {
@@ -624,6 +736,7 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledParams> = {
@@ -854,6 +967,7 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const eventDrivenExecutionSuppressedSchema: RootSchema<EventDrivenExecutionSuppressedParams> = {

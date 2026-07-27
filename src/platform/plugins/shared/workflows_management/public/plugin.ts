@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, Subject, type Subscription } from 'rxjs';
+import { combineLatest, filter, type Observable, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -21,11 +21,17 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
+import type { DeepLinksParams } from './deep_links';
+import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
@@ -99,6 +105,9 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
+      // Deep links are refined reactively in start() from global uiSettings; at bootstrap the
+      // executions link stays off (default) and the library link on, matching getDeepLinks defaults.
+      deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -177,13 +186,28 @@ export class WorkflowsPlugin
     const capabilities = getWorkflowsCapabilities(core.application.capabilities);
     const isAuthorized = capabilities.canReadWorkflow; // Read privilege is the minimum privilege required
 
-    this.appVisibilitySubscription = this.availabilityService
-      .getIsAvailable$()
-      .subscribe((isAvailable) => {
+    const isAvailable$ = this.availabilityService.getIsAvailable$();
+
+    const deepLinksFlags$: Observable<DeepLinksParams> = combineLatest({
+      libraryEnabled: core.settings.globalClient.get$<boolean>(
+        WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+        false
+      ),
+      executionsViewEnabled: core.settings.globalClient.get$<boolean>(
+        WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+        false
+      ),
+    });
+
+    this.appVisibilitySubscription = combineLatest([isAvailable$, deepLinksFlags$]).subscribe(
+      ([isAvailable, deepLinksFlags]) => {
+        // Always set the next value of the app updater in a single place to avoid race conditions
         this.appUpdater$.next(() => ({
           visibleIn: this.getVisibleIn({ isAuthorized, isAvailable }),
+          deepLinks: getDeepLinks(deepLinksFlags),
         }));
-      });
+      }
+    );
   }
 
   /**
@@ -198,14 +222,14 @@ export class WorkflowsPlugin
   }): AppDeepLinkLocations[] {
     // Not available takes precedence over authorized.
     if (!params.isAvailable) {
-      // Remove generic locations, but keep in sideNav and globalSearch to make users aware of the feature.
-      return ['globalSearch', 'sideNav'];
+      // Remove generic locations, but keep in 'classicSideNav', 'projectSideNav' and globalSearch to make users aware of the feature.
+      return ['globalSearch', 'classicSideNav', 'projectSideNav'];
     }
     if (!params.isAuthorized) {
-      // Remove from sideNav so it does not use nav real estate, but keep in globalSearch to make it discoverable
+      // Remove from 'classicSideNav', 'projectSideNav' so it does not use nav real estate, but keep in globalSearch to make it discoverable
       return ['globalSearch'];
     }
-    return ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
+    return ['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'projectSideNav'];
   }
 
   /**

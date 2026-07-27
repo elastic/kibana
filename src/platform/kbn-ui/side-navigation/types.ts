@@ -83,6 +83,10 @@ export interface MenuItem {
    */
   label: string;
   /**
+   * (optional) Override for the secondary menu/panel header title. Defaults to `label` when omitted.
+   */
+  secondaryMenuTitle?: string;
+  /**
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */
   'data-test-subj'?: string;
@@ -97,7 +101,7 @@ export interface MenuItem {
 }
 
 /**
- * The complete navigation structure containing primary and footer menu items.
+ * The complete navigation structure containing primary, overflow, and footer menu items.
  * This is the main data structure passed to the Navigation component.
  */
 export interface NavigationStructure {
@@ -105,6 +109,10 @@ export interface NavigationStructure {
    * The items to be displayed in the navigation footer.
    */
   footerItems: MenuItem[];
+  /**
+   * Items that are always placed in the overflow ("More") menu.
+   */
+  overflowItems?: MenuItem[];
   /**
    * The primary navigation items displayed in the navigation main menu.
    */

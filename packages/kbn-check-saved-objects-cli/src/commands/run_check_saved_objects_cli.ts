@@ -7,11 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFileSync } from 'fs';
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { getKibanaServer, startElasticsearch, stopElasticsearch } from '../util';
+import {
+  FindingsCollector,
+  type SavedObjectsCheckReport,
+  type TypeChangeDetails,
+} from '../findings';
+import { classifyUpdatedTypes, getNewTypes, resolveSnapshotSha } from '../snapshots';
+import type { MigrationSnapshot } from '../types';
 import type { MigrationAlgorithm, TaskContext } from './types';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
+
+/**
+ * Computes model version change details for a single SO type by diffing the
+ * `from` and `to` snapshots. Returns `undefined` when there is nothing to report.
+ */
+const computeTypeChanges = (
+  typeName: string,
+  from: MigrationSnapshot | undefined,
+  to: MigrationSnapshot
+): TypeChangeDetails | undefined => {
+  const toInfo = to.typeDefinitions[typeName];
+  if (!toInfo) return undefined;
+
+  const fromVersionMap = new Map(
+    (from?.typeDefinitions[typeName]?.modelVersions ?? []).map((v) => [v.version, v])
+  );
+
+  const newModelVersions = toInfo.modelVersions
+    .filter((v) => !fromVersionMap.has(v.version))
+    .map((v) => `10.${v.version}.0`);
+
+  const modifiedModelVersions = toInfo.modelVersions
+    .filter((v) => {
+      const fromVersion = fromVersionMap.get(v.version);
+      return fromVersion !== undefined && fromVersion.modelVersionHash !== v.modelVersionHash;
+    })
+    .map((v) => `10.${v.version}.0`);
+
+  if (newModelVersions.length === 0 && modifiedModelVersions.length === 0) return undefined;
+  return { newModelVersions, modifiedModelVersions };
+};
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
@@ -26,6 +65,7 @@ export function runCheckSavedObjectsCli() {
       const client = flagsReader.boolean('client');
       const test = flagsReader.boolean('test');
       const algorithmFlag = flagsReader.string('algorithm') ?? 'v2';
+      const reportPath = flagsReader.string('reportPath');
 
       let migrationAlgorithms: MigrationAlgorithm[];
       if (algorithmFlag === 'both') {
@@ -44,10 +84,42 @@ export function runCheckSavedObjectsCli() {
         );
       }
 
+      let resolvedGitRev = gitRev;
+      let baselineUsedAncestorSnapshot = false;
+      if (!server && !test && gitRev) {
+        const resolvedBaseline = await resolveSnapshotSha(gitRev);
+        resolvedGitRev = resolvedBaseline.resolvedSha;
+        baselineUsedAncestorSnapshot = resolvedBaseline.usedAncestorSnapshot;
+        if (baselineUsedAncestorSnapshot) {
+          log.warning(
+            `Using ancestor snapshot '${resolvedBaseline.resolvedSha}' as baseline because no snapshot exists yet for requested merge-base '${resolvedBaseline.requestedSha}'.`
+          );
+        }
+      }
+
+      let resolvedServerlessGitRev = serverlessGitRev;
+      let serverlessBaselineUsedAncestorSnapshot = false;
+      if (!server && !test && serverlessGitRev) {
+        const resolvedServerlessBaseline = await resolveSnapshotSha(serverlessGitRev);
+        resolvedServerlessGitRev = resolvedServerlessBaseline.resolvedSha;
+        serverlessBaselineUsedAncestorSnapshot = resolvedServerlessBaseline.usedAncestorSnapshot;
+        if (serverlessBaselineUsedAncestorSnapshot) {
+          log.warning(
+            `Using ancestor snapshot '${resolvedServerlessBaseline.resolvedSha}' as serverless baseline because no snapshot exists yet for requested SHA '${resolvedServerlessBaseline.requestedSha}'.`
+          );
+        }
+      }
+
       const context: TaskContext = {
-        gitRev: gitRev!,
-        serverlessGitRev,
+        gitRev: resolvedGitRev!,
+        requestedGitRev: gitRev,
+        baselineUsedAncestorSnapshot,
+        serverlessGitRev: resolvedServerlessGitRev,
+        requestedServerlessGitRev: serverlessGitRev,
+        serverlessBaselineUsedAncestorSnapshot,
         updatedTypes: [],
+        typesWithNewModelVersions: [],
+        wipTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
         fixtures: {
@@ -62,9 +134,11 @@ export function runCheckSavedObjectsCli() {
       globalTask = new Listr(
         [
           {
-            title: 'Start ES',
+            title: 'Start ES asynchronously',
             // we launch the ES server in the background and store a promise that resolves when the server is ready
-            task: (ctx) => (ctx.esServer = startElasticsearch()),
+            task: (ctx) => {
+              ctx.esServer = startElasticsearch();
+            },
             enabled: !client, // we skip this step if '--client' is passed
           },
           {
@@ -119,7 +193,7 @@ export function runCheckSavedObjectsCli() {
               ctx.test = true;
             },
             enabled: !server && !test,
-            skip: (ctx) => ctx.updatedTypes.length > 0,
+            skip: (ctx) => ctx.typesWithNewModelVersions.length > 0,
           },
           /**
            * ==================================================================
@@ -143,7 +217,8 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Automated rollback tests',
             task: automatedRollbackTests,
-            skip: (ctx) => ctx.updatedTypes.length === 0 || globalTask.errors.length > 0,
+            skip: (ctx) =>
+              ctx.typesWithNewModelVersions.length === 0 || globalTask.errors.length > 0,
             enabled: !server,
           },
         ],
@@ -177,10 +252,57 @@ export function runCheckSavedObjectsCli() {
           ],
           { fallbackRenderer: 'simple', exitOnError: false }
         ).run(context);
+
+        if (reportPath) {
+          try {
+            const collector = new FindingsCollector();
+            collector.ingestErrors(globalTask?.errors ?? []);
+
+            const newTypes =
+              context.from && context.to ? getNewTypes({ from: context.from, to: context.to }) : [];
+            const { updatedTypes } =
+              context.from && context.to
+                ? classifyUpdatedTypes({ from: context.from, to: context.to })
+                : { updatedTypes: context.updatedTypes.map(({ name }) => name) };
+
+            const typeChanges: Record<string, TypeChangeDetails> = {};
+            if (context.to) {
+              for (const typeName of updatedTypes) {
+                const details = computeTypeChanges(typeName, context.from, context.to);
+                if (details) typeChanges[typeName] = details;
+              }
+            }
+
+            const report: SavedObjectsCheckReport = {
+              status: exitCode === 0 ? 'pass' : 'fail',
+              baseline: context.requestedGitRev ?? gitRev,
+              ...(context.baselineUsedAncestorSnapshot && {
+                baselineSnapshotSha: context.gitRev,
+                baselineSnapshotUsedAncestor: true,
+              }),
+              serverlessBaseline: context.requestedServerlessGitRev ?? serverlessGitRev,
+              ...(context.serverlessBaselineUsedAncestorSnapshot && {
+                serverlessBaselineSnapshotSha: context.serverlessGitRev,
+                serverlessBaselineSnapshotUsedAncestor: true,
+              }),
+              newTypes,
+              updatedTypes,
+              removedTypes: context.newRemovedTypes,
+              findings: collector.getFindings(),
+              ...(Object.keys(typeChanges).length > 0 && { typeChanges }),
+              ...(context.test && { testMode: true }),
+            };
+            writeFileSync(reportPath, JSON.stringify(report, null, 2));
+          } catch (writeErr) {
+            log.warning(
+              `Failed to write Saved Objects check report to '${reportPath}': ${writeErr}`
+            );
+          }
+        }
       }
       if (exitCode) {
         log.warning(
-          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/validate#troubleshooting'
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/troubleshooting'
         );
       }
       process.exit(exitCode);
@@ -195,9 +317,10 @@ export function runCheckSavedObjectsCli() {
         alias: {
           baseline: 'gitRev',
           'serverless-baseline': 'serverlessGitRev',
+          'report-path': 'reportPath',
         },
         boolean: ['fix', 'server', 'client', 'test'],
-        string: ['gitRev', 'serverlessGitRev', 'algorithm'],
+        string: ['gitRev', 'serverlessGitRev', 'algorithm', 'reportPath'],
         default: {
           verify: true,
           mappings: true,
@@ -210,6 +333,7 @@ export function runCheckSavedObjectsCli() {
         --client           Do not start ES server (requires running the command above on a separate term)
         --test             Use a sample type registry with dummy types and hardcoded snapshots (no longer starts Kibana)
         --algorithm <v2|zdt|both>  Migration algorithm to use for rollback tests (default: v2)
+        --report-path <file>       Write a structured JSON report of changes and findings to this file
       `,
       },
     }

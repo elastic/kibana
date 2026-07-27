@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import { hasValidIndexPattern } from '../../../../helpers/has_valid_index_pattern';
+import { executeEsqlQuery } from '../../../../../../../common/task/agent/helpers/execute_esql';
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
-import {
-  getValidateEsql,
-  type GetValidateEsqlParams,
-} from '../../../../../../../common/task/agent/helpers/validate_esql/validation';
-import type { GraphNode, TranslateDashboardPanelState } from '../../types';
+import { getValidateEsql } from '../../../../../../../common/task/agent/helpers/validate_esql/validation';
+import type {
+  GraphNode,
+  TranslatePanelGraphParams,
+  TranslateDashboardPanelState,
+} from '../../types';
 
-/**
- * This node runs all validation steps, and will redirect to the END of the graph if no errors are found.
- * Any new validation steps should be added here.
- */
-export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
+export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode => {
   const validateEsql = getValidateEsql(params);
   return async (state): Promise<Partial<TranslateDashboardPanelState>> => {
     if (!state.esql_query) {
@@ -31,25 +30,39 @@ export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
       };
     }
 
-    const { error } = await validateEsql({ query: state.esql_query });
+    const { error: syntaxError } = await validateEsql({ query: state.esql_query });
 
-    if (error && state.esql_query.match(/\[(macro|lookup):.*?\]/)) {
-      // The fix_query_errors tends to remove all the macro and lookup placeholder from the query to make the query valid,
-      // we need to keep them so we skip validation unless the missing resources are provided
+    if (state.esql_query.match(/\[(macro|lookup):.*?\]/)) {
       return {
-        validation_errors: { esql_errors: error, retries_left: 0 },
+        validation_errors: {
+          esql_errors: syntaxError,
+          retries_left: 0,
+        },
         comments: [
           generateAssistantComment(
-            '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping self-healing loop'
+            '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping syntax and execution checks'
           ),
         ],
       };
     }
 
+    if (syntaxError || !hasValidIndexPattern(state.index_pattern)) {
+      return {
+        validation_errors: {
+          esql_errors: syntaxError,
+          retries_left: state.validation_errors.retries_left - 1,
+        },
+      };
+    }
+
+    const executionError = await executeEsqlQuery(state.esql_query, params);
+
     return {
       validation_errors: {
-        esql_errors: error,
-        retries_left: state.validation_errors.retries_left - 1,
+        esql_errors: executionError,
+        retries_left: executionError
+          ? state.validation_errors.retries_left - 1
+          : state.validation_errors.retries_left,
       },
     };
   };

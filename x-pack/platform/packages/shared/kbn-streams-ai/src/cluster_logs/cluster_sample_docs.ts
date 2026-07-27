@@ -7,7 +7,7 @@
 
 import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
-import { formatDocumentAnalysis, mergeSampleDocumentsWithFieldCaps } from '@kbn/ai-tools';
+import { formatDocumentAnalysis, mergeSampleDocumentsWithSchema } from '@kbn/ai-tools';
 import { getFlattenedObject } from '@kbn/std';
 import { dbscan } from './dbscan';
 
@@ -253,20 +253,25 @@ export function clusterSampleDocs({
   finalizeDocs();
 
   const { clusters, noise } = dbscan(docs, EPSILON, MIN_POINTS, hybridDistance);
+  const schema = Object.entries(fieldCaps.fields).map(([name, caps]) => ({
+    name,
+    types: Object.keys(caps),
+  }));
 
   return {
     sampled: hits.length,
     noise,
     clusters: clusters.map((cluster) => {
       const samples = cluster.map((i) => hits[i]);
+
       return {
         count: cluster.length,
         samples,
         analysis: formatDocumentAnalysis(
-          mergeSampleDocumentsWithFieldCaps({
+          mergeSampleDocumentsWithSchema({
             total: samples.length,
             hits: samples,
-            fieldCaps,
+            schema,
           }),
           { dropEmpty: true, dropUnmapped }
         ),

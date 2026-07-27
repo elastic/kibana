@@ -41,7 +41,7 @@ import { DefaultLayout } from '../../../layouts';
 import { AgentPolicyFilter } from '../agent_list_page/components/filter_bar/agent_policy_filter';
 import { HierarchicalActionsMenu } from '../components';
 
-import { ConfirmRevokeModal, ConfirmDeleteModal } from './components/confirm_bulk_action_modal';
+import { ConfirmRevokeModal, ConfirmDeleteModal } from './components/confirm_action_modal';
 import { Divider, getTokenActionItems } from './components/token_actions';
 import { getColumns } from './components/columns';
 import { useBulkActions } from './hooks/use_bulk_actions';
@@ -169,13 +169,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           onConfirm={onBulkActionConfirm}
         />
       )}
-      <EuiText color="subdued">
-        <FormattedMessage
-          id="xpack.fleet.enrollmentTokensList.pageDescription"
-          defaultMessage="Create and revoke enrollment tokens. An enrollment token enables one or more agents to enroll in Fleet and send data."
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">

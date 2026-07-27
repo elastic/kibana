@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 
 import { AddComment } from '../add_comment';
 import { useCaseViewParams } from '../../common/navigation';
-import { getManualAlertIdsWithNoRuleId } from './helpers';
 import type { UserActionTreeProps } from './types';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
@@ -72,7 +71,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     currentUserProfile,
     data: caseData,
     statusActionButton,
-    useFetchAlertData,
+    attachActionButton,
     userActivityQueryParams,
     userActionsStats,
   } = props;
@@ -103,13 +102,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       lastPage,
     });
 
-  const alertIdsWithoutRuleInfo = useMemo(
-    () => getManualAlertIdsWithNoRuleId(caseData.comments),
-    [caseData.comments]
-  );
-
-  const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
-
   const { getCanAddUserComments } = useUserPermissions();
 
   // add-comment markdown is not visible in History filter
@@ -133,9 +125,17 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
         showLoading={false}
         statusActionButton={statusActionButton}
+        attachActionButton={attachActionButton}
       />
     ),
-    [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
+    [
+      caseId,
+      handleUpdate,
+      handleManageMarkdownEditId,
+      statusActionButton,
+      attachActionButton,
+      commentRefs,
+    ]
   );
 
   const bottomActions = shouldShowCommentEditor
@@ -183,8 +183,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           {...props}
           caseUserActions={infiniteCaseUserActions}
           attachments={infiniteLatestAttachments}
-          loadingAlertData={loadingAlertData}
-          manualAlertsData={manualAlertsData}
           commentRefs={commentRefs}
           handleManageQuote={handleManageQuote}
           bottomActions={lastPage <= 1 ? bottomActions : []}
@@ -207,8 +205,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
               {...props}
               caseUserActions={lastPageUserActions}
               attachments={lastPageAttachments}
-              loadingAlertData={loadingAlertData}
-              manualAlertsData={manualAlertsData}
               bottomActions={bottomActions}
               commentRefs={commentRefs}
               handleManageQuote={handleManageQuote}

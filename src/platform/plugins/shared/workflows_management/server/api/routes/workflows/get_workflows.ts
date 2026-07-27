@@ -20,8 +20,15 @@ import {
   OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
+import {
+  canReadManagedWorkflowExecutions,
+  hasWorkflowReadPrivilege,
+  resolveAuthorizedManagedFilter,
+  WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
+} from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
+
+const MAX_VISIBILITY_CONTEXT_LENGTH = 128;
 
 const querySchema = schema.object({
   query: schema.maybe(schema.string({ meta: { description: 'Free-text search query.' } })),
@@ -45,6 +52,37 @@ const querySchema = schema.object({
       [schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })],
       { meta: { description: 'Filter by tags.' } }
     )
+  ),
+  managed: schema.maybe(
+    schema.oneOf([schema.literal('all'), schema.literal('managed'), schema.literal('unmanaged')], {
+      meta: { description: 'Filter by managed status. Defaults to "unmanaged".' },
+    })
+  ),
+  visibilityContext: schema.maybe(
+    schema.oneOf(
+      [
+        schema.string({ maxLength: MAX_VISIBILITY_CONTEXT_LENGTH }),
+        schema.arrayOf(schema.string({ maxLength: MAX_VISIBILITY_CONTEXT_LENGTH }), {
+          maxSize: MAX_ARRAY_PARAM_SIZE,
+        }),
+      ],
+      {
+        meta: {
+          description:
+            'When managed workflows are included, only return managed workflows visible in these contexts.',
+        },
+      }
+    )
+  ),
+  sortField: schema.maybe(
+    schema.oneOf([schema.literal('name'), schema.literal('enabled')], {
+      meta: { description: 'Field to sort by.' },
+    })
+  ),
+  sortOrder: schema.maybe(
+    schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      meta: { description: 'Sort direction.' },
+    })
   ),
 });
 
@@ -71,18 +109,22 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
+          if (!hasWorkflowReadPrivilege(request)) {
             return response.forbidden();
           }
-          const params = prepareParams(request.query);
+          const managedFilter = resolveAuthorizedManagedFilter(request, request.query.managed);
+          const params = prepareParams({ ...request.query, managed: managedFilter });
           const spaceId = spaces.getSpaceId(request);
           const includeExecutionHistory =
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           return response.ok({
-            body: await api.getWorkflows(params, spaceId, { includeExecutionHistory }),
+            body: await api.getWorkflows(params, spaceId, {
+              includeExecutionHistory,
+              includeManagedExecutionHistory: canReadManagedWorkflowExecutions(request),
+            }),
           });
         } catch (error) {
-          return handleRouteError(response, error);
+          return handleRouteError(response, error as Error);
         }
       })
     );
@@ -95,6 +137,10 @@ function prepareParams({
   createdBy,
   tags,
   query,
+  managed,
+  visibilityContext,
+  sortField,
+  sortOrder,
 }: TypeOf<typeof querySchema>): GetWorkflowsParams {
   return {
     query,
@@ -103,5 +149,12 @@ function prepareParams({
     enabled: enabled != null && !Array.isArray(enabled) ? [enabled] : enabled,
     createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
+    managedFilter: managed,
+    visibilityContext:
+      visibilityContext != null && !Array.isArray(visibilityContext)
+        ? [visibilityContext]
+        : visibilityContext,
+    sortField,
+    sortOrder,
   };
 }

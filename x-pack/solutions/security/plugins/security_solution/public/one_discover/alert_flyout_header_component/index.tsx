@@ -14,15 +14,17 @@ import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
-import { Header } from '../../flyout_v2/document/header';
+import { Header } from '../../flyout_v2/document/main/header';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
-import { NotesDetails } from '../../flyout_v2/notes';
+import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DiscoverCellActions } from '../cell_actions';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
+import { getDocumentTitle } from '../../flyout_v2/document/main/utils/get_header_title';
 
 export const MISSING_METADATA_CALLOUT = i18n.translate(
   'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
@@ -110,6 +112,7 @@ export const AlertFlyoutHeader = ({
       {
         ...defaultToolsFlyoutProperties,
         historyKey,
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       }
     );
   }, [history, historyKey, hit, services, store]);

@@ -22,6 +22,7 @@ import {
 import type { CasesPermissions } from '../../../../common';
 import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
+import { KibanaServices } from './services';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -34,6 +35,40 @@ export const useToasts = (): StartServices['notifications']['toasts'] =>
   useKibana().services.notifications.toasts;
 
 export const useHttp = (): StartServices['http'] => useKibana().services.http;
+
+/**
+ * Cases UI config flags. Mirrors the shape exposed on `CasesPublicStart['config']`
+ * so call sites inside the cases plugin can read flags the same way external
+ * consumers do (`cases.config.<flag>`), without poking the singleton directly.
+ */
+export const useCasesConfig = () => {
+  const config = KibanaServices.getConfig();
+  return useMemo(
+    () => ({
+      // TODO: flip defaults to `true` once attachments/templates are GA.
+      // https://github.com/elastic/security-team/issues/15066
+      attachmentsEnabled: config?.attachments?.enabled ?? false,
+      chatEnabled: config?.chat?.enabled ?? false,
+      templatesEnabled: config?.templates?.enabled ?? false,
+      detailsRedesignEnabled: config?.casesRedesign?.details ?? false,
+      // Single source of truth for the `casesRedesign.{list,details,settings}` flags so
+      // routing and layout decisions don't each re-derive this object from the raw config.
+      casesRedesign: {
+        list: config?.casesRedesign?.list ?? false,
+        details: config?.casesRedesign?.details ?? false,
+        settings: config?.casesRedesign?.settings ?? false,
+      },
+    }),
+    [
+      config?.attachments?.enabled,
+      config?.chat?.enabled,
+      config?.templates?.enabled,
+      config?.casesRedesign?.list,
+      config?.casesRedesign?.details,
+      config?.casesRedesign?.settings,
+    ]
+  );
+};
 
 interface UserRealm {
   name: string;

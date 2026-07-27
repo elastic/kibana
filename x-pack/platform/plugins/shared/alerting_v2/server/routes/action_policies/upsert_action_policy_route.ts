@@ -12,13 +12,13 @@ import { z } from '@kbn/zod/v4';
 import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
+  errorResponseSchema,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { buildRouteValidationWithZod } from '../route_validation';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 
 const actionPolicyIdParamsSchema = z.object({
@@ -31,7 +31,10 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
+      requiredPrivileges: [
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.rules.read,
+      ],
     },
   };
   static routeOptions = {
@@ -40,10 +43,10 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',
   } as const;
 
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createActionPolicyDataSchema),
-      params: buildRouteValidationWithZod(actionPolicyIdParamsSchema),
+      body: createActionPolicyDataSchema,
+      params: actionPolicyIdParamsSchema,
     },
     response: {
       200: {
@@ -55,7 +58,17 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
         description: 'Returns the newly created action policy.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid request parameters or body.',
+      },
+      404: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the action policy with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description:
+          'Indicates the action policy was created or updated concurrently by another caller.',
       },
     },
   };

@@ -1,0 +1,201 @@
+version: '1'
+name: 'Significant Events Discovery'
+description: 'Correlates unhandled detections into discoveries using a discovery agent and propagates rule-level resolutions.'
+enabled: true
+settings:
+  timeout: '20m'
+  concurrency:
+    key: significant-events-discovery
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - streams
+  - significant-events
+  - discovery
+triggers:
+  - type: manual
+    inputs:
+      - name: detectionLookback
+        type: string
+        default: 'now-24h'
+        required: false
+        description: 'Lookback window for unprocessed detections; older detections are considered stale and excluded from the batch.'
+      - name: detectionBatchMax
+        type: number
+        default: 10
+        required: false
+        description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
+outputs:
+  - name: processedCount
+    type: number
+  - name: hasWork
+    type: boolean
+consts:
+  DETECTIONS_INDEX: '.significant_events-detections'
+
+steps:
+  # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
+  - name: set_initial_vars
+    type: data.set
+    with:
+      spaceId: '{{ workflow.spaceId }}'
+
+  # Unbounded processed-marker semijoin by detection_id, then reduce to the latest
+  # unprocessed detection per rule (_id tie-break). Score by severity + age.
+  - name: get_detections
+    type: elasticsearch.esql.query
+    with:
+      query: |-
+        FROM .significant_events-detections METADATA _id, _source
+        | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+        | WHERE change_point_type IS NOT NULL AND processed_count == 0
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY rule_uuid
+        | WHERE @timestamp == latest_timestamp
+        | INLINE STATS latest_id = MAX(_id) BY rule_uuid
+        | WHERE _id == latest_id
+        | EVAL severity_score = COALESCE(severity_score, 0)
+        | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
+        | EVAL score = severity_score + staleness_minutes
+        | SORT score DESC, @timestamp ASC, _id ASC
+        | LIMIT ?1
+        | KEEP rule_uuid, _source, score
+      params:
+        - '${{ inputs.detectionBatchMax }}'
+      filter:
+        bool:
+          filter:
+            - term:
+                kibana.space_ids: '{{ variables.spaceId }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ inputs.detectionLookback }}'
+    on-failure:
+      continue: true
+
+  # Size must be computed separately — comparison operators cannot follow a filter chain.
+  - name: compute_batch_size
+    type: data.set
+    with:
+      processedCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
+
+  - name: compute_has_work
+    type: data.set
+    with:
+      hasWork: '${{ steps.compute_batch_size.output.processedCount > 0 }}'
+
+  - name: maybe_exit_no_work
+    type: if
+    condition: '${{ steps.compute_has_work.output.hasWork == false }}'
+    steps:
+      - name: output_no_detections
+        type: workflow.output
+        with:
+          processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
+          hasWork: false
+
+  # -----------------------------------------------------------------------
+  # Correlate detections into discoveries.
+  # -----------------------------------------------------------------------
+  - name: run_discovery_agent
+    type: ai.agent
+    agent-id: "significant_events.discovery"
+    # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
+    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
+    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    connector-id-by-feature: 'significant_events_discovery'
+    plugin-id: 'significant_events_discovery'
+    aggregate-by: 'significant_events'
+    create-conversation: true
+    public-conversation: true
+    with:
+      message: |
+        ## Detection batch
+
+        Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_detections.output.values | json }}
+      schema:
+        type: object
+        properties:
+          written_rule_uuids:
+            type: array
+            items:
+              type: string
+            description: >-
+              rule_uuid of every entry across signals[] whose final discovery_write
+              result was either written: true or skipped with
+              reason: duplicate_within_window. Failed or unattempted writes must not
+              be included. Used both
+              as a hallucination guardrail (schema validation forces the agent to
+              report real activity) and as the per-rule filter for which detections
+              get stamped as processed. Full discovery data is written via the
+              discovery_write tool — this is a compact summary only.
+        required: [written_rule_uuids]
+    on-failure:
+      continue: false
+
+  - name: compute_written_rule_uuids
+    # Normalise the agent's self-reported summary into a plain array for the stamping gate below.
+    type: data.set
+    with:
+      written_rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids | default: [] | uniq }}'
+
+  # Size must be computed separately — comparison operators cannot follow a filter chain.
+  - name: count_written_rules
+    type: data.set
+    with:
+      writtenCount: '${{ variables.written_rule_uuids | size | default: 0 }}'
+
+  # Mark processed detections for every written rule (one query, not N).
+  # Gate with type: if — step-level `if` is stripped on elasticsearch.* schemas.
+  - name: maybe_stamp_processed
+    type: if
+    condition: '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
+    steps:
+      - name: get_written_rules_backlog
+        type: elasticsearch.esql.query
+        with:
+          query: |-
+            FROM .significant_events-detections
+            | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+            | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | KEEP detection_id
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: '{{ variables.spaceId }}'
+                - terms:
+                    rule_uuid: '${{ variables.written_rule_uuids }}'
+                - range:
+                    '@timestamp':
+                      gte: '{{ inputs.detectionLookback }}'
+        on-failure:
+          continue: false
+
+      - name: foreach_stamp_processed
+        type: foreach
+        foreach: '${{ steps.get_written_rules_backlog.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: write_processed_marker
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+              body:
+                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+                kibana:
+                  space_ids:
+                    - '{{ variables.spaceId }}'
+                detection_id: '{{ foreach.item[0] }}'
+                processed_by: '{{ execution.id }}'
+            on-failure:
+              continue: true
+
+  - name: output_result
+    type: workflow.output
+    with:
+      processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
+      hasWork: true

@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
+import type { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 
@@ -132,6 +134,21 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the drag operation is complete.
      */
     dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
+  };
+
+  /**
+   * Factory accessors for EUI Component Objects from `@elastic/eui-test-helpers`,
+   * pre-bound to this page. By default a Component Object is scoped to the whole
+   * page; pass an optional `scope` (a `Locator` or another Component Object) to
+   * target an instance inside a specific subtree — e.g. one combo box in a flyout
+   * when several share the same `data-test-subj`.
+   *
+   * @example
+   * await page.components.comboBox('dataViewSelector').setSelectedOptions(['logs-*']);
+   * await page.components.comboBox('roleComboBox', flyout).clear();
+   */
+  components: {
+    comboBox: (testSubj: string, scope?: ObjectScope) => KbnComboBoxObject;
   };
 };
 

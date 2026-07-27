@@ -12,12 +12,12 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, annotationEditor } = getPageObjects(['visualize', 'annotationEditor']);
-  const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
   const log = getService('log');
+  const contentList = getService('contentList');
 
   describe('annotation listing page', function () {
     before(async function () {
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.gotoVisualizationLandingPage();
       await visualize.selectAnnotationsTab();
-      await listingTable.waitUntilTableIsLoaded();
+      await contentList.waitForReady();
     });
 
     after(async function () {
@@ -44,89 +44,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    describe('search', function () {
-      afterEach(async function () {
-        await listingTable.clearSearchFilter();
-      });
-
-      describe('by text', () => {
-        it('matches on the first word', async function () {
-          await retry.try(async () => {
-            await listingTable.searchForItemWithName('search');
-            await listingTable.expectItemsCount('eventAnnotation', 1);
-          });
-        });
-
-        it('matches the second word', async function () {
-          await listingTable.searchForItemWithName('for');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
-        });
-
-        it('matches the second word prefix', async function () {
-          await listingTable.searchForItemWithName('fo');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
-        });
-
-        it('does not match mid word', async function () {
-          await listingTable.searchForItemWithName('earc');
-          // custom timeout so this test moves faster
-          await listingTable.expectItemsCount('eventAnnotation', 0, 1000);
-        });
-
-        it('is case insensitive', async function () {
-          await listingTable.searchForItemWithName('SEARCH');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
-        });
-
-        it('is using AND operator', async function () {
-          await listingTable.searchForItemWithName('search banana');
-          // custom timeout so this test moves faster
-          await listingTable.expectItemsCount('eventAnnotation', 0, 1000);
-        });
-
-        it('matches on description', async function () {
-          await listingTable.searchForItemWithName('i have a description');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
-        });
-      });
-
-      describe('by tag', () => {
-        it('filters by tag', async () => {
-          await listingTable.selectFilterTags('tag');
-          await listingTable.expectItemsCount('eventAnnotation', 7);
-        });
-      });
-    });
-
-    describe('delete', function () {
-      it('deletes some groups', async function () {
-        await listingTable.deleteItem('to delete 1');
-        await listingTable.deleteItem('to delete 2');
-        await listingTable.searchForItemWithName('to delete');
-        await listingTable.expectItemsCount('eventAnnotation', 0, 1000);
-        await listingTable.clearSearchFilter();
-      });
-    });
+    // Listing-level search / tag-filter / bulk-delete coverage now lives
+    // in `src/platform/plugins/private/event_annotation_listing/test/scout/`
+    // (parity with the new `@kbn/content-list` toolbar/selection wiring).
+    // The cases below remain in FTR because they exercise the Lens annotation
+    // editor surface, not the listing itself.
 
     describe('edit', function () {
       it('edits group metadata', async function () {
-        await listingTable.clickItemLink('eventAnnotation', 'group 3');
+        await contentList.clickItemByName('group 3');
         await annotationEditor.editGroupMetadata({
           title: 'edited title',
           description: 'edited description',
         });
         await annotationEditor.saveGroup();
 
-        await listingTable.searchForItemWithName('edited title');
-        await listingTable.expectItemsCount('eventAnnotation', 1);
+        await contentList.search('edited title');
+        await contentList.expectItemCount(1);
 
-        await listingTable.searchForItemWithName('edited description');
-        await listingTable.expectItemsCount('eventAnnotation', 1);
+        await contentList.search('edited description');
+        await contentList.expectItemCount(1);
       });
 
       describe('individual annotations', () => {
         it('edits an existing annotation', async function () {
-          await listingTable.clickItemLink('eventAnnotation', 'edited title');
+          await contentList.clickItemByName('edited title');
           expect(await annotationEditor.getAnnotationCount()).to.be(1);
 
           await annotationEditor.openAnnotation();
@@ -162,11 +104,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('data view switching', () => {
         before(async () => {
-          await listingTable.clearSearchFilter();
+          // `clearSearch` already awaits `waitForReady` internally.
+          await contentList.clearSearch();
         });
 
         it('recovers from missing data view', async () => {
-          await listingTable.clickItemLink('eventAnnotation', 'missing data view');
+          await contentList.clickItemByName('missing data view');
 
           await retry.try(async () => {
             expect(await annotationEditor.showingMissingDataViewPrompt()).to.be(true);
@@ -194,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(canvasExists).to.be(!yes);
           };
 
-          await listingTable.clickItemLink('eventAnnotation', 'Group with additional fields');
+          await contentList.clickItemByName('Group with additional fields');
 
           await assertShowingMissingFieldError(false);
 

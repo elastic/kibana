@@ -14,7 +14,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { dataViewAdHoc } from '../__mocks__/data_view_complex';
 import { mockControlState } from '../__mocks__/esql_controls';
@@ -28,6 +28,7 @@ import * as getDiscoverLocatorParamsModule from './utils/get_discover_locator_pa
 const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) => ({
   uuid,
   type: ESQL_CONTROL,
+  anyStateChange$: of(),
   serializeState: () => state,
   applySerializedState: () => undefined,
 });

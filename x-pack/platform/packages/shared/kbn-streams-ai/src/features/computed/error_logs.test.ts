@@ -12,6 +12,7 @@ import { errorLogsGenerator } from './error_logs';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSampleDocumentsEsql: jest.fn(),
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS: 30_000,
 }));
 
 const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
@@ -25,7 +26,7 @@ describe('errorLogsGenerator', () => {
     jest.clearAllMocks();
   });
 
-  it('uses an ES|QL KQL filter that matches log level and error keywords', async () => {
+  it('uses an ES|QL MATCH_PHRASE filter with unmappedFields=NULLIFY', async () => {
     getSampleDocumentsEsqlMock.mockResolvedValueOnce({
       hits: [
         {
@@ -48,14 +49,21 @@ describe('errorLogsGenerator', () => {
       logger,
     });
 
-    expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith({
-      esClient,
-      index: stream.name,
-      start: 100,
-      end: 200,
-      sampleSize: 5,
-      kql: 'log.level:"error" OR message:"error" OR message:"exception" OR body.text:"error" OR body.text:"exception"',
-    });
+    expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient,
+        index: stream.name,
+        start: 100,
+        end: 200,
+        sampleSize: 5,
+        unmappedFields: 'NULLIFY',
+        // Composer-built expression; deep-equality matchers fail here so just
+        // assert it is present. The query-string assertion lives in
+        // get_sample_documents.test.ts; this test guarantees the generator
+        // wires the whereCondition through.
+        whereCondition: expect.anything(),
+      })
+    );
     expect(result).toEqual({
       samples: [{ 'log.level': 'error', message: 'exception thrown' }],
     });

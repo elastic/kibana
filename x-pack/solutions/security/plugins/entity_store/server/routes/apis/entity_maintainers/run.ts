@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -37,8 +37,8 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(maintainerIdParamsSchema),
-            query: buildRouteValidationWithZod(runMaintainerQuerySchema),
+            params: buildStrictRouteValidationWithZod(maintainerIdParamsSchema),
+            query: buildStrictRouteValidationWithZod(runMaintainerQuerySchema),
           },
         },
       },

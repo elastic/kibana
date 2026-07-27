@@ -10,6 +10,41 @@
 import type { LayoutConfigType } from '../layout';
 
 /**
+ * TLS / mTLS options for the OTLP log appender.
+ *
+ * Values may be **filesystem paths** to PEM files (recommended for production) or **inline PEM strings**
+ * (strings containing `-----BEGIN`).
+ *
+ * Maps to Node.js TLS options for `http` / `proto` (via `https.Agent`) and to `grpc.credentials.createSsl`
+ * for `grpc`.
+ *
+ * @public
+ */
+export interface OtelAppenderTlsConfig {
+  /**
+   * PEM-encoded certificate authority bundle(s) used to verify the OTLP endpoint.
+   * Use a single string, or an array when multiple CA files are required.
+   */
+  certificateAuthorities?: string | string[];
+  /** Client certificate for mutual TLS (requires {@link OtelAppenderTlsConfig.key}). */
+  certificate?: string;
+  /** Private key for the client certificate (requires {@link OtelAppenderTlsConfig.certificate}). */
+  key?: string;
+  /** Passphrase for {@link OtelAppenderTlsConfig.key} when the key is encrypted. */
+  keyPassphrase?: string;
+  /**
+   * How strictly to verify the server certificate (aligned with Elasticsearch client semantics).
+   * Defaults to `full`.
+   */
+  verificationMode: 'none' | 'certificate' | 'full';
+  /**
+   * Whether to allow partial trust chain verification.
+   * Defaults to `true`.
+   */
+  allowPartialTrustChain?: boolean;
+}
+
+/**
  * Configuration of an OpenTelemetry (OTLP) log appender.
  * Ships log records to an OTLP-compatible endpoint over HTTP.
  *
@@ -31,7 +66,7 @@ export interface OtelAppenderConfig {
   type: 'otel';
   /**
    * The protocol to use for the OTLP exporter.
-   * Defaults to 'grpc'.
+   * Defaults to `proto`.
    */
   protocol: 'http' | 'proto' | 'grpc';
   /** OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs */
@@ -67,4 +102,42 @@ export interface OtelAppenderConfig {
    * `"[service.name]": my-kibana`
    */
   attributes?: Record<string, string>;
+  /**
+   * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
+   */
+  ssl?: OtelAppenderTlsConfig;
+  /**
+   * Optional map of source attribute paths to target attribute path(s) applied after meta fields are
+   * flattened into OTel attributes. Use this to rename or fan-out fields without changing the
+   * upstream `AuditEvent` / `LogRecord` shape.
+   *
+   * - Single target: `{ 'kibana.space_id': 'kibana.space.id' }` — rename in place.
+   * - Multiple targets: `{ 'client.ip': ['source.address', 'source.ip'] }` — copy value to all
+   *   listed keys and remove the original.
+   *
+   * Keys absent from the log record are silently skipped. With JSON layout, meta-sourced keys
+   * (e.g. `kibana.*`, `client.ip`) are part of the structured body and not repeated as individual
+   * attributes, so renames targeting those fields have no effect under that layout.
+   */
+  fieldRenames?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys to remove from the OTLP output. Applied to both log record
+   * attributes and resource attributes. Keys absent from the output are silently skipped.
+   * Injected programmatically (e.g. by the audit service to satisfy Serverless field exclusions).
+   */
+  fieldDrops?: string[];
+  /**
+   * Optional default attribute values written only when the key is not already present in the log
+   * record attributes. Applied after `fieldRenames` and `fieldDrops`. Use to fill in fields that are
+   * absent from some event types (e.g. `event.type` on authentication events).
+   * Values may be a string or an array of strings.
+   */
+  fieldDefaults?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys whose string values should be uppercased at emit time.
+   * Applied after all other field transforms. Use for fields where OTel semantic conventions
+   * require uppercase but the upstream event carries lowercase (e.g. `http.request.method`).
+   * Non-string values and absent keys are silently skipped.
+   */
+  fieldUppercase?: string[];
 }

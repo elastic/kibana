@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity, Observation, ObservationModule } from '../../types';
+import { OBSERVATION_MODULE_WEIGHTS } from '../weights';
 import { MODULE_ID, MODULE_NAME, MODULE_PRIORITY } from './config';
 import { fetchAlertSummariesForEntities } from './data_access';
 import { buildObservationsForEntity } from './observations';
@@ -22,7 +23,12 @@ export const createBehavioralAnalysisModule = ({
   logger,
   alertsIndexPattern,
 }: BehavioralAnalysisModuleDeps): ObservationModule => ({
-  config: { id: MODULE_ID, name: MODULE_NAME, priority: MODULE_PRIORITY },
+  config: {
+    id: MODULE_ID,
+    name: MODULE_NAME,
+    priority: MODULE_PRIORITY,
+    weight: OBSERVATION_MODULE_WEIGHTS.behavioral_analysis,
+  },
 
   isEnabled: () => Boolean(alertsIndexPattern),
 
@@ -36,7 +42,7 @@ export const createBehavioralAnalysisModule = ({
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      const summary = alertDataByEntity.get(`${entity.type}:${entity.name}`);
+      const summary = alertDataByEntity.get(entity.id);
       if (summary && summary.totalAlerts > 0) {
         observations.push(...buildObservationsForEntity(entity, summary));
       }

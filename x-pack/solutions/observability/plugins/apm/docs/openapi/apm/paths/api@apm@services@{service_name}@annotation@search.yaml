@@ -41,21 +41,33 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/annotation_search_response.yaml'
+          examples:
+            getAnnotationResponse1:
+              $ref: '../components/examples/annotation_search_get_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
     '500':
       description: Internal Server Error response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/500_response.yaml'
+          examples:
+            internalServerErrorResponse:
+              $ref: '../components/examples/error_500_response.yaml'

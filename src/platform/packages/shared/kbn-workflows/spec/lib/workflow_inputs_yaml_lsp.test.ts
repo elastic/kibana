@@ -15,6 +15,10 @@ import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_co
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
 import type { ConnectorContractUnion } from '../..';
+import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
+import type { Trigger } from '../schema/triggers';
+import type { ManualTrigger } from '../schema/triggers/manual_trigger_schema';
+import { isManualTrigger } from '../schema/triggers/manual_trigger_schema';
 
 describe('workflow inputs — YAML language server vs generated JSON Schema', () => {
   it('should produce no schema diagnostics (Monaco / yaml-language-server path)', async () => {
@@ -78,10 +82,14 @@ describe('workflow inputs — YAML language server vs generated JSON Schema', ()
       workflowYamlContent
     );
     expect(diagnostics).toEqual([]);
-
-    expect(workflowData.inputs).toBeDefined();
-    expect(workflowData.inputs.properties).toBeDefined();
-    expect(Array.isArray(workflowData.inputs.properties)).toBe(false);
-    expect(typeof workflowData.inputs.properties).toBe('object');
+    const manualTrigger = workflowData.triggers.find((trigger: Trigger) =>
+      isManualTrigger(trigger)
+    ) as ManualTrigger;
+    expect(manualTrigger).toBeDefined();
+    expect(manualTrigger.inputs).toBeDefined();
+    const inputs = manualTrigger.inputs as JsonModelSchemaType;
+    expect(inputs.properties).toBeDefined();
+    expect(Array.isArray(inputs.properties)).toBe(false);
+    expect(typeof inputs.properties).toBe('object');
   });
 });

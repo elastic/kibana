@@ -9,25 +9,17 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { MarkerType } from '@xyflow/react';
 import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { PopoverContent } from './popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 
-const routePath = '/service-map?rangeFrom=now-15m&rangeTo=now';
 const noop = () => {};
-
-const decorators: Meta['decorators'] = [
-  (Story) => (
-    <MockApmPluginStorybook routePath={routePath}>
-      <Story />
-    </MockApmPluginStorybook>
-  ),
-];
 
 const meta: Meta<typeof PopoverContent> = {
   title: 'app/ServiceMap/Popover',
   component: PopoverContent,
-  decorators,
+  parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
+  },
 };
 
 export default meta;

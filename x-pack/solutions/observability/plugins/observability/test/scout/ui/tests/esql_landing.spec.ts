@@ -24,7 +24,8 @@ import { test } from '../fixtures';
 import { generateLogsData, TEST_START_DATE, TEST_END_DATE } from '../fixtures/generators';
 import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/268022
+test.describe.skip(
   'Observability Landing Page (discover.isEsqlDefault enabled)',
   { tag: [...tags.stateful.classic] },
   () => {

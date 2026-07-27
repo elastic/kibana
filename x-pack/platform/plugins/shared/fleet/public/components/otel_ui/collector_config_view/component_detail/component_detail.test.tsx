@@ -301,4 +301,58 @@ describe('OTelComponentDetail', () => {
 
     expect(result.queryByTestId('otelComponentDetailTab-metrics')).not.toBeInTheDocument();
   });
+
+  it('renders a documentation link for a known component', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
+    const docLink = result.getByTestId('otelComponentDocLink');
+    expect(docLink).toBeInTheDocument();
+    expect(docLink.getAttribute('href')).toBe(
+      'https://opentelemetry.io/docs/collector/components/receiver/'
+    );
+  });
+
+  it('does not render a documentation link for pipeline type', () => {
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="logs/default"
+        componentType="pipeline"
+        config={config}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.queryByTestId('otelComponentDocLink')).not.toBeInTheDocument();
+  });
+
+  it('renders a documentation link for any component of a supported type', () => {
+    const unknownConfig: OTelCollectorConfig = {
+      receivers: { unknown_nonexistent: { endpoint: 'localhost:1234' } },
+      service: { pipelines: {} },
+    };
+
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="unknown_nonexistent"
+        componentType="receiver"
+        config={unknownConfig}
+        onClose={jest.fn()}
+      />
+    );
+
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
+    const docLink = result.getByTestId('otelComponentDocLink');
+    expect(docLink).toBeInTheDocument();
+    expect(docLink.getAttribute('href')).toBe(
+      'https://opentelemetry.io/docs/collector/components/receiver/'
+    );
+  });
 });

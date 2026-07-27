@@ -6,7 +6,7 @@
  */
 
 import React, { type FC } from 'react';
-import { EuiHealth, EuiText } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import type { Tag } from '../../../common/types';
 import { testSubjFriendly } from '../../utils';
 
@@ -18,9 +18,7 @@ export const TagSearchBarOption: FC<TagSearchBarOptionProps> = ({ tag }) => {
   const { name, color } = tag;
   return (
     <EuiHealth color={color} data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}>
-      <span>
-        <EuiText>{name}</EuiText>
-      </span>
+      <span>{name}</span>
     </EuiHealth>
   );
 };

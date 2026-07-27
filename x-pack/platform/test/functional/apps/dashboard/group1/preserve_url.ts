@@ -18,6 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
 
+  /**
+   * Purpose: Verify dashboard app opens to last opened dashboard in space
+   *
+   * Migration: Migrate to router RTL test
+   */
   describe('preserve url', function () {
     const anotherSpace = 'another-space';
 

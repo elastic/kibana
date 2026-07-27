@@ -20,7 +20,6 @@ import {
   GET_RULE_HEALTH_URL,
   GET_SPACE_HEALTH_URL,
   readRuleExecutionResultsUrl,
-  SETUP_HEALTH_URL,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 
 import type {
@@ -29,13 +28,6 @@ import type {
 } from './api_client_interface';
 
 export const api: IRuleMonitoringApiClient = {
-  setupDetectionEngineHealthApi: async (): Promise<void> => {
-    await http().fetch(SETUP_HEALTH_URL, {
-      version: '1',
-      method: 'POST',
-    });
-  },
-
   readRuleExecutionResults: (
     args: ReadRuleExecutionResultsArgs
   ): Promise<ReadRuleExecutionResultsResponse> => {

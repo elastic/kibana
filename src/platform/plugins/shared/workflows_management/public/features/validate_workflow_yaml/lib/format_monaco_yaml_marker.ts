@@ -34,6 +34,13 @@ export function formatMonacoYamlMarker(
     newMarker.severity = monaco.MarkerSeverity.Error;
   }
 
+  if (marker.message === 'Property inputs is not allowed.' && marker.startColumn === 1) {
+    return {
+      ...newMarker,
+      message: 'The "inputs" must be defined under a manual trigger, not at the root level.',
+    };
+  }
+
   // JSON Schema `pattern` errors lose the Zod error message during conversion.
   // Match the pattern string from the schema source of truth and replace with
   // the original human-readable message.

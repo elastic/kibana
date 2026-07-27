@@ -10,14 +10,18 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
+  EuiHorizontalRule,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
 
+import { useKibana } from '../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
+import type { AttackDiscoverySettingsTab } from '../../../common/lib/telemetry';
 import { Footer } from './footer';
 import * as i18n from './translations';
 import { useTabsView } from './hooks/use_tabs_view';
@@ -64,6 +68,7 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
+  const { telemetry } = useKibana().services;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
   });
@@ -108,6 +113,15 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
     settings,
   ]);
 
+  useEffect(() => {
+    const tabMap: Record<string, AttackDiscoverySettingsTab> = {
+      [SCHEDULE_TAB_ID]: 'schedule',
+    };
+    const tab: AttackDiscoverySettingsTab = tabMap[defaultSelectedTabId ?? ''] ?? 'settings';
+
+    telemetry.reportEvent(AttackDiscoveryEventTypes.SettingsFlyoutOpened, { tab });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { tabsContainer, actionButtons: tabsActionButtons } = useTabsView({
     connectorId,
     defaultSelectedTabId,
@@ -137,10 +151,11 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
       size="m"
       type="overlay"
     >
-      <EuiFlyoutHeader hasBorder={false}>
+      <EuiFlyoutHeader>
         <EuiTitle data-test-subj="title" size="m">
           <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
+        <EuiHorizontalRule margin="m" />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>{tabsContainer}</EuiFlyoutBody>

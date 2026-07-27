@@ -6,6 +6,7 @@
  */
 
 import { omitBy } from 'lodash';
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import type {
@@ -31,7 +32,10 @@ import {
   LogLevelSetting,
   logLevelToNumber,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
+import {
+  SECURITY_EXECUTION_OUTCOME,
+  SECURITY_RULE_STATUS,
+} from '../../../../rule_types/utils/apm_field_names';
 import type {
   ExecutionResult,
   IRuleExecutionLogForExecutors,
@@ -54,7 +58,8 @@ export function createRuleExecutionLogClientForExecutors(
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
-  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId, cpsData } =
+    context;
 
   // Buffers the execution related data
   const executionResultBuffer: ExecutionResultBuffer = {
@@ -166,6 +171,17 @@ export function createRuleExecutionLogClientForExecutors(
             userError: executionResult.userError,
           };
 
+          agent.setCustomContext({
+            [SECURITY_EXECUTION_OUTCOME]: {
+              status: normalizedExecutionResult.status,
+              message: normalizedExecutionResult.message,
+              user_error: normalizedExecutionResult.userError,
+              errors: executionResultBuffer.errors,
+              warnings: executionResultBuffer.warnings,
+              metrics: executionResultBuffer.metrics,
+            },
+          });
+
           writeStatusChangeToEventLog(normalizedExecutionResult);
           writeMetricsToEventLog(executionResultBuffer.metrics);
 
@@ -256,6 +272,7 @@ export function createRuleExecutionLogClientForExecutors(
         ruleType,
         spaceId,
         executionId,
+        cpsData,
       },
     });
   };
@@ -282,6 +299,7 @@ export function createRuleExecutionLogClientForExecutors(
         ruleType,
         spaceId,
         executionId,
+        cpsData,
       },
     });
   };
@@ -305,6 +323,7 @@ export function createRuleExecutionLogClientForExecutors(
         ruleType,
         spaceId,
         executionId,
+        cpsData,
       },
       message,
       logLevel,

@@ -9,6 +9,7 @@ import type { CreateInventoryViewAttributes } from './apis/inventory_views/types
 
 export const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
 export const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_HOSTS_DATA_MIDPOINT = '2023-03-28T18:20:30.000Z';
 export const DATE_WITH_HOSTS_DATA = '03/28/2023 6:20:59 PM';
 export const DATE_WITH_HOSTS_DATA_TIMESTAMP = 1680027659000;
 
@@ -128,6 +129,8 @@ export const EXTENDED_TIMEOUT = 45000; // 45 seconds
  * KPI-heavy suites opt into.
  */
 export const KPI_RENDER_TIMEOUT = 90000;
+
+export const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
 
 export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 export const KUBERNETES_CARD_DISMISSED_STORAGE_KEY = 'infra.inventory.k8sCardDismissed';

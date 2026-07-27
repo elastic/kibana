@@ -211,6 +211,22 @@ describe('convertUIStepsToDSL', () => {
     expect(dsl.steps).toHaveLength(0);
   });
 
+  it('strips undefined fields from action steps', () => {
+    const uiSteps: StreamlangStepWithUIAttributes[] = [
+      {
+        customIdentifier: '1',
+        action: 'set',
+        to: 'foo',
+        value: 'bar',
+        description: undefined,
+        parentId: null,
+      },
+    ];
+    const dsl = convertUIStepsToDSL(uiSteps);
+    expect(dsl.steps[0]).not.toHaveProperty('description');
+    expect(dsl.steps[0]).toMatchObject({ action: 'set', to: 'foo', value: 'bar' });
+  });
+
   it('nests else-branch steps under condition.else using branch attribute', () => {
     const uiSteps: StreamlangStepWithUIAttributes[] = [
       {

@@ -13,57 +13,56 @@ enabled: false
 description: This is a workflow to test case kibana E2E
 triggers:
   - type: manual
+    inputs:
+      type: object
+      title: Alert
+      description: Alert metadata with severity level and comments
 
-inputs:
-  type: object
-  title: Alert
-  description: Alert metadata with severity level and comments
+      properties:
+        title:
+          type: string
+          description: Short human-readable title
 
-  properties:
-    title:
-      type: string
-      description: Short human-readable title
+        description:
+          type: string
+          description: Detailed description of the alert
 
-    description:
-      type: string
-      description: Detailed description of the alert
+        severity:
+          type: string
+          description: Severity level of the alert
+          enum:
+            - low
+            - medium
+            - high
+            - critical
 
-    severity:
-      type: string
-      description: Severity level of the alert
-      enum:
-        - low
-        - medium
-        - high
-        - critical
+        comments:
+          type: array
+          description: List of comments associated with the alert
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - user
+                description: Comment category
 
-    comments:
-      type: array
-      description: List of comments associated with the alert
-      items:
-        type: object
-        properties:
-          type:
-            type: string
-            enum:
-              - user
-            description: Comment category
+              comment:
+                type: string
+                description: Comment text
 
-          comment:
-            type: string
-            description: Comment text
+            required:
+              - type
+              - comment
+            additionalProperties: false
 
-        required:
-          - type
-          - comment
-        additionalProperties: false
+      required:
+        - title
+        - description
+        - severity
 
-  required:
-    - title
-    - description
-    - severity
-
-  additionalProperties: false
+      additionalProperties: false
 
 steps:
   - name: create_case

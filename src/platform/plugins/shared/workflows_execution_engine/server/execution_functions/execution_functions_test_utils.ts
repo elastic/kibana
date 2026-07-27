@@ -9,6 +9,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
@@ -21,7 +22,9 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   logging: { console: true },
   http: { allowedHosts: ['*'] },
   maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
+  eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
   collectQueueMetrics: false,
+  hitlExternalResume: { enabled: true },
 });
 
 export const createMockLogger = (): Logger =>
@@ -37,11 +40,18 @@ export const createFakeKibanaRequest = (): KibanaRequest => ({ headers: {} } as 
 export interface MockWorkflowRuntime {
   start: jest.Mock;
   resume: jest.Mock;
+  getWorkflowExecutionStatus: jest.Mock;
+  getWorkflowExecution: jest.Mock;
 }
 
 export const createMockWorkflowRuntime = (): MockWorkflowRuntime => ({
   start: jest.fn().mockResolvedValue(undefined),
   resume: jest.fn().mockResolvedValue(undefined),
+  getWorkflowExecutionStatus: jest.fn().mockReturnValue(ExecutionStatus.COMPLETED),
+  getWorkflowExecution: jest.fn().mockReturnValue({
+    isTestRun: false,
+    status: ExecutionStatus.COMPLETED,
+  }),
 });
 
 export interface MockWorkflowExecutionRepository {
@@ -50,7 +60,7 @@ export interface MockWorkflowExecutionRepository {
 }
 
 export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRepository => ({
-  getWorkflowExecutionById: jest.fn(),
+  getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
 
@@ -70,7 +80,10 @@ export const buildMockSetupDependenciesReturn = (options: {
   ({
     workflowRuntime: options.workflowRuntime,
     stepExecutionRuntimeFactory: {},
-    workflowExecutionState: {},
+    workflowExecutionState: {
+      getWorkflowExecution: jest.fn().mockReturnValue({ status: ExecutionStatus.WAITING }),
+      getLastFailedStepContext: jest.fn(),
+    },
     workflowLogger: {},
     nodesFactory: {},
     workflowExecutionGraph: {},
@@ -86,7 +99,7 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionRepository: MockWorkflowExecutionRepository;
   dependencies: ContextDependencies;
   fakeRequest: KibanaRequest;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
 }) => ({
   workflowRuntime: options.workflowRuntime,
   stepExecutionRuntimeFactory: {},
@@ -98,6 +111,6 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   esClient: {},
   fakeRequest: options.fakeRequest,
   coreStart: options.dependencies.coreStart,
-  taskAbortController: options.taskAbortController,
+  signal: options.signal,
   workflowTaskManager: {},
 });

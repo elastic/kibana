@@ -8,7 +8,7 @@
  */
 
 // Target type for filtering Playwright configs by deployment target
-import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
+import type { ScoutTargetArch, ScoutTargetDomain, ScoutTestChannel } from '@kbn/scout-info';
 
 export type TargetType = 'all' | 'local' | 'local-stateful-only' | 'mki' | 'ech';
 
@@ -20,7 +20,11 @@ export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
-  /** Set when using --affected-modules: true if this module's @kbn/ ID is in the affected set */
+  /**
+   * Set when --code-changes is provided: true if this module's @kbn/ ID is in
+   * the affected set (or if it owns an affected config in the tests-only fast
+   * path). Used to drive the "affected " prefix on Buildkite step labels.
+   */
   isAffected?: boolean;
   configs: {
     path: string;
@@ -28,6 +32,7 @@ export interface ModuleDiscoveryInfo {
     tags: string[];
     serverRunFlags: string[];
     usesParallelWorkers: boolean;
+    testChannels?: ScoutTestChannel[];
   }[];
 }
 

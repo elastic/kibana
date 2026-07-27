@@ -9,7 +9,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { getClusterHealthRoute } from './detection_engine_health/get_cluster_health/get_cluster_health_route';
 import { getRuleHealthRoute } from './detection_engine_health/get_rule_health/get_rule_health_route';
 import { getSpaceHealthRoute } from './detection_engine_health/get_space_health/get_space_health_route';
-import { setupHealthRoute } from './detection_engine_health/setup/setup_health_route';
 import { readRuleExecutionResultsRoute } from './rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route';
 
 export const registerRuleMonitoringRoutes = (router: SecuritySolutionPluginRouter) => {
@@ -17,8 +16,6 @@ export const registerRuleMonitoringRoutes = (router: SecuritySolutionPluginRoute
   getClusterHealthRoute(router);
   getSpaceHealthRoute(router);
   getRuleHealthRoute(router);
-  setupHealthRoute(router);
-
   // Rule execution logs API
   readRuleExecutionResultsRoute(router);
 };

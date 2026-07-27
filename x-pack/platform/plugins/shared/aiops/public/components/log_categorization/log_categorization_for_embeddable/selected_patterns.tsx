@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
@@ -42,6 +43,9 @@ export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openI
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.aiops.logCategorization.selectedPatternsPopoverAriaLabel', {
+        defaultMessage: 'Selected patterns',
+      })}
       closePopover={() => setShowMenu(false)}
       isOpen={showMenu}
       panelPaddingSize="none"

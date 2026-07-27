@@ -13,17 +13,21 @@ import {
   type ListInboxActionsResponse,
 } from '@kbn/inbox-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { INBOX_API_PRIVILEGE_READ } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { STUB_INBOX_ACTIONS } from './stub_actions';
 
-export const registerListInboxActionsRoute = ({ router, logger }: RouteDependencies) => {
+export const registerListInboxActionsRoute = ({
+  router,
+  logger,
+  registry,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: INBOX_ACTIONS_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [INBOX_API_PRIVILEGE_READ] },
       },
       summary: 'List inbox actions',
     })
@@ -39,21 +43,14 @@ export const registerListInboxActionsRoute = ({ router, logger }: RouteDependenc
       async (_context, request, response) => {
         try {
           const { status, source_app: sourceApp, page, per_page: perPage } = request.query;
+          const spaceId = getSpaceId(request);
 
-          // Deferred: replace with real storage adapter / ES reader once the
-          // HITL action schema stabilizes.
-          const filtered = STUB_INBOX_ACTIONS.filter((action) => {
-            if (status && action.status !== status) return false;
-            if (sourceApp && action.source_app !== sourceApp) return false;
-            return true;
-          });
+          const { actions, total } = await registry.list(
+            { status, sourceApp, page, perPage },
+            { request, spaceId }
+          );
 
-          const start = (page - 1) * perPage;
-          const end = start + perPage;
-          const body: ListInboxActionsResponse = {
-            actions: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          const body: ListInboxActionsResponse = { actions, total };
 
           return response.ok({ body });
         } catch (error) {

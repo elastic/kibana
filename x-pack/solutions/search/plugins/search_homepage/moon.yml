@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/sample-data-ingest'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/search-shared-ui'
+  - '@kbn/shared-components'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'
@@ -50,6 +51,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/cloud'
   - '@kbn/agent-builder-browser'
+  - '@kbn/workflows-ui'
   - '@kbn/scout-search'
 tags:
   - plugin

@@ -6,8 +6,14 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type {
+  InferenceConnector,
+  EisInferenceEndpointMetadata,
+  CspRegion,
+} from '@kbn/inference-common';
 import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
+
+export type { CspRegion };
 
 /** Route path constants (const object so imported paths stay type-narrowed as `string`). */
 export const APIRoutes = {
@@ -18,6 +24,8 @@ export const APIRoutes = {
   PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
   GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  // Single path shared by GET, PUT, and DELETE region policy operations
+  REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
 } as const;
 
 export interface InferenceConnectorsResponse {
@@ -67,25 +75,21 @@ export interface InferenceFeatureResponse {
   recommendedEndpoints: string[];
   isBeta?: boolean;
   isTechPreview?: boolean;
+  ignoreGlobalDefault?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
   };
 }
 
-export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {
-  metadata: {
-    heuristics?: {
-      properties?: string[];
-      status?: string;
-      release_date?: string;
-      end_of_life_date?: string;
-    } & Record<string, unknown>;
-    display?: {
-      name?: string;
-      model_creator?: string;
-    } & Record<string, unknown>;
-  } & Record<string, unknown>;
+export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
+  service: 'elastic';
+  service_settings: { model_id: string };
+  metadata?: EisInferenceEndpointMetadata;
+};
+
+export type InferenceEndpointWithMetadata = EisInferenceEndpoint & {
+  metadata: EisInferenceEndpointMetadata;
 };
 
 export type InferenceEndpointWithDisplayNameMetadata = InferenceEndpointWithMetadata & {
@@ -103,3 +107,30 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
     };
   };
 };
+
+export interface RegionPolicyBody {
+  allowed_regions?: CspRegion[];
+  allowed_geos?: string[];
+  fallback_region?: CspRegion;
+}
+
+export interface RegionPolicyResponse {
+  region_policy: RegionPolicyBody;
+  created_at: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+}
+
+export enum EisModelStatus {
+  Preview = 'preview',
+  GA = 'ga',
+  // metadata status is 'deprecated' OR the end_of_life_date is within the next 30 days
+  Deprecated = 'deprecated',
+  // The following status are purely for the UI and not directly received from EIS metadata
+  // DeprecatedEOL is status: end_of_life_date in the past regardless of status value
+  DeprecatedEOL = 'deprecated_eol',
+  // Unknown is used when we either don't have a status value in the metadata
+  // or we haven't updated our parsing for a new value
+  Unknown = 'unknown',
+}

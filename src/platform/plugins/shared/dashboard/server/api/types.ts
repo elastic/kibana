@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
+import type { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import type {
   getDashboardStateSchema,
   getPanelSchema,
@@ -30,5 +31,6 @@ export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
-export type DashboardPinnedPanelsState = NonNullable<DashboardState['pinned_panels']>;
+export type DashboardPinnedPanelsState = TypeOf<ReturnType<typeof getPinnedPanelsSchema>>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
+export type Operation = 'create' | 'read' | 'update' | 'search';

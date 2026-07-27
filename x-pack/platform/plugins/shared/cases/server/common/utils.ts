@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
@@ -61,12 +61,11 @@ import type {
   CasesFindResponse,
 } from '../../common/types/api';
 import {
-  isLegacyAttachmentRequest,
   isEventAttachmentType,
+  isAlertAttachmentType,
   getIndexFromMetadata,
   toStringArray,
 } from '../../common/utils/attachments';
-import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../common/constants/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -78,14 +77,39 @@ export const defaultSortField = 'created_at';
  */
 export const nullUser: User = { username: null, full_name: null, email: null };
 
+/**
+ * A stored template reference is always version-pinned. The create request may omit `version`
+ * (server-side template expansion resolves it to the latest), so by the time a case is persisted
+ * the version must have been stamped — this converts the request shape to the storage shape and
+ * guards the invariant.
+ */
+const pinStoredTemplate = (
+  template: CasePostRequest['template']
+): CaseTransformedAttributes['template'] => {
+  if (template == null) {
+    return template;
+  }
+
+  if (template.version === undefined) {
+    throw new Error(
+      `Cannot persist case: template ${template.id} has no pinned version. Template expansion must resolve the version before the case is saved.`
+    );
+  }
+
+  return { id: template.id, version: template.version };
+};
+
 export const transformNewCase = ({
   user,
-  newCase,
+  newCase: { template, ...newCase },
 }: {
   user: User;
   newCase: CasePostRequest;
 }): CaseTransformedAttributes => ({
   ...newCase,
+  // Re-added only when present so an absent template stays absent (an explicit
+  // `template: undefined` key changes SO create payloads and snapshots).
+  ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
@@ -178,30 +202,23 @@ export const flattenAttachmentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment:
-    | AlertAttachmentPayload
-    | EventAttachmentPayload
-    | {
-        type: typeof SECURITY_EVENT_ATTACHMENT_TYPE;
-        attachmentId: string | string[];
-        metadata?: unknown;
-      }
+  comment: AttachmentRequestV2
 ): { ids: string[]; indices: string[] } => {
-  if (comment.type === AttachmentType.alert) {
+  if ('alertId' in comment) {
     return {
       ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
       indices: Array.isArray(comment.index) ? comment.index : [comment.index],
     };
   }
 
-  if (comment.type === AttachmentType.event) {
+  if ('eventId' in comment) {
     return {
       ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
       indices: Array.isArray(comment.index) ? comment.index : [comment.index],
     };
   }
 
-  if (comment.type === SECURITY_EVENT_ATTACHMENT_TYPE) {
+  if ('attachmentId' in comment) {
     const metadataIndex = getIndexFromMetadata(comment.metadata);
     return {
       ids: toStringArray(comment.attachmentId),
@@ -224,7 +241,7 @@ export const getIDsAndIndicesAsArrays = (
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
 const getAndValidateAlertInfoFromComment = (comment: AttachmentRequestV2): AlertInfo[] => {
-  if (!isLegacyAttachmentRequest(comment) || !isCommentRequestTypeAlert(comment)) {
+  if (!isAlertAttachmentType(comment.type)) {
     return [];
   }
 
@@ -333,7 +350,7 @@ export function createAlertUpdateStatusRequest({
   status,
   closingReason,
 }: {
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
   status: CaseStatuses;
   closingReason?: string;
 }): UpdateAlertStatusRequest[] {
@@ -343,15 +360,18 @@ export function createAlertUpdateStatusRequest({
 /**
  * Counts the total alert IDs within a single comment.
  */
-export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributes>) => {
+export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributesV2>) => {
   let totalAlerts = 0;
-  if (comment.attributes.type === AttachmentType.alert) {
-    if (Array.isArray(comment.attributes.alertId)) {
-      totalAlerts += comment.attributes.alertId.length;
-    } else {
-      totalAlerts++;
-    }
+  const { type } = comment.attributes;
+
+  if (type === AttachmentType.alert && 'alertId' in comment.attributes) {
+    const { alertId } = comment.attributes;
+    totalAlerts += Array.isArray(alertId) ? alertId.length : 1;
+  } else if (isAlertAttachmentType(type) && 'attachmentId' in comment.attributes) {
+    const { attachmentId } = comment.attributes as { attachmentId: string | string[] };
+    totalAlerts += Array.isArray(attachmentId) ? attachmentId.length : 1;
   }
+
   return totalAlerts;
 };
 
@@ -523,8 +543,8 @@ export const getCaseViewPath = (params: {
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
   const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
-  const appRoute = getApplicationRoute(OWNER_INFO, owner);
-  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
+  const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
+  const basePath = `${publicBaseUrlWithSpace}${ownerInfo.appBasePath}${ownerInfo.casesBasePath}`;
 
   if (commentId) {
     const commentPath = normalizePath(

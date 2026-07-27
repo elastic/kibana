@@ -13,12 +13,23 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserStorageDefinition, IUserStorageClient } from '@kbn/core-user-storage-common';
 import { USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE } from './saved_objects';
 
+/** Converts a namespace id to a stable string — mirrors `SavedObjectsUtils.namespaceIdToString`. */
+const namespaceToString = (namespace: string | undefined): string => namespace ?? 'default';
+
 interface UserStorageAttributes {
   userId: string;
   data?: Record<string, unknown>;
 }
 
+const getErrorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : String(err);
+
 interface UserStorageClientOpts {
+  /**
+   * Must be a client obtained via `getScopedClient` (not `createScopedRepository`):
+   * only the former applies the spaces extension, so `getCurrentNamespace()` returns
+   * the correct space id rather than always `undefined`.
+   */
   savedObjectsClient: SavedObjectsClientContract;
   profileUid: string;
   definitions: ReadonlyMap<string, UserStorageDefinition>;
@@ -29,10 +40,17 @@ interface UserStorageClientOpts {
 export class UserStorageClient implements IUserStorageClient {
   private readonly soClient: SavedObjectsClientContract;
   private readonly profileUid: string;
+  private readonly namespace: string | undefined;
   private readonly definitions: ReadonlyMap<string, UserStorageDefinition>;
   private readonly logger: Logger;
 
   constructor({ savedObjectsClient, profileUid, definitions, logger }: UserStorageClientOpts) {
+    // Resolve the active space namespace so that space-scoped document ids are
+    // namespaced (e.g. `<space>:<profile_uid>`), preventing cross-space id
+    // collisions on the `multiple-isolated` SO type.
+    const namespace = savedObjectsClient.getCurrentNamespace();
+    this.namespace = namespace;
+
     this.soClient = savedObjectsClient;
     this.profileUid = profileUid;
     this.definitions = definitions;
@@ -44,7 +62,7 @@ export class UserStorageClient implements IUserStorageClient {
     const soType = this.getSoType(definition);
 
     try {
-      const doc = await this.soClient.get<UserStorageAttributes>(soType, this.profileUid);
+      const doc = await this.soClient.get<UserStorageAttributes>(soType, this.getSoId(definition));
       const raw = doc.attributes.data?.[key];
       if (raw != null) {
         const parsed = definition.schema.safeParse(raw);
@@ -64,17 +82,20 @@ export class UserStorageClient implements IUserStorageClient {
     return definition.defaultValue as T;
   }
 
-  async getAll(): Promise<Record<string, unknown>> {
+  async getForInjection(): Promise<Record<string, unknown>> {
+    const injectableEntries = [...this.definitions.entries()].filter(([, d]) => d.preload === true);
+    if (injectableEntries.length === 0) return {};
+
     let hasSpace = false;
     let hasGlobal = false;
-    for (const d of this.definitions.values()) {
+    for (const [, d] of injectableEntries) {
       if (d.scope === 'space') hasSpace = true;
       else if (d.scope === 'global') hasGlobal = true;
       if (hasSpace && hasGlobal) break;
     }
 
     const objectsToFetch: Array<{ type: string; id: string }> = [];
-    if (hasSpace) objectsToFetch.push({ type: USER_STORAGE_SO_TYPE, id: this.profileUid });
+    if (hasSpace) objectsToFetch.push({ type: USER_STORAGE_SO_TYPE, id: this.spaceDocId() });
     if (hasGlobal) objectsToFetch.push({ type: USER_STORAGE_GLOBAL_SO_TYPE, id: this.profileUid });
 
     let spaceData: Record<string, unknown> | undefined;
@@ -96,7 +117,7 @@ export class UserStorageClient implements IUserStorageClient {
     }
 
     const result: Record<string, unknown> = {};
-    for (const [key, definition] of this.definitions) {
+    for (const [key, definition] of injectableEntries) {
       const data = definition.scope === 'space' ? spaceData : globalData;
       const raw = data?.[key];
       if (raw != null) {
@@ -114,38 +135,70 @@ export class UserStorageClient implements IUserStorageClient {
     return result;
   }
 
-  async set<T = unknown>(key: string, value: T): Promise<void> {
+  async set<T = unknown>(key: string, value: T): Promise<T> {
     const definition = this.assertRegistered(key);
-    const validated = definition.schema.parse(value);
+    const validated = definition.schema.parse(value) as T;
     const soType = this.getSoType(definition);
+
+    const soId = this.getSoId(definition);
 
     this.logger.debug(`Setting userStorage key [${key}] (scope: ${definition.scope})`);
 
     const dataUpdate = { data: { [key]: validated } };
 
     try {
-      await this.soClient.update(soType, this.profileUid, dataUpdate);
+      await this.soClient.update(soType, soId, dataUpdate);
     } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        try {
-          await this.soClient.create(
-            soType,
-            { userId: this.profileUid, data: { [key]: validated } },
-            { id: this.profileUid }
-          );
-        } catch (createErr) {
-          // Conflict means a concurrent first-write for this user beat us to create().
-          // The doc now exists but our key isn't in it yet — retry as update().
-          if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
-            await this.soClient.update(soType, this.profileUid, dataUpdate);
-          } else {
-            throw createErr;
-          }
-        }
-      } else {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        this.logger.error(
+          `Failed to update userStorage key [${key}] for user [${this.profileUid}] ` +
+            `(type: ${soType}, id: ${soId}, scope: ${definition.scope}): ${getErrorMessage(err)}`
+        );
         throw err;
       }
+
+      this.logger.debug(
+        `No existing userStorage document [${soType}/${soId}]; creating one for key [${key}].`
+      );
+
+      try {
+        await this.soClient.create(
+          soType,
+          { userId: this.profileUid, data: { [key]: validated } },
+          {
+            id: soId,
+          }
+        );
+      } catch (createErr) {
+        // Conflict means a concurrent first-write for this user beat us to create().
+        // The doc now exists but our key isn't in it yet — retry as update().
+        if (!SavedObjectsErrorHelpers.isConflictError(createErr)) {
+          this.logger.error(
+            `Failed to create userStorage document [${soType}/${soId}] for key [${key}] ` +
+              `(scope: ${definition.scope}): ${getErrorMessage(createErr)}`
+          );
+          throw createErr;
+        }
+
+        this.logger.debug(
+          `Conflict creating userStorage document [${soType}/${soId}] for key [${key}]; ` +
+            `retrying as update.`
+        );
+
+        try {
+          await this.soClient.update(soType, soId, dataUpdate);
+        } catch (retryErr) {
+          this.logger.error(
+            `Failed to persist userStorage key [${key}] for user [${this.profileUid}] ` +
+              `(type: ${soType}, id: ${soId}, scope: ${definition.scope}) after create-conflict retry: ` +
+              `${getErrorMessage(retryErr)}`
+          );
+          throw retryErr;
+        }
+      }
     }
+
+    return validated;
   }
 
   async remove(key: string): Promise<void> {
@@ -155,7 +208,7 @@ export class UserStorageClient implements IUserStorageClient {
     this.logger.debug(`Removing userStorage key [${key}] (scope: ${definition.scope})`);
 
     try {
-      await this.soClient.update(soType, this.profileUid, { data: { [key]: null } });
+      await this.soClient.update(soType, this.getSoId(definition), { data: { [key]: null } });
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw err;
@@ -173,5 +226,27 @@ export class UserStorageClient implements IUserStorageClient {
 
   private getSoType(definition: UserStorageDefinition): string {
     return definition.scope === 'space' ? USER_STORAGE_SO_TYPE : USER_STORAGE_GLOBAL_SO_TYPE;
+  }
+
+  /**
+   * Returns the saved object document id for the given definition.
+   *
+   * - **Global** (`scope: 'global'`): `profile_uid` — one agnostic doc per user.
+   * - **Space** (`scope: 'space'`): `{space}:{profile_uid}` — `user-storage` is
+   *   `namespaceType: 'multiple-isolated'`, which means the raw ES `_id` does NOT
+   *   include a namespace prefix (unlike `single` types). Without application-level
+   *   namespacing the same profile_uid becomes a globally-unique id, causing cross-
+   *   space writes to conflict. Embedding the space in the id gives each space its
+   *   own document while preserving the access-control capabilities of the
+   *   `multiple-isolated` namespace type.
+   */
+  private getSoId(definition: UserStorageDefinition): string {
+    if (definition.scope === 'global') return this.profileUid;
+    return this.spaceDocId();
+  }
+
+  /** Space-scoped document id for this request: `{space}:{profile_uid}`. */
+  private spaceDocId(): string {
+    return `${namespaceToString(this.namespace)}:${this.profileUid}`;
   }
 }

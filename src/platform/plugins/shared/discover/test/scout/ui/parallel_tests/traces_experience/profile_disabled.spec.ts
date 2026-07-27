@@ -43,15 +43,15 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('wait for results to load', async () => {
-            await pageObjects.discover.waitForDocTableRendered();
+            await pageObjects.dataGrid.waitForDocTableRendered();
           });
 
           await spaceTest.step('verify trace-specific columns are not present', async () => {
             for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
-              await expect(pageObjects.discover.getColumnHeader(column)).toBeHidden();
+              await expect(pageObjects.dataGrid.getColumnHeader(column)).toBeHidden();
             }
           });
         }
@@ -62,7 +62,7 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'esql' });
 
           await spaceTest.step('run ESQL query for traces', async () => {
             await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
@@ -79,10 +79,10 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('open first document in flyout', async () => {
-            await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
+            await pageObjects.tracesExperience.openDocumentFlyout();
           });
 
           await spaceTest.step('verify Overview tab is not present', async () => {

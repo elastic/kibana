@@ -14,9 +14,9 @@ export {
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
   attachmentTools,
-  filestoreTools,
   internalTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
@@ -24,7 +24,6 @@ export {
   isInternalTool,
   isExcludedFromFilestore,
   isAttachmentTool,
-  isFilestoreTool,
 } from './constants';
 export {
   type ByIdsToolSelection,

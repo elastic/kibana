@@ -13,8 +13,16 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
 };
 
+// Matches the requiredPrivileges declared by the Security Solution asset criticality HTTP routes
+// (e.g. `.../asset_criticality/routes/upsert.ts`), so callers that bypass Kibana's route-level
+// authorization (a synthetic/fake request) can enforce the same Kibana feature privilege.
+export const ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES = [
+  'securitySolution',
+  'securitySolution-entity-analytics',
+];
+
 export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
-  requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
+  requiredPrivileges: ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
 };
 
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
@@ -30,6 +38,8 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   docsLimit: true,
   maxLogsPerPage: true,
   maxTimeWindowSize: true,
+  maxLogsPerWindow: true,
+  maxLogsPerWindowCapBehavior: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
@@ -56,6 +66,8 @@ export const LogExtractionUpdateParams = z.object({
     .string()
     .regex(/[smdh]$/)
     .optional(),
+  maxLogsPerWindow: z.number().int().min(0).optional(),
+  maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

@@ -344,6 +344,7 @@ export const ActionForm = ({
                   ? item.iconClass
                   : suspendedComponentWithProps(item.iconClass as React.ComponentType)
               }
+              aria-hidden={true}
             />
           </EuiKeyPadMenuItem>
         );
@@ -440,7 +441,11 @@ export const ActionForm = ({
                 onSelectConnector={(connectorId: string) => {
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
                   setActionIdByIndex(connectorId, index, newConnector);
-                  if (newConnector && newConnector.actionTypeId) {
+                  if (
+                    newConnector &&
+                    newConnector.actionTypeId &&
+                    actionTypeRegistry.has(newConnector.actionTypeId)
+                  ) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                     if (actionTypeRegistered.convertParamsBetweenGroups) {
                       const updatedActions = actions.map((_item: RuleUiAction, i: number) => {
@@ -519,7 +524,8 @@ export const ActionForm = ({
                 if (
                   newConnector &&
                   actionConnector &&
-                  newConnector.actionTypeId !== actionConnector.actionTypeId
+                  newConnector.actionTypeId !== actionConnector.actionTypeId &&
+                  actionTypeRegistry.has(newConnector.actionTypeId)
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                   if (actionTypeRegistered.convertParamsBetweenGroups) {

@@ -11,6 +11,7 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_SP_BASE_URL,
 } from '@kbn/mock-idp-utils';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import {
@@ -27,7 +28,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { DeploymentAgnosticCommonServices } from '../services';
 import { services } from '../services';
-import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import {
+  AI_ASSISTANT_SNAPSHOT_REPO_PATH,
+  STREAMS_SNAPSHOT_REPO_PATH,
+  LOCAL_PRODUCT_DOC_PATH,
+} from './common_paths';
 import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -73,8 +78,6 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
       },
     };
 
-    const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
-
     return {
       servers,
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
@@ -99,14 +102,17 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kbnUrl}/logout`,
+          // SP args must match the fixed URL the mock IdP plugin embeds in SAML responses.
+          // The plugin's `onPreResponse` rewrites IdP-bound redirects to the actual Kibana URL
+          // (`server.publicBaseUrl` below) at runtime, so ES does not need to know that URL.
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${MOCK_IDP_SP_BASE_URL}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${MOCK_IDP_SP_BASE_URL}/logout`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
-          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
+          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH},${STREAMS_SNAPSHOT_REPO_PATH}`,
           ...(options.esServerArgs || []),
         ],
         files: [

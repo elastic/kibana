@@ -287,6 +287,7 @@ export const postEvaluateRoute = (
                 evaluationId,
                 evaluatorConnectorId,
                 getInferenceConnectorById: getInferenceConnectorById(inference, request),
+                inferenceClient: inference.getClient({ request }),
                 langSmithApiKey,
                 langSmithProject,
                 logger,

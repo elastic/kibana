@@ -51,16 +51,17 @@ Those anchors, plus persisted action history, let the dispatcher decide which ep
 
 The pipeline then moves through these phases:
 
-1. Fetch candidate episodes
-2. Fetch suppression facts
-3. Split into dispatchable vs suppressed episodes
-4. Load rule metadata for dispatchable episodes
-5. Load enabled action policies
-6. Evaluate policy matchers
-7. Build action groups
-8. Apply throttling
-9. Dispatch eligible groups
-10. Store final actions and reasons
+1. Wait for plugin resources to be ready
+2. Fetch candidate episodes
+3. Fetch suppression facts
+4. Split into dispatchable vs suppressed episodes
+5. Load rule metadata for dispatchable episodes
+6. Load enabled action policies
+7. Evaluate policy matchers
+8. Build action groups
+9. Apply throttling
+10. Dispatch eligible groups
+11. Store final actions and reasons
 
 ### Decision outcomes written to `.alert-actions`
 
@@ -96,6 +97,7 @@ DispatcherService
    v
 DispatcherPipeline
    |
+   +--> WaitForResourcesStep
    +--> FetchEpisodesStep
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
@@ -159,16 +161,17 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | # | Step | Responsibility |
 | --- | --- | --- |
-| 1 | `FetchEpisodesStep` | Load episodes that should be considered in this run. |
-| 2 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
-| 3 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
-| 4 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
-| 5 | `FetchPoliciesStep` | Load enabled action policies for the space. |
-| 6 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
-| 7 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
-| 8 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
-| 9 | `DispatchStep` | Perform delivery side effects for eligible groups. |
-| 10 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
+| 1 | `WaitForResourcesStep` | Block the run until the dispatcher's required plugin resources are ready. |
+| 2 | `FetchEpisodesStep` | Load episodes that should be considered in this run. |
+| 3 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
+| 4 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
+| 5 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
+| 6 | `FetchPoliciesStep` | Load enabled action policies for the space. |
+| 7 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
+| 8 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
+| 9 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
+| 10 | `DispatchStep` | Perform delivery side effects for eligible groups. |
+| 11 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
 
 ## Halt reasons
 

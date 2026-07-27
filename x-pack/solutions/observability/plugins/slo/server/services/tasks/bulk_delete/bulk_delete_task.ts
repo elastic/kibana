@@ -40,7 +40,7 @@ export class BulkDeleteTask {
         title: 'SLO bulk delete',
         timeout: '10m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
@@ -68,13 +68,13 @@ export class BulkDeleteTask {
                 {} as Record<IndicatorTypes, TransformGenerator>,
                 scopedClusterClient,
                 this.logger,
-                abortController
+                signal
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
                 new DefaultSummaryTransformGenerator(),
                 scopedClusterClient,
                 this.logger,
-                abortController
+                signal
               );
 
               const deleteSLO = new DeleteSLO(
@@ -83,7 +83,8 @@ export class BulkDeleteTask {
                 summaryTransformManager,
                 scopedClusterClient,
                 rulesClient,
-                abortController
+                this.logger,
+                signal
               );
 
               try {
@@ -94,7 +95,7 @@ export class BulkDeleteTask {
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,
-                  abortController,
+                  signal,
                 });
 
                 return {

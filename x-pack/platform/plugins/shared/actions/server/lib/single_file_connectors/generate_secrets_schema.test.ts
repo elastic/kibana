@@ -139,6 +139,61 @@ describe('generateSecretsSchema', () => {
     });
   });
 
+  describe('customValidator - experimental EARS auth gating', () => {
+    const experimentalEarsAuthSpec: ConnectorSpec['auth'] = {
+      types: [
+        'none',
+        {
+          type: 'ears',
+          isExperimental: true,
+          defaults: { provider: 'google', scope: 'https://www.googleapis.com/auth/calendar' },
+        },
+      ],
+    };
+
+    const stableEarsAuthSpec: ConnectorSpec['auth'] = {
+      types: [
+        'none',
+        {
+          type: 'ears',
+          defaults: { provider: 'slack', scope: 'channels:read' },
+        },
+      ],
+    };
+
+    it('throws when EARS is enabled but experimental is disabled for an experimental provider', () => {
+      mockConfigUtils.isEarsEnabled.mockReturnValue(true);
+      mockConfigUtils.isEarsExperimentalEnabled.mockReturnValue(false);
+      const validator = generateSecretsSchema(experimentalEarsAuthSpec, mockConfigUtils);
+
+      expect(() =>
+        validator.customValidator!({ authType: 'ears', provider: 'google' }, validatorServices)
+      ).toThrow(
+        'EARS OAuth authentication is not enabled for the "google" provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.'
+      );
+    });
+
+    it('does not throw when both EARS and experimental are enabled for an experimental provider', () => {
+      mockConfigUtils.isEarsEnabled.mockReturnValue(true);
+      mockConfigUtils.isEarsExperimentalEnabled.mockReturnValue(true);
+      const validator = generateSecretsSchema(experimentalEarsAuthSpec, mockConfigUtils);
+
+      expect(() =>
+        validator.customValidator!({ authType: 'ears', provider: 'google' }, validatorServices)
+      ).not.toThrow();
+    });
+
+    it('does not throw for stable EARS providers when experimental is disabled', () => {
+      mockConfigUtils.isEarsEnabled.mockReturnValue(true);
+      mockConfigUtils.isEarsExperimentalEnabled.mockReturnValue(false);
+      const validator = generateSecretsSchema(stableEarsAuthSpec, mockConfigUtils);
+
+      expect(() =>
+        validator.customValidator!({ authType: 'ears', provider: 'slack' }, validatorServices)
+      ).not.toThrow();
+    });
+  });
+
   describe('customValidator - allowedHosts validation for URL fields', () => {
     const oauthAuthSpec = {
       types: [

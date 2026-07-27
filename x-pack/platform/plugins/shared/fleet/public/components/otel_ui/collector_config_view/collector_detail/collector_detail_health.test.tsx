@@ -28,6 +28,12 @@ const config: OTelCollectorConfig = {
   },
 };
 
+const onlineHealth: ComponentHealth = {
+  healthy: true,
+  status: 'StatusOK',
+  status_time_unix_nano: 1777926000000000000,
+};
+
 describe('CollectorDetailHealth', () => {
   let testRenderer: TestRenderer;
 
@@ -38,6 +44,26 @@ describe('CollectorDetailHealth', () => {
   it('renders no-data message when health is undefined', () => {
     const result = testRenderer.render(<CollectorDetailHealth />);
     expect(result.getByTestId('collectorDetailHealthNoData')).toBeInTheDocument();
+  });
+
+  it.each(['offline', 'inactive', 'unenrolled', 'uninstalled'] as const)(
+    'shows offline callout and hides health data when agentStatus is %s',
+    (status) => {
+      const result = testRenderer.render(
+        <CollectorDetailHealth health={onlineHealth} agentStatus={status} />
+      );
+      expect(result.getByTestId('collectorDetailHealthOffline')).toBeInTheDocument();
+      expect(result.queryByTestId('collectorDetailHealth')).not.toBeInTheDocument();
+      expect(result.queryByText('Healthy')).not.toBeInTheDocument();
+    }
+  );
+
+  it('does not show offline callout when agentStatus is online', () => {
+    const result = testRenderer.render(
+      <CollectorDetailHealth health={onlineHealth} agentStatus="online" />
+    );
+    expect(result.queryByTestId('collectorDetailHealthOffline')).not.toBeInTheDocument();
+    expect(result.getByTestId('collectorDetailHealth')).toBeInTheDocument();
   });
 
   it('renders healthy status', () => {
@@ -77,6 +103,48 @@ describe('CollectorDetailHealth', () => {
     const panel = result.getByTestId('collectorDetailHealth');
     expect(panel.textContent).toContain('Unhealthy');
     expect(panel.textContent).toContain('connection refused');
+  });
+
+  it('resolves connector health when an exporter id appears in config.connectors', () => {
+    const connectorConfig: OTelCollectorConfig = {
+      receivers: { otlp: {} },
+      processors: { batch: {} },
+      connectors: { 'forward/connector': {} },
+      exporters: { 'elasticsearch/default': {} },
+      service: {
+        pipelines: {
+          'logs/default': {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['forward/connector'],
+          },
+        },
+      },
+    };
+
+    const health: ComponentHealth = {
+      healthy: true,
+      status: 'StatusOK',
+      component_health_map: {
+        'pipeline:logs/default': {
+          healthy: true,
+          status: 'StatusOK',
+          component_health_map: {
+            'receiver:otlp': { healthy: true, status: 'StatusOK' },
+            'processor:batch': { healthy: true, status: 'StatusOK' },
+            // health is keyed as connector, not exporter
+            'connector:forward/connector': { healthy: true, status: 'StatusOK' },
+          },
+        },
+      },
+    };
+
+    const result = testRenderer.render(
+      <CollectorDetailHealth health={health} config={connectorConfig} />
+    );
+
+    const pipeline = result.getByTestId('collectorHealthPipeline-logs/default');
+    expect(pipeline.textContent).toContain('3 healthy');
   });
 
   it('renders pipeline component breakdown when config is provided', () => {

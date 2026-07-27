@@ -220,7 +220,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, 'logs.otel.child', {
             dashboards: [],
             rules: [],
-            queries: [],
             stream: {
               type: 'wired',
               description: '',
@@ -1107,6 +1106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
       });
@@ -1117,6 +1117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
       beforeEach(async () => {
@@ -1251,7 +1252,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const wiredChildStreamBody = {
         dashboards: [],
         rules: [],
-        queries: [],
         stream: {
           type: 'wired' as const,
           description: '',
@@ -1364,12 +1364,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await kibanaServer.uiSettings.update({
             [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
           });
+          await kibanaServer.uiSettings.waitForEventualCacheRefresh();
         });
 
         after(async () => {
           await kibanaServer.uiSettings.update({
             [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
           });
+          await kibanaServer.uiSettings.waitForEventualCacheRefresh();
         });
 
         it('removes SLO attachment links when a query stream is deleted', async () => {

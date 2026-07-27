@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
   coreFeatureFlagsMock,
@@ -56,6 +57,7 @@ const taskManager = taskManagerMock.createStart();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const rulesClientContext: RulesClientContext = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -83,7 +85,6 @@ const rulesClientContext: RulesClientContext = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  fieldsToExcludeFromPublicApi: [],
   minimumScheduleIntervalInMs: 0,
   featureFlags: coreFeatureFlagsMock.createStart(),
   isServerless: false,
@@ -572,6 +573,7 @@ describe('bulkEditRules', () => {
             lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
             status: 'pending',
           },
+          isSnoozedUntil: null,
           snoozeSchedule: [],
           systemActions: [],
           createdAt: expect.any(Date),

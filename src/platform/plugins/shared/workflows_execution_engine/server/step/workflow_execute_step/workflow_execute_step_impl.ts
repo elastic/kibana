@@ -78,12 +78,23 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
-    return { workflowId: String(workflowId), inputs: mappedInputs };
+    return { workflowId: String(workflowId ?? ''), inputs: mappedInputs };
+  }
+
+  private assertValidWorkflowId(workflowId: string): void {
+    if (workflowId.trim().length > 0) {
+      return;
+    }
+
+    const { node, stepExecutionRuntime } = this.init;
+    throw new Error(
+      `${node.type} step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}" rendered an empty workflow-id.`
+    );
   }
 
   /**
    * Applies strategy result to step and workflow runtime (completed/failed → finish or fail step
-   * and navigate; waiting/cancelled → no navigation). Caller is responsible for flushEventLogs.
+   * and navigate; waiting/cancelled → no navigation).
    */
   private handleResult(result: StrategyResult): void {
     const { stepExecutionRuntime, workflowExecutionRuntime } = this.init;
@@ -109,8 +120,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
-      } finally {
-        await stepExecutionRuntime.flushEventLogs();
       }
       return;
     }
@@ -122,12 +131,13 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     // Persist resolved inputs for observability in the execution UI
     stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
-    await stepExecutionRuntime.flushEventLogs();
 
     // Select executor based on step type
     const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
 
     try {
+      this.assertValidWorkflowId(workflowId);
+
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
       const currentDepth = (typeof rawDepth === 'number' ? rawDepth : -1) + 1;
       const maxWorkflowDepth = this.init.config.maxWorkflowDepth;
@@ -137,7 +147,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         );
         stepExecutionRuntime.failStep(error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -148,7 +157,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         );
         stepExecutionRuntime.failStep(error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -157,7 +165,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -173,8 +180,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();
-    } finally {
-      await stepExecutionRuntime.flushEventLogs();
     }
   }
 
@@ -186,12 +191,22 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     await this.init.workflowsExecutionEngine.cancelWorkflowExecution(
       executionId,
-      this.init.spaceId
+      this.init.spaceId,
+      this.init.request
     );
   }
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
-    return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId);
+    const isManagedParentRun = this.isManagedParentExecution();
+    return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId, {
+      includeGlobal: isManagedParentRun,
+      managedFilter: isManagedParentRun ? 'all' : 'unmanaged',
+    });
+  }
+
+  private isManagedParentExecution(): boolean {
+    const { workflowExecution } = this.init.stepExecutionRuntime;
+    return workflowExecution.managed === true;
   }
 
   private async ensureWorkflowIsExecutable(workflow: EsWorkflow): Promise<void> {
@@ -203,8 +218,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         `Workflow "${workflow.id}" cannot call itself (self-referencing detected at step "${node.stepId}")`
       );
     }
-    // Note: spaceId validation is already done by the repository when fetching the workflow
-    // since getWorkflow filter by spaceId
+    // Note: workflow visibility is validated by the repository fetch.
+    // Global definitions are included only for managed parent workflow runs.
     if (!workflow.enabled) {
       throw new Error(
         `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`

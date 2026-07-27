@@ -23,9 +23,16 @@ describe('getStreamsLocation', () => {
   });
 
   it('returns management tab path when name and managementTab are provided', () => {
-    expect(getStreamsLocation({ name: 'logs.nginx', managementTab: 'significantEvents' })).toEqual({
+    expect(getStreamsLocation({ name: 'logs.nginx', managementTab: 'overview' })).toEqual({
       app: 'streams',
-      path: '/logs.nginx/management/significantEvents',
+      path: '/logs.nginx/management/overview',
+    });
+  });
+
+  it('returns canvas management tab path', () => {
+    expect(getStreamsLocation({ name: 'logs.nginx', managementTab: 'canvas' })).toEqual({
+      app: 'streams',
+      path: '/logs.nginx/management/canvas',
     });
   });
 });

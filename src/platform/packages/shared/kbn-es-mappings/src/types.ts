@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type api from '@elastic/elasticsearch/lib/api/types';
+import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { Required } from 'utility-types';
 import type { UnionKeys, Exact, MissingKeysError, PartialWithArrayValues } from './types_helpers';
 
@@ -24,6 +24,8 @@ export type StrictMappingTypeMapping = Strict<api.MappingTypeMapping>;
 export type AnyMapping = Strict<api.MappingProperty>;
 export type KeywordMapping = Strict<api.MappingKeywordProperty>;
 export type TextMapping = Strict<api.MappingTextProperty>;
+export type MatchOnlyTextMapping = Strict<api.MappingMatchOnlyTextProperty>;
+export type SemanticTextMapping = Strict<api.MappingSemanticTextProperty>;
 export type DateMapping = Strict<api.MappingDateProperty>;
 export type DateNanosMapping = Strict<api.MappingDateNanosProperty>;
 export type LongMapping = Strict<api.MappingLongNumberProperty>;
@@ -46,6 +48,8 @@ type AllMappingPropertyType = Required<api.MappingProperty>['type'];
 type SupportedMappingPropertyType = AllMappingPropertyType &
   (
     | 'text'
+    | 'match_only_text'
+    | 'semantic_text'
     | 'integer'
     | 'keyword'
     | 'boolean'
@@ -80,6 +84,10 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
               : never
             : string
           : T extends 'text'
+          ? string
+          : T extends 'match_only_text'
+          ? string
+          : T extends 'semantic_text'
           ? string
           : T extends 'integer'
           ? number

@@ -32,9 +32,10 @@ const SOURCE_TEST_SUBJ: Record<MetricSourceKind, string> = {
   [METRIC_SOURCE_KIND.DATA_STREAM]: 'metricsExperienceFlyoutOverviewTabDataStreamLabel',
 };
 
-interface StaticIndexName {
-  indexName: string;
+interface SourceLink {
   kind: MetricSourceKind;
+  indexName: string;
+  streamLink: React.ReactNode;
 }
 
 const LABEL_WIDTH_MULTIPLIER = 11.25;
@@ -42,35 +43,32 @@ const LABEL_WIDTH_MULTIPLIER = 11.25;
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
   /**
-   * When set, prepends a static `<Label>: <indexName>` row above the standard
-   * metadata. The label is derived from `kind` (Index or Data stream). Used
-   * when the index name is not rendered through the streams flyout.
+   * When set, prepends a `<Label>: <indexName>` row above the standard metadata.
+   * The label is derived from `kind` (Index or Data stream) and the value is the index name or stream link.
    */
-  staticIndexName?: StaticIndexName;
+  indexRow?: SourceLink;
 }
 
-export const OverviewTabMetadata = ({ metricItem, staticIndexName }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem, indexRow }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * LABEL_WIDTH_MULTIPLIER;
 
-    const indexNameRow = staticIndexName
+    const indexNameRow = indexRow
       ? [
           {
-            title: <StrongTitle text={SOURCE_LABEL[staticIndexName.kind]} />,
+            title: <StrongTitle text={SOURCE_LABEL[indexRow.kind]} />,
             description: (
-              <EuiText
-                color="primary"
-                size="s"
+              <div
                 css={css`
                   word-break: break-word;
                   overflow-wrap: anywhere;
                 `}
-                data-test-subj={SOURCE_TEST_SUBJ[staticIndexName.kind]}
+                data-test-subj={SOURCE_TEST_SUBJ[indexRow.kind]}
               >
-                {staticIndexName.indexName}
-              </EuiText>
+                {indexRow.streamLink ?? <EuiText size="xs">{indexRow.indexName}</EuiText>}
+              </div>
             ),
           },
         ]
@@ -137,13 +135,7 @@ export const OverviewTabMetadata = ({ metricItem, staticIndexName }: OverviewTab
     ];
 
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
-  }, [
-    euiTheme.base,
-    staticIndexName,
-    metricItem.fieldTypes,
-    metricItem.metricTypes,
-    metricItem.units,
-  ]);
+  }, [euiTheme.base, indexRow, metricItem.fieldTypes, metricItem.metricTypes, metricItem.units]);
 
   return (
     <EuiPanel

@@ -20,6 +20,7 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
       properties: {
         type: { type: 'keyword' },
         name: { type: 'keyword' },
+        id: { type: 'keyword' },
       },
     },
     tags: { type: 'keyword' },

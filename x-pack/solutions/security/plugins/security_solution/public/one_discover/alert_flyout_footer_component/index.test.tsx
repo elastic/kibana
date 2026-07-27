@@ -8,7 +8,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutFooter } from '.';
 import type { StartServices } from '../../types';
 import { SECURITY_FEATURE_ID } from '../../../common/constants';
@@ -28,7 +28,7 @@ const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }
   <>{children}</>
 ));
 
-jest.mock('../../flyout_v2/document/footer', () => ({
+jest.mock('../../flyout_v2/document/main/footer', () => ({
   Footer: (props: unknown) => mockDocumentFooter(props),
 }));
 jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({

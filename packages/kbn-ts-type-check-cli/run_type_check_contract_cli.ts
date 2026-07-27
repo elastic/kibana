@@ -37,6 +37,7 @@ export const runTypeCheckContractCli = () => {
         onWarning: (message) => log.warning(message),
       });
 
+      const withArchive = flagsReader.boolean('with-archive');
       await executeTypeCheckValidation({
         baseContext,
         log,
@@ -44,7 +45,8 @@ export const runTypeCheckContractCli = () => {
         cleanup: flagsReader.boolean('cleanup'),
         extendedDiagnostics: flagsReader.boolean('extended-diagnostics'),
         verbose: flagsReader.boolean('verbose'),
-        withArchive: flagsReader.boolean('with-archive'),
+        restoreArchive: withArchive || flagsReader.boolean('restore-archive'),
+        uploadArchive: withArchive || flagsReader.boolean('upload-archive'),
       });
     },
     {
@@ -69,7 +71,14 @@ export const runTypeCheckContractCli = () => {
     `,
       flags: {
         string: ['project', ...VALIDATION_RUN_STRING_FLAGS],
-        boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
+        boolean: [
+          'clean-cache',
+          'cleanup',
+          'extended-diagnostics',
+          'with-archive',
+          'restore-archive',
+          'upload-archive',
+        ],
         help: [
           {
             flag: '--project [path]',
@@ -90,8 +99,16 @@ export const runTypeCheckContractCli = () => {
             description: 'Turn on extended diagnostics in the TypeScript compiler',
           },
           {
+            flag: '--restore-archive',
+            description: 'Restore cached artifacts from GCS before running tsc',
+          },
+          {
+            flag: '--upload-archive',
+            description: 'Upload resulting artifacts to GCS after a successful tsc run',
+          },
+          {
             flag: '--with-archive',
-            description: 'Restore cached artifacts before running and archive results afterwards',
+            description: 'Shorthand for `--restore-archive --upload-archive`',
           },
         ],
       },

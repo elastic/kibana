@@ -184,6 +184,21 @@ export const CONSOLE_COMMANDS = {
           { defaultMessage: 'The process name to kill' }
         ),
       },
+      killDescendants: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.killDescendants.arg.comment',
+          {
+            defaultMessage: 'Also terminate all descendant (child) processes of the target process',
+          }
+        ),
+        notSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.killDescendants.notSupported',
+          {
+            defaultMessage:
+              'This version of the Endpoint does not support killing process descendants. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+      },
     },
   },
   suspendProcess: {
@@ -311,6 +326,12 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {
       defaultMessage: 'Cancel a pending action on the host',
     }),
+    forceArgInfo: i18n.translate(
+      'xpack.securitySolution.endpointConsoleCommands.cancel.forceArgInfo',
+      {
+        defaultMessage: 'Forcefully cancel the action, even if it is already in progress',
+      }
+    ),
   },
   memoryDump: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
@@ -482,31 +503,6 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       }
     ),
   },
-};
-
-export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
-  return {
-    title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
-      defaultMessage: `Confirm {type}`,
-      values: { type: entryType },
-    }),
-    body: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.body', {
-      defaultMessage:
-        'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly. Select “Cancel” to revise your entry, or "Add" to continue with the entry in its current state.',
-    }),
-    confirmButton: i18n.translate(
-      'xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText',
-      {
-        defaultMessage: 'Add',
-      }
-    ),
-    cancelButton: i18n.translate(
-      'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-      {
-        defaultMessage: 'Cancel',
-      }
-    ),
-  };
 };
 
 export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(

@@ -9,8 +9,9 @@
 
 import React from 'react';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { createRouter } from './create_router';
+import { createRouter, MAX_PATH_LENGTH, toReactRouterPath } from './create_router';
 import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { createMemoryHistory } from 'history';
 import { last } from 'lodash';
@@ -664,5 +665,165 @@ describe('createRouter', () => {
         query: { filter: null },
       });
     });
+  });
+});
+
+describe('createRouter with zod params', () => {
+  const zodRoutes = {
+    '/': {
+      element: <></>,
+      params: z.object({
+        query: z.object({
+          rangeFrom: z.string(),
+          rangeTo: z.string(),
+        }),
+      }),
+      defaults: {
+        query: {
+          rangeFrom: 'now-30m',
+        },
+      },
+      children: {
+        '/services': {
+          element: <></>,
+          params: z.object({
+            query: z.object({
+              transactionType: z.string(),
+            }),
+          }),
+        },
+        '/service-map': {
+          element: <></>,
+          params: z.object({
+            query: z.object({
+              maxNumNodes: z.coerce.number(),
+            }),
+          }),
+        },
+      },
+    },
+  };
+
+  let history = createMemoryHistory();
+  const router = createRouter(zodRoutes);
+
+  beforeEach(() => {
+    history = createMemoryHistory();
+  });
+
+  it('returns and coerces params for a matching route', () => {
+    history.push('/service-map?rangeFrom=now-15m&rangeTo=now&maxNumNodes=3');
+
+    expect(router.getParams('/', history.location)).toEqual({
+      path: {},
+      query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+    });
+
+    expect(router.getParams('/service-map', history.location)).toEqual({
+      path: {},
+      query: { rangeFrom: 'now-15m', rangeTo: 'now', maxNumNodes: 3 },
+    });
+  });
+
+  it('applies defaults', () => {
+    history.push('/services?rangeTo=now&transactionType=request');
+
+    expect(router.getParams('/', history.location)).toEqual({
+      path: {},
+      query: { rangeFrom: 'now-30m', rangeTo: 'now' },
+    });
+  });
+
+  it('recovers a null query param that has a default via InvalidRouteParamsException', () => {
+    history.push('/services?rangeFrom&rangeTo=now&transactionType=request');
+
+    expect(() => {
+      router.getParams('/services', history.location);
+    }).toThrow(InvalidRouteParamsException);
+
+    try {
+      router.getParams('/services', history.location);
+    } catch (e) {
+      const error = e as InvalidRouteParamsException;
+      expect(error.patched.query).toEqual(
+        expect.objectContaining({
+          rangeFrom: 'now-30m',
+          rangeTo: 'now',
+          transactionType: 'request',
+        })
+      );
+    }
+  });
+
+  it('throws a plain Error when recovery with defaults also fails', () => {
+    history.push('/services?transactionType=request');
+
+    expect(() => {
+      router.getParams('/services', history.location);
+    }).not.toThrow(InvalidRouteParamsException);
+    expect(() => {
+      router.getParams('/services', history.location);
+    }).toThrow(Error);
+  });
+
+  it('builds and validates links', () => {
+    expect(
+      router.link('/service-map', {
+        query: { maxNumNodes: '3', rangeFrom: 'now-15m', rangeTo: 'now' },
+      } as any)
+    ).toEqual('/service-map?maxNumNodes=3&rangeFrom=now-15m&rangeTo=now');
+
+    expect(() => {
+      router.link('/service-map', {
+        query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+      } as any);
+    }).toThrowError();
+  });
+});
+
+describe('toReactRouterPath', () => {
+  it('converts {param} placeholders to :param format', () => {
+    expect(toReactRouterPath('/services/{serviceName}')).toBe('/services/:serviceName');
+  });
+
+  it('converts multiple placeholders', () => {
+    expect(toReactRouterPath('/services/{serviceName}/errors/{groupId}')).toBe(
+      '/services/:serviceName/errors/:groupId'
+    );
+  });
+
+  it('returns paths without placeholders unchanged', () => {
+    expect(toReactRouterPath('/services')).toBe('/services');
+    expect(toReactRouterPath('/')).toBe('/');
+    expect(toReactRouterPath('/a/b/c')).toBe('/a/b/c');
+  });
+
+  it('does not match unbalanced or nested braces', () => {
+    expect(toReactRouterPath('/services/{a{b}}')).toBe('/services/{a:b}');
+    expect(toReactRouterPath('/services/{{name}}')).toBe('/services/{:name}');
+  });
+
+  it('handles empty braces as a no-op', () => {
+    expect(toReactRouterPath('/services/{}')).toBe('/services/{}');
+  });
+
+  it('does not catastrophically backtrack on crafted input (ReDoS) and does not throw an error', () => {
+    const malicious = '/app/apm/services/' + '{{.'.repeat(MAX_PATH_LENGTH / 4);
+    const start = performance.now();
+    toReactRouterPath(malicious);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(100);
+
+    expect(() => {
+      toReactRouterPath(malicious);
+    }).not.toThrowError();
+  });
+
+  it('throws an error if the path is too long', () => {
+    const malicious = '/app/apm/services/' + '{{.'.repeat(MAX_PATH_LENGTH + 1);
+    expect(() => {
+      toReactRouterPath(malicious);
+    }).toThrowError('Path is too long to process');
   });
 });

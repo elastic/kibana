@@ -10,6 +10,8 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { DATASETS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+// TODO: Re-enable when datasets are available in Tech preview
+// import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
@@ -29,11 +31,28 @@ export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInit
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
         const result = await service.getDatasets();
 
+        // TODO: Enable counter when datasets are available in Tech preview
+        // esqlRouteRequestCounter.add(1, {
+        //   route: 'datasets',
+        //   outcome: 'success',
+        //   'http.response.status_code': 200,
+        // });
         return response.ok({
           body: result,
         });
       } catch (error) {
         logger.get().debug(error);
+        // TODO: Re-enable counter + structured error log when datasets are available in Tech preview
+        // esqlRouteRequestCounter.add(1, {
+        //   route: 'datasets',
+        //   outcome: 'failure',
+        //   'http.response.status_code': getErrorStatusCode(error),
+        // });
+        // const message = error instanceof Error ? error.message : String(error);
+        // logger.get().error(`Failed to fetch ES|QL datasets: ${message}`, {
+        //   tags: ['esql', 'datasets'],
+        //   error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        // });
         return response.ok({
           body: { datasets: [] },
         });

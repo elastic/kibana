@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
+import { getMeaningfulBucketMs } from '../../util/stream_overview_esql';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
@@ -70,7 +71,7 @@ export function DocumentsColumn({
   const hasData = docCount > 0;
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
-  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+  const minInterval = getMeaningfulBucketMs(timeState.end - timeState.start, numDataPoints);
 
   const noDocCountData = histogramQueryResult.error ? '' : '-';
 
@@ -154,6 +155,7 @@ export function DocumentsColumn({
                     xAccessor="x"
                     yAccessors={['doc_count']}
                     data={serie.data}
+                    enableHistogramMode
                   />
                 ))}
               </Chart>

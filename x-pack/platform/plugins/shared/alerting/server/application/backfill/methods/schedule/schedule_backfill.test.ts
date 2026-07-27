@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
@@ -52,6 +53,7 @@ const filter = fromKueryExpression(
 );
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -438,6 +440,7 @@ describe('scheduleBackfill()', () => {
         rules: [
           {
             id: existingDecryptedRule1.id,
+            isSnoozedUntil: null,
             legacyId: null,
             actions: existingDecryptedRule1.attributes.actions,
             alertTypeId: existingDecryptedRule1.attributes.alertTypeId,
@@ -470,6 +473,7 @@ describe('scheduleBackfill()', () => {
           },
           {
             id: existingDecryptedRule2.id,
+            isSnoozedUntil: null,
             legacyId: null,
             actions: existingDecryptedRule2.attributes.actions,
             alertTypeId: existingDecryptedRule2.attributes.alertTypeId,

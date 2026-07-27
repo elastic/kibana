@@ -42,11 +42,16 @@ export const useToolsMutation = ({
         configuration: { tools: newToolSelections },
       });
     },
-    onMutate: async (newToolSelections: ToolSelection[]) => {
-      await queryClient.cancelQueries({ queryKey: agentQueryKey });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: agentQueryKey });
+    },
+  });
+
+  const mutateToolSelections = useCallback(
+    (newToolSelections: ToolSelection[], { onSuccess }: { onSuccess?: () => void } = {}) => {
+      queryClient.cancelQueries({ queryKey: agentQueryKey });
 
       const previousAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
-
       if (previousAgent) {
         queryClient.setQueryData<AgentDefinition>(agentQueryKey, {
           ...previousAgent,
@@ -57,18 +62,18 @@ export const useToolsMutation = ({
         });
       }
 
-      return { previousAgent };
+      updateToolsMutation.mutate(newToolSelections, {
+        onSuccess,
+        onError: () => {
+          if (previousAgent) {
+            queryClient.setQueryData<AgentDefinition>(agentQueryKey, previousAgent);
+          }
+          addErrorToast({ title: labels.agentTools.updateToolsErrorToast });
+        },
+      });
     },
-    onError: (_err, _newToolSelections, context) => {
-      if (context?.previousAgent) {
-        queryClient.setQueryData<AgentDefinition>(agentQueryKey, context.previousAgent);
-      }
-      addErrorToast({ title: labels.agentTools.updateToolsErrorToast });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: agentQueryKey });
-    },
-  });
+    [updateToolsMutation, queryClient, agentQueryKey, addErrorToast]
+  );
 
   const handleAddTool = useCallback(
     (tool: ToolDefinition, { onSuccess }: { onSuccess?: (toolId: string) => void } = {}) => {
@@ -76,27 +81,27 @@ export const useToolsMutation = ({
       if (isToolSelected(tool, currentSelections)) return;
       const newSelections = toggleToolSelection(tool.id, allTools, currentSelections);
 
-      updateToolsMutation.mutate(newSelections, {
+      mutateToolSelections(newSelections, {
         onSuccess: () => {
           onSuccess?.(tool.id);
           addSuccessToast({ title: labels.agentTools.addToolSuccessToast(tool.id) });
         },
       });
     },
-    [getCurrentToolSelections, allTools, updateToolsMutation, addSuccessToast]
+    [getCurrentToolSelections, allTools, mutateToolSelections, addSuccessToast]
   );
 
   const handleRemoveTool = useCallback(
     (tool: ToolDefinition) => {
       const currentSelections = getCurrentToolSelections();
       const newSelections = toggleToolSelection(tool.id, allTools, currentSelections);
-      updateToolsMutation.mutate(newSelections, {
+      mutateToolSelections(newSelections, {
         onSuccess: () => {
           addSuccessToast({ title: labels.agentTools.removeToolSuccessToast(tool.id) });
         },
       });
     },
-    [getCurrentToolSelections, allTools, updateToolsMutation, addSuccessToast]
+    [getCurrentToolSelections, allTools, mutateToolSelections, addSuccessToast]
   );
 
   const handlers = useMemo(

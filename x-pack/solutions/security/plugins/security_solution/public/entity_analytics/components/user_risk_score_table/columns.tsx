@@ -6,7 +6,7 @@
  */
 
 import React, { type SyntheticEvent } from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { SecurityCellActions, CellActionsMode } from '../../../common/components/cell_actions';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
@@ -91,9 +91,9 @@ export const getUserRiskScoreColumns = ({
     render: (riskScore) => {
       if (riskScore != null) {
         return (
-          <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {formatRiskScore(riskScore)}
-          </span>
+          <EuiToolTip content={`${riskScore}`}>
+            <span data-test-subj="risk-score-truncate">{formatRiskScore(riskScore)}</span>
+          </EuiToolTip>
         );
       }
       return getEmptyTagValue();

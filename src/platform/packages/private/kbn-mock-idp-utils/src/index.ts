@@ -8,7 +8,7 @@
  */
 
 export {
-  MOCK_IDP_KIBANA_BASE_PATH,
+  MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
@@ -55,3 +55,9 @@ export {
   createUiamOAuthAccessToken,
   projectTypeToAlias,
 } from './utils';
+
+export {
+  seedTestOAuthConnection,
+  updateTestOAuthConnection,
+  deleteTestOAuthConnection,
+} from './cosmos_db_seeder';

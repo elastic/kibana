@@ -45,6 +45,7 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
+export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -76,6 +77,12 @@ export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
+export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
+export const CASE_TEMPLATE_DETAILS_URL = `${CASE_TEMPLATES_URL}/{template_id}` as const;
+// Public discovery of the `extended_fields` a caller may apply. `fields` is a static segment,
+// so — like `templates`/`reporters`/`tags` — it resolves ahead of the `{case_id}` param route.
+export const CASE_FIELDS_URL = `${CASES_URL}/fields` as const;
+export const CASE_APPLICABLE_FIELDS_URL = `${CASE_DETAILS_URL}/fields` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
@@ -116,7 +123,6 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
-export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
 
 export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
 export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
@@ -124,6 +130,10 @@ export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bu
 export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
 export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
 export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
+
+export const INTERNAL_FIELD_DEFINITIONS_URL = `${CASES_INTERNAL_URL}/field_definitions` as const;
+export const INTERNAL_FIELD_DEFINITION_DETAILS_URL =
+  `${INTERNAL_FIELD_DEFINITIONS_URL}/{field_definition_id}` as const;
 
 /**
  * Action routes
@@ -148,10 +158,19 @@ export const MAX_BULK_GET_CASES = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
 export const MAX_CASES_PER_PAGE = 100 as const;
 export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
+/**
+ * Upper bound on how many user actions are pulled into memory when performing a
+ * free-text `search` over a case's user actions (see `UserActionFinder.findAll`).
+ * This keeps the request bounded for cases with very large activity logs; cases
+ * with more user actions than this will only be searched over their most recently
+ * fetched actions.
+ */
+export const MAX_USER_ACTIONS_FOR_SEARCH = 5000 as const;
 export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
 export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
+export const MAX_USER_ACTION_AUTHORS_FILTER_LENGTH = 100 as const;
 export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
@@ -159,6 +178,11 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_OWNER_LENGTH = 30 as const;
+export const MAX_ISO_DATE_LENGTH = 30 as const;
+export const MAX_ATTACHMENT_ID_LENGTH = 512 as const; // ES `_id` upper bound
+export const MAX_ATTACHMENT_TYPE_LENGTH = 50 as const;
+export const MAX_USERNAME_LENGTH = 1024 as const;
 export const MAX_RULE_NAME_LENGTH = 100 as const;
 export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
@@ -177,13 +201,18 @@ export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connector-generated case ids are 64-char SHA-256 digests and bulk_create accepts arbitrary ids
+export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
+export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
+export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
+export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
 
 /**
  * Cases features
@@ -266,11 +295,26 @@ export const SEARCH_DEBOUNCE_MS = 500;
  */
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
+  casesListFields: 'cases.list.fields',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
+  casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',
-  templatesTableState: 'templates.list.state',
-  templatesYamlEditorCreateState: 'templates.yaml.editor.create',
-  templatesYamlEditorEditState: 'templates.yaml.editor.edit',
+  templatesTableState: 'cases.templates.list.state',
+  templatesYamlEditorCreateState: 'cases.templates.yaml.editor.create',
+  templatesYamlEditorEditState: 'cases.templates.yaml.editor.edit',
+  userActivitySortOrder: 'cases.userActivity.sortOrder',
+  userActivityFilters: 'cases.userActivity.redesign.filters',
+  attachmentFilters: 'cases.attachments.filters',
+  casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
+  caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
+  caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
+  // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
+  // re-trigger the banner/tour by bumping the suffix.
+  casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
+  caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
+  templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
+  templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
+  showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
 /**

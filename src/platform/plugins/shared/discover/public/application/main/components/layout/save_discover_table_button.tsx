@@ -70,7 +70,7 @@ export function SaveDiscoverTableButton() {
           color="text"
           size="s"
           iconSize="m"
-          iconType="dashboardApp"
+          iconType="addToDashboard"
           onClick={() => setShowSaveModal(true)}
         />
       </EuiToolTip>

@@ -14,7 +14,8 @@ import { FLAGS } from '../src/constants';
 import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
-import { sha256 } from '../src/utils';
+import { sha256, REDACTED } from '../src/utils';
+import { asKibanaClient } from '../test_utils';
 
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
@@ -30,6 +31,7 @@ const defaultLogOpts = {
 
 describe('ChangeHistoryClient', () => {
   let esServer: EsTestCluster;
+  let esClient: Client;
   const logger = loggingSystemMock.createLogger();
 
   const defaultCostructorOpts = {
@@ -40,9 +42,8 @@ describe('ChangeHistoryClient', () => {
   };
 
   const cleanup = async () => {
-    const client = esServer.getClient();
-    await client.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
-    await client.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
+    await esClient.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
+    await esClient.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
   };
 
   beforeAll(async () => {
@@ -52,6 +53,7 @@ describe('ChangeHistoryClient', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'debug' }),
     });
     await esServer.start();
+    esClient = asKibanaClient(esServer.getClient());
   });
 
   afterAll(async () => {
@@ -66,7 +68,7 @@ describe('ChangeHistoryClient', () => {
   describe('initialize', () => {
     const getEsDataStreams = async (name: string) => {
       try {
-        const res = await esServer.getClient().indices.getDataStream({ name });
+        const res = await esClient.indices.getDataStream({ name });
         return res?.data_streams?.map((s) => s.name) ?? [];
       } catch (error) {
         if (
@@ -85,7 +87,7 @@ describe('ChangeHistoryClient', () => {
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toHaveLength(0);
 
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
       expect(client.isInitialized()).toBe(true);
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toEqual([DATA_STREAM_NAME]);
@@ -93,6 +95,16 @@ describe('ChangeHistoryClient', () => {
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'any-id');
       expect(result.total).toBe(0);
       expect(result.items).toEqual([]);
+    });
+
+    it('enrolls the data stream in DSL lifecycle without ILM or data_retention', async () => {
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
+      await client.initialize(esClient);
+
+      const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
+      const indexTemplate = template.index_templates[0]?.index_template;
+      expect(indexTemplate?.template?.settings?.index?.lifecycle?.name).toBeUndefined();
+      expect(indexTemplate?.template?.lifecycle).toEqual({ enabled: true });
     });
   });
 
@@ -128,10 +140,8 @@ describe('ChangeHistoryClient', () => {
 
   describe('log and getHistory', () => {
     let client: ChangeHistoryClient;
-    let esClient: Client;
 
     beforeEach(async () => {
-      esClient = esServer.getClient();
       client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esClient);
     });
@@ -184,7 +194,7 @@ describe('ChangeHistoryClient', () => {
 
     beforeEach(async () => {
       client = new ChangeHistoryClient(defaultCostructorOpts);
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
     });
 
     it('should log multiple changes and return them via getHistory with correct count and ordering', async () => {
@@ -304,32 +314,35 @@ describe('ChangeHistoryClient', () => {
     });
   });
 
-  describe('hashing selected fields', () => {
+  describe('masking selected fields', () => {
     let client: ChangeHistoryClient;
 
     beforeEach(async () => {
       client = new ChangeHistoryClient(defaultCostructorOpts);
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
     });
 
-    it('should hash sensitive fields in snapshot and list paths in object.fields.hashed', async () => {
+    it('should hash and redact sensitive fields and list paths in object.fields', async () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'masked-id',
         snapshot: {
           name: 'My Rule',
-          user: { email: 'secret@example.com', name: 'Alice' },
+          user: { name: 'Alice' },
           apiKey: 'sk-secret-key-12345',
         },
       };
       const fieldsToHash = {
-        user: { email: true },
         apiKey: true,
+      };
+      const fieldsToRedact = {
+        user: { name: true },
       };
       await client.log(change, {
         ...defaultLogOpts,
         spaceId: 'default',
         fieldsToHash,
+        fieldsToRedact,
       });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'masked-id');
@@ -340,16 +353,16 @@ describe('ChangeHistoryClient', () => {
       const hash = sha256(JSON.stringify(change.snapshot));
       expect(doc.object.hash).toEqual(hash);
 
-      // Check hashed field paths
-      expect(doc.object.fields.hashed.sort()).toEqual(['apiKey', 'user.email'].sort());
+      // Check hashed and redacted field paths
+      expect(doc.object.fields.hashed).toEqual(['apiKey']);
+      expect(doc.object.fields.redacted).toEqual(['user.name']);
       const snapshot = doc.object.snapshot as Record<string, unknown>;
       expect(snapshot).toEqual({
         name: 'My Rule',
         user: {
-          email: sha256('secret@example.com'),
-          name: 'Alice',
+          name: REDACTED,
         },
-        apiKey: sha256('sk-secret-key-12345'),
+        apiKey: sha256('masked-id' + 'sk-secret-key-12345').slice(-12),
       });
     });
   });

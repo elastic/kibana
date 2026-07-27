@@ -10,8 +10,22 @@ export {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   getEntityTool,
   SECURITY_GET_ENTITY_TOOL_ID,
+  listWatchlistsTool,
+  SECURITY_LIST_WATCHLISTS_TOOL_ID,
   searchEntitiesTool,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
+  setAssetCriticalityTool,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+  createWatchlistTool,
+  SECURITY_CREATE_WATCHLIST_TOOL_ID,
+  deleteWatchlistTool,
+  SECURITY_DELETE_WATCHLIST_TOOL_ID,
+  updateWatchlistTool,
+  SECURITY_UPDATE_WATCHLIST_TOOL_ID,
+  addEntitiesToWatchlistTool,
+  SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
+  removeEntitiesFromWatchlistTool,
+  SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
 } from './entity_analytics';
 export {
   attackDiscoverySearchTool,
@@ -26,3 +40,4 @@ export {
 export { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_discovery_tool';
 export { pciComplianceTool, PCI_COMPLIANCE_TOOL_ID } from './pci_compliance_tool';
 export { pciFieldMapperTool, PCI_FIELD_MAPPER_TOOL_ID } from './pci_field_mapper_tool';
+export { runRulePreviewTool, SECURITY_RUN_RULE_PREVIEW_TOOL_ID } from './run_rule_preview_tool';

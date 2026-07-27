@@ -8,12 +8,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiToolTip,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -24,11 +26,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
@@ -37,14 +39,28 @@ import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
+import {
+  getModelEOLDate,
+  getModelReleaseDate,
+  getModelStatus,
+  getRegionZoneCounts,
+} from '../../utils/eis_utils';
+import { REGION_DISPLAY_NAMES } from '../../../common/constants';
+import type { EisInferenceEndpoint } from '../../../common/types';
+import { useInferencePreferencesEnabled } from '../../feature_flag';
+import { EisModelStatus } from '../../types';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
+
+const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
-  allEndpoints: InferenceAPIConfigResponse[];
+  allEndpoints: EisInferenceEndpoint[];
   onClose: () => void;
   onSaveEndpoint: () => void;
-  onDeleteEndpoint: (endpoint: InferenceAPIConfigResponse) => void;
+  onDeleteEndpoint?: (endpoint: EisInferenceEndpoint) => void;
   onCopyEndpointId: (id: string) => void;
+  canManage?: boolean;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -54,23 +70,33 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onSaveEndpoint,
   onDeleteEndpoint,
   onCopyEndpointId,
+  canManage = true,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
+  const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
+  const showRegions = useInferencePreferencesEnabled();
 
   useEffect(() => {
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
   }, [usageTracker, modelId]);
 
-  const { endpoints, displayName, modelAuthor } = useMemo(() => {
+  const {
+    endpoints,
+    displayName,
+    modelAuthor,
+    modelStatus,
+    modelMetadata,
+    modelReleaseDate,
+    modelEOLDate,
+    regionZoneCounts,
+  } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
-    const endpointWithName = filtered.find((ep) => isInferenceEndpointWithDisplayNameMetadata(ep));
-    const endpointWithCreator = filtered.find((ep) =>
-      isInferenceEndpointWithDisplayCreatorMetadata(ep)
-    );
+    const endpointWithName = filtered.find(isInferenceEndpointWithDisplayNameMetadata);
+    const endpointWithCreator = filtered.find(isInferenceEndpointWithDisplayCreatorMetadata);
+    const endpointModelMetadata = filtered.find(isInferenceEndpointWithMetadata)?.metadata;
 
     return {
       endpoints: filtered,
@@ -80,6 +106,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
             defaultMessage: 'Unknown',
           }),
+      modelStatus: getModelStatus(endpointModelMetadata),
+      modelMetadata: endpointModelMetadata,
+      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
+      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
+      regionZoneCounts: getRegionZoneCounts(filtered, allEndpoints),
     };
   }, [allEndpoints, modelId]);
 
@@ -102,7 +133,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   }, [usageTracker]);
 
   const handleOpenEditModal = useCallback(
-    (endpoint: InferenceAPIConfigResponse) => {
+    (endpoint: EisInferenceEndpoint) => {
       usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_edit_endpoint`]);
       setEditingEndpoint(endpoint);
       setIsModalOpen(true);
@@ -124,6 +155,79 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelAuthor,
     },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate', {
+        defaultMessage: 'Release date',
+      }),
+      description: modelReleaseDate,
+    },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelEndOfLifeDate', {
+        defaultMessage: 'End-of-life date',
+      }),
+      description: modelEOLDate,
+    },
+    ...(showRegions && regionZoneCounts.length > 0
+      ? [
+          {
+            title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
+              defaultMessage: 'Regions',
+            }),
+            description: (
+              <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
+                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions, geoOnly }) =>
+                  geoOnly ? (
+                    <EuiToolTip
+                      key={geo}
+                      content={i18n.translate(
+                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.geoOnly',
+                        {
+                          defaultMessage: 'Available in the {geo} zone',
+                          values: { geo: geo.toUpperCase() },
+                        }
+                      )}
+                    >
+                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
+                        {geo.toUpperCase()}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  ) : (
+                    <EuiToolTip
+                      key={geo}
+                      title={i18n.translate(
+                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
+                        {
+                          defaultMessage: 'Available in {count} of {total} regions',
+                          values: { count: modelCount, total: totalCount },
+                        }
+                      )}
+                      content={(() => {
+                        const names = modelRegions.map(
+                          (r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region
+                        );
+                        const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
+                        return names.length > TOOLTIP_MAX_VISIBLE_REGIONS
+                          ? `${visible} ${i18n.translate(
+                              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
+                              {
+                                defaultMessage: 'and {count} more',
+                                values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
+                              }
+                            )}`
+                          : visible;
+                      })()}
+                    >
+                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
+                        {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  )
+                )}
+              </EuiBadgeGroup>
+            ),
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',
@@ -156,11 +260,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <span data-test-subj="flyoutTaskBadges">
+        <EuiBadgeGroup data-test-subj="flyoutTaskBadges">
+          <ModelStatusBadge id={modelId} status={modelStatus} metadata={modelMetadata} />
           {uniqueTaskTypes.map((taskType) => (
             <EuiBadge key={taskType}>{taskType}</EuiBadge>
           ))}
-        </span>
+        </EuiBadgeGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -187,20 +292,23 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="plusInCircle"
-                  color="text"
-                  onClick={handleOpenAddModal}
-                  data-test-subj="modelDetailFlyoutAddEndpointButton"
-                >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
-                    { defaultMessage: 'Add endpoint' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              {canManage && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="plusInCircle"
+                    color="text"
+                    onClick={handleOpenAddModal}
+                    disabled={modelStatus === EisModelStatus.DeprecatedEOL}
+                    data-test-subj="modelDetailFlyoutAddEndpointButton"
+                  >
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
+                      { defaultMessage: 'Add endpoint' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -212,7 +320,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                     endpoint={endpoint}
                     onView={handleOpenEditModal}
                     onCopy={onCopyEndpointId}
-                    onDelete={onDeleteEndpoint}
+                    onDelete={canManage ? onDeleteEndpoint : undefined}
                   />
                   {index !== endpoints.length - 1 && <EuiHorizontalRule margin="none" />}
                 </React.Fragment>

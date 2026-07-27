@@ -17,6 +17,10 @@ import type { DocViewRenderProps } from '../types';
  */
 export interface DocViewerViewedEvent {
   /**
+   * Document type of the originating top-level doc view; inherited by all nested views.
+   */
+  originDocType?: string;
+  /**
    * Identifies which doc viewer content is being viewed.
    */
   contentId: string;
@@ -60,14 +64,15 @@ export interface UseDocViewerViewedEventParams
  * Reports a viewed event for a doc viewer content area when its calculated event key changes.
  */
 export const useDocViewerViewedEvent = ({
-  reportEvent,
+  originDocType,
   contentId,
   tabId,
   keys,
   enabled = true,
   initialEventKey,
-  onEventKeyChange,
   skipNextReport,
+  reportEvent,
+  onEventKeyChange,
 }: UseDocViewerViewedEventParams) => {
   const lastReportedEventRef = useRef(initialEventKey);
   const skipNextReportRef = useRef(skipNextReport);
@@ -77,7 +82,7 @@ export const useDocViewerViewedEvent = ({
       return;
     }
 
-    const eventKey = [contentId, tabId, ...(keys ?? [])].filter(Boolean).join('|');
+    const eventKey = [contentId, tabId, originDocType, ...(keys ?? [])].filter(Boolean).join('|');
 
     if (lastReportedEventRef.current === eventKey) {
       return;
@@ -93,6 +98,7 @@ export const useDocViewerViewedEvent = ({
     try {
       onEventKeyChange?.(eventKey);
       reportEvent(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+        originDocType,
         contentId,
         tabId,
       });
@@ -100,7 +106,7 @@ export const useDocViewerViewedEvent = ({
       // eslint-disable-next-line no-console
       console.error(`Error reporting event ${DOC_VIEWER_VIEWED_EVENT_TYPE}:`, error);
     }
-  }, [contentId, enabled, keys, onEventKeyChange, reportEvent, tabId]);
+  }, [contentId, enabled, originDocType, keys, onEventKeyChange, reportEvent, tabId]);
 };
 
 /**

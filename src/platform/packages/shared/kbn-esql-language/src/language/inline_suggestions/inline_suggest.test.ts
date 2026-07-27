@@ -101,6 +101,32 @@ describe('inlineSuggest', () => {
     expect(result).toEqual({ items: [] });
   });
 
+  it('should return empty items when the editor is empty', async () => {
+    const result = await inlineSuggest('', '', mockRange, mockCallbacks);
+
+    expect(result).toEqual({ items: [] });
+    expect(mockCallbacks.getEditorExtensions).not.toHaveBeenCalled();
+  });
+
+  it('should return empty items when the cursor is on a blank trailing line', async () => {
+    const result = await inlineSuggest('FROM logs*\n', 'FROM logs*\n', mockRange, mockCallbacks);
+
+    expect(result).toEqual({ items: [] });
+    expect(mockCallbacks.getEditorExtensions).not.toHaveBeenCalled();
+  });
+
+  it('should return empty items when the cursor is on a // comment line', async () => {
+    const result = await inlineSuggest(
+      'FROM logs*\n// summarise per host',
+      'FROM logs*\n// summarise per host',
+      mockRange,
+      mockCallbacks
+    );
+
+    expect(result).toEqual({ items: [] });
+    expect(mockCallbacks.getEditorExtensions).not.toHaveBeenCalled();
+  });
+
   it('should return suggestions when cursor is at the end of the query', async () => {
     const result = await inlineSuggest('FROM logs*', 'FROM logs*', mockRange, mockCallbacks);
 

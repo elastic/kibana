@@ -17,6 +17,7 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
+    "@kbn/connector-specs",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
@@ -33,9 +34,11 @@
     "@kbn/usage-api-plugin",
     "@kbn/logging-mocks",
     "@kbn/crypto",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/core-spaces-common",
+    "@kbn/i18n"
   ],
   "exclude": ["target/**/*"]
 }

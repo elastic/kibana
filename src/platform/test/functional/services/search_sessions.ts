@@ -23,6 +23,7 @@ export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
   private readonly security = this.ctx.getService('security');
   private readonly toasts = this.ctx.getService('toasts');
   private readonly es = this.ctx.getService('es');
@@ -82,6 +83,13 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+  public async expectCompletedSearchToast() {
+    await this.retry.waitFor(
+      'the toast appears indicating that the search session is completed',
+      () => this.testSubjects.exists('backgroundSearchCompletedToastLink')
+    );
+  }
+
   public async openCompletedSearchFromToast() {
     await this.retry.try(async () => {
       const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
@@ -93,26 +101,30 @@ export class SearchSessionsService extends FtrService {
   }
 
   private async dismissSuccessToast() {
-    const successToast = await this.getSuccessToast();
-    if (!successToast) return;
-    const closeBtn = await successToast.findByTestSubject('toastCloseButton');
-    await closeBtn.click();
+    await this.retryOnStale(async () => {
+      const successToast = await this.getSuccessToast();
+      if (!successToast) return;
+      const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+      await closeBtn.click();
 
-    await this.retry.waitFor('success toast to be dismissed', async () => {
-      const _successToast = await this.getSuccessToast();
-      return !_successToast;
+      await this.retry.waitFor('success toast to be dismissed', async () => {
+        const _successToast = await this.getSuccessToast();
+        return !_successToast;
+      });
     });
   }
 
   private async getSuccessToast() {
-    const toasts = await this.toasts.getAll();
-    for (const toast of toasts) {
-      const text = await toast.getVisibleText();
-      if (text.includes('Background search completed')) {
-        return toast;
+    return await this.retryOnStale(async () => {
+      const toasts = await this.toasts.getAll();
+      for (const toast of toasts) {
+        const text = await toast.getVisibleText();
+        if (text.includes('Background search completed')) {
+          return toast;
+        }
       }
-    }
-    return null;
+      return null;
+    });
   }
 
   public async openFlyoutFromToast() {
@@ -164,14 +176,17 @@ export class SearchSessionsService extends FtrService {
       'Failed to fetch background search info',
     ];
 
-    const toasts = await this.toasts.getAll();
-    for (const toast of toasts) {
-      const text = await toast.getVisibleText();
-      if (messages.some((message) => text.includes(message))) {
-        return true;
+    return await this.retryOnStale(async () => {
+      const toasts = await this.toasts.getAll();
+      for (const toast of toasts) {
+        const text = await toast.getVisibleText();
+        if (messages.some((message) => text.includes(message))) {
+          return true;
+        }
       }
-    }
-    return false;
+
+      return false;
+    });
   }
 
   /*

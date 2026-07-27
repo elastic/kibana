@@ -27,23 +27,25 @@ apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () 
   });
 
   apiTest('GET returns all registered keys with their default values', async ({ apiClient }) => {
-    const response = await h.get(apiClient);
-    expect(response).toHaveStatusCode(200);
+    const response = await h.getAllKeys(apiClient);
+    expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual(DEFAULT_VALUES);
   });
 
   apiTest('PUT sets a valid string value', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:string_key', 'custom_value')).toHaveStatusCode(200);
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:string_key']).toBe('custom_value');
+    const response = await h.getKey(apiClient, 'test:string_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe('custom_value');
   });
 
   apiTest('PUT sets a valid number value', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:number_key', 99)).toHaveStatusCode(200);
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:number_key']).toBe(99);
+    const response = await h.getKey(apiClient, 'test:number_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe(99);
   });
 
   apiTest('PUT returns 400 for an unregistered key', async ({ apiClient }) => {
@@ -57,8 +59,9 @@ apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () 
 
     expect(await h.del(apiClient, 'test:string_key')).toHaveStatusCode(200);
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:string_key']).toBe('default_value');
+    const response = await h.getKey(apiClient, 'test:string_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe('default_value');
   });
 
   apiTest('DELETE returns 400 for an unregistered key', async ({ apiClient }) => {
@@ -75,30 +78,34 @@ apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () 
     };
     expect(await h.put(apiClient, 'test:object_key', value)).toHaveStatusCode(200);
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:object_key']).toStrictEqual(value);
+    const response = await h.getKey(apiClient, 'test:object_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toStrictEqual(value);
   });
 
   apiTest('PUT/GET array round-trips correctly', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:array_key', ['a', 'b', 'c'])).toHaveStatusCode(200);
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:array_key']).toStrictEqual(['a', 'b', 'c']);
+    const response = await h.getKey(apiClient, 'test:array_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toStrictEqual(['a', 'b', 'c']);
   });
 
   apiTest('PUT/GET boolean round-trips correctly', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:boolean_key', true)).toHaveStatusCode(200);
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:boolean_key']).toBe(true);
+    const response = await h.getKey(apiClient, 'test:boolean_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe(true);
   });
 
   apiTest('Multiple PUTs overwrite — last value wins', async ({ apiClient }) => {
     await h.put(apiClient, 'test:string_key', 'first');
     await h.put(apiClient, 'test:string_key', 'second');
 
-    const response = await h.get(apiClient);
-    expect(response.body['test:string_key']).toBe('second');
+    const response = await h.getKey(apiClient, 'test:string_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe('second');
   });
 
   apiTest(
@@ -112,8 +119,8 @@ apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () 
         pinnedItems: ['item-1'],
       });
 
-      const response = await h.get(apiClient);
-      expect(response).toHaveStatusCode(200);
+      const response = await h.getAllKeys(apiClient);
+      expect(response.statusCode).toBe(200);
       expect(response.body).toMatchObject({
         'test:string_key': 'custom',
         'test:number_key': 100,

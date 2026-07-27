@@ -69,9 +69,22 @@ describe('Cases Ui Plugin', () => {
       },
       features: featuresPluginMock.createStart(),
       security: securityMock.createStart(),
+      dashboard: {
+        findDashboardsService: jest.fn(),
+      } as unknown as CasesPublicStartDependencies['dashboard'],
       data: dataPluginMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       lens: lensPluginMock.createStartContract(),
+      maps: {
+        Map: () => null,
+        PassiveMap: () => null,
+        createLayerDescriptors: {
+          createSecurityLayerDescriptors: jest.fn(),
+          createBasemapLayerDescriptor: jest.fn(),
+          createESSearchSourceLayerDescriptor: jest.fn(),
+        },
+        suggestEMSTermJoinConfig: jest.fn(),
+      },
       contentManagement: contentManagementMock.createStartContract(),
       storage: {
         store: {
@@ -122,7 +135,11 @@ describe('Cases Ui Plugin', () => {
 
       expect(
         pluginsSetup.management.sections.section.insightsAndAlerting.registerApp
-      ).toHaveBeenCalled();
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mainPaddingSize: 'none',
+        })
+      );
     });
 
     it('should not register kibana feature when stack is disabled', async () => {
@@ -152,13 +169,15 @@ describe('Cases Ui Plugin', () => {
         },
         config: {
           templatesEnabled: false,
+          attachmentsEnabled: false,
+          chatEnabled: false,
+          casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {
           canUseCases: expect.any(Function),
           getRuleIdFromEvent: expect.any(Function),
           getUICapabilities: expect.any(Function),
           groupAlertsByRule: expect.any(Function),
-          getObservablesFromEcs: expect.any(Function),
         },
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),

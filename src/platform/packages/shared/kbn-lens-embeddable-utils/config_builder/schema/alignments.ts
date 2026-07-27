@@ -27,7 +27,7 @@ type BeforeAfterAlignment = (typeof BEFORE_AFTER_ALIGN)[number];
 
 interface Options<T extends string> {
   defaultValue?: T;
-  meta?: { description: string };
+  meta?: { description: string; id?: string; title?: string };
 }
 
 export const horizontalAlignmentSchema = (opts?: Options<HorizontalAlignment>) =>

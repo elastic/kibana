@@ -14,6 +14,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { AzureRepository, Repository } from '../../../../../common/types';
@@ -29,6 +30,8 @@ interface Props {
     replaceSettings?: boolean
   ) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const AzureSettings: React.FunctionComponent<Props> = ({
@@ -36,6 +39,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
   isManagedRepository,
   updateRepositorySettings,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const {
     settings: {
@@ -71,6 +76,30 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       [name]: value,
     });
   };
+
+  const readOnlyTooltipContent = isReadOnlyToggleDisabled
+    ? readOnlyToggleDisabledTooltipContent
+    : undefined;
+  const isReadOnlySwitchDisabled =
+    Boolean(isReadOnlyToggleDisabled) || locationMode === locationModeOptions[1].value;
+  const readOnlySwitchControl = (
+    <EuiSwitch
+      disabled={isReadOnlySwitchDisabled}
+      label={
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
+          defaultMessage="Read-only repository"
+        />
+      }
+      checked={!!readonly}
+      onChange={(e) => {
+        updateRepositorySettings({
+          readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
+        });
+      }}
+      data-test-subj="readOnlyToggle"
+    />
+  );
 
   return (
     <Fragment>
@@ -372,22 +401,11 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >
-          <EuiSwitch
-            disabled={locationMode === locationModeOptions[1].value}
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
-                defaultMessage="Read-only repository"
-              />
-            }
-            checked={!!readonly}
-            onChange={(e) => {
-              updateRepositorySettings({
-                readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
-              });
-            }}
-            data-test-subj="readOnlyToggle"
-          />
+          {readOnlyTooltipContent ? (
+            <EuiToolTip content={readOnlyTooltipContent}>{readOnlySwitchControl}</EuiToolTip>
+          ) : (
+            readOnlySwitchControl
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </Fragment>

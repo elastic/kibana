@@ -98,6 +98,48 @@ describe('useAgentBuilderAttachment', () => {
     });
   });
 
+  it('forwards attachmentDescription onto the attachment as description', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          attachmentDescription: 'Rule: My detection rule',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ description: 'Rule: My detection rule' })],
+      })
+    );
+  });
+
+  it('forwards origin onto the attachment', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          origin: 'rule-so-id',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ origin: 'rule-so-id' })],
+      })
+    );
+  });
+
   it('opens flyout with correct sessionTag', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
       wrapper: createWrapper(mockAgentBuilderService),

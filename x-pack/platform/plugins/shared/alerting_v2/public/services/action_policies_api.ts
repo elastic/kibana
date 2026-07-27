@@ -14,6 +14,7 @@ import type {
   ActionPolicyResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 export interface BulkActionActionPoliciesResponse {
@@ -65,6 +66,12 @@ export class ActionPoliciesApi {
     });
   }
 
+  public async upsertActionPolicy(id: string, data: CreateActionPolicyData) {
+    return this.http.put<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
+      body: JSON.stringify(data),
+    });
+  }
+
   public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
     return this.http.patch<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
       body: JSON.stringify(data),
@@ -111,8 +118,12 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async fetchDataFields() {
-    return this.http.get<string[]>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`);
+  public async fetchRuleEventFields(matcher?: string) {
+    const trimmed = matcher?.trim();
+    return this.http.get<string[]>(
+      ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+      trimmed ? { query: { matcher: trimmed } } : {}
+    );
   }
 
   public async fetchTags(params?: { search?: string }) {

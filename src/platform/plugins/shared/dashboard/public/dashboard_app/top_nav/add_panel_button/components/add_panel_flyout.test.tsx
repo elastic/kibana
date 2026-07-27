@@ -27,6 +27,15 @@ jest.mock('../../../../services/kibana_services', () => {
   };
 });
 
+jest.mock('../use_featured_items', () => {
+  return {
+    useFeaturedItems: () => ({
+      featuredItems: [],
+      loading: false,
+    }),
+  };
+});
+
 const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
     <IntlProvider locale="en">{children}</IntlProvider>

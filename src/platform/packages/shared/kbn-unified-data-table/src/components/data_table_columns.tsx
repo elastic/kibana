@@ -174,7 +174,6 @@ function buildEuiGridColumn({
             defaultMessage: 'Reset width',
           }),
           iconType: 'refresh',
-          size: 'xs',
           iconProps: { size: 'm' },
           onClick: () => {
             onResize({ columnId: columnName, width: undefined });

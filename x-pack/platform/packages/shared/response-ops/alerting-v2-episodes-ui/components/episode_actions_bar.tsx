@@ -11,12 +11,15 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeAction } from '../actions/types';
+import { EPISODE_ACTIONS_BAR_MORE_ACTIONS } from './translations';
 
 const PRIMARY_ACTION_IDS = new Set([
   'ALERTING_V2_ACK_EPISODE',
@@ -30,9 +33,16 @@ export interface EpisodeActionsBarProps {
   actions: EpisodeAction[];
   episodes: AlertEpisode[];
   onSuccess?: () => void;
+  /** When true, primary actions render as icon-only buttons instead of labeled buttons. */
+  iconOnly?: boolean;
 }
 
-export const EpisodeActionsBar = ({ actions, episodes, onSuccess }: EpisodeActionsBarProps) => {
+export const EpisodeActionsBar = ({
+  actions,
+  episodes,
+  onSuccess,
+  iconOnly = false,
+}: EpisodeActionsBarProps) => {
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
 
   const primaryActions = actions.filter((a) => PRIMARY_ACTION_IDS.has(a.id));
@@ -48,56 +58,72 @@ export const EpisodeActionsBar = ({ actions, episodes, onSuccess }: EpisodeActio
   };
 
   return (
-    <div data-test-subj="episodeActionsBar">
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="episodeActionsBar">
       {primaryActions.length > 0 &&
-        primaryActions.map((action) => (
-          <EuiButtonEmpty
-            key={action.id}
-            iconType={action.iconType}
-            color="text"
-            size="s"
-            data-test-subj={`episodeActionsBar-primary-${action.id}`}
-            onClick={() => handlePrimaryClick(action)}
-          >
-            {action.displayName}
-          </EuiButtonEmpty>
-        ))}
-      {overflowActions.length > 0 && (
-        <EuiPopover
-          data-test-subj="episodeActionsBar-overflow"
-          isOpen={isOverflowOpen}
-          closePopover={() => setIsOverflowOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downRight"
-          aria-label={i18n.translate(
-            'xpack.alertingV2EpisodesUi.episodeActionsBar.moreActionsPopoverAriaLabel',
-            { defaultMessage: 'More actions' }
-          )}
-          button={
-            <EuiButtonIcon
-              iconType="boxesHorizontal"
-              color="text"
-              aria-label="More actions"
-              data-test-subj="episodeActionsBar-overflow-trigger"
-              onClick={() => setIsOverflowOpen((open) => !open)}
-            />
-          }
-        >
-          <EuiContextMenuPanel
-            size="s"
-            items={overflowActions.map((action) => (
-              <EuiContextMenuItem
+        primaryActions.map((action) =>
+          iconOnly ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip key={action.id} content={action.displayName} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType={action.iconType}
+                  color="text"
+                  aria-label={action.displayName}
+                  data-test-subj={`episodeActionsBar-primary-${action.id}`}
+                  onClick={() => handlePrimaryClick(action)}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
                 key={action.id}
-                icon={<EuiIcon type={action.iconType} size="m" aria-hidden={true} />}
-                data-test-subj={`episodeActionsBar-overflow-${action.id}`}
-                onClick={() => handleOverflowClick(action)}
+                iconType={action.iconType}
+                color="text"
+                size="s"
+                data-test-subj={`episodeActionsBar-primary-${action.id}`}
+                onClick={() => handlePrimaryClick(action)}
               >
                 {action.displayName}
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiPopover>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )
+        )}
+      {overflowActions.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            data-test-subj="episodeActionsBar-overflow"
+            isOpen={isOverflowOpen}
+            closePopover={() => setIsOverflowOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+            aria-label={EPISODE_ACTIONS_BAR_MORE_ACTIONS}
+            button={
+              <EuiToolTip content={EPISODE_ACTIONS_BAR_MORE_ACTIONS} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="boxesHorizontal"
+                  color="text"
+                  aria-label={EPISODE_ACTIONS_BAR_MORE_ACTIONS}
+                  data-test-subj="episodeActionsBar-overflow-trigger"
+                  onClick={() => setIsOverflowOpen((open) => !open)}
+                />
+              </EuiToolTip>
+            }
+          >
+            <EuiContextMenuPanel
+              items={overflowActions.map((action) => (
+                <EuiContextMenuItem
+                  key={action.id}
+                  icon={<EuiIcon type={action.iconType} size="m" aria-hidden={true} />}
+                  data-test-subj={`episodeActionsBar-overflow-${action.id}`}
+                  onClick={() => handleOverflowClick(action)}
+                >
+                  {action.displayName}
+                </EuiContextMenuItem>
+              ))}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

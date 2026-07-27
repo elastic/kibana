@@ -32,6 +32,19 @@ describe('getLiquidInstance', () => {
     expect(result).toBeDefined();
   });
 
+  it('parses templates using built-in sha256 and hmac_sha256 filters', () => {
+    const engine = getLiquidInstance();
+    const shaTemplate = engine.parse('{{ val | sha256 }}');
+    expect(engine.renderSync(shaTemplate, { val: 'Polyjuice' })).toBe(
+      '44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0'
+    );
+
+    const hmacTemplate = engine.parse('{{ val | hmac_sha256: key }}');
+    expect(engine.renderSync(hmacTemplate, { val: 'Polyjuice', key: 'Polina' })).toBe(
+      '8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20'
+    );
+  });
+
   describe('json_parse filter behavior', () => {
     it('parses valid JSON strings', () => {
       const engine = getLiquidInstance();
@@ -52,6 +65,25 @@ describe('getLiquidInstance', () => {
       const template = engine.parse('{{ val | json_parse }}');
       const result = engine.renderSync(template, { val: 'not json' });
       expect(result).toBe('not json');
+    });
+  });
+
+  describe('pick filter behavior', () => {
+    it('registers pick so a template using it parses and renders (strictFilters)', () => {
+      const engine = getLiquidInstance();
+      const template = engine.parse('{{ val | pick: fields | json }}');
+      const result = engine.renderSync(template, { val: { a: 1, b: 2 }, fields: ['a'] });
+      expect(JSON.parse(result as string)).toEqual({ a: 1 });
+    });
+
+    it('keeps nested dotted-path fields', () => {
+      const engine = getLiquidInstance();
+      const template = engine.parse('{{ val | pick: fields | json }}');
+      const result = engine.renderSync(template, {
+        val: { host: { name: 'h1', ip: '10.0.0.1' } },
+        fields: ['host.name'],
+      });
+      expect(JSON.parse(result as string)).toEqual({ host: { name: 'h1' } });
     });
   });
 });

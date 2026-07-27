@@ -114,9 +114,11 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
 
         let dropdownDisplay = (
           <div>
-            <div className="eui-textTruncate" title={endpointScript.name}>
-              <strong>{endpointScript.name}</strong>
-            </div>
+            <EuiToolTip content={endpointScript.name} disableScreenReaderOutput>
+              <div className="eui-textTruncate">
+                <strong>{endpointScript.name}</strong>
+              </div>
+            </EuiToolTip>
             <div className="eui-textTruncate">{endpointScript.description || getEmptyValue()}</div>
           </div>
         );
@@ -153,14 +155,16 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
                 <div className="eui-textTruncate">{endpointScript.name}</div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="crossInCircle"
-                  color="text"
-                  display="empty"
-                  onClick={clearCurrentSelectionHandler}
-                  aria-label={CLEAR_SELECTION_LABEL}
-                  data-test-subj={getTestId('clearSelection')}
-                />
+                <EuiToolTip content={CLEAR_SELECTION_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="crossInCircle"
+                    color="text"
+                    display="empty"
+                    onClick={clearCurrentSelectionHandler}
+                    aria-label={CLEAR_SELECTION_LABEL}
+                    data-test-subj={getTestId('clearSelection')}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -201,8 +205,6 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         options={scriptOptions}
         data-test-subj={getTestId()}
         valueOfSelected={selectedScript}
-        itemLayoutAlign="top"
-        hasDividers
         fullWidth
         isLoading={isFetching}
         placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}

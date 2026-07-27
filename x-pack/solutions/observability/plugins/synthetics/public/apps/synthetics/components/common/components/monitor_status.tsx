@@ -11,6 +11,7 @@ import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_
 import type {
   EncryptedSyntheticsMonitor,
   OverviewStatusMetaData,
+  SelectedSyntheticsMonitor,
 } from '../../../../../../common/runtime_types';
 
 export const BadgeStatus = ({
@@ -50,7 +51,7 @@ export const MonitorStatus = ({
 }: {
   loading?: boolean;
   compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: EncryptedSyntheticsMonitor | SelectedSyntheticsMonitor;
   status?: string;
 }) => {
   const isBrowserType = monitor.type === 'browser';
@@ -84,6 +85,10 @@ const FAILED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.failedLabel'
 
 const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorStatus.pendingLabel', {
   defaultMessage: 'Pending',
+});
+
+const STALE_LABEL = i18n.translate('xpack.synthetics.monitorStatus.staleLabel', {
+  defaultMessage: 'Stale',
 });
 
 const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.succeededLabel', {
@@ -120,6 +125,11 @@ const badgeMapping: Record<string, BadgeData> = {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },
+  },
+  stale: {
+    color: 'warning',
+    dataTestSubj: 'monitorLatestStatusStale',
+    labels: { default: STALE_LABEL },
   },
   up: {
     color: 'success',

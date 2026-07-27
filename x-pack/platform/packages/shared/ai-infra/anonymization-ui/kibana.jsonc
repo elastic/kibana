@@ -1,7 +1,10 @@
 {
   "type": "shared-browser",
   "id": "@kbn/anonymization-ui",
-  "owner": ["@elastic/workchat-eng", "@elastic/security-generative-ai", "@elastic/security-threat-hunting"],
+  "owner": [
+    "@elastic/workchat-eng",
+    "@elastic/security-threat-hunting"
+  ],
   "group": "platform",
   "visibility": "shared"
 }

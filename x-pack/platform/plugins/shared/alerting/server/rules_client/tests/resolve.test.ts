@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { ConstructorOptions } from '../rules_client';
@@ -47,6 +48,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -154,6 +156,7 @@ describe('resolve()', () => {
           "status": "ok",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -177,7 +180,7 @@ describe('resolve()', () => {
     `);
   });
 
-  test('calls saved objects client with id and includeSnoozeData params', async () => {
+  test('always includes snooze data in result', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
       saved_object: {
@@ -230,7 +233,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
-    const result = await rulesClient.resolve({ id: '1', includeSnoozeData: true });
+    const result = await rulesClient.resolve({ id: '1' });
     expect(result.isSnoozedUntil).toBeTruthy();
   });
 
@@ -344,6 +347,7 @@ describe('resolve()', () => {
           "status": "ok",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -545,6 +549,7 @@ describe('resolve()', () => {
           "status": "ok",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
 import type { CreateRuleParams } from './create_rule';
 import type { ConstructorOptions } from '../../../../rules_client';
@@ -73,6 +74,7 @@ const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -448,6 +450,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -460,6 +463,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -658,6 +662,33 @@ describe('create()', () => {
         ],
       }
     `);
+  });
+
+  test('uses initialRevision when provided in options', async () => {
+    const data = getMockData();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...data,
+        alertTypeId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        actions: [],
+      },
+      references: [],
+    });
+
+    await rulesClient.create({ data: { ...data, actions: [] }, options: { initialRevision: 5 } });
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchObject({ revision: 5 });
   });
 
   test('sets legacyId when kibanaVersion is < 8.0.0', async () => {
@@ -962,6 +993,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -971,6 +1003,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1161,6 +1194,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1170,6 +1204,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1413,6 +1448,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1422,6 +1458,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [
           Object {
             "actionTypeId": "test",
@@ -1598,6 +1635,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1606,6 +1644,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": 10000,
         },
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1802,6 +1841,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1812,6 +1852,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2006,6 +2047,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -2016,6 +2058,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2196,6 +2239,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2208,6 +2252,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2351,6 +2396,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2363,6 +2409,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2508,6 +2555,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2520,6 +2568,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2708,6 +2757,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "123",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2722,6 +2772,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2764,6 +2815,72 @@ describe('create()', () => {
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('authorizes validated params via the rule type params authorizer with the request', async () => {
+    // No actions, so this test does not consume the shared generated-action uuid counter.
+    const data = getMockData({ actions: [] });
+    // Reject so we can assert the call arguments without exercising the full
+    // create pipeline (which needs additional per-test mocking).
+    const authorize = jest.fn().mockRejectedValue(new Error('stop'));
+    ruleTypeRegistry.get.mockReturnValue({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'test',
+      validLegacyConsumers: [],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      validate: {
+        params: schema.object({ bar: schema.boolean() }, { unknowns: 'allow' }),
+      },
+      authorize: { params: { authorize } },
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      solution: 'stack',
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrow('stop');
+
+    expect(authorize).toHaveBeenCalledTimes(1);
+    expect(authorize).toHaveBeenCalledWith(
+      { bar: true },
+      expect.objectContaining({ request: rulesClientParams.request })
+    );
+  });
+
+  test('propagates an error thrown by the rule type params authorizer', async () => {
+    const data = getMockData({ actions: [] });
+    ruleTypeRegistry.get.mockReturnValue({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      category: 'test',
+      validLegacyConsumers: [],
+      defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
+      validate: {
+        params: schema.object({}, { unknowns: 'allow' }),
+      },
+      authorize: {
+        params: { authorize: jest.fn().mockRejectedValue(new Error('not authorized')) },
+      },
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      solution: 'stack',
+    });
+
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"not authorized"`
     );
   });
 
@@ -3889,6 +4006,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -3897,6 +4015,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -4291,6 +4410,7 @@ describe('create()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": null,
           "params": Object {
             "bar": true,
@@ -4300,6 +4420,7 @@ describe('create()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [
             Object {
               "actionTypeId": "test",
@@ -4936,11 +5057,13 @@ This is the type of text _investigation guides_ will contain.`;
     const createdRuleSO = {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
+      updated_at: '2023-03-05T10:30:00.000Z',
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
         params: { bar: true },
         createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [],
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         running: false,
@@ -4998,7 +5121,6 @@ This is the type of text _investigation guides_ will contain.`;
         {
           action: 'rule_create',
           spaceId: 'default',
-          data: { metadata: { bulkCount: 1 } },
         }
       );
     });
@@ -5015,42 +5137,36 @@ This is the type of text _investigation guides_ will contain.`;
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
           {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
+            timestamp: '2023-03-05T10:30:00.000Z',
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: createdRuleSO.attributes,
-              references: createdRuleSO.references,
-            },
+            snapshot: expect.objectContaining({
+              id: '1',
+              alertTypeId: '123',
+              params: { bar: true },
+              createdAt: '2019-02-12T21:01:22.479Z',
+              updatedAt: '2019-02-12T21:01:22.479Z',
+            }),
           },
         ],
         expect.any(Object)
       );
     });
 
-    test('stamps the change with the time the create flow began (Date.now() at start of create)', async () => {
+    test('stamps the change with updated_at from the saved object', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
 
-      // Drive Date.now() so the create flow captures a known timestamp at its start.
-      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
 
-      try {
-        unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+      await trackingClient.create({ data: getMockData() });
 
-        await trackingClient.create({ data: getMockData() });
-
-        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-        const [changes] = changeTrackingService.logBulk.mock.calls[0];
-        expect(changes).toHaveLength(1);
-        expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
-      } finally {
-        dateNowSpy.mockRestore();
-      }
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes).toHaveLength(1);
+      expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
     });
 
     test('does not log when the rule type opts out of tracking', async () => {

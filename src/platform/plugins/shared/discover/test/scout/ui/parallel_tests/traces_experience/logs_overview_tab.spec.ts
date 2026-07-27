@@ -24,15 +24,15 @@ type DiscoverPage = PageObjects['discover'];
 const openTraceTimeline = async (pageObjects: {
   discover: DiscoverPage;
   tracesExperience: {
-    openOverviewTab: (d: DiscoverPage) => Promise<void>;
+    openOverviewTab: () => Promise<void>;
     flyout: TracesFlyout;
   };
 }) => {
-  await pageObjects.discover.goto();
+  await pageObjects.discover.goto({ queryMode: 'esql' });
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
-  await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+  await pageObjects.tracesExperience.openOverviewTab();
   const { flyout } = pageObjects.tracesExperience;
   await flyout.traceSummary.fullScreenButton.click();
   await expect(flyout.waterfallFlyout.container).toBeVisible();

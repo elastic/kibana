@@ -25,7 +25,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  formatFieldValue,
+  formatFieldValueText,
 } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -46,7 +46,6 @@ import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
-import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -68,23 +67,21 @@ import { RiskScoreCell } from './risk_score_cell';
 
 import { AdditionalControls } from './additional_controls';
 import { EntitiesEmptyState } from './empty_state';
-import { DataViewContext } from '.';
+import { DataViewContext, type EntitiesTableConfig } from '.';
 import { getEntityFields } from './utils';
 import { useStyles } from './hooks/use_styles';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
 import { useLeadingControlColumns } from './hooks/use_leading_control_columns';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
-  ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
   TEST_SUBJ_GROUPING,
-  LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
-  ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
 } from './constants';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 interface DefaultColumn {
   id: string;
@@ -168,6 +165,12 @@ export interface EntitiesDataTableProps {
   height?: number;
   groupSelectorComponent?: JSX.Element;
   selectedGroup?: string;
+  /**
+   * Per-instance identifiers/localStorage keys. Required so each shared mount
+   * (EA home page, case attachments accordion, …) declares its own and never
+   * silently reuses another surface's keys.
+   */
+  config: EntitiesTableConfig;
 }
 
 export const EntitiesDataTable = ({
@@ -175,7 +178,9 @@ export const EntitiesDataTable = ({
   height,
   groupSelectorComponent,
   selectedGroup,
+  config,
 }: EntitiesDataTableProps) => {
+  const { tableId, columnsLocalStorageKey, columnsSettingsLocalStorageKey } = config;
   const {
     pageSize,
     sort,
@@ -190,10 +195,13 @@ export const EntitiesDataTable = ({
   } = state;
 
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
-  const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
+    alertsPrivileges: {
+      alerts: { read: canReadAlerts },
+    },
   } = useUserPrivileges();
+  const { hasIndexRead: canReadAlertsIndex } = useAlertsPrivileges();
   const { setQuery, deleteQuery } = useGlobalTime();
 
   const openTableFlyout = useCallback(
@@ -216,13 +224,13 @@ export const EntitiesDataTable = ({
           params: {
             [panelParam]: entityName,
             entityId,
-            contextID: ENTITY_ANALYTICS_TABLE_ID,
-            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+            contextID: tableId,
+            scopeId: tableId,
           },
         },
       });
     },
-    [openFlyout, closeFlyout]
+    [openFlyout, closeFlyout, tableId]
   );
 
   const {
@@ -248,15 +256,15 @@ export const EntitiesDataTable = ({
 
   useEffect(() => {
     setQuery({
-      id: ENTITY_ANALYTICS_TABLE_ID,
+      id: tableId,
       inspect: inspectData,
       loading: isLoadingGridData,
       refetch,
     });
     return () => {
-      deleteQuery({ id: ENTITY_ANALYTICS_TABLE_ID });
+      deleteQuery({ id: tableId });
     };
-  }, [setQuery, deleteQuery, inspectData, isLoadingGridData, refetch]);
+  }, [setQuery, deleteQuery, inspectData, isLoadingGridData, refetch, tableId]);
 
   const [lastUpdatedAt, setLastUpdatedAt] = useState(Date.now());
   useEffect(() => {
@@ -266,12 +274,12 @@ export const EntitiesDataTable = ({
   }, [rowsData?.pages, isLoadingGridData]);
 
   const [localStorageColumns, setLocalStorageColumns] = useLocalStorage(
-    ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
+    columnsLocalStorageKey,
     DEFAULT_COLUMNS.map((c) => c.id)
   );
 
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
-    LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
+    columnsSettingsLocalStorageKey,
     {
       columns: DEFAULT_COLUMNS.reduce((columnSettings, column) => {
         const columnDefaultSettings = column.width ? { width: column.width } : {};
@@ -300,14 +308,14 @@ export const EntitiesDataTable = ({
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
 
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
-    const config: CustomGridColumnsConfiguration = {
+    const columnsConfig: CustomGridColumnsConfiguration = {
       alerts: ({ column }) => ({ ...column, isExpandable: false }),
       [ENTITY_FIELDS.ENTITY_SOURCE]: ({ column }) => ({ ...column, isExpandable: false }),
     };
     if (dataView.timeFieldName) {
-      config[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
+      columnsConfig[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
     }
-    return config;
+    return columnsConfig;
   }, [dataView.timeFieldName]);
 
   const {
@@ -334,6 +342,12 @@ export const EntitiesDataTable = ({
 
   const styles = useStyles();
 
+  const columnsWithPrivileges = useMemo(
+    () =>
+      localStorageColumns?.filter((c) => c !== 'alerts' || (canReadAlerts && canReadAlertsIndex)),
+    [localStorageColumns, canReadAlerts, canReadAlertsIndex]
+  );
+
   const {
     columns: currentColumns,
     onSetColumns,
@@ -345,7 +359,7 @@ export const EntitiesDataTable = ({
     dataView,
     dataViews,
     setAppState: (props) => setLocalStorageColumns(props.columns),
-    columns: localStorageColumns,
+    columns: columnsWithPrivileges,
     sort,
   });
 
@@ -405,7 +419,7 @@ export const EntitiesDataTable = ({
             return getEmptyTagValue();
           }
           const field = dv.fields.getByName(columnId);
-          return <>{formatFieldValue(value, row.raw, ff, dv, field, 'text')}</>;
+          return <>{formatFieldValueText({ value, fieldFormats: ff, dataView: dv, field })}</>;
         },
       ])
     );
@@ -427,7 +441,12 @@ export const EntitiesDataTable = ({
               const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
               const isTarget = resolvedTo === null || resolvedTo === undefined;
               const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
-              const formattedValue = formatFieldValue(value, row.raw, ff, dv, field, 'text');
+              const formattedValue = formatFieldValueText({
+                value,
+                fieldFormats: ff,
+                dataView: dv,
+                field,
+              });
 
               if (isTarget) {
                 return (
@@ -494,7 +513,7 @@ export const EntitiesDataTable = ({
 
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
-    investigateInTimeline,
+    tableId,
   });
 
   const onResetColumns = () => {
@@ -556,7 +575,7 @@ export const EntitiesDataTable = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <InspectButton queryId={ENTITY_ANALYTICS_TABLE_ID} title={INSPECT_TITLE} />
+                <InspectButton queryId={tableId} title={INSPECT_TITLE} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <LastUpdated updatedAt={lastUpdatedAt} />
@@ -583,7 +602,7 @@ export const EntitiesDataTable = ({
         </EuiFlexGroup>
       );
     },
-    [lastUpdatedAt, groupSelectorComponent]
+    [lastUpdatedAt, groupSelectorComponent, tableId]
   );
 
   const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;

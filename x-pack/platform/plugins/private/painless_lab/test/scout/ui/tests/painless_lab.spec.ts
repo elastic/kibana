@@ -39,26 +39,36 @@ const TEST_SCRIPT_REQUEST = `POST _scripts/painless/_execute
   }
 }`;
 
-test.describe('Painless Lab', { tag: tags.stateful.all }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.painlessLab.goto();
-    await pageObjects.painlessLab.waitForEditorToLoad();
-  });
+test.describe(
+  'Painless Lab',
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+    ],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.painlessLab.goto();
+      await pageObjects.painlessLab.waitForEditorToLoad();
+    });
 
-  test('validate painless lab editor and request', async ({ pageObjects }) => {
-    await pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
-    await pageObjects.painlessLab.editorOutputPane.waitFor({ state: 'visible' });
-    await expect(pageObjects.painlessLab.editorOutputPane).toContainText(TEST_SCRIPT_RESULT);
+    test('validate painless lab editor and request', async ({ pageObjects }) => {
+      await pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
+      await pageObjects.painlessLab.editorOutputPane.waitFor({ state: 'visible' });
+      await expect(pageObjects.painlessLab.editorOutputPane).toContainText(TEST_SCRIPT_RESULT);
 
-    await pageObjects.painlessLab.viewRequestButton.click();
-    await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
+      await pageObjects.painlessLab.viewRequestButton.click();
+      await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
 
-    expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
+      expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
 
-    await pageObjects.painlessLab.flyoutResponseTab.click();
-    expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(
-      UPDATED_TEST_SCRIPT_RESPONSE
-    );
-  });
-});
+      await pageObjects.painlessLab.flyoutResponseTab.click();
+      expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(
+        UPDATED_TEST_SCRIPT_RESPONSE
+      );
+    });
+  }
+);

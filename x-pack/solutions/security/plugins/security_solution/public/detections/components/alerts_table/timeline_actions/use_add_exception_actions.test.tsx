@@ -8,12 +8,9 @@
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useAlertExceptionActions } from './use_add_exception_actions';
-import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-
-jest.mock('../../user_info');
-const mockUseUserData = useUserData as jest.Mock;
+import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
@@ -21,13 +18,19 @@ const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
+jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+
 describe('useAlertExceptionActions', () => {
+  beforeEach(() => {
+    mockUseAlertsPrivileges.mockReturnValue({ hasIndexWrite: true });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return both add rule exception and add endpoint exception menu items with all privileges', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: true }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: true } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
@@ -46,7 +49,6 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should disable adding endpoint exceptions when user has no endpoint exceptions ALL privilege', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: true }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: true } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(false);
 
@@ -65,7 +67,6 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should disable adding endpoint exceptions when alert is not an endpoint alert', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: true }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: true } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
@@ -85,7 +86,6 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should disable adding rule exceptions when user has no security:ALL privilege', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: true }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: false } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
@@ -104,9 +104,9 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should disable adding rule exceptions when user has no index write privilege', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: false }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: true } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
+    mockUseAlertsPrivileges.mockReturnValue({ hasIndexWrite: false });
 
     const { result } = renderHook(
       () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: jest.fn() }),
@@ -123,7 +123,6 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should not return menu items when user has neither security:ALL nor endpoint exceptions ALL privilege', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: true }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: false } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(false);
 
@@ -136,9 +135,9 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should not return menu items when user has neither index write and it is not an endpoint alert', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: false }]);
     mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { exceptions: { edit: true } } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
+    mockUseAlertsPrivileges.mockReturnValue({ hasIndexWrite: false });
 
     const { result } = renderHook(
       () =>

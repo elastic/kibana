@@ -23,6 +23,9 @@ interface LifecyclePhaseButtonProps {
   size?: string;
   testSubjPrefix?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
+  showWarningIcon?: boolean;
 }
 
 export const LifecyclePhaseButton = ({
@@ -36,8 +39,13 @@ export const LifecyclePhaseButton = ({
   size,
   testSubjPrefix,
   isEditLifecycleFlyoutOpen = false,
+  disableInteractions = false,
+  showWarningIcon = false,
 }: LifecyclePhaseButtonProps) => {
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  // While any lifecycle-editing flyout is open the timeline is in preview mode, where the stored
+  // sizes (which describe the currently applied lifecycle) would be misleading.
+  const showSize = Boolean(size) && !isEditLifecycleFlyoutOpen && !disableInteractions;
 
   return (
     <EuiPanel
@@ -66,6 +74,7 @@ export const LifecyclePhaseButton = ({
         backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
         isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '48px',
+        fullSize: true,
         ...(isDelete
           ? {
               minWidth: '50px',
@@ -81,7 +90,7 @@ export const LifecyclePhaseButton = ({
           justifyContent="center"
           alignItems="center"
           responsive={false}
-          style={{ width: '100%', height: '100%' }}
+          css={{ width: '100%', height: '100%' }}
         >
           <EuiFlexItem grow={false}>
             <EuiIcon
@@ -96,39 +105,57 @@ export const LifecyclePhaseButton = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-          <EuiText
-            size="xs"
-            color={euiTheme.colors.plainDark}
-            data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-              fontWeight: euiTheme.font.weight.semiBold,
-            }}
-          >
-            {capitalize(label)}
-          </EuiText>
-          <EuiText
-            size="xs"
-            color={euiTheme.colors.plainDark}
-            data-test-subj={
-              size && !isEditLifecycleFlyoutOpen
-                ? `${prefix}lifecyclePhase-${label}-size`
-                : undefined
-            }
-            title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-            }}
-          >
-            {size && !isEditLifecycleFlyoutOpen ? size : null}
-          </EuiText>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {showWarningIcon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type="warning"
+                size="m"
+                color="text"
+                data-test-subj={`${prefix}lifecyclePhase-${label}-warningIcon`}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.phaseWarningIconAriaLabel',
+                  {
+                    defaultMessage: '{phase} phase requires attention',
+                    values: { phase: capitalize(label) },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          )}
+
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.plainDark}
+                data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
+                css={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  fontWeight: euiTheme.font.weight.semiBold,
+                }}
+              >
+                {capitalize(label)}
+              </EuiText>
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.plainDark}
+                data-test-subj={showSize ? `${prefix}lifecyclePhase-${label}-size` : undefined}
+                title={showSize ? size : undefined}
+                css={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                }}
+              >
+                {showSize ? size : null}
+              </EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>

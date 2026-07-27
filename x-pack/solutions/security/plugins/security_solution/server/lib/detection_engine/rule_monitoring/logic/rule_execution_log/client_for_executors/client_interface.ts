@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConsumerExecutionMetrics } from '@kbn/alerting-plugin/server/types';
+import type { ConsumerExecutionMetrics, CpsData } from '@kbn/alerting-plugin/server/types';
 import type {
   RuleExecutionStatus,
   RuleExecutionStatusEnum,
@@ -123,6 +123,11 @@ export interface RuleExecutionContext {
    * Kibana space id of the rule being executed.
    */
   spaceId: string;
+
+  /**
+   * Resolved CPS (Cross-Project Search) data for this execution scope.
+   */
+  cpsData?: CpsData;
 }
 
 export interface LogMessageOptions {

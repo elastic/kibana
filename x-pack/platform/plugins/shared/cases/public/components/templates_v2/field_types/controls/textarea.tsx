@@ -6,10 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import React, { useCallback, useMemo } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { EuiFormRow, EuiTextArea, EuiMarkdownEditor } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -23,9 +23,7 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
-
-const { emptyField } = fieldValidators;
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
 type TextareaProps = z.infer<typeof TextareaFieldSchema> & ConditionRenderProps;
 
@@ -33,62 +31,108 @@ export const Textarea = ({
   label,
   name,
   type,
+  metadata,
   isRequired,
+  isRequiredOnClose,
   patternValidation,
   minLength,
   maxLength,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
 }: TextareaProps) => {
-  const validations = [];
+  const { control, resetField } = useFormContext();
+  const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+  const isMarkdown = metadata?.markdown === true;
 
-  if (isRequired) {
-    validations.push({ validator: emptyField(FIELD_REQUIRED) });
-  }
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
-  if (patternValidation) {
-    const { regex, message } = patternValidation;
-    validations.push({
-      validator: ({ value }: { value: unknown }) => {
-        if (typeof value !== 'string' || value === '') return;
+  const rules = useMemo(() => {
+    const validate: Record<string, (value: unknown) => true | string> = {};
+
+    if (isRequired) {
+      validate.required = (value) =>
+        typeof value === 'string' && value.trim() !== '' ? true : FIELD_REQUIRED;
+    }
+
+    if (patternValidation) {
+      const { regex, message } = patternValidation;
+      validate.pattern = (value) => {
+        if (typeof value !== 'string' || value === '') return true;
         try {
-          if (!new RegExp(regex).test(value)) {
-            return { message: message ?? FIELD_PATTERN_MISMATCH(regex) };
-          }
+          return new RegExp(regex).test(value) ? true : message ?? FIELD_PATTERN_MISMATCH(regex);
         } catch {
-          return { message: FIELD_PATTERN_INVALID };
+          return FIELD_PATTERN_INVALID;
         }
-      },
-    });
-  }
+      };
+    }
 
-  if (minLength !== undefined) {
-    validations.push({
-      validator: ({ value }: { value: unknown }) => {
-        if (typeof value === 'string' && value.length < minLength) {
-          return { message: FIELD_MIN_LENGTH(minLength) };
-        }
-      },
-    });
-  }
+    if (minLength !== undefined) {
+      validate.minLength = (value) =>
+        typeof value === 'string' && value.length < minLength ? FIELD_MIN_LENGTH(minLength) : true;
+    }
 
-  if (maxLength !== undefined) {
-    validations.push({
-      validator: ({ value }: { value: unknown }) => {
-        if (typeof value === 'string' && value.length > maxLength) {
-          return { message: FIELD_MAX_LENGTH(maxLength) };
-        }
-      },
-    });
-  }
+    if (maxLength !== undefined) {
+      validate.maxLength = (value) =>
+        typeof value === 'string' && value.length > maxLength ? FIELD_MAX_LENGTH(maxLength) : true;
+    }
+
+    return { validate };
+  }, [isRequired, patternValidation, minLength, maxLength]);
 
   return (
-    <UseField
+    <Controller
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
-      component={TextAreaField}
-      config={{ validations }}
-      componentProps={{
-        label,
-        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue=""
+      render={({ field, fieldState }) => {
+        const showInlineActions = fieldState.isDirty && onConfirm != null;
+        return (
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+              isInvalid={Boolean(fieldState.error)}
+              error={fieldState.error?.message}
+              fullWidth
+            >
+              {isMarkdown ? (
+                <EuiMarkdownEditor
+                  value={(field.value as string) ?? ''}
+                  onChange={field.onChange}
+                  aria-label={typeof label === 'string' ? label : name}
+                  editorId={path}
+                  data-test-subj="template-field-markdown-editor"
+                  readOnly={isSaving}
+                />
+              ) : (
+                <EuiTextArea
+                  inputRef={field.ref}
+                  name={field.name}
+                  value={(field.value as string) ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  isInvalid={Boolean(fieldState.error)}
+                  disabled={isSaving}
+                  fullWidth
+                />
+              )}
+            </EuiFormRow>
+            {showInlineActions && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
       }}
     />
   );

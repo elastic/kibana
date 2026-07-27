@@ -117,7 +117,7 @@ const AddButton = ({ type, onSelectType, selectors, responses }: AddSelectorButt
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

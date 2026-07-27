@@ -24,6 +24,7 @@ export type FilterItems = Array<{
   label: string;
   checked?: 'on' | undefined;
   disabled?: boolean;
+  isGroupLabel?: boolean;
   searchableLabel?: string;
   'data-test-subj'?: string;
 }>;
@@ -76,7 +77,7 @@ export const useScriptLibraryFilter = (
   const filterOptions = useMemo(() => {
     items.unshift({
       label: FILTER_PLACEHOLDERS.getFilterOptionsLabel(items.length),
-      disabled: true,
+      isGroupLabel: true,
     });
     return items;
   }, [items]);

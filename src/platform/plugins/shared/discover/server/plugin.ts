@@ -16,7 +16,10 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { registerRoutes } from './api/register_routes';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
@@ -40,11 +43,13 @@ export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
   private readonly config: ConfigSchema;
+  private readonly logger: Logger;
   private subscriptions: Subscription[] = [];
   private embeddableTransformsEnabled = true;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(
@@ -55,10 +60,17 @@ export class DiscoverServerPlugin
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
       share?: SharePluginSetup;
+      usageCollection?: UsageCollectionSetup;
     }
   ) {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
+
+    registerRoutes(
+      core.http,
+      this.logger,
+      plugins.usageCollection?.createUsageCounter('discover_sessions_api')
+    );
 
     if (plugins.home) {
       registerSampleData(plugins.home.sampleData);

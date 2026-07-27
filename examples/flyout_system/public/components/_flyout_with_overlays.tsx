@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core/public';
+import { useBooleanUrlState } from '@kbn/shared-url-state';
 
 import {
   createChildFlyoutDescriptionItems,
@@ -280,7 +281,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useBooleanUrlState(
+    `flyoutOverlays_${title.replace(/\s+/g, '')}Open`
+  );
   const flyoutRef = useRef<OverlayRef | null>(null);
   const childFlyoutRefA = useRef<OverlayRef | null>(null);
   const childFlyoutRefB = useRef<OverlayRef | null>(null);
@@ -294,51 +297,55 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   }, [title]);
 
   const handleCloseFlyout = useCallback(() => {
-    if (flyoutRef.current) {
+    setIsFlyoutOpen(false);
+  }, [setIsFlyoutOpen]);
+
+  // Bridge URL-backed open state to the imperative overlays.openSystemFlyout API:
+  // opening mounts the overlay, closing (via URL, Back button, or user click) unmounts it.
+  useEffect(() => {
+    if (isFlyoutOpen && !flyoutRef.current) {
+      flyoutRef.current = overlays.openSystemFlyout(
+        <FlyoutContent
+          historyKey={historyKey}
+          title={title}
+          flyoutType={flyoutType}
+          flyoutOwnFocus={flyoutOwnFocus}
+          mainSize={mainSize}
+          mainMaxWidth={mainMaxWidth}
+          childSize={childSize}
+          childMaxWidth={childMaxWidth}
+          overlays={overlays}
+          childFlyoutRefA={childFlyoutRefA}
+          childFlyoutRefB={childFlyoutRefB}
+          handleCloseFlyout={handleCloseFlyout}
+        />,
+        {
+          id: `mainFlyout-${title}`,
+          title,
+          type: flyoutType,
+          ownFocus: flyoutOwnFocus,
+          size: mainSize,
+          minWidth: FLYOUT_MIN_WIDTH,
+          maxWidth: mainMaxWidth,
+          resizable: true,
+          onActive: mainFlyoutOnActive,
+          onClose: () => {
+            setIsFlyoutOpen(false);
+            // flyoutRef is cleared by the effect cleanup
+          },
+          ['aria-labelledby']: `flyoutHeading-${title}`,
+          historyKey,
+        }
+      );
+    } else if (!isFlyoutOpen && flyoutRef.current) {
       flyoutRef.current.close();
       flyoutRef.current = null;
-      setIsFlyoutOpen(false);
+      setTimeout(() => {
+        triggerRef.current?.focus();
+      }, 100);
     }
-
-    // Return focus to trigger button after closing main flyout
-    setTimeout(() => {
-      triggerRef.current?.focus();
-    }, 100);
-  }, []);
-
-  const openFlyout = useCallback(() => {
-    flyoutRef.current = overlays.openSystemFlyout(
-      <FlyoutContent
-        historyKey={historyKey}
-        title={title}
-        flyoutType={flyoutType}
-        flyoutOwnFocus={flyoutOwnFocus}
-        mainSize={mainSize}
-        mainMaxWidth={mainMaxWidth}
-        childSize={childSize}
-        childMaxWidth={childMaxWidth}
-        overlays={overlays}
-        childFlyoutRefA={childFlyoutRefA}
-        childFlyoutRefB={childFlyoutRefB}
-        handleCloseFlyout={handleCloseFlyout}
-      />,
-      {
-        id: `mainFlyout-${title}`,
-        title,
-        type: flyoutType,
-        ownFocus: flyoutOwnFocus,
-        size: mainSize,
-        minWidth: FLYOUT_MIN_WIDTH,
-        maxWidth: mainMaxWidth,
-        resizable: true,
-        onActive: mainFlyoutOnActive,
-        onClose: handleCloseFlyout,
-        ['aria-labelledby']: `flyoutHeading-${title}`,
-        historyKey,
-      }
-    );
-    setIsFlyoutOpen(true);
   }, [
+    isFlyoutOpen,
     title,
     flyoutType,
     flyoutOwnFocus,
@@ -346,11 +353,22 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     mainMaxWidth,
     childSize,
     childMaxWidth,
-    handleCloseFlyout,
     overlays,
-    mainFlyoutOnActive,
     historyKey,
+    mainFlyoutOnActive,
+    handleCloseFlyout,
+    setIsFlyoutOpen,
   ]);
+
+  // Unmount cleanup: prevent an orphaned overlay if the component unmounts while open.
+  useEffect(() => {
+    return () => {
+      if (flyoutRef.current) {
+        flyoutRef.current.close();
+        flyoutRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -358,8 +376,14 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              {/* Switches to control flyout options */}
-              <FlyoutTypeSwitch title={title} flyoutType={flyoutType} onChange={setFlyoutType} />
+              {/* Switches to control flyout options. Disabled while open: the imperative
+                  overlays.openSystemFlyout API bakes these options in at open time. */}
+              <FlyoutTypeSwitch
+                title={title}
+                flyoutType={flyoutType}
+                onChange={setFlyoutType}
+                disabled={isFlyoutOpen}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {/* Switch for ownFocus behavior */}
@@ -367,7 +391,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
-                disabled={flyoutType === 'push'}
+                disabled={isFlyoutOpen || flyoutType === 'push'}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -375,7 +399,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlexItem grow={false}>
           <EuiButton
             buttonRef={triggerRef}
-            onClick={openFlyout}
+            onClick={() => setIsFlyoutOpen(true)}
             disabled={isFlyoutOpen}
             data-test-subj={`openMainFlyoutOverlaysButton-${title}`}
           >

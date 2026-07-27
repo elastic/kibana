@@ -28,6 +28,7 @@ import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import { OpenInDiscover } from '../links/discover_links/open_in_discover';
+import { SPAN_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { SpanMetadata } from '../metadata_table/span_metadata';
@@ -168,6 +169,7 @@ export function SpanFlyout({
                     spanId,
                     sortDirection: 'DESC',
                   }}
+                  ebt={{ element: SPAN_FLYOUT_EBT_ELEMENTS.HEADER }}
                 />
               </EuiFlexItem>
             )}

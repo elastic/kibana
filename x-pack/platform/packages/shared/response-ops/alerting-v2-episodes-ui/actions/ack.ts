@@ -22,7 +22,7 @@ export const createAckAction = (deps: AckActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_ACK_EPISODE',
   order: 10,
   displayName: i18n.ACK,
-  iconType: 'info',
+  iconType: 'checkCircle',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 && episodes.some((ep) => ep.last_ack_action !== 'ack'),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {

@@ -17,8 +17,8 @@ jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../hooks/use_create_timeline');
 
 const mockGetState = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

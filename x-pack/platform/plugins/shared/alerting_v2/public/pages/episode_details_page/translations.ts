@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const EPISODE_DETAILS_BREADCRUMB_FALLBACK = i18n.translate(
   'xpack.alertingV2.breadcrumbs.episodeDetailsFallback',
   {
-    defaultMessage: 'Episode',
+    defaultMessage: 'Alert episode',
   }
 );
 
@@ -26,6 +26,13 @@ export const METADATA_TAB_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.mainTabMetadata',
   {
     defaultMessage: 'Metadata',
+  }
+);
+
+export const TIMELINE_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabTimeline',
+  {
+    defaultMessage: 'Timeline',
   }
 );
 
@@ -65,18 +72,6 @@ export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
   });
 };
 
-/** --- Rule kind --- */
-export const RULE_KIND_SIGNAL = i18n.translate('xpack.alertingV2.episodeDetails.ruleKindSignal', {
-  defaultMessage: 'Signal',
-});
-
-export const RULE_KIND_ALERTING = i18n.translate(
-  'xpack.alertingV2.episodeDetails.ruleKindAlerting',
-  {
-    defaultMessage: 'Alerting',
-  }
-);
-
 /** --- Error state --- */
 export const EPISODE_NOT_FOUND_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.episodeNotFoundTitle',
@@ -95,6 +90,91 @@ export const EPISODE_NOT_FOUND_BODY = i18n.translate(
 export const BACK_TO_ALERT_EPISODES = i18n.translate('xpack.alertingV2.episodes.backToEpisodes', {
   defaultMessage: 'Back to alert episodes',
 });
+
+export const EPISODES_LIST_BACK_LABEL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.episodesListBackLabel',
+  {
+    defaultMessage: 'Alert episodes',
+  }
+);
+
+/** --- App header badges --- */
+export const STATUS_BADGE_INACTIVE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeInactive',
+  {
+    defaultMessage: 'Inactive',
+  }
+);
+
+export const STATUS_BADGE_PENDING = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgePending',
+  {
+    defaultMessage: 'Pending',
+  }
+);
+
+export const STATUS_BADGE_ACTIVE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeActive',
+  {
+    defaultMessage: 'Active',
+  }
+);
+
+export const STATUS_BADGE_RECOVERING = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeRecovering',
+  {
+    defaultMessage: 'Recovering',
+  }
+);
+
+export const STATUS_BADGE_UNKNOWN = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeUnknown',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
+export const ACKNOWLEDGED_BADGE_LABEL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.acknowledgedBadgeLabel',
+  {
+    defaultMessage: 'Acknowledged',
+  }
+);
+
+export const ACKNOWLEDGED_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodeDetails.acknowledgedBadgeTooltip',
+  {
+    defaultMessage: 'This alert is acknowledged.',
+  }
+);
+
+export const SNOOZED_BADGE_LABEL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedBadgeLabel',
+  {
+    defaultMessage: 'Snoozed',
+  }
+);
+
+export const SNOOZED_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedBadgeTooltip',
+  {
+    defaultMessage: 'Notifications are snoozed.',
+  }
+);
+
+export const getSnoozedUntilTooltip = (expiry: Date): string =>
+  i18n.translate('xpack.alertingV2.episodeDetails.snoozedUntilBadgeTooltip', {
+    defaultMessage: 'Notifications snoozed until {expiry}.',
+    values: {
+      expiry: expiry.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
+    },
+  });
 
 /** --- Page header --- */
 export const LOADING_RULE_TITLE = i18n.translate(
@@ -140,14 +220,6 @@ export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.gr
 
 export const TAGS_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.tagsLabel', {
   defaultMessage: 'Tags',
-});
-
-export const TRIGGERED_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
-  defaultMessage: 'Triggered',
-});
-
-export const DURATION_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.durationLabel', {
-  defaultMessage: 'Duration',
 });
 
 export const ASSIGNEE_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.assigneeLabel', {
@@ -221,74 +293,3 @@ export const RULE_STATUS_DISABLED = i18n.translate(
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2.episodeDetails.runbookEmpty', {
   defaultMessage: 'No runbook has been added to this rule.',
 });
-
-export const RELATED_EPISODES_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedEpisodesTitle',
-  {
-    defaultMessage: 'Related alert episodes',
-  }
-);
-
-export const RELATED_EPISODES_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedEpisodesEmpty',
-  {
-    defaultMessage: 'No related episodes found.',
-  }
-);
-
-export const RELATED_SAME_GROUP_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedSameGroupTitle',
-  {
-    defaultMessage: 'Same alert group',
-  }
-);
-
-export const RELATED_SAME_GROUP_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedSameGroupDescription',
-  {
-    defaultMessage: 'Other episodes for this rule that share the same group as this alert.',
-  }
-);
-
-export const RELATED_SAME_GROUP_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedSameGroupEmpty',
-  {
-    defaultMessage: 'No other episodes in this group.',
-  }
-);
-
-export const RELATED_OTHER_GROUPS_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedOtherGroupsTitle',
-  {
-    defaultMessage: 'Other groups for this rule',
-  }
-);
-
-export const RELATED_OTHER_GROUPS_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedOtherGroupsDescription',
-  {
-    defaultMessage:
-      'Other episodes for this rule that belong to a different group than the current alert.',
-  }
-);
-
-export const RELATED_RULE_ONLY_LIST_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedRuleOnlyListTitle',
-  {
-    defaultMessage: 'Other episodes for this rule',
-  }
-);
-
-export const RELATED_RULE_ONLY_LIST_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedRuleOnlyListDescription',
-  {
-    defaultMessage: 'Other episodes for this rule, excluding the current one.',
-  }
-);
-
-export const RELATED_OTHER_GROUPS_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedOtherGroupsEmpty',
-  {
-    defaultMessage: 'No other related episodes for this rule.',
-  }
-);

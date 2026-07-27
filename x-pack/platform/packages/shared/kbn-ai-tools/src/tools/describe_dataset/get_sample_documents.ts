@@ -17,6 +17,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { castArray } from 'lodash';
+import {
+  parseEsqlSourceDocuments,
+  getEsqlDocumentId,
+} from '../../utils/parse_esql_source_documents';
 
 const SAMPLE_PROBABILITY_FACTOR = 3;
 const SAMPLE_LIMIT_FACTOR = 10;
@@ -32,7 +36,27 @@ interface GetSampleDocumentsEsqlParams {
   size?: number;
   sampleSize?: number;
   whereCondition?: WhereCondition;
-  loadUnmappedFields?: boolean;
+  /**
+   * Controls the ES|QL `SET unmapped_fields=...` prefix:
+   * - `'LOAD'` reads unmapped fields from `_source` (used by the entity-filter
+   *   sampling arm to query source-only fields).
+   * - `'NULLIFY'` nullifies unmapped fields so full-text-search functions like
+   *   `MATCH_PHRASE` skip them silently instead of raising
+   *   `verification_exception: Unknown column [...]`.
+   * Omitted means ES|QL uses its default unmapped-field behavior (any direct
+   * reference to an unmapped column is a verification error).
+   */
+  unmappedFields?: 'LOAD' | 'NULLIFY';
+  /**
+   * Optional Query DSL filter clauses forwarded as the ES|QL `_query` request's
+   * `filter` parameter. ES applies these at the request layer (before the ES|QL
+   * pipeline runs), so callers can pass raw fixture-style DSL (`term`, `terms`,
+   * `match`, `match_phrase`, `exists`, `bool { should, minimum_should_match }`,
+   * ...) without translating to KQL. Multiple clauses are ANDed with the
+   * internal date-range filter.
+   */
+  dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
+  requestTimeout: number;
 }
 
 interface GetSampleDocumentsEsqlResponse {
@@ -123,9 +147,13 @@ export function getSampleDocuments({
  * oversamples with `SAMPLE`, shuffles the returned rows client-side, then trims
  * to the requested size.
  *
- * `loadUnmappedFields` emits `SET unmapped_fields="LOAD"` so ES|QL predicates
- * can evaluate source-only fields. This replaces the older fieldCaps +
- * runtime_mappings path used for entity-filtered Significant Events sampling.
+ * `unmappedFields` emits `SET unmapped_fields="<mode>"` so ES|QL predicates
+ * can evaluate source-only fields (`'LOAD'`, replaces the older fieldCaps +
+ * runtime_mappings path for entity-filtered sampling) or silently nullify
+ * unmapped columns (`'NULLIFY'`, required when the `WHERE` includes
+ * `MATCH_PHRASE` / `MATCH` against fields that may not be mapped on every
+ * backing index — DSL `match_phrase` no-matches missing fields, but bare
+ * ES|QL full-text functions raise `verification_exception` instead).
  */
 export async function getSampleDocumentsEsql({
   esClient,
@@ -136,15 +164,27 @@ export async function getSampleDocumentsEsql({
   size = 1000,
   sampleSize,
   whereCondition,
-  loadUnmappedFields = false,
+  unmappedFields,
+  dslFilter,
+  requestTimeout,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
-  const filter = { bool: { filter: dateRangeQuery(start, end) } };
+  const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
+  const filter = {
+    bool: { filter: [...dateRangeQuery(start, end), ...extraDslClauses] },
+  };
+
+  // One deadline for every request this call makes (count + sample can be two
+  // sequential requests), so `requestTimeout` bounds the whole call rather than
+  // resetting on each individual request.
+  const signal = AbortSignal.timeout(requestTimeout);
+  const runQuery = (params: { query: string; filter: typeof filter; drop_null_columns: true }) =>
+    esClient.esql.query(params, { signal }) as unknown as Promise<ESQLSearchResponse>;
 
   const whereExpression = buildWhereExpression({ kql, whereCondition });
   const printQuery = (query: ComposerQuery) => {
-    if (loadUnmappedFields) {
-      query.addSetCommand('unmapped_fields', 'LOAD');
+    if (unmappedFields) {
+      query.addSetCommand('unmapped_fields', unmappedFields);
     }
     return query.print('basic');
   };
@@ -184,11 +224,11 @@ export async function getSampleDocumentsEsql({
       return { hits: [], total: 0 };
     }
 
-    const countResponse = (await esClient.esql.query({
+    const countResponse = await runQuery({
       query: buildCountQuery(),
       filter,
       drop_null_columns: true,
-    })) as unknown as ESQLSearchResponse;
+    });
 
     const total = getCount(countResponse);
     if (total === 0) {
@@ -197,22 +237,22 @@ export async function getSampleDocumentsEsql({
 
     const sampleProbability = Math.min(1, (SAMPLE_PROBABILITY_FACTOR * sampleSize) / total);
     const sampleLimit = SAMPLE_LIMIT_FACTOR * sampleSize;
-    const sampleResponse = (await esClient.esql.query({
+    const sampleResponse = await runQuery({
       query: buildQuery({ sampleProbability, limit: sampleLimit }),
       filter,
       drop_null_columns: true,
-    })) as unknown as ESQLSearchResponse;
+    });
 
     const hits = parseHits(sampleResponse);
     shuffleInPlace(hits); // This is very important, read the function jsdoc for more information
     return { hits: hits.slice(0, sampleSize), total: hits.length };
   }
 
-  const response = (await esClient.esql.query({
+  const response = await runQuery({
     query: buildQuery({ limit: size }),
     filter,
     drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  });
   const hits = parseHits(response);
   return { hits, total: hits.length };
 }
@@ -233,25 +273,11 @@ function buildWhereExpression({
 }
 
 function parseHits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {
-  const sourceIndex = response.columns.findIndex((column) => column.name === '_source');
-  const idIndex = response.columns.findIndex((column) => column.name === '_id');
-  if (sourceIndex === -1 || idIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const id = row[idIndex];
-    if (typeof id !== 'string') {
-      return [];
-    }
-    return [
-      {
-        _index: '',
-        _id: id,
-        _source: (row[sourceIndex] as Record<string, unknown> | null) ?? {},
-      },
-    ];
-  });
+  return parseEsqlSourceDocuments(response).map((doc) => ({
+    _index: '',
+    _id: getEsqlDocumentId(doc),
+    _source: doc.source,
+  }));
 }
 
 function getCount(response: ESQLSearchResponse): number {

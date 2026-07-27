@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/276365
+issues:
+- https://github.com/elastic/kibana/issues/266698
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Search and data
+title: "Fix Dev Tools Console copy button silently failing to copy output"
+description: "The Dev Tools Console copy button now copies response output reliably, including when the clipboard API is unavailable."

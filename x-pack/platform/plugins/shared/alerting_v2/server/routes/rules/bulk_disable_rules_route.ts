@@ -8,9 +8,8 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
-import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
+import { bulkByIdsSchema, bulkResponseSchema, errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -28,18 +27,19 @@ export class BulkDisableRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Disable rules in bulk',
+    summary: 'Disable rules in bulk by ID',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkOperationParamsSchema),
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
-        body: () => bulkOperationResponseSchema,
-        description: 'Indicates a successful call.',
+        body: () => bulkResponseSchema,
+        description: 'Returns the result of the bulk disable operation.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },
@@ -50,16 +50,14 @@ export class BulkDisableRulesRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkOperationParams>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const { ids, filter, search, match_all } = this.request.body;
-    const params = ids ? { ids } : { filter, search, match_all };
-    const result = await this.rulesClient.bulkDisableRules(params);
+    const result = await this.rulesClient.bulkDisableRules({ ids: this.request.body.ids });
     return this.ctx.response.ok({ body: result });
   }
 }

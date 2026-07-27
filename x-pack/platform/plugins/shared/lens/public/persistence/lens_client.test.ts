@@ -29,17 +29,18 @@ const mockAttributes: LooseLensAttributes = {
 // TEMP SKIP: apiFormat flag enabled
 describe.skip('LensClient', () => {
   const httpMock = coreMock.createStart().http;
-  const client = new LensClient(httpMock);
+  let client: LensClient;
 
   beforeAll(() => {
-    httpMock.get.mockResolvedValue(mockResponse);
-    httpMock.post.mockResolvedValue(mockResponse);
-    httpMock.put.mockResolvedValue(mockResponse);
-    httpMock.delete.mockResolvedValue({ response: { ok: true } });
+    client = new LensClient(httpMock);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    httpMock.get.mockResolvedValue(mockResponse);
+    httpMock.post.mockResolvedValue(mockResponse);
+    httpMock.put.mockResolvedValue(mockResponse);
+    httpMock.delete.mockResolvedValue({ response: { ok: true } });
   });
 
   it.todo('get');

@@ -29,6 +29,7 @@ interface UserAuthenticationAttributes extends BasicAttributes {
 interface GetCurrentProfileAttributes extends BasicAttributes {
   profileActivationRequired?: boolean;
   apiKeyRetrievalRequired?: boolean;
+  fakeRequestProfileResolution?: boolean;
 }
 
 export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
@@ -45,6 +46,7 @@ class SecurityTelemetry {
   private readonly logoutCounter: Counter<Attributes>;
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
   private readonly getCurrentProfileCounter: Counter<Attributes>;
+  private readonly getCurrentProfileIdCounter: Counter<Attributes>;
 
   // Adds more boundaries in 50-500ms range where most operations typically fall
   private readonly DEFAULT_BUCKET_BOUNDARIES = [
@@ -119,6 +121,15 @@ class SecurityTelemetry {
         valueType: ValueType.INT,
       }
     );
+
+    this.getCurrentProfileIdCounter = this.meter.createCounter(
+      'user_profiles.get_current_profile_id.invocations',
+      {
+        description: 'Number of invocations of getCurrentProfileId',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
   }
 
   private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
@@ -129,6 +140,7 @@ class SecurityTelemetry {
       deletedPrivileges,
       profileActivationRequired,
       apiKeyRetrievalRequired,
+      fakeRequestProfileResolution,
       ...rest
     } = attributes;
 
@@ -142,6 +154,9 @@ class SecurityTelemetry {
         : {}),
       ...(apiKeyRetrievalRequired
         ? { 'profile.get_current.api_key_retrieval_required': apiKeyRetrievalRequired }
+        : {}),
+      ...(fakeRequestProfileResolution
+        ? { 'profile.get_current.fake_request_profile_resolution': fakeRequestProfileResolution }
         : {}),
       ...rest,
     };
@@ -186,6 +201,11 @@ class SecurityTelemetry {
   recordGetCurrentProfileInvocation = (attributes: GetCurrentProfileAttributes) => {
     const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
     this.getCurrentProfileCounter.add(1, transformedAttributes);
+  };
+
+  recordGetCurrentProfileIdInvocation = (attributes: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
+    this.getCurrentProfileIdCounter.add(1, transformedAttributes);
   };
 }
 

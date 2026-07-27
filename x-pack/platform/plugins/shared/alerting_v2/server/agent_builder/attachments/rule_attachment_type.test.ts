@@ -6,10 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type {
-  AttachmentResolveContext,
-  AttachmentTypeDefinition,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
   Attachment,
   VersionedAttachmentWithOrigin,
@@ -31,16 +29,16 @@ const baseRuleData: RuleAttachmentData = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  evaluation: { query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  },
   state_transition: null,
   createdBy: 'elastic',
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedBy: 'elastic',
   updatedAt: '2026-04-10T00:00:00.000Z',
 };
-
-const buildResolveContext = (): AttachmentResolveContext =>
-  ({ request: {} as KibanaRequest, spaceId: 'default' } as AttachmentResolveContext);
 
 type RuleVersionedAttachment = VersionedAttachmentWithOrigin<
   typeof RULE_ATTACHMENT_TYPE,
@@ -98,7 +96,7 @@ describe('createRuleAttachmentType', () => {
         metadata: { name: 'New', owner: 'observability' },
         time_field: '@timestamp',
         schedule: { every: '1m' },
-        evaluation: { query: { base: 'FROM logs-*' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       };
       const result = await definition.validate(proposed);
       expect(result.valid).toBe(true);
@@ -117,7 +115,10 @@ describe('createRuleAttachmentType', () => {
     it('returns rule data parsed against the schema', async () => {
       getRule.mockResolvedValueOnce(baseRuleData);
 
-      const result = await definition.resolve!('rule-1', buildResolveContext());
+      const result = await definition.resolve!(
+        'rule-1',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(result).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
@@ -126,7 +127,10 @@ describe('createRuleAttachmentType', () => {
     it('returns undefined and logs a warning when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('not found'));
 
-      const result = await definition.resolve!('rule-missing', buildResolveContext());
+      const result = await definition.resolve!(
+        'rule-missing',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -139,7 +143,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false when origin_snapshot_at is missing', async () => {
       const attachment = buildVersionedAttachment({ origin_snapshot_at: undefined });
 
-      const result = await definition.isStale!(attachment, buildResolveContext());
+      const result = await definition.isStale!(
+        attachment,
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
       expect(getRule).not.toHaveBeenCalled();
@@ -148,7 +155,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false when rule.updatedAt equals snapshot time', async () => {
       getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-10T00:00:00.000Z' });
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
     });
@@ -156,7 +166,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false when rule.updatedAt is before snapshot time', async () => {
       getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-09T00:00:00.000Z' });
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
     });
@@ -164,7 +177,10 @@ describe('createRuleAttachmentType', () => {
     it('returns true when rule.updatedAt is after snapshot AND differs from latest version', async () => {
       getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-20T00:00:00.000Z' });
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(true);
     });
@@ -182,7 +198,10 @@ describe('createRuleAttachmentType', () => {
         ],
       });
 
-      const result = await definition.isStale!(attachment, buildResolveContext());
+      const result = await definition.isStale!(
+        attachment,
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
     });
@@ -190,7 +209,10 @@ describe('createRuleAttachmentType', () => {
     it('returns false and logs a warning when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.isStale!(buildVersionedAttachment(), buildResolveContext());
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
 
       expect(result).toBe(false);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -201,15 +223,17 @@ describe('createRuleAttachmentType', () => {
 
   describe('format', () => {
     const buildAttachment = (
-      data: RuleAttachmentData
+      data: RuleAttachmentData,
+      origin?: string
     ): Attachment<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData> => ({
       id: 'attach-1',
       type: RULE_ATTACHMENT_TYPE,
       data,
+      ...(origin ? { origin } : {}),
     });
 
-    const formatValue = async (data: RuleAttachmentData): Promise<string> => {
-      const formatted = await definition.format(buildAttachment(data), {
+    const formatValue = async (data: RuleAttachmentData, origin?: string): Promise<string> => {
+      const formatted = await definition.format(buildAttachment(data, origin), {
         request: {} as KibanaRequest,
         spaceId: 'default',
       });
@@ -221,7 +245,7 @@ describe('createRuleAttachmentType', () => {
     };
 
     it('reports enabled saved rule', async () => {
-      const value = await formatValue(baseRuleData);
+      const value = await formatValue(baseRuleData, 'rule-1');
       expect(value).toContain('Status: enabled');
       expect(value).toContain('"High CPU"');
       expect(value).toContain('Schedule: every 5m');
@@ -231,21 +255,22 @@ describe('createRuleAttachmentType', () => {
     });
 
     it('reports disabled saved rule', async () => {
-      const value = await formatValue({ ...baseRuleData, enabled: false });
+      const value = await formatValue({ ...baseRuleData, enabled: false }, 'rule-1');
       expect(value).toContain('Status: disabled');
     });
 
-    it('reports proposed rule when id is missing', async () => {
-      const proposed: RuleAttachmentData = {
-        ...baseRuleData,
-        id: undefined,
-        enabled: undefined,
-        createdBy: undefined,
-        createdAt: undefined,
-        updatedBy: undefined,
-        updatedAt: undefined,
-      };
-      const value = await formatValue(proposed);
+    it('includes Rule ID when origin is set', async () => {
+      const value = await formatValue(baseRuleData, 'rule-1');
+      expect(value).toContain('Rule ID: rule-1');
+    });
+
+    it('omits Rule ID when origin is not set', async () => {
+      const value = await formatValue(baseRuleData);
+      expect(value).not.toContain('Rule ID:');
+    });
+
+    it('reports proposed rule when origin is not set', async () => {
+      const value = await formatValue(baseRuleData);
       expect(value).toContain('Status: proposed (not yet saved)');
     });
 

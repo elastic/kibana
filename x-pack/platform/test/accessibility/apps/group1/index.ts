@@ -10,13 +10,11 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('X-Pack Accessibility Tests - Group 1', function () {
     loadTestFile(require.resolve('./login_page'));
-    loadTestFile(require.resolve('./kibana_overview'));
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./grok_debugger'));
     loadTestFile(require.resolve('./search_profiler'));
     loadTestFile(require.resolve('./painless_lab'));
-    loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./dashboard_controls'));
     loadTestFile(require.resolve('./dashboard_links'));

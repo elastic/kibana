@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: migrate most of these to component/unit tests. Field-type-related show/hide behavior doesn't need to be a functional test.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
@@ -27,9 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sidebar field stats popover', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

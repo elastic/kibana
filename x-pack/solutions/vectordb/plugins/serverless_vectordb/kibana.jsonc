@@ -17,9 +17,18 @@
       "vectordb"
     ],
     "requiredPlugins": [
-      "serverless"
+      "dataViews",
+      "navigation",
+      "serverless",
+      "share",
+      "agentBuilder"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": []
+    "optionalPlugins": [
+      "console",
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

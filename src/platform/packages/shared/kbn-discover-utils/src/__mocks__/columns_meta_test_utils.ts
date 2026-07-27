@@ -109,18 +109,6 @@ export const columnsMetaWithCustomField: DataTableColumnsMeta = {
 };
 
 /**
- * Creates a spy on formatFieldValue that returns 'formatted'.
- * Remember to call mockRestore() in afterEach.
- *
- * @deprecated Use `createFormatFieldValueReactSpy` instead for testing components
- * that use `formatFieldValueReact`. This spy is only needed for legacy code paths
- * that haven't been migrated yet (e.g., UnifiedDocViewer, SummaryColumn).
- */
-export const createFormatFieldValueSpy = () => {
-  return jest.spyOn(formatValueModule, 'formatFieldValue').mockReturnValue('formatted');
-};
-
-/**
  * Creates a spy on formatFieldValueReact that returns 'formatted'.
  * Remember to call mockRestore() in afterEach.
  */

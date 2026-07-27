@@ -602,6 +602,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }): Omit<EuiComboBoxProps<string>, 'selectedOptions'> & FormattedComboBoxProps => ({
       selectedOptions: field?.value || [],
       isDisabled: readOnly,
+      enableCopy: true,
     }),
   },
   [ConfigKey.TIMEOUT]: {
@@ -1346,7 +1347,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
         defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
         values={{
-          icon: <EuiIcon type="warning" color="warning" size="s" />,
+          icon: <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />,
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"

@@ -15,8 +15,7 @@ import { clearConversations } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
-  const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
@@ -40,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // configure anonymization rules for these tests
-      await setAdvancedSettings(supertest, {
+      await setAdvancedSettings(kibanaServer, {
         [aiAnonymizationSettings]: JSON.stringify(
           {
             rules: [
@@ -101,7 +100,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       proxy.close();
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
-      await setAdvancedSettings(supertest, {
+      await setAdvancedSettings(kibanaServer, {
         [aiAnonymizationSettings]: JSON.stringify({ rules: [] }),
       });
     });

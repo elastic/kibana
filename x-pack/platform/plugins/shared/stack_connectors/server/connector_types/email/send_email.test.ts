@@ -245,6 +245,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
+        type: 'client_secret',
         config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
@@ -342,6 +343,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
+        type: 'client_secret',
         config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
@@ -380,6 +382,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
+        type: 'client_secret',
         config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },
@@ -414,6 +417,7 @@ describe('send_email module', () => {
       connectorId: '1',
       connectorTokenClient,
       credentials: {
+        type: 'client_secret',
         config: { clientId: '123456' },
         secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
       },

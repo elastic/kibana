@@ -70,7 +70,6 @@ export const actionStatusRequestHandler = function (
       const agentIDs: string[] = Array.isArray(req.query.agent_ids)
         ? [...new Set(req.query.agent_ids)]
         : [req.query.agent_ids];
-
       await endpointContext.service
         .getInternalFleetServices(spaceId)
         .ensureInCurrentSpace({ agentIds: agentIDs });

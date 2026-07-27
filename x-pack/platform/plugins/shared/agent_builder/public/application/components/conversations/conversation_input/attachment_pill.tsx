@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
-  EuiPanel,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
   EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -79,24 +82,31 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
+          <div css={iconContainerStyles}>
+            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
+          <EuiText size="xs" css={titleStyles}>
             <strong>{displayName}</strong>
           </EuiText>
         </EuiFlexItem>
         {canRemoveAttachment && isHovered && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              size="xs"
-              color="text"
-              aria-label={removeAriaLabel}
-              onClick={onRemoveAttachment}
-            />
+            <EuiToolTip content={removeAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={removeAriaLabel}
+                onClick={onRemoveAttachment}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+                  detail: 'conversation',
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

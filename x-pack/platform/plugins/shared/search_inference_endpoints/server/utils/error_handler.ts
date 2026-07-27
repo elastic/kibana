@@ -7,6 +7,7 @@
 
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 
@@ -25,6 +26,11 @@ export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) 
           statusCode: e.output.statusCode,
           body: e.message,
         });
+      }
+      if (isResponseError(e)) {
+        const statusCode = e.statusCode ?? 500;
+        const message: string = e.body?.error?.reason ?? e.message;
+        return response.customError({ statusCode, body: { message } });
       }
       if (isKibanaServerError(e)) {
         return response.customError({ statusCode: e.statusCode, body: e.message });

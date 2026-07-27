@@ -13,8 +13,9 @@ import {
   GetTraceRequestParams,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 interface TraceSpanSource {
   span_id?: string;
@@ -34,7 +35,7 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
       path: EVALS_TRACE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'Get trace spans',
     })
@@ -104,6 +105,14 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
             },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get trace',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(`Failed to get trace: ${error}`);
           return response.customError({
             statusCode: 500,

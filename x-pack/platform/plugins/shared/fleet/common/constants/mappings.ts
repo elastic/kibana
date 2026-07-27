@@ -466,6 +466,9 @@ export const AGENT_MAPPINGS = {
             description: {
               type: 'keyword',
             },
+            name: {
+              type: 'keyword',
+            },
           },
         },
         deployment: {
@@ -525,6 +528,9 @@ export const AGENT_MAPPINGS = {
     config: {
       properties: {
         description: {
+          type: 'keyword',
+        },
+        name: {
           type: 'keyword',
         },
       },

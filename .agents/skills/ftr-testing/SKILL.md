@@ -252,7 +252,7 @@ suiteTags: {
 
 ### CI config files
 
-FTR configs must be listed in `.buildkite/ftr_*_configs.yml` to run in CI:
+FTR configs must be listed in `.buildkite/ftr-manifests/ftr_*_configs.yml` to run in CI:
 
 - `ftr_platform_stateful_configs.yml`: platform stateful configs
 - `ftr_base_serverless_configs.yml`: base serverless configs

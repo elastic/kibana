@@ -6,6 +6,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -16,12 +18,23 @@ import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
 import { DefaultSummaryClient } from '../../summary_client';
-import { computeCompositeSummary } from '../../compute_composite_summary';
+import { computeCompositeSummary } from '../../composites/compute_composite_summary';
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
+import { COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES } from './constants';
+
+jest.mock('@kbn/apm-utils', () => ({
+  addTransactionLabels: jest.fn(),
+  withSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
+}));
+
+jest.mock('elastic-apm-node', () => ({
+  default: { setCustomContext: jest.fn() },
+  __esModule: true,
+}));
 
 jest.mock('../../summary_client');
 jest.mock('../../burn_rates_client');
-jest.mock('../../compute_composite_summary');
+jest.mock('../../composites/compute_composite_summary');
 
 const MockDefaultSummaryClient = DefaultSummaryClient as jest.MockedClass<
   typeof DefaultSummaryClient
@@ -29,6 +42,14 @@ const MockDefaultSummaryClient = DefaultSummaryClient as jest.MockedClass<
 const mockComputeCompositeSummary = computeCompositeSummary as jest.MockedFunction<
   typeof computeCompositeSummary
 >;
+
+const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+  typeof addTransactionLabels
+>;
+const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+  typeof apm.setCustomContext
+>;
+const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
 
 const COMPOSITE_ID = 'composite-slo-id-12345678';
 const MEMBER_ID = 'member-slo-id-123456789';
@@ -142,6 +163,7 @@ describe('computeAndPersistCompositeSummaries', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let abortController: AbortController;
+  let signal: AbortSignal;
   let mockComputeSummaries: jest.Mock;
 
   beforeEach(() => {
@@ -149,8 +171,12 @@ describe('computeAndPersistCompositeSummaries', () => {
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
     abortController = new AbortController();
+    signal = abortController.signal;
     jest.useFakeTimers().setSystemTime(TEST_DATE);
     jest.clearAllMocks();
+    addTransactionLabelsMock.mockClear();
+    setCustomContextMock.mockClear();
+    withSpanMock.mockClear();
 
     mockComputeSummaries = jest
       .fn()
@@ -204,7 +230,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(esClient.bulk).not.toHaveBeenCalled();
@@ -220,7 +246,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(mockComputeSummaries).toHaveBeenCalledTimes(1);
@@ -236,7 +262,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(esClient.bulk).toHaveBeenCalledWith(
@@ -256,7 +282,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
@@ -271,15 +297,19 @@ describe('computeAndPersistCompositeSummaries', () => {
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
         },
-        sliValue: 0.995,
-        status: 'HEALTHY',
-        errorBudgetInitial: 0.01,
-        errorBudgetConsumed: 0.5,
-        errorBudgetRemaining: 0.5,
-        errorBudgetIsEstimated: false,
-        fiveMinuteBurnRate: 0.5,
-        oneHourBurnRate: 0.4,
-        oneDayBurnRate: 0.3,
+        summary: {
+          sliValue: 0.995,
+          status: 'HEALTHY',
+          errorBudget: {
+            initial: 0.01,
+            consumed: 0.5,
+            remaining: 0.5,
+            isEstimated: false,
+          },
+          fiveMinuteBurnRate: 0.5,
+          oneHourBurnRate: 0.4,
+          oneDayBurnRate: 0.3,
+        },
         unresolvedMemberIds: [],
       });
     });
@@ -304,7 +334,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(esClient.bulk).toHaveBeenCalledWith(
@@ -326,11 +356,11 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
-      expect(bulkCall.operations[0]._id ?? bulkCall.operations[0].index._id).toContain('default:');
+      expect(bulkCall.operations[0].index._id).toBe(`default:${COMPOSITE_ID}`);
     });
   });
 
@@ -355,7 +385,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(soClient.find).toHaveBeenCalledWith(
@@ -379,7 +409,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       // no member SLOs resolved — computeSummaries is not called
@@ -401,7 +431,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
@@ -417,7 +447,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(mockComputeSummaries).toHaveBeenCalledWith(
@@ -442,7 +472,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(esClient.bulk).toHaveBeenCalledTimes(2);
@@ -455,7 +485,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
@@ -477,7 +507,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(mockComputeSummaries).not.toHaveBeenCalled();
@@ -502,7 +532,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       // Second SLO still processed despite first throwing
@@ -522,7 +552,7 @@ describe('computeAndPersistCompositeSummaries', () => {
           esClient,
           soClient: soClient as any,
           logger,
-          abortController,
+          signal,
         })
       ).resolves.not.toThrow();
     });
@@ -538,7 +568,7 @@ describe('computeAndPersistCompositeSummaries', () => {
           esClient,
           soClient: soClient as any,
           logger,
-          abortController,
+          signal,
         })
       ).resolves.toBeUndefined();
     });
@@ -554,7 +584,7 @@ describe('computeAndPersistCompositeSummaries', () => {
           esClient,
           soClient: soClient as any,
           logger,
-          abortController,
+          signal,
         })
       ).rejects.toThrow('ES cluster unavailable');
     });
@@ -568,7 +598,7 @@ describe('computeAndPersistCompositeSummaries', () => {
           esClient,
           soClient: soClient as any,
           logger,
-          abortController,
+          signal,
         })
       ).rejects.toThrow();
 
@@ -597,11 +627,160 @@ describe('computeAndPersistCompositeSummaries', () => {
         esClient,
         soClient: soClient as any,
         logger,
-        abortController,
+        signal,
       });
 
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
       expect(closeMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('APM instrumentation', () => {
+    const spanOpts = { type: 'task' as const, labels: { plugin: 'slo' } };
+
+    it('sets transaction labels and emits pipeline spans on a successful single-page run', async () => {
+      mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        signal,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'success',
+        composite_slo_summary_hit_max_limit: false,
+      });
+      expect(setCustomContextMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          composite_slo_summary_processed_composites: 1,
+          composite_slo_summary_pages_fetched: 1,
+          composite_slo_summary_decode_errors: 0,
+          composite_slo_summary_space_errors: 0,
+          composite_slo_summary_compute_errors: 0,
+          composite_slo_summary_bulk_errors: 0,
+          composite_slo_summary_duration_ms: expect.any(Number),
+        })
+      );
+
+      expect(withSpanMock).toHaveBeenCalledWith(
+        {
+          name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.DECODE_AND_GROUP_COMPOSITES,
+          ...spanOpts,
+        },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        {
+          name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.FETCH_MEMBER_DEFINITIONS,
+          ...spanOpts,
+        },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        {
+          name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.COMPUTE_MEMBER_SUMMARIES,
+          ...spanOpts,
+        },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.BULK_WRITE, ...spanOpts },
+        expect.any(Function)
+      );
+    });
+
+    it('records labels when the finder yields only an empty page', async () => {
+      mockPointInTimeFinder([[]]);
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        signal,
+      });
+
+      expect(withSpanMock).not.toHaveBeenCalled();
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'success',
+        composite_slo_summary_hit_max_limit: false,
+      });
+      expect(setCustomContextMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          composite_slo_summary_processed_composites: 0,
+          composite_slo_summary_pages_fetched: 1,
+        })
+      );
+    });
+
+    it('sets aborted outcome when bulk rejects RequestAbortedError', async () => {
+      mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
+      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(
+        new errors.RequestAbortedError('aborted')
+      );
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        signal,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'aborted',
+        composite_slo_summary_hit_max_limit: false,
+      });
+    });
+
+    it('sets error outcome when bulk rejects a non-abort error', async () => {
+      mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
+      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new Error('ES unavailable'));
+
+      await expect(
+        computeAndPersistCompositeSummaries({
+          esClient,
+          soClient: soClient as any,
+          logger,
+          signal,
+        })
+      ).rejects.toThrow('ES unavailable');
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'error',
+        composite_slo_summary_hit_max_limit: false,
+      });
+    });
+
+    it('emits four spans per processed page across multiple pages', async () => {
+      mockPointInTimeFinder([
+        [buildStoredCompositeSLO({ id: 'composite-slo-id-aaaaaaaa' })],
+        [buildStoredCompositeSLO({ id: 'composite-slo-id-bbbbbbbb' })],
+      ]);
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        signal,
+      });
+
+      expect(withSpanMock).toHaveBeenCalledTimes(8);
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'success',
+        composite_slo_summary_hit_max_limit: false,
+      });
+      expect(setCustomContextMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          composite_slo_summary_processed_composites: 2,
+          composite_slo_summary_pages_fetched: 2,
+        })
+      );
     });
   });
 });

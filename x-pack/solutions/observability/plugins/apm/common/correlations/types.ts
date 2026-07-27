@@ -39,7 +39,7 @@ export interface CommonCorrelationsQueryParams {
 }
 
 export type EntityType = 'transaction' | 'exit_span';
-export type Metric = 'latency' | 'failure_rate';
+export type Metric = 'latency' | 'failure_rate' | 'throughput' | 'infra_metrics';
 
 export interface UnifiedCorrelation {
   fieldName: string;
@@ -51,6 +51,8 @@ export interface UnifiedCorrelation {
   normalizedScore?: number;
   histogram?: HistogramItem[];
   isFallbackResult?: boolean;
+  rpmDelta?: number;
+  rpmBaseline?: number;
   doc_count?: number;
   bg_count?: number;
   failurePercentage?: number;

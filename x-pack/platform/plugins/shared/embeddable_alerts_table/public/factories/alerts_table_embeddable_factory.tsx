@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import React, { useCallback, useEffect, useState } from 'react';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -19,7 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -37,7 +37,7 @@ import { queryClient } from '../query_client';
 export const getAlertsTableEmbeddableFactory = (
   coreServices: CoreStart,
   deps: EmbeddableAlertsTablePublicStartDependencies
-): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
+): EmbeddablePublicDefinition<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -51,31 +51,32 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const serializeState = (): EmbeddableAlertsTableSerializedState => ({
-      ...titleManager.getLatestState(),
-      ...timeRangeManager.getLatestState(),
-      tableConfig: tableConfig$.getValue(),
-    });
-
-    const unsavedChangesApi = initializeUnsavedChanges<EmbeddableAlertsTableSerializedState>({
+    const stateApi = initializeStateApi<EmbeddableAlertsTableSerializedState>({
       uuid,
       parentApi,
       anyStateChange$: merge(
         timeRangeManager.anyStateChange$,
         titleManager.anyStateChange$,
-        tableConfig$
-      ).pipe(map(() => undefined)),
-      serializeState,
+        tableConfig$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
+      serializeState: (): EmbeddableAlertsTableSerializedState => ({
+        ...titleManager.getLatestState(),
+        ...timeRangeManager.getLatestState(),
+        tableConfig: tableConfig$.getValue(),
+      }),
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         tableConfig: 'deepEquality',
       }),
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
-        timeRangeManager.reinitializeState(lastSaved);
-        if (lastSaved?.tableConfig) {
-          tableConfig$.next(lastSaved.tableConfig);
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
+        timeRangeManager.reinitializeState(nextState);
+        if (nextState.tableConfig) {
+          tableConfig$.next(nextState.tableConfig);
         }
       },
     });
@@ -89,9 +90,8 @@ export const getAlertsTableEmbeddableFactory = (
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...unsavedChangesApi,
+      ...stateApi,
       dataLoading$: queryLoading$,
-      serializeState,
       isEditingEnabled: () => {
         // Users cannot edit panels based on a solution they cannot access.
         // The first condition ensures panels are editable even if the table configuration is
@@ -128,15 +128,28 @@ export const getAlertsTableEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const { timeRange: selectedTimeRange } = useFetchContext(api);
+        const fetchContext = useFetchContext(api);
         const tableConfig = useStateFromPublishingSubject(tableConfig$);
+        const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number | undefined>();
+
+        useEffect(() => {
+          if (fetchContext.isReload) {
+            setLastReloadRequestTime(Date.now());
+          }
+        }, [fetchContext.isReload]);
+
+        const onLoadingChange = useCallback((isLoading: boolean) => {
+          queryLoading$.next(isLoading);
+        }, []);
 
         return (
           <KibanaContextProvider services={services}>
             <QueryClientProvider client={queryClient}>
               <EmbeddableAlertsTable
                 id={`${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${uuid}`}
-                timeRange={selectedTimeRange}
+                timeRange={fetchContext.timeRange}
+                lastReloadRequestTime={lastReloadRequestTime}
+                onLoadingChange={onLoadingChange}
                 solution={tableConfig?.solution}
                 query={tableConfig?.query}
                 services={services}

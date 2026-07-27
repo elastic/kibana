@@ -1,9 +1,6 @@
 {
   "description": "Security: Linux - Looks for sudo activity from an unusual user context. Unusual unique user identifier context changes can be due to privilege escalation.",
-  "groups": [
-    "security",
-    "linux"
-  ],
+  "groups": ["security", "linux"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -14,15 +11,7 @@
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "process.name",
-      "host.name",
-      "host.id",
-      "process.args",
-      "user.name",
-      "user.id",
-      "event.module"
-    ]
+    "influencers": ["process.name", "host.name", "host.id", "process.args", "user.name", "user.id", "event.module"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -35,6 +24,8 @@
     "created_by": "ml-module-security-linux-v3",
     "security_app_display_name": "Unusual Sudo Activity",
     "managed": true,
-    "job_revision": 4
+    "job_revision": 4,
+    "threat_tactics": ["TA0005", "TA0004"],
+    "threat_techniques": ["T1548"]
   }
 }

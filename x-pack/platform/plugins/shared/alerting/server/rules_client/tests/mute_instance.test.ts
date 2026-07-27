@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions } from '../rules_client';
 import { RulesClient } from '../rules_client';
 import {
@@ -52,6 +53,7 @@ const alertsService = {
 } as unknown as jest.Mocked<AlertsService>;
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -221,7 +223,7 @@ describe('muteInstance()', () => {
         query: { validateAlertsExistence: false },
       });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
+      expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',

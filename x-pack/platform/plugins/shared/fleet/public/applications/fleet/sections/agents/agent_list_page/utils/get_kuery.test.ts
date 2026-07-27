@@ -10,7 +10,7 @@ import { getKuery } from './get_kuery';
 describe('getKuery', () => {
   const search = 'base search';
   const selectedTags = ['tag_1', 'tag_2', 'tag_3'];
-  const noTags = ['No Tags'];
+  const noTags = ['No tags'];
   const selectedAgentIds = ['agent_id1', 'agent_id2'];
   const selectedAgentPolicies = ['policy1', 'policy2', 'policy3'];
   const selectedStatus = ['healthy', 'unhealthy'];

@@ -120,6 +120,15 @@ export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.exten
 });
 
 /**
+ * Template reference accepted on case CREATION — zod mirror of `CaseRequestTemplateRt`.
+ * `version` may be omitted: the server resolves and pins the template's latest version.
+ */
+export const CaseRequestTemplateSchema = z.object({
+  id: z.string(),
+  version: z.number().int().min(1).optional(),
+});
+
+/**
  * Create case
  */
 export const CasePostRequestSchema = z.object({
@@ -152,7 +161,7 @@ export const CasePostRequestSchema = z.object({
     ])
     .optional(),
   customFields: CaseRequestCustomFieldsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
 
@@ -263,9 +272,15 @@ const CasesSearchRequestSearchFieldsValues = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ] as const;
 
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
+
+const ExtendedFieldFilterSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
   customFields: z
@@ -274,6 +289,7 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
   searchFields: z
     .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
     .optional(),
+  extendedFieldFilters: z.array(ExtendedFieldFilterSchema).optional(),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({

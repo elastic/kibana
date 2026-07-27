@@ -33,6 +33,12 @@ export type RowControlComponent = FC<RowControlProps>;
 
 export interface RowControlColumn {
   id: string;
+  /**
+   * Optional predicate called per-row before the inline/menu split.
+   * Returning `false` removes this action from the row entirely.
+   * If omitted, the action is always included.
+   */
+  isAvailable?: (props: RowControlRowProps) => boolean;
   render: (Control: RowControlComponent, props: RowControlRowProps) => ReactElement;
   width?: number;
 }

@@ -30,9 +30,11 @@
       "fieldFormats",
       "unifiedSearch",
       "embeddable",
+      "controls",
+      "uiActions",
       "licensing"
     ],
-    "optionalPlugins": ["alerting", "serverless", "cloud"],
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
     "runtimePluginDependencies": ["agentBuilder"],
     "extraPublicDirs": ["common"]
   }

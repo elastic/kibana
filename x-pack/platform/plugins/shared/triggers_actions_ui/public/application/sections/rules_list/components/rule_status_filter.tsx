@@ -105,6 +105,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
           'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilterPopoverAriaLabel',
           { defaultMessage: 'Filter by rule state' }
         )}
+        panelPaddingSize="s"
         button={
           <EuiFilterButton
             data-test-subj={buttonDataTestSubj}

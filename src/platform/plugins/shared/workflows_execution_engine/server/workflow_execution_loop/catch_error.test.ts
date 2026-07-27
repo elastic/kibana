@@ -92,6 +92,19 @@ describe('catchError', () => {
     expect(stepErrorCatcher.catchError).toHaveBeenCalledTimes(1);
   });
 
+  it('does NOT re-fail a step that already settled itself in a terminal state', async () => {
+    // Regression: a step that failed itself with its own output (e.g. a parallel
+    // step under fail-fast persisting its aggregate) must not be re-failed here —
+    // that would overwrite its status/output (clobbering the persisted output).
+    const initialError = new Error('boom');
+    const { params, stepRuntime } = createParams(initialError);
+    stepRuntime.stepExecution = { status: 'failed' };
+
+    await catchError(params as any, stepRuntime as any);
+
+    expect(stepRuntime.failStep).not.toHaveBeenCalled();
+  });
+
   it('updates workflow error and logs when catchError itself throws', async () => {
     const initialError = new Error('boom');
     const { params, stepRuntime, workflowExecutionState } = createParams(initialError);

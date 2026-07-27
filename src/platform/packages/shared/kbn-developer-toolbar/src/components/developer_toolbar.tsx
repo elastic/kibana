@@ -291,7 +291,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   }
 
   return (
-    <div css={getToolbarContainerStyles()}>
+    <div id="developerToolbar" css={getToolbarContainerStyles()}>
       <>{handleShortcut}</>
       {state.isEnabled('errorsMonitor') && (
         <EuiThemeProvider colorMode="light">
