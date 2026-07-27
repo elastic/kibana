@@ -156,6 +156,9 @@ export interface InternalChromeNext extends ChromeNext {
   contextSwitcher: ChromeNext['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
   };
+  projectPicker: ChromeNext['projectPicker'] & {
+    get$(): Observable<ReactNode>;
+  };
   globalSearch: ChromeNext['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };

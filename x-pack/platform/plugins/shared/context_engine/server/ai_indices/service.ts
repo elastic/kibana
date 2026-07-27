@@ -8,23 +8,24 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { MAX_AI_INDICES } from '../../common/constants';
+import {
+  AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
+  AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
+  MAX_AI_INDICES,
+} from '../../common/constants';
 import type {
   AiIndexDest,
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
-
-/**
- * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `ai-index-` base.
- */
-const DEST_INDEX_PREFIX = 'ai-index-';
-const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
-const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
 
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
@@ -50,10 +51,27 @@ export class AiIndexService {
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
   }
 
+  /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
+  async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
+    await this.assertValidDest(properties.dest);
+
+    const now = new Date().toISOString();
+    const document: AiIndexDocument = { ...properties, date_created: now, date_modified: now };
+
+    try {
+      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new AiIndexAlreadyExistsError(aiIndexId);
+      }
+      throw error;
+    }
+  }
+
   /**
    * Creates or fully replaces an AI index, preserving `date_created` on update.
    * Concurrent writes are guarded with optimistic concurrency control; a losing
-   * writer gets a {@link AiIndexConflictError}.
+   * writer gets an {@link AiIndexConflictError}.
    */
   async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
