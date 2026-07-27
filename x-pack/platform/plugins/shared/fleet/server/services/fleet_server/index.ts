@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { escapeQuotes } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 import { uniqBy } from 'lodash';
@@ -18,6 +17,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../../common/constants';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import { buildPolicyIdOrVariantsKuery } from '../../../common/services/version_specific_policies_utils';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
@@ -76,7 +76,7 @@ export const hasFleetServersForPolicies = async (
               ? `namespaces:"${spaceIds?.[0]}"`
               : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
 
-          return `(policy_id:"${escapeQuotes(id)}" and (${space}))`;
+          return `(${buildPolicyIdOrVariantsKuery(id)} and (${space}))`;
         })
         .join(' or ')
     );
