@@ -20,9 +20,9 @@ import type { ServiceToken } from '@kbn/core-di';
  * @see {@link CapabilitiesSetup}
  * @example
  * ```ts
- * bind(CapabilitiesProvider).toConstantValue(() => {
+ * bind(CapabilitiesProvider).toConstantValue(() => ({
  *   something: { read: true },
- * });
+ * }));
  * ```
  * @public
  */
