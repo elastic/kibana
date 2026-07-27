@@ -84,7 +84,7 @@ describe('buildActorSliceProbeQuery', () => {
       | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
       | STATS _firstEvent = MIN(@timestamp) BY actorUserId
       | SORT _firstEvent ASC
-      | LIMIT 2
+      | LIMIT 3500
       | STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*), actorIds = VALUES(actorUserId)"
     `);
   });
@@ -133,7 +133,7 @@ describe('buildActorSliceProbeQuery', () => {
       | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
       | STATS _firstEvent = MIN(@timestamp) BY actorUserId
       | SORT _firstEvent ASC
-      | LIMIT 2
+      | LIMIT 3500
       | STATS sliceBoundary = MAX(_firstEvent), actorCount = COUNT(*), actorIds = VALUES(actorUserId)"
     `);
   });
