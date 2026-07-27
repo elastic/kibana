@@ -671,6 +671,18 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       optional: true,
     },
   },
+  view: {
+    type: 'keyword',
+    _meta: {
+      description: 'The requested event response view (compact or full)',
+    },
+  },
+  page: {
+    type: 'long',
+    _meta: {
+      description: 'The requested event search page',
+    },
+  },
   error_message: {
     type: 'text',
     _meta: {
