@@ -82,7 +82,7 @@ describe('cli_processing', () => {
         '--grep=@local-serverless-search',
       ];
       expect(() => stripRunCommand(argv)).toThrow(
-        /Invalid command structure: Expected "node <playwright_path> test" or "npx playwright test"/
+        /Invalid command structure: Expected "node scripts\/playwright test"/
       );
     });
   });

@@ -20,9 +20,7 @@ export const stripRunCommand = (commandArgs: string[]): string => {
   const isNpxCommand = commandArgs[0] === 'npx' && commandArgs[1] === 'playwright';
 
   if (!isNodeCommand && !isNpxCommand) {
-    throw new Error(
-      'Invalid command structure: Expected "node <playwright_path> test" or "npx playwright test".'
-    );
+    throw new Error('Invalid command structure: Expected "node scripts/playwright test".');
   }
 
   const restArgs = commandArgs.slice(2);
