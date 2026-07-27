@@ -518,7 +518,7 @@ describe('TaskPool', () => {
       taskHasExpired.resolve();
     });
 
-    test('a task whose expiration check throws is evicted without aborting cancellation of the rest of the pool', async () => {
+    test('a task whose expiration check throws is skipped without aborting cancellation of the rest of the pool', async () => {
       const pool = new TaskPool({
         capacity$: of(3),
         definitions,
@@ -574,26 +574,29 @@ describe('TaskPool', () => {
         },
       ]);
 
-      // pool.run() re-checks availableCapacity() with all three runners in the pool, so
-      // the broken runner must have been best-effort cancelled and dropped without the
-      // throw aborting the claim path
-      sinon.assert.calledOnce(brokenCancel);
-      expect(logger.error).toHaveBeenCalledWith(
+      // pool.run() re-checks availableCapacity() with all three runners in the pool. The
+      // broken runner is left in place (not cancelled) so its throw can't abort the claim
+      // path; it is simply skipped and logged.
+      sinon.assert.notCalled(brokenCancel);
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(
-          `Failed to cancel expired task TaskType "shooooo"; removing it from the pool`
+          `Failed to determine whether task TaskType "shooooo" is expired; skipping it`
         )
       );
       // the genuinely expired runner ordered after it is still cancelled, healthy untouched
       sinon.assert.calledOnce(expiredCancel);
       sinon.assert.notCalled(healthyCancel);
-      expect(pool.usedCapacity).toEqual(1);
 
-      // a subsequent capacity check still succeeds and reflects the freed capacity
+      // only the expired runner's slot is cleared; the broken runner keeps its slot instead
+      // of wedging the whole node
+      expect(pool.usedCapacity).toEqual(2);
+
+      // a subsequent capacity check still succeeds instead of throwing
       let capacity: number | undefined;
       expect(() => {
         capacity = pool.availableCapacity();
       }).not.toThrow();
-      expect(capacity).toEqual(2);
+      expect(capacity).toEqual(1);
 
       halt.resolve();
     });

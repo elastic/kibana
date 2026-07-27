@@ -273,15 +273,15 @@ export class TaskPool {
           this.cancelTask(taskRunner);
         }
       } catch (err) {
-        // A single broken runner (e.g. an invariant violation while computing its
-        // expiration) must not abort cancellation for the rest of the pool. Remove it
-        // so it can't wedge capacity or keep throwing on every poll.
-        this.logger.error(
-          `Failed to cancel expired task ${taskRunner.toString()}; removing it from the pool: ${getErrorMessage(
+        // We couldn't determine whether this runner is expired, so we can't safely cancel
+        // it. Skip it: leaving its slot occupied until its run() completes is a far better
+        // failure mode than letting one broken runner abort cancellation for the rest of
+        // the pool or, via availableCapacity, the node's entire claim cycle.
+        this.logger.warn(
+          `Failed to determine whether task ${taskRunner.toString()} is expired; skipping it: ${getErrorMessage(
             err
           )}`
         );
-        this.cancelTask(taskRunner);
       }
     }
   }
