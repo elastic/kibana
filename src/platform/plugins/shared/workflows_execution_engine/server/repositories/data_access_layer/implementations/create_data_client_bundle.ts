@@ -11,9 +11,7 @@ import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_clien
 import { createUnsupportedStorageSourceError } from '../lib/validate_factory_params';
 import type { CreateDataClientDeps, DataClientBundle } from '../types';
 
-export function createDataClientBundle(
-  deps: CreateDataClientDeps
-): DataClientBundle {
+export function createDataClientBundle(deps: CreateDataClientDeps): DataClientBundle {
   switch (deps.source) {
     case 'system_index':
       return new PlainIndexDataClientBundle(deps);

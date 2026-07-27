@@ -11,11 +11,11 @@ import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { PlainIndexDataClientBundle } from './plain_index_data_client_bundle';
-import { DeferredDataClient } from '../deferred_data_client';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../constants/execution_indexes';
+import { DeferredDataClient } from '../deferred_data_client';
 
 describe('PlainIndexDataClientBundle', () => {
   it('creates workflow and step DAL instances backed by their system indices', async () => {

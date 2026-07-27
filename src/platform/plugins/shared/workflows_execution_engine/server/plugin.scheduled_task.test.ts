@@ -16,9 +16,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 jest.mock('./repositories/data_access_layer', () => {
   const actual = jest.requireActual('./repositories/data_access_layer');
-  const { createDataClientJestMock } = jest.requireActual(
-    './test_utils/data_client_jest_mock'
-  );
+  const { createDataClientJestMock } = jest.requireActual('./test_utils/data_client_jest_mock');
   return {
     ...actual,
     createDataClientBundle: jest.fn(() => createDataClientJestMock()),

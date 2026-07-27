@@ -38,41 +38,29 @@ export class DeferredDataClient<TExecution extends { id: string }>
   search(
     request: ExecutionsSearchRequest
   ): Promise<SearchResponse<TExecution, Record<string, AggregationsAggregate>>> {
-    return this.dataClientPromise.then((dataClient) =>
-      dataClient.search(request)
-    );
+    return this.dataClientPromise.then((dataClient) => dataClient.search(request));
   }
 
   count(request: ExecutionsCountRequest): Promise<CountResponse> {
-    return this.dataClientPromise.then((dataClient) =>
-      dataClient.count(request)
-    );
+    return this.dataClientPromise.then((dataClient) => dataClient.count(request));
   }
 
   getByIds(
     ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution> | undefined
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
-    return this.dataClientPromise.then((dataClient) =>
-      dataClient.getByIds(ids, options)
-    );
+    return this.dataClientPromise.then((dataClient) => dataClient.getByIds(ids, options));
   }
 
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    return this.dataClientPromise.then((dataClient) =>
-      dataClient.bulk(request)
-    );
+    return this.dataClientPromise.then((dataClient) => dataClient.bulk(request));
   }
 
   scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
-    return this.dataClientPromise.then((dataClient) =>
-      dataClient.scriptUpdate(request)
-    );
+    return this.dataClientPromise.then((dataClient) => dataClient.scriptUpdate(request));
   }
 
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<DeleteByQueryResponse> {
-    return this.dataClientPromise.then((dataClient) =>
-      dataClient.deleteByQuery(request)
-    );
+    return this.dataClientPromise.then((dataClient) => dataClient.deleteByQuery(request));
   }
 }

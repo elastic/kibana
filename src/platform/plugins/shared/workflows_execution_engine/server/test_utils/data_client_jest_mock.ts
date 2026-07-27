@@ -11,8 +11,9 @@ export const mockDataClientBundleInitSetup = jest.fn().mockResolvedValue(undefin
 export const mockDataClientBundleInitStart = jest.fn().mockResolvedValue(undefined);
 
 export const createDataClientJestMock = () => {
-  const { createMockStepDataClient, createMockWorkflowDataClient } =
-    jest.requireActual('../repositories/data_access_layer/mocks');
+  const { createMockStepDataClient, createMockWorkflowDataClient } = jest.requireActual(
+    '../repositories/data_access_layer/mocks'
+  );
 
   return {
     initSetup: mockDataClientBundleInitSetup,

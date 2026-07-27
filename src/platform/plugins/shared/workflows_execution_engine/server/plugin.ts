@@ -24,7 +24,6 @@ import {
 import type {
   BulkScheduleWorkflowResult,
   EsWorkflowExecution,
-  EsWorkflowStepExecution,
   WorkflowExecutionEngineModel,
   WorkflowSettings,
 } from '@kbn/workflows';
