@@ -20,7 +20,7 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 
 - **Look for:** Tests with no `afterEach`/`after` cleanup; `esArchiverLoad` without unload; API resources created but never deleted; global mutable state.
 - **Why:** Cypress runs each spec in a clean browser. Scout shares the environment across specs in a worker — leftover data causes cascading failures.
-- **Scout approach:** Explicit cleanup in `afterAll`/`afterEach`, defensive cleanup in `beforeAll`, unique identifiers per worker (`scoutSpace.id`).
+- **Scout approach:** Explicit cleanup in `afterAll`/`afterEach`, unique identifiers per worker (`scoutSpace.id`), and targeted idempotent cleanup in `beforeAll` only for deterministic leftovers from interrupted runs. Never use broad catch-all cleanup in `beforeAll`.
 
 ### Force interactions
 

@@ -179,7 +179,7 @@ Use the solution-specific skill's page object and API service templates as start
 
 2. **Add explicit cleanup** in the Scout test (`afterAll` / `afterEach`)
 
-3. **Add defensive cleanup in `beforeAll`** — handles leftover data from a previous failed run
+3. **Add targeted defensive cleanup in `beforeAll` when needed** — remove deterministic resources left by an interrupted previous run. Do not run broad catch-all cleanup there; primary cleanup belongs in `afterAll` / `afterEach`.
 
 4. **Verify cleanup works** — run the test twice in a row locally. Second run fails → cleanup is incomplete.
 
