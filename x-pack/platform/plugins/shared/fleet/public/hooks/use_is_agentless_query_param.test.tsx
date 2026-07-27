@@ -49,6 +49,8 @@ describe('useIsAgentlessQueryParam', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
+      // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
+      disableAgentlessLegacyAPI: false,
     });
     const { result } = renderWithSearch('?isAgentless=true');
     expect(result.current).toBe(false);
