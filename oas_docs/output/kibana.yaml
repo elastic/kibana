@@ -2916,9 +2916,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: Skill IDs to enable for this execution.
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3371,9 +3381,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: Skill IDs to enable for this execution.
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
