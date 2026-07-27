@@ -42,32 +42,63 @@ import {
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
-const isPromiseLike = (value: unknown): boolean =>
+const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
   typeof value === 'object' &&
   value !== null &&
   typeof (value as { then?: unknown }).then === 'function';
 
+/** The value half of a raw resource-attribute entry: an AttributeValue, or a promise of one. */
+type ResolvedResourceValue = ReturnType<resources.Resource['getRawAttributes']>[number][1];
+
 /**
- * Captures the named resource-attribute keys from a resource so they can be re-emitted as per-record
- * log attributes. Reads the raw attributes (pre-async-resolution) and keeps the first occurrence of
- * each key. Async-detected values (e.g. host.id from getMachineId) are skipped — per-record
- * attributes must be resolved at emit time. Returns an empty object when nothing is requested/found.
+ * Captures the requested resource-attribute values from the resolved attribute map so they can be
+ * re-emitted as per-record log attributes. Async-detected values (e.g. host.id from getMachineId) are
+ * skipped — per-record attributes must be resolved at emit time. Returns an empty object when nothing
+ * is requested/found.
  */
 const capturePromotedResourceAttributes = (
-  resource: resources.Resource,
+  resolved: ReadonlyMap<string, unknown>,
   keys?: string[]
 ): Attributes => {
   const promoted: Attributes = {};
-  if (!keys?.length) {
-    return promoted;
-  }
-  const wanted = new Set(keys);
-  for (const [key, value] of resource.getRawAttributes()) {
-    if (wanted.has(key) && !(key in promoted) && value != null && !isPromiseLike(value)) {
+  for (const key of keys ?? []) {
+    const value = resolved.get(key);
+    if (value != null && !isPromiseLike(value)) {
       promoted[key] = value as AttributeValue;
     }
   }
   return promoted;
+};
+
+/**
+ * A `fieldAdditions` template parsed once at construction so `append()` doesn't re-parse the regex on
+ * every record (audit logging is a hot path). `segments` are the literal/placeholder parts in order;
+ * `refs` are the referenced attribute keys, for the presence/scalar check.
+ */
+interface CompiledFieldAddition {
+  key: string;
+  refs: string[];
+  segments: Array<{ literal: string } | { ref: string }>;
+}
+
+/**
+ * Parses each `fieldAdditions` template into literal segments + placeholder refs. Splitting on the
+ * `{ref}` capturing group yields alternating literals (even indices) and refs (odd indices).
+ */
+const compileFieldAdditions = (
+  fieldAdditions?: Record<string, string>
+): CompiledFieldAddition[] | undefined => {
+  if (!fieldAdditions) {
+    return undefined;
+  }
+  return Object.entries(fieldAdditions).map(([key, template]) => {
+    const tokens = template.split(/\{([^}]+)\}/);
+    const segments = tokens.map((token, index) =>
+      index % 2 === 0 ? { literal: token } : { ref: token }
+    );
+    const refs = tokens.filter((_, index) => index % 2 === 1);
+    return { key, refs, segments };
+  });
 };
 
 /**
@@ -154,7 +185,7 @@ const toAttributes = (
   fieldDrops?: string[],
   fieldDefaults?: Record<string, string | string[]>,
   fieldUppercase?: string[],
-  fieldAdditions?: Record<string, string>,
+  compiledAdditions?: CompiledFieldAddition[],
   promotedAttributes?: Attributes
 ): Attributes => {
   const attrs: Attributes = {
@@ -224,16 +255,22 @@ const toAttributes = (
   // Derived attributes: build a value from a template referencing other flattened attributes.
   // Runs after renames (so templates can reference renamed keys) and before drops (so a template
   // may reference source fields that are then dropped, e.g. url.original from url.scheme/domain/path).
-  if (fieldAdditions) {
-    for (const [key, template] of Object.entries(fieldAdditions)) {
-      const refs = [...template.matchAll(/\{([^}]+)\}/g)].map((match) => match[1]);
-      // Skip when any referenced field is missing/nullish/empty so events that don't carry the
-      // source fields (e.g. non-http events for url.original) don't get a degenerate value.
-      const allPresent = refs.every((ref) => attrs[ref] != null && attrs[ref] !== '');
-      if (!allPresent) {
+  if (compiledAdditions) {
+    for (const { key, refs, segments } of compiledAdditions) {
+      // Templates may only reference scalar fields. Skip when any referenced field is missing,
+      // nullish, empty, or an array/object — so events that don't carry the source fields (e.g.
+      // non-http events for url.original) don't get a degenerate value, and array-valued attributes
+      // (e.g. source.ip, event.type) aren't silently comma-joined into the template.
+      const allUsable = refs.every((ref) => {
+        const value = attrs[ref];
+        return value != null && value !== '' && typeof value !== 'object';
+      });
+      if (!allUsable) {
         continue;
       }
-      attrs[key] = template.replace(/\{([^}]+)\}/g, (_, ref) => String(attrs[ref]));
+      attrs[key] = segments
+        .map((segment) => ('literal' in segment ? segment.literal : String(attrs[segment.ref])))
+        .join('');
     }
   }
 
@@ -355,7 +392,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly fieldDrops?: string[];
   private readonly fieldDefaults?: Record<string, string | string[]>;
   private readonly fieldUppercase?: string[];
-  private readonly fieldAdditions?: Record<string, string>;
+  private readonly compiledAdditions?: CompiledFieldAddition[];
   private readonly promotedAttributes: Attributes;
 
   constructor(config: OtelAppenderConfig) {
@@ -372,45 +409,53 @@ export class OtelAppender implements DisposableAppender {
     //     (its default).
     // An explicit allowlist fully governs the resource — a key it names is kept even if fieldDrops
     // also lists it, because fieldDrops is primarily a per-record denylist (a field can be dropped
-    // from per-record attributes yet kept in the resource, e.g. audit logs' service.type). Filtering
-    // rebuilds via getRawAttributes() so async entries (e.g. host.id) are preserved for the SDK to
-    // await at export time.
+    // from per-record attributes yet kept in the resource, e.g. audit logs' service.type).
     const includeResources = config.includeResources ?? ['*'];
     const includeAll = includeResources.includes('*');
     const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
-    // Capture the promoted resource attributes from the fully-resolved resource BEFORE the
-    // includeResources allowlist strips them, so they can be re-emitted per-record (e.g. project.id,
-    // which arrives as a resource attribute promoted from an APM global label).
-    this.promotedAttributes = capturePromotedResourceAttributes(
-      baseResource,
-      config.promoteResourceAttributes
-    );
-    let resource;
-    if (includeAll && !config.fieldDrops?.length) {
-      resource = baseResource;
-    } else {
-      // Explicit allowlist governs alone; otherwise (['*']) fall back to the fieldDrops denylist.
-      const keepAttribute = ([key]: [string, unknown]) =>
-        includeAll ? !config.fieldDrops?.includes(key) : includeResources.includes(key);
-      const rawAttributes = baseResource.getRawAttributes();
 
-      // merge() lists the overriding resource's attributes first and does not dedupe, so a key can
-      // appear twice (e.g. service.name from both APM config and config.attributes). Keep the FIRST
-      // occurrence to match the SDK's first-wins merge semantics — Object.fromEntries alone is
-      // last-wins and would pick the overridden base value.
-      const seen = new Set<string>();
-      const kept = rawAttributes.filter((entry) => {
-        const [key] = entry;
-        if (seen.has(key) || !keepAttribute(entry)) {
-          return false;
+    // The default appender (keep everything, no drops) uses the merged resource directly. Only when
+    // we have to reshape it — filter the resource or promote attributes onto records — do we resolve
+    // the attributes ourselves.
+    const needsFilter = !includeAll || Boolean(config.fieldDrops?.length);
+    const needsPromotion = Boolean(config.promoteResourceAttributes?.length);
+    let resource: resources.Resource = baseResource;
+    let promoted: Attributes = {};
+
+    if (needsFilter || needsPromotion) {
+      // Resolve attribute precedence explicitly instead of trusting the order merge() concatenates
+      // raw entries in: config.attributes (kibana.yml / audit injection) are authoritative for the
+      // keys they set, so seed them first; the remaining detected keys then resolve first-wins,
+      // matching the SDK's public `.attributes` getter (`attrs[k] ??= v`). This keeps the override
+      // precedence correct even if the SDK ever changes merge()'s internal ordering. Reading raw
+      // entries preserves async values (e.g. host.id) for the SDK to await at export time.
+      const resolved = new Map<string, ResolvedResourceValue>(
+        Object.entries(config.attributes ?? {})
+      );
+      for (const [key, value] of baseResource.getRawAttributes()) {
+        if (!resolved.has(key)) {
+          resolved.set(key, value);
         }
-        seen.add(key);
-        return true;
-      });
-      resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+      }
+
+      // Promotion captures from the resolved map BEFORE the allowlist below narrows it, so a key can
+      // be emitted per-record (e.g. project.id) even when it's dropped from the resource.
+      if (needsPromotion) {
+        promoted = capturePromotedResourceAttributes(resolved, config.promoteResourceAttributes);
+      }
+
+      if (needsFilter) {
+        // Explicit allowlist governs alone; otherwise (['*']) fall back to the fieldDrops denylist.
+        const keepAttribute = (key: string) =>
+          includeAll ? !config.fieldDrops?.includes(key) : includeResources.includes(key);
+        const kept = [...resolved].filter(([key]) => keepAttribute(key));
+        resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+      }
     }
+    this.promotedAttributes = promoted;
+
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -428,7 +473,7 @@ export class OtelAppender implements DisposableAppender {
     this.fieldDrops = config.fieldDrops;
     this.fieldDefaults = config.fieldDefaults;
     this.fieldUppercase = config.fieldUppercase;
-    this.fieldAdditions = config.fieldAdditions;
+    this.compiledAdditions = compileFieldAdditions(config.fieldAdditions);
   }
 
   public append(record: LogRecord): void {
@@ -457,7 +502,7 @@ export class OtelAppender implements DisposableAppender {
         this.fieldDrops,
         this.fieldDefaults,
         this.fieldUppercase,
-        this.fieldAdditions,
+        this.compiledAdditions,
         this.promotedAttributes
       ),
     });

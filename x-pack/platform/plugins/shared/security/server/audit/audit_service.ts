@@ -100,11 +100,12 @@ export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
 
 // project.id arrives as a resource attribute (buildOtelResources() promotes the
 // `elastic.apm.globalLabels.project.id` APM global label to the OTel resource, and deployments may
-// also set it via the appender's `attributes`). It belongs on each record too — a single Kibana
-// instance can serve multiple projects — so copy it into per-record attributes. It is deliberately
-// kept in BOTH places: the log-delivery pipeline reads project.id from the resource (removing it
-// breaks delivery), so we keep it there (via includeResources below) and also promote a per-record
-// copy. Absent when there is no such source (e.g. non-Cloud), in which case nothing is promoted.
+// also set it via the appender's `attributes`). On Serverless each Kibana instance serves exactly
+// one project, so this instance-wide id correctly identifies the project every audit record belongs
+// to — which is why it is safe to copy onto each record. It is deliberately kept in BOTH places:
+// the log-delivery pipeline reads project.id from the resource (removing it breaks delivery), so we
+// keep it there (via includeResources below) and also promote a per-record copy. Absent when there
+// is no such source (e.g. non-Cloud), in which case nothing is promoted.
 export const AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES: string[] = ['project.id'];
 
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);

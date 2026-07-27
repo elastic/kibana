@@ -177,8 +177,9 @@ export interface OtelAppenderConfig {
    * template may reference fields that are subsequently dropped (e.g. build `url.original` from
    * `url.scheme`/`url.domain`/`url.path`, then drop those components).
    *
-   * The addition is skipped when any referenced field is missing/nullish/empty, so events that do
-   * not carry the source fields (e.g. non-http events) don't receive a degenerate value.
+   * Templates may only reference scalar fields. The addition is skipped when any referenced field is
+   * missing/nullish/empty or array/object-valued, so events that do not carry the source fields (e.g.
+   * non-http events) don't receive a degenerate value, and array attributes aren't silently joined.
    */
   fieldAdditions?: Record<string, string>;
 }

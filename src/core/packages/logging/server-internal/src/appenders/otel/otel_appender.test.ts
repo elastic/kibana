@@ -475,13 +475,14 @@ describe('OtelAppender', () => {
         expect(filteredArg['service.type']).toBe('kibana');
       });
 
-      it('keeps the overriding value on duplicate keys (config.attributes wins over detected)', () => {
-        // merge() emits the overriding resource's attributes first, so service.name appears twice:
-        // the configured 'serverless-kibana' (override, first) and the APM-derived 'kibana' (base).
+      it('keeps the configured value on duplicate keys regardless of merge() ordering', () => {
+        // The APM-derived service.name ('kibana') is deliberately placed FIRST in the raw entries —
+        // i.e. as if merge() emitted the base before the override. config.attributes must still win,
+        // because precedence is resolved from config.attributes, not from raw-entry position.
         wireResourceWithRawAttributes([
-          ['service.name', 'serverless-kibana'],
-          ['service.type', 'kibana'],
           ['service.name', 'kibana'],
+          ['service.type', 'kibana'],
+          ['service.name', 'serverless-kibana'],
         ]);
 
         new OtelAppender({
@@ -491,7 +492,7 @@ describe('OtelAppender', () => {
         });
 
         const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
-        // First occurrence (the override) wins — not the last/base value.
+        // The configured override wins even though the base value appears first in the raw entries.
         expect(filteredArg['service.name']).toBe('serverless-kibana');
         expect(filteredArg['service.type']).toBe('kibana');
       });
@@ -1128,6 +1129,20 @@ describe('OtelAppender', () => {
 
       const { attributes } = mockEmit.mock.calls[0][0];
       expect(attributes).not.toHaveProperty(['url.original']);
+    });
+
+    it('skips the addition when a referenced field is array-valued (no silent comma-join)', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        // event.category is an array; a template must not stringify it into a degenerate value.
+        fieldAdditions: { 'derived.field': 'prefix-{event.category}' },
+      });
+      appender.append(makeRecord({ meta: { event: { category: ['authentication', 'web'] } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['derived.field']);
+      // The array-valued source itself is untouched.
+      expect(attributes).toHaveProperty(['event.category'], ['authentication', 'web']);
     });
   });
 
