@@ -7,7 +7,11 @@
 
 import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  getLatestVersion,
+} from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import {
@@ -46,7 +50,10 @@ export const createAgentLiveUpdatesSubscription = ({
             (ref) =>
               ref.attachment_id === attachment.id &&
               (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
-                ref.operation === ATTACHMENT_REF_OPERATION.created)
+                ref.operation === ATTACHMENT_REF_OPERATION.created) &&
+              // Only reapply agent-driven edits. A `user` ref here is the dashboard's own
+              // ambient self-sync echoing back — reapplying it would revert what just changed.
+              ref.actor === ATTACHMENT_REF_ACTOR.agent
           ) === true
         );
       });

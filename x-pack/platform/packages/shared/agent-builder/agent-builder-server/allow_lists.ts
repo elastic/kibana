@@ -300,6 +300,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+
+  // Platform – Custom Content
+  'platform.custom_content.panel_context',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

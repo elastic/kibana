@@ -22,3 +22,5 @@ export const CUSTOM_CONTENT_CSP_META =
   '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\';">';
 
 export const CUSTOM_CONTENT_ENABLED_FLAG_KEY = 'dashboard.customContent.enabled';
+
+export const CUSTOM_CONTENT_REFINE_SESSION_TAG = 'custom_content';

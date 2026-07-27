@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+
+export const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_context';
+
+export const customContentContextAttachmentDataSchema = z.object({
+  panel_template: z.string(),
+  esql_query: z.string().optional(),
+  panel_title: z.string().optional(),
+});
+
+export type CustomContentContextAttachmentData = z.infer<
+  typeof customContentContextAttachmentDataSchema
+>;

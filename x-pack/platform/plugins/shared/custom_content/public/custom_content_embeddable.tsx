@@ -9,7 +9,7 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
-import type { HasTypeDisplayName } from '@kbn/presentation-publishing';
+import type { HasTypeDisplayName, HasEditCapabilities } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   titleComparators,
@@ -25,9 +25,11 @@ import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 import { CustomContentComponent } from './components/custom_content_component';
+import { EditCustomContentFlyout } from './components/edit_custom_content_flyout';
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
-  HasTypeDisplayName;
+  HasTypeDisplayName &
+  HasEditCapabilities;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -39,6 +41,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
+    const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -46,6 +49,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
+
+    const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
+      if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
+      if (update.template !== undefined) template$.next(update.template);
+    };
 
     const stateApi = initializeStateApi<CustomContentEmbeddableState>({
       uuid,
@@ -88,16 +96,23 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
         }),
+      onEdit: async ({ isNewPanel } = {}) => {
+        isFlyoutOpen$.next(true);
+      },
+      isEditingEnabled: () => true,
     });
 
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
-        const [prompt, esqlQuery, savedTemplate] = useBatchedPublishingSubjects(
-          prompt$,
-          esqlQuery$,
-          template$
-        );
+        const [prompt, esqlQuery, savedTemplate, isFlyoutOpen, panelTitle] =
+          useBatchedPublishingSubjects(
+            prompt$,
+            esqlQuery$,
+            template$,
+            isFlyoutOpen$,
+            titleManager.api.title$
+          );
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
           apiPublishesTimeRange(parentApi)
@@ -121,16 +136,50 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           template$.next(t);
         }, []);
 
+        const handleFlyoutSave = useCallback(
+          (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
+            applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
+            setGenerationVersion((v) => v + 1);
+          },
+          []
+        );
+
+        const handleAgentUpdate = useCallback(
+          (update: { template?: string; esqlQuery?: string }) => {
+            applyConfigUpdate(update);
+            setGenerationVersion((v) => v + 1);
+          },
+          []
+        );
+
+        const handleFlyoutClose = useCallback(() => {
+          isFlyoutOpen$.next(false);
+        }, []);
+
         return (
-          <CustomContentComponent
-            embeddableId={uuid}
-            prompt={prompt}
-            esqlQuery={esqlQuery}
-            timeRange={timeRange}
-            generationVersion={generationVersion}
-            savedTemplate={savedTemplate}
-            onTemplateChange={onTemplateChange}
-          />
+          <>
+            <CustomContentComponent
+              embeddableId={uuid}
+              prompt={prompt}
+              esqlQuery={esqlQuery}
+              timeRange={timeRange}
+              generationVersion={generationVersion}
+              savedTemplate={savedTemplate}
+              onTemplateChange={onTemplateChange}
+            />
+            {isFlyoutOpen && (
+              <EditCustomContentFlyout
+                embeddableId={uuid}
+                esqlQuery={esqlQuery}
+                template={savedTemplate}
+                timeRange={timeRange}
+                panelTitle={panelTitle ?? undefined}
+                onSave={handleFlyoutSave}
+                onAgentUpdate={handleAgentUpdate}
+                onClose={handleFlyoutClose}
+              />
+            )}
+          </>
         );
       },
     };

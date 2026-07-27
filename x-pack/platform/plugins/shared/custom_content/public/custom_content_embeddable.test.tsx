@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
@@ -32,6 +32,25 @@ jest.mock('./components/custom_content_component', () => ({
       />
     );
   },
+}));
+
+let capturedFlyoutProps:
+  | {
+      onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
+      onAgentUpdate: (update: { template?: string; esqlQuery?: string }) => void;
+      onClose: () => void;
+    }
+  | undefined;
+
+jest.mock('./components/edit_custom_content_flyout', () => ({
+  EditCustomContentFlyout: (props: any) => {
+    capturedFlyoutProps = props;
+    return <div data-test-subj="mockEditCustomContentFlyout" />;
+  },
+}));
+
+jest.mock('./services', () => ({
+  getServices: () => ({ agentBuilder: undefined, core: { http: {} }, search: jest.fn() }),
 }));
 
 const baseState: CustomContentEmbeddableState = {
@@ -176,6 +195,76 @@ describe('customContentEmbeddableFactory', () => {
       });
 
       expect(embeddable.api.serializeState().template).toBe('<div>generated</div>');
+    });
+  });
+
+  describe('flyout integration', () => {
+    beforeEach(() => {
+      capturedFlyoutProps = undefined;
+    });
+
+    it('`isEditingEnabled` returns true', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      expect(embeddable.api.isEditingEnabled()).toBe(true);
+    });
+
+    it('`onEdit` opens the flyout', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull();
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+    });
+
+    it('`handleFlyoutSave` updates state and re-renders', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () =>
+        capturedFlyoutProps!.onSave('FROM metrics | LIMIT 10', '<div>new</div>')
+      );
+
+      const state = embeddable.api.serializeState();
+      expect(state.esqlQuery).toBe('FROM metrics | LIMIT 10');
+      expect(state.template).toBe('<div>new</div>');
+    });
+
+    it('`handleAgentUpdate` updates state', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () =>
+        capturedFlyoutProps!.onAgentUpdate({ template: '<p>agent result</p>' })
+      );
+
+      expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
+    });
+
+    it('closing the flyout via `onClose`', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onClose());
+      await waitFor(() => expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull());
     });
   });
 });
