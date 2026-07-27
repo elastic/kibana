@@ -12,6 +12,7 @@ import type {
   MarkReadConversationResponse,
   RenameConversationResponse,
 } from '../../../common/http_api/conversations';
+import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 
@@ -55,6 +56,36 @@ export function registerInternalConversationRoutes({
           id: updatedConversation.id,
           title: updatedConversation.title,
         },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_apply_template`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          template_id: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { template_id: templateId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.applyTemplate(conversationId, templateId);
+
+      return response.ok<ApplyTemplateResponse>({
+        body: { id: updatedConversation.id },
       });
     })
   );

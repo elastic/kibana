@@ -13,6 +13,7 @@ import type {
   MarkReadConversationResponse,
   RenameConversationResponse,
 } from '../../../common/http_api/conversations';
+import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
@@ -69,6 +70,19 @@ export class ConversationsService {
     return await this.http.post<MarkReadConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_mark_read`,
       { body: JSON.stringify({ read }) }
+    );
+  }
+
+  async applyTemplate({
+    conversationId,
+    templateId,
+  }: {
+    conversationId: string;
+    templateId: string;
+  }): Promise<ApplyTemplateResponse> {
+    return await this.http.post<ApplyTemplateResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_apply_template`,
+      { body: JSON.stringify({ template_id: templateId }) }
     );
   }
 

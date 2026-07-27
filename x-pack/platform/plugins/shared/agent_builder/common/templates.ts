@@ -6,7 +6,5 @@
  */
 
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
-import { CONVERSATION_TEMPLATES } from '../../../../common/templates';
 
-export const getTemplate = (id: string): ConversationTemplate | undefined =>
-  CONVERSATION_TEMPLATES.find((t) => t.id === id);
+export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [];
