@@ -21,7 +21,7 @@ const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
  * sites use the same method names, so they won't change.
  *
  * - Overrides {@link setSelectedOptions} to **type-to-filter, then select by
- *   accessible name token**. The base implementation never types (it matches an
+ *   accessible name**. The base implementation never types (it matches an
  *   unfiltered `getByTitle`), so it times out on the many Kibana combo boxes whose
  *   options are filterable / virtualized / async — the option is not in the DOM
  *   until you type. Kept as the same method name on purpose: when this behavior
@@ -49,15 +49,16 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
 
   /**
    * Smart replacement for the base {@link EuiComboBoxObject.setSelectedOptions}:
-   * type each label to filter, then select by exact `title` / primary label
-   * (e.g. `"ip"` matches `"ip"`, not `"clientip"`).
+   * type each label to filter, then select the option matched by its **accessible
+   * name**.
    *
    * Why override: while filtering, EUI middle-truncates the visible option text
-   * (`EuiTextTruncate`, e.g. `by…es`) and may drop the option `title`, but the
-   * full label remains in title/innerText. Substring accessible-name match wrongly
-   * matches `clientip`. Poll until matches appear, then click once outside the
-   * poll (avoids re-clicks on retry). Duplicate labels use keyboard
-   * (`ArrowDown` + `Enter`) fallback.
+   * (`EuiTextTruncate`, e.g. `by…es`) and drops the option `title`, but the
+   * accessible name keeps the full label — so `getByRole('option', { name })`
+   * resolves reliably where a text/title match would not. Being a poll, it also
+   * waits out async / server-side filtering (it only passes once the real match
+   * renders, never a stale pre-filter suggestion). A single match is clicked; a
+   * keyboard fallback (`ArrowDown` + `Enter`) handles duplicate labels.
    *
    * For free-text `onCreateOption` combos use {@link setCustomSelectedOptions}.
    */
@@ -69,38 +70,18 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
       await this.inputWrapper.click();
       await this.searchField.fill(label);
 
-      await expect
-        .poll(async () => (await this.getExactOptionMatches(label)).length, { timeout })
-        .toBeGreaterThan(0);
-
-      const matches = await this.getExactOptionMatches(label);
-      if (matches.length === 1) {
-        await matches[0].click();
+      const option = this.optionsList().getByRole('option', { name: label });
+      await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
+      if ((await option.count()) === 1) {
+        await option.click();
       } else {
-        // Duplicate visible labels — select the first filtered option via keyboard.
+        // Duplicate label / multiple substring matches — keyboard-select the
+        // highlighted match; avoids the nth-methods banned in kbn-scout.
         await this.searchField.press('ArrowDown');
         await this.searchField.press('Enter');
       }
-
       await this.searchField.blur();
     }
-  }
-
-  private async getExactOptionMatches(label: string): Promise<Locator[]> {
-    const options = await this.optionsList().getByRole('option').all();
-    const matches: Locator[] = [];
-    for (const option of options) {
-      const title = (await option.getAttribute('title'))?.trim();
-      if (title === label) {
-        matches.push(option);
-        continue;
-      }
-      const primaryLabel = (await option.innerText()).trim().split('\n')[0]?.trim();
-      if (primaryLabel === label) {
-        matches.push(option);
-      }
-    }
-    return matches;
   }
 
   /**
