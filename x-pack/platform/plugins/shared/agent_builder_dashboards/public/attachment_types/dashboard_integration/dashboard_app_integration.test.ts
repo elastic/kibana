@@ -460,5 +460,4 @@ describe('registerDashboardAppIntegration', () => {
     );
     expect(addAttachment.mock.calls[0][0].id).not.toBe(firstDraftAttachment.id);
   });
-
 });

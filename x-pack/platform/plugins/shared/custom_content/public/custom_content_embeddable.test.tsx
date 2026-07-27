@@ -161,7 +161,6 @@ describe('customContentEmbeddableFactory', () => {
       expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
-
   });
 
   describe('template caching', () => {

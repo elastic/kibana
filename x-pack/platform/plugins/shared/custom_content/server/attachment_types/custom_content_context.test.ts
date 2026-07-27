@@ -15,7 +15,10 @@ import { createCustomContentContextAttachmentType } from './custom_content_conte
 
 const buildAttachment = (
   data: CustomContentContextAttachmentData
-): Attachment<typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE, CustomContentContextAttachmentData> => ({
+): Attachment<
+  typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+  CustomContentContextAttachmentData
+> => ({
   id: 'att-1',
   type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   data,
