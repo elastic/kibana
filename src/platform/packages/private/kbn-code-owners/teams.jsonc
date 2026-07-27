@@ -513,6 +513,13 @@
     ]
   },
   {
+    "id": "nightshift-sre-agent",
+    "name": "Nightshift SRE Agent Team",
+    "github": {
+      "team": "elastic/nightshift-sre-agent-team"
+    }
+  },
+  {
     "id": "obs-cloudnative-monitoring",
     "name": "Obs Cloudnative Monitoring",
     "areas": [
