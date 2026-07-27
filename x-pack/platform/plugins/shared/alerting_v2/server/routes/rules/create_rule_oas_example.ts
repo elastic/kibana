@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
-import { getInvalidRuleDataMessage } from '../../lib/errors/rule_error_messages';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { CREATE_RULE_REQUEST, ruleResponseExample } from './rule_oas_shared_examples';
 
 const INVALID_CREATE_RULE_RESPONSE = invalidResponseExample({
   summary: 'Missing required rule metadata',
-  code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  message: getInvalidRuleDataMessage('create', 'metadata: Required'),
-  details: { context: 'create', errors: { metadata: ['Required'] } },
+  message: 'metadata: Required',
+  details: { errors: { metadata: ['Required'] } },
 });
 
 export const createRuleOasExamples = (): AlertingOasOperationObject =>

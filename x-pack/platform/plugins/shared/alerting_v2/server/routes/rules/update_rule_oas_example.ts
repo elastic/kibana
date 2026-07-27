@@ -7,10 +7,7 @@
 
 import type { UpdateRuleBody } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
-import {
-  getInvalidRuleDataMessage,
-  getRuleVersionConflictMessage,
-} from '../../lib/errors/rule_error_messages';
+import { getRuleVersionConflictMessage } from '../../lib/errors/rule_error_messages';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
@@ -32,9 +29,8 @@ export const UPDATE_RULE_REQUEST: UpdateRuleBody = {
 
 const INVALID_UPDATE_RULE_RESPONSE = invalidResponseExample({
   summary: 'Update body includes an unrecognized field',
-  code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  message: getInvalidRuleDataMessage('update', "Unrecognized key(s) in object: 'unknownField'"),
-  details: { context: 'update', errors: { unknownField: ['Unrecognized key'] } },
+  message: "Unrecognized key(s) in object: 'unknownField'",
+  details: { errors: { unknownField: ['Unrecognized key'] } },
 });
 
 const RULE_VERSION_CONFLICT_RESPONSE = {

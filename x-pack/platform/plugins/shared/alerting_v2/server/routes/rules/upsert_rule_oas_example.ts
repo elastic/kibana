@@ -6,10 +6,7 @@
  */
 
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
-import {
-  getInvalidRuleDataMessage,
-  getRuleVersionConflictMessage,
-} from '../../lib/errors/rule_error_messages';
+import { getRuleVersionConflictMessage } from '../../lib/errors/rule_error_messages';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
@@ -21,9 +18,8 @@ import {
 
 const INVALID_UPSERT_RULE_RESPONSE = invalidResponseExample({
   summary: 'Upsert body is missing required rule metadata',
-  code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-  message: getInvalidRuleDataMessage('upsert', 'metadata: Required'),
-  details: { context: 'upsert', errors: { metadata: ['Required'] } },
+  message: 'metadata: Required',
+  details: { errors: { metadata: ['Required'] } },
 });
 
 const RULE_UPSERT_CONFLICT_RESPONSE = {
