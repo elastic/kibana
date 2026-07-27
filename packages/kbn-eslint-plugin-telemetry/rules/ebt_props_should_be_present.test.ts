@@ -58,14 +58,15 @@ for (const [name, tester] of [tsTester, babelTester]) {
           filename: 'foo.tsx',
           code: `<${element} {...getEbtProps({ action: 'foo', element: 'bar' })} />`,
         })),
-        // Non-interactive elements are not checked
+        // Custom component with onClick + EBT via getEbtProps — should not be flagged
         {
           filename: 'foo.tsx',
-          code: `<div onClick={onClick} />`,
+          code: `function Foo() { return <CustomWrapper {...getEbtProps({ action: 'a', element: 'e', detail: 'd' })} onClick={fn} />; }`,
         },
+        // Custom component with no onClick — not interactive, should not be flagged
         {
           filename: 'foo.tsx',
-          code: `<span onClick={onClick} />`,
+          code: `<CustomWrapper className="foo" />`,
         },
       ],
 
@@ -98,6 +99,35 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        // Custom component with onClick but no EBT props — should be flagged
+        {
+          filename: 'foo.tsx',
+          code: `<CustomWrapper onClick={fn}>Click</CustomWrapper>`,
+          errors: [
+            {
+              message: `<CustomWrapper> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        // Native elements with onClick not already in the list — should be flagged
+        {
+          filename: 'foo.tsx',
+          code: `<div onClick={fn}>Click</div>`,
+          errors: [
+            {
+              message: `<div> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        {
+          filename: 'foo.tsx',
+          code: `<span onClick={fn}>Click</span>`,
+          errors: [
+            {
+              message: `<span> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
             },
           ],
         },

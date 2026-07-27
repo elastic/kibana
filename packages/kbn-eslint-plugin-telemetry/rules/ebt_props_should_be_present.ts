@@ -12,6 +12,14 @@ import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { checkNodeForExistingEbtProps } from '../helpers/check_node_for_existing_ebt_props';
 
+const hasOnClickProp = (openingEl: TSESTree.JSXOpeningElement): boolean =>
+  openingEl.attributes.some(
+    (attr) =>
+      attr.type === AST_NODE_TYPES.JSXAttribute &&
+      attr.name.type === AST_NODE_TYPES.JSXIdentifier &&
+      attr.name.name === 'onClick'
+  );
+
 /**
  * Interactive EUI components and native HTML elements that should carry EBT
  * tracking attributes (`data-ebt-action` and `data-ebt-element`).
@@ -51,10 +59,14 @@ export const EbtPropsShouldBePresent: Rule.RuleModule = {
         const name = String(node.name);
         const parent = node.parent;
 
-        if (
-          parent?.type !== AST_NODE_TYPES.JSXOpeningElement ||
-          !EBT_INTERACTIVE_ELEMENTS.includes(name)
-        ) {
+        if (parent?.type !== AST_NODE_TYPES.JSXOpeningElement) {
+          return;
+        }
+
+        const isKnownInteractive = EBT_INTERACTIVE_ELEMENTS.includes(name);
+        const isUnknownWithOnClick = !isKnownInteractive && hasOnClickProp(parent);
+
+        if (!isKnownInteractive && !isUnknownWithOnClick) {
           return;
         }
 
