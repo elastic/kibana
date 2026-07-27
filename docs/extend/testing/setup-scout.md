@@ -188,7 +188,8 @@ Pass `--namespace` to the [Scout CLI](#scout-setup-cli):
 ```bash
 node scripts/scout generate \
   --path x-pack/solutions/security/plugins/security_solution \
-  --namespace detection_engine
+  --namespace detection_engine \
+  --type both
 ```
 
 In interactive mode, if the plugin already uses namespaces, the generator lists the existing ones so you can pick one or create a new one. After scaffolding, it reminds you to set the namespace owner in `.github/CODEOWNERS`:

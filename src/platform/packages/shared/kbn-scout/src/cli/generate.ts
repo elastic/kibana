@@ -359,10 +359,10 @@ export const generateCmd: Command<void> = {
     --force            If some Scout directories already exist, generate only the missing sections without prompting
   `,
     examples: `
-    node scripts/scout.js generate --path x-pack/platform/plugins/shared/maps --type api
-    node scripts/scout.js generate --path x-pack/platform/plugins/shared/maps --type ui --no-ui-parallel
-    node scripts/scout.js generate --path x-pack/platform/plugins/shared/security --type both --scout-root scout_uiam_local --force
-    node scripts/scout.js generate --path x-pack/solutions/security/plugins/security_solution --type ui --namespace detection_engine
+    node scripts/scout generate --path x-pack/platform/plugins/shared/maps --type api
+    node scripts/scout generate --path x-pack/platform/plugins/shared/maps --type ui --no-ui-parallel
+    node scripts/scout generate --path x-pack/platform/plugins/shared/security --type both --scout-root scout_uiam_local --force
+    node scripts/scout generate --path x-pack/solutions/security/plugins/security_solution --type ui --namespace detection_engine
   `,
   },
   run: async ({ flagsReader, log }) => {
