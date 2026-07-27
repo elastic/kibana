@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class MlDataVisualizerActions {
   readonly actionsPanel: Locator;
@@ -68,14 +69,21 @@ export class MlDataVisualizerActions {
 
   async selectDataView(name: string): Promise<void> {
     await this.dataSourceSelectorButton.click();
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'visible' });
 
-    await this.page.testSubj.fill('indexPattern-switcher--input', name);
-    await this.page.locator(`[data-test-subj="dataView-${name}"]`).click();
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
 
+    const searchInput = this.page.testSubj.locator('indexPattern-switcher--input');
+    if (await searchInput.isVisible()) {
+      await searchInput.fill(name);
+    }
+
+    const option = switcher.locator(`li[role="option"][data-test-subj="dataView-${name}"]`);
+    await option.waitFor({ state: 'visible', timeout: 40_000 });
+    await option.click();
+
+    await switcher.waitFor({ state: 'hidden' });
     await this.page.waitForURL(/index=/, { timeout: 10_000 });
-
     await this.page.testSubj.waitForSelector('dataVisualizerIndexPage', { state: 'visible' });
   }
 
@@ -95,22 +103,33 @@ export class MlDataVisualizerActions {
       .locator('table:not([aria-busy="true"])')
       .waitFor({ state: 'visible', timeout: 40_000 });
 
-    await this.savedObjectFinderSearchInput.fill(name);
-    // fill() triggers a 300 ms debounced search — wait for the match explicitly.
-    const resultItem = this.page.testSubj.locator(`savedObjectTitle${name}`);
+    if (await this.savedObjectFinderSearchInput.isVisible()) {
+      await this.savedObjectFinderSearchInput.fill(name);
+    }
+
+    const resultItem = this.page.locator(`button[data-test-subj="savedObjectTitle${name}"]`);
     await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
     await resultItem.click();
     await this.loadSearchForm.waitFor({ state: 'hidden' });
 
     await this.page.waitForURL(/savedSearchId/, { timeout: 10_000 });
-
     await this.page.testSubj.waitForSelector('dataVisualizerIndexPage', { state: 'visible' });
   }
 
-  async clickUseFullDataButton(): Promise<void> {
-    await this.useFullDataButton.click();
-    await this.applyTimeButton.click();
-    await this.totalDocCount.waitFor({ state: 'visible' });
+  /**
+   * Applies the full data time range. Retries like DV Scout / FTR — saved-search
+   * filters can race with the initial load so the first apply may leave total docs at 0.
+   */
+  async clickUseFullDataButton(expectedFormattedTotalDocCount: string): Promise<void> {
+    await expect(async () => {
+      await expect(this.useFullDataButton).toBeEnabled({ timeout: 10_000 });
+      await this.useFullDataButton.click();
+      await expect(this.applyTimeButton).toBeEnabled({ timeout: 10_000 });
+      await this.applyTimeButton.click();
+      await expect(this.totalDocCount).toHaveText(expectedFormattedTotalDocCount, {
+        timeout: 10_000,
+      });
+    }).toPass({ timeout: 60_000 });
   }
 
   async clickCreateAdvancedJobButton(): Promise<void> {

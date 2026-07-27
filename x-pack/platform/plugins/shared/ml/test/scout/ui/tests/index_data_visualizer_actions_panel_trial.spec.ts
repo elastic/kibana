@@ -65,8 +65,7 @@ test.describe('index based actions panel on trial license', { tag: tags.stateful
       await mlDataVisualizerActions.selectSavedSearch(testData.SAVED_SEARCH_TITLE);
 
       await expect(mlDataVisualizerActions.timeRangeSelectorSection).toBeVisible();
-      await mlDataVisualizerActions.clickUseFullDataButton();
-      await expect(mlDataVisualizerActions.totalDocCount).toHaveText(testData.DOC_COUNT_FORMATTED);
+      await mlDataVisualizerActions.clickUseFullDataButton(testData.DOC_COUNT_FORMATTED);
     });
 
     await scoutTest.step('navigates to Discover page', async () => {
