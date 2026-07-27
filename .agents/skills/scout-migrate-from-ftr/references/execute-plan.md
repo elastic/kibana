@@ -183,6 +183,7 @@ Keep Scout tests for what **requires a real browser and running server**: naviga
 
 ### 8) Clean up FTR wiring
 
+- Before removing FTR wiring, verify every migrated spec is included by the config in its UI/API directory: `playwright.config.ts` with `testDir: './tests'`, or `parallel.playwright.config.ts` with `testDir: './parallel_tests'`. Run the config or spec locally to confirm Playwright discovery.
 - Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files identified in the plan's mirror table.
 - Delete old FTR test files once Scout coverage is verified. If a mirrored stateful/serverless file remains, either delete it too (when covered by the same Scout spec) or document why it still needs separate coverage.
 - For staged migrations, mark remaining FTR suites as `describe.skip` to avoid duplicate coverage.

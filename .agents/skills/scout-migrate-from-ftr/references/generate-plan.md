@@ -56,6 +56,8 @@ Also read thoroughly:
 
 For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
 
+Build a scenario parity map with one row for every FTR `it(...)` block. Record its behavior and assertions, its exact Scout destination, and whether it becomes a Scout `test`, `test.step`, API test, RTL/Jest test, drop, or defer. Never group away or omit individual blocks; justify every move, drop, or defer.
+
 **File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
 
 ### 3. Complexity estimation
