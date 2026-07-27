@@ -57,7 +57,7 @@ export interface LocatorDefinition<P extends SerializableRecord>
 
   /**
    * Extracts the time range from the locator's parameters.
-   * 
+   *
    * Implement this alongside `setTimeRange` when the
    * locator params support time-range.
    *
@@ -67,7 +67,7 @@ export interface LocatorDefinition<P extends SerializableRecord>
 
   /**
    * Returns a new copy of `params` with the supplied `timeRange` applied.
-   * 
+   *
    * Implement this alongside `getTimeRange` when the
    * locator params support time-range.
    *
