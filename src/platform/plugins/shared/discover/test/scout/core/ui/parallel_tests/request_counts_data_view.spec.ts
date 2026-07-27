@@ -1,0 +1,245 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { spaceTest } from '../fixtures';
+import { measureSearchRequests } from '../fixtures';
+
+const LONG_WINDOW_LOGSTASH_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern';
+
+spaceTest.describe(
+  'Discover request counts - data view mode',
+  { tag: tags.deploymentAgnostic },
+  () => {
+    spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
+      await discoverScoutSpace.setupDiscoverDefaults();
+      await scoutSpace.savedObjects.load(LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+    });
+
+    spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.teardownDiscoverDefaults();
+    });
+
+    spaceTest(
+      'should send 2 search requests (documents + chart) on page load',
+      async ({ page, pageObjects }) => {
+        // Reload first, so measureSearchRequests sets up the resource timing buffer on the NEW
+        // document (buffer size and entries reset on navigation). page.reload() resolves at the
+        // load event, before Discover's React app has mounted — no search has started yet, so
+        // the buffer setup cannot miss a request.
+        await page.reload();
+        // On initial page load the discoverDataGridUpdating indicator never mounts (the grid is
+        // replaced by a loading spinner until results arrive), so waitUntilSearchingHasFinished()
+        // alone returns too early. Wait for the rendered doc table and chart instead — each only
+        // appears after its search request completed.
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.dataGrid.waitForDocTableRendered();
+          await pageObjects.discover.expectXYVisChartVisible();
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when refreshing',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.submitQuery();
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when changing the query',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.queryBar.setQuery('bytes > 1000');
+          await pageObjects.discover.submitQuery();
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when changing the time range',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.datePicker.setAbsoluteRange({
+            from: 'Sep 21, 2015 @ 06:31:44.000',
+            to: 'Sep 23, 2015 @ 00:00:00.000',
+          });
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send no requests when toggling the chart visibility',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.hideChart();
+          await pageObjects.discover.showChart();
+        });
+        expect(count).toBe(0);
+      }
+    );
+
+    spaceTest(
+      'should send a request for chart data when showing the chart after a time range change',
+      async ({ page, pageObjects }) => {
+        await pageObjects.discover.hideChart();
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: 'Sep 21, 2015 @ 06:31:44.000',
+          to: 'Sep 24, 2015 @ 00:00:00.000',
+        });
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.showChart();
+        });
+        expect(count).toBe(1);
+      }
+    );
+
+    spaceTest(
+      'should send expected requests for saved search changes',
+      async ({ page, pageObjects }) => {
+        await pageObjects.queryBar.setQuery('bytes > 1000');
+        await pageObjects.discover.submitQuery();
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: 'Sep 21, 2015 @ 06:31:44.000',
+          to: 'Sep 23, 2015 @ 00:00:00.000',
+        });
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+
+        const saveCount = await measureSearchRequests(
+          page,
+          pageObjects.discover,
+          'ese',
+          async () => {
+            await pageObjects.discover.saveSearch('data view test');
+          }
+        );
+        expect(saveCount).toBe(0);
+
+        await pageObjects.queryBar.setQuery('bytes < 2000');
+        await pageObjects.discover.submitQuery();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+
+        const revertCount = await measureSearchRequests(
+          page,
+          pageObjects.discover,
+          'ese',
+          async () => {
+            await pageObjects.discover.revertUnsavedChanges();
+          }
+        );
+        expect(revertCount).toBe(2);
+
+        const newSearchCount = await measureSearchRequests(
+          page,
+          pageObjects.discover,
+          'ese',
+          async () => {
+            await pageObjects.discover.clickNewSearch();
+            await pageObjects.discover.waitUntilSearchingHasFinished();
+          }
+        );
+        expect(newSearchCount).toBe(2);
+
+        const loadCount = await measureSearchRequests(
+          page,
+          pageObjects.discover,
+          'ese',
+          async () => {
+            await pageObjects.discover.loadSavedSearch('data view test');
+          }
+        );
+        expect(loadCount).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when adding a filter',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.filterBar.addFilter({
+            field: 'extension',
+            operator: 'is',
+            value: 'jpg',
+          });
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when sorting',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.dataGrid.openColumnMenuByField('@timestamp');
+          await page.testSubj
+            .locator('dataGridHeaderCellActionGroup-@timestamp')
+            .getByRole('button', { name: 'Sort Old-New' })
+            .click();
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 1 request (chart) when changing to a breakdown field without an other bucket',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.chooseBreakdownField('type');
+        });
+        expect(count).toBe(1);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.chooseBreakdownField('geo.src');
+        });
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 1 request (chart) when changing the chart interval',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.setChartInterval('Day');
+        });
+        expect(count).toBe(1);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when changing the data view',
+      async ({ page, pageObjects }) => {
+        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', async () => {
+          await pageObjects.discover.selectDataView('long-window-logstash-*');
+        });
+        expect(count).toBe(2);
+      }
+    );
+  }
+);
