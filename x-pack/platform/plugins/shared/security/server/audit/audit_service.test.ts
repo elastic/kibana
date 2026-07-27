@@ -22,6 +22,7 @@ import {
   AUDIT_OTEL_FIELD_DEFAULTS,
   AUDIT_OTEL_FIELD_DROPS,
   AUDIT_OTEL_FIELD_RENAMES,
+  AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
   AUDIT_OTEL_RESOURCE_ATTRIBUTES,
   AuditService,
   createLoggingConfig,
@@ -822,6 +823,8 @@ describe('#createLoggingConfig', () => {
     // includeResources keeps only the audit resource attribute keys; attributes supply the values.
     expect(otelAppender.includeResources).toEqual(Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES));
     expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
+    // project.id is promoted from the resource to per-record attributes.
+    expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
   });
 
   test('merges user-provided attributes with audit resource attributes', async () => {
@@ -880,6 +883,7 @@ describe('#createLoggingConfig', () => {
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDefaults');
     expect(appenders.auditTrailAppender).not.toHaveProperty('fieldAdditions');
     expect(appenders.auditTrailAppender).not.toHaveProperty('includeResources');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('promoteResourceAttributes');
   });
 
   test('does not inject audit transforms for an OTel appender when not serverless', async () => {
@@ -912,6 +916,7 @@ describe('#createLoggingConfig', () => {
     expect(otelAppender).not.toHaveProperty('fieldUppercase');
     expect(otelAppender).not.toHaveProperty('fieldAdditions');
     expect(otelAppender).not.toHaveProperty('includeResources');
+    expect(otelAppender).not.toHaveProperty('promoteResourceAttributes');
   });
 });
 

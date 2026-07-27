@@ -42,6 +42,34 @@ import {
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
+const isPromiseLike = (value: unknown): boolean =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { then?: unknown }).then === 'function';
+
+/**
+ * Captures the named resource-attribute keys from a resource so they can be re-emitted as per-record
+ * log attributes. Reads the raw attributes (pre-async-resolution) and keeps the first occurrence of
+ * each key. Async-detected values (e.g. host.id from getMachineId) are skipped — per-record
+ * attributes must be resolved at emit time. Returns an empty object when nothing is requested/found.
+ */
+const capturePromotedResourceAttributes = (
+  resource: resources.Resource,
+  keys?: string[]
+): Attributes => {
+  const promoted: Attributes = {};
+  if (!keys?.length) {
+    return promoted;
+  }
+  const wanted = new Set(keys);
+  for (const [key, value] of resource.getRawAttributes()) {
+    if (wanted.has(key) && !(key in promoted) && value != null && !isPromiseLike(value)) {
+      promoted[key] = value as AttributeValue;
+    }
+  }
+  return promoted;
+};
+
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
  * Returns `0` for filter-only levels ('all', 'off') so even though the level is incorrect, the record is still logged.
@@ -126,10 +154,14 @@ const toAttributes = (
   fieldDrops?: string[],
   fieldDefaults?: Record<string, string | string[]>,
   fieldUppercase?: string[],
-  fieldAdditions?: Record<string, string>
+  fieldAdditions?: Record<string, string>,
+  promotedAttributes?: Attributes
 ): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
+    // Resource attributes promoted to per-record attributes (captured once at construction). Seeded
+    // first so the field transforms below apply to them like any other attribute.
+    ...promotedAttributes,
   };
 
   if (record.transactionId) {
@@ -255,6 +287,8 @@ export class OtelAppender implements DisposableAppender {
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
     includeResources: schema.maybe(schema.arrayOf(schema.string())),
+    // Resource-attribute keys to also emit as per-record log attributes.
+    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string())),
     // Template-based derived attributes: target key -> template with {field} placeholders.
     fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     fieldRenames: schema.maybe(
@@ -322,6 +356,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly fieldDefaults?: Record<string, string | string[]>;
   private readonly fieldUppercase?: string[];
   private readonly fieldAdditions?: Record<string, string>;
+  private readonly promotedAttributes: Attributes;
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -344,6 +379,13 @@ export class OtelAppender implements DisposableAppender {
     const includeAll = includeResources.includes('*');
     const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
+    );
+    // Capture the promoted resource attributes from the fully-resolved resource BEFORE the
+    // includeResources allowlist strips them, so they can be re-emitted per-record (e.g. project.id,
+    // which arrives as a resource attribute promoted from an APM global label).
+    this.promotedAttributes = capturePromotedResourceAttributes(
+      baseResource,
+      config.promoteResourceAttributes
     );
     let resource;
     if (includeAll && !config.fieldDrops?.length) {
@@ -415,7 +457,8 @@ export class OtelAppender implements DisposableAppender {
         this.fieldDrops,
         this.fieldDefaults,
         this.fieldUppercase,
-        this.fieldAdditions
+        this.fieldAdditions,
+        this.promotedAttributes
       ),
     });
   }

@@ -141,6 +141,7 @@ describe('OtelAppender', () => {
       expect(result.fieldDefaults).toBeUndefined();
       expect(result.fieldAdditions).toBeUndefined();
       expect(result.includeResources).toBeUndefined();
+      expect(result.promoteResourceAttributes).toBeUndefined();
     });
 
     it('accepts fieldAdditions as a map of template strings', () => {
@@ -159,6 +160,14 @@ describe('OtelAppender', () => {
         includeResources: ['service.name', 'service.type'],
       });
       expect(result.includeResources).toEqual(['service.name', 'service.type']);
+    });
+
+    it('accepts promoteResourceAttributes as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      expect(result.promoteResourceAttributes).toEqual(['project.id']);
     });
 
     it('accepts fieldUppercase as an array of strings', () => {
@@ -514,6 +523,79 @@ describe('OtelAppender', () => {
         // Fast path: the merged resource is used directly, with no getRawAttributes()-based rebuild.
         expect(resourceWithKnownRaw.getRawAttributes).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('promoteResourceAttributes', () => {
+    // Wire buildOtelResources().merge(...) to resolve to a resource whose getRawAttributes()
+    // returns the given entries (mirrors the includeResources wiring above).
+    const wireResource = (rawAttributes: Array<[string, unknown]>) => {
+      const resourceWithKnownRaw = makeMockResource('known');
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
+    };
+
+    it('promotes a resource attribute into per-record attributes', () => {
+      wireResource([
+        ['service.name', 'serverless-kibana'],
+        ['project.id', 'proj-123'],
+      ]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['project.id'], 'proj-123');
+    });
+
+    it('skips async (Promise) resource values', () => {
+      wireResource([['host.id', Promise.resolve('async-host-id')]]);
+
+      const appender = new OtelAppender({ ...validConfig, promoteResourceAttributes: ['host.id'] });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['host.id']);
+    });
+
+    it('promotes nothing when the key is absent from the resource', () => {
+      wireResource([['service.name', 'serverless-kibana']]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['project.id']);
+    });
+
+    it('promotes per-record even when includeResources strips it from the resource', () => {
+      wireResource([
+        ['service.name', 'serverless-kibana'],
+        ['service.type', 'kibana'],
+        ['project.id', 'proj-123'],
+      ]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        includeResources: ['service.name', 'service.type'],
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      // Per-record attributes carry project.id...
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['project.id'], 'proj-123');
+      // ...but the resource does not (the allowlist stripped it).
+      const filteredResourceArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      expect(filteredResourceArg).not.toHaveProperty(['project.id']);
     });
   });
 

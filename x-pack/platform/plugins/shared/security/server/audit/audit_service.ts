@@ -94,6 +94,13 @@ export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
   'service.type': 'kibana',
 };
 
+// project.id arrives as a resource attribute — buildOtelResources() promotes the
+// `elastic.apm.globalLabels.project.id` APM global label to the OTel resource. It belongs on each
+// record (a single Kibana instance can serve multiple projects), so promote it into per-record
+// attributes; includeResources then keeps it out of the resource. Absent when there is no such
+// global label (e.g. non-Cloud), in which case nothing is promoted.
+export const AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES: string[] = ['project.id'];
+
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
 interface AuditServiceSetupParams {
@@ -270,6 +277,10 @@ export const createLoggingConfig = (config: ConfigType['audit'], isServerless = 
               ...baseAppender.attributes,
               ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
             }),
+            promoteResourceAttributes: [
+              ...(baseAppender.promoteResourceAttributes ?? []),
+              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            ],
             attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
           }
         : baseAppender;

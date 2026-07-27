@@ -121,6 +121,15 @@ export interface OtelAppenderConfig {
    */
   includeResources?: string[];
   /**
+   * Resource-attribute keys to also emit as per-record log attributes. Each value is captured once
+   * (at appender construction) from the resolved resource — before {@link OtelAppenderConfig.includeResources}
+   * narrows it — and added to every log record's attributes. Use when a value that arrives as a
+   * resource attribute (e.g. `project.id`, promoted from an APM global label) belongs per-record;
+   * pair with `includeResources` to keep it out of the resource and only on records. Only
+   * synchronously-resolved values are promoted; async-detected ones (e.g. `host.id`) are skipped.
+   */
+  promoteResourceAttributes?: string[];
+  /**
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
   ssl?: OtelAppenderTlsConfig;
