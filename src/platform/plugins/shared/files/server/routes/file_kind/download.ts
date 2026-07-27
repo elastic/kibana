@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
-import { fileNameWithExt } from '../common_schemas';
+import { fileId, fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
 import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
 import { getById, validateFileNameExtension } from './helpers';
@@ -22,7 +22,7 @@ export const method = 'get' as const;
 
 const rt = {
   params: schema.object({
-    id: schema.string(),
+    id: fileId,
     fileName: schema.maybe(fileNameWithExt),
   }),
 };
