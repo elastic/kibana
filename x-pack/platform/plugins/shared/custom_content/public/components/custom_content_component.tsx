@@ -8,12 +8,15 @@
 import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
 interface CustomContentComponentProps {
   embeddableId: string;
   prompt: string | undefined;
+  esqlQuery: string | undefined;
+  timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
   onTemplateChange: (template: string) => void;
@@ -38,6 +41,8 @@ const iframeCss = css({
 export const CustomContentComponent = ({
   embeddableId,
   prompt,
+  esqlQuery,
+  timeRange,
   generationVersion,
   savedTemplate,
   onTemplateChange,
@@ -47,6 +52,8 @@ export const CustomContentComponent = ({
   const { html, isLoading, error, isAiUnavailable } = useCustomContentHtml({
     embeddableId,
     prompt,
+    esqlQuery,
+    timeRange,
     generationVersion,
     savedTemplate,
     colorMode,

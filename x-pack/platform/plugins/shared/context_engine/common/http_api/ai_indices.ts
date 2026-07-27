@@ -50,6 +50,14 @@ export interface ListAiIndexResponse {
   ai_indices: AiIndexHttpItem[];
 }
 
+export interface CreateAiIndexRequest extends AiIndexProperties {
+  id: string;
+}
+
+export interface CreateAiIndexResponse {
+  status: 'created';
+}
+
 export interface PutAiIndexResponse {
   status: 'created' | 'updated';
 }

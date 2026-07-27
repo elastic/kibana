@@ -8,7 +8,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { MAX_AI_INDICES } from '../../common/constants';
+import {
+  AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
+  AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
+  MAX_AI_INDICES,
+} from '../../common/constants';
 import type {
   AiIndexDest,
   AiIndexHttpItem,
@@ -20,17 +24,10 @@ import {
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexIdConflictError,
+  AiIndexAlreadyExistsError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
-
-/**
- * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `ai-index-` base.
- */
-const DEST_INDEX_PREFIX = 'ai-index-';
-const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
-const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
 
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
@@ -55,6 +52,28 @@ export class AiIndexService {
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
     this.esClient = esClient;
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
+  }
+
+  /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
+  async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
+    await this.assertValidDest(properties.dest);
+
+    const now = new Date().toISOString();
+    const document: AiIndexDocument = {
+      ...properties,
+      managed: false,
+      date_created: now,
+      date_modified: now,
+    };
+
+    try {
+      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new AiIndexAlreadyExistsError(aiIndexId);
+      }
+      throw error;
+    }
   }
 
   /**

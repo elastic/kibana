@@ -15,6 +15,7 @@ import {
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexIdConflictError,
+  AiIndexAlreadyExistsError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
@@ -100,14 +101,49 @@ describe('AiIndexService', () => {
     });
   });
 
-  describe('put', () => {
-    const properties = {
-      description: 'KIs representing previously answered, commonly asked questions',
-      dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
-      automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
-      sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
-    };
+  const properties = {
+    description: 'KIs representing previously answered, commonly asked questions',
+    dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
+    automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
+    sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
+  };
 
+  describe('create', () => {
+    it('creates with op_type create, without looking up the existing document', async () => {
+      await expect(service.create('customer_support', properties)).resolves.toBeUndefined();
+
+      expect(storageClient.get).not.toHaveBeenCalled();
+      expect(storageClient.index).toHaveBeenCalledWith({
+        id: 'customer_support',
+        op_type: 'create',
+        document: expect.objectContaining({
+          ...properties,
+          date_created: expect.any(String),
+          date_modified: expect.any(String),
+        }),
+      });
+    });
+
+    it('throws AiIndexAlreadyExistsError when the id already exists (409)', async () => {
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(service.create('customer_support', properties)).rejects.toBeInstanceOf(
+        AiIndexAlreadyExistsError
+      );
+    });
+
+    it('rejects an invalid dest before writing', async () => {
+      await expect(
+        service.create('customer_support', {
+          ...properties,
+          dest: { type: 'data_stream', value: 'customer_support*' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('put', () => {
     it('creates an AI index with op_type create when none exists', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
 
@@ -397,7 +433,7 @@ describe('AiIndexService', () => {
   });
 
   describe('putManaged', () => {
-    const properties = {
+    const managedProperties = {
       description: 'Elastic managed AI index',
       dest: { type: 'index' as const, value: 'ai-index-idx-sml-data' },
       automations: [],
@@ -415,7 +451,7 @@ describe('AiIndexService', () => {
       mockValidIndexDest();
       storageClient.get.mockRejectedValue(createNotFoundError());
 
-      await expect(service.putManaged('elastic', properties)).resolves.toBe('created');
+      await expect(service.putManaged('elastic', managedProperties)).resolves.toBe('created');
 
       expect(storageClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -435,7 +471,7 @@ describe('AiIndexService', () => {
         _source: { ...aiIndexDocument, managed: true },
       });
 
-      await expect(service.putManaged('elastic', properties)).resolves.toBe('updated');
+      await expect(service.putManaged('elastic', managedProperties)).resolves.toBe('updated');
 
       const [indexArgs] = storageClient.index.mock.calls[0];
       expect(indexArgs.if_seq_no).toBe(7);
@@ -452,7 +488,7 @@ describe('AiIndexService', () => {
         _source: { ...aiIndexDocument, managed: false },
       });
 
-      await expect(service.putManaged('elastic', properties)).rejects.toBeInstanceOf(
+      await expect(service.putManaged('elastic', managedProperties)).rejects.toBeInstanceOf(
         AiIndexIdConflictError
       );
       expect(storageClient.index).not.toHaveBeenCalled();

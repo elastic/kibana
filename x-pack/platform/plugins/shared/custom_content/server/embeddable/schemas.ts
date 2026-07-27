@@ -10,11 +10,13 @@ import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from '../../common/constants';
 
 export const customContentStateSchema = schema.object({
   prompt: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_PROMPT_LENGTH })),
+  esqlQuery: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH })),
   template: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH })),
 });
 
