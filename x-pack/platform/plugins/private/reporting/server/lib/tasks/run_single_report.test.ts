@@ -120,7 +120,6 @@ function createStreamMock({
 }
 
 let mockStream = createStreamMock();
-const mockStream = createStreamMock();
 const mockGetContentStream = jest.fn();
 const mockEventTracker = eventTrackerMock.create();
 
