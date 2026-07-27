@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
-import type { rRuleRequestSchema } from '../../../r_rule';
+import type { rRuleRequestSchema } from '@kbn/response-ops-schedule-schema';
 
 export const validateSnoozeSchedule = (schedule: {
   rRule: TypeOf<typeof rRuleRequestSchema>;
