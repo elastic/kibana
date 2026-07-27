@@ -20,6 +20,13 @@ import {
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import { ConfigSchema } from '../config';
+import { securityTelemetry } from '../otel/instrumentation';
+
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordOAuthTokenExchangeAttempt: jest.fn(),
+  },
+}));
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
 
@@ -410,6 +417,10 @@ describe('UiamService', () => {
   });
 
   describe('#exchangeOAuthToken', () => {
+    beforeEach(() => {
+      (securityTelemetry.recordOAuthTokenExchangeAttempt as jest.Mock).mockClear();
+    });
+
     it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
       const mockResponse = {
         token: 'essu_ephemeral_token_value',
@@ -443,6 +454,10 @@ describe('UiamService', () => {
           dispatcher: AGENT_MOCK,
         }
       );
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'success' }
+      );
     });
 
     it('throws when audience in response does not match expected audience', async () => {
@@ -459,6 +474,10 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).rejects.toThrow(
         'OAuth token audience mismatch'
       );
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'failure' }
+      );
     });
 
     it('throws and logs error when UIAM service returns an error', async () => {
@@ -470,6 +489,10 @@ describe('UiamService', () => {
       });
 
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'failure' }
+      );
     });
   });
 
