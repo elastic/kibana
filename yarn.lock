@@ -8710,6 +8710,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-schedule-schema@link:x-pack/platform/packages/shared/response-ops/schedule-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-scheduling-types@link:x-pack/platform/packages/shared/response-ops/scheduling-types":
   version "0.0.0"
   uid ""
