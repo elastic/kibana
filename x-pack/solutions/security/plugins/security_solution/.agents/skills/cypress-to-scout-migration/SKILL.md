@@ -145,9 +145,20 @@ bash .agents/skills/cypress-to-scout-migration/scripts/scaffold_scout_spec.sh \
 
 ## Security Solution tags
 
+Choose the narrowest deployment scope that preserves the original test's coverage:
+
 ```typescript
+// Stateful and Serverless Complete
 { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] }
+
+// Stateful only
+{ tag: tags.stateful.classic }
+
+// Serverless Complete only
+{ tag: tags.serverless.security.complete }
 ```
+
+For a stateful UI test that needs the Security solution view, call `scoutSpace.setSolutionView('security')`; the deployment tag does not configure the space.
 
 Available Security serverless tiers:
 - `tags.serverless.security.complete`
@@ -220,7 +231,7 @@ After migration, run the `scout-best-practices-reviewer` skill against the new t
 - [ ] Static locators are `readonly` constructor properties; parameterized locators use named methods
 - [ ] No EUI CSS class selectors (`.euiTableRow`, `.euiToolTipAnchor`) — use `getByRole()` or `data-test-subj`
 - [ ] All Security-specific resources cleaned in `afterAll`/`afterEach`
-- [ ] Tags include both stateful and serverless: `[...tags.stateful.classic, ...tags.serverless.security.complete]`
+- [ ] Tags preserve the original test's deployment scope; stateful-only and serverless-only coverage remain valid when intentional
 
 ## Ownership notes
 
