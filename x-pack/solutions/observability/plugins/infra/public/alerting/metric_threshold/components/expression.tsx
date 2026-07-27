@@ -35,16 +35,13 @@ import type { Query } from '@kbn/es-query';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { NoDataBehavior } from '../../../../common/alerting/metrics';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
-import {
-  useMetricsDataViewContext,
-  useSourceContext,
-  withSourceProvider,
-} from '../../../containers/metrics_source';
+import { withSourceProvider } from '../../../containers/metrics_source';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import type { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
+import { useMetricsViewWithSource } from '../hooks/use_metrics_view_with_source';
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -151,13 +148,13 @@ export const getNoDataBehaviorValue = (
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source, error: sourceError, isLoading: isSourceLoading, loadSource } = useSourceContext();
   const {
     metricsView,
-    error: metricsViewError,
-    loading: isMetricsViewLoading,
+    source,
+    error: metricsViewLoadError,
+    isLoading: isMetricsViewLoading,
     refetch: refetchMetricsView,
-  } = useMetricsDataViewContext();
+  } = useMetricsViewWithSource();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
 
@@ -346,20 +343,6 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
-  // `metricsView` depends on the source configuration having resolved first
-  // (see `useSourceContext`/`useMetricsDataViewContext`). Without explicit
-  // loading/error states here, a slow or failing `/api/metrics/source`
-  // request just left the conditions section silently empty, making it
-  // impossible to tell "still loading" from "no conditions configured" from
-  // "something broke". See https://github.com/elastic/kibana/issues/279610
-  const isMetricsViewInitializing = isSourceLoading || isMetricsViewLoading;
-  const metricsViewLoadError = sourceError || metricsViewError?.message;
-
-  const retryLoadingMetricsView = useCallback(() => {
-    loadSource();
-    refetchMetricsView();
-  }, [loadSource, refetchMetricsView]);
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -372,7 +355,7 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <EuiSpacer size="xs" />
-      {isMetricsViewInitializing ? (
+      {isMetricsViewLoading ? (
         <div>
           <EuiSpacer size="m" />
           <EuiLoadingSpinner size="l" data-test-subj="infraMetricThresholdConditionsLoading" />
@@ -392,7 +375,7 @@ export const Expressions: React.FC<Props> = (props) => {
             <p>{metricsViewLoadError}</p>
             <EuiButton
               data-test-subj="infraMetricThresholdConditionsErrorTryAgain"
-              onClick={retryLoadingMetricsView}
+              onClick={refetchMetricsView}
               iconType="refresh"
             >
               {i18n.translate('xpack.infra.metricThreshold.rule.metricsViewError.tryAgain', {
@@ -564,4 +547,4 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default withSourceProvider<Props>(Expressions)('default');
+export default withSourceProvider<Props>(Expressions)('default', false);

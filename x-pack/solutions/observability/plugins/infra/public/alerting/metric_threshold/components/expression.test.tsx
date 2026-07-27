@@ -27,35 +27,41 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
-const mockLoadSource = jest.fn();
-const mockRefetchMetricsView = jest.fn();
+const mockRefetch = jest.fn();
 
-const defaultUseSourceContext = {
+const mockMetricsView = {
+  indices: 'metricbeat-*',
+  timeFieldName: mockDataView.timeFieldName,
+  fields: mockDataView.fields,
+  dataViewReference: mockDataView,
+} as ResolvedDataView;
+
+const defaultUseMetricsViewWithSource: {
+  metricsView: ResolvedDataView | undefined;
+  source: { id: string } | undefined;
+  isLoading: boolean;
+  error: string | undefined;
+  refetch: jest.Mock;
+} = {
+  metricsView: mockMetricsView,
   source: { id: 'default' },
   isLoading: false,
   error: undefined,
-  loadSource: mockLoadSource,
+  refetch: mockRefetch,
 };
 
-const defaultUseMetricsDataViewContext = {
-  metricsView: {
-    indices: 'metricbeat-*',
-    timeFieldName: mockDataView.timeFieldName,
-    fields: mockDataView.fields,
-    dataViewReference: mockDataView,
-  } as ResolvedDataView,
-  loading: false,
-  error: undefined,
-  refetch: mockRefetchMetricsView,
-};
+const mockUseMetricsViewWithSource = jest.fn(() => defaultUseMetricsViewWithSource);
 
-const mockUseSourceContext = jest.fn(() => defaultUseSourceContext);
-const mockUseMetricsDataViewContext = jest.fn(() => defaultUseMetricsDataViewContext);
+jest.mock('../hooks/use_metrics_view_with_source', () => ({
+  useMetricsViewWithSource: () => mockUseMetricsViewWithSource(),
+}));
 
+// `Expressions` renders child components (e.g. `UnifiedSearchBar`) that still read
+// `useMetricsDataViewContext`/`useSourceContext` directly from the container.
 jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
-  useSourceContext: () => mockUseSourceContext(),
-  useMetricsDataViewContext: () => mockUseMetricsDataViewContext(),
+  useSourceContext: () => ({ source: { id: 'default' } }),
+  useMetricsDataViewContext: () => ({ metricsView: mockMetricsView }),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -69,10 +75,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
 
 describe('Expression', () => {
   beforeEach(() => {
-    mockUseSourceContext.mockReturnValue(defaultUseSourceContext);
-    mockUseMetricsDataViewContext.mockReturnValue(defaultUseMetricsDataViewContext);
-    mockLoadSource.mockClear();
-    mockRefetchMetricsView.mockClear();
+    mockUseMetricsViewWithSource.mockReturnValue(defaultUseMetricsViewWithSource);
+    mockRefetch.mockClear();
   });
 
   async function setup(currentOptions: {
@@ -144,78 +148,47 @@ describe('Expression', () => {
     ]);
   });
 
-  it('should show a loading indicator while the source configuration is being fetched', async () => {
-    mockUseSourceContext.mockReturnValue({
-      ...defaultUseSourceContext,
+  it('should show a loading indicator while the metrics view is being fetched', async () => {
+    mockUseMetricsViewWithSource.mockReturnValue({
+      ...defaultUseMetricsViewWithSource,
+      metricsView: undefined,
       isLoading: true,
     });
-    mockUseMetricsDataViewContext.mockReturnValue({
-      ...defaultUseMetricsDataViewContext,
-      metricsView: undefined,
-      loading: true,
-    });
 
     const { wrapper } = await setup({});
 
-    expect(
-      wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()
-    ).toBe(true);
-    expect(
-      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()).toBe(
+      false
+    );
   });
 
-  it('should show a loading indicator while the metrics data view is being resolved', async () => {
-    mockUseMetricsDataViewContext.mockReturnValue({
-      ...defaultUseMetricsDataViewContext,
+  it('should show an error callout with a retry action when the metrics view fails to load', async () => {
+    mockUseMetricsViewWithSource.mockReturnValue({
+      ...defaultUseMetricsViewWithSource,
       metricsView: undefined,
-      loading: true,
-    });
-
-    const { wrapper } = await setup({});
-
-    expect(
-      wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()
-    ).toBe(true);
-  });
-
-  it('should show an error callout with a retry action when the source configuration fails to load', async () => {
-    mockUseSourceContext.mockReturnValue({
-      ...defaultUseSourceContext,
       error: 'Internal Server Error',
     });
-    mockUseMetricsDataViewContext.mockReturnValue({
-      ...defaultUseMetricsDataViewContext,
-      metricsView: undefined,
-    });
 
     const { wrapper } = await setup({});
 
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()).toBe(
+      false
+    );
     expect(
-      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()
-    ).toBe(true);
-    expect(
-      wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()
-    ).toBe(false);
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').first().text()
+    ).toContain('Internal Server Error');
 
-    wrapper.find('[data-test-subj="infraMetricThresholdConditionsErrorTryAgain"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="infraMetricThresholdConditionsErrorTryAgain"]')
+      .simulate('click');
 
-    expect(mockLoadSource).toHaveBeenCalled();
-    expect(mockRefetchMetricsView).toHaveBeenCalled();
-  });
-
-  it('should show an error callout when the metrics data view fails to resolve', async () => {
-    mockUseMetricsDataViewContext.mockReturnValue({
-      ...defaultUseMetricsDataViewContext,
-      metricsView: undefined,
-      error: new Error('Failed to resolve data view'),
-    });
-
-    const { wrapper } = await setup({});
-
-    expect(
-      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()
-    ).toBe(true);
+    expect(mockRefetch).toHaveBeenCalled();
   });
 });
 
