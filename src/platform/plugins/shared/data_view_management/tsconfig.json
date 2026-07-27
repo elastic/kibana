@@ -48,7 +48,8 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/cps-utils",
     "@kbn/cps",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }
