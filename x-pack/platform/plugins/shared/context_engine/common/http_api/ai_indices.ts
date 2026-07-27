@@ -31,7 +31,6 @@ export interface AiIndexAutomation {
 }
 
 export interface AiIndexProperties {
-  name: string;
   description?: string;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
@@ -48,6 +47,14 @@ export type GetAiIndexResponse = AiIndexHttpItem;
 
 export interface ListAiIndexResponse {
   ai_indices: AiIndexHttpItem[];
+}
+
+export interface CreateAiIndexRequest extends AiIndexProperties {
+  id: string;
+}
+
+export interface CreateAiIndexResponse {
+  status: 'created';
 }
 
 export interface PutAiIndexResponse {
