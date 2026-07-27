@@ -48,8 +48,15 @@ const generateDashboardSchema = z.object({
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
+ *
+ * `summariesByPanelId` holds the one-sentence authoring summary of every chart
+ * authored in this run, keyed by panel id. Panels that were not authored now
+ * (or whose engine returned no summary) simply have no `summary`.
  */
-const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
+const summarizeDashboard = (
+  dashboardData: DashboardAttachmentData,
+  summariesByPanelId: Map<string, string>
+) => ({
   title: dashboardData.title,
   description: dashboardData.description,
   panels: dashboardData.panels.map((widget) => {
@@ -63,6 +70,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
           type: panel.type,
           id: panel.id,
           grid: panel.grid,
+          summary: summariesByPanelId.get(panel.id),
         })),
       };
     }
@@ -70,6 +78,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
       type: widget.type,
       id: widget.id,
       grid: widget.grid,
+      summary: summariesByPanelId.get(widget.id),
     };
   }),
   controls: (dashboardData.pinned_panels ?? []).map((control) => {
@@ -85,7 +94,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and compact dashboard/panel summaries.
+ * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -170,14 +179,10 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(finalDashboardData),
-                panel_summaries:
-                  panelSummaries.length > 0
-                    ? panelSummaries.map(({ panelId, summary }) => ({
-                        panel_id: panelId,
-                        summary,
-                      }))
-                    : undefined,
+                dashboard: summarizeDashboard(
+                  finalDashboardData,
+                  new Map(panelSummaries.map(({ panelId, summary }) => [panelId, summary]))
+                ),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },
