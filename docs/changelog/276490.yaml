@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/276490
+issues:
+- https://github.com/elastic/kibana/issues/276473
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- AI and machine Learning
+title: "Fix jobs and trained models becoming inaccessible when all spaces are removed"
+description: "The Machine Learning APIs that update job and trained model spaces now reject requests that would remove a job or model from every space."

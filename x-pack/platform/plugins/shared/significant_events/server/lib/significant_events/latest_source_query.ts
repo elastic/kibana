@@ -9,6 +9,7 @@ import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/e
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import dateMath from '@kbn/datemath';
 import { getSourceColumnIndex, toEsqlRequest } from '../streams/esql';
 import {
   type CommonSearchOptions,
@@ -73,7 +74,7 @@ const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
   });
 };
 
-const executeEsqlQuery = async <T>({
+export const executeEsqlQuery = async <T>({
   esClient,
   query,
 }: {
@@ -90,7 +91,7 @@ const executeEsqlQuery = async <T>({
   }
 };
 
-const executeCountQuery = async ({
+export const executeCountQuery = async ({
   esClient,
   query,
 }: {
@@ -148,6 +149,16 @@ export const fromIndexForSpace = ({
   )} IS NULL`;
 };
 
+/**
+ * Resolve a time bound to ISO. Only date-math expressions (`now-7d`, `2026-07-01||/d`) go through
+ * `dateMath.parse` — plain ISO/date strings pass through verbatim so Elasticsearch parses them as
+ * UTC; routing them through moment would reinterpret date-only values in server-local time.
+ */
+export const resolveTimeBound = (expr: string, { roundUp = false } = {}): string =>
+  expr.includes('now') || expr.includes('||')
+    ? dateMath.parse(expr, { roundUp })?.toISOString() ?? expr
+    : expr;
+
 export const applyTimeRange = ({
   query,
   from,
@@ -157,16 +168,16 @@ export const applyTimeRange = ({
   from?: string;
   to?: string;
 }): ComposerQuery => {
-  let q = query;
+  let timeRangeQuery = query;
   if (from !== undefined) {
-    const fromIso = from;
-    q = q.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
+    const fromIso = resolveTimeBound(from);
+    timeRangeQuery = timeRangeQuery.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
   }
   if (to !== undefined) {
-    const toIso = to;
-    q = q.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
+    const toIso = resolveTimeBound(to, { roundUp: true });
+    timeRangeQuery = timeRangeQuery.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
   }
-  return q;
+  return timeRangeQuery;
 };
 
 interface BuildLatestSourceBaseQueryArgs {
@@ -289,6 +300,12 @@ interface RunFindByIdEsqlQueryArgs {
   index: string;
   idField: string;
   idValue: string;
+  // Optional extra predicate ANDed onto the id match (e.g. `change_point_type IS NOT NULL`
+  // so detection reads exclude processed-marker docs).
+  where?: ESQLAstExpression;
+  // Cap the result to the most recent N docs. When set, the query sorts DESC + LIMIT to fetch the
+  // latest N, then the hits are reversed back to chronological (ASC) order for the caller.
+  limit?: number;
 }
 
 export const runFindByIdEsqlQuery = async <T>({
@@ -297,15 +314,24 @@ export const runFindByIdEsqlQuery = async <T>({
   index,
   idField,
   idValue,
+  where,
+  limit,
 }: RunFindByIdEsqlQueryArgs): Promise<{ hits: T[] }> => {
   let query = fromIndexForSpace({ index, space, columns: ['_source'] });
 
   query = query.where`${esql.col(idField)} == ${esql.str(idValue)}`;
-  query = query.sort(['@timestamp', 'ASC']);
+  if (where) {
+    query = query.where`${where}`;
+  }
+  // Limited reads take the most recent N (DESC + LIMIT); unlimited reads stay chronological (ASC).
+  query = query.sort(['@timestamp', limit != null ? 'DESC' : 'ASC']);
+  if (limit != null) {
+    query = query.limit(limit);
+  }
   query = query.keep('_source');
 
   const hits = await executeEsqlQuery<T>({ esClient, query });
-  return { hits };
+  return { hits: limit != null ? hits.reverse() : hits };
 };
 
 interface RunFindByIdsEsqlQueryArgs {
@@ -314,6 +340,8 @@ interface RunFindByIdsEsqlQueryArgs {
   index: string;
   idField: string;
   idValues: string[];
+  // Optional extra predicate ANDed onto the id-membership filter.
+  where?: ESQLAstExpression;
 }
 
 export const runFindByIdsEsqlQuery = async <T>({
@@ -322,10 +350,14 @@ export const runFindByIdsEsqlQuery = async <T>({
   index,
   idField,
   idValues,
+  where: extraWhere,
 }: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
   if (idValues.length === 0) return { hits: [] };
 
-  const where = inFilter({ where: undefined, field: idField, values: idValues });
+  let where = inFilter({ where: undefined, field: idField, values: idValues });
+  if (extraWhere) {
+    where = andWhere(where, extraWhere);
+  }
   let query = fromIndexForSpace({ index, space, columns: ['_source'] });
 
   if (where) {
@@ -356,7 +388,7 @@ interface RunGetProcessedIdsArgs {
 /**
  * Returns the set of IDs where a handled stamp (kind == handledKind) is at least
  * as recent as the latest state doc (kind in stateKinds). Used by both DetectionClient
- * and DiscoveryClient to determine which episodes are fully processed.
+ * and DiscoveryClient to determine which events are fully processed.
  */
 export const runGetProcessedIds = async ({
   esClient,
@@ -389,6 +421,59 @@ export const runGetProcessedIds = async ({
         BY ${idCol}
       | WHERE max_handled_ts >= max_state_ts OR max_state_ts IS NULL
       | KEEP ${idCol}`;
+
+    const response = await queryEsql({ esClient, query });
+    const rows = esqlToObjects<Record<string, string>>(response);
+    for (const row of rows) {
+      const id = row[idField];
+      if (id) processed.add(id);
+    }
+  }
+  return processed;
+};
+
+interface RunGetProcessedMarkerIdsArgs {
+  esClient: ElasticsearchClient;
+  space: string;
+  index: string;
+  idField: string;
+  idValues: string[];
+  chunkSize?: number;
+}
+
+/**
+ * Returns the set of ids that have a processed marker in the data stream. A marker
+ * is any document carrying `processed_by` (detections carry `change_point_type` instead).
+ * Because `detection_id` is unique-per-detection, membership is a plain semijoin: a detection
+ * is processed iff a marker references its exact id — no timestamp comparison needed
+ * (unlike the shared `runGetProcessedIds`, which the discovery pipeline still uses).
+ */
+export const runGetProcessedMarkerIds = async ({
+  esClient,
+  space,
+  index,
+  idField,
+  idValues,
+  chunkSize = 250,
+}: RunGetProcessedMarkerIdsArgs): Promise<Set<string>> => {
+  if (!idValues.length) return new Set();
+
+  const processed = new Set<string>();
+  const idCol = esql.col(idField);
+
+  for (let i = 0; i < idValues.length; i += chunkSize) {
+    const batch = idValues.slice(i, i + chunkSize);
+    const where = inFilter({ where: undefined, field: idField, values: batch });
+
+    // `detection_id` / `processed_by` are ordinary mapped fields referenced in WHERE/STATS/KEEP —
+    // NOT ES|QL METADATA (which only accepts `_id`, `_source`, …). Passing them as `columns` here
+    // emitted `FROM … METADATA detection_id, processed_by` and failed with a verification_exception.
+    let query = fromIndexForSpace({ index, space });
+    query = query.where`${esql.col('processed_by')} IS NOT NULL`;
+    if (where) {
+      query = query.where`${where}`;
+    }
+    query = query.pipe`STATS marker_count = COUNT(*) BY ${idCol}`.keep(idField);
 
     const response = await queryEsql({ esClient, query });
     const rows = esqlToObjects<Record<string, string>>(response);

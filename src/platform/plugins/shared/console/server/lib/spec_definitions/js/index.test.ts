@@ -10,6 +10,10 @@
 import { SpecDefinitionsService } from '../../../services';
 import type { EndpointDefinition } from '../../../../common/types';
 
+interface NameOrDefinitionAutocompleteRules {
+  __any_of: Array<string | { type: { __one_of: string[] } }>;
+}
+
 describe('console query DSL autocomplete globals', () => {
   // `globals` holds the recursive autocomplete rule tree, which the service
   // itself types as `Record<string, any>`; `endpoints` keeps its real type.
@@ -23,6 +27,23 @@ describe('console query DSL autocomplete globals', () => {
     globals = json.globals;
     endpoints = json.endpoints;
   });
+
+  const getAnalyzeRules = () => {
+    const rules = endpoints.analyze.data_autocomplete_rules;
+
+    if (!rules) {
+      throw new Error('Expected the analyze endpoint to define data_autocomplete_rules');
+    }
+
+    return rules;
+  };
+
+  const getNameSuggestions = ({ __any_of }: NameOrDefinitionAutocompleteRules) =>
+    __any_of.filter((rule): rule is string => typeof rule === 'string');
+
+  const getDefinitionTypeSuggestions = ({ __any_of }: NameOrDefinitionAutocompleteRules) =>
+    __any_of.find((rule): rule is { type: { __one_of: string[] } } => typeof rule !== 'string')
+      ?.type.__one_of ?? [];
 
   // Regression test for https://github.com/elastic/kibana/issues/188264:
   // filter context accepts the same query DSL as query context, so every
@@ -76,6 +97,158 @@ describe('console query DSL autocomplete globals', () => {
       expect(endpoints['indices.update_aliases'].data_autocomplete_rules).toMatchObject({
         actions: { __any_of: [{ add: { filter: queryLink } }] },
       });
+    });
+  });
+
+  // The `put_mapping` rules predate the Elasticsearch 7.x removal of mapping
+  // types, but its nested-object and multi-field scope links still pointed at
+  // the removed `type` level (`put_mapping.type.properties`). That path no
+  // longer exists in the rule tree, so sub-field autocomplete inside
+  // `properties.<field>.properties` and `properties.<field>.fields` resolved
+  // to nothing. The links must target the real top-level `properties` key.
+  describe('put_mapping nested field scope links', () => {
+    it('points nested object properties at the put_mapping properties rules', () => {
+      expect(endpoints.put_mapping.data_autocomplete_rules).toMatchObject({
+        properties: {
+          '*': {
+            properties: { __scope_link: 'put_mapping.properties' },
+            fields: { '*': { __scope_link: 'put_mapping.properties.field' } },
+          },
+        },
+      });
+    });
+
+    it('does not reference the removed mapping `type` level anywhere', () => {
+      expect(JSON.stringify(endpoints.put_mapping.data_autocomplete_rules)).not.toContain(
+        'put_mapping.type'
+      );
+    });
+  });
+
+  describe('WHEN generating put_mapping autocomplete rules', () => {
+    const dynamicTemplateMatchTypeValues = [
+      '*',
+      'string',
+      'object',
+      'long',
+      'double',
+      'boolean',
+      'date',
+      'binary',
+    ];
+
+    it('SHOULD expose dynamic mapping and dynamic template suggestions', () => {
+      expect(endpoints.put_mapping.data_autocomplete_rules).toMatchObject({
+        dynamic: {
+          __one_of: ['true', 'false', 'strict', 'runtime'],
+        },
+        dynamic_templates: [
+          {
+            '*': {
+              mapping: expect.any(Object),
+              runtime: expect.any(Object),
+              match: '',
+              match_pattern: {
+                __one_of: ['simple', 'regex'],
+              },
+              match_mapping_type: {
+                __one_of: [
+                  {
+                    __one_of: dynamicTemplateMatchTypeValues,
+                  },
+                  [
+                    {
+                      __one_of: dynamicTemplateMatchTypeValues,
+                    },
+                  ],
+                ],
+              },
+              path_match: '',
+              path_unmatch: '',
+              unmatch: '',
+              unmatch_mapping_type: {
+                __one_of: [
+                  {
+                    __one_of: dynamicTemplateMatchTypeValues,
+                  },
+                  [
+                    {
+                      __one_of: dynamicTemplateMatchTypeValues,
+                    },
+                  ],
+                ],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    it('SHOULD link the generated indices.put_mapping endpoint to the put_mapping body rules', () => {
+      expect(endpoints['indices.put_mapping'].data_autocomplete_rules).toEqual({
+        __scope_link: 'put_mapping',
+      });
+    });
+  });
+
+  describe('WHEN registering the analyze endpoint autocomplete rules', () => {
+    it('SHOULD include every analyze request body field', () => {
+      expect(Object.keys(getAnalyzeRules()).sort()).toEqual([
+        'analyzer',
+        'attributes',
+        'char_filter',
+        'explain',
+        'field',
+        'filter',
+        'normalizer',
+        'text',
+        'tokenizer',
+      ]);
+    });
+
+    it('SHOULD suggest configured token filters only as object definitions', () => {
+      const filterRules = getAnalyzeRules().filter as NameOrDefinitionAutocompleteRules;
+      const definitionOnlyTypes = [
+        'condition',
+        'dictionary_decompounder',
+        'hunspell',
+        'hyphenation_decompounder',
+        'keep',
+        'keep_types',
+        'keyword_marker',
+        'pattern_capture',
+        'pattern_replace',
+        'predicate_token_filter',
+        'stemmer_override',
+        'synonym',
+        'synonym_graph',
+      ];
+
+      expect(getNameSuggestions(filterRules)).not.toEqual(
+        expect.arrayContaining(definitionOnlyTypes)
+      );
+      expect(getDefinitionTypeSuggestions(filterRules)).toEqual(
+        expect.arrayContaining(definitionOnlyTypes)
+      );
+      expect(filterRules.__any_of).not.toContain('conditional');
+      expect(getDefinitionTypeSuggestions(filterRules)).not.toContain('conditional');
+    });
+
+    it('SHOULD suggest configured char filters only as object definitions', () => {
+      const charFilterRules = getAnalyzeRules().char_filter as NameOrDefinitionAutocompleteRules;
+
+      expect(getNameSuggestions(charFilterRules)).toEqual(['html_strip']);
+      expect(getDefinitionTypeSuggestions(charFilterRules)).toEqual([
+        'html_strip',
+        'mapping',
+        'pattern_replace',
+      ]);
+    });
+
+    it('SHOULD omit analyzer types that are not global analyzer names', () => {
+      const analyzerRules = getAnalyzeRules().analyzer as { __one_of: string[] };
+
+      expect(analyzerRules.__one_of).not.toEqual(expect.arrayContaining(['custom', 'nori']));
     });
   });
 });

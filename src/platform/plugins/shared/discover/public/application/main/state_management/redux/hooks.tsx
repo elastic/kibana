@@ -13,7 +13,7 @@ import {
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
-} from 'react-redux';
+} from 'react-redux-v7';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext, useContext } from 'react';
 import defaultComparator from 'fast-deep-equal';

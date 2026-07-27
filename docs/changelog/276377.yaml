@@ -8,5 +8,5 @@ products:
   target: 2026-07-09
 areas:
 - Search and data
-title: Add dryRun preview to Fleet bulk agent API endpoints
+title: Add `dryRun` preview to Fleet bulk agent API endpoints
 description: "When the optional `dryRun` flag is enabled, the Fleet bulk agent API endpoints return the count of agents that would be affected without making changes."

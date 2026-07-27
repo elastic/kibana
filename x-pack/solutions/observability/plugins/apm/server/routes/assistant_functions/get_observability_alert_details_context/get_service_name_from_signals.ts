@@ -8,9 +8,8 @@
 import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
-import type * as t from 'io-ts';
 import moment from 'moment';
-import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import type { AlertDetailsContextualInsightsHandlerQuery } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { SERVICE_NAME } from '@kbn/apm-types';
@@ -29,7 +28,7 @@ export async function getServiceNameFromSignals({
   logSourcesService,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof alertDetailsContextRt>;
+  query: AlertDetailsContextualInsightsHandlerQuery;
   esClient: ElasticsearchClient;
   logSourcesService: LogSourcesService;
   apmEventClient: APMEventClient;

@@ -156,7 +156,7 @@ async function createNamespaceTemplatesForPackage({
   dataStreams,
   namespaces,
   logContext,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -165,7 +165,7 @@ async function createNamespaceTemplatesForPackage({
   dataStreams: RegistryDataStream[];
   namespaces: string[];
   logContext: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<string[]> {
   if (dataStreams.length === 0 || namespaces.length === 0) {
     return [];
@@ -176,15 +176,10 @@ async function createNamespaceTemplatesForPackage({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
+      if (signal) throwIfAborted(signal);
       const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
       const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
-      const baseTemplate = await fetchIndexTemplate(
-        esClient,
-        templateName,
-        logContext,
-        abortController
-      );
+      const baseTemplate = await fetchIndexTemplate(esClient, templateName, logContext, signal);
       if (!baseTemplate) return;
 
       for (const namespace of namespaces) {
@@ -196,10 +191,7 @@ async function createNamespaceTemplatesForPackage({
           isOtelInputType,
         });
 
-        await esClient.indices.putIndexTemplate(
-          { name: nsName, ...nsTemplate },
-          { signal: abortController?.signal }
-        );
+        await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
         updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
       }
     },
@@ -210,7 +202,7 @@ async function createNamespaceTemplatesForPackage({
     return [];
   }
 
-  if (abortController) throwIfAborted(abortController);
+  if (signal) throwIfAborted(signal);
   // A user can opt in a namespace before any data stream for that namespace exists
   // (no data has been ingested yet). In that case `getDataStream` 404s on the
   // namespace-scoped pattern; nothing to update, so just continue.
@@ -250,7 +242,7 @@ async function deleteNamespaceTemplatesForPackage({
   dataStreams,
   namespaces,
   logContext,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -259,7 +251,7 @@ async function deleteNamespaceTemplatesForPackage({
   dataStreams: RegistryDataStream[];
   namespaces: string[];
   logContext: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<string[]> {
   if (dataStreams.length === 0 || namespaces.length === 0) {
     return [];
@@ -270,7 +262,7 @@ async function deleteNamespaceTemplatesForPackage({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
+      if (signal) throwIfAborted(signal);
       const templateName = getRegistryDataStreamAssetBaseName(
         dataStream,
         isOtelDataStream(dataStream, packageInfo)
@@ -278,10 +270,7 @@ async function deleteNamespaceTemplatesForPackage({
       for (const namespace of namespaces) {
         const nsName = generateNamespaceTemplateName(templateName, namespace);
         try {
-          await esClient.indices.deleteIndexTemplate(
-            { name: nsName },
-            { ignore: [404], signal: abortController?.signal }
-          );
+          await esClient.indices.deleteIndexTemplate({ name: nsName }, { ignore: [404], signal });
           deleted.push(nsName);
         } catch (err: unknown) {
           logger.warn(
@@ -411,14 +400,14 @@ export async function syncNamespaceTemplates({
   packageName,
   addedNamespaces,
   removedNamespaces,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   addedNamespaces: string[];
   removedNamespaces: string[];
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<SyncNamespaceTemplatesSummary> {
   const summary: SyncNamespaceTemplatesSummary = {
     packageName,
@@ -449,7 +438,7 @@ export async function syncNamespaceTemplates({
   }
 
   if (addedNamespaces.length > 0) {
-    if (abortController) throwIfAborted(abortController);
+    if (signal) throwIfAborted(signal);
     const createdTemplates = await createNamespaceTemplatesForPackage({
       soClient,
       esClient,
@@ -458,7 +447,7 @@ export async function syncNamespaceTemplates({
       dataStreams,
       namespaces: addedNamespaces,
       logContext: 'syncNamespaceTemplates',
-      abortController,
+      signal,
     });
     if (createdTemplates.length > 0) {
       summary.created = addedNamespaces;
@@ -466,7 +455,7 @@ export async function syncNamespaceTemplates({
   }
 
   if (removedNamespaces.length > 0) {
-    if (abortController) throwIfAborted(abortController);
+    if (signal) throwIfAborted(signal);
     const deletedTemplates = await deleteNamespaceTemplatesForPackage({
       soClient,
       esClient,
@@ -475,7 +464,7 @@ export async function syncNamespaceTemplates({
       dataStreams,
       namespaces: removedNamespaces,
       logContext: 'syncNamespaceTemplates',
-      abortController,
+      signal,
     });
     if (deletedTemplates.length > 0) {
       summary.removed = removedNamespaces;

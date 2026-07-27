@@ -21,6 +21,9 @@ export const REMOVED_TYPES: string[] = [
   // deprecated in https://github.com/elastic/kibana/pull/121442
   'alerting:siem.signals',
 
+  // Significant Events Alerting v1 rule type removed in https://github.com/elastic/kibana/pull/278464
+  'alerting:streams.rules.esql',
+
   'search_sessions_monitor',
   'search_sessions_cleanup',
   'search_sessions_expire',
@@ -46,6 +49,9 @@ export const REMOVED_TYPES: string[] = [
   'streams_onboarding',
   'streams_features_identification',
   'streams_significant_events_queries_generation',
+
+  // Legacy streams description generation task replaced by the synchronous suggestion API
+  'streams_description_generation',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [

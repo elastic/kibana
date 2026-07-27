@@ -26,6 +26,27 @@ import {
   type EpisodeActionContext,
 } from '@kbn/alerting-v2-episodes-ui/actions';
 
+const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+
+const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
+let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
+
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
   ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
@@ -53,6 +74,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query');
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
+  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
@@ -209,6 +231,7 @@ const renderPage = () => {
 describe('AlertEpisodesListPage', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
@@ -320,6 +343,7 @@ describe('AlertEpisodesListPage', () => {
 describe('query invalidation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
     capturedFilterBarOnRefresh = undefined;
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
@@ -393,6 +417,7 @@ describe('query invalidation', () => {
 describe('episode count + reset filters toolbar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
     capturedFilterBarOnFilterChange = undefined;
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
@@ -435,5 +460,72 @@ describe('episode count + reset filters toolbar', () => {
     await waitFor(() => {
       expect(screen.getByTestId('episodesFilterBar-resetFilters')).toBeDisabled();
     });
+  });
+});
+
+describe('privilege gating', () => {
+  const ackAction = {
+    id: 'ALERTING_V2_ACK_EPISODE',
+    order: 10,
+    displayName: 'Acknowledge',
+    iconType: 'checkCircle',
+    isCompatible: () => true,
+    execute: jest.fn(async () => {}),
+  };
+  const discoverAction = {
+    id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    order: 50,
+    displayName: 'Open in Discover',
+    iconType: 'discoverApp',
+    isCompatible: () => true,
+    execute: jest.fn(async () => {}),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    mockHttp.post.mockResolvedValue({ rules: [] });
+    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
+    mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+  });
+
+  const getRowControlIds = (): string[] => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    return (lastCall?.rowAdditionalLeadingControls ?? []).map((control) => control.id);
+  };
+
+  const waitForRows = () =>
+    waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBeGreaterThan(0);
+    });
+
+  it('exposes every episode action when the user has write privilege', async () => {
+    mockCapabilities = WRITE_CAPABILITIES;
+
+    renderPage();
+    await waitForRows();
+
+    expect(getRowControlIds()).toEqual([
+      'ALERTING_V2_ACK_EPISODE',
+      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    ]);
+    expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
+      'ALERTING_V2_ACK_EPISODE',
+      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    ]);
+  });
+
+  it('hides mutating episode actions when the user only has read privilege', async () => {
+    mockCapabilities = READ_ONLY_CAPABILITIES;
+
+    renderPage();
+    await waitForRows();
+
+    expect(getRowControlIds()).toEqual([OPEN_IN_DISCOVER_EPISODE_ACTION_ID]);
+    expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
+      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    ]);
   });
 });

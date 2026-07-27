@@ -38,6 +38,7 @@ const createStartContractMock = () => {
   const nextGlobalSearchState$ = new BehaviorSubject<GlobalSearchConfig | undefined>(undefined);
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
+  const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
   const inlineAppHeaderState$ = new BehaviorSubject(false);
   let appHeaderRegistrationId = 0;
@@ -63,6 +64,11 @@ const createStartContractMock = () => {
       legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(
         undefined
       ) as unknown as DeeplyMockedKeys<Observable<MountPoint | undefined>>,
+      capabilities: lazyObject({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+      }),
     }),
     sidebar: lazyObject(sidebar),
     navLinks: lazyObject({
@@ -162,6 +168,12 @@ const createStartContractMock = () => {
         get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
         set: jest.fn((content?: ReactNode) => {
           nextContextSwitcherState$.next(content ?? null);
+        }),
+      }),
+      projectPicker: lazyObject({
+        get$: jest.fn().mockReturnValue(nextProjectPickerState$),
+        set: jest.fn((content?: ReactNode) => {
+          nextProjectPickerState$.next(content ?? null);
         }),
       }),
       inlineAppHeader: lazyObject({

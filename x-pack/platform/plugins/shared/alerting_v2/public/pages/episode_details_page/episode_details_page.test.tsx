@@ -23,6 +23,27 @@ import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { TestProviders } from '../../test_utils/test_providers';
 import { EpisodeDetailsPage } from './episode_details_page';
 
+const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+
+const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
+let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({ push: jest.fn() }),
@@ -45,8 +66,13 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => ({
+  useEpisodeFlapping: jest.fn(() => ({ isFlapping: false, isLoading: false })),
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(),
+  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
 }));
 
 // Sections that call useFetchEpisodeQuery independently are mocked to keep the
@@ -159,6 +185,7 @@ const renderPage = () =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCapabilities = WRITE_CAPABILITIES;
   mockUseParams.mockReturnValue({ episodeId });
   mockUseFetchEpisodeQuery.mockReturnValue(episodeQuery);
   mockUseFetchRule.mockReturnValue(fetchRuleResult);
@@ -241,39 +268,10 @@ describe('EpisodeDetailsPage', () => {
     );
   });
 
-  it('renders the rule description in the header area', () => {
-    renderPage();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderDescription')).toHaveTextContent(
-      'Rule description'
-    );
-  });
-
-  it('omits the header metadata row when the rule has no description', () => {
-    const loadedRuleState = fetchRuleResult.ruleState as unknown as {
-      status: RuleStateStatus;
-      ruleId: string;
-      rule: { metadata: Record<string, unknown> };
-    };
-
-    mockUseFetchRule.mockReturnValue({
-      ...fetchRuleResult,
-      ruleState: {
-        ...loadedRuleState,
-        rule: {
-          ...loadedRuleState.rule,
-          metadata: { ...loadedRuleState.rule.metadata, description: undefined },
-        },
-      },
-    } as unknown as FetchRuleResult);
-
+  it('does not render rule audit metadata in the header area', () => {
     renderPage();
 
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDescription')
-    ).not.toBeInTheDocument();
   });
 
   it('hides the metadata tab when the rule is not loaded', () => {
@@ -329,6 +327,57 @@ describe('EpisodeDetailsPage', () => {
         episodes: [mockEpisode],
       })
     );
+  });
+
+  describe('privilege gating', () => {
+    const ackAction = {
+      id: 'ALERTING_V2_ACK_EPISODE',
+      order: 10,
+      displayName: 'Acknowledge',
+      iconType: 'checkCircle',
+      isCompatible: () => true,
+      execute: jest.fn(async () => {}),
+    };
+    const discoverAction = {
+      id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+      order: 50,
+      displayName: 'Open in Discover',
+      iconType: 'discoverApp',
+      isCompatible: () => true,
+      execute: jest.fn(async () => {}),
+    };
+
+    it('renders mutating actions in the header menu when the user has write privilege', async () => {
+      mockCapabilities = WRITE_CAPABILITIES;
+      mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+
+      renderPage();
+
+      await openAppMenuOverflow();
+
+      expect(
+        await screen.findByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`episodeActionsBar-primaryAction-${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`)
+      ).toBeInTheDocument();
+    });
+
+    it('hides mutating actions and keeps Open in Discover when the user only has read privilege', async () => {
+      mockCapabilities = READ_ONLY_CAPABILITIES;
+      mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+
+      renderPage();
+
+      expect(
+        await screen.findByTestId(
+          `episodeActionsBar-primaryAction-${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('renders the not-found prompt when there is no episode', () => {

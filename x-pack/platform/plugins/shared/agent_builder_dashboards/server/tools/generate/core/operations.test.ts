@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
@@ -86,10 +87,12 @@ describe('executeDashboardOperations', () => {
   });
 
   const createResolvedPanelContent = (
-    panelContent: Pick<AttachmentPanel, 'type' | 'config'>
+    panelContent: Pick<AttachmentPanel, 'type' | 'config'>,
+    authoringNote = 'Created a visualization using the requested data.'
   ): PanelContentAttempt => ({
     type: 'success',
     panelContent,
+    authoringNote,
   });
 
   const createResolvePanelContent = (
@@ -271,6 +274,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -283,6 +287,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
               sectionId: 'section-a',
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -292,10 +297,13 @@ describe('executeDashboardOperations', () => {
       ],
       logger,
       resolvePanelContent: createResolvePanelContent({
-        'show total requests': createResolvedPanelContent({
-          type: LENS_EMBEDDABLE_TYPE,
-          config: { type: 'metric' },
-        }),
+        'show total requests': createResolvedPanelContent(
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric' },
+          },
+          'Created a titleless metric showing total requests.'
+        ),
         'show p95 latency': {
           type: 'failure',
           failure: {
@@ -335,6 +343,15 @@ describe('executeDashboardOperations', () => {
         type: 'add_panels',
         identifier: 'show p95 latency',
         error: 'ES|QL generation failed',
+      },
+    ]);
+    const generatedPanel = getPanelsOnly(result.dashboardData.panels).find(
+      (panel) => panel.grid.x === 24 && panel.grid.y === 0
+    );
+    expect(result.panelAuthoringNotes).toEqual([
+      {
+        panelId: generatedPanel?.id,
+        authoringNote: 'Created a titleless metric showing total requests.',
       },
     ]);
   });
@@ -419,12 +436,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -485,12 +504,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -613,6 +634,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -626,6 +648,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -712,6 +735,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -723,6 +747,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 0, y: 1, w: 24, h: 9 },
             },
@@ -794,6 +819,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
@@ -805,6 +831,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1110,12 +1137,14 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
                 sectionId: 'section-a',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -1186,14 +1215,20 @@ describe('executeDashboardOperations', () => {
         ],
         logger,
         resolvePanelContent: createResolvePanelContent({
-          'panel-1': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'bar' },
-          }),
-          'section-panel-1': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'line' },
-          }),
+          'panel-1': createResolvedPanelContent(
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'bar' },
+            },
+            'Changed the panel to a bar chart and retained its title.'
+          ),
+          'section-panel-1': createResolvedPanelContent(
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'line' },
+            },
+            'Changed the panel to a line chart with the legend below.'
+          ),
         }),
       });
 
@@ -1214,6 +1249,16 @@ describe('executeDashboardOperations', () => {
           config: { type: 'line' },
         })
       );
+      expect(result.panelAuthoringNotes).toEqual([
+        {
+          panelId: 'panel-1',
+          authoringNote: 'Changed the panel to a bar chart and retained its title.',
+        },
+        {
+          panelId: 'section-panel-1',
+          authoringNote: 'Changed the panel to a line chart with the legend below.',
+        },
+      ]);
     });
 
     it('resolves repeated visualization edits against the latest panel state', async () => {
@@ -1342,12 +1387,14 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show p95 latency',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },

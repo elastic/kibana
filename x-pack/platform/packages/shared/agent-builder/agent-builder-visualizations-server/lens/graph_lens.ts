@@ -25,6 +25,7 @@ import {
   type GenerateConfigAction,
   type ValidateConfigAction,
   type GenerateTimeRangeAction,
+  isGenerateEsqlAction,
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
@@ -32,6 +33,31 @@ import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+const parseConfigAuthoringResponse = (
+  responseText: string
+): { config: Record<string, unknown>; authoringNote?: string } => {
+  const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
+  const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
+  const parsed = JSON.parse(jsonText);
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Response is not a valid JSON object');
+  }
+
+  const { config, authoring_note: authoringNote } = parsed as {
+    config?: unknown;
+    authoring_note?: unknown;
+  };
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    throw new Error('Response must include a valid "config" object');
+  }
+  const normalizedNote = typeof authoringNote === 'string' ? authoringNote.trim() : '';
+  return {
+    config: config as Record<string, unknown>,
+    ...(normalizedNote ? { authoringNote: normalizedNote } : {}),
+  };
+};
 
 const validateConfigForChartType = (
   chartType: SupportedChartType,
@@ -92,6 +118,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   }),
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
+  authoringNote: Annotation<string | null>(),
   timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
@@ -208,22 +235,7 @@ export const createVisualizationGraph = async (
       // Invoke model without schema validation
       const response = await defaultModel.chatModel.invoke(prompt);
       const responseText = extractTextFromMessage(response);
-
-      // Try to extract JSON from markdown code blocks
-      const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
-      let configResponse: any;
-
-      if (jsonMatches.length > 0) {
-        const jsonText = jsonMatches[0][1].trim();
-        configResponse = JSON.parse(jsonText);
-      } else {
-        configResponse = JSON.parse(responseText);
-      }
-
-      // Verify it's a valid object
-      if (!configResponse || typeof configResponse !== 'object') {
-        throw new Error('Response is not a valid JSON object');
-      }
+      const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
       // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
       // config generation only binds columns from it.
@@ -237,6 +249,7 @@ export const createVisualizationGraph = async (
         type: 'generate_config',
         success: true,
         config: configResponse,
+        authoringNote,
         attempt,
       };
     } catch (error) {
@@ -302,6 +315,7 @@ export const createVisualizationGraph = async (
           type: 'validate_config',
           success: true,
           config: validatedConfig,
+          authoringNote: lastGenerateAction.authoringNote,
           attempt,
         };
       }
@@ -400,16 +414,24 @@ What is the most appropriate time range for this visualization?`,
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
-    const lastGenerateEsqlAction = [...state.actions]
-      .reverse()
-      .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
+    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
     const lastTimeRangeAction = [...state.actions]
       .reverse()
       .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
 
+    // Surface an ES|QL resolution failure (a query that was never generated, so
+    // no config was attempted) so the caller gets the real root cause.
+    const esqlError =
+      lastGenerateEsqlAction && !lastGenerateEsqlAction.success
+        ? `Could not resolve a valid ES|QL query for the visualization: ${
+            lastGenerateEsqlAction.error ?? 'Unknown error'
+          }`
+        : null;
+
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
+      authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
+      error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
@@ -443,6 +465,19 @@ What is the most appropriate time range for this visualization?`,
     return GENERATE_CONFIG_NODE;
   };
 
+  // Router: A config authored without a query can never validate (data_source
+  // is pinned from the generated query), so when ES|QL generation failed route
+  // straight to finalize with the ES|QL error instead of burning config
+  // generation retries.
+  const afterGenerateEsqlRouter = (state: VisualizationState): string => {
+    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
+    if (!lastGenerateEsqlAction?.success) {
+      logger.warn('ES|QL generation failed; finalizing without generating a config');
+      return 'finalize';
+    }
+    return GENERATE_CONFIG_NODE;
+  };
+
   // Router: Use an explicit ES|QL query when provided, otherwise generate one.
   // Existing config is still valuable because generateESQLNode includes the
   // prior query as context when regenerating edits.
@@ -469,7 +504,10 @@ What is the most appropriate time range for this visualization?`,
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
     })
-    .addEdge(GENERATE_ESQL_NODE, GENERATE_CONFIG_NODE)
+    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      finalize: 'finalize',
+    })
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,

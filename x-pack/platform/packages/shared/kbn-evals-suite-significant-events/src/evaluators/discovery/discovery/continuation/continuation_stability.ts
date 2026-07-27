@@ -5,92 +5,176 @@
  * 2.0.
  */
 
-import type { Evaluator, Example } from '@kbn/evals';
-import { selectEvaluators } from '@kbn/evals';
+import type { ConverseStep, Evaluator, Example } from '@kbn/evals';
 
 /** One discovery agent invocation in a sequential "detections over time" run. */
 export interface ContinuationCycle {
   /** rule_name of the detection fed this cycle — for human-readable explanations only. */
   ruleName?: string;
-  /** discovery_slug(s) the agent emitted this cycle (one per produced discovery). */
-  producedSlugs: string[];
+  /** event_id(s) the agent emitted this cycle (one per produced discovery). */
+  producedEventIds: string[];
+
+  /** Whether this cycle should reuse an established event ID. Defaults to true. */
+  expectReuse?: boolean;
+  /** Whether this cycle must perform a topology-filtered event search. */
+  expectTopologyEventSearch?: boolean;
+  /** Event IDs explicitly supplied by the agent to discovery_write, before handler deduplication. */
+  requestedEventIds?: string[];
+
+  steps?: ConverseStep[];
 }
 
 export interface ContinuationStabilityResult {
-  /** Fraction of post-establishing cycles that reused an already-seen slug; null when not gradable. */
+  /** Fraction of comparable post-establishing cycles that matched the expected reuse decision. */
   score: number | null;
-  /** Cycles after the establishing cycle that reused a prior slug. */
+  /** Cycles whose actual reuse decision matched expectReuse. */
+  correctCycles: number;
+  /** Cycles after the establishing cycle that reused a prior event ID. */
   reusedCycles: number;
-  /** Cycles after the establishing cycle that were gradable (produced at least one slug). */
+  /** Cycles after the establishing cycle that were gradable (produced at least one event ID). */
   comparableCycles: number;
-  /** Distinct slugs across the whole run — ideal is 1 for a single cascade. */
-  distinctSlugs: number;
+  /** Post-establishing cycles excluded from scoring (no discovery produced, or not gradable by this scorer). */
+  emptyCycles: number;
+  /** Distinct event IDs across the whole run — ideal is 1 for a single cascade. */
+  distinctEventIds: number;
   explanation: string;
 }
 
-/**
- * Score whether related detections arriving one-at-a-time fold into the SAME slug rather than
- * proliferating new ones. score = reusedCycles / comparableCycles (a cycle is "reused" when any slug
- * it produced was already seen). Null when there are fewer than two gradable cycles.
- */
-export function scoreContinuationStability(
-  cycles: ContinuationCycle[]
-): ContinuationStabilityResult {
-  const seen = new Set<string>();
-  const allSlugs = new Set<string>();
-  let reusedCycles = 0;
-  let comparableCycles = 0;
-  let establishedFirstCycle = false;
+interface ContinuationScoreState {
+  readonly seenEventIds: ReadonlySet<string>;
+  readonly allEventIds: ReadonlySet<string>;
+  readonly established: boolean;
+  readonly reusedCycles: number;
+  readonly correctCycles: number;
+  readonly comparableCycles: number;
+  readonly emptyCycles: number;
+}
 
-  cycles.forEach((cycle) => {
-    const slugs = cycle.producedSlugs.filter(Boolean);
+interface ContinuationScoreOptions {
+  readonly cycles: ContinuationCycle[];
+  readonly isReuse: (cycle: ContinuationCycle, seenEventIds: ReadonlySet<string>) => boolean;
+  /** When provided, cycles failing this predicate are excluded from scoring but still feed seen event IDs. */
+  readonly isGradable?: (cycle: ContinuationCycle) => boolean;
+  readonly noComparableExplanation: string;
+  readonly resultExplanation: (state: ContinuationScoreState) => string;
+}
 
-    if (!establishedFirstCycle) {
-      // The establishing cycle seeds the "seen" set; it is never graded for reuse. Skip empty
-      // leading cycles so the first cycle that actually produces a slug establishes the episode.
-      if (slugs.length > 0) {
-        slugs.forEach((slug) => {
-          seen.add(slug);
-          allSlugs.add(slug);
-        });
-        establishedFirstCycle = true;
-      }
-      return;
+const initialScoreState: ContinuationScoreState = {
+  seenEventIds: new Set(),
+  allEventIds: new Set(),
+  established: false,
+  reusedCycles: 0,
+  correctCycles: 0,
+  comparableCycles: 0,
+  emptyCycles: 0,
+};
+
+const scoreContinuation = ({
+  cycles,
+  isReuse,
+  isGradable,
+  noComparableExplanation,
+  resultExplanation,
+}: ContinuationScoreOptions): ContinuationStabilityResult => {
+  const state = cycles.reduce<ContinuationScoreState>((current, cycle) => {
+    const producedEventIds = cycle.producedEventIds.filter(Boolean);
+    if (!current.established) {
+      return producedEventIds.length === 0
+        ? current
+        : {
+            ...current,
+            seenEventIds: new Set(producedEventIds),
+            allEventIds: new Set(producedEventIds),
+            established: true,
+          };
+    }
+    if (producedEventIds.length === 0) {
+      return { ...current, emptyCycles: current.emptyCycles + 1 };
+    }
+    if (isGradable && !isGradable(cycle)) {
+      return {
+        ...current,
+        seenEventIds: new Set([...current.seenEventIds, ...producedEventIds]),
+        allEventIds: new Set([...current.allEventIds, ...producedEventIds]),
+        emptyCycles: current.emptyCycles + 1,
+      };
     }
 
-    comparableCycles += 1;
-    const reused = slugs.some((slug) => seen.has(slug));
-    if (reused) {
-      reusedCycles += 1;
-    }
-    slugs.forEach((slug) => {
-      seen.add(slug);
-      allSlugs.add(slug);
-    });
-  });
+    const reused = isReuse(cycle, current.seenEventIds);
+    return {
+      ...current,
+      seenEventIds: new Set([...current.seenEventIds, ...producedEventIds]),
+      allEventIds: new Set([...current.allEventIds, ...producedEventIds]),
+      reusedCycles: current.reusedCycles + Number(reused),
+      correctCycles: current.correctCycles + Number(reused === (cycle.expectReuse ?? true)),
+      comparableCycles: current.comparableCycles + 1,
+    };
+  }, initialScoreState);
 
-  if (comparableCycles === 0) {
+  const emptyNote =
+    state.emptyCycles > 0 ? `; ${state.emptyCycles} cycle(s) were excluded from scoring` : '';
+  if (state.comparableCycles === 0) {
     return {
       score: null,
+      correctCycles: 0,
       reusedCycles: 0,
       comparableCycles: 0,
-      distinctSlugs: allSlugs.size,
-      explanation:
-        'Fewer than two gradable cycles — nothing to continue (need an establishing cycle plus at least one follow-up)',
+      emptyCycles: state.emptyCycles,
+      distinctEventIds: state.allEventIds.size,
+      explanation: `${noComparableExplanation}${emptyNote}`,
     };
   }
 
-  const score = reusedCycles / comparableCycles;
   return {
-    score,
-    reusedCycles,
-    comparableCycles,
-    distinctSlugs: allSlugs.size,
-    explanation:
-      `${reusedCycles}/${comparableCycles} follow-up cycle(s) reused an established slug ` +
-      `(${allSlugs.size} distinct slug(s) across the run; ideal is 1 for a single cascade)`,
+    score: state.correctCycles / state.comparableCycles,
+    correctCycles: state.correctCycles,
+    reusedCycles: state.reusedCycles,
+    comparableCycles: state.comparableCycles,
+    emptyCycles: state.emptyCycles,
+    distinctEventIds: state.allEventIds.size,
+    explanation: `${resultExplanation(state)}${emptyNote}`,
   };
-}
+};
+
+/**
+ * Score whether related detections arriving one-at-a-time fold into the same event ID rather than
+ * proliferating new ones.
+ */
+export const scoreContinuationStability = (
+  cycles: ContinuationCycle[]
+): ContinuationStabilityResult =>
+  scoreContinuation({
+    cycles,
+    isReuse: (cycle, seenEventIds) =>
+      cycle.producedEventIds.some((eventId) => seenEventIds.has(eventId)),
+    noComparableExplanation:
+      'Fewer than two gradable cycles — nothing to continue (need an establishing cycle plus at least one follow-up)',
+    resultExplanation: (state) =>
+      `${state.correctCycles}/${state.comparableCycles} follow-up cycle(s) matched the expected ` +
+      `reuse decision; ${state.reusedCycles} actually reused an established event ID ` +
+      `(${state.allEventIds.size} distinct event ID(s) across the run)`,
+  });
+
+/**
+ * Score the agent's routing decision independently from the write handler's final event ID.
+ * This prevents write-time deduplication from being mistaken for an agent-selected continuation.
+ */
+export const scoreContinuationRouting = (
+  cycles: ContinuationCycle[]
+): ContinuationStabilityResult =>
+  scoreContinuation({
+    cycles,
+    isReuse: (cycle, seenEventIds) =>
+      (cycle.requestedEventIds ?? []).some((eventId) => seenEventIds.has(eventId)),
+    // `undefined` means routing was not captured (instrumentation gap) — ungradable; `[]` is a
+    // genuine agent omission and stays gradable.
+    isGradable: (cycle) => cycle.requestedEventIds !== undefined,
+    noComparableExplanation:
+      'Fewer than two gradable cycles — no follow-up routing decision to score',
+    resultExplanation: (state) =>
+      `${state.correctCycles}/${state.comparableCycles} follow-up cycle(s) made the expected ` +
+      `explicit routing decision; ${state.reusedCycles} explicitly selected an established event_id`,
+  });
 
 /** Output shape produced by the sequential "continuation over time" discovery agent. */
 export interface ContinuationStabilityOutput {
@@ -99,13 +183,16 @@ export interface ContinuationStabilityOutput {
 
 export type ContinuationEvaluator = Evaluator<Example, ContinuationStabilityOutput>;
 
-/** CODE evaluator: scores whether re-arriving detections reuse one stable slug. Score = reused / comparable cycles. */
+/** CODE evaluator: scores whether re-arriving detections reuse one stable event ID. */
 export const continuationStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_stability',
   kind: 'CODE',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
 
-/** Factory mirroring `createDiscoveryEvaluators` so the spec wires it the same way. */
-export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
-  selectEvaluators([continuationStabilityEvaluator]);
+/** CODE evaluator: scores explicit continuation routing before handler-generated outcomes. */
+export const continuationRoutingEvaluator: ContinuationEvaluator = {
+  name: 'continuation_routing',
+  kind: 'CODE',
+  evaluate: ({ output }) => Promise.resolve(scoreContinuationRouting(output.cycles ?? [])),
+};

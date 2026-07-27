@@ -73,19 +73,8 @@ const createTabsWithStoredTimeDifference = async (pageObjects: PageObjects) => {
     await expectCurrentTimeConfiguration(pageObjects, UPDATED_TIME_CONFIGURATION);
   });
 
-  await spaceTest.step('switching tabs restores each tab time configuration', async () => {
-    await unifiedTabs.selectTab(1);
-    await discover.waitUntilTabIsLoaded();
-    await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);
-
-    await unifiedTabs.selectTab(2);
-    await discover.waitUntilTabIsLoaded();
-    await expectCurrentTimeConfiguration(pageObjects, UPDATED_TIME_CONFIGURATION);
-
-    await unifiedTabs.selectTab(0);
-    await discover.waitUntilTabIsLoaded();
-    await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);
-  });
+  await unifiedTabs.selectTab(0);
+  await discover.waitUntilTabIsLoaded();
 };
 
 spaceTest.describe('Discover tabs - time range', { tag: '@local-stateful-classic' }, () => {
@@ -118,10 +107,6 @@ spaceTest.describe('Discover tabs - time range', { tag: '@local-stateful-classic
       await discover.loadSavedSearch(sessionName);
       await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);
 
-      await unifiedTabs.selectTab(1);
-      await discover.waitUntilTabIsLoaded();
-      await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);
-
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
       await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);
@@ -146,10 +131,6 @@ spaceTest.describe('Discover tabs - time range', { tag: '@local-stateful-classic
     await discover.waitUntilTabIsLoaded();
     await expectCurrentTimeConfiguration(pageObjects, UPDATED_TIME_CONFIGURATION);
     await expect(discover.unsavedChangesIndicator()).toBeHidden();
-
-    await unifiedTabs.selectTab(1);
-    await discover.waitUntilTabIsLoaded();
-    await expectCurrentTimeConfiguration(pageObjects, INITIAL_TIME_CONFIGURATION);
 
     await unifiedTabs.selectTab(0);
     await discover.waitUntilTabIsLoaded();

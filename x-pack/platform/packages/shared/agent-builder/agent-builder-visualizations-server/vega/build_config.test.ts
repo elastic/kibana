@@ -34,6 +34,7 @@ const createMockLogger = (): Logger =>
 
 const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
 const SPEC = '{"$schema":"vega-lite","mark":"bar"}';
+const AUTHORING_NOTE = 'Created a bar chart using the requested data.';
 
 describe('buildVegaConfig', () => {
   const events = {} as ToolEventEmitter;
@@ -48,7 +49,12 @@ describe('buildVegaConfig', () => {
     mockedValidateEsqlQuery.mockReset();
     mockedValidateEsqlQuery.mockResolvedValue(undefined); // default: query is valid
     logger = createMockLogger();
-    invoke = jest.fn().mockResolvedValue({ spec: SPEC, error: null, esqlQuery: PROVIDED_ESQL });
+    invoke = jest.fn().mockResolvedValue({
+      spec: SPEC,
+      authoringNote: AUTHORING_NOTE,
+      error: null,
+      esqlQuery: PROVIDED_ESQL,
+    });
     mockedCreateGraph.mockResolvedValue({ invoke } as unknown as Awaited<
       ReturnType<typeof createVegaGraph>
     >);
@@ -70,8 +76,40 @@ describe('buildVegaConfig', () => {
     expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
-    expect(result).toEqual({ spec: SPEC, esqlQuery: PROVIDED_ESQL });
+    expect(result).toEqual({
+      spec: SPEC,
+      authoringNote: AUTHORING_NOTE,
+      esqlQuery: PROVIDED_ESQL,
+    });
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns a valid spec when the graph omits the authoring note', async () => {
+    invoke.mockResolvedValue({ spec: SPEC, error: null, esqlQuery: PROVIDED_ESQL });
+
+    await expect(run(PROVIDED_ESQL)).resolves.toEqual({
+      spec: SPEC,
+      esqlQuery: PROVIDED_ESQL,
+    });
+  });
+
+  it('returns the authored panel title from the graph', async () => {
+    invoke.mockResolvedValue({
+      spec: SPEC,
+      title: 'Requests by host',
+      authoringNote: AUTHORING_NOTE,
+      error: null,
+      esqlQuery: PROVIDED_ESQL,
+    });
+
+    const result = await run(PROVIDED_ESQL);
+
+    expect(result).toEqual({
+      spec: SPEC,
+      title: 'Requests by host',
+      authoringNote: AUTHORING_NOTE,
+      esqlQuery: PROVIDED_ESQL,
+    });
   });
 
   it('drops an invalid provided ES|QL and warns, so the graph regenerates', async () => {

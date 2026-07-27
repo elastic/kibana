@@ -63,13 +63,23 @@ describe.skip('recover_esql end-to-end (real build_config + real graph)', () => 
     invoke = jest.fn().mockResolvedValue(
       '```json\n' +
         JSON.stringify({
-          mark: { type: 'bar', color: 'steelblue' },
-          encoding: { x: { field: 'response.keyword' } },
+          authoring_note: 'Restyled the existing bar chart while preserving its data.',
+          spec: {
+            mark: { type: 'bar', color: 'steelblue' },
+            encoding: { x: { field: 'response.keyword' } },
+          },
         }) +
         '\n```'
     );
+    // The default and low-effort models share a connector so the default-model
+    // fallback in `generateVisualizationEsql` stays out of this test.
+    const scopedModel = {
+      connector: { connectorId: 'default-connector' },
+      chatModel: { invoke },
+    };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({ chatModel: { invoke } }),
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedValidateEsqlQuery.mockResolvedValue(undefined);
     // A visual-only edit: the generator keeps the seeded query unchanged and

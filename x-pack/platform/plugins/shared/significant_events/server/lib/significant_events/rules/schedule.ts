@@ -16,23 +16,16 @@ export const RULE_LOOKBACK_OVERLAP_RATIO = 2;
 
 const CRITICAL_CHANGE_POINT_BUCKET_INTERVAL = '30s';
 const DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES = 30;
-const DEFAULT_QUICK_RECOVERY_LOOKBACK_MINUTES = 11;
 // Histogram buckets to request per rule (`lookback = TARGET * interval` yields TARGET buckets).
 // ES `change_point` returns `indeterminable` below 22 buckets and consumes one fewer than the
 // histogram emits, so 25 keeps a safe margin above that floor at every cadence.
 const CHANGE_POINT_BUCKET_TARGET = 25;
-const RECENT_ACTIVITY_MINUTES_FLOOR = 5;
-const QUIET_STATIONARY_PEAK_ALERT_COUNT = 30;
 
 export interface RuleDetectionSchedule {
   interval_minutes: number;
-  recent_activity_minutes: number;
   bucket_interval: string;
   lookback: string;
   lookback_minutes: number;
-  quick_recovery_lookback: string;
-  quick_recovery_lookback_minutes: number;
-  quiet_stationary_peak_min_alert_count: number;
 }
 
 export function scheduleIntervalForQuery(
@@ -76,26 +69,13 @@ export function getRuleDetectionSchedule(
   const lookbackMinutes = isCriticalCadence
     ? DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES
     : Math.max(DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES, CHANGE_POINT_BUCKET_TARGET * intervalMinutes);
-  const quickRecoveryLookbackMinutes = isCriticalCadence
-    ? DEFAULT_QUICK_RECOVERY_LOOKBACK_MINUTES
-    : CHANGE_POINT_BUCKET_TARGET * intervalMinutes;
 
   return {
     interval_minutes: intervalMinutes,
-    recent_activity_minutes: Math.max(
-      RECENT_ACTIVITY_MINUTES_FLOOR,
-      RULE_LOOKBACK_OVERLAP_RATIO * intervalMinutes
-    ),
     bucket_interval: isCriticalCadence
       ? CRITICAL_CHANGE_POINT_BUCKET_INTERVAL
       : `${intervalMinutes}m`,
     lookback: `now-${lookbackMinutes}m`,
     lookback_minutes: lookbackMinutes,
-    quick_recovery_lookback: `now-${quickRecoveryLookbackMinutes}m`,
-    quick_recovery_lookback_minutes: quickRecoveryLookbackMinutes,
-    quiet_stationary_peak_min_alert_count: Math.max(
-      1,
-      Math.ceil(QUIET_STATIONARY_PEAK_ALERT_COUNT / intervalMinutes)
-    ),
   };
 }
