@@ -10,41 +10,21 @@
 import { renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import type { FilterManager } from '@kbn/data-plugin/public';
-import type { ToastsStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { useFiltersValidation } from './use_filters_validation';
+import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 describe('useFiltersValidation', () => {
   let filterUpdates$: Subject<void>;
-  let filterManager: Pick<FilterManager, 'getFilters' | 'getUpdates$'>;
-  let toastNotifications: Pick<ToastsStart, 'addWarning'>;
-  let adHocDataView: DataView;
-  let persistedDataView: DataView;
+  let services: ReturnType<typeof createDiscoverServicesMock>;
 
   beforeEach(() => {
     jest.useFakeTimers();
-
     filterUpdates$ = new Subject<void>();
-
-    filterManager = {
-      getFilters: jest.fn().mockReturnValue([]),
-      getUpdates$: jest.fn().mockReturnValue(filterUpdates$),
-    };
-
-    toastNotifications = {
-      addWarning: jest.fn(),
-    };
-
-    adHocDataView = {
-      id: 'ad-hoc-id',
-      isPersisted: () => false,
-    } as unknown as DataView;
-
-    persistedDataView = {
-      id: 'persisted-id',
-      isPersisted: () => true,
-    } as unknown as DataView;
+    services = createDiscoverServicesMock();
+    jest.spyOn(services.filterManager, 'getUpdates$').mockReturnValue(filterUpdates$);
+    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -53,20 +33,20 @@ describe('useFiltersValidation', () => {
 
   it('should show warning when ad-hoc data view has mismatched filter index', () => {
     const filters: Filter[] = [{ meta: { index: 'different-id' } } as Filter];
-    (filterManager.getFilters as jest.Mock).mockReturnValue(filters);
+    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: adHocDataView,
-        filterManager: filterManager as FilterManager,
-        toastNotifications: toastNotifications as ToastsStart,
+        dataView: dataViewAdHoc,
+        filterManager: services.filterManager,
+        toastNotifications: services.toastNotifications,
       })
     );
 
     filterUpdates$.next();
     jest.advanceTimersByTime(500);
 
-    expect(toastNotifications.addWarning).toHaveBeenCalledWith(
+    expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({
         'data-test-subj': 'invalidFiltersWarnToast',
       })
@@ -75,66 +55,64 @@ describe('useFiltersValidation', () => {
 
   it('should not show warning when data view is persisted', () => {
     const filters: Filter[] = [{ meta: { index: 'different-id' } } as Filter];
-    (filterManager.getFilters as jest.Mock).mockReturnValue(filters);
+    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: persistedDataView,
-        filterManager: filterManager as FilterManager,
-        toastNotifications: toastNotifications as ToastsStart,
+        dataView: dataViewMock,
+        filterManager: services.filterManager,
+        toastNotifications: services.toastNotifications,
       })
     );
 
     filterUpdates$.next();
     jest.advanceTimersByTime(500);
 
-    expect(toastNotifications.addWarning).not.toHaveBeenCalled();
+    expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
   it('should not show warning when all filter indices match data view id', () => {
-    const filters: Filter[] = [{ meta: { index: 'ad-hoc-id' } } as Filter];
-    (filterManager.getFilters as jest.Mock).mockReturnValue(filters);
+    const filters: Filter[] = [{ meta: { index: dataViewAdHoc.id } } as Filter];
+    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: adHocDataView,
-        filterManager: filterManager as FilterManager,
-        toastNotifications: toastNotifications as ToastsStart,
+        dataView: dataViewAdHoc,
+        filterManager: services.filterManager,
+        toastNotifications: services.toastNotifications,
       })
     );
 
     filterUpdates$.next();
     jest.advanceTimersByTime(500);
 
-    expect(toastNotifications.addWarning).not.toHaveBeenCalled();
+    expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
   it('should not show warning when no filters exist', () => {
-    (filterManager.getFilters as jest.Mock).mockReturnValue([]);
-
     renderHook(() =>
       useFiltersValidation({
-        dataView: adHocDataView,
-        filterManager: filterManager as FilterManager,
-        toastNotifications: toastNotifications as ToastsStart,
+        dataView: dataViewAdHoc,
+        filterManager: services.filterManager,
+        toastNotifications: services.toastNotifications,
       })
     );
 
     filterUpdates$.next();
     jest.advanceTimersByTime(500);
 
-    expect(toastNotifications.addWarning).not.toHaveBeenCalled();
+    expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
   it('should unsubscribe on unmount', () => {
     const filters: Filter[] = [{ meta: { index: 'different-id' } } as Filter];
-    (filterManager.getFilters as jest.Mock).mockReturnValue(filters);
+    jest.spyOn(services.filterManager, 'getFilters').mockReturnValue(filters);
 
     const { unmount } = renderHook(() =>
       useFiltersValidation({
-        dataView: adHocDataView,
-        filterManager: filterManager as FilterManager,
-        toastNotifications: toastNotifications as ToastsStart,
+        dataView: dataViewAdHoc,
+        filterManager: services.filterManager,
+        toastNotifications: services.toastNotifications,
       })
     );
 
@@ -143,6 +121,6 @@ describe('useFiltersValidation', () => {
     filterUpdates$.next();
     jest.advanceTimersByTime(500);
 
-    expect(toastNotifications.addWarning).not.toHaveBeenCalled();
+    expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 });

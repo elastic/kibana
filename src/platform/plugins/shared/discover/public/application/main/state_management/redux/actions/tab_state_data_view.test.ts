@@ -20,14 +20,14 @@ import {
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
 } from '../../../../../__mocks__/data_view_complex';
-import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
+import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import * as tabStateActions from './tab_state';
 import { selectDataSourceProfileId } from '../runtime_state';
-import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
-import { BehaviorSubject } from 'rxjs';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 
-const setup = async () => {
+const setup = async ({ dataView = dataViewMockWithTimeField }: { dataView?: DataView } = {}) => {
   const services = createDiscoverServicesMock();
   const toolkit = getDiscoverInternalStateMock({
     services,
@@ -40,7 +40,7 @@ const setup = async () => {
   });
 
   const persistedTab = getPersistedTabMock({
-    dataView: dataViewMockWithTimeField,
+    dataView: dataView.isPersisted() ? dataView : dataViewMockWithTimeField,
     services,
   });
 
@@ -51,6 +51,16 @@ const setup = async () => {
     }),
   });
   await toolkit.initializeSingleTab({ tabId: persistedTab.id });
+
+  if (!dataView.isPersisted()) {
+    // Ad-hoc data views can't be stored by ID in a persisted tab, so switch after initialization.
+    await toolkit.internalState.dispatch(
+      internalStateActions.onDataViewCreated({
+        tabId: persistedTab.id,
+        nextDataView: dataView,
+      })
+    );
+  }
 
   return {
     ...toolkit,
@@ -321,30 +331,10 @@ describe('tab_state_data_view actions', () => {
   });
 
   describe('updateAdHocDataViewId', () => {
-    const setupWithAdHocDataView = async () => {
-      const toolkit = await setup();
-      const { internalState, tabId, services } = toolkit;
-
-      jest
-        .spyOn(services.dataViews, 'get')
-        .mockImplementationOnce((id) =>
-          id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
-        );
-
-      await internalState.dispatch(
-        internalStateActions.onDataViewCreated({
-          tabId,
-          nextDataView: dataViewAdHoc,
-        })
-      );
-
-      return toolkit;
-    };
-
     it('should generate new ID and create new data view', async () => {
-      const { internalState, tabId, services } = await setupWithAdHocDataView();
+      const { internalState, tabId, services } = await setup({ dataView: dataViewAdHoc });
 
-      const createSpy = services.dataViews.create as jest.Mock;
+      const createSpy = jest.mocked(services.dataViews.create);
       createSpy.mockClear();
 
       const result = await internalState.dispatch(
@@ -359,9 +349,14 @@ describe('tab_state_data_view actions', () => {
     });
 
     it('should update filter references to new data view ID', async () => {
-      const { internalState, tabId, services } = await setupWithAdHocDataView();
+      const { internalState, tabId, services } = await setup({ dataView: dataViewAdHoc });
 
-      await internalState.dispatch(
+      const mockExecute = jest.fn();
+      jest
+        .mocked(services.uiActions.getAction)
+        .mockResolvedValue({ execute: mockExecute } as unknown as Action<object, object>);
+
+      const result = await internalState.dispatch(
         internalStateActions.updateAdHocDataViewId({
           tabId,
           editedDataView: dataViewAdHoc,
@@ -369,10 +364,19 @@ describe('tab_state_data_view actions', () => {
       );
 
       expect(services.uiActions.getTrigger).toHaveBeenCalledWith(UPDATE_FILTER_REFERENCES_TRIGGER);
+      expect(services.uiActions.getAction).toHaveBeenCalledWith(UPDATE_FILTER_REFERENCES_ACTION);
+      expect(mockExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromDataView: dataViewAdHoc.id,
+          toDataView: result?.id,
+        })
+      );
     });
 
     it('should replace data view when used in single tab', async () => {
-      const { internalState, tabId, runtimeStateManager } = await setupWithAdHocDataView();
+      const { internalState, tabId, runtimeStateManager } = await setup({
+        dataView: dataViewAdHoc,
+      });
 
       const previousId = dataViewAdHoc.id;
 
@@ -389,12 +393,15 @@ describe('tab_state_data_view actions', () => {
     });
 
     it('should append data view when used in multiple tabs', async () => {
-      const { internalState, tabId, runtimeStateManager } = await setupWithAdHocDataView();
+      const { internalState, tabId, runtimeStateManager, addNewTab, initializeSingleTab } =
+        await setup({ dataView: dataViewAdHoc });
 
       // Add a second tab with the same ad-hoc data view to simulate multi-tab usage
-      runtimeStateManager.tabs.byId['second-tab'] = getTabRuntimeStateMock({
-        currentDataView$: new BehaviorSubject<DataView | undefined>(dataViewAdHoc),
-      });
+      await addNewTab({ tab: getTabStateMock({ id: 'second-tab' }) });
+      await initializeSingleTab({ tabId: 'second-tab' });
+      internalState.dispatch(
+        internalStateActions.assignNextDataView({ tabId: 'second-tab', dataView: dataViewAdHoc })
+      );
 
       const adHocDataViewsBefore = runtimeStateManager.adHocDataViews$.getValue();
       expect(adHocDataViewsBefore).toHaveLength(1);
@@ -407,14 +414,17 @@ describe('tab_state_data_view actions', () => {
       );
 
       // Multi-tab: new data view is appended rather than replacing the old one
-      expect(runtimeStateManager.adHocDataViews$.getValue()).toHaveLength(2);
+      const adHocDataViewsAfter = runtimeStateManager.adHocDataViews$.getValue();
+      expect(adHocDataViewsAfter).toHaveLength(2);
+      expect(adHocDataViewsAfter[0].id).toBe(dataViewAdHoc.id);
+      expect(adHocDataViewsAfter[1].id).not.toBe(dataViewAdHoc.id);
     });
 
     it('should be no-op for persisted data views', async () => {
       const { internalState, tabId, services } = await setup();
       // setup() initializes with dataViewMockWithTimeField which is persisted
 
-      const createSpy = services.dataViews.create as jest.Mock;
+      const createSpy = jest.mocked(services.dataViews.create);
       createSpy.mockClear();
 
       const result = await internalState.dispatch(

@@ -18,6 +18,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
+  const fieldEditor = getService('fieldEditor');
   const filterBar = getService('filterBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
@@ -174,6 +175,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const second = await secondSearchCell.getVisibleText();
 
       expect(+second).to.equal(+first * 2);
+    });
+
+    it('should update id after data view field edit', async () => {
+      await discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
+      await header.waitUntilLoadingHasFinished();
+
+      const prevDataViewId = await discover.getCurrentDataViewId();
+
+      // trigger data view id update
+      await dataGrid.clickEditField('_bytes-runtimefield');
+      await fieldEditor.setName('_bytes-runtimefield-edited', true);
+      await fieldEditor.save();
+      await fieldEditor.confirmSave();
+      await header.waitUntilLoadingHasFinished();
+
+      const newDataViewId = await discover.getCurrentDataViewId();
+      expect(prevDataViewId).not.to.equal(newDataViewId);
     });
   });
 }
