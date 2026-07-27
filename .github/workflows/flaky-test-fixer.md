@@ -22,8 +22,20 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
 concurrency:
-  group: 'flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}'
+  # Keep one fixer lane per issue for the real trigger. Every other label event (e.g. the
+  # sibling `failure:*` labels the investigator applies in the same batch as `ai:fix-flaky`)
+  # gets its own group suffix, so it can skip without canceling a pending or in-flight fix run.
+  group: >-
+    flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'ai:fix-flaky' &&
+        github.event.label.name
+      ) ||
+      'fix'
+    }}
   cancel-in-progress: false
+  job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}

@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
@@ -54,7 +53,6 @@ const experimentalFeatures = {
   enableRiskScorePrivmonModifier: false,
 } as unknown as ExperimentalFeatures;
 
-const applicationStub = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
 const resolveSecurityCanvasContext = jest.fn(
   async () => ({} as unknown as SecurityCanvasEmbeddedBundle)
 );
@@ -69,7 +67,6 @@ const renderCanvas = (data: unknown) =>
         attachment={attachmentOf(data)}
         isSidebar={false}
         experimentalFeatures={experimentalFeatures}
-        application={applicationStub}
         resolveSecurityCanvasContext={resolveSecurityCanvasContext}
       />
     </I18nProvider>

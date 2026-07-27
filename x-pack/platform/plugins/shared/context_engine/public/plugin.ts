@@ -6,6 +6,7 @@
  */
 
 import {
+  AppStatus,
   DEFAULT_APP_CATEGORIES,
   type AppDeepLinkLocations,
   type AppMountParameters,
@@ -60,8 +61,11 @@ export class ContextEnginePlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
-      // Hidden by default; visible only when both the feature flag and the advanced setting are on.
-      visibleIn: [],
+      visibleIn: [...VISIBLE_LOCATIONS],
+      // Inaccessible by default: the app and its routes are gated until both the
+      // feature flag and the advanced setting are on. While inaccessible, core also
+      // removes it from every navigation surface.
+      status: AppStatus.inaccessible,
       keywords: ['context', 'ai index', 'context engine'],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
@@ -71,7 +75,10 @@ export class ContextEnginePlugin
           ]).pipe(
             map(
               ([flagEnabled, settingEnabled]): AppUpdater =>
-                () => ({ visibleIn: flagEnabled && settingEnabled ? [...VISIBLE_LOCATIONS] : [] })
+                () => ({
+                  status:
+                    flagEnabled && settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+                })
             )
           )
         )

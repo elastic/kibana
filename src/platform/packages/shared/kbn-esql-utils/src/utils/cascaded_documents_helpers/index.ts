@@ -39,6 +39,10 @@ import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
 import {
+  convertTimeseriesCommandNodeToFrom,
+  hasTimeseriesInfoCommand,
+} from '../query_parsing_helpers';
+import {
   isSupportedStatsFunction,
   type SupportedFieldTypes,
   type FieldValue,
@@ -92,6 +96,12 @@ export interface ESQLStatsQueryMeta {
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
   const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
+
+  if (hasTimeseriesInfoCommand(queryString)) {
+    // TS_INFO/METRICS_INFO rows are synthetic metric metadata rather than documents,
+    // so there's no underlying document to drive a cascade experience from
+    return { groupByFields, appliedFunctions };
+  }
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
@@ -463,7 +473,11 @@ function handleStatsByColumnLeafOperation(
         continue;
       }
     } else {
-      mutate.generic.commands.insert(cascadeOperationQuery.ast, cmd, 0);
+      mutate.generic.commands.insert(
+        cascadeOperationQuery.ast,
+        convertTimeseriesCommandNodeToFrom(cmd),
+        0
+      );
     }
   }
 
@@ -523,7 +537,10 @@ function handleStatsByCategorizeLeafOperation(
       return;
     }
 
-    mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    mutate.generic.commands.append(
+      cascadeOperationQuery.ast,
+      convertTimeseriesCommandNodeToFrom(cmd)
+    );
   });
 
   // we select the first argument because that's the field being categorized
