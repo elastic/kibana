@@ -9,7 +9,7 @@ import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { getFieldEvaluationsEsql } from '@kbn/entity-store/common/domain/euid';
 
 import type { RelationshipIntegrationConfig } from './types';
-import { COMPOSITE_PAGE_SIZE, ESQL_ENGINE_PREAMBLE, SLICE_SAMPLE_PROBABILITY } from './constants';
+import { ESQL_ENGINE_PREAMBLE, SLICE_SAMPLE_PROBABILITY } from './constants';
 
 /**
  * "At least one of these fields exists and is non-empty" ES|QL fragment.
