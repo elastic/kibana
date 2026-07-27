@@ -45,7 +45,10 @@ const evaluate = (discoveries: Partial<Discovery>[], ruleUuids: string[]) =>
     input: {
       detections: ruleUuids.map(detection),
     },
-    output: { discoveries: discoveries as Discovery[], steps: [] },
+    output: {
+      discoveries: discoveries as Discovery[],
+      steps: [],
+    },
     expected: {} as never,
     metadata: null,
   });

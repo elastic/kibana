@@ -297,10 +297,11 @@ export const MarkdownFieldSchema = BaseFieldSchema.extend({
 });
 
 /**
- * This can be used to parse `fields` section in the YAML `definition` of the template.
- * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ * Union of all inline (control-based) field definitions — every concrete field shape that can be
+ * authored directly, excluding library references (`$ref`). This is the schema for a standalone
+ * field-library definition, which stores concrete fields, never references to other fields.
  */
-export const FieldSchema = z.union([
+export const InlineFieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
@@ -311,8 +312,13 @@ export const FieldSchema = z.union([
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
   MarkdownFieldSchema,
-  RefFieldSchema,
 ]);
+
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ */
+export const FieldSchema = z.union([...InlineFieldSchema.options, RefFieldSchema]);
 
 export type Field = z.infer<typeof FieldSchema>;
 

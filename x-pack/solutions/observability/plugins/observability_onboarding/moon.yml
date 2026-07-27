@@ -59,6 +59,8 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/dashboard-plugin'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod

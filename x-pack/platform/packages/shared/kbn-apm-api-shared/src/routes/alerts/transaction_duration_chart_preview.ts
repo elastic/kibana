@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import { alertParamsSchema, type PreviewChartResponse } from './types';
 
@@ -15,5 +15,5 @@ export interface TransactionDurationChartPreviewResponse {
 export const transactionDurationChartPreviewRoute =
   defineRoute<TransactionDurationChartPreviewResponse>()({
     endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
-    params: z.object({ query: alertParamsSchema }),
+    params: lazySchema(() => z.object({ query: alertParamsSchema })),
   });
