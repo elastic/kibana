@@ -155,12 +155,12 @@ export const createMemoryDiscoveryTools = ({
   };
 
   const promptSnippet = `
-You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, and operational patterns. Pages are organized by categories (like Wikipedia). After analyzing the current data independently, you may use memory tools to enrich your findings with additional context:
+You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, operational patterns, known-benign noise, and prior false positives. Pages are organized by categories (like Wikipedia). Before inventing or promoting new KI queries — especially anything that looks familiar or historically noisy — consult memory:
 - **memory_search** — Search by keyword to find relevant pages (supports category filter)
 - **memory_read** — Read the full content of a specific page by name or ID
 - **memory_list** — List all pages to discover what knowledge exists
 
-Analyze the data on its own merits first. Use the knowledge base to add context or cross-reference, not as a starting point.`;
+Use memory to avoid regenerating known-bad / demoted patterns and to prefer queries aligned with durable prior learnings. Still ground every proposed query in the current stream data; memory is prior context, not a substitute for evidence.`;
 
   return { tools, callbacks, promptSnippet };
 };

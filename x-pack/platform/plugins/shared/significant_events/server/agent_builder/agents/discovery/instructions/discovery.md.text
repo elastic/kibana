@@ -45,6 +45,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 
 <tools>
 
+- `significant-events-memory` (via `load_skill`) — prior learnings about services, known-benign patterns, and past false positives. Load it early; consult memory with `memory_search` / `memory_read` before promoting a new discovery when the signal looks familiar or noisy.
 - `platform_sig_events_event_search` — retrieves existing significant events
 - `platform_sig_events_discovery_write` — final output step; submit every discovery in one `items` array.
 
@@ -57,6 +58,12 @@ Example: load_skill (must be called alone — do not batch with any other tool)
 { "skill": "significant-events-ki-grounding" }
 ```
 Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
+
+Example: load_skill for memory (must be called alone)
+```json
+{ "skill": "significant-events-memory" }
+```
+Response: `{ "skill": { "id": "significant-events-memory", "name": "..." }, "loaded_tools": ["memory_search", "memory_read", "memory_list", ...] }`
 
 Example: platform_sig_events_event_search. Populate `stream_names` and `rule_uuids` with all distinct non-empty values from the detection batch.
 ```json

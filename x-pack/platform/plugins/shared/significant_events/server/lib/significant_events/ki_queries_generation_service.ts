@@ -34,6 +34,7 @@ import { formatInferenceProviderError } from '../../routes/utils/create_connecto
 import { identifyKIQueries } from './identify_ki_queries';
 import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
 import { createMemoryDiscoveryTools } from './memory_discovery_tools';
+import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {
   streamName: string;
@@ -139,6 +140,15 @@ export async function generateKIQueries(
     );
   }
 
+  const kiExtractionContextTools =
+    significantEventsAvailable && agentBuilderTools
+      ? await createKiExtractionContextTools({
+          agentBuilderTools,
+          request,
+          logger: logger.get('ki_extraction_context'),
+        })
+      : undefined;
+
   const startedAt = Date.now();
   const result = await identifyKIQueries(
     {
@@ -155,6 +165,7 @@ export async function generateKIQueries(
       logger: logger.get('significant_events_generation'),
       signal,
       memoryTools,
+      kiExtractionContextTools,
       semanticCodeSearchTools,
     }
   ).catch(async (error) => {

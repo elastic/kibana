@@ -47,6 +47,7 @@ Use tools only for **fresh** detection signals (see `<inputs>` for the fresh/car
 
 Your queries answer: **is the failure still happening now?** They are current-state checks, not root-cause investigations.
 
+- `significant-events-memory` (via `load_skill`) — optional prior context (known-benign patterns, past dismissals). Load once early if a discovery looks familiar; do not let memory override a failed current-state check.
 - `platform_sig_events_ki_search` — apply one hard gate before dispatching any verification. Call at most once for the whole run when `signals` is absent or empty **OR** any fresh entry in `signals[]` has missing/null `evidence` or an empty `evidence.esql_query`.
     If every fresh signal carries a non-empty `esql_query`, this tool is **FORBIDDEN for the entire run** — do not call it for enrichment, confidence, severity, or corroboration.
     When required, pass only `kind: ["feature", "query"]` and `stream_names` (the deduplicated union of discovery `stream_names[]`); never pass `search_text`. Do not issue a follow-up search when 0 query KIs are returned — the one-call limit is absolute. Query selection is constrained to KIs whose `rule.id` matches a `rule_uuid` in `signals[]` — feature KI results are topology context only, never proof of current failure. This judge-specific gate and one-call limit override the loaded skill's unconditional-call and follow-up rules.
@@ -64,6 +65,12 @@ Example: load_skill (must be called alone — do not batch with any other tool)
 { "skill": "significant-events-ki-grounding" }
 ```
 Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
+
+Example: load_skill for memory (must be called alone)
+```json
+{ "skill": "significant-events-memory" }
+```
+Response: `{ "skill": { "id": "significant-events-memory", "name": "..." }, "loaded_tools": ["memory_search", "memory_read", "memory_list", ...] }`
 
 Example: platform_core_execute_esql (current-state check, DESC LIMIT 1)
 ```json
