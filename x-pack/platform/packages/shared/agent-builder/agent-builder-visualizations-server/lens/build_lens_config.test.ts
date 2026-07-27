@@ -50,7 +50,7 @@ describe('buildLensConfig', () => {
   } as unknown as ModelProvider;
 
   const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
-  const SUMMARY = 'Created a titleless metric showing the total log count.';
+  const AUTHORING_NOTE = 'Created a titleless metric showing the total log count.';
 
   let logger: Logger;
   let invoke: jest.Mock;
@@ -62,7 +62,7 @@ describe('buildLensConfig', () => {
     logger = createMockLogger();
     invoke = jest.fn().mockResolvedValue({
       validatedConfig: { type: 'metric' },
-      summary: SUMMARY,
+      authoringNote: AUTHORING_NOTE,
       error: null,
       currentAttempt: 1,
       esqlQuery: PROVIDED_ESQL,
@@ -131,11 +131,11 @@ describe('buildLensConfig', () => {
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke).toHaveBeenCalledTimes(1);
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
-    expect(result.summary).toBe(SUMMARY);
+    expect(result.authoringNote).toBe(AUTHORING_NOTE);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns a valid config when the graph omits the summary', async () => {
+  it('returns a valid config when the graph omits the authoring note', async () => {
     invoke.mockResolvedValue({
       validatedConfig: { type: 'metric' },
       error: null,

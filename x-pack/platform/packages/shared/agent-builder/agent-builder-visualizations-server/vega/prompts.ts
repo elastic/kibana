@@ -125,11 +125,11 @@ Your task is to author the visualization specification for the following request
 ${nlQuery}
 </user_query>
 
-IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, "summary" is one factual sentence describing the final chart and notable presentation choices without reasoning, and "spec" is the Vega-Lite specification:
+IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, "authoring_note" is one factual sentence describing the final chart and notable presentation choices without reasoning, and "spec" is the Vega-Lite specification:
 \`\`\`json
 {
   "title": "Concise panel title",
-  "summary": "One-sentence description of the authored chart",
+  "authoring_note": "One-sentence description of the authored chart",
   "spec": {
     // Vega-Lite v6 specification
   }

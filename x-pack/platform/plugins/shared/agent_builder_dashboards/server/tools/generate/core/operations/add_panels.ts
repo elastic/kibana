@@ -39,8 +39,11 @@ export const addPanelsOperation = defineOperation({
         panelsToAdd: [{ id: panelId, ...materializedPanel.panelContent, grid: item.grid }],
         sectionId: item.sectionId,
       });
-      if (materializedPanel.summary) {
-        context.panelSummaries.push({ panelId, summary: materializedPanel.summary });
+      if (materializedPanel.authoringNote) {
+        context.panelAuthoringNotes.push({
+          panelId,
+          authoringNote: materializedPanel.authoringNote,
+        });
       }
     }
 

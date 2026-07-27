@@ -48,7 +48,7 @@ export interface BuildLensConfigParams {
 interface BuildLensConfigResult {
   selectedChartType: SupportedChartType;
   validatedConfig: VisualizationConfig;
-  summary?: string;
+  authoringNote?: string;
   esqlQuery: string;
   timeRange?: { from: string; to: string };
 }
@@ -119,7 +119,8 @@ export const buildLensConfig = async ({
     error: null,
   });
 
-  const { validatedConfig, summary, error, currentAttempt, esqlQuery, timeRange } = finalState;
+  const { validatedConfig, authoringNote, error, currentAttempt, esqlQuery, timeRange } =
+    finalState;
 
   if (!validatedConfig) {
     throw new Error(
@@ -132,7 +133,7 @@ export const buildLensConfig = async ({
   return {
     selectedChartType,
     validatedConfig,
-    ...(summary ? { summary } : {}),
+    ...(authoringNote ? { authoringNote } : {}),
     esqlQuery,
     ...(timeRange && { timeRange }),
   };

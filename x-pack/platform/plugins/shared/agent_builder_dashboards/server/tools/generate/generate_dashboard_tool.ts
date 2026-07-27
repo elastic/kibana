@@ -49,13 +49,13 @@ const generateDashboardSchema = z.object({
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
  *
- * `summariesByPanelId` holds the one-sentence authoring summary of every chart
+ * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
- * (or whose engine returned no summary) simply have no `summary`.
+ * (or whose engine returned no note) simply have no `authoring_note`.
  */
 const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,
-  summariesByPanelId: Map<string, string>
+  authoringNotesByPanelId: Map<string, string>
 ) => ({
   title: dashboardData.title,
   description: dashboardData.description,
@@ -70,7 +70,7 @@ const summarizeDashboard = (
           type: panel.type,
           id: panel.id,
           grid: panel.grid,
-          summary: summariesByPanelId.get(panel.id),
+          authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
       };
     }
@@ -78,7 +78,7 @@ const summarizeDashboard = (
       type: widget.type,
       id: widget.id,
       grid: widget.grid,
-      summary: summariesByPanelId.get(widget.id),
+      authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
   controls: (dashboardData.pinned_panels ?? []).map((control) => {
@@ -133,7 +133,7 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures, panelSummaries } = await executeDashboardOperations({
+        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -181,7 +181,12 @@ Use operations[] to:
                 version: attachment.current_version ?? 1,
                 dashboard: summarizeDashboard(
                   finalDashboardData,
-                  new Map(panelSummaries.map(({ panelId, summary }) => [panelId, summary]))
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
                 ),
                 failures: failures.length > 0 ? failures : undefined,
               },

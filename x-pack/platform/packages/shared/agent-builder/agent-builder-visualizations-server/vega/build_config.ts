@@ -34,7 +34,7 @@ export interface BuildVegaConfigResult {
   /** Visualization / panel title from the authoring response schema. */
   title?: string;
   /** One-sentence factual description of the chart and notable presentation choices. */
-  summary?: string;
+  authoringNote?: string;
   /** Canonical ES|QL query bound into the spec's data source. */
   esqlQuery: string;
 }
@@ -105,7 +105,7 @@ export const buildVegaConfig = async ({
     error: null,
   });
 
-  const { spec, title, summary, error, esqlQuery } = finalState;
+  const { spec, title, authoringNote, error, esqlQuery } = finalState;
 
   if (!spec) {
     throw new Error(
@@ -116,7 +116,7 @@ export const buildVegaConfig = async ({
   return {
     spec,
     ...(typeof title === 'string' && title.trim() ? { title: title.trim() } : {}),
-    ...(summary ? { summary } : {}),
+    ...(authoringNote ? { authoringNote } : {}),
     esqlQuery,
   };
 };

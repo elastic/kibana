@@ -20,7 +20,7 @@ type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
 export interface MaterializedPanelInput {
   panelContent: PanelContent;
-  summary?: string;
+  authoringNote?: string;
 }
 
 export type PanelCreationRequest =
@@ -211,8 +211,8 @@ export const createPanelInputMaterializer = ({
 
     return {
       panelContent: resolvedRequest.resolvedPanel.panelContent,
-      ...(resolvedRequest.resolvedPanel.summary
-        ? { summary: resolvedRequest.resolvedPanel.summary }
+      ...(resolvedRequest.resolvedPanel.authoringNote
+        ? { authoringNote: resolvedRequest.resolvedPanel.authoringNote }
         : {}),
     };
   };

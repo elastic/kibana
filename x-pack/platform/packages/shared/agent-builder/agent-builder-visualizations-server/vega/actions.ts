@@ -24,7 +24,7 @@ export interface AuthorSpecAction {
   /** Panel / visualization title from the authoring response schema. */
   title?: string;
   /** One-sentence factual description of the authored chart and presentation choices. */
-  summary?: string;
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -37,8 +37,8 @@ export interface ValidateSpecAction {
   spec?: string;
   /** Panel / visualization title carried through from the matching authoring attempt. */
   title?: string;
-  /** Authoring summary carried through from the matching authoring attempt. */
-  summary?: string;
+  /** Authoring note carried through from the matching authoring attempt. */
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }

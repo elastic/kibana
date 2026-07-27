@@ -19,7 +19,7 @@ export type PanelContentAttempt =
   | {
       type: 'success';
       panelContent: Pick<AttachmentPanel, 'type' | 'config'>;
-      summary?: string;
+      authoringNote?: string;
     }
   | {
       type: 'failure';
@@ -29,9 +29,10 @@ export type PanelContentAttempt =
 /** Operations that can trigger inline panel resolution. */
 export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
 
-export interface PanelSummary {
+/** One-sentence note describing a chart authored during the current turn. */
+export interface PanelAuthoringNote {
   panelId: string;
-  summary: string;
+  authoringNote: string;
 }
 
 /**
