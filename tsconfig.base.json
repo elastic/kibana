@@ -47,6 +47,8 @@
       "@kbn/agent-builder-plugin/*": ["./x-pack/platform/plugins/shared/agent_builder/*"],
       "@kbn/agent-builder-server": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-server"],
       "@kbn/agent-builder-server/*": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-server/*"],
+      "@kbn/agent-builder-skill-loader": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader"],
+      "@kbn/agent-builder-skill-loader/*": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader/*"],
       "@kbn/agent-builder-sml-plugin": ["./x-pack/platform/plugins/shared/agent_builder_sml"],
       "@kbn/agent-builder-sml-plugin/*": ["./x-pack/platform/plugins/shared/agent_builder_sml/*"],
       "@kbn/agent-builder-tools-base": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base"],
