@@ -118967,6 +118967,35 @@ components:
     Security_Detections_API_ItemsPerSearch:
       minimum: 1
       type: integer
+    Security_Detections_API_KillProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"'
+          enum:
+            - kill-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of process.pid
+              type: string
+            kill_descendants:
+              description: Whether to also terminate the descendant processes of the targeted process. This field is only available for use with v9.6.0 of the stack.
+              type: boolean
+            overwrite:
+              default: true
+              description: Whether to overwrite field with process.pid
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     Security_Detections_API_KqlQueryLanguage:
       enum:
         - kuery
@@ -120070,32 +120099,14 @@ components:
         - error
         - message
     Security_Detections_API_ProcessesParams:
-      type: object
-      properties:
-        command:
-          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"'
-          enum:
-            - kill-process
-            - suspend-process
-          type: string
-        comment:
-          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
-          type: string
-        config:
-          type: object
-          properties:
-            field:
-              description: Field to use instead of process.pid
-              type: string
-            overwrite:
-              default: true
-              description: Whether to overwrite field with process.pid
-              type: boolean
-          required:
-            - field
-      required:
-        - command
-        - config
+      discriminator:
+        mapping:
+          kill-process: '#/components/schemas/Security_Detections_API_KillProcessParams'
+          suspend-process: '#/components/schemas/Security_Detections_API_SuspendProcessParams'
+        propertyName: command
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_KillProcessParams'
+        - $ref: '#/components/schemas/Security_Detections_API_SuspendProcessParams'
     Security_Detections_API_QueryAlertsBodyParams:
       type: object
       properties:
@@ -122020,6 +122031,32 @@ components:
         - asc
         - desc
       type: string
+    Security_Detections_API_SuspendProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"'
+          enum:
+            - suspend-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of process.pid
+              type: string
+            overwrite:
+              default: true
+              description: Whether to overwrite field with process.pid
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     Security_Detections_API_Threat:
       description: |
         > info
