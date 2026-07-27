@@ -10,8 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
+import { highlightTags } from '../utils/highlight/highlight_tags';
 import { FieldFormat } from '../field_format';
-import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
+import type { ReactContextTypeHit, ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 const TRANSFORM_OPTIONS = [
@@ -137,6 +138,70 @@ export class StringFormat extends FieldFormat {
     const formatted = this.textConvert(val);
     const fieldName = field?.name;
 
-    return getHighlightReact(formatted, fieldName, hit);
+    return getHighlightReact(
+      formatted,
+      fieldName,
+      this.applyTransformsToHighlightHit(hit, fieldName)
+    );
   };
+
+  /**
+   * Applies the selected transform (if any) to the content of the highlighted snippets so they
+   * can match with the field value. Base64 and URL param are not supported.
+   */
+  private applyTransformsToHighlightHit(
+    hit: ReactContextTypeHit | undefined,
+    fieldName: string | undefined
+  ): ReactContextTypeHit | undefined {
+    const substrings = fieldName ? hit?.highlight?.[fieldName] : undefined;
+    if (!hit || !fieldName || !substrings?.length) return hit;
+
+    const transformText = this.getTextTransform();
+    if (!transformText) return hit;
+
+    return {
+      ...hit,
+      highlight: {
+        ...hit.highlight,
+        [fieldName]: substrings.map((snippet) => this.transformSnippetText(snippet, transformText)),
+      },
+    };
+  }
+
+  private getTextTransform(): ((text: string) => string) | null {
+    switch (this.param('transform')) {
+      case 'lower':
+        return (text) => text.toLowerCase();
+      case 'upper':
+        return (text) => text.toUpperCase();
+      case 'title':
+        return (text) => this.toTitleCase(text);
+      case 'short':
+        return (text) => String(shortenDottedString(text));
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Applies a text transform to a highlight snippet while leaving the Kibana
+   * highlight tags untouched, so the tags still match when the snippet is located
+   * within the transformed value.
+   */
+  private transformSnippetText(snippet: string, transformText: (text: string) => string): string {
+    const { pre, post } = highlightTags;
+    return snippet
+      .split(pre)
+      .map((segment, index) => {
+        if (index === 0) return transformText(segment);
+
+        const postIndex = segment.indexOf(post);
+        if (postIndex === -1) return pre + transformText(segment);
+
+        const highlighted = segment.slice(0, postIndex);
+        const rest = segment.slice(postIndex + post.length);
+        return pre + transformText(highlighted) + post + transformText(rest);
+      })
+      .join('');
+  }
 }
