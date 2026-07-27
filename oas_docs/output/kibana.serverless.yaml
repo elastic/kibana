@@ -85415,8 +85415,6 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
-          maxLength: 256
-          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
