@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  COMPUTED_FEATURE_TYPES,
-  INFERRED_FEATURE_TYPES,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   QUERY_TYPE_MATCH,
@@ -27,16 +25,13 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/streams-ai';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { searchKnowledgeIndicatorsToolHandler } from './handler';
+import { KNOWLEDGE_INDICATOR_FEATURE_TYPES, searchKnowledgeIndicatorsToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
 
-const MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 100;
-const KNOWLEDGE_INDICATOR_FEATURE_TYPES = [
-  ...COMPUTED_FEATURE_TYPES,
-  ...INFERRED_FEATURE_TYPES,
-] as const;
+const MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
+const KI_SEARCH_MAX_PER_PAGE_FULL = 10;
 
 const searchKnowledgeIndicatorsSchema = z.object({
   stream_names: z
@@ -106,6 +101,15 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .optional()
     .default(DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE)
     .describe(`Number of Knowledge Indicators to return per page.`),
+  view: z
+    .enum(['compact', 'full'])
+    .optional()
+    .default('compact')
+    .describe(
+      dedent`Response detail level.
+      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
+      - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve complete computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
+    ),
 });
 
 export function createSearchKnowledgeIndicatorsTool({
@@ -175,11 +179,20 @@ export function createSearchKnowledgeIndicatorsTool({
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
+        const { view, ...restParams } = toolParams;
+        const maxPerPage =
+          view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
+        const params = {
+          ...restParams,
+          per_page: Math.min(restParams.per_page, maxPerPage),
+        };
+
         const output = await searchKnowledgeIndicatorsToolHandler({
           streamsClient: scopedClients.streamsClient,
           kiClient,
           logger,
-          params: toolParams,
+          params,
+          view,
         });
 
         return {
