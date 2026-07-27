@@ -169,7 +169,8 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({
   useEffect(() => {
     const status = migrationStatus.data?.migration_status;
     setIsComplete(status === 'NO_MIGRATION_NEEDED');
-    setIsMigrationNeeded(!!status && status !== 'NO_MIGRATION_NEEDED');
+    const needsMigration = status === 'MIGRATION_NEEDED' || status === 'IN_PROGRESS' || status === 'ERROR';
+    setIsMigrationNeeded(needsMigration);
     // Depending upon setIsComplete/setIsMigrationNeeded would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [migrationStatus.data?.migration_status]);
