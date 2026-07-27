@@ -1,5 +1,5 @@
 {
-  "sha1": "8e6eccef43cd63e7f320251c5920cc1c25c75f59",
+  "sha1": "f93b56169bf0eed86b28caf65c42d55459513129",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -17,6 +17,118 @@
       }
     },
     {
+      "id": "91fe9b1cae52b18-e22d49720eca493",
+      "title": "Lens ad hoc data view should allow building a chart based on ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-42d7700c605e8ce",
+      "title": "Lens ad hoc data view should allow managing runtime fields on an ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-3e851f8fb452c95",
+      "title": "Lens ad hoc data view should allow adding an ad-hoc chart to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 175,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-08429a5fe9cf2a5",
+      "title": "Lens ad hoc data view should allow saving the ad-hoc chart into a saved object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 211,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-b09942a2f451ee7",
+      "title": "Lens ad hoc data view should be possible to share a URL of a visualization with ad hoc data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 249,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-5a6b2e6ecddce29",
+      "title": "Lens ad hoc data view should be possible to download a visualization with ad hoc data views as CSV",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 293,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-39ba1618903f884",
+      "title": "Lens ad hoc data view should navigate to Discover correctly from Lens with an ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 361,
+        "column": 12
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-d34e6a66c086509",
+      "title": "Lens ad hoc data view should navigate to Discover correctly from a dashboard embeddable and persist ad hoc data view after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 430,
+        "column": 12
+      }
+    },
+    {
       "id": "39967da8b6ee942-a2f17ede9b95bc3",
       "title": "Lens ESQL dashboard inline editing should keep the table type when the user adds a limit via Try ESQL",
       "expectedStatus": "passed",
@@ -26,7 +138,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 47,
+        "line": 49,
         "column": 12
       }
     },
@@ -40,7 +152,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 89,
+        "line": 91,
         "column": 12
       }
     },
@@ -107,6 +219,20 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
         "line": 188,
         "column": 14
+      }
+    },
+    {
+      "id": "86639c1e1b9af16-a6ebcaecfc66cff",
+      "title": "Lens inspector pagination should allow switching between inspector table pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/inspector_pagination.spec.ts",
+        "line": 38,
+        "column": 12
       }
     },
     {
@@ -303,6 +429,20 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
         "line": 85,
         "column": 14
+      }
+    },
+    {
+      "id": "e6ca88dcf9f62d8-38dae6b1e652db6",
+      "title": "Lens with multiple data views should allow building a multi-data-view chart and applying global filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/multiple_data_views.spec.ts",
+        "line": 54,
+        "column": 12
       }
     },
     {
