@@ -22,6 +22,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -471,6 +472,56 @@ export class RulesClient {
     await this.rulesSavedObjectService.delete({ id });
 
     this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
+  }
+
+  @withApm
+  public async runRuleNow({ id }: { id: string }): Promise<void> {
+    const { spaceId } = this.getSpaceContext();
+
+    const { attrs } = await this.getExistingRule(id);
+
+    if (!attrs.enabled) {
+      throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
+        code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+        details: { rule_id: id },
+      });
+    }
+
+    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+
+    let conflict: boolean | undefined;
+    try {
+      ({ conflict } = await this.taskManager.runSoon(taskId));
+    } catch (e) {
+      if (e instanceof TaskAlreadyRunningError) {
+        throw Boom.conflict(`Rule with id "${id}" is already running`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          details: { rule_id: id },
+        });
+      }
+
+      // Avoid leaking task-store / saved-object errors (e.g. a 404 when the
+      // rule is enabled but has no executor task). Prefer a code already on
+      // the Boom payload when present; otherwise use the generic run error.
+      const existingCode = Boom.isBoom(e)
+        ? (e.data as { code?: string } | undefined)?.code
+        : undefined;
+
+      throw Boom.internal(`Failed to run rule with id "${id}"`, {
+        code: existingCode ?? ALERTING_V2_ERROR_CODES.RULE_RUN_ERROR,
+        details: { rule_id: id },
+      });
+    }
+
+    if (conflict) {
+      // The task store update raced with another concurrent update and was
+      // rejected with a 409 — the task was not actually rescheduled. Surface
+      // as a soft conflict so the caller can retry.
+      throw Boom.conflict(`Running rule with id "${id}" conflicted, please retry`, {
+        code: ALERTING_V2_ERROR_CODES.RULE_RUN_CONFLICT,
+        details: { rule_id: id },
+      });
+    }
   }
 
   @withApm
