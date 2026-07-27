@@ -17,6 +17,7 @@ import {
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
+import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
@@ -29,6 +30,7 @@ export const createJudgeEvaluators = (
     createJudgeToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
+    confirmationAlignmentEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
