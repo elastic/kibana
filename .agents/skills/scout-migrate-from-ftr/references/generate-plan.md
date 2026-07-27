@@ -152,7 +152,7 @@ Scan every test file for patterns that need attention during migration:
 | **Global loading indicator waits** | `waitForSelector('globalLoadingIndicator')` or similar global spinners |
 | **Hardcoded timeouts** | `await new Promise(r => setTimeout(r, ...))`, `browser.sleep(...)` |
 | **Shared mutable state** | Variables mutated across `it()` blocks relying on execution order |
-| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state) |
+| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state). Record the `beforeEach`/`afterEach` behavior and expected application state at the start and end of every block so the executor can preserve resets when converting blocks to `test.step()` |
 | **Duplicate test cases** | Multiple `it()` blocks testing the same behavior with minor variations |
 | **Missing cleanup** | Setup in `before`/`beforeEach` without corresponding teardown |
 | **Retry wrappers** | `retry.try(...)`, `retry.waitFor(...)` around assertions |

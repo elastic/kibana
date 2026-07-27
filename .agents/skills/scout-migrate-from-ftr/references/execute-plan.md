@@ -87,6 +87,9 @@ Guideline:
 
 - If the FTR suite uses multiple `it(...)` blocks as sequential steps of one flow, combine them into a single `test(...)` and convert the step boundaries into `test.step(...)`.
 - If an `it(...)` block is already an independent test case, keep it as its own `test(...)` and ensure it sets up its own preconditions.
+- `test.step(...)` is reporting structure only: every step shares the same page, browser context, DOM, and cumulative application state. It does not run `beforeEach`/`afterEach` or reset state between steps.
+- Before combining `it(...)` blocks, inspect the original `beforeEach`/`afterEach` hooks and record the expected state at the start and end of each block. If a hook reset state between blocks, reproduce that reset explicitly at the corresponding step boundary, or keep separate Scout tests and reconstruct their prerequisites.
+- Inventory all UI and application state that can carry into later steps, such as form values, selections, navigation context, persisted settings, resources created through the UI, and unsaved changes. Reopen or reset the application only when the original test boundary requires it, using a source-verified page object method or `page.gotoApp()` rather than assuming an app-specific reset method exists.
 
 Minimal sketch:
 
