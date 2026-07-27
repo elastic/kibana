@@ -45,6 +45,7 @@ export {
 export const DesignExplorationChromeGlobalStyles = () => {
   const euiTheme = useEuiTheme();
   const activeVariantId = getDesignExplorationVariant();
+  const colorMode = euiTheme.colorMode;
 
   useEffect(() => {
     document.body.setAttribute(DESIGN_EXPLORATION_BODY_ATTR, 'true');
@@ -52,7 +53,7 @@ export const DesignExplorationChromeGlobalStyles = () => {
 
     const syncKnobs = () => {
       const variant = getActiveDesignExplorationVariant();
-      applyDesignExplorationKnobCssVars(variant.knobTokens, variant.id);
+      applyDesignExplorationKnobCssVars(variant.knobTokens, variant.id, colorMode);
     };
 
     syncKnobs();
@@ -87,7 +88,7 @@ export const DesignExplorationChromeGlobalStyles = () => {
       document.body.removeAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR);
       document.body.removeAttribute(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR);
     };
-  }, [activeVariantId]);
+  }, [activeVariantId, colorMode]);
 
   return <Global styles={createActiveDesignExplorationStyles(euiTheme)} />;
 };

@@ -21,6 +21,7 @@ import {
   designExplorationVariantScope,
 } from './design_exploration_shared';
 import { designExplorationKnobVar as knobVar } from './design_exploration_knobs';
+import { designExplorationBespokeVar as bespokeVar } from './design_exploration_bespoke_colors';
 
 export const INTERBANA_VARIANT_ID = 'interbana';
 
@@ -40,7 +41,6 @@ export const INTERBANA_VARIANT_ID = 'interbana';
 //     lifts a true-white app surface; secondary nav side panel gets a subtle shade
 //   - warm orange accent instead of Linear's cool indigo
 const INTERBANA_ACCENT = '#F26522'; // warm orange accent (est. from reference)
-const INTERBANA_MENU_ITEM_TEXT_COLOR = '#333333';
 const INTERBANA_TOP_BAR_HEIGHT = 80;
 const INTERBANA_APP_HEADER_TRANSITION_MS = 200;
 const INTERBANA_NAV_EXPANDED_WIDTH = 220;
@@ -81,7 +81,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
   // Still a single shared hairline for anywhere a border remains, but it's
   // used far more sparingly than in Linbana — mainly on individual cards and
   // controls, not as internal row dividers within a shared container.
-  const INTERBANA_HAIRLINE = `1px solid color-mix(in srgb, ${colors.borderBaseSubdued} 70%, transparent)`;
+  const INTERBANA_HAIRLINE = `1px solid ${bespokeVar('borderSubdued')}`;
   const INTERBANA_SURFACE_HOVER_FILL = `color-mix(in srgb, ${colors.textParagraph} 4%, transparent)`;
 
   return css`
@@ -193,7 +193,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     [data-test-subj='kbnChromeNav-primaryNavigation']
     [data-menu-item='true'] {
-      --menu-item-text-color: ${INTERBANA_MENU_ITEM_TEXT_COLOR} !important;
+      --menu-item-text-color: ${bespokeVar('textNav')} !important;
     }
 
     ${scope}
@@ -305,7 +305,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope}:has(${INTERBANA_NAV_EXPANDED_SELECTOR})
       [data-test-subj='kbnChromeNav-footer']
       [data-footer-label] {
-      --menu-item-text-color: ${INTERBANA_MENU_ITEM_TEXT_COLOR};
+      --menu-item-text-color: ${bespokeVar('textNav')};
       box-sizing: border-box !important;
       display: flex !important;
       flex-direction: row !important;
@@ -513,7 +513,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [class*='css-'][class*='-section--labelStyles'] {
       font-size: 11px !important;
       font-weight: 500 !important;
-      color: #516381b3 !important;
+      color: ${bespokeVar('textSubdued')} !important;
       text-transform: uppercase !important;
     }
 
@@ -572,10 +572,26 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusPanel')} !important;
       border: ${INTERBANA_HAIRLINE} !important;
       box-shadow: none !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} [data-test-subj='embeddablePanel']:has(.echMetricText) {
       border-radius: ${knobVar('radiusPanelCompact')} !important;
+    }
+
+    ${scope} .echChartBackground,
+    ${scope} .echMetric,
+    ${scope} .euiDataGridRow,
+    ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)),
+    ${scope} [class*='css-'][class*='-control_panel--formControl'],
+    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']) {
+      background-color: ${knobVar('surface')} !important;
+    }
+
+    ${scope} [class*='css-'][class*='-control_panel--formControl'] {
+      border: ${INTERBANA_HAIRLINE} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: none !important;
     }
 
     ${scope} .dshLayout--editing .embPanel__header:hover {
@@ -622,7 +638,6 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      background-color: ${colors.backgroundBasePlain} !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
@@ -653,11 +668,16 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: transparent !important;
     }
 
-    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']),
+    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']) {
+      border: none !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: none !important;
+    }
+
     ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
       border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} .euiFormControlLayout--group:not(:focus-within) {
@@ -775,10 +795,17 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .echMetricText__title > span {
       font-size: 14px !important;
       font-weight: 600 !important;
+      color: ${bespokeVar('textNav')} !important;
     }
 
     ${scope} .echMetricText {
       padding: 0 !important;
+      color: ${bespokeVar('textNav')} !important;
+    }
+
+    ${scope} .echMetricText__value,
+    ${scope} .echMetricText__value .echMetricText__part {
+      color: ${bespokeVar('textNav')} !important;
     }
 
     ${scope} .echMetricText__title > span,
@@ -787,7 +814,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .echMetricText__subtitle {
-      color: ${colors.textSubdued} !important;
+      color: ${bespokeVar('textSubdued')} !important;
       font-size: 12px !important;
       font-weight: 400 !important;
       padding-top: 2px !important;
@@ -941,7 +968,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: 0 !important;
       border-block-end: ${INTERBANA_HAIRLINE} !important;
       box-shadow: none !important;
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${knobVar('surface')} !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
     }

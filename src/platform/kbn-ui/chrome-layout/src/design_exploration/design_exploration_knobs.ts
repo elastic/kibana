@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ColorMode } from '@elastic/eui';
+import {
+  resolveDesignExplorationBespokeCssVars,
+  resolveDesignExplorationKnobTokensForColorMode,
+} from './design_exploration_bespoke_colors';
+
 export const DESIGN_EXPLORATION_KNOBS_SESSION_KEY = 'dev.core.chrome.designExploration.knobs';
 
 export const DESIGN_EXPLORATION_KNOBS_CHANGED_EVENT = 'design-exploration-knobs-changed';
@@ -387,9 +393,17 @@ export const resolveDesignExplorationKnobCssVars = (
 
 export const applyDesignExplorationKnobCssVars = (
   tokens: DesignExplorationKnobTokens,
-  variantId: string
+  variantId: string,
+  colorMode: ColorMode
 ) => {
-  const cssVars = resolveDesignExplorationKnobCssVars(tokens, getDesignExplorationKnobValues(variantId));
+  const resolvedTokens = resolveDesignExplorationKnobTokensForColorMode(tokens, variantId, colorMode);
+  const cssVars = {
+    ...resolveDesignExplorationKnobCssVars(
+      resolvedTokens,
+      getDesignExplorationKnobValues(variantId)
+    ),
+    ...resolveDesignExplorationBespokeCssVars(variantId, colorMode),
+  };
 
   Object.entries(cssVars).forEach(([name, value]) => {
     document.documentElement.style.setProperty(name, value);

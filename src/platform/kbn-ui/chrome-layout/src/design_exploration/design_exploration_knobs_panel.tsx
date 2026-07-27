@@ -83,7 +83,7 @@ const getPanelFormControlStyles = (backgroundColor: string, borderColor: string)
 };
 
 export const DesignExplorationKnobsPanel = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [revision, setRevision] = useState(0);
   const panelTitleId = useGeneratedHtmlId({ prefix: 'designExplorationKnobsTitle' });
@@ -98,10 +98,10 @@ export const DesignExplorationKnobsPanel = () => {
   );
 
   const applyKnobs = useCallback(() => {
-    applyDesignExplorationKnobCssVars(activeVariant.knobTokens, activeVariant.id);
+    applyDesignExplorationKnobCssVars(activeVariant.knobTokens, activeVariant.id, colorMode);
     notifyDesignExplorationKnobsChanged();
     setRevision((current) => current + 1);
-  }, [activeVariant]);
+  }, [activeVariant, colorMode]);
 
   const onKnobChange = useCallback(
     (knobId: DesignExplorationKnobId, value: number) => {

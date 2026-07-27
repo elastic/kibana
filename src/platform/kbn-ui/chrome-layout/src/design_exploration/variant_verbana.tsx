@@ -32,6 +32,7 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
   return css`
     ${scope} {
+      background-color: ${knobVar('canvas')} !important;
       ${layoutVarName('application.marginRight')}: 0px !important;
     }
 
@@ -222,7 +223,7 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: ${knobVar('shellShadow')} !important;
       background-color: color-mix(
         in srgb,
-        ${colors.backgroundBaseSubdued} 80%,
+        ${knobVar('surfaceNav')} 80%,
         transparent
       ) !important;
       backdrop-filter: blur(10px) !important;
@@ -283,7 +284,7 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: ${knobVar('shellShadow')} !important;
       background-color: color-mix(
         in srgb,
-        ${colors.backgroundBasePlain} 75%,
+        ${knobVar('surface')} 75%,
         transparent
       ) !important;
       backdrop-filter: blur(10px) !important;
