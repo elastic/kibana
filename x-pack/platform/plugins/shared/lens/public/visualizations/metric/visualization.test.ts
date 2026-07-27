@@ -274,6 +274,19 @@ describe('metric visualization', () => {
         ).toEqual({ ...fullState, secondaryNameVisibility: 'after' });
       });
 
+      test('migrates the pre-rename secondaryLabelPosition key, preserving an explicit position', () => {
+        // Real saved objects created after #261247 (which introduced this field as
+        // `before`/`after`) but before its rename to `secondaryNameVisibility` persist it
+        // under this legacy key, which no longer exists on `MetricVisualizationState`.
+        const { secondaryNameVisibility, ...restFullState } = fullState;
+        const legacyState = {
+          ...restFullState,
+          secondaryLabelPosition: 'after',
+        } as MetricVisualizationState;
+
+        expect(initialize(legacyState)).toEqual({ ...fullState, secondaryNameVisibility: 'after' });
+      });
+
       test('leaves the position unset without a secondary metric', () => {
         const { secondaryMetricAccessor, secondaryNameVisibility, ...restFullState } = fullState;
         expect(initialize({ ...restFullState, secondaryLabel: '' })).toEqual(restFullState);

@@ -9,10 +9,21 @@ import type { MetricVisualizationState } from '../../../../public';
 import type { LensAttributes } from '../../../../server/content_management/v1';
 
 /**
+ * Pre-rename shape of `secondaryNameVisibility`. Real saved objects created between
+ * `#261247` (which introduced this field as `'before' | 'after'`) and the rename to
+ * `secondaryNameVisibility` still persist it under this legacy key.
+ * @deprecated
+ */
+interface LegacyMetricVisualizationState {
+  secondaryLabelPosition?: MetricVisualizationState['secondaryNameVisibility'];
+}
+
+/**
  * Cleanup metric properties
  * - Move `valuesTextAlign` to `primaryAlign` and `secondaryAlign`
  * - Drop `secondaryPrefix`/`secondaryLabel` in favour of the secondary metric operation name,
  *   preserving their visibility in `secondaryNameVisibility`
+ * - Rename `secondaryLabelPosition` to `secondaryNameVisibility`
  */
 export function metricMigrations(attributes: LensAttributes): LensAttributes {
   if (!attributes.state || attributes.visualizationType !== 'lnsMetric') {
@@ -36,8 +47,10 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
 export const getUpdatedMetricState = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {
-  const { secondaryPrefix, secondaryLabel, valuesTextAlign, ...restState } = state;
-  let newState = { ...restState };
+  const legacyState = state as MetricVisualizationState & LegacyMetricVisualizationState;
+  const { secondaryPrefix, secondaryLabel, secondaryLabelPosition, valuesTextAlign, ...restState } =
+    legacyState;
+  let newState: MetricVisualizationState = { ...restState };
 
   if (valuesTextAlign) {
     newState = {
@@ -59,7 +72,9 @@ export const getUpdatedMetricState = (
           ? 'hidden'
           : // A state without an explicit position predates `Name visibility`, where the label
             // was shown before the value by default. Newer states always set it explicitly.
-            newState.secondaryNameVisibility ?? 'before',
+            // `secondaryLabelPosition` is the pre-rename key: real saved objects created after
+            // `#261247` but before the rename persist their explicit choice there.
+            newState.secondaryNameVisibility ?? secondaryLabelPosition ?? 'before',
     };
   }
 
