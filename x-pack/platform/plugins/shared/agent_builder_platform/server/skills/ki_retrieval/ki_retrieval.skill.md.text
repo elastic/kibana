@@ -51,8 +51,8 @@ to deduplicate across branches.
 ```esql
 FROM ai-index-idx-* METADATA _id, _index, _score
 | FORK
-    ( WHERE content:"<query>"          | SORT _score DESC | LIMIT 20 )
-    ( WHERE content.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
 | FUSE
 | SORT _score DESC, _id ASC
 | LIMIT 10
@@ -67,7 +67,7 @@ keyword-only is a valid alternative:
 
 ```esql
 FROM ai-index-idx-* METADATA _id, _index, _score
-| WHERE content:"<query>" OR title:"<query>"
+| WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | LIMIT 10
 ```
@@ -80,8 +80,8 @@ To scope results to a specific type or tag, add a `WHERE` before `FORK`:
 FROM ai-index-idx-* METADATA _id, _index, _score
 | WHERE type == "index_metadata"
 | FORK
-    ( WHERE content:"<query>"          | SORT _score DESC | LIMIT 20 )
-    ( WHERE content.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
 | FUSE
 | SORT _score DESC, _id ASC
 | LIMIT 10
