@@ -17,7 +17,7 @@ import { fromApiLead } from './types';
 import * as i18n from './translations';
 import { MAX_RECENT_LEADS } from './utils';
 
-const LEADS_PAGE = 'entity_analytics-threat_hunting_leads';
+const LEADS_PAGE = 'entity_analytics:threat_hunting_leads';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';

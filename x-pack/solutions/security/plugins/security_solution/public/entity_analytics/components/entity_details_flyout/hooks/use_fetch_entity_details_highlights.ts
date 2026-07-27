@@ -27,11 +27,11 @@ import { getAnonymizedEntityIdentifier } from '../utils/helpers';
 import type { EntityHighlightsResponse } from '../types';
 
 const HIGHLIGHTS_CONTEXT = buildExecutionContext(
-  'entity_analytics-entity_details_flyout',
+  'entity_analytics:entity_details_flyout',
   'entity_details_highlights'
 );
 const AI_SUMMARY_SAVE_CONTEXT = buildExecutionContext(
-  'entity_analytics-entity_details_flyout',
+  'entity_analytics:entity_details_flyout',
   'entity_details_ai_summary_save'
 );
 

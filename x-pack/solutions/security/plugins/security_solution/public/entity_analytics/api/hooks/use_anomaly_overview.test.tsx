@@ -33,7 +33,7 @@ describe('useAnomalyOverview', () => {
     const executionContext = {
       child: {
         type: 'security_solution',
-        name: 'entity_analytics-entity_details_flyout',
+        name: 'entity_analytics:entity_details_flyout',
         id: 'anomaly_overview',
       },
     };

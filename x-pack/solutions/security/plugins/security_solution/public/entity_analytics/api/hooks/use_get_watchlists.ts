@@ -17,7 +17,7 @@ export const useGetWatchlists = () => {
     queryFn: ({ signal }) =>
       fetchWatchlists({
         signal,
-        context: buildExecutionContext('entity_analytics-watchlists', 'watchlists_list'),
+        context: buildExecutionContext('entity_analytics:watchlists', 'watchlists_list'),
       }),
   });
 };

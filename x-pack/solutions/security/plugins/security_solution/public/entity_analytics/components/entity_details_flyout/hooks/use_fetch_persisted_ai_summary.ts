@@ -12,7 +12,7 @@ import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { buildExecutionContext } from '../../../common';
 
 const PERSISTED_AI_SUMMARY_CONTEXT = buildExecutionContext(
-  'entity_analytics-entity_details_flyout',
+  'entity_analytics:entity_details_flyout',
   'entity_details_ai_summary_get'
 );
 

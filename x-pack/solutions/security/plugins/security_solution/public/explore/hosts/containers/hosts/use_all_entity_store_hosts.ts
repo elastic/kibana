@@ -33,7 +33,7 @@ import * as i18n from './translations';
 const ENTITY_STORE_HOSTS_LIST_QUERY_KEY = 'ENTITY_STORE_HOSTS_LIST';
 
 const HOSTS_ENTITY_STORE_LIST_CONTEXT = buildExecutionContext(
-  'explore-hosts_page',
+  'entity_analytics:explore-hosts_page',
   'hosts_entity_store_list'
 );
 

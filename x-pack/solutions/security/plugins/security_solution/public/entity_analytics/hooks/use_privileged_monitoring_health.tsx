@@ -12,7 +12,7 @@ import { useEntityAnalyticsRoutes } from '../api/api';
 import { buildExecutionContext } from '../common';
 
 const PUM_HEALTH_CONTEXT = buildExecutionContext(
-  'entity_analytics-privileged_user_monitoring',
+  'entity_analytics:privileged_user_monitoring',
   'pum_health'
 );
 

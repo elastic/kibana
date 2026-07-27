@@ -29,11 +29,11 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 export const ID = 'networkTopNFlowQuery';
 
 const NETWORK_TOP_N_FLOW_CONTEXT = buildExecutionContext(
-  'explore-network_page',
+  'entity_analytics:explore-network_page',
   'network_top_n_flow'
 );
 const NETWORK_TOP_N_FLOW_COUNT_CONTEXT = buildExecutionContext(
-  'explore-network_page',
+  'entity_analytics:explore-network_page',
   'network_top_n_flow_count'
 );
 

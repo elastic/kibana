@@ -34,7 +34,7 @@ const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 const tableType = hostsModel.HostsTableType.authentications;
 
 const HOSTS_AUTHENTICATIONS_CONTEXT = buildExecutionContext(
-  'explore-hosts_page',
+  'entity_analytics:explore-hosts_page',
   'authentications'
 );
 

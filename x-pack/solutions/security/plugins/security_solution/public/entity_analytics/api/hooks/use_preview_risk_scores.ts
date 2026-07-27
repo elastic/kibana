@@ -77,7 +77,7 @@ export const useRiskScorePreview = ({
         signal,
         params,
         context: buildExecutionContext(
-          'entity_analytics-risk_score_management',
+          'entity_analytics:risk_score_management',
           'risk_score_preview'
         ),
       });

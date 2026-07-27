@@ -445,7 +445,7 @@ const createTaskRunnerFactory =
         return coreStart.executionContext.withContext(
           {
             type: 'security_solution',
-            name: 'entity_analytics-risk_scoring_task',
+            name: 'entity_analytics:risk_scoring_task',
             id: taskInstance.id,
           },
           () =>

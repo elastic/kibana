@@ -12,7 +12,7 @@ import { useEntityAnalyticsRoutes } from '../../../../../api/api';
 import { buildExecutionContext } from '../../../../../common';
 import type { WatchlistTableItemType } from '../types';
 
-const WATCHLISTS_PAGE = 'entity_analytics-watchlists';
+const WATCHLISTS_PAGE = 'entity_analytics:watchlists';
 
 /**
  * Derives a human-readable source label from an entity source.

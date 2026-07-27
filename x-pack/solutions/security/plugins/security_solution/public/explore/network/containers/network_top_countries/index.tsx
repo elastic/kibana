@@ -30,7 +30,7 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 export const ID = 'networkTopCountriesQuery';
 
 const NETWORK_TOP_COUNTRIES_CONTEXT = buildExecutionContext(
-  'explore-network_page',
+  'entity_analytics:explore-network_page',
   'network_top_countries'
 );
 

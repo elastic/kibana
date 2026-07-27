@@ -57,11 +57,11 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 const SERVICE_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-service_right',
+  'entity_analytics:entity_details_flyout-service_right',
   'entity_from_store'
 );
 const SERVICE_RISK_SCORE_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-service_right',
+  'entity_analytics:entity_details_flyout-service_right',
   'service_risk_score'
 );
 

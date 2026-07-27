@@ -165,7 +165,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
         return core.executionContext.withContext(
           {
             type: 'security_solution',
-            name: 'entity_analytics-privilege_monitoring_task',
+            name: 'entity_analytics:privilege_monitoring_task',
             id: taskInstance.id,
           },
           () =>

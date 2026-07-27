@@ -16,7 +16,7 @@ import type { ServiceItem } from '../../../../../common/search_strategy/security
 import { OBSERVED_SERVICE_QUERY_ID } from '../content';
 
 const OBSERVED_SERVICE_DETAILS_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-service_right',
+  'entity_analytics:entity_details_flyout-service_right',
   'service_observed_details'
 );
 

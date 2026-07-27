@@ -54,7 +54,7 @@ export const fetchGenericEntity = async (
       },
       {
         executionContext: buildExecutionContext(
-          'entity_details_flyout-generic_right',
+          'entity_analytics:entity_details_flyout-generic_right',
           'generic_entity_search'
         ),
       }

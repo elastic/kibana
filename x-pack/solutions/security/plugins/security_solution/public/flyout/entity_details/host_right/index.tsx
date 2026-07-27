@@ -79,7 +79,7 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 
 const HOST_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-host_right',
+  'entity_analytics:entity_details_flyout-host_right',
   'entity_from_store'
 );
 

@@ -9,18 +9,18 @@ import { buildExecutionContext } from './execution_context';
 
 describe('buildExecutionContext', () => {
   it('returns a child execution context tagged as security_solution', () => {
-    expect(buildExecutionContext('entity_analytics-home_page', 'entities_table')).toEqual({
+    expect(buildExecutionContext('entity_analytics:home_page', 'entities_table')).toEqual({
       child: {
         type: 'security_solution',
-        name: 'entity_analytics-home_page',
+        name: 'entity_analytics:home_page',
         id: 'entities_table',
       },
     });
   });
 
   it('preserves the name and id verbatim so trace labels match the caller', () => {
-    const ctx = buildExecutionContext('explore-hosts_page', 'hosts_all');
-    expect(ctx.child.name).toBe('explore-hosts_page');
+    const ctx = buildExecutionContext('entity_analytics:explore-hosts_page', 'hosts_all');
+    expect(ctx.child.name).toBe('entity_analytics:explore-hosts_page');
     expect(ctx.child.id).toBe('hosts_all');
   });
 });

@@ -15,7 +15,7 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { MANAGED_USER_QUERY_ID } from '../constants';
 
 const MANAGED_USER_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-user_right',
+  'entity_analytics:entity_details_flyout-user_right',
   'user_managed_details'
 );
 import * as i18n from '../translations';

@@ -93,7 +93,7 @@ export const useRiskLevelsEsqlQuery = ({
             strategy: 'esql_async',
             projectRouting: '_alias:_origin',
             executionContext: buildExecutionContext(
-              'entity_analytics-home_page',
+              'entity_analytics:home_page',
               'risk_level_panel'
             ),
           }

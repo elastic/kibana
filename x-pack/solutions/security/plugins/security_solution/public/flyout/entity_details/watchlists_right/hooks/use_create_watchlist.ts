@@ -34,7 +34,7 @@ export const useCreateWatchlist = ({
     mutationFn: () =>
       createWatchlist(
         watchlist,
-        buildExecutionContext('entity_analytics-watchlists', 'watchlist_create')
+        buildExecutionContext('entity_analytics:watchlists', 'watchlist_create')
       ),
     onSuccess: async () => {
       toasts.addSuccess({

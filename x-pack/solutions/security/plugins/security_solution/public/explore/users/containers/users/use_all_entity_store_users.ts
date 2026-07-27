@@ -31,7 +31,7 @@ import * as i18n from './translations';
 const ENTITY_STORE_USERS_LIST_QUERY_KEY = 'ENTITY_STORE_USERS_LIST';
 
 const USERS_ENTITY_STORE_LIST_CONTEXT = buildExecutionContext(
-  'explore-users_page',
+  'entity_analytics:explore-users_page',
   'users_entity_store_list'
 );
 

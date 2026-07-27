@@ -18,7 +18,7 @@ export const useFetchPrivilegedUserIndices = (query: string | undefined) => {
         signal,
         query,
         context: buildExecutionContext(
-          'entity_analytics-privileged_user_monitoring',
+          'entity_analytics:privileged_user_monitoring',
           'pum_indices_search'
         ),
       }),

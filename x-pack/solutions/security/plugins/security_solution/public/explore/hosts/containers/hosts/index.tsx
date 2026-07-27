@@ -24,7 +24,7 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 import type { HostsArgs } from './hosts_table_query_types';
 import { HOSTS_ALL_TABLE_QUERY_ID } from './hosts_table_query_types';
 
-const HOSTS_ALL_CONTEXT = buildExecutionContext('explore-hosts_page', 'hosts_all');
+const HOSTS_ALL_CONTEXT = buildExecutionContext('entity_analytics:explore-hosts_page', 'hosts_all');
 
 export const ID = HOSTS_ALL_TABLE_QUERY_ID;
 

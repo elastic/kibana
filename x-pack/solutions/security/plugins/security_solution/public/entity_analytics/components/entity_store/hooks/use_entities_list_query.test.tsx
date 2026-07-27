@@ -67,7 +67,7 @@ describe('useEntitiesListQuery', () => {
     const executionContext = {
       child: {
         type: 'security_solution',
-        name: 'entity_analytics-entity_store_management',
+        name: 'entity_analytics:entity_store_management',
         id: 'entities_list',
       },
     };

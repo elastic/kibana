@@ -85,7 +85,7 @@ describe('useEntityFromStore', () => {
       const executionContext = {
         child: {
           type: 'security_solution',
-          name: 'entity_details_flyout-host_right',
+          name: 'entity_analytics:entity_details_flyout-host_right',
           id: 'entity_from_store',
         },
       };

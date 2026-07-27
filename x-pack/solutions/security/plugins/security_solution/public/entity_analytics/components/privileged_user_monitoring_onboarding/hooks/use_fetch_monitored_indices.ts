@@ -17,7 +17,7 @@ export const useFetchMonitoredIndices = () => {
       listPrivMonMonitoredIndices({
         signal,
         context: buildExecutionContext(
-          'entity_analytics-privileged_user_monitoring',
+          'entity_analytics:privileged_user_monitoring',
           'pum_monitored_indices_list'
         ),
       }),

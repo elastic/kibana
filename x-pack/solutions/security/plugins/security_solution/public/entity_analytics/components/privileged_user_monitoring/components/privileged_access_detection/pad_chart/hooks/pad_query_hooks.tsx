@@ -61,7 +61,7 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
             signal,
             filter: filterQuery,
             executionContext: buildExecutionContext(
-              'entity_analytics-privileged_user_monitoring',
+              'entity_analytics:privileged_user_monitoring',
               'pad_chart_top_users'
             ),
           })
@@ -115,7 +115,7 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
             signal,
             filter: filterQuery,
             executionContext: buildExecutionContext(
-              'entity_analytics-privileged_user_monitoring',
+              'entity_analytics:privileged_user_monitoring',
               'pad_chart_anomalies'
             ),
           })

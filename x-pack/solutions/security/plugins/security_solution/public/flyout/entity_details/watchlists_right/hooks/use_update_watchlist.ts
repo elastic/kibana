@@ -104,7 +104,7 @@ export const useUpdateWatchlist = ({
       // Update the watchlist metadata only after entity sources have succeeded
       const updatedWatchlist = await updateWatchlist(
         { id: watchlistId, body: watchlist },
-        buildExecutionContext('entity_analytics-watchlists', 'watchlist_update')
+        buildExecutionContext('entity_analytics:watchlists', 'watchlist_update')
       );
 
       return updatedWatchlist;

@@ -34,9 +34,9 @@ import {
 } from '../../../../../common/search_strategy';
 import type { HostsComponentsQueryProps } from './types';
 
-const HOSTS_RISK_TAB_CONTEXT = buildExecutionContext('explore-hosts_page', 'hosts_risk_score');
+const HOSTS_RISK_TAB_CONTEXT = buildExecutionContext('entity_analytics:explore-hosts_page', 'hosts_risk_score');
 const HOSTS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
-  'explore-hosts_page',
+  'entity_analytics:explore-hosts_page',
   'hosts_risk_score_kpi'
 );
 

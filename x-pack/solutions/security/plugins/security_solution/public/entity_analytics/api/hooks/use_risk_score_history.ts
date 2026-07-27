@@ -55,7 +55,7 @@ export const useRiskScoreHistory = ({
         signal,
         params: { entityType, entityId, from, to, scoreType, includeContributions },
         context: buildExecutionContext(
-          'entity_analytics-risk_score_management',
+          'entity_analytics:risk_score_management',
           'risk_score_history'
         ),
       });

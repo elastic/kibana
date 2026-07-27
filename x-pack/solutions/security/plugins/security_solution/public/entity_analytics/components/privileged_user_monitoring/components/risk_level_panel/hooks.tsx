@@ -66,7 +66,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
         signal,
         filter: filterQuery,
         executionContext: buildExecutionContext(
-          'entity_analytics-privileged_user_monitoring',
+          'entity_analytics:privileged_user_monitoring',
           'pum_risk_level_panel'
         ),
       }),

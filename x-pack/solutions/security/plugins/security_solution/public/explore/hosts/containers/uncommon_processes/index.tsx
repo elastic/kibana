@@ -30,7 +30,7 @@ import { useSearchStrategy } from '../../../../common/containers/use_search_stra
 import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 const UNCOMMON_PROCESSES_CONTEXT = buildExecutionContext(
-  'explore-hosts_page',
+  'entity_analytics:explore-hosts_page',
   'uncommon_processes'
 );
 

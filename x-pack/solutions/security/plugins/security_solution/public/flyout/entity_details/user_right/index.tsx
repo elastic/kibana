@@ -87,11 +87,11 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 const USER_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-user_right',
+  'entity_analytics:entity_details_flyout-user_right',
   'entity_from_store'
 );
 const USER_RISK_SCORE_CONTEXT = buildExecutionContext(
-  'entity_details_flyout-user_right',
+  'entity_analytics:entity_details_flyout-user_right',
   'user_risk_score'
 );
 

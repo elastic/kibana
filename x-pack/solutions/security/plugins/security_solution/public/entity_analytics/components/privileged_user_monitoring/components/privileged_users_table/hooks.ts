@@ -23,7 +23,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { buildExecutionContext } from '../../../../common';
 import { DEFAULT_PAGE_SIZE } from '.';
 
-const PUM_PAGE = 'entity_analytics-privileged_user_monitoring';
+const PUM_PAGE = 'entity_analytics:privileged_user_monitoring';
 const PRIVILEGED_USERS_TABLE_CONTEXT = buildExecutionContext(PUM_PAGE, 'privileged_users_table');
 const PRIVILEGED_USERS_RISK_SCORE_CONTEXT = buildExecutionContext(
   PUM_PAGE,

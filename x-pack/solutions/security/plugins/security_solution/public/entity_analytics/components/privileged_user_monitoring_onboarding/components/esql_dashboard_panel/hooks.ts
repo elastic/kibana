@@ -47,7 +47,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
         signal,
         filter: filterQuery,
         executionContext: buildExecutionContext(
-          'entity_analytics-privileged_user_monitoring',
+          'entity_analytics:privileged_user_monitoring',
           'pum_onboarding_dashboard_panel'
         ),
       });

@@ -69,7 +69,7 @@ export const createMigrationTask =
         return coreStart.executionContext.withContext(
           {
             type: 'security_solution',
-            name: 'entity_analytics-asset_criticality_migration',
+            name: 'entity_analytics:asset_criticality_migration',
             id: TASK_ID,
           },
           async () => {

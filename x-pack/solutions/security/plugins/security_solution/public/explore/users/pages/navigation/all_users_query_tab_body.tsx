@@ -28,7 +28,7 @@ const UsersTableManage = manageQuery(UsersTable);
 
 const QUERY_ID = 'UsersTable';
 
-const USERS_ALL_CONTEXT = buildExecutionContext('explore-users_page', 'users_all');
+const USERS_ALL_CONTEXT = buildExecutionContext('entity_analytics:explore-users_page', 'users_all');
 
 export const AllUsersQueryTabBody = ({
   endDate,

@@ -208,7 +208,7 @@ describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s',
   test('forwards executionContext to useSearchStrategy', () => {
     mockRiskEngineStatus('ENABLED');
     const executionContext = {
-      child: { type: 'security_solution', name: 'explore-hosts_page', id: 'hosts_risk_score' },
+      child: { type: 'security_solution', name: 'entity_analytics:explore-hosts_page', id: 'hosts_risk_score' },
     };
 
     renderHook(() => useRiskScore({ riskEntity, executionContext }), {

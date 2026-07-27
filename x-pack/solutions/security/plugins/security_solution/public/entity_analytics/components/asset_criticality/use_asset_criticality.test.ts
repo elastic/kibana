@@ -114,7 +114,7 @@ describe('useAssetCriticality', () => {
       const executionContext = {
         child: {
           type: 'security_solution',
-          name: 'entity_analytics-asset_criticality',
+          name: 'entity_analytics:asset_criticality',
           id: 'asset_criticality_get',
         },
       };
@@ -160,7 +160,7 @@ describe('useAssetCriticality', () => {
       const executionContext = {
         child: {
           type: 'security_solution',
-          name: 'entity_analytics-asset_criticality',
+          name: 'entity_analytics:asset_criticality',
           id: 'asset_criticality_list',
         },
       };

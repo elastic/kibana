@@ -30,7 +30,7 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 export const ID = 'networkUsersQuery';
 
-const NETWORK_USERS_CONTEXT = buildExecutionContext('explore-network_page', 'network_users');
+const NETWORK_USERS_CONTEXT = buildExecutionContext('entity_analytics:explore-network_page', 'network_users');
 
 export interface NetworkUsersArgs {
   id: string;

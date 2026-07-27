@@ -24,7 +24,7 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 export const ID = 'networkDnsQuery';
 
-const NETWORK_DNS_CONTEXT = buildExecutionContext('explore-network_page', 'network_dns');
+const NETWORK_DNS_CONTEXT = buildExecutionContext('entity_analytics:explore-network_page', 'network_dns');
 
 export interface NetworkDnsResponse {
   id: string;

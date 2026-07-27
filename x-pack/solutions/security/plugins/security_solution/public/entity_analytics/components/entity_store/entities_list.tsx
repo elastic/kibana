@@ -82,7 +82,7 @@ export const EntitiesList: React.FC = () => {
         },
       }),
       executionContext: buildExecutionContext(
-        'entity_analytics-entity_store_management',
+        'entity_analytics:entity_store_management',
         'entities_list'
       ),
     }),

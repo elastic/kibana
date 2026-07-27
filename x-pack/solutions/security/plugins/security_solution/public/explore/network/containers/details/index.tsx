@@ -20,7 +20,7 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 export const ID = 'networkDetailsQuery';
 
-const NETWORK_DETAILS_CONTEXT = buildExecutionContext('explore-network_page', 'network_details');
+const NETWORK_DETAILS_CONTEXT = buildExecutionContext('entity_analytics:explore-network_page', 'network_details');
 
 export interface NetworkDetailsArgs {
   id: string;

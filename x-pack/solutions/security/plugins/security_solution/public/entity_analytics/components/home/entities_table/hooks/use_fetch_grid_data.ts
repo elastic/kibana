@@ -106,7 +106,7 @@ export function useFetchGridData(options: UseEntitiesOptions) {
             params: queryParams as LatestEntitiesRequest['params'],
           },
           {
-            executionContext: buildExecutionContext('entity_analytics-home_page', 'entities_table'),
+            executionContext: buildExecutionContext('entity_analytics:home_page', 'entities_table'),
           }
         )
       );

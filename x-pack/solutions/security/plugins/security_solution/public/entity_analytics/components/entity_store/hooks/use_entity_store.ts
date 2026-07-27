@@ -14,7 +14,7 @@ import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { buildExecutionContext } from '../../../common';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
-const ENTITY_STORE_MANAGEMENT_PAGE = 'entity_analytics-entity_store_management';
+const ENTITY_STORE_MANAGEMENT_PAGE = 'entity_analytics:entity_store_management';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
 

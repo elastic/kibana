@@ -131,7 +131,7 @@ export const useFetchGroupedData = ({
           },
           {
             executionContext: buildExecutionContext(
-              'entity_analytics-home_page',
+              'entity_analytics:home_page',
               'entities_table_grouped'
             ),
           }
@@ -184,7 +184,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
           },
           {
             executionContext: buildExecutionContext(
-              'entity_analytics-home_page',
+              'entity_analytics:home_page',
               'entities_table_target_metadata'
             ),
           }

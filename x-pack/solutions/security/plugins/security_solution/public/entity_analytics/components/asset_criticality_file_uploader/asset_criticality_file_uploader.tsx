@@ -108,7 +108,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
           state.validatedFile.validLines.text,
           state.validatedFile.name,
           buildExecutionContext(
-            'entity_analytics-asset_criticality',
+            'entity_analytics:asset_criticality',
             'asset_criticality_bulk_upload'
           )
         );

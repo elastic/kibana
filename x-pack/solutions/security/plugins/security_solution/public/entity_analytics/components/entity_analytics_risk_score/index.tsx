@@ -136,7 +136,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
     filterQuery,
     timerange,
     executionContext: useMemo(
-      () => buildExecutionContext('entity_analytics-home_page', `risk_score_panel_${riskEntity}`),
+      () => buildExecutionContext('entity_analytics:home_page', `risk_score_panel_${riskEntity}`),
       [riskEntity]
     ),
   });

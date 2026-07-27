@@ -32,7 +32,7 @@ import type { AuthenticationsUserTableProps } from './types';
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
 const USERS_AUTHENTICATIONS_CONTEXT = buildExecutionContext(
-  'explore-users_page',
+  'entity_analytics:explore-users_page',
   'authentications'
 );
 

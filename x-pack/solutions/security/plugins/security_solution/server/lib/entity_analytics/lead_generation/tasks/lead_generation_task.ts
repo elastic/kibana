@@ -132,7 +132,7 @@ const createLeadGenerationTaskRunnerFactory =
         return core.executionContext.withContext(
           {
             type: 'security_solution',
-            name: 'entity_analytics-lead_generation_task',
+            name: 'entity_analytics:lead_generation_task',
             id: taskInstance.id,
           },
           () =>

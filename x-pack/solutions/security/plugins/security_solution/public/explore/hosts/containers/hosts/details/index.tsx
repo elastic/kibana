@@ -20,7 +20,7 @@ import { useUiSetting } from '../../../../../common/lib/kibana';
 import { buildExecutionContext } from '../../../../../entity_analytics/common';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
-const HOST_DETAILS_CONTEXT = buildExecutionContext('explore-hosts_page', 'host_details');
+const HOST_DETAILS_CONTEXT = buildExecutionContext('entity_analytics:explore-hosts_page', 'host_details');
 
 export const ID = 'hostsDetailsQuery';
 

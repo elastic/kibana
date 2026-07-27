@@ -33,7 +33,7 @@ describe('useRiskEngineStatus', () => {
     const executionContext = {
       child: {
         type: 'security_solution',
-        name: 'entity_analytics-risk_score_management',
+        name: 'entity_analytics:risk_score_management',
         id: 'risk_engine_status',
       },
     };

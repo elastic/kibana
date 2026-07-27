@@ -19,7 +19,7 @@ import { buildExecutionContext } from '../../../../../entity_analytics/common';
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
-const OBSERVED_USER_CONTEXT = buildExecutionContext('explore-users_page', 'user_details_observed');
+const OBSERVED_USER_CONTEXT = buildExecutionContext('entity_analytics:explore-users_page', 'user_details_observed');
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 

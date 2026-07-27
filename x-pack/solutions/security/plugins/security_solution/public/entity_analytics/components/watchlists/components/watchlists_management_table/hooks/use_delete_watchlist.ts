@@ -20,7 +20,7 @@ export const useDeleteWatchlist = (spaceId: string) => {
     mutationFn: (id: string) =>
       deleteWatchlist(
         { id },
-        buildExecutionContext('entity_analytics-watchlists', 'watchlist_delete')
+        buildExecutionContext('entity_analytics:watchlists', 'watchlist_delete')
       ),
     onSuccess: async () => {
       addSuccess(

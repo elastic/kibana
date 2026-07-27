@@ -35,9 +35,9 @@ import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 import { RiskScoresNoDataDetected } from './risk_score_no_data_detected';
 
-const USERS_RISK_TAB_CONTEXT = buildExecutionContext('explore-users_page', 'users_risk_score');
+const USERS_RISK_TAB_CONTEXT = buildExecutionContext('entity_analytics:explore-users_page', 'users_risk_score');
 const USERS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
-  'explore-users_page',
+  'entity_analytics:explore-users_page',
   'users_risk_score_kpi'
 );
 

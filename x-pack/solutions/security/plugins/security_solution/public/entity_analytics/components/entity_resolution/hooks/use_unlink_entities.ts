@@ -39,7 +39,7 @@ export const useUnlinkEntities = () => {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
-        context: buildExecutionContext('entity_analytics-entity_resolution', 'resolution_unlink'),
+        context: buildExecutionContext('entity_analytics:entity_resolution', 'resolution_unlink'),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });

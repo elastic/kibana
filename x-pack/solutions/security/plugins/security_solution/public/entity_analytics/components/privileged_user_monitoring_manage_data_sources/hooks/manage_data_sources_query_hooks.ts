@@ -33,7 +33,7 @@ export const useGetLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
             search,
             signal,
             executionContext: buildExecutionContext(
-              'entity_analytics-privileged_user_monitoring',
+              'entity_analytics:privileged_user_monitoring',
               'pum_data_sources_latest_csv'
             ),
           })

@@ -45,7 +45,7 @@ export const useLinkEntities = (options?: UseLinkEntitiesOptions) => {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
-        context: buildExecutionContext('entity_analytics-entity_resolution', 'resolution_link'),
+        context: buildExecutionContext('entity_analytics:entity_resolution', 'resolution_link'),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });

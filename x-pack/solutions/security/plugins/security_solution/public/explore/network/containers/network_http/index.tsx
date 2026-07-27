@@ -30,7 +30,7 @@ import { buildExecutionContext } from '../../../../entity_analytics/common';
 
 export const ID = 'networkHttpQuery';
 
-const NETWORK_HTTP_CONTEXT = buildExecutionContext('explore-network_page', 'network_http');
+const NETWORK_HTTP_CONTEXT = buildExecutionContext('entity_analytics:explore-network_page', 'network_http');
 
 export interface NetworkHttpArgs {
   id: string;
