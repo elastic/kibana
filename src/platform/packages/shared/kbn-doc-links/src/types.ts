@@ -323,6 +323,7 @@ export interface DocLinks {
     readonly automaticImport: string;
     readonly attacksPage: string;
     readonly mitreCoverage: string;
+    readonly remapMitreAttack: string;
   };
   readonly server: {
     readonly protocol: string;

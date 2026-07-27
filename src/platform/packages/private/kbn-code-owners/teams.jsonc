@@ -40,6 +40,16 @@
     }
   },
   {
+    "id": "apm-agent-approvers",
+    "name": "APM Agent Approvers",
+    "github": {
+      "team": "elastic/apm-agent-approvers"
+    },
+    "responsibilities": [
+      "Client Apps plugin"
+    ]
+  },
+  {
     "id": "ai-infra",
     "name": "AI Infrastructure",
     "areas": [
