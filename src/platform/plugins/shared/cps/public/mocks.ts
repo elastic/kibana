@@ -14,6 +14,7 @@ export type Start = jest.Mocked<CPSPluginStart>;
 
 const createStartContract = (): Start => ({
   cpsManager: createCpsManagerMock(),
+  isTierEligible: false,
 });
 
 export const cpsPluginMock = {
