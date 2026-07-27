@@ -37,16 +37,16 @@ export interface ChatCallbackAcceptedResponse {
   status: ExecutionStatus.scheduled;
 }
 
-export interface ChatCallbackEventPayload {
+export interface ChatCallbackEventResponse {
   execution_id: string;
   status: ExecutionStatus.running;
   event: ChatEvent;
 }
 
-export interface ChatCallbackFailurePayload {
+export interface ChatCallbackFailureResponse {
   execution_id: string;
   status: ExecutionStatus.failed | ExecutionStatus.aborted;
   error?: SerializedExecutionError;
 }
 
-export type ChatCallbackOutboundPayload = ChatCallbackEventPayload | ChatCallbackFailurePayload;
+export type ChatCallbackResponse = ChatCallbackEventResponse | ChatCallbackFailureResponse;

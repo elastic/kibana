@@ -16,7 +16,7 @@ import {
   type ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import type { ChatCallbackFailurePayload } from '../../../common/http_api/chat_callback';
+import type { ChatCallbackFailureResponse } from '../../../common/http_api/chat_callback';
 import { CallbackDeliveryService, deliverStream } from './callback_delivery_service';
 
 const callbackUrl = 'https://relay.example.com/v1/events?token=abc';
@@ -44,7 +44,7 @@ const createEvent = (text: string): ChatEvent =>
     data: { text_chunk: text, message_id: 'message-1' },
   } as ChatEvent);
 
-const failurePayload: ChatCallbackFailurePayload = {
+const failurePayload: ChatCallbackFailureResponse = {
   execution_id: 'execution-1',
   status: ExecutionStatus.failed,
   error: {

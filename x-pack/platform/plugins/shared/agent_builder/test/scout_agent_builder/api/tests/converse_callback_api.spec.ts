@@ -20,9 +20,9 @@ import {
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type {
   ChatCallbackAcceptedResponse,
-  ChatCallbackEventPayload,
-  ChatCallbackFailurePayload,
-  ChatCallbackOutboundPayload,
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
 } from '../../../../common/http_api/chat_callback';
 import type { ListConversationsResponse } from '../../../../common/http_api/conversations';
 import {
@@ -98,28 +98,27 @@ apiTest.describe(
       'elastic-api-version': ELASTIC_API_VERSION,
     });
 
-    const isEventPayload = (
-      payload: ChatCallbackOutboundPayload
-    ): payload is ChatCallbackEventPayload => payload.status === ExecutionStatus.running;
+    const isEventPayload = (payload: ChatCallbackResponse): payload is ChatCallbackEventResponse =>
+      payload.status === ExecutionStatus.running;
 
     /**
      * Consumes streamed callback requests until one matches the predicate,
      * returning every request received along the way (match included).
      */
     const collectCallbackRequestsUntil = async (
-      predicate: (payload: ChatCallbackOutboundPayload) => boolean
+      predicate: (payload: ChatCallbackResponse) => boolean
     ): Promise<CallbackTestServerRequest[]> => {
       const requests: CallbackTestServerRequest[] = [];
       let matched = false;
       while (!matched) {
         const request = await callbackServer.waitForRequest();
         requests.push(request);
-        matched = predicate(request.body as ChatCallbackOutboundPayload);
+        matched = predicate(request.body as ChatCallbackResponse);
       }
       return requests;
     };
 
-    const isConversationEventPayload = (payload: ChatCallbackOutboundPayload): boolean =>
+    const isConversationEventPayload = (payload: ChatCallbackResponse): boolean =>
       isEventPayload(payload) &&
       (isConversationCreatedEvent(payload.event) || isConversationUpdatedEvent(payload.event));
 
@@ -128,17 +127,17 @@ apiTest.describe(
       collectCallbackRequestsUntil(isConversationEventPayload);
 
     /** Waits for the terminal failure payload, skipping streamed running events. */
-    const waitForFailurePayload = async (): Promise<ChatCallbackFailurePayload> => {
+    const waitForFailurePayload = async (): Promise<ChatCallbackFailureResponse> => {
       const requests = await collectCallbackRequestsUntil(
         (payload) =>
           payload.status === ExecutionStatus.failed || payload.status === ExecutionStatus.aborted
       );
-      return requests[requests.length - 1].body as ChatCallbackFailurePayload;
+      return requests[requests.length - 1].body as ChatCallbackFailureResponse;
     };
 
     const getEvents = (requests: CallbackTestServerRequest[]) =>
       requests
-        .map((request) => request.body as ChatCallbackOutboundPayload)
+        .map((request) => request.body as ChatCallbackResponse)
         .filter(isEventPayload)
         .map(({ event }) => event);
 
@@ -161,7 +160,7 @@ apiTest.describe(
     };
 
     const getExecutionId = (requests: CallbackTestServerRequest[]): string =>
-      (requests[0].body as ChatCallbackEventPayload).execution_id;
+      (requests[0].body as ChatCallbackEventResponse).execution_id;
 
     apiTest('delivers completed response to callback URL', async ({ apiClient }) => {
       const mockedLlmResponse = 'Callback LLM response';
@@ -204,7 +203,7 @@ apiTest.describe(
         expect(callbackRequest.url).toBe('/callback?token=success');
         expect(callbackRequest.headers['content-type']).toBe('application/json');
 
-        const payload = callbackRequest.body as ChatCallbackEventPayload;
+        const payload = callbackRequest.body as ChatCallbackEventResponse;
         expect(payload.execution_id).toBe(accepted.execution_id);
         expect(payload.status).toBe(ExecutionStatus.running);
         expect(payload.event).toBeDefined();

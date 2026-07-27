@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import type { ChatCallbackOutboundPayload } from '../../../common/http_api/chat_callback';
+import type { ChatCallbackResponse } from '../../../common/http_api/chat_callback';
 import { serializeExecutionError } from './execution_runner';
 
 const callbackRetryOptions = {
@@ -28,7 +28,7 @@ const callbackRetryOptions = {
 
 /** Posts a single callback payload, resolving with the response status. */
 export type MakeRequest = (
-  payload: ChatCallbackOutboundPayload,
+  payload: ChatCallbackResponse,
   signal: AbortSignal
 ) => Promise<{ status: number }>;
 
@@ -88,7 +88,7 @@ export class CallbackDeliveryService {
     payload,
     makeRequest,
   }: {
-    payload: ChatCallbackOutboundPayload;
+    payload: ChatCallbackResponse;
     makeRequest: MakeRequest;
   }): Promise<void> {
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
