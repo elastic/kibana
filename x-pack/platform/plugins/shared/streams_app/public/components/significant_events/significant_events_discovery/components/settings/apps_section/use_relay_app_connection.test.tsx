@@ -78,8 +78,20 @@ describe('useRelayAppConnection', () => {
     jest.useRealTimers();
   });
 
-  it('does not poll while there is no connection in progress', async () => {
+  it('does not poll when the connection is not in progress', async () => {
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
+    const { wrapper } = createSetup();
+    renderHook(() => useRelayAppConnection(), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenCalledTimes(1);
+
+    await flush(POLL_INTERVAL_MS * 3);
+    expect(httpGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not poll when the connection is already completed (connected/error)', async () => {
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
     const { wrapper } = createSetup();
     renderHook(() => useRelayAppConnection(), { wrapper });
 
@@ -94,7 +106,7 @@ describe('useRelayAppConnection', () => {
   // already `oauth_in_progress` — e.g. started from another tab — must poll,
   // not just fetch once and stop, since pollDeadlineRef starts at 0 without a
   // connect() call ever having run in this hook instance.
-  it('polls status when an install is already in progress on mount, without calling connect', async () => {
+  it('polls when the status is in-progress on mount, without calling connect', async () => {
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
     const { wrapper } = createSetup();
     renderHook(() => useRelayAppConnection(), { wrapper });
@@ -125,6 +137,25 @@ describe('useRelayAppConnection', () => {
     // No further polling once the deadline has passed.
     await flush(POLL_INTERVAL_MS * 5);
     expect(httpGet).toHaveBeenCalledTimes(callsAtTimeout);
+  });
+
+  it('stops polling when the in-progress install resolves and resets the deadline', async () => {
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
+    const { wrapper } = createSetup();
+    renderHook(() => useRelayAppConnection(), { wrapper });
+
+    await flush();
+    const callsBeforeConnected = httpGet.mock.calls.length;
+
+    // Install completes — status returns connected.
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
+    await flush(POLL_INTERVAL_MS);
+    const callsAfterConnected = httpGet.mock.calls.length;
+    expect(callsAfterConnected).toBeGreaterThan(callsBeforeConnected);
+
+    // No more polling after that.
+    await flush(POLL_INTERVAL_MS * 5);
+    expect(httpGet).toHaveBeenCalledTimes(callsAfterConnected);
   });
 
   // Regression coverage: the tab must be opened synchronously (before the
@@ -189,13 +220,26 @@ describe('useRelayAppConnection', () => {
     });
   });
 
-  // Regression coverage: disconnect() resets the deadline to 0. If a later
-  // in-progress state (e.g. the user immediately reconnects) reused that
-  // stale/expired ref value instead of arming a fresh deadline, polling would
-  // stop dead on the very next check.
-  it('disconnect() resets the poll deadline so a later in-progress state gets a fresh polling window', async () => {
+  it('disconnect() posts to the disconnect route with no connection id', async () => {
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
+    httpPost.mockResolvedValue({ status: 'disconnected' });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+    await flush();
+
+    await act(async () => {
+      await result.current.disconnect();
+    });
+
+    expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/apps/slack/disconnect');
+  });
+
+  // Regression coverage: the deadline must reset when the connection is no longer in-progress
+  // so a later reconnect gets a fresh polling window instead of one capped by the
+  // time remaining from the previous install's deadline.
+  it('resets the poll deadline when the install resolves, so a subsequent connect gets a fresh window', async () => {
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
-    httpPost.mockResolvedValue({ success: true });
+    httpPost.mockResolvedValue({ status: 'disconnected' });
     const { wrapper, queryClient } = createSetup();
     const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
 
@@ -203,19 +247,21 @@ describe('useRelayAppConnection', () => {
     await flush();
     await flush(POLL_TIMEOUT_MS - POLL_INTERVAL_MS);
 
+    // Disconnect: status now returns not_connected → deadline resets.
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     await act(async () => {
       await result.current.disconnect();
     });
 
+    // A new in-progress connection appears (user reconnects).
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
     await act(() =>
       queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY })
     );
     const callsAfterReconnectObserved = httpGet.mock.calls.length;
 
-    // Almost a full new poll window: this would already be expired if the
-    // stale pre-disconnect deadline had leaked through.
+    // Almost a full new poll window should still be active; if the stale
+    // pre-disconnect deadline had leaked through, polling would have stopped.
     await flush(POLL_TIMEOUT_MS - POLL_INTERVAL_MS);
     expect(httpGet.mock.calls.length).toBeGreaterThan(callsAfterReconnectObserved);
   });
@@ -233,6 +279,27 @@ describe('useRelayAppConnection', () => {
     });
 
     expect(addError).toHaveBeenCalledTimes(1);
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('surfaces the relay reason from the response body as the connect toast message', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
+    httpPost.mockRejectedValue(
+      Object.assign(new Error('Bad Gateway'), { body: { message: 'workspace already bound' } })
+    );
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+    await flush();
+
+    await act(async () => {
+      await result.current.connect().catch(() => undefined);
+    });
+
+    expect(addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'workspace already bound' }),
+      expect.any(Object)
+    );
     consoleErrorSpy.mockRestore();
   });
 
