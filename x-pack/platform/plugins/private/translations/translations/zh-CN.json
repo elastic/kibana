@@ -15926,8 +15926,6 @@
     "xpack.cases.customFields": "自定义字段",
     "xpack.cases.customFields.addCustomField": "添加字段",
     "xpack.cases.customFields.defaultValue": "默认值",
-    "xpack.cases.customFields.deleteField": "删除字段“{fieldName}”？",
-    "xpack.cases.customFields.deleteFieldDescription": "将从所有案例中移除该字段，且数据将会丢失。",
     "xpack.cases.customFields.description": "添加更多可选和必填字段，以进行定制案例协作。",
     "xpack.cases.customFields.fieldLabel": "字段标签",
     "xpack.cases.customFields.fieldLabelHelpText": "最多 50 个字符",
