@@ -170,6 +170,7 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
+import { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
