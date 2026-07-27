@@ -61,11 +61,13 @@ function convertAPIDomainToStateFormat(
         lowerBound: domain.min,
         upperBound: domain.max,
         ...domainRounding,
+        ...(domain.enforce != null && { enforce: domain.enforce }),
       };
     case 'fit':
       return {
         mode: 'dataBounds',
         ...domainRounding,
+        ...(domain.enforce != null && { enforce: domain.enforce }),
       };
     default:
       return;
@@ -270,12 +272,14 @@ function convertDomainStateToAPIFormat(
         min: domain.lowerBound,
         max: domain.upperBound,
         rounding,
+        ...(domain.enforce != null && { enforce: domain.enforce }),
       };
     }
     if (domain.mode === 'dataBounds') {
       return {
         type: 'fit',
         rounding,
+        ...(domain.enforce != null && { enforce: domain.enforce }),
       };
     }
   }

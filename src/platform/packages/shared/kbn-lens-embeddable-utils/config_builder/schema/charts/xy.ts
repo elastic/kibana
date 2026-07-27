@@ -99,10 +99,21 @@ const domainFullConfigSchema = schema.object(
   }
 );
 
+const domainEnforceSchema = schema.maybe(
+  schema.boolean({
+    meta: {
+      id: 'vis_api_domain_enforce',
+      description:
+        'When true, bypasses axis extent validation: allows fit mode for bar/area series and applies custom bounds even when they would otherwise fail validation.',
+    },
+  })
+);
+
 const domainFitConfigSchema = schema.object(
   {
     type: schema.literal('fit'),
     rounding: schema.maybe(domainRoundingSchema),
+    enforce: domainEnforceSchema,
   },
   {
     meta: {
@@ -119,6 +130,7 @@ const domainCustomConfigSchema = schema.object(
     min: schema.number({ meta: { description: 'Min domain value' } }),
     max: schema.number({ meta: { description: 'Max domain value' } }),
     rounding: schema.maybe(domainRoundingSchema),
+    enforce: domainEnforceSchema,
   },
   {
     meta: {

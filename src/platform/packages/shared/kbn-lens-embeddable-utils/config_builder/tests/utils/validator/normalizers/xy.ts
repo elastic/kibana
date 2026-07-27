@@ -323,7 +323,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     if (!viz.xExtent || viz.xExtent.mode === 'full') {
       viz.xExtent = { mode: 'dataBounds', niceValues: false };
     } else {
-      delete viz.xExtent.enforce; // enforce field not preserved through round-trip
       if (viz.xExtent.niceValues == null) viz.xExtent.niceValues = false;
     }
 
@@ -332,7 +331,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       if (!viz.yLeftExtent) {
         viz.yLeftExtent = { mode: 'full', niceValues: true };
       } else {
-        delete viz.yLeftExtent.enforce;
         if (viz.yLeftExtent.niceValues == null) viz.yLeftExtent.niceValues = true;
       }
     } else {
@@ -344,7 +342,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       if (!viz.yRightExtent) {
         viz.yRightExtent = { mode: 'full', niceValues: true };
       } else {
-        delete viz.yRightExtent.enforce;
         if (viz.yRightExtent.niceValues == null) viz.yRightExtent.niceValues = true;
       }
     } else {
