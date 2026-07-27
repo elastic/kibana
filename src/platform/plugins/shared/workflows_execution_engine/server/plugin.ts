@@ -1032,7 +1032,6 @@ export class WorkflowsExecutionEnginePlugin
       options: {
         refresh: boolean | 'wait_for';
         executionId?: string;
-        metadata?: Record<string, string>;
       } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
@@ -1046,12 +1045,9 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
-      const executionContext = options.metadata
-        ? { ...context, metadata: options.metadata }
-        : context;
       const workflowExecution = await buildExecutionDocument({
         workflow,
-        context: executionContext,
+        context,
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
@@ -1168,7 +1164,6 @@ export class WorkflowsExecutionEnginePlugin
         {
           refresh: true,
           executionId: options.executionId,
-          metadata: options.metadata,
         }
       );
 
