@@ -141,7 +141,7 @@ describe('useLinkedActionPolicies', () => {
 
     expect(mockListActionPolicies).toHaveBeenCalledWith({
       page: 1,
-      perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
+      per_page: LINKED_ACTION_POLICIES_FETCH_LIMIT,
     });
     expect(result.current.totalCount).toBe(2);
     expect(result.current.catchAllCount).toBe(1);

@@ -8,9 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { FindActionPoliciesSortField } from '@kbn/alerting-v2-schemas';
 import type { FindActionPoliciesResponse } from '../services/action_policies_api';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { actionPolicyKeys } from './query_key_factory';
+import { toFindActionPoliciesRequest } from './query_param_mappers';
 
 interface UseFetchActionPoliciesParams {
   page: number;
@@ -18,7 +20,7 @@ interface UseFetchActionPoliciesParams {
   search?: string;
   tags?: string[];
   enabled?: boolean;
-  sortField?: string;
+  sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -45,15 +47,9 @@ export const useFetchActionPolicies = ({
       sortOrder,
     }),
     queryFn: () =>
-      actionPoliciesApi.listActionPolicies({
-        page,
-        perPage,
-        search,
-        tags,
-        enabled,
-        sortField,
-        sortOrder,
-      }),
+      actionPoliciesApi.listActionPolicies(
+        toFindActionPoliciesRequest({ page, perPage, search, tags, enabled, sortField, sortOrder })
+      ),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
     onError: (error: Error) => {

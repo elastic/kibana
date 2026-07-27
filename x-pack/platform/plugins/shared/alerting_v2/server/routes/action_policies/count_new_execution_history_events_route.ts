@@ -19,6 +19,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
+import { toCountNewEventsSinceArgs } from '../request_mappers';
 
 @injectable()
 export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
@@ -67,14 +68,9 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { since, search, rule_ids: ruleIds, outcome } = this.request.query;
-
     const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,
-      since,
-      search,
-      ruleIds,
-      outcome,
+      ...toCountNewEventsSinceArgs(this.request.query),
     });
 
     return this.ctx.response.ok({ body: result });

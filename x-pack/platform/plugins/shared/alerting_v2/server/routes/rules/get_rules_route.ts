@@ -20,6 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { toFindRulesArgs } from '../request_mappers';
 
 @injectable()
 export class GetRulesRoute extends BaseAlertingRoute {
@@ -65,14 +66,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const result = await this.rulesClient.findRules({
-      page: this.request.query.page,
-      perPage: this.request.query.per_page,
-      filter: this.request.query.filter,
-      search: this.request.query.search,
-      sortField: this.request.query.sort_field,
-      sortOrder: this.request.query.sort_order,
-    });
+    const result = await this.rulesClient.findRules(toFindRulesArgs(this.request.query));
     return this.ctx.response.ok({ body: result });
   }
 }

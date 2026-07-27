@@ -19,6 +19,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { toFindActionPoliciesArgs } from '../request_mappers';
 
 @injectable()
 export class ListActionPoliciesRoute extends BaseAlertingRoute {
@@ -66,24 +67,9 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const {
-      page,
-      per_page: perPage,
-      search,
-      tags,
-      enabled,
-      sort_field: sortField,
-      sort_order: sortOrder,
-    } = this.request.query ?? {};
-    const result = await this.actionPolicyClient.findActionPolicies({
-      page,
-      perPage,
-      search,
-      tags,
-      enabled,
-      sortField,
-      sortOrder,
-    });
+    const result = await this.actionPolicyClient.findActionPolicies(
+      toFindActionPoliciesArgs(this.request.query ?? {})
+    );
     return this.ctx.response.ok({ body: result });
   }
 }

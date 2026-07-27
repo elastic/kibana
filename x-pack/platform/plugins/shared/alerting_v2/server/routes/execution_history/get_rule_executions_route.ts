@@ -15,14 +15,12 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ExecutionHistoryClientToken } from '../../lib/execution_history_client';
-import type {
-  ExecutionHistoryClientContract,
-  GetRuleExecutionsArgs,
-} from '../../lib/execution_history_client';
+import type { ExecutionHistoryClientContract } from '../../lib/execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH } from '../constants';
+import { toGetRuleExecutionsArgs } from '../request_mappers';
 
 @injectable()
 export class GetRuleExecutionsRoute extends BaseAlertingRoute {
@@ -66,29 +64,9 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const {
-      rule_id: ruleIds,
-      outcome: outcomes,
-      from,
-      to,
-      sort,
-      sort_order: sortOrder,
-      page,
-      per_page: perPage,
-    } = this.request.query;
-
-    const args: GetRuleExecutionsArgs = {
-      ruleIds,
-      outcomes,
-      from,
-      to,
-      sort: sort === 'started_at' ? 'startedAt' : sort,
-      sortOrder,
-      page,
-      perPage,
-    };
-
-    const result = await this.executionHistoryClient.getRuleExecutions(args);
+    const result = await this.executionHistoryClient.getRuleExecutions(
+      toGetRuleExecutionsArgs(this.request.query)
+    );
     return this.ctx.response.ok({ body: result });
   }
 }

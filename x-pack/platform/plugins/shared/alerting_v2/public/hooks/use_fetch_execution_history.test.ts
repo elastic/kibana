@@ -59,7 +59,7 @@ describe('useFetchExecutionHistory', () => {
     await waitFor(() => {
       expect(mockListExecutionHistory).toHaveBeenCalledWith({
         page: 2,
-        perPage: 25,
+        per_page: 25,
         search: 'foo',
         outcome: 'throttled',
       });
@@ -137,6 +137,6 @@ describe('useFetchExecutionHistory', () => {
 
     rerender({ page: 2, perPage: 50 });
     await waitFor(() => expect(mockListExecutionHistory).toHaveBeenCalledTimes(2));
-    expect(mockListExecutionHistory).toHaveBeenLastCalledWith({ page: 2, perPage: 50 });
+    expect(mockListExecutionHistory).toHaveBeenLastCalledWith({ page: 2, per_page: 50 });
   });
 });

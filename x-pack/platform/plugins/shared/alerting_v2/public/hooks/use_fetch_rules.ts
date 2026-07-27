@@ -11,6 +11,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
+import { toFindRulesRequest } from './query_param_mappers';
 
 export const useFetchRules = ({
   page,
@@ -34,7 +35,10 @@ export const useFetchRules = ({
 
   return useQuery({
     queryKey: ruleKeys.list({ page, perPage, filter, search, sortField, sortOrder }),
-    queryFn: () => rulesApi.listRules({ page, perPage, filter, search, sortField, sortOrder }),
+    queryFn: () =>
+      rulesApi.listRules(
+        toFindRulesRequest({ page, perPage, filter, search, sortField, sortOrder })
+      ),
     onError: () => {
       toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useFetchRules.errorMessage', {

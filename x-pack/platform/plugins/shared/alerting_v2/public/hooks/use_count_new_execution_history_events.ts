@@ -13,6 +13,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
+import { toCountNewExecutionEventsRequest } from './query_param_mappers';
 
 const POLL_INTERVAL_MS = 10_000;
 
@@ -35,7 +36,10 @@ export const useCountNewExecutionHistoryEvents = ({
 
   return useQuery<CountPolicyExecutionEventsResponse, Error>({
     queryKey: executionHistoryKeys.countSince(since, { search, ruleIds, outcome }),
-    queryFn: () => executionHistoryApi.countNewSince(since, { search, ruleIds, outcome }),
+    queryFn: () =>
+      executionHistoryApi.countNewSince(
+        toCountNewExecutionEventsRequest({ since, search, ruleIds, outcome })
+      ),
     refetchOnWindowFocus: true,
     refetchInterval: POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,

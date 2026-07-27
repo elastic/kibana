@@ -13,6 +13,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
+import { toListExecutionHistoryRequest } from './query_param_mappers';
 
 interface UseFetchExecutionHistoryParams {
   page: number;
@@ -34,7 +35,9 @@ export const useFetchExecutionHistory = ({
   return useQuery<ListPolicyExecutionHistoryResponse, Error>({
     queryKey: executionHistoryKeys.list({ page, perPage, search, ruleIds, outcome }),
     queryFn: () =>
-      executionHistoryApi.listExecutionHistory({ page, perPage, search, ruleIds, outcome }),
+      executionHistoryApi.listExecutionHistory(
+        toListExecutionHistoryRequest({ page, perPage, search, ruleIds, outcome })
+      ),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

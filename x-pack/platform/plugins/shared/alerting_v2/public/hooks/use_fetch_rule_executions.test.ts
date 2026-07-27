@@ -54,7 +54,7 @@ describe('useFetchRuleExecutions', () => {
     await waitFor(() => {
       expect(mockGetRuleExecutions).toHaveBeenCalledWith({
         page: 2,
-        perPage: 50,
+        per_page: 50,
         outcome: ['failure'],
       });
     });

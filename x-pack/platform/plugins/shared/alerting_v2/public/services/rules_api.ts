@@ -12,8 +12,8 @@ import type {
   BulkOperationParams,
   BulkOperationResponse,
   CreateRuleData,
+  FindRulesRequest,
   FindRulesResponse,
-  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -21,15 +21,6 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
-
-export interface ListRulesParams {
-  page?: number;
-  perPage?: number;
-  filter?: string;
-  search?: string;
-  sortField?: FindRulesSortField;
-  sortOrder?: 'asc' | 'desc';
-}
 
 export type { BulkOperationParams, BulkOperationResponse };
 
@@ -43,16 +34,9 @@ export class RulesApi {
     });
   }
 
-  public async listRules(params: ListRulesParams) {
+  public async listRules(params: FindRulesRequest = {}) {
     return this.http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-      query: {
-        page: params.page,
-        perPage: params.perPage,
-        filter: params.filter,
-        search: params.search,
-        sortField: params.sortField,
-        sortOrder: params.sortOrder,
-      },
+      query: params,
     });
   }
 

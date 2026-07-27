@@ -19,6 +19,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import { toListExecutionHistoryArgs } from '../request_mappers';
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
@@ -67,21 +68,9 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const {
-      page,
-      per_page: perPage,
-      search,
-      rule_ids: ruleIds,
-      outcome,
-    } = this.request.query ?? {};
-
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,
-      page,
-      perPage,
-      search,
-      ruleIds,
-      outcome,
+      ...toListExecutionHistoryArgs(this.request.query ?? {}),
     });
 
     return this.ctx.response.ok({ body: result });
