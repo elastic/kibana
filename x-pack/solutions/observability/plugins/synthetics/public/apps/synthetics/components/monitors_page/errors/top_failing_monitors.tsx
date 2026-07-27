@@ -158,6 +158,10 @@ export const TopFailingMonitors = ({
               ? euiTheme.colors.warning
               : euiTheme.colors.vis.euiColorVis0;
 
+          const barLabel = `${monitor.downChecks} errors, ${pct}% failure, ${formatDowntime(
+            monitor.downtimeMs
+          )} downtime`;
+
           return (
             <React.Fragment key={monitor.configId}>
               <EuiLink
@@ -174,15 +178,12 @@ export const TopFailingMonitors = ({
               </EuiLink>
 
               <EuiToolTip
-                content={`${monitor.downChecks} errors, ${pct}% failure, ${formatDowntime(
-                  monitor.downtimeMs
-                )} downtime`}
+                content={barLabel}
+                disableScreenReaderOutput
               >
                 <div
                   tabIndex={0}
-                  aria-label={`${monitor.downChecks} errors, ${pct}% failure, ${formatDowntime(
-                    monitor.downtimeMs
-                  )} downtime`}
+                  aria-label={barLabel}
                   css={css`
                     position: relative;
                     height: 20px;
