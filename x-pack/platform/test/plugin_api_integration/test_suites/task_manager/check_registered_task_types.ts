@@ -205,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:v2:extract_entity_task:user',
         'entity_store:v2:history_snapshot_task',
         'entity_store:v2:status_report_task',
+        'event_bus:durable_consumer',
         'fleet:agent-status-change-task',
         'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',

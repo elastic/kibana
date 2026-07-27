@@ -1,0 +1,19 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "server/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-lifecycle-server-internal",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

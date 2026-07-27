@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/event-bus-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Prototype cross-node, in-cluster event bus for Kibana using Elasticsearch as the transport (append-only datastream read by per-consumer offset).",
+  "plugin": {
+    "id": "eventBus",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "eventBus"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}
