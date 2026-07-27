@@ -94,13 +94,7 @@ export const TabsView = (props: SingleTabViewProps) => {
         ) : (
           tabsBar
         );
-        return (
-          <ChromeAppHeader
-            menu={topNavMenuItems}
-            hasTabs={Boolean(tabsBar)}
-            tabsBar={tabsBarWithDelimiter}
-          />
-        );
+        return <ChromeAppHeader menu={topNavMenuItems} tabsBar={tabsBarWithDelimiter} />;
       };
     }
   }, [isChromeNextProjectHeader, topNavMenuItems, euiTheme]);
