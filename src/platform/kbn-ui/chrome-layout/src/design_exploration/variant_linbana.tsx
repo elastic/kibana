@@ -85,10 +85,26 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusPanel')} !important;
       border: ${LINEAR_HAIRLINE} !important;
       box-shadow: none !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} [data-test-subj='embeddablePanel']:has(.echMetricText) {
       border-radius: ${knobVar('radiusPanelCompact')} !important;
+    }
+
+    ${scope} .echChartBackground,
+    ${scope} .echMetric,
+    ${scope} .euiDataGridRow,
+    ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)),
+    ${scope} [class*='css-'][class*='-control_panel--formControl'],
+    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']) {
+      background-color: ${knobVar('surface')} !important;
+    }
+
+    ${scope} [class*='css-'][class*='-control_panel--formControl'] {
+      border: ${LINEAR_HAIRLINE} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: none !important;
     }
 
     ${scope}
@@ -128,7 +144,6 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
@@ -160,9 +175,13 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: transparent !important;
     }
 
-    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']),
+    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']) {
+      border: none !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: none !important;
+    }
+
     ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
-      // border: ${LINEAR_HAIRLINE} !important;
       border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
       background-color: ${knobVar('surface')} !important;

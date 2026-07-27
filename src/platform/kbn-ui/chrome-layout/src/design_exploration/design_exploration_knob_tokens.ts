@@ -48,7 +48,7 @@ export const VERBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
 export const LINBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
   canvas: '#F3F4F8',
   surface: '#FAFAFC',
-  surfaceNav: '#EEEFF4',
+  surfaceNav: '#F3F4F8',
   padding: 20,
   gutter: 8,
   panelPadding: DESIGN_EXPLORATION_PADDING_COMPACT + 4,
@@ -62,6 +62,7 @@ export const LINBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
 
 export const ATTBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
   ...LINBANA_KNOB_TOKENS,
+  surfaceNav: LINBANA_KNOB_TOKENS.canvas,
 };
 
 export const INTERBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {

@@ -27,12 +27,17 @@ export const VERBANA_VARIANT_ID = 'verbana';
 export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationVariantScope(VERBANA_VARIANT_ID);
   const { colors, levels } = euiTheme.euiTheme;
+  const isDarkMode = euiTheme.colorMode === 'DARK';
   const appHeaderStackZIndex = Number(levels.mask) + 1;
   const embeddablePanelShadow = getEmbeddablePanelShadow(euiTheme);
+  const verbanaCanvas = isDarkMode ? colors.backgroundBaseSubdued : knobVar('canvas');
+  const verbanaGlassNav = isDarkMode ? colors.backgroundBaseSubdued : knobVar('surfaceNav');
+  const verbanaGlassSurface = isDarkMode ? colors.backgroundBasePlain : knobVar('surface');
+  const verbanaShellShadow = isDarkMode ? embeddablePanelShadow : knobVar('shellShadow');
 
   return css`
     ${scope} {
-      background-color: ${knobVar('canvas')} !important;
+      background-color: ${verbanaCanvas} !important;
       ${layoutVarName('application.marginRight')}: 0px !important;
     }
 
@@ -220,10 +225,10 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) [data-test-subj='appHeader'] {
       border-radius: ${knobVar('radiusControl')} !important;
       border: none !important;
-      box-shadow: ${knobVar('shellShadow')} !important;
+      box-shadow: ${verbanaShellShadow} !important;
       background-color: color-mix(
         in srgb,
-        ${knobVar('surfaceNav')} 80%,
+        ${verbanaGlassNav} 80%,
         transparent
       ) !important;
       backdrop-filter: blur(10px) !important;
@@ -281,10 +286,10 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
       width: calc(100% - ${knobVar('padding')}) !important;
       margin: ${knobVar('padding')} 8px !important;
       border-radius: ${knobVar('radiusControl')} !important;
-      box-shadow: ${knobVar('shellShadow')} !important;
+      box-shadow: ${verbanaShellShadow} !important;
       background-color: color-mix(
         in srgb,
-        ${knobVar('surface')} 75%,
+        ${verbanaGlassSurface} 75%,
         transparent
       ) !important;
       backdrop-filter: blur(10px) !important;

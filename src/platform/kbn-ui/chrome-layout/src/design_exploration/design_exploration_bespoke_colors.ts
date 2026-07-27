@@ -64,18 +64,12 @@ const INTERBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalett
   },
 };
 
-const VERBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalette> = {
+const VERBANA_BESPOKE_COLORS: Partial<Record<ColorMode, DesignExplorationBespokePalette>> = {
   LIGHT: {
     canvas: '#ECEFF4',
     surface: '#FFFFFF',
     surfaceNav: '#F4F6FA',
     shellShadow: '0px 1px 3px 0px rgba(20, 20, 20, 0.08)',
-  },
-  DARK: {
-    canvas: '#0D1117',
-    surface: '#161B22',
-    surfaceNav: '#1A2332',
-    shellShadow: DARK_SHELL_SHADOW,
   },
 };
 
@@ -83,23 +77,36 @@ const LINBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalette>
   LIGHT: {
     canvas: '#F3F4F8',
     surface: '#FAFAFC',
-    surfaceNav: '#EEEFF4',
+    surfaceNav: '#F3F4F8',
     shellShadow: 'none',
   },
   DARK: {
     canvas: '#0F1117',
     surface: '#17191F',
-    surfaceNav: '#1E2129',
+    surfaceNav: '#0F1117',
     shellShadow: 'none',
   },
 };
 
-const BESPOKE_COLORS_BY_VARIANT: Record<string, Record<ColorMode, DesignExplorationBespokePalette>> =
-  {
+const ATTBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalette> = {
+  LIGHT: {
+    ...LINBANA_BESPOKE_COLORS.LIGHT,
+    surfaceNav: LINBANA_BESPOKE_COLORS.LIGHT.canvas,
+  },
+  DARK: {
+    ...LINBANA_BESPOKE_COLORS.DARK,
+    surfaceNav: LINBANA_BESPOKE_COLORS.DARK.canvas,
+  },
+};
+
+const BESPOKE_COLORS_BY_VARIANT: Record<
+  string,
+  Partial<Record<ColorMode, DesignExplorationBespokePalette>>
+> = {
     [INTERBANA_VARIANT_ID]: INTERBANA_BESPOKE_COLORS,
     [VERBANA_VARIANT_ID]: VERBANA_BESPOKE_COLORS,
     [LINBANA_VARIANT_ID]: LINBANA_BESPOKE_COLORS,
-    [ATTBANA_VARIANT_ID]: LINBANA_BESPOKE_COLORS,
+    [ATTBANA_VARIANT_ID]: ATTBANA_BESPOKE_COLORS,
   };
 
 const getBespokePalette = (
