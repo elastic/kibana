@@ -48,6 +48,7 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
+      security: setupDeps.security,
     });
 
     return {};
