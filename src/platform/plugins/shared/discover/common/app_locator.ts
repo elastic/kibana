@@ -145,7 +145,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * dashboard panel CSV export action — only have access to the resolved variable
    * values, not the controls state.
    */
-  esqlVariables?: ESQLControlVariable[] & SerializableRecord;
+  esqlVariables?: ESQLControlVariable[];
   /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */

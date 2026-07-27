@@ -36,7 +36,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
@@ -64,7 +64,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const handleClick = useCallback(() => {
     const indexName = selectedPatterns.join(',');
     if (enableNewFlyout) {
-      openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+      openDocumentFlyoutFromPattern({
+        documentId: eventId,
+        indexName,
+        origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+      });
     } else {
       openFlyout({
         right: {

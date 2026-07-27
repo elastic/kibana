@@ -44,6 +44,24 @@ describe('utils', () => {
 
       expect(options.find((o) => o.value === 'm')?.text).toBe('minute');
     });
+
+    it('hides units smaller than the minimum duration', () => {
+      const options = getTimeOptions(1, 60 * 1000);
+
+      expect(options.map((o) => o.value)).toEqual(['m', 'h', 'd']);
+    });
+
+    it('keeps all units when the minimum is below the smallest unit', () => {
+      const options = getTimeOptions(1, 5 * 1000);
+
+      expect(options.map((o) => o.value)).toEqual(['s', 'm', 'h', 'd']);
+    });
+
+    it('keeps all units when no minimum is provided', () => {
+      const options = getTimeOptions(1);
+
+      expect(options.map((o) => o.value)).toEqual(['s', 'm', 'h', 'd']);
+    });
   });
 
   describe('getTimeFieldOptions', () => {

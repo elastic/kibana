@@ -14,18 +14,20 @@ const REFETCH_INTERVAL_MS = 60_000;
 
 /**
  * Fetches the lifecycle chain of a significant event: its change-point
- * detections, discoveries, and stored event versions.
+ * detections and stored event versions.
  *
  * `eventUuid` is the event document version id (`event_uuid`), not the stable
  * incident key (`event_id`) — the lifecycle route looks up by event_uuid first.
  */
 export const useFetchEventLifecycle = (
-  eventUuid: string
+  eventUuid: string,
+  { enabled = true }: { enabled?: boolean } = {}
 ): UseQueryResult<EventLifecycleResponse, Error> => {
   const { http } = useKibana().services;
 
   return useQuery<EventLifecycleResponse, Error>({
     queryKey: ['nightshift.eventLifecycle', eventUuid],
+    enabled: enabled && Boolean(eventUuid),
     queryFn: async ({ signal }) => {
       return http.get<EventLifecycleResponse>(
         `/internal/significant_events/events/${encodeURIComponent(eventUuid)}/lifecycle`,

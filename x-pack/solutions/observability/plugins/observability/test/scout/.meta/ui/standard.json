@@ -1,5 +1,5 @@
 {
-  "sha1": "ff80132de5ac46c3eefe0fc73cf4d034601efff2",
+  "sha1": "f1603c58e15d7fe0e543379c8efaf7c15c55e32f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -600,8 +600,8 @@
       }
     },
     {
-      "id": "d3ffd39f648f151-77c285778f177cc",
-      "title": "Observability cases - no privileges returns the feature-privileges-required page",
+      "id": "d3ffd39f648f151-47502b229835fc7",
+      "title": "Observability cases - no privileges returns Application not found when the Observability app is inaccessible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

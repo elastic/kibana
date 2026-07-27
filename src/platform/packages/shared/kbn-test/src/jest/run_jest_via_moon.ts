@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import Os from 'os';
 import Path from 'path';
 
@@ -56,6 +56,8 @@ export interface MoonJestResult {
   verboseDetail?: string;
   failureExcerpt?: string[];
   warnings?: string[];
+  /** REPO_ROOT-relative path to the full captured Moon/Jest output, written on failure. */
+  logPath?: string;
 }
 
 export interface MoonJestProgress {
@@ -70,6 +72,19 @@ export interface MoonJestParseResult {
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+
+export const MOON_JEST_LOG_PATH = 'target/kibana-check-jest-output.log';
+
+const writeMoonJestLog = (output: string): string | undefined => {
+  try {
+    const absPath = Path.resolve(REPO_ROOT, MOON_JEST_LOG_PATH);
+    mkdirSync(Path.dirname(absPath), { recursive: true });
+    writeFileSync(absPath, stripAnsi(output));
+    return MOON_JEST_LOG_PATH;
+  } catch {
+    return undefined;
+  }
+};
 
 /** Mirrors CI's unit-test heap cap (`.buildkite/scripts/steps/test/jest_parallel.sh`). */
 export const JEST_WORKER_MAX_OLD_SPACE_MB = 4096;
@@ -202,15 +217,16 @@ export const parseMoonJestOutput = (output: string): MoonJestParseResult => {
   for (const rawLine of output.split('\n')) {
     const stripped = stripAnsi(rawLine).trim();
 
-    // "pass RunTask(@kbn/foo:jest) (cached, ...)" from --summary detailed
-    const cachedMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+    // "pass RunTask(@kbn/foo:jest) (cached, ...)" from --summary detailed.
+    // Project ids aren't always @-scoped (e.g. `kibana-buildkite`), so match any non-space id.
+    const cachedMatch = stripped.match(/^pass RunTask\(([^\s():|]+):jest\) \(cached/);
     if (cachedMatch) {
       cachedProjects.add(cachedMatch[1]);
       continue;
     }
 
     // Jest --json output: either prefixed "@kbn/foo:jest | {...}" or unprefixed "{...}"
-    const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+    const jsonPrefixMatch = stripped.match(/^([^\s():|]+):jest \| \{/);
     const isUnprefixedJson = !jsonPrefixMatch && stripped.startsWith('{"num');
     if (jsonPrefixMatch || isUnprefixedJson) {
       const project = jsonPrefixMatch ? jsonPrefixMatch[1] : '_single';
@@ -336,17 +352,17 @@ export const buildMoonJestWarnings = ({
 const parseMoonJestProgressProject = (rawLine: string) => {
   const stripped = stripAnsi(rawLine).trim();
 
-  const cachedSummaryMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+  const cachedSummaryMatch = stripped.match(/^pass RunTask\(([^\s():|]+):jest\) \(cached/);
   if (cachedSummaryMatch) {
     return cachedSummaryMatch[1];
   }
 
-  const summaryMatch = stripped.match(/^(?:pass|fail) RunTask\((@[^:]+):jest\) \(/);
+  const summaryMatch = stripped.match(/^(?:pass|fail) RunTask\(([^\s():|]+):jest\) \(/);
   if (summaryMatch) {
     return summaryMatch[1];
   }
 
-  const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+  const jsonPrefixMatch = stripped.match(/^([^\s():|]+):jest \| \{/);
   if (jsonPrefixMatch) {
     return jsonPrefixMatch[1];
   }
@@ -486,22 +502,29 @@ export const runJestViaMoon = async ({
 
   const cachedCount = tasks.filter((t) => t.cached).length;
   const ranCount = tasks.length - cachedCount;
+  const exitCode = result.exitCode ?? 0;
   const warnings = buildMoonJestWarnings({
     output,
-    exitCode: result.exitCode ?? 0,
+    exitCode,
     taskCount: tasks.length,
     parseFailures,
   });
+
+  // Persist the full log on any failure so the complete output survives even when parsing
+  // couldn't attribute failures to individual tests.
+  const hasFailure = exitCode !== 0 || failed.length > 0;
+  const logPath = hasFailure ? writeMoonJestLog(output) : undefined;
 
   return {
     taskCount: tasks.length,
     cachedCount,
     totalTests: tasks.reduce((sum, t) => sum + t.testCount, 0),
     failed,
-    exitCode: result.exitCode ?? 0,
+    exitCode,
     failureExcerpt:
-      tasks.length === 0 && result.exitCode !== 0 ? extractMoonFailureExcerpt(output) : undefined,
+      tasks.length === 0 && exitCode !== 0 ? extractMoonFailureExcerpt(output) : undefined,
     warnings,
+    logPath,
     verboseDetail: verbose
       ? `${packageInfo.jestDirs.length} packages, ${ranCount} ran, ${cachedCount} cached, ${cpus} cpus → concurrency=${concurrency}, maxWorkers=${maxWorkers}`
       : undefined,
