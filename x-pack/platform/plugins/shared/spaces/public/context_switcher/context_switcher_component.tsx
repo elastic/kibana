@@ -85,10 +85,17 @@ const ContextSwitcherInner = ({
     canManageSpaces: core.application.capabilities.spaces?.manage === true,
   });
 
-  const handleSpaceSelect = useCallback(
-    (spaceId: string) => {
+  const handleSpaceSelect = useCallback<ContextSwitcherSpacesConfig['onSelect']>(
+    (spaceId, event) => {
       const url = addSpaceIdToPath(core.http.basePath.serverBasePath, spaceId, ENTER_SPACE_PATH);
-      core.application.navigateToUrl(url);
+
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        core.application.navigateToUrl(url);
+      }
     },
     [core]
   );
