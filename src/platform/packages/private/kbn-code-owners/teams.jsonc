@@ -589,9 +589,31 @@
       "Streams"
     ]
   },
+    {
+    "id": "obs-signals-logs",
+    "name": "Observability signals: Logs",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-logs-team",
+      "label": "Team:obs-signals-logs"
+    },
+    "responsibilities": [
+      "Logs analytics",
+      "Logs skills",
+      "Logs explorer",
+      "Logs stream",
+      "Observability navigation",
+      "Observability overview page",
+      "Synthetics",
+      "Univeral profiling",
+      "Uptime",
+      "Exploratory view",
+      "UX Dashboard"
+    ]
+  },
   {
     "id": "obs-signals-metrics",
-    "name": "Obs UX: Signals & Metrics",
+    "name": "Observability signals: Metrics",
     "areas": ["observability"],
     "github": {
       "team": "elastic/obs-signals-metrics-team",
