@@ -104,7 +104,7 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 1. **Catalog every FTR service and page object** used by the tests: name, what it does, which files use it, and whether it contains hidden assertions (`existOrFail`, `missingOrFail`, or `expect` calls that should move to specs)
 2. **Check for existing Scout equivalents**: does a matching page object or API service already exist in the Scout packages or in other plugins' `test/scout` trees? Note: exists / exists-but-in-wrong-scope / missing
 3. **For missing equivalents**, recommend scope (shared Scout package vs solution-scoped vs plugin-local) based on how many plugins would benefit
-4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor knows where to use Scout's EUI wrappers
+4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor can use a published Component Object through `page.components.*`, or identify where an existing legacy EUI wrapper is temporarily required because no equivalent Component Object exists
 5. **Flag brittle locator strategies**: `find.byCssSelector(...)`, `find.byClassName(...)`, or text-based lookups. Note where `data-test-subj` attributes are missing in source code and need to be added
 6. **Flag FTR page objects with hidden assertions**: these need restructuring since page objects should return state, with assertions belonging in the spec
 

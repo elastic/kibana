@@ -9,7 +9,7 @@
 - [Parallelization](#parallelization)
 - [Fixtures](#fixtures)
 - [Package Organization](#package-organization)
-- [EUI Wrappers](#eui-wrappers)
+- [EUI Component Objects](#eui-component-objects)
 
 ## Testing Layer Priority
 
@@ -194,12 +194,17 @@ export const test = baseTest.extend<{}, MyWorkerFixtures>({
 
 Put shared code in `@kbn/scout`, security-specific code in `@kbn/scout-security`.
 
-## EUI Test Helpers
+## EUI Component Objects
 
-Scout exposes the `@elastic/eui-test-helpers` package for EUI components that are non-trivial to drive, pre-bound to the page — use `page.components.*` instead of raw selectors:
-`page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`, `page.components.superSelect(testSubj)`, `page.components.globalToastList()`
+For EUI components that are non-trivial to drive, prefer the published `@elastic/eui-test-helpers` Component Objects exposed pre-bound to the page through `page.components.*`:
 
-For simple, native-like components (text fields, checkboxes) use plain Playwright locators.
+```typescript
+await page.components.comboBox('fieldSelectorComboBox').setSelectedOptions(['host.name']);
+```
+
+Available factories include `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`, `page.components.superSelect(testSubj)`, and `page.components.globalToastList()`. For simple, native-like components such as text fields and checkboxes, use plain Playwright locators.
+
+Existing legacy EUI wrappers exported by `@kbn/scout` are compatibility fallbacks only when no equivalent Component Object exists. Do not add or extend wrappers in a test suite.
 
 ## Kibana Component Interaction Patterns
 
