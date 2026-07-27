@@ -82,9 +82,9 @@ session-timeout: 90
 #   # data-setup: skip
 #
 # CCS cleanup is blocked until the session verifies that the remote-cluster
-# state has been restored. The generated config.json tracks this as:
-#   ccs_state: unchanged
-#   ccs_restored: false
-# capture-remote-cluster.py persists the writable restore payload and
-# restoration provenance in:
+# state has been restored. The generated config.json tracks capture and
+# mutation progress as ccs_state: captured, mutation_pending, modified, or
+# restored. ccs_restored is false until verification succeeds.
+# capture-remote-cluster.py persists the writable restore payload, raw
+# persistent/transient settings, and restoration provenance in:
 #   ccs_restore: { remote_cluster_alias, endpoint, payload, provenance }

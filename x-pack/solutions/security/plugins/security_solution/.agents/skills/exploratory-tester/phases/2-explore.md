@@ -2,6 +2,12 @@
 
 ---
 
+Before starting Phase 2, inspect `config.json → skipped_setup`. If it contains
+`step: "user-provisioning"`, **do not explore**: stop, report that the
+session-user setup failed, and run the restore-aware cleanup command below.
+The authenticated admin setup session must never be used as an exploration
+identity.
+
 ## Session cap check — run before every flow
 
 Before starting each flow (single or parallel), check whether the session time cap has been reached:

@@ -21,12 +21,13 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 The script persists only the writable update payload in
 `config.json → ccs_restore.payload`; it excludes read-only status fields from
 the GET response. It also persists the restoration provenance
-(`isConfiguredByNode` and `hasDeprecatedProxySetting`) so a node-configured
-cluster is restored by removing the temporary persistent override rather than
-being converted into a persistent configuration. Inspect the payload and
-provenance and show them to the user before continuing. Note `mode` (`proxy`
-or `sniff`), `proxyAddress` or `seeds`, `serverName`, `skipUnavailable`, and
-`hasDeprecatedProxySetting`.
+(`isConfiguredByNode` and `hasDeprecatedProxySetting`) and the exact
+persistent/transient Elasticsearch settings layers. Legacy `proxy` settings
+remain in the raw snapshot instead of being sent through the Kibana serializer,
+and transient settings are restored to the transient layer. Inspect the
+payload and provenance and show them to the user before continuing. Note `mode`
+(`proxy` or `sniff`), `proxyAddress` or `seeds`, `serverName`,
+`skipUnavailable`, and `hasDeprecatedProxySetting`.
 
 ### 2. Get user confirmation
 
@@ -36,75 +37,45 @@ Show the user the captured config and ask, verbatim:
 
 Wait for an explicit yes. On anything else, skip the scenario and log the affected checklist step as `skipped: user declined remote-cluster break`.
 
-### 3. Mark the session state before breaking the shared cluster
+### 3. Journal and break it — invalid address, everything else unchanged
 ```bash
-PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
-python3 - "$SESSION_DIR" <<'PY'
-import sys
-from pathlib import Path
-
-from session_resources import edit_session_config
-
-with edit_session_config(Path(sys.argv[1]) / "config.json") as config:
-    config["ccs_state"] = "modified"
-    config["ccs_restored"] = False
-PY
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/break-remote-cluster.py \
+  --session-dir "$SESSION_DIR" \
+  --alias "<REMOTE_ALIAS>"
 ```
+The script records `ccs_state="mutation_pending"` before issuing the shared
+cluster request, and changes it to `modified` only after the request succeeds.
+If the process crashes or the request fails, cleanup still treats the pending
+state as requiring restoration. For a persistent or transient snapshot it
+mutates the original Elasticsearch settings layer directly; for a
+node-configured cluster it uses the Kibana API to create a temporary
+persistent override. It never sends `hasDeprecatedProxySetting` through the
+Kibana serializer, so legacy proxy configuration is not silently converted to
+`proxy: null`.
 
-### 4. Break it — invalid proxyAddress, everything else unchanged
-
-Build the complete writable update payload from the persisted snapshot. Keep
-all fields unchanged except the address that makes the connection fail:
-```bash
-CCS_BREAK_BODY=$(PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
-python3 - "$SESSION_DIR" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-from session_resources import load_session_config
-
-config = load_session_config(Path(sys.argv[1]) / "config.json")
-payload = dict(config["ccs_restore"]["payload"])
-if payload["mode"] == "sniff":
-    payload["seeds"] = ["invalid.broken.example:9300"]
-    payload["proxyAddress"] = None
-    payload["proxySocketConnections"] = None
-else:
-    payload["proxyAddress"] = "invalid.broken.example:9400"
-    payload["seeds"] = None
-    payload["nodeConnections"] = None
-print(json.dumps(payload, separators=(",", ":")))
-PY
-)
-curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" \
-  -H "kbn-xsrf: true" -H "Content-Type: application/json" \
-  "<SOURCE_KIBANA_URL>/api/remote_clusters/<REMOTE_ALIAS>" \
-  -d "$CCS_BREAK_BODY"
-```
-
-### 5. Verify it is actually broken
+### 4. Verify it is actually broken
 ```bash
 curl -s -H "Authorization: ApiKey <API_KEY>" "<SOURCE_ES_URL>/_remote/info?pretty"
 ```
 Confirm `<REMOTE_ALIAS>.connected` is `false` before running any test flow. If it still shows `connected: true`, the change has not propagated — wait a few seconds and re-check; do not start the flow against a still-connected cluster.
 
-### 6. Run the affected flows
+### 5. Run the affected flows
 
 Run the CCS "unreachable remote" flows now. Capture evidence exactly as for any finding (`scripts/record-evidence.md`).
 
-### 7. Restore the exact original config
+### 6. Restore the exact original config
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-remote-cluster.py \
   --session-dir "$SESSION_DIR"
 ```
 
-The script restores from the durable snapshot, verifies the complete
-configuration and provenance, polls until `<REMOTE_ALIAS>.connected == true`,
-and only then sets `ccs_state="restored"`. **Do not proceed to the next flow,
-and do not end the session, until this command succeeds.** If restore fails,
-tell the user immediately with the persisted snapshot so they can restore it
-manually — treat a broken shared deployment as urgent.
+The script restores the raw persistent/transient settings layers from the
+durable snapshot, verifies the complete configuration and provenance, polls
+until `<REMOTE_ALIAS>.connected == true`, and only then sets
+`ccs_state="restored"`. **Do not proceed to the next flow, and do not end the
+session, until this command succeeds.** If restore fails, tell the user
+immediately with the persisted snapshot so they can restore it manually —
+treat a broken shared deployment as urgent.
 
 ## Notes
 

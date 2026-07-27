@@ -471,10 +471,13 @@ When testing CCS, replace `null` with:
 }
 ```
 Set `data_view_verified` to `true` only after confirming the tested data view's index pattern includes `<remote_cluster_alias>:*`.
-Keep `ccs_state` as `"unchanged"` unless a flow temporarily modifies the
-remote-cluster configuration. Set it to `"modified"` before that mutation and
-to `"restored"` only after the original configuration and connection have been
-verified. Cleanup fails closed while the state is `"modified"`.
+Keep `ccs_state` as `"unchanged"` until a CCS snapshot is captured. Capture
+sets it to `"captured"`; `break-remote-cluster.py` changes it to
+`"mutation_pending"` before the request and to `"modified"` only after the
+request succeeds. `restore-remote-cluster.py` sets it to `"restored"` only
+after the original raw settings layers, configuration, provenance, and
+connection have been verified. Cleanup fails closed for captured, pending, and
+modified states.
 
 ---
 

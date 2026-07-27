@@ -31,15 +31,21 @@ def main() -> int:
         )
         return 1
 
-    cleanup_script = Path(__file__).with_name("cleanup-session-resources.py")
+    restore_cleanup_script = Path(__file__).with_name(
+        "restore-and-cleanup-session.py"
+    )
+    cleanup_args = [
+        sys.executable,
+        str(restore_cleanup_script),
+        "--session-dir",
+        str(parsed_args.session_dir),
+        "--kind",
+        "kibana_space",
+    ]
+    if "--dry-run" in sys.argv:
+        cleanup_args.append("--dry-run")
     result = subprocess.run(
-        [
-            sys.executable,
-            str(cleanup_script),
-            *sys.argv[1:],
-            "--kind",
-            "kibana_space",
-        ],
+        cleanup_args,
         check=False,
     )
     return result.returncode

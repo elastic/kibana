@@ -83,6 +83,33 @@ def _cleanup_order(resource: dict[str, Any]) -> tuple[int, str]:
     return (0 if kind in CCS_RESOURCE_KINDS else 1, str(resource.get("id", "")))
 
 
+def _response_body(stdout: str) -> str:
+    lines = stdout.strip().splitlines()
+    return "\n".join(lines[:-1]) if len(lines) > 1 else ""
+
+
+def _delete_by_query_error(
+    *,
+    resource_id: str,
+    status: str,
+    response_body: str,
+) -> str | None:
+    if status == "404":
+        return None
+    try:
+        response = json.loads(response_body)
+    except json.JSONDecodeError as exc:
+        return f"Resource {resource_id!r}: invalid delete_by_query response: {exc}"
+    if not isinstance(response, dict):
+        return f"Resource {resource_id!r}: delete_by_query response was not an object"
+    if response.get("timed_out") is not False:
+        return f"Resource {resource_id!r}: delete_by_query timed out"
+    failures = response.get("failures")
+    if not isinstance(failures, list) or failures:
+        return f"Resource {resource_id!r}: delete_by_query reported failures"
+    return None
+
+
 def cleanup_session(
     config: dict[str, Any],
     dry_run: bool,
@@ -184,6 +211,17 @@ def cleanup_session(
         )
         status = http_status(result.stdout)
         if status in SUCCESSFUL_CLEANUP_STATUSES:
+            if method == "POST" and "_delete_by_query" in str(
+                resource.get("endpoint", "")
+            ):
+                delete_by_query_error = _delete_by_query_error(
+                    resource_id=resource_id,
+                    status=status,
+                    response_body=_response_body(result.stdout),
+                )
+                if delete_by_query_error is not None:
+                    errors.append(delete_by_query_error)
+                    continue
             resource["cleanup_status"] = (
                 "already_gone" if status == "404" else "deleted"
             )

@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -18,6 +19,7 @@ DELETE_SCRIPT = SCRIPT_DIR / "delete-flow-spaces.py"
 NOISE_SCRIPT = SCRIPT_DIR / "create-noise-index.sh"
 POSITIVE_CONTROL = SCRIPT_DIR / "positive-control-alert.md"
 BREAK_REMOTE = SCRIPT_DIR / "break-remote-cluster.md"
+BREAK_CCS_SCRIPT = SCRIPT_DIR / "break-remote-cluster.py"
 CAPTURE_CCS_SCRIPT = SCRIPT_DIR / "capture-remote-cluster.py"
 RESTORE_CCS_SCRIPT = SCRIPT_DIR / "restore-remote-cluster.py"
 RECONCILE_SCRIPT = SCRIPT_DIR / "reconcile-session-resource.py"
@@ -27,10 +29,38 @@ OWNED_REUSED_FIXTURE = FIXTURES_DIR / "session-resources-owned-reused.json"
 EARLY_EXIT_FIXTURE = FIXTURES_DIR / "session-resources-early-exit.json"
 PHASES_DIR = SCRIPT_DIR.parent / "phases"
 TEMPLATE_DIR = SCRIPT_DIR.parent / "templates"
+EMPTY_CCS_SETTINGS = {"persistent": {}, "transient": {}}
+PERSISTENT_CCS_SETTINGS = {
+    "persistent": {
+        "cluster": {
+            "remote": {
+                "remote": {
+                    "mode": "proxy",
+                    "proxy_address": "remote.example.test:9400",
+                }
+            }
+        }
+    },
+    "transient": {},
+}
+TRANSIENT_CCS_SETTINGS = {
+    "persistent": {},
+    "transient": {
+        "cluster": {
+            "remote": {
+                "remote": {
+                    "mode": "sniff",
+                    "seeds": ["remote.example:9300"],
+                }
+            }
+        }
+    },
+}
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_resources import (  # noqa: E402
     build_auth_args,
+    ccs_cleanup_blocked,
     cleanup_candidates,
     ensure_session_manifest,
     namespaced_flow_space_id,
@@ -111,6 +141,23 @@ class SessionResourceContractTests(unittest.TestCase):
         del config["environment"]["ccs"]["remote"]["credentials"]
         with self.assertRaisesRegex(ValueError, "remote credentials"):
             build_auth_args(config, base_url_key="ccs_remote_es_url")
+
+    def test_ccs_cleanup_blocks_captured_and_pending_mutation_states(self):
+        config = {
+            "environment": {"ccs": {"remote_cluster_alias": "remote"}},
+            "ccs_restore": {},
+        }
+        for state in ("captured", "mutation_pending", "modified"):
+            config["ccs_state"] = state
+            self.assertTrue(ccs_cleanup_blocked(config))
+
+        config["ccs_state"] = "unchanged"
+        self.assertTrue(ccs_cleanup_blocked(config))
+        config.pop("ccs_restore")
+        self.assertFalse(ccs_cleanup_blocked(config))
+        config["ccs_restore"] = {}
+        config["environment"] = {}
+        self.assertTrue(ccs_cleanup_blocked(config))
 
     def test_reconcile_pending_resource_transitions_by_probe_status(self):
         config = {
@@ -211,8 +258,25 @@ class SessionResourceContractTests(unittest.TestCase):
             fake_curl.write_text(
                 """#!/usr/bin/env python3
 import json
+import sys
 
-print(json.dumps([{
+if "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy": "old.remote.test:9400",
+                        "skip_unavailable": "false",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+else:
+    print(json.dumps([{
         "name": "remote",
         "mode": "proxy",
         "isConnected": True,
@@ -223,7 +287,7 @@ print(json.dumps([{
         "serverName": None,
         "isConfiguredByNode": False,
         "hasDeprecatedProxySetting": True,
-}]))
+    }]))
 print("200")
 """,
                 encoding="utf-8",
@@ -261,7 +325,6 @@ print("200")
                     "proxyAddress": "old.remote.test:9400",
                     "proxySocketConnections": 3,
                     "serverName": None,
-                    "hasDeprecatedProxySetting": True,
                 },
             )
             self.assertEqual(
@@ -269,10 +332,110 @@ print("200")
                 {
                     "is_configured_by_node": False,
                     "has_deprecated_proxy_setting": True,
+                    "configuration_layer": "persistent",
+                    "settings": {
+                        "persistent": {
+                            "cluster": {
+                                "remote": {
+                                    "remote": {
+                                        "mode": "proxy",
+                                        "proxy": "old.remote.test:9400",
+                                        "skip_unavailable": "false",
+                                    }
+                                }
+                            }
+                        },
+                        "transient": {},
+                    },
                 },
             )
             self.assertNotIn("isConnected", restore["payload"])
             self.assertNotIn("securityModel", restore["payload"])
+
+    def test_capture_remote_cluster_preserves_transient_settings_layer(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "unchanged",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import sys
+
+if "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {},
+        "transient": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "sniff",
+                        "seeds": ["remote.example:9300"],
+                    }
+                }
+            }
+        },
+    }))
+else:
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "sniff",
+        "isConnected": True,
+        "skipUnavailable": False,
+        "seeds": ["remote.example:9300"],
+        "nodeConnections": 3,
+        "proxyAddress": None,
+        "proxySocketConnections": None,
+        "serverName": None,
+        "isConfiguredByNode": False,
+        "hasDeprecatedProxySetting": False,
+    }]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            restore = config["ccs_restore"]
+            self.assertEqual(restore["provenance"]["configuration_layer"], "transient")
+            self.assertEqual(restore["provenance"]["settings"], TRANSIENT_CCS_SETTINGS)
+            self.assertEqual(config["ccs_state"], "captured")
 
     def test_reconcile_resource_cli_adopts_a_pending_remote_resource(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -404,6 +567,469 @@ print("200")
             self.assertNotIn("Traceback", result.stderr)
             self.assertIn("not pending", result.stderr)
 
+    def test_restore_remote_cluster_reports_missing_snapshot_cleanly(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            session_dir = Path(raw_dir) / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_restore": None,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertNotIn("Traceback", result.stderr)
+            self.assertIn("no durable CCS restore snapshot", result.stderr)
+
+    def test_break_remote_cluster_journals_mutation_before_request(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "captured",
+                        "ccs_restored": False,
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": {
+                                "skipUnavailable": False,
+                                "mode": "proxy",
+                                "seeds": None,
+                                "nodeConnections": None,
+                                "proxyAddress": "remote.example.test:9400",
+                                "proxySocketConnections": 3,
+                                "serverName": None,
+                            },
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": True,
+                                "configuration_layer": "persistent",
+                                "settings": {
+                                    "persistent": {
+                                        "cluster": {
+                                            "remote": {
+                                                "remote": {
+                                                    "mode": "proxy",
+                                                    "proxy": "remote.example.test:9400",
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "transient": {},
+                                },
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
+    config = json.loads(open(os.environ["SESSION_CONFIG"]).read())
+    log.write(config["ccs_state"] + "\\n")
+    log.write(" ".join(sys.argv[1:]) + "\\n")
+print(json.dumps({"acknowledged": True}))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+            environment["SESSION_CONFIG"] = str(config_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(BREAK_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "modified")
+            self.assertEqual(
+                log_path.read_text(encoding="utf-8").splitlines()[0],
+                "mutation_pending",
+            )
+            curl_log = log_path.read_text(encoding="utf-8")
+            self.assertIn("https://source.es.test/_cluster/settings", curl_log)
+            self.assertIn("invalid.broken.example:9400", curl_log)
+            self.assertIn('"proxy"', curl_log)
+
+    def test_restore_repairs_captured_snapshot_drift_without_modified_state(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "captured",
+                        "ccs_restored": False,
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": {
+                                "skipUnavailable": False,
+                                "mode": "proxy",
+                                "seeds": None,
+                                "nodeConnections": None,
+                                "proxyAddress": "remote.example.test:9400",
+                                "proxySocketConnections": 3,
+                                "serverName": None,
+                            },
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "persistent",
+                                "settings": PERSISTENT_CCS_SETTINGS,
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            restored_marker = root / "restored"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+restored = os.path.exists(os.environ["RESTORED_MARKER"])
+if "PUT" in sys.argv:
+    open(os.environ["RESTORED_MARKER"], "w").close()
+    print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    address = "remote.example.test:9400" if restored else "wrong.example.test:9400"
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": address,
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+elif any("api/remote_clusters" in value for value in sys.argv):
+    address = "remote.example.test:9400" if restored else "wrong.example.test:9400"
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": address,
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": False,
+        "isConfiguredByNode": False,
+    }]))
+else:
+    print(json.dumps({"remote": {"connected": True}}))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["RESTORED_MARKER"] = str(restored_marker)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--timeout-seconds",
+                    "1",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(restored_marker.exists())
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "restored")
+
+    def test_break_failure_leaves_mutation_pending_for_cleanup(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "captured",
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": {
+                                "skipUnavailable": False,
+                                "mode": "proxy",
+                                "seeds": None,
+                                "nodeConnections": None,
+                                "proxyAddress": "remote.example.test:9400",
+                                "proxySocketConnections": 3,
+                                "serverName": None,
+                            },
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "persistent",
+                                "settings": PERSISTENT_CCS_SETTINGS,
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+print('{"error": "request rejected"}')
+print("500")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(BREAK_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "mutation_pending")
+            self.assertIn("pending", result.stderr)
+
+    def test_restore_does_not_hold_config_lock_during_polling(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "modified",
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": {
+                                "skipUnavailable": False,
+                                "mode": "proxy",
+                                "seeds": None,
+                                "nodeConnections": None,
+                                "proxyAddress": "remote.example.test:9400",
+                                "proxySocketConnections": 3,
+                                "serverName": None,
+                            },
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "persistent",
+                                "settings": PERSISTENT_CCS_SETTINGS,
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            started_marker = root / "curl-started"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+import time
+
+if not os.path.exists(os.environ["STARTED_MARKER"]):
+    open(os.environ["STARTED_MARKER"], "w").close()
+    time.sleep(2)
+if "PUT" in sys.argv:
+    print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": "remote.example.test:9400",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+elif any("api/remote_clusters" in value for value in sys.argv):
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": "remote.example.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": False,
+        "isConfiguredByNode": False,
+    }]))
+else:
+    print(json.dumps({"remote": {"connected": True}}))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["STARTED_MARKER"] = str(started_marker)
+
+            restore_process = subprocess.Popen(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--timeout-seconds",
+                    "1",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env=environment,
+            )
+            deadline = time.monotonic() + 2
+            while not started_marker.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(started_marker.exists())
+
+            register_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(REGISTER_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "lock-test-index",
+                    "--endpoint",
+                    "/lock-test-index",
+                    "--base-url",
+                    "es_url",
+                    "--owned",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+                timeout=1.5,
+            )
+            restore_stdout, restore_stderr = restore_process.communicate(timeout=5)
+
+            self.assertEqual(register_result.returncode, 0, register_result.stderr)
+            self.assertEqual(restore_process.returncode, 0, restore_stderr or restore_stdout)
+
     def test_restore_remote_cluster_uses_snapshot_and_marks_state_after_verify(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
@@ -418,7 +1044,6 @@ print("200")
                 "proxyAddress": "old.remote.test:9400",
                 "proxySocketConnections": 3,
                 "serverName": None,
-                "hasDeprecatedProxySetting": True,
             }
             config_path.write_text(
                 json.dumps(
@@ -439,6 +1064,21 @@ print("200")
                             "provenance": {
                                 "is_configured_by_node": False,
                                 "has_deprecated_proxy_setting": True,
+                                "configuration_layer": "persistent",
+                                "settings": {
+                                    "persistent": {
+                                        "cluster": {
+                                            "remote": {
+                                                "remote": {
+                                                    "mode": "proxy",
+                                                    "proxy": "old.remote.test:9400",
+                                                    "skip_unavailable": "false",
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "transient": {},
+                                },
                             },
                         },
                     }
@@ -458,6 +1098,21 @@ with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
     log.write(" ".join(sys.argv[1:]) + "\\n")
 if "PUT" in sys.argv:
     print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy": "old.remote.test:9400",
+                        "skip_unavailable": "false",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
 elif any("api/remote_clusters" in value for value in sys.argv):
     print(json.dumps([{
         "name": "remote",
@@ -510,7 +1165,7 @@ print("200")
             self.assertEqual(config["ccs_state"], "restored")
             self.assertTrue(config["ccs_restored"])
             curl_log = log_path.read_text(encoding="utf-8")
-            self.assertIn("kbn-xsrf: true", curl_log)
+            self.assertIn("https://source.es.test/_cluster/settings", curl_log)
             self.assertIn("old.remote.test:9400", curl_log)
             self.assertIn(
                 "https://source.kibana.test/api/remote_clusters\n",
@@ -533,7 +1188,6 @@ print("200")
                 "proxyAddress": None,
                 "proxySocketConnections": None,
                 "serverName": None,
-                "hasDeprecatedProxySetting": False,
             }
             config_path.write_text(
                 json.dumps(
@@ -553,6 +1207,8 @@ print("200")
                             "provenance": {
                                 "is_configured_by_node": True,
                                 "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "node",
+                                "settings": EMPTY_CCS_SETTINGS,
                             },
                         },
                     }
@@ -571,6 +1227,8 @@ with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
     log.write(" ".join(sys.argv[1:]) + "\\n")
 if "DELETE" in sys.argv:
     print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({"persistent": {}, "transient": {}}))
 elif any("api/remote_clusters" in value for value in sys.argv):
     print(json.dumps([{
         "name": "remote",
@@ -612,8 +1270,11 @@ print("200")
             config = json.loads(config_path.read_text(encoding="utf-8"))
             self.assertEqual(config["ccs_state"], "restored")
             curl_log = log_path.read_text(encoding="utf-8")
-            self.assertIn("-X DELETE", curl_log)
-            self.assertNotIn("-X PUT", curl_log)
+            self.assertIn("https://source.es.test/_cluster/settings", curl_log)
+            self.assertNotIn(
+                "-X PUT https://source.kibana.test/api/remote_clusters/remote",
+                curl_log,
+            )
 
     def test_restore_and_cleanup_restores_ccs_before_cleanup(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -629,7 +1290,6 @@ print("200")
                 "proxyAddress": "remote.example.test:9400",
                 "proxySocketConnections": 3,
                 "serverName": None,
-                "hasDeprecatedProxySetting": False,
             }
             config_path.write_text(
                 json.dumps(
@@ -650,6 +1310,8 @@ print("200")
                             "provenance": {
                                 "is_configured_by_node": False,
                                 "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "persistent",
+                                "settings": PERSISTENT_CCS_SETTINGS,
                             },
                         },
                         "session_resources": [],
@@ -665,6 +1327,20 @@ import sys
 
 if "PUT" in sys.argv:
     print(json.dumps({"acknowledged": True}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": "remote.example.test:9400",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
 elif any("api/remote_clusters" in value for value in sys.argv):
     print(json.dumps([{
         "name": "remote",
@@ -765,6 +1441,7 @@ print("200")
         noise = (SCRIPT_DIR / "create-noise-index.sh").read_text(encoding="utf-8")
         positive_control = POSITIVE_CONTROL.read_text(encoding="utf-8")
         break_remote = BREAK_REMOTE.read_text(encoding="utf-8")
+        delete_flow_spaces = DELETE_SCRIPT.read_text(encoding="utf-8")
         session_template = (
             TEMPLATE_DIR / "session.example.yaml"
         ).read_text(encoding="utf-8")
@@ -801,6 +1478,10 @@ print("200")
         )
         self.assertIn('--base-url es_url', login)
         self.assertIn('--endpoint "/_security/user/$TEST_USERNAME"', login)
+        self.assertIn("USER_PROVISIONING_SKIPPED", login)
+        self.assertIn("Do not continue to Phase 2", login)
+        self.assertIn("user-provisioning", explore)
+        self.assertIn("do not explore", explore)
         self.assertIn("NOISE_INDEX_NAME", login)
         self.assertIn("cleanup-session-resources.py", report)
         self.assertIn("restore-and-cleanup-session.py", explore)
@@ -811,11 +1492,15 @@ print("200")
         self.assertIn("ENVIRONMENT_API_KEY", setup)
         self.assertIn("edit_session_config", setup)
         self.assertIn('"ccs_state": "unchanged"', setup)
+        self.assertIn('"captured"', setup)
+        self.assertIn('"mutation_pending"', setup)
         self.assertIn("ccs_state", report)
-        self.assertIn('config["ccs_state"] = "modified"', break_remote)
+        self.assertIn("break-remote-cluster.py", break_remote)
+        self.assertIn('ccs_state="mutation_pending"', break_remote)
         self.assertIn("capture-remote-cluster.py", break_remote)
         self.assertIn("restore-remote-cluster.py", break_remote)
         self.assertIn('ccs_state="restored"', break_remote)
+        self.assertIn("restore-and-cleanup-session.py", delete_flow_spaces)
         self.assertIn("session_id", session_template)
         self.assertIn("ccs_restored", session_template)
         self.assertIn("ccs_restore", setup)
@@ -1836,6 +2521,7 @@ import sys
 
 with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
     log.write(" ".join(sys.argv[1:]))
+print('{"timed_out": false, "failures": []}')
 print("200")
 """,
                 encoding="utf-8",
@@ -1862,6 +2548,78 @@ print("200")
             curl_args = log_path.read_text(encoding="utf-8")
             self.assertIn("-X POST", curl_args)
             self.assertIn(body, curl_args)
+
+    def test_cleanup_rejects_partial_alert_delete_by_query_response(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            body = json.dumps(
+                {"query": {"term": {"kibana.alert.rule.uuid": "rule-1"}}}
+            )
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://kibana.example.test",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "es_alerts",
+                                "id": "positive-control-alerts-rule-1",
+                                "owned": True,
+                                "state": "owned",
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": (
+                                    "/.alerts-security.alerts-qa/"
+                                    "_delete_by_query"
+                                ),
+                                "base_url": "es_url",
+                                "method": "POST",
+                                "body": body,
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+print('{"timed_out": true, "failures": [{"reason": "shard failure"}]}')
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("delete_by_query", result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["session_resources"][0]["state"], "owned")
 
     def test_cleanup_fails_closed_when_ccs_is_not_restored(self):
         with tempfile.TemporaryDirectory() as raw_dir:

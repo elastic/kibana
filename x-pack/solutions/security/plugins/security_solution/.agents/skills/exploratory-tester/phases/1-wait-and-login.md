@@ -2,9 +2,10 @@
 
 ---
 
-If any setup step aborts after `config.json` exists, restore CCS first when
-`config.json → ccs_state` is `"modified"`. When it is `"unchanged"`, no CCS
-mutation occurred and cleanup can proceed immediately:
+If any setup step aborts after `config.json` exists, always run the
+restore-aware cleanup wrapper. It verifies a captured snapshot and restores
+CCS when `ccs_state` is `"captured"`, `"mutation_pending"`, or `"modified"`;
+when there is no snapshot, it proceeds with ordinary cleanup:
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
@@ -335,9 +336,11 @@ esac
 ```
 `environment.es_url`: replace `kb.` with `es.` in ECH URLs. If the configured
 Kibana key does not have Elasticsearch user-management privileges, the
-user-provisioning branch records `skipped_setup` and continues without
-switching to the unprovisioned test user. Do not fall back to browser
-credentials for API calls.
+user-provisioning branch records `skipped_setup`. **Do not continue to Phase 2
+when `USER_PROVISIONING_SKIPPED=true`: stop setup, run the restore-aware
+cleanup command, and report that exploration did not run.** Never explore as
+the admin setup user after test-user provisioning fails. Do not fall back to
+browser credentials for API calls.
 
 Serverless: skip user creation — roles are pre-provisioned. Add `{ "step": "role-creation:<role>", "reason": "serverless" }` to `skipped_setup`.
 
@@ -363,9 +366,10 @@ endpoint. Built-in or pre-existing roles must not be registered as owned.
 ## Step 1d — Switch to test user
 
 _Skip for user-provided environments — provided credentials are the test credentials._
-If `USER_PROVISIONING_SKIPPED=true`, also skip this step and retain the
-authenticated setup session; `skipped_setup` is the source of truth for the
-report.
+If `USER_PROVISIONING_SKIPPED=true`, stop the session before Phase 2. Do not
+retain the authenticated admin setup session for exploration; run the
+restore-aware cleanup command and report the provisioning failure. The
+`skipped_setup` entry is the source of truth for the report.
 
 1. Navigate to `<environment.url>/logout`
 2. Navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`

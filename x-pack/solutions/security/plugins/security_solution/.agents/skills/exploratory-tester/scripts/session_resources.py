@@ -32,7 +32,9 @@ RESOURCE_KINDS = frozenset(
 )
 RESOURCE_STATES = frozenset({"pending", "owned", "reused"})
 RESOURCE_PRESENT_STATUSES = frozenset({"200", "201", "204"})
-CCS_STATES = frozenset({"unchanged", "modified", "restored"})
+CCS_STATES = frozenset(
+    {"unchanged", "captured", "mutation_pending", "modified", "restored"}
+)
 
 
 def load_session_config(config_path: Path) -> dict[str, Any]:
@@ -83,6 +85,22 @@ def edit_session_config(
         else:
             if persist:
                 write_session_config(config_path, config)
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+@contextmanager
+def session_operation_lock(
+    config_path: Path,
+    operation: str,
+) -> Iterator[None]:
+    if not re.fullmatch(r"[a-z0-9-]+", operation):
+        raise ValueError("Session operation lock name is invalid")
+    lock_path = config_path.with_name(f".{config_path.name}.{operation}.lock")
+    with lock_path.open("a+", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
         finally:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
@@ -287,12 +305,28 @@ def pending_resources(config: dict[str, Any]) -> list[dict[str, Any]]:
 def ccs_cleanup_blocked(config: dict[str, Any]) -> bool:
     environment = config.get("environment", {})
     ccs = environment.get("ccs") if isinstance(environment, dict) else None
-    if not isinstance(ccs, dict) or not ccs:
-        return False
     state = config.get("ccs_state")
+    snapshot_present = isinstance(config.get("ccs_restore"), dict)
+    if not isinstance(ccs, dict) or not ccs:
+        if state == "restored":
+            return False
+        return snapshot_present or state in {
+            "captured",
+            "mutation_pending",
+            "modified",
+        }
     if state is not None:
-        return state not in CCS_STATES or state == "modified"
-    return config.get("ccs_restored") is not True
+        if state not in CCS_STATES:
+            return True
+        if state in {"captured", "mutation_pending", "modified"}:
+            return True
+        if state == "unchanged" and isinstance(config.get("ccs_restore"), dict):
+            return True
+        return False
+    return (
+        config.get("ccs_restored") is not True
+        or isinstance(config.get("ccs_restore"), dict)
+    )
 
 
 def register_resource(

@@ -5,7 +5,9 @@ import argparse
 import json
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Iterator
 from urllib.parse import quote
 
 from session_resources import (
@@ -13,6 +15,7 @@ from session_resources import (
     edit_session_config,
     http_status,
     resolve_resource_base_url,
+    session_operation_lock,
     validate_resource_endpoint,
 )
 
@@ -25,7 +28,6 @@ RESTORE_FIELDS = (
     "proxyAddress",
     "proxySocketConnections",
     "serverName",
-    "hasDeprecatedProxySetting",
 )
 
 
@@ -61,12 +63,87 @@ def _find_cluster(payload: object, alias: str) -> dict[str, object] | None:
     return None
 
 
+def _settings_for_alias(
+    payload: object,
+    *,
+    layer: str,
+    alias: str,
+) -> dict[str, object] | None:
+    if not isinstance(payload, dict):
+        return None
+    layer_payload = payload.get(layer)
+    if not isinstance(layer_payload, dict):
+        return None
+    cluster_payload = layer_payload.get("cluster")
+    if not isinstance(cluster_payload, dict):
+        return None
+    remote_payload = cluster_payload.get("remote")
+    if not isinstance(remote_payload, dict):
+        return None
+    alias_settings = remote_payload.get(alias)
+    return alias_settings if isinstance(alias_settings, dict) else None
+
+
+def _settings_snapshot(
+    payload: object,
+    *,
+    alias: str,
+) -> tuple[dict[str, object], str]:
+    persistent = _settings_for_alias(payload, layer="persistent", alias=alias)
+    transient = _settings_for_alias(payload, layer="transient", alias=alias)
+    settings = {
+        "persistent": (
+            {
+                "cluster": {
+                    "remote": {
+                        alias: persistent,
+                    }
+                }
+            }
+            if persistent is not None
+            else {}
+        ),
+        "transient": (
+            {
+                "cluster": {
+                    "remote": {
+                        alias: transient,
+                    }
+                }
+            }
+            if transient is not None
+            else {}
+        ),
+    }
+    if transient is not None:
+        configuration_layer = "transient"
+    elif persistent is not None:
+        configuration_layer = "persistent"
+    else:
+        configuration_layer = "node"
+    return settings, configuration_layer
+
+
+@contextmanager
+def _capture_session_config(config_path: Path) -> Iterator[dict[str, Any]]:
+    with session_operation_lock(config_path, "ccs-restore"):
+        with edit_session_config(config_path) as config:
+            yield config
+
+
 def main() -> int:
     args = parse_args()
     config_path = Path(args.session_dir) / "config.json"
 
-    with edit_session_config(config_path) as config:
+    with _capture_session_config(config_path) as config:
+        if config.get("ccs_state") in {"mutation_pending", "modified"}:
+            print(
+                "Cannot capture CCS while a prior mutation is pending or modified.",
+                file=sys.stderr,
+            )
+            return 1
         source_url = resolve_resource_base_url(config, "url")
+        es_url = resolve_resource_base_url(config, "es_url")
         collection_endpoint = validate_resource_endpoint("/api/remote_clusters")
         endpoint = validate_resource_endpoint(
             f"/api/remote_clusters/{quote(args.alias, safe='')}"
@@ -126,8 +203,71 @@ def main() -> int:
             )
             return 1
 
+        settings_result = subprocess.run(
+            [
+                "curl",
+                "-s",
+                "-w",
+                "\n%{http_code}",
+                *build_auth_args(config),
+                "-X",
+                "GET",
+                f"{es_url}/_cluster/settings?include_defaults=false",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        settings_status = http_status(settings_result.stdout)
+        if settings_status != "200":
+            print(
+                f"Unable to capture raw CCS settings (HTTP {settings_status}).",
+                file=sys.stderr,
+            )
+            return 1
+        try:
+            settings_response = json.loads(_response_body(settings_result.stdout))
+        except json.JSONDecodeError as exc:
+            print(f"Invalid raw CCS settings response: {exc}", file=sys.stderr)
+            return 1
+        if not isinstance(settings_response, dict) or not isinstance(
+            settings_response.get("persistent", {}),
+            dict,
+        ) or not isinstance(settings_response.get("transient", {}), dict):
+            print("Raw CCS settings response has malformed layers.", file=sys.stderr)
+            return 1
+        settings, configuration_layer = _settings_snapshot(
+            settings_response,
+            alias=args.alias,
+        )
+        persistent_settings = _settings_for_alias(
+            settings_response,
+            layer="persistent",
+            alias=args.alias,
+        )
+        transient_settings = _settings_for_alias(
+            settings_response,
+            layer="transient",
+            alias=args.alias,
+        )
+        if is_configured_by_node and (
+            persistent_settings is not None or transient_settings is not None
+        ):
+            print(
+                "CCS provenance disagrees with raw persistent/transient settings.",
+                file=sys.stderr,
+            )
+            return 1
+        if not is_configured_by_node and (
+            persistent_settings is None and transient_settings is None
+        ):
+            print(
+                "CCS response is not node-configured but has no raw settings layer.",
+                file=sys.stderr,
+            )
+            return 1
+
         payload = {field: cluster.get(field) for field in RESTORE_FIELDS}
-        payload["hasDeprecatedProxySetting"] = has_deprecated_proxy_setting
         config["ccs_restore"] = {
             "remote_cluster_alias": args.alias,
             "endpoint": endpoint,
@@ -135,8 +275,12 @@ def main() -> int:
             "provenance": {
                 "is_configured_by_node": is_configured_by_node,
                 "has_deprecated_proxy_setting": has_deprecated_proxy_setting,
+                "configuration_layer": configuration_layer,
+                "settings": settings,
             },
         }
+        config["ccs_state"] = "captured"
+        config["ccs_restored"] = False
 
     print(f"Persisted CCS restore snapshot for {args.alias!r}.")
     return 0
