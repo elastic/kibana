@@ -262,12 +262,12 @@ const EntityAnalyticsHomePageContent = () => {
     return <PageLoader />;
   }
 
-  if (showEmptyPrompt) {
-    return <EmptyPrompt />;
-  }
-
   if (entityStoreDisabled) {
     return <EntityStoreDisabledEmptyPrompt />;
+  }
+
+  if (showEmptyPrompt) {
+    return <EmptyPrompt />;
   }
 
   return (

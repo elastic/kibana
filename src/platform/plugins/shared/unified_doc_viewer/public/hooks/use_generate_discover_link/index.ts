@@ -19,8 +19,10 @@ export interface GenerateDiscoverLink {
 
 export function useGetGenerateDiscoverLink({
   indexPattern,
+  unmappedFieldsPolicy,
 }: {
   indexPattern?: string | (string | undefined)[];
+  unmappedFieldsPolicy?: 'NULLIFY' | 'LOAD';
 }) {
   const {
     data,
@@ -31,6 +33,10 @@ export function useGetGenerateDiscoverLink({
   const timeRange = data.query.timefilter.timefilter.getAbsoluteTime();
   const discoverLocator = locators.get('DISCOVER_APP_LOCATOR');
   const indices = castArray(indexPattern).filter(Boolean);
+
+  const settingsPrefix = unmappedFieldsPolicy
+    ? `SET unmapped_fields = "${unmappedFieldsPolicy}";\n`
+    : '';
 
   const generateDiscoverLink: GenerateDiscoverLink = (
     first?: Record<string, any> | WhereClause,
@@ -44,7 +50,7 @@ export function useGetGenerateDiscoverLink({
     const _from = from(indices.join());
 
     if (typeof first === 'function') {
-      esql = _from.pipe(first as WhereClause, ...rest).toString();
+      esql = `${settingsPrefix}${_from.pipe(first as WhereClause, ...rest).toString()}`;
     } else if (first && typeof first === 'object') {
       const whereClause = first as Record<string, any>;
       const paramKeysMap = new Map<string, string>();
@@ -58,7 +64,7 @@ export function useGetGenerateDiscoverLink({
           params.push({ [paramKey]: whereClause[key] });
         });
 
-      esql = _from
+      esql = `${settingsPrefix}${_from
         .pipe(
           where(
             Array.from(paramKeysMap.keys())
@@ -67,9 +73,9 @@ export function useGetGenerateDiscoverLink({
             params
           )
         )
-        .toString();
+        .toString()}`;
     } else {
-      esql = _from.toString();
+      esql = `${settingsPrefix}${_from.toString()}`;
     }
 
     const url = discoverLocator.getRedirectUrl({
