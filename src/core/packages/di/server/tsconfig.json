@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core-analytics-server",
+    "@kbn/core-capabilities-common",
     "@kbn/core-capabilities-server",
     "@kbn/core-doc-links-server",
     "@kbn/core-elasticsearch-server",

@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core-analytics-server-mocks",
+    "@kbn/core-capabilities-server-mocks",
     "@kbn/core-di",
     "@kbn/core-di-internal",
     "@kbn/core-di-mocks",

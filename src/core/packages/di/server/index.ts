@@ -8,7 +8,11 @@
  */
 
 export { Analytics, type IAnalytics } from './src/services/analytics';
-export { CapabilitiesProvider } from './src/services/capabilities';
+export {
+  CapabilitiesAccessor,
+  CapabilitiesProvider,
+  type ICapabilitiesAccessor,
+} from './src/services/capabilities';
 export { DocLinks, type IDocLinks } from './src/services/doc_links';
 export {
   ElasticsearchClient,

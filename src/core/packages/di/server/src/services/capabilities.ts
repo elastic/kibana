@@ -8,7 +8,11 @@
  */
 
 import type { ServiceIdentifier } from 'inversify';
-import type { CapabilitiesProvider as ICapabilitiesProvider } from '@kbn/core-capabilities-server';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type {
+  CapabilitiesProvider as ICapabilitiesProvider,
+  ResolveCapabilitiesOptions,
+} from '@kbn/core-capabilities-server';
 
 /**
  * Service identifier to register a capabilities provider.
@@ -24,3 +28,18 @@ import type { CapabilitiesProvider as ICapabilitiesProvider } from '@kbn/core-ca
 export const CapabilitiesProvider = Symbol(
   'CapabilitiesProvider'
 ) as ServiceIdentifier<ICapabilitiesProvider>;
+
+/**
+ * Resolves the {@link Capabilities} for the current HTTP request.
+ * @public
+ */
+export type ICapabilitiesAccessor = (options: ResolveCapabilitiesOptions) => Promise<Capabilities>;
+
+/**
+ * The accessor resolving the capabilities in the current HTTP request context.
+ * @see {@link ICapabilitiesAccessor}
+ * @public
+ */
+export const CapabilitiesAccessor = Symbol(
+  'CapabilitiesAccessor'
+) as ServiceIdentifier<ICapabilitiesAccessor>;

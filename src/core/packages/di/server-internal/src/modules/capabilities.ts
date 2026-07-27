@@ -8,7 +8,15 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { CoreSetup, CapabilitiesProvider } from '@kbn/core-di-server';
+import { cacheInScope } from '@kbn/core-di-internal';
+import {
+  CapabilitiesAccessor,
+  CapabilitiesProvider,
+  CoreSetup,
+  CoreStart,
+  type ICapabilitiesAccessor,
+  Request,
+} from '@kbn/core-di-server';
 import { OnSetup } from '@kbn/core-di';
 
 export function loadCapabilites({ bind, onActivation }: ContainerModuleLoadOptions): void {
@@ -21,4 +29,14 @@ export function loadCapabilites({ bind, onActivation }: ContainerModuleLoadOptio
   bind(OnSetup).toConstantValue((container) => {
     container.getAll(CapabilitiesProvider);
   });
+
+  bind(CapabilitiesAccessor)
+    .toResolvedValue(
+      (capabilities, request): ICapabilitiesAccessor =>
+        (options) =>
+          capabilities.resolveCapabilities(request, options),
+      [CoreStart('capabilities'), Request]
+    )
+    .inRequestScope()
+    .onActivation(cacheInScope(CapabilitiesAccessor));
 }

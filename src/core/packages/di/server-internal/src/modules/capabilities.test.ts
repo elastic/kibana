@@ -9,15 +9,25 @@
 
 import { type Container, ContainerModule } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { CapabilitiesProvider, CoreSetup } from '@kbn/core-di-server';
-import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-server';
+import {
+  CapabilitiesAccessor,
+  CapabilitiesProvider,
+  CoreSetup,
+  CoreStart,
+  Request,
+} from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loadCapabilites } from './capabilities';
 
 describe('loadCapabilities', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
-  let capabilities: jest.Mocked<TCoreSetup['capabilities']>;
+  let capabilitiesSetup: ReturnType<typeof capabilitiesServiceMock.createSetupContract>;
+  let capabilitiesStart: ReturnType<typeof capabilitiesServiceMock.createStartContract>;
+  let request: KibanaRequest;
 
   function setup() {
     container.get(OnSetup)(container);
@@ -26,10 +36,14 @@ describe('loadCapabilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
-    capabilities = { registerProvider: jest.fn() } as unknown as typeof capabilities;
+    capabilitiesSetup = capabilitiesServiceMock.createSetupContract();
+    capabilitiesStart = capabilitiesServiceMock.createStartContract();
+    request = httpServerMock.createKibanaRequest();
     container = injection.getContainer();
     container.load(new ContainerModule(loadCapabilites));
-    container.bind(CoreSetup('capabilities')).toConstantValue(capabilities);
+    container.bind(CoreSetup('capabilities')).toConstantValue(capabilitiesSetup);
+    container.bind(CoreStart('capabilities')).toConstantValue(capabilitiesStart);
+    container.bind(Request).toConstantValue(request);
   });
 
   it('should register capabilities', () => {
@@ -37,6 +51,30 @@ describe('loadCapabilities', () => {
     container.bind(CapabilitiesProvider).toConstantValue(capabilitiesProvider);
     setup();
 
-    expect(capabilities.registerProvider).toHaveBeenCalledWith(capabilitiesProvider);
+    expect(capabilitiesSetup.registerProvider).toHaveBeenCalledWith(capabilitiesProvider);
+  });
+
+  it('should not resolve the capabilities when resolving the accessor', () => {
+    container.get(CapabilitiesAccessor);
+
+    expect(capabilitiesStart.resolveCapabilities).not.toHaveBeenCalled();
+  });
+
+  it('should resolve the capabilities for the current request', async () => {
+    const capabilities = { navLinks: {}, management: {}, catalogue: {} };
+    capabilitiesStart.resolveCapabilities.mockResolvedValue(capabilities);
+
+    await expect(
+      container.get(CapabilitiesAccessor)({ capabilityPath: 'myPlugin.*' })
+    ).resolves.toBe(capabilities);
+    expect(capabilitiesStart.resolveCapabilities).toHaveBeenCalledWith(request, {
+      capabilityPath: 'myPlugin.*',
+    });
+  });
+
+  it('should create the capabilities accessor only once per scope', () => {
+    const fork = injection.fork();
+
+    expect(fork.get(CapabilitiesAccessor)).toBe(fork.get(CapabilitiesAccessor));
   });
 });
