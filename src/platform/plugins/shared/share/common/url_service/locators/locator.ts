@@ -11,6 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DependencyList } from 'react';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { useLocatorUrl } from './use_locator_url';
 import type {
   LocatorDefinition,
@@ -54,6 +55,19 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   ) {
     this.id = definition.id;
     this.migrations = definition.migrations || {};
+
+    // Ensure getTimeRange and setTimeRange or neither at runtime
+    //
+    // Unable to ensure at compile time because
+    // TypeScript requires Discriminated Union for "all-or-none" constraint for a set of optional methods
+    // and classes can not implement dynamic types.
+    const hasGetTimeRange = 'getTimeRange' in definition;
+    const hasSetTimeRange = 'setTimeRange' in definition;
+    if (hasGetTimeRange !== hasSetTimeRange) {
+      throw new Error(
+        'LocatorDefinition must provide both getTimeRange and setTimeRange or neither.'
+      );
+    }
   }
 
   // PersistableState<P> -------------------------------------------------------
@@ -138,4 +152,12 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     getUrlParams?: LocatorGetUrlParams,
     deps: DependencyList = []
   ): string => useLocatorUrl<P>(this, params, getUrlParams, deps);
+
+  public getTimeRange(params: P) {
+    return this.definition.getTimeRange?.(params);
+  }
+
+  public setTimeRange(params: P, timeRange?: TimeRange): P {
+    return this.definition.setTimeRange ? this.definition.setTimeRange(params) : params;
+  }
 }

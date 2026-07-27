@@ -31,7 +31,6 @@ export type {
   ExportShareDerivatives,
   ExportShareParameters,
   RegisterShareIntegrationArgs,
-  ShareableLocatorParams,
   SharingData,
   ShareActionConfigArgs,
 } from './types';

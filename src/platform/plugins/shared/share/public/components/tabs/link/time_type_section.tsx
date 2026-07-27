@@ -14,6 +14,7 @@ import React, { useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   getRelativeTimeValueAndUnitFromTimeString,
@@ -122,11 +123,6 @@ const RelativeTimeText = ({
     </BoldText>
   );
 };
-
-interface TimeRange {
-  from: string;
-  to: string;
-}
 
 interface Props {
   timeRange?: TimeRange;

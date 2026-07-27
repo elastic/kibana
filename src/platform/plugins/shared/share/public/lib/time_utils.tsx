@@ -8,6 +8,7 @@
  */
 
 import dateMath from '@kbn/datemath';
+import type { TimeRange } from '@kbn/es-query';
 
 const unitMap = new Map([
   ['s', 'second'],
@@ -66,5 +67,5 @@ export const convertRelativeTimeStringToAbsoluteTimeString = (
   return valueParsed && valueParsed.isValid() ? valueParsed.toISOString() : dateString;
 };
 
-export const isTimeRangeAbsoluteTime = (timeRange?: { from: string; to: string }) =>
+export const isTimeRangeAbsoluteTime = (timeRange?: TimeRange) =>
   !(timeRange?.from?.includes('now') || timeRange?.to?.includes('now'));
