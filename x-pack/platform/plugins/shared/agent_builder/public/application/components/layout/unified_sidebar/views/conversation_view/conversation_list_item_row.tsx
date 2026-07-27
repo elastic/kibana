@@ -29,6 +29,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
+import { useToasts } from '../../../../../hooks/use_toasts';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -59,6 +60,9 @@ const labels = {
   }),
   actionsMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.actionsMenu', {
     defaultMessage: 'Conversation actions',
+  }),
+  deleteError: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteError', {
+    defaultMessage: 'Failed to delete conversation',
   }),
 };
 
@@ -93,6 +97,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
   const { deleteConversation, renameConversation, markAsRead, markAsUnread } =
     useConversationListMutations({ routeConversationId, agentId });
+  const { addErrorToast } = useToasts();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -103,11 +108,16 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       setIsDeleting(true);
       try {
         await deleteConversation(convId);
+      } catch (e) {
+        addErrorToast({
+          title: labels.deleteError,
+          text: e instanceof Error ? e.message : undefined,
+        });
       } finally {
         setIsDeleting(false);
       }
     },
-    [deleteConversation]
+    [deleteConversation, addErrorToast]
   );
 
   const baseLinkStyles = createConversationListItemStyles(euiTheme);
