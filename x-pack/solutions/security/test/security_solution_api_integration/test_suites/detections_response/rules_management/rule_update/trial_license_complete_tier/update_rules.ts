@@ -862,7 +862,7 @@ export default ({ getService }: FtrProviderContext) => {
           superTestResponseActionsNoAuthz = await utils.createSuperTest(
             ROLE.endpoint_response_actions_no_access
           );
-          
+
           superTestResponseActionsAuthz = await utils.createSuperTestWithCustomRole({
             name: ROLE.endpoint_response_actions_access,
             privileges: rolesUsersProvider.loader.getPreDefinedRole(
