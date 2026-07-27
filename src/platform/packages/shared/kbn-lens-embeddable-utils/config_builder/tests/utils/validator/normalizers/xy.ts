@@ -205,19 +205,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         // without a breakdown there is nothing to collapse — transform drops it
         if (layer.collapseFn === '' || !layer.splitAccessors?.length) delete layer.collapseFn;
 
-        // textBased layers use splitAccessor (singular) for breakdown; the transform drops it
-        if (layer.splitAccessor) {
-          const tbLayer = (attributes.state as any).datasourceStates?.textBased?.layers?.[
-            layer.layerId
-          ];
-          if (tbLayer?.columns) {
-            tbLayer.columns = tbLayer.columns.filter(
-              (col: any) => col.columnId !== layer.splitAccessor
-            );
-          }
-          delete layer.splitAccessor;
-        }
-
         // colorMapping/palette: only preserved through the round-trip when there's a breakdown.
         // Legacy palette (palette field, no colorMapping) round-trips back as palette, not colorMapping.
         // If colorMapping is present it overrides palette; default colorMapping is only added when
