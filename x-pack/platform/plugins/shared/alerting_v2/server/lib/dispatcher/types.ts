@@ -35,6 +35,7 @@ export interface AlertEpisode {
 export interface AlertEpisodeSuppression {
   rule_id: RuleId | null;
   source: string | null;
+  space_id: string | null;
   group_hash: string;
   episode_id: string | null;
   should_suppress: boolean;

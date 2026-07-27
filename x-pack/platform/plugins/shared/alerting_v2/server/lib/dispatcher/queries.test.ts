@@ -388,7 +388,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain(
-      'subject = CASE(source IS NULL OR source == "internal", rule_id, source)'
+      'subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, "::", source))'
     );
   });
 
@@ -411,10 +411,12 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('BY subject, group_hash, episode_id');
   });
 
-  it('projects source via LAST aggregation in STATS', () => {
+  it('projects source and space_id via LAST aggregation in STATS', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('source = LAST(source, @timestamp)');
+    expect(requests[0].query).toContain('space_id = LAST(space_id, @timestamp)');
+    expect(requests[0].query).toContain('last_snooze_action, source, space_id');
   });
 
   it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {
@@ -428,15 +430,37 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('rule-abc::hash-abc');
   });
 
-  it('uses episodeSubject for pair key construction (external episode uses source)', () => {
+  it('uses episodeSubject for pair key construction (external episode uses space-scoped source)', () => {
     const episodes = [
       createAlertEpisode({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' }),
     ];
 
     const requests = getAlertEpisodeSuppressionsQueries(episodes);
 
-    // For external episodes, episodeSubject returns source
-    expect(requests[0].query).toContain('pagerduty::hash-pd');
+    // For external episodes, episodeSubject returns `${space_id}::${source}`
+    expect(requests[0].query).toContain('default::pagerduty::hash-pd');
+  });
+
+  it('builds distinct pair keys for the same vendor and group_hash in different spaces', () => {
+    const episodes = [
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'hash-pd',
+      }),
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-b',
+        group_hash: 'hash-pd',
+      }),
+    ];
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    expect(requests[0].query).toContain('space-a::pagerduty::hash-pd');
+    expect(requests[0].query).toContain('space-b::pagerduty::hash-pd');
   });
 });
 

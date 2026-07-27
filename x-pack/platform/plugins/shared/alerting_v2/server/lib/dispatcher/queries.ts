@@ -12,7 +12,7 @@ import {
   type AlertEventType,
 } from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, ActionGroupId } from './types';
-import { episodeSubject } from './steps/utils/subject';
+import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
 // Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
 // an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
@@ -54,7 +54,10 @@ const PAIR_SEPARATOR = '::';
 
 // Shared subject-derivation expression used in both dispatchable and suppression queries.
 // null/absent source is treated as 'internal' for backward compat with legacy action rows.
-const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, source)`;
+// External subjects are prefixed with the space id because a vendor name is not space-aware:
+// without it, two spaces ingesting the same vendor with the same group_hash would share
+// throttling and suppression state. See `episodeSubject`, which must produce the same key.
+const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, ${SUBJECT_SEPARATOR}, source))`;
 
 // ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
 // producing `parsing_exception: ESQL statement is too large`. Without chunking the dispatcher
@@ -135,6 +138,7 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
             last_snooze_action = MAX(last_snooze_action),
             source = LAST(source, @timestamp),
+            space_id = LAST(space_id, @timestamp),
             rule_id = LAST(rule_id, @timestamp)
           BY subject, group_hash, episode_id
         | EVAL should_suppress = CASE(
@@ -143,7 +147,7 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
   });
 };
 

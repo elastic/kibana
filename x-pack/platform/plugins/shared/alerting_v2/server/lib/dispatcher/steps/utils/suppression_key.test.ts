@@ -19,15 +19,24 @@ describe('suppressionEpisodeKey', () => {
     ).toBe('rule-1:h:e');
   });
 
-  it('returns source-prefixed key for external episodes', () => {
+  it('returns space-scoped source-prefixed key for external episodes', () => {
     expect(
       suppressionEpisodeKey({
         source: 'pagerduty',
         rule_id: null,
+        space_id: 'default',
         group_hash: 'h',
         episode_id: 'e',
       })
-    ).toBe('pagerduty:h:e');
+    ).toBe('default::pagerduty:h:e');
+  });
+
+  it('keys the same vendor episode differently per space', () => {
+    const base = { source: 'pagerduty', rule_id: null, group_hash: 'h', episode_id: 'e' };
+
+    expect(suppressionEpisodeKey({ ...base, space_id: 'space-a' })).not.toBe(
+      suppressionEpisodeKey({ ...base, space_id: 'space-b' })
+    );
   });
 
   it('treats null source as internal (uses rule_id)', () => {
@@ -49,10 +58,15 @@ describe('suppressionEpisodeKey', () => {
 });
 
 describe('suppressionSeriesKey', () => {
-  it('returns source-prefixed wildcard key for external series', () => {
-    expect(suppressionSeriesKey({ source: 'pagerduty', rule_id: null, group_hash: 'h' })).toBe(
-      'pagerduty:h:*'
-    );
+  it('returns space-scoped source-prefixed wildcard key for external series', () => {
+    expect(
+      suppressionSeriesKey({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        group_hash: 'h',
+      })
+    ).toBe('default::pagerduty:h:*');
   });
 
   it('returns rule_id-prefixed wildcard key for internal series', () => {

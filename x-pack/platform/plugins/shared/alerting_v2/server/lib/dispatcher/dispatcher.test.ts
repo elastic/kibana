@@ -204,6 +204,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-1',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           should_suppress: false,
@@ -211,6 +212,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-2',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           should_suppress: false,
@@ -322,6 +324,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-1',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           should_suppress: true,
@@ -329,6 +332,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-2',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           should_suppress: false,
@@ -537,6 +541,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-001',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           should_suppress: false,
@@ -544,6 +549,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-002',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           should_suppress: true,
@@ -551,6 +557,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-004',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-1',
           episode_id: null,
           should_suppress: true,
@@ -558,6 +565,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-004',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-2',
           episode_id: null,
           should_suppress: true,
@@ -565,6 +573,7 @@ describe('DispatcherService', () => {
         {
           rule_id: 'rule-005',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           should_suppress: true,
@@ -692,6 +701,87 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+
+    it('keeps external episodes isolated per space when a vendor group_hash collides', async () => {
+      // The same PagerDuty incident is ingested into two spaces: identical source,
+      // group_hash and episode_id. Only space-a has acked it.
+      const externalEpisode = (spaceId: string): AlertEpisode => ({
+        last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        rule_id: null,
+        source: 'pagerduty',
+        space_id: spaceId,
+        group_hash: 'pd-incident-P1234567',
+        episode_id: 'pd-ep-1',
+        episode_status: 'active',
+      });
+
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: null,
+          source: 'pagerduty',
+          space_id: 'space-a',
+          group_hash: 'pd-incident-P1234567',
+          episode_id: 'pd-ep-1',
+          should_suppress: true,
+          last_ack_action: 'ack',
+        },
+      ];
+
+      mockFindAllDecrypted.mockResolvedValue(
+        ['policy_space_a', 'policy_space_b'].map((id, index) => ({
+          id,
+          attributes: {
+            name: `Policy ${id}`,
+            enabled: true,
+            destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
+            auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
+            createdBy: null,
+            updatedBy: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+          namespaces: [index === 0 ? 'space-a' : 'space-b'],
+        }))
+      );
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(
+          createDispatchableAlertEventsResponse([
+            externalEpisode('space-a'),
+            externalEpisode('space-b'),
+          ])
+        )
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+
+      expect(docs.filter((doc) => doc.action_type === 'fire')).toEqual([
+        expect.objectContaining({
+          action_type: 'fire',
+          rule_id: null,
+          source: 'pagerduty',
+          space_id: 'space-b',
+          group_hash: 'pd-incident-P1234567',
+        }),
+      ]);
+      expect(docs.filter((doc) => doc.action_type === 'suppress')).toEqual([
+        expect.objectContaining({
+          action_type: 'suppress',
+          source: 'pagerduty',
+          space_id: 'space-a',
+          reason: 'ack',
+        }),
+      ]);
     });
   });
 

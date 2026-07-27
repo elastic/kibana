@@ -57,6 +57,7 @@ export function createAlertEpisodeSuppression(
   return {
     rule_id: 'rule-1',
     source: 'internal',
+    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     should_suppress: false,

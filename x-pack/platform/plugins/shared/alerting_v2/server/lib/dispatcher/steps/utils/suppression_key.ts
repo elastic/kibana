@@ -10,6 +10,7 @@ import { episodeSubject } from './subject';
 interface SubjectInput {
   source?: string | null;
   rule_id?: string | null;
+  space_id?: string | null;
 }
 
 /**
@@ -17,7 +18,7 @@ interface SubjectInput {
  * `${subject}:${group_hash}:${episode_id}`
  *
  * For internal episodes `subject = rule_id`; for external episodes
- * `subject = source` (the vendor name, e.g. "pagerduty").
+ * `subject = ${space_id}::${source}` (e.g. "default::pagerduty").
  */
 export const suppressionEpisodeKey = (
   x: SubjectInput & { group_hash: string; episode_id: string }

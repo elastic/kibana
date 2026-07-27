@@ -229,6 +229,38 @@ describe('applySuppression', () => {
     expect(dispatchable[0].episode_id).toBe('ep-external');
   });
 
+  it('does not leak an external suppression across spaces', () => {
+    const externalEpisode = (spaceId: string) =>
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: spaceId,
+        group_hash: 'pd-incident-1',
+        episode_id: 'pd-ep-1',
+      });
+    // Same vendor, same group_hash and same episode_id in both spaces: only the
+    // space-a series has been acked.
+    const ackInSpaceA = createAlertEpisodeSuppression({
+      source: 'pagerduty',
+      rule_id: null,
+      space_id: 'space-a',
+      group_hash: 'pd-incident-1',
+      episode_id: null,
+      should_suppress: true,
+      last_ack_action: 'ack',
+    });
+
+    const { suppressed, dispatchable } = applySuppression(
+      [externalEpisode('space-a'), externalEpisode('space-b')],
+      [ackInSpaceA]
+    );
+
+    expect(suppressed).toHaveLength(1);
+    expect(suppressed[0].space_id).toBe('space-a');
+    expect(dispatchable).toHaveLength(1);
+    expect(dispatchable[0].space_id).toBe('space-b');
+  });
+
   it('null-source suppression row (legacy internal) still matches internal episode by rule_id', () => {
     const episode = createAlertEpisode({
       source: 'internal',

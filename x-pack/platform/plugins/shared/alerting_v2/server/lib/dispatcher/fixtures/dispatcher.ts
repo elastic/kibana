@@ -50,6 +50,7 @@ export const createAlertEpisodeSuppressionsResponse = (
       { name: 'last_deactivate_action', type: 'keyword' },
       { name: 'last_snooze_action', type: 'keyword' },
       { name: 'source', type: 'keyword' },
+      { name: 'space_id', type: 'keyword' },
     ],
     values: suppressions.map((suppression) => [
       suppression.rule_id,
@@ -60,6 +61,7 @@ export const createAlertEpisodeSuppressionsResponse = (
       suppression.last_deactivate_action ?? null,
       suppression.last_snooze_action ?? null,
       suppression.source,
+      suppression.space_id,
     ]),
   };
 };

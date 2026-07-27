@@ -9,11 +9,27 @@ import { episodeSubject } from './subject';
 
 describe('episodeSubject', () => {
   it('returns rule_id for internal episodes', () => {
-    expect(episodeSubject({ source: 'internal', rule_id: 'rule-1' })).toBe('rule-1');
+    expect(episodeSubject({ source: 'internal', rule_id: 'rule-1', space_id: 'default' })).toBe(
+      'rule-1'
+    );
   });
 
-  it('returns source for external episodes', () => {
-    expect(episodeSubject({ source: 'pagerduty', rule_id: null })).toBe('pagerduty');
+  it('returns a space-scoped source for external episodes', () => {
+    expect(episodeSubject({ source: 'pagerduty', rule_id: null, space_id: 'default' })).toBe(
+      'default::pagerduty'
+    );
+  });
+
+  it('returns different subjects for the same vendor in different spaces', () => {
+    expect(episodeSubject({ source: 'pagerduty', rule_id: null, space_id: 'space-a' })).not.toBe(
+      episodeSubject({ source: 'pagerduty', rule_id: null, space_id: 'space-b' })
+    );
+  });
+
+  it('throws when an external episode has no space_id', () => {
+    expect(() => episodeSubject({ source: 'pagerduty', rule_id: null, space_id: null })).toThrow(
+      'episodeSubject: external episode has no space_id'
+    );
   });
 
   it('returns rule_id when source is null (treated as internal)', () => {
