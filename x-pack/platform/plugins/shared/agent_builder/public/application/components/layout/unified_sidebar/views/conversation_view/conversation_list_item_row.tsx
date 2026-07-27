@@ -135,6 +135,15 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     `,
   ]);
 
+  const iconSlotStyles = css`
+    width: ${euiTheme.size.l};
+    height: ${euiTheme.size.l};
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
   const rowStyles = useMemo(() => {
     const bg = euiTheme.colors.backgroundLightPrimary;
     return css`
@@ -306,31 +315,19 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
         {isDeleting ? (
           <EuiFlexItem grow={false}>
-            <div
-              css={css`
-                width: ${euiTheme.size.l};
-                height: ${euiTheme.size.l};
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              `}
-            >
+            <div css={iconSlotStyles}>
               <EuiLoadingSpinner size="s" />
             </div>
           </EuiFlexItem>
         ) : status !== undefined || showActionsMenu ? (
           <EuiFlexItem grow={false}>
             <div
-              css={css`
-                position: relative;
-                width: ${euiTheme.size.l};
-                height: ${euiTheme.size.l};
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              `}
+              css={[
+                iconSlotStyles,
+                css`
+                  position: relative;
+                `,
+              ]}
             >
               {status !== undefined && (
                 <div
