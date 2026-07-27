@@ -109,6 +109,7 @@ const runIteration = async ({ provider, level, levelMeta, spec, env, iter, mode 
     if (!record.success) {
       record.failReason = failReason ?? (record.execMs > levelMeta.ceilingMs ? 'ceiling_exceeded' : `exit_${res.exitCode}`);
       record.stderrTail = res.stderr.slice(-2000);
+      record.stdoutTail = res.stdout.slice(-4000);
     }
   } catch (err) {
     record.success = false;
