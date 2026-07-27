@@ -7,13 +7,24 @@
 
 import type { ScoutWorkerFixtures } from '@kbn/scout';
 
-export const FAREQUOTE_ES_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/ml/farequote';
-
-export const DATA_VIEW_TITLE = 'ft_farequote';
-export const TIME_FIELD_NAME = '@timestamp';
-
-export const SAVED_SEARCH_TITLE = 'ft_farequote_kuery';
-export const FAREQUOTE_KUERY_SAVED_SEARCH_ID = 'scout-ft-farequote-kuery';
+export {
+  FAREQUOTE_ES_ARCHIVE,
+  FAREQUOTE_INDEX as DATA_VIEW_TITLE,
+  FAREQUOTE_INDEX,
+  FAREQUOTE_KUERY_SAVED_SEARCH_ID,
+  FAREQUOTE_SAVED_SEARCHES,
+  FAREQUOTE_SAVED_SEARCH_SETS,
+  IHP_OUTLIER_ES_ARCHIVE,
+  IHP_OUTLIER_INDEX,
+  SAVED_SEARCH_TITLE,
+  TIME_FIELD_NAME,
+  createFarequoteKuerySavedSearch,
+  createFarequoteSavedSearches,
+  createSavedSearchFarequoteFilterAndKueryIfNeeded,
+  createSavedSearchFarequoteKueryIfNeeded,
+  deleteAllFarequoteSavedSearches,
+  deleteFarequoteSavedSearches,
+} from './farequote_saved_searches';
 
 export const EXPECTED_DISCOVER_QUERY = 'airline: A* and responsetime > 5';
 export const DOC_COUNT_FORMATTED = '34,415';
@@ -32,61 +43,6 @@ export const ADVANCED_JOB_DATAFEED_QUERY = JSON.stringify(
   2
 );
 
-const farequoteKuerySearchSourceJSON = JSON.stringify({
-  highlightAll: true,
-  version: true,
-  query: {
-    query: EXPECTED_DISCOVER_QUERY,
-    language: 'kuery',
-  },
-  filter: [],
-  indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-});
-
-/**
- * Creates the ft_farequote_kuery Discover session.
- * Must include `tabs` — Discover model version 13 requires it on create, and the
- * SavedObjectFinder / content-management search path expects the tabbed shape
- * (see data_visualizer Scout fixtures and FTR ml test_resources_data).
- *
- * Top-level columns/sort/kibanaSavedObjectMeta were removed from the create
- * schema in v13; they live under tabs[].attributes only.
- */
-export const createFarequoteKuerySavedSearch = async (
-  kbnClient: ScoutWorkerFixtures['kbnClient'],
-  dataViewId: string
-): Promise<void> => {
-  await kbnClient.savedObjects.create({
-    type: 'search',
-    id: FAREQUOTE_KUERY_SAVED_SEARCH_ID,
-    overwrite: true,
-    attributes: {
-      title: SAVED_SEARCH_TITLE,
-      description: '',
-      tabs: [
-        {
-          id: 'tab_0',
-          label: 'My Tab',
-          attributes: {
-            columns: ['_source'],
-            sort: ['@timestamp', 'desc'],
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: farequoteKuerySearchSourceJSON,
-            },
-          },
-        },
-      ],
-    },
-    references: [
-      {
-        id: dataViewId,
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
-  });
-};
-
 /** Saved-object attributes for the shared 'ML Test' dashboard created in every DFA spec's beforeAll. */
 export const ML_TEST_DASHBOARD_ATTRIBUTES = {
   title: 'ML Test',
@@ -100,3 +56,5 @@ export const ML_TEST_DASHBOARD_ATTRIBUTES = {
     searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
   },
 } as const;
+
+export type KbnClient = ScoutWorkerFixtures['kbnClient'];

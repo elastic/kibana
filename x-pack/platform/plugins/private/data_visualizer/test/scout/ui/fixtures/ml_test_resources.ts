@@ -71,6 +71,28 @@ const getSavedObjectIdByTitle = async ({
   );
 };
 
+const DATA_VIEW_ID_PLACEHOLDER = 'INDEX_PATTERN_ID_PLACEHOLDER';
+
+/**
+ * Injects the real data view id into references and into searchSourceJSON strings.
+ * A JSON.parse reviver alone does not replace placeholders inside stringified JSON.
+ */
+const injectDataViewId = <T>(value: T, dataViewId: string): T =>
+  JSON.parse(JSON.stringify(value).split(DATA_VIEW_ID_PLACEHOLDER).join(dataViewId)) as T;
+
+/**
+ * Discover model version 13 create schema only allows title/description/tabs.
+ * Fixtures still carry legacy top-level columns/sort/kibanaSavedObjectMeta for
+ * readability; strip them before POST so create validation succeeds.
+ */
+const toDiscoverSessionCreateAttributes = (
+  attributes: SavedSearchDefinition['requestBody']['attributes']
+) => ({
+  title: attributes.title,
+  description: attributes.description ?? '',
+  tabs: attributes.tabs,
+});
+
 const updateSavedSearchRequestBody = async ({
   apiServices,
   body,
@@ -89,12 +111,11 @@ const updateSavedSearchRequestBody = async ({
     throw new Error(`Data view '${dataViewTitle}' must exist before creating saved searches.`);
   }
 
-  return JSON.parse(JSON.stringify(body), (_key, value) => {
-    if (value === 'INDEX_PATTERN_ID_PLACEHOLDER') {
-      return dataViewId;
-    }
-    return value;
-  });
+  const withIds = injectDataViewId(body, dataViewId);
+  return {
+    attributes: toDiscoverSessionCreateAttributes(withIds.attributes),
+    references: withIds.references,
+  };
 };
 
 export const getMlTestResources = ({
