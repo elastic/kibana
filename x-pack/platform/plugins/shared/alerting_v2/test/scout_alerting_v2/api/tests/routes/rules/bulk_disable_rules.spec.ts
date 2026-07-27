@@ -56,7 +56,7 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
     const returnedIds = response.body.rules.map((rule: { id: string }) => rule.id);
     expect(returnedIds.sort()).toStrictEqual([ruleA.id, ruleB.id].sort());
     // Verify the side effect: both rules are now disabled.
-    const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
   });
 
@@ -76,7 +76,7 @@ apiTest.describe('Bulk disable rules API', { tag: '@local-stateful-classic' }, (
       expect(response).toHaveStatusCode(200);
       expect(response.body.errors).toStrictEqual([]);
       expect(response.body.rules).toHaveLength(2);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
     }
   );

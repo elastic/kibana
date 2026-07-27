@@ -179,7 +179,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.total).toBe(2);
     expect(response.body.errors).toStrictEqual([]);
 
-    const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.actionPolicies.list({ per_page: 100 });
     const remainingIds = remaining.items.map((policy) => policy.id);
     expect(remainingIds).not.toContain(p1.id);
     expect(remainingIds).not.toContain(p2.id);
@@ -295,7 +295,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
     const updatedEnable = await apiServices.alertingV2.actionPolicies.get(pEnable.id);
     expect(updatedEnable.enabled).toBe(true);
 
-    const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.actionPolicies.list({ per_page: 100 });
     expect(remaining.items.map((policy) => policy.id)).not.toContain(pDelete.id);
   });
 
@@ -347,7 +347,7 @@ apiTest.describe('Bulk action policies API', { tag: '@local-stateful-classic' },
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe('non-existent-del-id');
 
-      const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.actionPolicies.list({ per_page: 100 });
       expect(remaining.items.map((policy) => policy.id)).not.toContain(existing.id);
     }
   );

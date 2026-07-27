@@ -13,7 +13,7 @@ import type {
   BulkOperationParams,
   BulkOperationResponse,
   CreateRuleData,
-  FindRulesParams,
+  FindRulesRequest,
   FindRulesResponse,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
@@ -32,7 +32,7 @@ export interface RulesApiService {
   create: (data: CreateRuleData, options?: RuleApiSpaceOptions) => Promise<RuleResponse>;
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
-  find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
+  find: (query?: FindRulesRequest) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;

@@ -58,7 +58,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
     expect(response.body.errors).toStrictEqual([]);
     expectNoBulkTruncationMetadata(response.body);
     // Verify the side effect: only rule-c is left.
-    const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(remaining.items.map((rule) => rule.id)).toStrictEqual([ruleC.id]);
   });
 
@@ -77,7 +77,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.errors).toStrictEqual([]);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.total).toBe(0);
       expect(remaining.items).toStrictEqual([]);
     }
@@ -99,7 +99,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
       expect(response).toHaveStatusCode(200);
       expect(response.body.errors).toStrictEqual([]);
       // The dev rule should remain; the prod rule should be gone.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       const remainingIds = remaining.items.map((rule) => rule.id);
       expect(remainingIds).toStrictEqual([devRule.id]);
       expect(remainingIds).not.toContain(prodRule.id);
@@ -124,7 +124,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
         error: { statusCode: 404 },
       });
       // The existing rule should still have been deleted despite the error.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).not.toContain(rule.id);
     }
   );
@@ -147,7 +147,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
       expectNoBulkTruncationMetadata(response.body);
 
       // The survivor must still be present.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.total).toBe(1);
     }
   );
@@ -235,7 +235,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
       });
       expect(response).toHaveStatusCode(403);
       // Verify the rule still exists after the failed call.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );
@@ -252,7 +252,7 @@ apiTest.describe('Bulk delete rules API', { tag: '@local-stateful-classic' }, ()
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );

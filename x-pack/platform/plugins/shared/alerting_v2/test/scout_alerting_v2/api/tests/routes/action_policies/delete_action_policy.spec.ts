@@ -54,7 +54,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
 
       expect(deleteResponse).toHaveStatusCode(204);
 
-      const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.actionPolicies.list({ per_page: 100 });
       expect(remaining.items.map((policy) => policy.id)).not.toContain(created.id);
     }
   );
