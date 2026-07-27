@@ -18,7 +18,7 @@ import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter, unwrapVersionedResponseBodyValidation } from '.';
 import { createRequest } from './core_versioned_route.test.util';
-import { isConfigSchema } from '@kbn/config-schema';
+import { isConfigSchema, schema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
@@ -350,6 +350,304 @@ describe('Versioned route', () => {
     }
   );
 
+  it('maps request validation failures with the resolved version onRequestValidationError', async () => {
+    let handler: InternalRouteHandler;
+    const onRequestValidationErrorV1 = jest.fn((error, request, response) =>
+      response.custom({
+        statusCode: 422,
+        body: { version: request.apiVersion, source: error.source },
+        headers: { 'x-custom': 'v1' },
+      })
+    );
+    const onRequestValidationErrorV2 = jest.fn((error, request, response) =>
+      response.custom({
+        statusCode: 409,
+        body: { version: request.apiVersion, source: error.source },
+      })
+    );
+
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            ...testValidation.fooValidation,
+            response: {
+              ...testValidation.fooValidation.response,
+              422: {
+                body: () =>
+                  schema.object({
+                    version: schema.literal('1'),
+                    source: schema.literal('body'),
+                  }),
+              },
+            },
+            onRequestValidationError: onRequestValidationErrorV1,
+          },
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: {
+            ...testValidation.fooValidation,
+            response: {
+              ...testValidation.fooValidation.response,
+              409: {
+                body: () =>
+                  schema.object({
+                    version: schema.literal('2'),
+                    source: schema.literal('body'),
+                  }),
+              },
+            },
+            onRequestValidationError: onRequestValidationErrorV2,
+          },
+        },
+        handlerFn
+      );
+
+    const responseV1 = await handler!(
+      createRequest({ version: '1', body: {}, params: { foo: 1 }, query: { foo: 1 } })
+    );
+    const responseV2 = await handler!(
+      createRequest({ version: '2', body: {}, params: { foo: 1 }, query: { foo: 1 } })
+    );
+
+    expect(responseV1.status).toBe(422);
+    expect(responseV1.payload).toEqual({ version: '1', source: 'body' });
+    expect(responseV1.options.headers).toMatchObject({
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+      'x-custom': 'v1',
+    });
+    expect(responseV2.status).toBe(409);
+    expect(responseV2.payload).toEqual({ version: '2', source: 'body' });
+    expect(responseV2.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '2' });
+    expect(onRequestValidationErrorV1).toHaveBeenCalledTimes(1);
+    expect(onRequestValidationErrorV2).toHaveBeenCalledTimes(1);
+  });
+
+  it('validates malformed mapped request validation responses in dev mode', async () => {
+    let handler: InternalRouteHandler;
+    versionedRouter = CoreVersionedRouter.from({
+      router,
+      log: loggingSystemMock.createLogger(),
+      env: devEnv,
+    });
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test',
+        access: 'internal',
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: { body: schema.object({ foo: schema.number() }) },
+            response: {
+              422: { body: () => schema.object({ message: schema.string() }) },
+            },
+            onRequestValidationError: (_error, _request, response) =>
+              response.custom({ statusCode: 422, body: { message: 1 } }),
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(createRequest({ version: '1', body: {} }));
+
+    expect(response.status).toBe(500);
+    expect(response.payload).toMatch(
+      'Failed output validation: [response body.message]: expected value of type [string] but got [number]'
+    );
+    expect(response.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '1' });
+  });
+
+  it('rejects undocumented mapped request validation response statuses in dev mode', async () => {
+    let handler: InternalRouteHandler;
+    versionedRouter = CoreVersionedRouter.from({
+      router,
+      log: loggingSystemMock.createLogger(),
+      env: devEnv,
+    });
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test',
+        access: 'internal',
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: { body: schema.object({ foo: schema.number() }) },
+            response: { 422: { description: 'Validation failed' } },
+            onRequestValidationError: (_error, _request, response) =>
+              response.custom({ statusCode: 409, body: { message: 'Invalid request' } }),
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(createRequest({ version: '1', body: {} }));
+
+    expect(response.status).toBe(500);
+    expect(response.payload).toMatch(
+      "Failed output validation: No response validation defined for status code [409] in 'validate.response'."
+    );
+    expect(response.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '1' });
+  });
+
+  it('does not instantiate mapped request validation response schemas outside dev mode', async () => {
+    let handler: InternalRouteHandler;
+    const body = jest.fn(() => schema.object({ message: schema.string() }));
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test',
+        access: 'internal',
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: { body: schema.object({ foo: schema.number() }) },
+            response: { 422: { body } },
+            onRequestValidationError: (_error, _request, response) =>
+              response.custom({ statusCode: 422, body: { message: 1 } }),
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(createRequest({ version: '1', body: {} }));
+
+    expect(response).toMatchObject({ status: 422, payload: { message: 1 } });
+    expect(body).not.toHaveBeenCalled();
+  });
+
+  it('preserves default request validation behavior for versions without onRequestValidationError', async () => {
+    let handler: InternalRouteHandler;
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: testValidation.fooValidation,
+        },
+        handlerFn
+      );
+
+    const response = await handler!(
+      createRequest({ version: '1', body: {}, params: { foo: 1 }, query: { foo: 1 } })
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toContain('[request body.foo]: expected value of type [number]');
+    expect(response.options.headers).toMatchObject({ [ELASTIC_HTTP_VERSION_HEADER]: '1' });
+  });
+
+  it('maps and logs custom request validation responses without response validation in dev mode', async () => {
+    let handler: InternalRouteHandler;
+    const log = loggingSystemMock.createLogger();
+    versionedRouter = CoreVersionedRouter.from({ router, log, env: devEnv });
+    const onRequestValidationError = jest.fn((error, request, response) =>
+      response.custom({ statusCode: 422, body: { version: request.apiVersion } })
+    );
+
+    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    versionedRouter
+      .post({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: testValidation.fooValidation.request,
+            onRequestValidationError,
+          },
+        },
+        handlerFn
+      );
+
+    const response = await handler!(
+      createRequest({ version: '1', body: {}, params: { foo: 1 }, query: { foo: 1 } })
+    );
+
+    expect(response.status).toBe(422);
+    expect(response.payload).toEqual({ version: '1' });
+    expect(log.error).toHaveBeenCalledWith('422 Request Validation Error', {
+      error: { message: '[request body.foo]: expected value of type [number] but got [undefined]' },
+      http: { request: { method: undefined, path: undefined }, response: { status_code: 422 } },
+    });
+  });
+
+  it('exposes request validation error response metadata in validate.response', () => {
+    versionedRouter
+      .post({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: testValidation.fooValidation.request,
+            response: {
+              200: { body: () => schema.object({ foo: schema.number() }) },
+              422: { body: () => schema.object({ message: schema.string() }) },
+            },
+            onRequestValidationError: (error, request, response) =>
+              response.custom({ statusCode: 422, body: { message: error.message } }),
+          },
+        },
+        handlerFn
+      );
+
+    const [{ handlers }] = versionedRouter.getRoutes();
+
+    expect(handlers[0].options.validate).toMatchObject({
+      response: { 200: expect.any(Object), 422: expect.any(Object) },
+      onRequestValidationError: expect.any(Function),
+    });
+  });
+
   it('constructs lazily provided validations once (idempotency)', async () => {
     let handler: InternalRouteHandler;
     const { fooValidation } = testValidation;
@@ -381,6 +679,8 @@ describe('Versioned route', () => {
         },
         handlerFn
       );
+
+    expect(lazyValidation).not.toHaveBeenCalled();
 
     for (let i = 0; i < 10; i++) {
       const { status } = await handler!(
