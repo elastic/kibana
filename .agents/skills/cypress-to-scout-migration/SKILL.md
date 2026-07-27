@@ -229,7 +229,7 @@ After the Scout test is verified:
 - Using `page.waitForLoadState('networkidle')` — anti-pattern, actively removed from Scout tests; wait for specific elements instead
 - Using short custom timeouts on `waitFor()` (e.g., 3s) — causes CI flakiness; use the default (10s)
 - Adding explicit waits before `clear()`, `fill()`, `click()` — these auto-wait; the extra wait is redundant
-- Specifying `{ state: 'visible' }` on `waitFor()` — it's the default, omit it
+- Using a bare `waitFor()` for a readiness signal — prefer `waitFor({ state: 'visible' })` so the expected state is explicit
 - Missing Scout tags (validated at runtime)
 - Using `esArchiver` for system indices (use `kbnClient`)
 - Not parallelizing tests that could run in parallel

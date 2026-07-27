@@ -37,9 +37,10 @@ await expect.poll(async () => {
 }).toBeGreaterThan(0);
 ```
 
-### `waitFor()` defaults
+### Explicit readiness waits
 
-- `{ state: 'visible' }` is the default — omit it: `await element.waitFor()` not `await element.waitFor({ state: 'visible' })`
+- When `waitFor()` represents a readiness signal, make the expected state explicit: `await element.waitFor({ state: 'visible' })`.
+- Don't add a separate wait immediately before an auto-waiting action or web-first assertion.
 - Don't use short custom timeouts (e.g., 3s) — they cause CI flakiness. Use the default (10s) unless there is a strong, documented reason.
 
 ### Built-in auto-waiting
