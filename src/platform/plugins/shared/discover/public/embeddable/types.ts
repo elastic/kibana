@@ -109,6 +109,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   HasTimeRange &
   HasInspectorAdapters &
   PublishesSelectedTabId &
+  CanCancelRequests &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &
