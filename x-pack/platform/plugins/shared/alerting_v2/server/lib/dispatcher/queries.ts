@@ -20,6 +20,10 @@ import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 //
 // `_source` is dropped after JSON_EXTRACT because ES|QL does not auto-prune METADATA fields;
 // without the explicit DROP it rides through the INLINE STATS buffer and can exceed ~16.8 MB.
+//
+// Rows with a null subject are dropped here: a doc with source "internal" and no rule is
+// schema-valid and reaches the index, but has no series identity. Deriving its subject in
+// TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
 
@@ -31,6 +35,7 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           episode_status = episode.status,
           data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
       | EVAL ${SUBJECT_EVAL}
+      | WHERE subject IS NOT NULL
       | DROP episode.id, rule.id, episode.status, _source
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp

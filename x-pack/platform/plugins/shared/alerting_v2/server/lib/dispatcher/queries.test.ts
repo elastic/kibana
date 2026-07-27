@@ -111,6 +111,15 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('subject = CASE(');
   });
 
+  it('drops rows whose subject could not be resolved, before any aggregation', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('WHERE subject IS NOT NULL');
+    expect(req.query.indexOf('WHERE subject IS NOT NULL')).toBeLessThan(
+      req.query.indexOf('INLINE STATS')
+    );
+  });
+
   it('groups INLINE STATS BY subject, group_hash (not rule_id, group_hash)', () => {
     const req = getDispatchableAlertEventsQuery();
 

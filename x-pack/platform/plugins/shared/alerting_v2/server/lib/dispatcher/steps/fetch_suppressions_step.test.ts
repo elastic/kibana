@@ -9,6 +9,7 @@ import { FetchSuppressionsStep } from './fetch_suppressions_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createAlertEpisodeSuppressionsResponse } from '../fixtures/dispatcher';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import type { AlertEpisodeSuppression } from '../types';
 
 describe('FetchSuppressionsStep', () => {
   it('fetches suppressions for provided episodes', async () => {
@@ -20,6 +21,7 @@ describe('FetchSuppressionsStep', () => {
         {
           rule_id: 'r1',
           source: 'internal',
+          space_id: 'default',
           group_hash: 'h1',
           episode_id: 'e1',
           should_suppress: true,
@@ -72,6 +74,7 @@ describe('FetchSuppressionsStep', () => {
         {
           rule_id: null,
           source: 'pagerduty',
+          space_id: 'default',
           group_hash: 'pd-hash',
           episode_id: 'pd-ep-1',
           should_suppress: true,
@@ -119,17 +122,12 @@ describe('FetchSuppressionsStep', () => {
     );
 
     mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
-      const rows: Array<{
-        rule_id: string;
-        source: string;
-        group_hash: string;
-        episode_id: string;
-        should_suppress: boolean;
-      }> = [];
+      const rows: AlertEpisodeSuppression[] = [];
       if (args.query.includes(`${longSegment}-r0::`)) {
         rows.push({
           rule_id: `${longSegment}-r0`,
           source: 'internal',
+          space_id: 'default',
           group_hash: `${longSegment}-g0`,
           episode_id: 'e0',
           should_suppress: true,
@@ -139,6 +137,7 @@ describe('FetchSuppressionsStep', () => {
         rows.push({
           rule_id: `${longSegment}-r199`,
           source: 'internal',
+          space_id: 'default',
           group_hash: `${longSegment}-g199`,
           episode_id: 'e199',
           should_suppress: false,
