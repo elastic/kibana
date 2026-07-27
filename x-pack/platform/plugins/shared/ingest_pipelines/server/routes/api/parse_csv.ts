@@ -14,8 +14,8 @@ import { csvToIngestPipeline } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
-  file: schema.string(),
-  copyAction: schema.string() as Type<FieldCopyAction>,
+  file: schema.string({ maxLength: 1000000 }),
+  copyAction: schema.string({ maxLength: 64 }) as Type<FieldCopyAction>,
 });
 
 type ReqBody = TypeOf<typeof bodySchema>;
