@@ -25,7 +25,8 @@ import {
 import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
 import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { i18n } from '@kbn/i18n';
-import { formatBytes, formatNumber, useDeploymentStats } from '../hooks/use_deployment_stats';
+import { useDeploymentStats } from '../hooks/use_deployment_stats';
+import { formatBytes, formatNumber } from '../utils/format';
 import { useAgentsCount } from '../hooks/use_agents_count';
 import { HomePageBanner } from './home_page_banner';
 import { DocumentationQuickLinks } from './documentation_quick_links';

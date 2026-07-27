@@ -61,6 +61,31 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
+  it('renders a Tags row with a badge per tag when the group has tags', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            lastSnoozeAction: null,
+            lastSnoozeActor: null,
+            snoozeExpiry: null,
+            tags: ['tag-a', 'tag-b'],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Tags')).toBeInTheDocument();
+    const tagsRow = screen.getByTestId('alertingV2EpisodeDetailsOverviewListTags');
+    expect(tagsRow).toHaveTextContent('tag-a');
+    expect(tagsRow).toHaveTextContent('tag-b');
+  });
+
   it('hides the grouping row and keeps other rows when grouping is forbidden', () => {
     render(
       <I18nProvider>

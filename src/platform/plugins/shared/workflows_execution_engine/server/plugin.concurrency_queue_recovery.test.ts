@@ -118,8 +118,9 @@ describe('concurrency queue recovery wiring', () => {
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner({
       taskInstance,
       fakeRequest,
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
       executionUuid: 'test-execution-uuid',
+      setCustomTaskRunEventFields: jest.fn(),
     });
 
     await runner.run();

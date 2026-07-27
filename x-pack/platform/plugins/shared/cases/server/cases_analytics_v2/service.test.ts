@@ -262,5 +262,43 @@ describe('CasesAnalyticsV2Service', () => {
 
       await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
     });
+
+    it('clears the per-space data-view bootstrap cache so migrated runtime fields project on next request', async () => {
+      const service = build(true);
+      await startWithTaskManager(service);
+
+      // The migration creates templates via raw `repo.create`, bypassing the lifecycle hook that
+      // normally refreshes per-space data views. Clearing the bootstrap cache is what forces the next
+      // cases request to recompute the runtime-field map instead of waiting out the cache TTL.
+      const dataViewService = (
+        service as unknown as {
+          dataViewService: { clearBootstrapCache: () => void };
+        }
+      ).dataViewService;
+      const clearSpy = jest.spyOn(dataViewService, 'clearBootstrapCache');
+
+      await service.triggerBackfillReconciliation();
+
+      expect(clearSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('still clears the bootstrap cache even when scheduling the reset task fails', async () => {
+      const service = build(true);
+      const taskManager = await startWithTaskManager(service);
+      (taskManager.schedule as jest.Mock).mockRejectedValue(new Error('tm down'));
+
+      // The cache clear runs before (and independently of) the scheduling try/catch, so a Task
+      // Manager failure must not strand the stale data views.
+      const dataViewService = (
+        service as unknown as {
+          dataViewService: { clearBootstrapCache: () => void };
+        }
+      ).dataViewService;
+      const clearSpy = jest.spyOn(dataViewService, 'clearBootstrapCache');
+
+      await service.triggerBackfillReconciliation();
+
+      expect(clearSpy).toHaveBeenCalledTimes(1);
+    });
   });
 });

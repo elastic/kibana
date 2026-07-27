@@ -95,6 +95,7 @@ export const buildUserProfileApi = ({
 }): CoreUserProfileDelegateContract => {
   return {
     getCurrent: (params) => getUserProfile().getCurrent(params),
+    getCurrentProfileId: (params) => getUserProfile().getCurrentProfileId(params),
     suggest: (params) => getUserProfile().suggest(params),
     bulkGet: (params) => getUserProfile().bulkGet(params),
     update: (uids, data) => getUserProfile().update(uids, data),

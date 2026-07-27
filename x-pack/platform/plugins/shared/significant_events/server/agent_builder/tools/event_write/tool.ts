@@ -11,17 +11,23 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
+import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { eventsWriteHandler } from './handler';
+import {
+  getBulkWriteToolErrorCode,
+  MAX_BULK_WRITE_ITEMS,
+  trackTelemetryBestEffort,
+} from '../bulk_write';
+import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-const eventsWriteSchema = significantEventSchema.pick({
+export const eventsWriteItemSchema = significantEventSchema.pick({
   event_id: true,
   discovery_id: true,
   status: true,
@@ -39,6 +45,10 @@ const eventsWriteSchema = significantEventSchema.pick({
   conversation_id: true,
 });
 
+export const eventsWriteSchema = z.object({
+  items: z.array(eventsWriteItemSchema).min(1).max(MAX_BULK_WRITE_ITEMS),
+});
+
 export function createEventsWriteTool({
   getScopedClients,
   server,
@@ -54,8 +64,7 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-        Create or version a significant event for a discovery event. Handles deduplication: looks up the current event version by event_id; if status has not changed, skips the write and returns the existing event_uuid.,
-        For events linked to a discovery event via event_id. Standalone events not tied to a discovery event use event_create instead.
+      Create or version a batch of significant events linked to discoveries. Each item appends a new event version and is enriched with event_uuid and previous_event_uuid. Submit at most one item per event_id. Standalone events not tied to a discovery use event_create instead.
     `,
     schema: eventsWriteSchema,
     tags: ['streams', 'significant_events'],
@@ -66,38 +75,58 @@ export function createEventsWriteTool({
         const { getEventClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
 
-        const data = await eventsWriteHandler({
+        const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),
-          input: toolParams,
+          inputs: toolParams.items,
         });
 
-        telemetry.trackAgentToolEventsWrite({
-          success: true,
-          event_id: data.event_id,
-          status: data.status,
-          written: data.written,
-          stream_names: toolParams.stream_names,
+        data.forEach((result) => {
+          const input = toolParams.items[result.index];
+          if (input === undefined) return;
+          trackTelemetryBestEffort({
+            logger,
+            description: 'events_write telemetry',
+            track: () =>
+              telemetry.trackAgentToolEventsWrite({
+                success: result.written,
+                event_id: result.event_id,
+                status: result.status,
+                written: result.written,
+                stream_names: input.stream_names,
+                error_message: result.written ? undefined : result.error.reason,
+              }),
+          });
         });
 
         return {
-          results: [{ type: ToolResultType.other, data }],
+          results: [{ type: ToolResultType.other, data: { results: data } }],
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        telemetry.trackAgentToolEventsWrite({
-          success: false,
-          event_id: toolParams.event_id,
-          status: toolParams.status,
-          written: false,
-          stream_names: toolParams.stream_names,
-          error_message: message,
+        toolParams.items.forEach((input) => {
+          trackTelemetryBestEffort({
+            logger,
+            description: 'failed events_write telemetry',
+            track: () =>
+              telemetry.trackAgentToolEventsWrite({
+                success: false,
+                event_id: input.event_id,
+                status: input.status,
+                written: false,
+                stream_names: input.stream_names,
+                error_message: message,
+              }),
+          });
         });
+        const code = getBulkWriteToolErrorCode(error instanceof Error ? error : new Error(message));
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
+                code,
+                retryable: false,
                 message: i18n.translate(
                   'xpack.significantEvents.agentBuilder.tools.eventsWrite.errorMessage',
                   {

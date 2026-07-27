@@ -19,6 +19,5 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
-    "@kbn/i18n-react",
   ]
 }

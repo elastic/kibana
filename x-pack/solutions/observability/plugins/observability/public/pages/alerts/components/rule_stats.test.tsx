@@ -10,7 +10,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { RulesLocatorParams } from '@kbn/rule-data-utils';
 
-const RULES_PAGE_LINK = '/app/rules';
 const STAT_CLASS = 'euiStat';
 const STAT_TITLE_PRIMARY_SELECTOR = '[class*="euiStat__title-primary"]';
 const STAT_BUTTON_CLASS = 'euiButtonEmpty';
@@ -33,10 +32,9 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false
     );
-    expect(stats.length).toEqual(6);
+    expect(stats.length).toEqual(4);
   });
   test('disabled stat is not clickable, when there are no disabled rules', async () => {
     const stats = renderRuleStats(
@@ -47,10 +45,9 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false
     );
-    const { findByText, container } = render(stats[4]);
+    const { findByText, container } = render(stats[1]);
     const disabledElement = await findByText('Disabled');
     expect(disabledElement).toBeInTheDocument();
     expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
@@ -67,11 +64,10 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false,
       mockedLocator
     );
-    const { container } = render(stats[4]);
+    const { container } = render(stats[1]);
 
     fireEvent.click(screen.getByText('Disabled'));
 
@@ -91,10 +87,9 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false
     );
-    const { container } = render(stats[4]);
+    const { container } = render(stats[1]);
     expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
   });
 
@@ -107,10 +102,9 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false
     );
-    const { findByText, container } = render(stats[3]);
+    const { findByText, container } = render(stats[2]);
     const snoozedElement = await findByText('Snoozed');
     expect(snoozedElement).toBeInTheDocument();
     expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
@@ -127,11 +121,10 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 1,
       },
-      RULES_PAGE_LINK,
       false,
       mockedLocator
     );
-    const { container } = render(stats[3]);
+    const { container } = render(stats[2]);
 
     fireEvent.click(screen.getByText('Snoozed'));
 
@@ -151,10 +144,9 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 1,
       },
-      RULES_PAGE_LINK,
       false
     );
-    const { container } = render(stats[3]);
+    const { container } = render(stats[2]);
     expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
   });
 
@@ -167,10 +159,9 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false
     );
-    const { findByText, container } = render(stats[2]);
+    const { findByText, container } = render(stats[3]);
     const errorsElement = await findByText('Errors');
     expect(errorsElement).toBeInTheDocument();
     expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
@@ -187,11 +178,10 @@ describe('Rule stats', () => {
         error: 2,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false,
       mockedLocator
     );
-    const { container } = render(stats[2]);
+    const { container } = render(stats[3]);
 
     fireEvent.click(screen.getByText('Errors'));
 
@@ -211,10 +201,9 @@ describe('Rule stats', () => {
         error: 2,
         snoozed: 0,
       },
-      RULES_PAGE_LINK,
       false
     );
-    const { container } = render(stats[2]);
+    const { container } = render(stats[3]);
     expect(container.querySelector(STAT_TITLE_PRIMARY_SELECTOR)).toBeTruthy();
   });
 });
