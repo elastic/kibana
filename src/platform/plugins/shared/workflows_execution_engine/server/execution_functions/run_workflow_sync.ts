@@ -61,7 +61,7 @@ export const runWorkflowSync = async ({
     workflowExecutionRepository: setup.workflowExecutionPersistence,
     fakeRequest: request,
     coreStart: dependencies.coreStart,
-    taskAbortController: abortController,
+    signal: abortController.signal,
     executionMode: 'sync',
   });
 

@@ -58,11 +58,11 @@ const baseWorkflowExecution = {
   duration: 0,
 };
 
-const completedExecution: EsWorkflowExecution = {
+const completedExecution = {
   ...baseWorkflowExecution,
   status: ExecutionStatus.COMPLETED,
   context: { output: { answer: 42 } },
-};
+} as unknown as EsWorkflowExecution;
 
 describe('executeWorkflowSync', () => {
   const workflow = { id: 'wf-1', yaml: '', isEphemeral: false } as WorkflowExecutionEngineModel;
