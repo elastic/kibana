@@ -15,10 +15,10 @@ import { DEFAULT_FORM_STATE } from '../constants';
 import { DispatchSection } from './dispatch_section';
 import type { ActionPolicyFormState } from '../types';
 
-const mockUseFetchDataFields = jest.fn();
+const mockUseFetchRuleEventFields = jest.fn();
 
-jest.mock('../../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: (matcher?: string) => mockUseFetchDataFields(matcher),
+jest.mock('../../../../hooks/use_fetch_rule_event_fields', () => ({
+  useFetchRuleEventFields: (matcher?: string) => mockUseFetchRuleEventFields(matcher),
 }));
 
 const renderSection = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
@@ -49,18 +49,18 @@ const TEST_SUBJ = {
 
 describe('DispatchSection', () => {
   beforeEach(() => {
-    mockUseFetchDataFields.mockReset();
-    mockUseFetchDataFields.mockReturnValue({ data: undefined, isLoading: false });
+    mockUseFetchRuleEventFields.mockReset();
+    mockUseFetchRuleEventFields.mockReturnValue({ data: undefined, isLoading: false });
   });
 
-  it('passes the form matcher value to useFetchDataFields', () => {
+  it('passes the form matcher value to useFetchRuleEventFields', () => {
     renderSection({ ...DEFAULT_FORM_STATE, matcher: 'rule.id : "r1"' });
 
-    expect(mockUseFetchDataFields).toHaveBeenCalledWith('rule.id : "r1"');
+    expect(mockUseFetchRuleEventFields).toHaveBeenCalledWith('rule.id : "r1"');
   });
 
-  it('populates the group-by combo-box with fields returned by useFetchDataFields', async () => {
-    mockUseFetchDataFields.mockReturnValue({
+  it('populates the group-by combo-box with fields returned by useFetchRuleEventFields', async () => {
+    mockUseFetchRuleEventFields.mockReturnValue({
       data: ['data.host', 'data.service'],
       isLoading: false,
     });
