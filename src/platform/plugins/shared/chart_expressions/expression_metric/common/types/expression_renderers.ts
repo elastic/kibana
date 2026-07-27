@@ -13,7 +13,7 @@ import type { LayoutDirection, MetricStyle } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
   MetricDensity,
-  SecondaryMetricLabelPosition,
+  SecondaryNameVisibility,
   TrendlineResult,
 } from './expression_functions';
 
@@ -49,7 +49,7 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
-  secondaryLabelPosition: SecondaryMetricLabelPosition;
+  secondaryNameVisibility: SecondaryNameVisibility;
   /**
    * Determines where the metric color should be applied.
    * Only applies when the background chart is a panel.

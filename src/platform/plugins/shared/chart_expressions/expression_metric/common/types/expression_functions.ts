@@ -40,12 +40,10 @@ export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
 export type MetricDensity = 'compact' | 'default';
 
 /**
- * Visibility and placement of the secondary metric label.
+ * Visibility and placement of the secondary metric name.
  * `hidden` has no equivalent in `@elastic/charts`, where it is expressed as an empty label.
  */
-export type SecondaryMetricLabelPosition =
-  | 'hidden'
-  | NonNullable<SecondaryMetricProps['labelPosition']>;
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
@@ -73,7 +71,7 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
-  secondaryLabelPosition: SecondaryMetricLabelPosition;
+  secondaryNameVisibility: SecondaryNameVisibility;
   applyColorTo?: 'background' | 'value';
 }
 

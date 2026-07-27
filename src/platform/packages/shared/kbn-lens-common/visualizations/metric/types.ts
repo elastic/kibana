@@ -27,9 +27,7 @@ export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
  * Visibility and placement of the secondary metric name.
  * `hidden` has no equivalent in `@elastic/charts`, where it is expressed as an empty label.
  */
-export type SecondaryMetricLabelPosition =
-  | 'hidden'
-  | NonNullable<SecondaryMetricProps['labelPosition']>;
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export type SecondaryTrend =
   | { type: 'none' }
@@ -83,7 +81,7 @@ export interface MetricVisualizationState {
    */
   titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
-  secondaryLabelPosition?: SecondaryMetricLabelPosition;
+  secondaryNameVisibility?: SecondaryNameVisibility;
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
@@ -113,7 +111,7 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'valueFontMode'
   | 'density'
   | 'primaryPosition'
-  | 'secondaryLabelPosition'
+  | 'secondaryNameVisibility'
   | 'applyColorTo'
 >;
 

@@ -12,7 +12,7 @@ import type { LensAttributes } from '../../../../server/content_management/v1';
  * Cleanup metric properties
  * - Move `valuesTextAlign` to `primaryAlign` and `secondaryAlign`
  * - Drop `secondaryPrefix`/`secondaryLabel` in favour of the secondary metric operation name,
- *   preserving their visibility in `secondaryLabelPosition`
+ *   preserving their visibility in `secondaryNameVisibility`
  */
 export function metricMigrations(attributes: LensAttributes): LensAttributes {
   if (!attributes.state || attributes.visualizationType !== 'lnsMetric') {
@@ -54,12 +54,12 @@ export const getUpdatedMetricState = (
     const legacyLabel = secondaryLabel ?? secondaryPrefix;
     newState = {
       ...newState,
-      secondaryLabelPosition:
+      secondaryNameVisibility:
         legacyLabel === ''
           ? 'hidden'
           : // A state without an explicit position predates `Name visibility`, where the label
             // was shown before the value by default. Newer states always set it explicitly.
-            newState.secondaryLabelPosition ?? 'before',
+            newState.secondaryNameVisibility ?? 'before',
     };
   }
 

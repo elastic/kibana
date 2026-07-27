@@ -46,6 +46,11 @@ interface LegacyMetricStyling {
   colorMode?: unknown;
   valuesTextSize?: unknown;
   titlesTextSize?: unknown;
+  /**
+   * Pre-rename name of `secondaryNameVisibility`, still present on real persisted SOs.
+   * @deprecated
+   */
+  secondaryLabelPosition?: MetricVisualizationState['secondaryNameVisibility'];
 }
 
 // Optional visualization accessors that legacy SOs may persist as explicit `null`; the transform
@@ -152,16 +157,19 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       // The secondary label is the operation name, so a legacy custom label is dropped and only
       // its visibility survives, mirroring `getUpdatedMetricState`.
       const legacyLabel = viz.secondaryLabel ?? viz.secondaryPrefix;
-      viz.secondaryLabelPosition =
+      viz.secondaryNameVisibility =
         legacyLabel === ''
           ? 'hidden'
-          : viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+          : viz.secondaryNameVisibility ??
+            legacyViz.secondaryLabelPosition ??
+            DEFAULT_SECONDARY_LABEL_PLACEMENT;
     } else {
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      viz.secondaryLabelPosition = DEFAULT_SECONDARY_LABEL_PLACEMENT;
+      viz.secondaryNameVisibility = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
     delete viz.secondaryLabel;
     delete viz.secondaryPrefix;
+    delete legacyViz.secondaryLabelPosition;
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
     viz.valueFontMode = viz.valueFontMode ?? 'default';
@@ -197,7 +205,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
     const viz = attributes.state.visualization;
 
     viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-    viz.secondaryLabelPosition = viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+    viz.secondaryNameVisibility = viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
 
     return attributes;
   },

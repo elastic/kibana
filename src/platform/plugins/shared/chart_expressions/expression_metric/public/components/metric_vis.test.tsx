@@ -94,7 +94,7 @@ const defaultMetricParams: MetricVisParam = {
     palette: undefined,
   },
   primaryPosition: 'bottom',
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'before',
   applyColorTo: 'background',
 };
 
@@ -331,7 +331,7 @@ describe('MetricVisComponent', function () {
       await rerender({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabelPosition: 'hidden' },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryNameVisibility: 'hidden' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
@@ -598,7 +598,7 @@ describe('MetricVisComponent', function () {
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryLabelPosition: 'before' },
+          metric: { ...config.metric, secondaryNameVisibility: 'before' },
         },
       });
 
@@ -616,7 +616,7 @@ describe('MetricVisComponent', function () {
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryLabelPosition: 'hidden' },
+          metric: { ...config.metric, secondaryNameVisibility: 'hidden' },
         },
       });
 
@@ -1278,7 +1278,7 @@ describe('MetricVisComponent', function () {
               baseline: undefined,
               palette: undefined,
             },
-            secondaryLabelPosition: 'before',
+            secondaryNameVisibility: 'before',
             applyColorTo: 'background',
           },
         },

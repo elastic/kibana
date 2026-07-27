@@ -528,12 +528,12 @@ function SecondaryMetricEditor({
             },
           ]}
           idSelected={`${idPrefix}${
-            state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition
+            state.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility
           }`}
-          onChange={(_id, secondaryLabelPosition) => {
+          onChange={(_id, secondaryNameVisibility) => {
             setState({
               ...state,
-              secondaryLabelPosition,
+              secondaryNameVisibility,
             });
           }}
         />

@@ -200,7 +200,7 @@ describe('Metric', () => {
     it('should hide the name when no label visibility is specified', () => {
       const { visualization, apiOutput } = convert(getConfigWithSecondaryLabel());
 
-      expect(visualization.secondaryLabelPosition).toBe('hidden');
+      expect(visualization.secondaryNameVisibility).toBe('hidden');
       expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
     });
 
@@ -209,7 +209,7 @@ describe('Metric', () => {
         getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
       );
 
-      expect(visualization.secondaryLabelPosition).toBe('hidden');
+      expect(visualization.secondaryNameVisibility).toBe('hidden');
       expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
     });
 
@@ -220,7 +220,7 @@ describe('Metric', () => {
           getConfigWithSecondaryLabel({ visible: true, placement })
         );
 
-        expect(visualization.secondaryLabelPosition).toBe(placement);
+        expect(visualization.secondaryNameVisibility).toBe(placement);
         expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement });
       }
     );
@@ -228,7 +228,7 @@ describe('Metric', () => {
     it('should default a visible name to before the value', () => {
       const { visualization } = convert(getConfigWithSecondaryLabel({ visible: true }));
 
-      expect(visualization.secondaryLabelPosition).toBe('before');
+      expect(visualization.secondaryNameVisibility).toBe('before');
     });
   });
 

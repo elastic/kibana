@@ -105,7 +105,7 @@ describe('metric visualization', () => {
     valueFontMode: 'default',
     density: 'compact',
     secondaryTrend: { type: 'none' },
-    secondaryLabelPosition: 'before',
+    secondaryNameVisibility: 'before',
     applyColorTo: 'background',
   };
 
@@ -179,7 +179,7 @@ describe('metric visualization', () => {
     });
 
     test('migrates legacy state properties secondaryPrefix and valuesTextAlign', () => {
-      const { secondaryLabelPosition, primaryAlign, secondaryAlign, ...restFullState } = fullState;
+      const { secondaryNameVisibility, primaryAlign, secondaryAlign, ...restFullState } = fullState;
       const stateWithLegacyProperties: MetricVisualizationState = {
         ...restFullState,
         secondaryPrefix: LEGACY_SECONDARY_PREFIX,
@@ -191,7 +191,7 @@ describe('metric visualization', () => {
       );
       expect(result).toEqual({
         ...fullState,
-        secondaryLabelPosition: 'before',
+        secondaryNameVisibility: 'before',
         primaryAlign: LEGACY_VALUES_TEXT_ALIGN,
         secondaryAlign: LEGACY_VALUES_TEXT_ALIGN,
       });
@@ -234,7 +234,7 @@ describe('metric visualization', () => {
       const getStateWithLegacyLabel = (
         legacy: Pick<MetricVisualizationState, 'secondaryLabel' | 'secondaryPrefix'>
       ): MetricVisualizationState => {
-        const { secondaryLabelPosition, ...restFullState } = fullState;
+        const { secondaryNameVisibility, ...restFullState } = fullState;
         return { ...restFullState, ...legacy };
       };
 
@@ -246,7 +246,7 @@ describe('metric visualization', () => {
         (property) => {
           expect(initialize(getStateWithLegacyLabel({ [property]: '' }))).toEqual({
             ...fullState,
-            secondaryLabelPosition: 'hidden',
+            secondaryNameVisibility: 'hidden',
           });
         }
       );
@@ -256,7 +256,7 @@ describe('metric visualization', () => {
         (property) => {
           expect(initialize(getStateWithLegacyLabel({ [property]: 'custom-text' }))).toEqual({
             ...fullState,
-            secondaryLabelPosition: 'before',
+            secondaryNameVisibility: 'before',
           });
         }
       );
@@ -264,18 +264,18 @@ describe('metric visualization', () => {
       test('shows the name before the value when no legacy label was persisted', () => {
         expect(initialize(getStateWithLegacyLabel({}))).toEqual({
           ...fullState,
-          secondaryLabelPosition: 'before',
+          secondaryNameVisibility: 'before',
         });
       });
 
       test('preserves an explicit position over the legacy label', () => {
         expect(
-          initialize({ ...fullState, secondaryLabelPosition: 'after', secondaryLabel: 'ignored' })
-        ).toEqual({ ...fullState, secondaryLabelPosition: 'after' });
+          initialize({ ...fullState, secondaryNameVisibility: 'after', secondaryLabel: 'ignored' })
+        ).toEqual({ ...fullState, secondaryNameVisibility: 'after' });
       });
 
       test('leaves the position unset without a secondary metric', () => {
-        const { secondaryMetricAccessor, secondaryLabelPosition, ...restFullState } = fullState;
+        const { secondaryMetricAccessor, secondaryNameVisibility, ...restFullState } = fullState;
         expect(initialize({ ...restFullState, secondaryLabel: '' })).toEqual(restFullState);
       });
     });
@@ -642,11 +642,11 @@ describe('metric visualization', () => {
                 "secondaryAlign": Array [
                   "right",
                 ],
-                "secondaryLabelPosition": Array [
-                  "before",
-                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
+                ],
+                "secondaryNameVisibility": Array [
+                  "before",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -745,11 +745,11 @@ describe('metric visualization', () => {
                 "secondaryAlign": Array [
                   "right",
                 ],
-                "secondaryLabelPosition": Array [
-                  "before",
-                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
+                ],
+                "secondaryNameVisibility": Array [
+                  "before",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -1066,7 +1066,7 @@ describe('metric visualization', () => {
               "secondaryAlign": Array [
                 "right",
               ],
-              "secondaryLabelPosition": Array [
+              "secondaryNameVisibility": Array [
                 "before",
               ],
               "subtitle": Array [
@@ -1294,11 +1294,11 @@ describe('metric visualization', () => {
       'forwards the %s name visibility',
       (visibility) => {
         const expression = visualization.toExpression(
-          { ...fullState, secondaryLabelPosition: visibility, collapseFn: undefined },
+          { ...fullState, secondaryNameVisibility: visibility, collapseFn: undefined },
           datasourceLayers
         );
         if (expression && typeof expression === 'object') {
-          expect(expression.chain[0].arguments.secondaryLabelPosition).toEqual([visibility]);
+          expect(expression.chain[0].arguments.secondaryNameVisibility).toEqual([visibility]);
         } else {
           fail('Expression is not an object');
         }
@@ -1631,14 +1631,14 @@ describe('metric visualization', () => {
         })
       ).toEqual({
         secondaryMetricAccessor: columnId,
-        secondaryLabelPosition: 'hidden',
+        secondaryNameVisibility: 'hidden',
       });
     });
 
     it('preserves the name visibility when the secondary metric dimension is replaced', () => {
       expect(
         visualization.setDimension({
-          prevState: { ...state, secondaryLabelPosition: 'after' },
+          prevState: { ...state, secondaryNameVisibility: 'after' },
           columnId,
           groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
           layerId: 'some-id',
@@ -1646,7 +1646,7 @@ describe('metric visualization', () => {
         })
       ).toEqual({
         secondaryMetricAccessor: columnId,
-        secondaryLabelPosition: 'after',
+        secondaryNameVisibility: 'after',
       });
     });
 
@@ -1705,7 +1705,7 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('secondaryMetricAccessor');
-      expect(removed).not.toHaveProperty('secondaryLabelPosition');
+      expect(removed).not.toHaveProperty('secondaryNameVisibility');
       expect(removed).not.toHaveProperty('secondaryColorMode');
       expect(removed).not.toHaveProperty('secondaryTrend');
     });

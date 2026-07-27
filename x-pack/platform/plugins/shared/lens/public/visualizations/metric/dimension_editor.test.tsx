@@ -43,7 +43,7 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
-type NameVisibility = NonNullable<MetricVisualizationState['secondaryLabelPosition']>;
+type NameVisibility = NonNullable<MetricVisualizationState['secondaryNameVisibility']>;
 
 const NAME_VISIBILITY_TITLES: Record<NameVisibility, string> = {
   hidden: 'Hide',
@@ -94,7 +94,7 @@ describe('dimension editor', () => {
     trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-    secondaryLabelPosition: 'before',
+    secondaryNameVisibility: 'before',
     applyColorTo: 'background',
   };
 
@@ -444,7 +444,7 @@ describe('dimension editor', () => {
         'renders %s as the selected visibility',
         (visibility) => {
           const { getNameVisibilityOption } = renderSecondaryMetricEditor({
-            state: { ...localState, secondaryLabelPosition: visibility },
+            state: { ...localState, secondaryNameVisibility: visibility },
           });
 
           for (const option of ['hidden', 'before', 'after'] as const) {
@@ -458,7 +458,7 @@ describe('dimension editor', () => {
 
       it('falls back to the default visibility when unset', () => {
         const { getNameVisibilityOption } = renderSecondaryMetricEditor({
-          state: { ...localState, secondaryLabelPosition: undefined },
+          state: { ...localState, secondaryNameVisibility: undefined },
         });
 
         expect(getNameVisibilityOption('hidden')).toHaveAttribute('aria-pressed', 'true');
@@ -472,13 +472,13 @@ describe('dimension editor', () => {
             setState,
             state: {
               ...localState,
-              secondaryLabelPosition: visibility === 'hidden' ? 'before' : 'hidden',
+              secondaryNameVisibility: visibility === 'hidden' ? 'before' : 'hidden',
             },
           });
 
           await clickOnNameVisibility(visibility);
           expect(setState).toHaveBeenCalledWith(
-            expect.objectContaining({ secondaryLabelPosition: visibility })
+            expect.objectContaining({ secondaryNameVisibility: visibility })
           );
         }
       );
@@ -679,7 +679,7 @@ describe('dimension editor', () => {
           const { getBaselineGroup, getNameVisibilityOption } = renderSecondaryMetricEditor({
             state: {
               ...localState,
-              secondaryLabelPosition: visibility,
+              secondaryNameVisibility: visibility,
               secondaryTrend: {
                 type: 'dynamic',
                 visuals: 'both',

@@ -359,7 +359,7 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
   delete state.secondaryTrend;
-  delete state.secondaryLabelPosition;
+  delete state.secondaryNameVisibility;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {
@@ -655,8 +655,8 @@ export const getMetricVisualization = ({
         updated.secondaryMetricAccessor = columnId;
         // Set explicitly so the legacy state migration cannot mistake this for a state
         // predating `Name visibility` and turn the name on
-        updated.secondaryLabelPosition =
-          prevState.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition;
+        updated.secondaryNameVisibility =
+          prevState.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility;
         break;
       case LENS_METRIC_GROUP_ID.MAX:
         updated.maxAccessor = columnId;

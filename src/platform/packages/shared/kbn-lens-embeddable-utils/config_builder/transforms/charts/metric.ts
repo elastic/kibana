@@ -162,9 +162,9 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
  * otherwise the Lens state migration would read the missing value as a chart predating
  * `Name visibility` and turn the label on.
  */
-function getSecondaryLabelPosition(
+function getSecondaryNameVisibility(
   label: NonNullable<MetricStyling['secondary']>['label']
-): MetricVisualizationState['secondaryLabelPosition'] {
+): MetricVisualizationState['secondaryNameVisibility'] {
   const isVisible = label?.visible ?? DEFAULT_SECONDARY_LABEL_VISIBLE;
   if (!isVisible) {
     return 'hidden';
@@ -179,7 +179,7 @@ function convertStylingToStateFormat(
   if (!styling) {
     return {
       density: DEFAULT_DENSITY,
-      ...(hasSecondary ? { secondaryLabelPosition: getSecondaryLabelPosition(undefined) } : {}),
+      ...(hasSecondary ? { secondaryNameVisibility: getSecondaryNameVisibility(undefined) } : {}),
     };
   }
   const primaryStyling = styling.primary;
@@ -200,7 +200,7 @@ function convertStylingToStateFormat(
     iconAlign: styling.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
-          secondaryLabelPosition: getSecondaryLabelPosition(secondaryStyling?.label),
+          secondaryNameVisibility: getSecondaryNameVisibility(secondaryStyling?.label),
           secondaryAlign: secondaryStyling?.value?.alignment,
         })
       : {}),
@@ -238,7 +238,7 @@ function convertStylingToAPIFormat(
       ? {
           // `secondaryLabel`/`secondaryPrefix` are legacy state kept as a fallback: attributes
           // already stored at the latest version skip the transform that drops them
-          ...(visualization.secondaryLabelPosition === 'hidden' ||
+          ...(visualization.secondaryNameVisibility === 'hidden' ||
           visualization.secondaryLabel === '' ||
           visualization.secondaryPrefix === ''
             ? {
@@ -250,7 +250,7 @@ function convertStylingToAPIFormat(
                 label: {
                   visible: true,
                   placement:
-                    visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+                    visualization.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
                 },
               }),
           value: {

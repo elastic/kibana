@@ -212,7 +212,7 @@ export type {
   ValueFontMode,
   SecondaryTrendType,
   SecondaryTrend,
-  SecondaryMetricLabelPosition,
+  SecondaryNameVisibility,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
   PrimaryMetricFontSize,

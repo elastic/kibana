@@ -189,11 +189,11 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
-    secondaryLabelPosition: {
+    secondaryNameVisibility: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
+      help: i18n.translate('expressionMetricVis.function.secondaryNameVisibility.help', {
         defaultMessage:
-          'Specifies whether the Secondary Metric label is hidden, or placed before or after the value',
+          'Specifies whether the Secondary Metric name is hidden, or placed before or after the value',
       }),
       required: false,
     },
@@ -293,7 +293,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               palette: args.secondaryTrendPalette,
               textPalette: args.secondaryTrendTextPalette,
             },
-            secondaryLabelPosition: args.secondaryLabelPosition,
+            secondaryNameVisibility: args.secondaryNameVisibility,
             applyColorTo: args.applyColorTo,
           },
           dimensions: {

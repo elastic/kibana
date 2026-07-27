@@ -55,7 +55,7 @@ const fullState: Required<
   valueFontMode: 'default',
   density: 'default',
   secondaryTrend: { type: 'none' },
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'before',
   applyColorTo: 'background',
 };
 

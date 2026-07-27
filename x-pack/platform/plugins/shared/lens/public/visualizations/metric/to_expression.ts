@@ -240,8 +240,8 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
-    secondaryLabelPosition:
-      state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+    secondaryNameVisibility:
+      state.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility,
     applyColorTo: state.applyColorTo,
   });
 
