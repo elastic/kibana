@@ -16,6 +16,8 @@ import {
   type SlackAppStatusResponse,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../../../util/errors';
+import { RELAY_APP_BINDINGS_QUERY_KEY } from './use_relay_app_bindings';
 
 const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';
@@ -55,6 +57,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       if (stillInProgress && !pollDeadlineRef.current) {
         pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
       }
+      if (!stillInProgress) {
+        pollDeadlineRef.current = 0;
+      }
       return stillInProgress && Date.now() < pollDeadlineRef.current ? POLL_INTERVAL_MS : false;
     },
   });
@@ -65,7 +70,7 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
     },
     onError: (error) => {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.connectError',
           {
@@ -85,7 +90,7 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       return http.post<SlackAppDisconnectResponse>(DISCONNECT_ROUTE);
     },
     onError: (error) => {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.disconnectError',
           { defaultMessage: 'Failed to disconnect the Slack app' }
@@ -93,7 +98,12 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       });
     },
     onSettled: () => {
-      return queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY }),
+        // Disconnecting drops all channel bindings; invalidate them too so the
+        // `keepPreviousData` bindings query does not keep serving stale rows.
+        queryClient.invalidateQueries({ queryKey: RELAY_APP_BINDINGS_QUERY_KEY }),
+      ]);
     },
   });
 

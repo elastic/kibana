@@ -20,6 +20,7 @@ import {
 } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 
@@ -41,7 +42,7 @@ jest.mock('@kbn/esql/public', () => ({
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
-  dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
   date_created: '2026-01-01T00:00:00.000Z',
@@ -88,6 +89,27 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
   });
 
+  it('renders a back button linking to the AI indexes landing page', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
+    expect(screen.getByTestId('contextAiIndexBackToListButton')).toHaveAttribute(
+      'href',
+      '/app/context_engine/'
+    );
+  });
+
   it('renders an empty state when there are no sources', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
@@ -106,6 +128,43 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(await screen.findByTestId('contextAiIndexDetailError')).toHaveTextContent('boom');
+  });
+
+  it('edits the description and refetches the AI index', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+
+    const textArea = await screen.findByTestId('contextDescriptionTextArea');
+    fireEvent.change(textArea, { target: { value: 'A brand new description' } });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            description: 'A brand new description',
+          }),
+        })
+      );
+    });
+
+    // The editor closes and the detail data is refetched after a successful save.
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
   it('opens the edit sources flyout with the current sources selected', async () => {
@@ -146,7 +205,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
-            dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
           }),
