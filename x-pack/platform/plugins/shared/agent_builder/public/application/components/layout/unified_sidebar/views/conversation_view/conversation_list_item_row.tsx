@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiTextTruncate,
   EuiToolTip,
@@ -28,6 +29,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
+import { useToasts } from '../../../../../hooks/use_toasts';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -65,6 +67,9 @@ const labels = {
   actionsMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.actionsMenu', {
     defaultMessage: 'Conversation actions',
   }),
+  deleteError: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteError', {
+    defaultMessage: 'Failed to delete conversation',
+  }),
 };
 
 export interface ConversationListItemRowProps {
@@ -96,6 +101,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     deleteConversation,
@@ -105,9 +111,27 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     markAsPinned,
     markAsUnpinned,
   } = useConversationListMutations({ routeConversationId, agentId });
+  const { addErrorToast } = useToasts();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
+
+  const handleDelete = useCallback(
+    async (convId: string) => {
+      setIsDeleteModalOpen(false);
+      setIsDeleting(true);
+      try {
+        await deleteConversation(convId);
+      } catch (e) {
+        addErrorToast({
+          title: labels.deleteError,
+          text: e instanceof Error ? e.message : undefined,
+        });
+        setIsDeleting(false);
+      }
+    },
+    [deleteConversation, addErrorToast]
+  );
 
   const baseLinkStyles = createConversationListItemStyles(euiTheme);
   const activeLinkStyles = createActiveConversationListItemStyles(euiTheme);
@@ -123,6 +147,15 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       display: block;
     `,
   ]);
+
+  const iconSlotStyles = css`
+    width: ${euiTheme.size.l};
+    height: ${euiTheme.size.l};
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
 
   const rowStyles = useMemo(() => {
     const bg = euiTheme.colors.backgroundLightPrimary;
@@ -298,6 +331,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         responsive={false}
         alignItems="center"
         css={rowStyles}
+        style={isDeleting ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
         data-test-subj={`agentBuilderSidebarConversationRow-${conversationId}`}
       >
         <EuiFlexItem
@@ -322,18 +356,21 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           </Link>
         </EuiFlexItem>
 
-        {status !== undefined || showActionsMenu ? (
+        {isDeleting ? (
+          <EuiFlexItem grow={false}>
+            <div css={iconSlotStyles}>
+              <EuiLoadingSpinner size="s" />
+            </div>
+          </EuiFlexItem>
+        ) : status !== undefined || showActionsMenu ? (
           <EuiFlexItem grow={false}>
             <div
-              css={css`
-                position: relative;
-                width: ${euiTheme.size.l};
-                height: ${euiTheme.size.l};
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              `}
+              css={[
+                iconSlotStyles,
+                css`
+                  position: relative;
+                `,
+              ]}
             >
               {status !== undefined && (
                 <div
@@ -390,7 +427,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           onClose={() => setIsDeleteModalOpen(false)}
           conversationId={conversationId}
           title={title}
-          onDelete={deleteConversation}
+          onDelete={handleDelete}
         />
       ) : null}
     </>
