@@ -657,7 +657,7 @@ describe('ai indices routes', () => {
     };
 
     describe('PUT /api/context_engine/ai_index/{aiIndexId}', () => {
-      it('logs outcome:unknown before the write on success', async () => {
+      it('logs outcome:success after the write succeeds', async () => {
         aiIndexService.put.mockResolvedValue('created');
 
         await callSecureRoute('PUT', aiIndexByIdPath, putRequest);
@@ -667,30 +667,20 @@ describe('ai indices routes', () => {
           expect.objectContaining({
             event: expect.objectContaining({
               action: 'ai_index_create_or_update',
-              outcome: 'unknown',
+              outcome: 'success',
             }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
       });
 
-      it('logs outcome:unknown then outcome:failure on error', async () => {
+      it('logs outcome:failure on error', async () => {
         aiIndexService.put.mockRejectedValue(new InvalidAiIndexDestError('bad dest'));
 
         await callSecureRoute('PUT', aiIndexByIdPath, putRequest);
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
-        expect(auditLogger.log).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            event: expect.objectContaining({
-              action: 'ai_index_create_or_update',
-              outcome: 'unknown',
-            }),
-          })
-        );
-        expect(auditLogger.log).toHaveBeenNthCalledWith(
-          2,
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
             event: expect.objectContaining({
               action: 'ai_index_create_or_update',
@@ -755,7 +745,7 @@ describe('ai indices routes', () => {
     });
 
     describe('DELETE /api/context_engine/ai_index/{aiIndexId}', () => {
-      it('logs outcome:unknown before the delete on success', async () => {
+      it('logs outcome:success after the delete succeeds', async () => {
         aiIndexService.delete.mockResolvedValue(undefined);
 
         await callSecureRoute('DELETE', aiIndexByIdPath, {
@@ -765,26 +755,19 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_delete', outcome: 'unknown' }),
+            event: expect.objectContaining({ action: 'ai_index_delete', outcome: 'success' }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
       });
 
-      it('logs outcome:unknown then outcome:failure on error', async () => {
+      it('logs outcome:failure on error', async () => {
         aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
         await callSecureRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'missing' } });
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
-        expect(auditLogger.log).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_delete', outcome: 'unknown' }),
-          })
-        );
-        expect(auditLogger.log).toHaveBeenNthCalledWith(
-          2,
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
             event: expect.objectContaining({ action: 'ai_index_delete', outcome: 'failure' }),
           })
