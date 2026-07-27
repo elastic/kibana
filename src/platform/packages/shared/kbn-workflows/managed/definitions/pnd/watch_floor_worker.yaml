@@ -1,4 +1,4 @@
-version: "1"
+version: '1'
 name: Watch Floor Worker
 description: >
   Watch Floor domain worker. Enriches a real detection-engine alert, triages it
@@ -8,28 +8,49 @@ enabled: true
 tags:
   - watch-worker
   - watch-floor-worker
+# CWL skill-customization: Option 2 (WG decided 2026-07-23, Slack C0BHGGA6PHC/p1784742716537469).
+# Watch-level skill allowlist authored on the `watch_policy` data.set step (CWL policy bag — the
+# top-level workflow schema is non-strict and strips unknown top-level keys). Passed into the
+# ai.agent step as a runtime override; effective skills = the allowlist verbatim (straight
+# replace of the agent's configured skill_ids — elastic/kibana#280617, confirmed in review;
+# there is no intersection with the agent's stored skill_ids at runtime). This means Option 2
+# does NOT give a hard allowlist boundary today: WG open question P5 (subset-validation for
+# managed Watches) is still open upstream — see
+# docs/working-groups/common-worker-layer/artifacts/2026-07-22-watch-skill-customization-research.md.
 triggers:
   - type: manual
 steps:
+  - name: watch_policy
+    # CWL policy bag. Watch Floor runs alert triage only.
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - alert-analysis
   - name: enrich_alert
     # Fetch the real alert evidence. Fail-closed: if enrichment fails we stop
     # before Reason rather than triaging an empty context.
-    type: http
+    type: kibana.request
     on-failure:
       continue: false
     with:
       method: POST
-      url: "kbn://internal/pnd/investigations/_enrich_alert"
+      path: '/internal/pnd/investigations/_enrich_alert'
       headers:
-        kbn-xsrf: "true"
-        Elastic-Api-Version: "1"
+        kbn-xsrf: 'true'
+        Elastic-Api-Version: '1'
       body:
-        alertId: "{{ inputs.alertId }}"
-        investigationId: "{{ inputs.investigationId }}"
+        alertId: '{{ inputs.alertId }}'
+        investigationId: '{{ inputs.investigationId }}'
   - name: triage_alerts
     type: ai.agent
-    timeout: "10m"
+    timeout: '10m'
     with:
+      # Option 2 runtime override — LIVE (elastic/kibana#280617, straight-replace semantics
+      # confirmed in review + on this branch: no intersection with the agent's stored
+      # skill_ids, since the type-base merge downstream re-adds those regardless).
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
       message: >
         Use the [/alert-analysis](skill://alert-analysis) skill to triage the
         enriched security alert below. Prefer recall over precision when unsure.
@@ -70,7 +91,12 @@ steps:
       workerRun:
         watch: watch-floor
         classification: "{{ steps.triage_alerts.output.structured_output.classification | default: 'inconclusive' }}"
-        confidence: "{{ steps.triage_alerts.output.structured_output.confidence_score | default: 0 }}"
+        confidence: '${{ steps.triage_alerts.output.structured_output.confidence_score | default: 0 }}'
         rationale: "{{ steps.triage_alerts.output.structured_output.rationale | default: 'Watch Floor triage completed.' }}"
-        alertId: "{{ inputs.alertId }}"
-        investigationId: "{{ inputs.investigationId }}"
+        alertId: '{{ inputs.alertId }}'
+        investigationId: '{{ inputs.investigationId }}'
+        # Rule-Tuning trigger (delta #3) — CONDITIONAL. `reason` renders to `false_positive` ONLY when
+        # the alert was dispositioned as a false positive; otherwise it renders empty and the server
+        # (WorkerRunSchema.ruleTuningTrigger is optional, built only when reason is present) attaches
+        # nothing. This is the Detection-Watch-subscribable Rule Tuning trigger source.
+        ruleTuningTriggerReason: "{%- if steps.triage_alerts.output.structured_output.classification == 'false_positive' -%}false_positive{%- endif -%}"
