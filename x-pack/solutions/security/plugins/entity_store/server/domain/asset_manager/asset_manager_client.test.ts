@@ -77,6 +77,8 @@ describe('AssetManagerClient', () => {
   const namespace = 'default';
 
   let client: AssetManagerClient;
+  let mockUserEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockInternalEsClient: jest.Mocked<ElasticsearchClient>;
   let mockEngineDescriptorClient: {
     getAll: jest.Mock;
     init: jest.Mock;
@@ -124,9 +126,13 @@ describe('AssetManagerClient', () => {
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
+    mockUserEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockInternalEsClient = {} as jest.Mocked<ElasticsearchClient>;
+
     client = new AssetManagerClient({
       logger: loggerMock.create(),
-      esClient: {} as jest.Mocked<ElasticsearchClient>,
+      esClient: mockUserEsClient,
+      internalEsClient: mockInternalEsClient,
       taskManager: {} as jest.Mocked<TaskManagerStartContract>,
       engineDescriptorClient:
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
@@ -157,6 +163,24 @@ describe('AssetManagerClient', () => {
     expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
   });
 
+  it('runs v1 cleanup and stored-script setup as the internal user', async () => {
+    await client.init({} as KibanaRequest, ['host', 'user']);
+
+    // Legacy v1 cleanup and managed stored scripts must not require the enabling user to hold
+    // transform/enrich/cluster-manage privileges, so they run as the internal/system user.
+    // Reference-equality (toBe) matters here: both mock clients are `{}` and would be
+    // structurally equal under objectContaining.
+    expect(mockStopAndRemoveV1).toHaveBeenCalled();
+    mockStopAndRemoveV1.mock.calls.forEach(([arg]) => {
+      expect(arg.esClient).toBe(mockInternalEsClient);
+      expect(arg.esClient).not.toBe(mockUserEsClient);
+    });
+    expect(mockInstallEuidStoredScripts).toHaveBeenCalled();
+    mockInstallEuidStoredScripts.mock.calls.forEach(([arg]) => {
+      expect(arg.esClient).toBe(mockInternalEsClient);
+    });
+  });
+
   it('does not recreate shared indices or data streams during per-type install', async () => {
     const installed = await client.install('host');
 
@@ -178,6 +202,7 @@ describe('AssetManagerClient', () => {
       getPrivilegesClient = new AssetManagerClient({
         logger: loggerMock.create(),
         esClient: {} as jest.Mocked<ElasticsearchClient>,
+        internalEsClient: {} as jest.Mocked<ElasticsearchClient>,
         taskManager: {} as jest.Mocked<TaskManagerStartContract>,
         engineDescriptorClient:
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
@@ -228,6 +253,38 @@ describe('AssetManagerClient', () => {
       expect(indexKeys).toContain('.entities.entities-default');
       expect(indexKeys).not.toContain('-logs-cloud_security_posture.*');
       expect(indexKeys).not.toContain('-logs-excluded-*');
+    });
+
+    it('checks the cluster + target assets that install creates as the requesting user', async () => {
+      // The updates data stream is also returned as an extraction source.
+      getLocalIndexPatternsMock.mockResolvedValue([
+        'logs-*',
+        '.entities.v2.updates.security_default',
+      ]);
+
+      await getPrivilegesClient.getPrivileges({} as KibanaRequest);
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+
+      // Ingest pipelines + templates are both created during install.
+      expect(calledWith.elasticsearch.cluster).toEqual(
+        expect.arrayContaining(['manage_index_templates', 'manage_ingest_pipelines'])
+      );
+
+      // The concrete latest index + its alias, and the updates/metadata data streams.
+      const indexKeys = Object.keys(calledWith.elasticsearch.index);
+      expect(indexKeys).toContain('entities-latest-default');
+      expect(indexKeys).toContain('.entities.v2.latest.security_default-*');
+      expect(indexKeys).toContain('.entities.v2.updates.security_default');
+      expect(indexKeys).toContain('.entities.v2.metadata.security_default');
+      expect(calledWith.elasticsearch.index['.entities.v2.latest.security_default-*']).toEqual(
+        expect.arrayContaining(['manage'])
+      );
+      // Updates data stream is both a target (manage) and a source (view_index_metadata);
+      // privileges must be unioned, not overwritten.
+      expect(calledWith.elasticsearch.index['.entities.v2.updates.security_default']).toEqual(
+        expect.arrayContaining(['manage', 'view_index_metadata'])
+      );
     });
   });
 
