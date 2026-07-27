@@ -450,7 +450,15 @@ def acquire_ccs_deployment_lease(
     config: dict[str, Any],
     *,
     env: Mapping[str, str] | None = None,
+    force: bool = False,
 ) -> None:
+    """Acquire or refresh the deployment CCS lease.
+
+    Foreign leases always block by default, including after TTL expiry, so a
+    long exploration window cannot be stolen by another session's break.
+    Pass force=True only for explicit crash-recovery takeover of an *expired*
+    foreign lease (never an active/unexpired one).
+    """
     session_id = require_session_id(config)
     existing = read_ccs_deployment_lease(config, env=env)
     if existing is not None:
@@ -458,10 +466,19 @@ def acquire_ccs_deployment_lease(
         if owner == session_id:
             _write_ccs_deployment_lease(config, session_id=session_id, env=env)
             return
-        if not ccs_deployment_lease_is_expired(existing, env=env):
-            raise ValueError(
-                f"CCS deployment lease is held by session {owner!r}"
+        expired = ccs_deployment_lease_is_expired(existing, env=env)
+        if force and expired:
+            _write_ccs_deployment_lease(config, session_id=session_id, env=env)
+            return
+        raise ValueError(
+            f"CCS deployment lease is held by session {owner!r}"
+            + (
+                "; pass force=True / --force-lease only if that session is dead "
+                "and its lease is expired"
+                if expired
+                else ""
             )
+        )
     _write_ccs_deployment_lease(config, session_id=session_id, env=env)
 
 
@@ -470,11 +487,7 @@ def assert_ccs_deployment_lease_allows_session(
     *,
     env: Mapping[str, str] | None = None,
 ) -> None:
-    """Refuse foreign leases even when expired.
-
-    TTL expiry enables acquire-time takeover for crash recovery; it must not
-    silently allow capture/restore against another session's exclusive window.
-    """
+    """Refuse foreign leases even when expired."""
     session_id = require_session_id(config)
     existing = read_ccs_deployment_lease(config, env=env)
     if existing is None:

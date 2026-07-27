@@ -1455,7 +1455,7 @@ print("500")
             self.assertNotEqual(result.returncode, 0, result.stdout)
             self.assertIsNone(read_ccs_deployment_lease(config, env=environment))
 
-    def test_expired_ccs_lease_can_be_taken_over(self):
+    def test_expired_ccs_lease_requires_force_to_take_over(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
             lock_dir = root / "locks"
@@ -1480,8 +1480,6 @@ print("500")
                 encoding="utf-8",
             )
 
-            # Expired foreign leases still fence capture/restore; only acquire
-            # may take over for crash recovery.
             with self.assertRaises(ValueError):
                 assert_ccs_deployment_lease_allows_session(
                     {
@@ -1495,10 +1493,29 @@ print("500")
                 "session_id": "fresh001",
                 "environment": {"es_url": "https://shared.es.test"},
             }
-            acquire_ccs_deployment_lease(takeover, env=environment)
+            # Long exploration must not lose the lease to a silent takeover.
+            with self.assertRaises(ValueError):
+                acquire_ccs_deployment_lease(takeover, env=environment)
+
+            acquire_ccs_deployment_lease(takeover, env=environment, force=True)
             lease = read_ccs_deployment_lease(takeover, env=environment)
             self.assertIsNotNone(lease)
             self.assertEqual(lease["session_id"], "fresh001")
+
+            # Force never steals an unexpired foreign lease.
+            with self.assertRaises(ValueError):
+                acquire_ccs_deployment_lease(
+                    {
+                        "session_id": "other002",
+                        "environment": {"es_url": "https://shared.es.test"},
+                    },
+                    env=environment,
+                    force=True,
+                )
+            self.assertEqual(
+                read_ccs_deployment_lease(takeover, env=environment)["session_id"],
+                "fresh001",
+            )
 
             with self.assertRaises(ValueError):
                 release_ccs_deployment_lease(
@@ -1512,6 +1529,124 @@ print("500")
                     env=environment,
                     require_owner=False,
                 )
+            )
+
+    def test_break_force_lease_flag_takes_over_expired_lease(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "fresh001",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://shared.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "captured",
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": {
+                                "skipUnavailable": False,
+                                "mode": "proxy",
+                                "seeds": None,
+                                "nodeConnections": None,
+                                "proxyAddress": "remote.example.test:9400",
+                                "proxySocketConnections": 3,
+                                "serverName": None,
+                            },
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "persistent",
+                                "settings": PERSISTENT_CCS_SETTINGS,
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            environment = os.environ.copy()
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+            environment["EXPLORATORY_TESTER_CCS_LEASE_TTL_SECONDS"] = "30"
+            lease_path = ccs_deployment_lease_path(
+                {
+                    "session_id": "stale0001",
+                    "environment": {"es_url": "https://shared.es.test"},
+                },
+                env=environment,
+            )
+            lease_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "stale0001",
+                        "acquired_at": time.time() - 120,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+print(json.dumps({"acknowledged": True}))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            blocked = subprocess.run(
+                [
+                    sys.executable,
+                    str(BREAK_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertNotEqual(blocked.returncode, 0, blocked.stdout)
+            self.assertIn("stale0001", blocked.stderr)
+
+            forced = subprocess.run(
+                [
+                    sys.executable,
+                    str(BREAK_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                    "--force-lease",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(forced.returncode, 0, forced.stderr)
+            self.assertEqual(
+                read_ccs_deployment_lease(
+                    {
+                        "session_id": "fresh001",
+                        "environment": {"es_url": "https://shared.es.test"},
+                    },
+                    env=environment,
+                )["session_id"],
+                "fresh001",
             )
 
     def test_expired_foreign_lease_blocks_capture(self):
@@ -2844,6 +2979,7 @@ print("200")
         self.assertIn("deployment-scoped lock", break_remote)
         self.assertIn("EXPLORATORY_TESTER_CCS_LOCK_DIR", break_remote)
         self.assertIn("lease", break_remote.lower())
+        self.assertIn("--force-lease", break_remote)
         self.assertIn("--max-time", noise)
         self.assertIn("--connect-timeout", noise)
         self.assertIn("--max-time", validation_section)

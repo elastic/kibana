@@ -23,6 +23,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--session-dir", required=True)
     parser.add_argument("--alias", required=True)
+    parser.add_argument(
+        "--force-lease",
+        action="store_true",
+        help=(
+            "Take over an expired foreign CCS deployment lease after confirming "
+            "the owning session is dead. Never use while another session may "
+            "still restore."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -154,10 +163,7 @@ def main() -> int:
                 for header in request_headers:
                     header_args.extend(["-H", header])
 
-                # Acquire (or refresh) the lease; expired foreign leases may be
-                # taken over here for crash recovery, but capture/restore still
-                # refuse foreign leases even when expired.
-                acquire_ccs_deployment_lease(config)
+                acquire_ccs_deployment_lease(config, force=args.force_lease)
                 config["ccs_state"] = "mutation_pending"
                 config["ccs_restored"] = False
 

@@ -85,14 +85,14 @@ treat a broken shared deployment as urgent.
   `EXPLORATORY_TESTER_CCS_LOCK_DIR`) so concurrent exploratory sessions against
   the same SOURCE cluster cannot mutate CCS at the same time.
 - Break also writes a deployment lease for the current `session_id`. While that
-  lease exists, other sessions cannot capture or break the same SOURCE CCS
-  config (they would otherwise snapshot the already-broken cluster). Restore
+  lease exists — including after the TTL clock expires — other sessions cannot
+  capture or break the same SOURCE CCS config (they would otherwise snapshot the
+  already-broken cluster or steal restore rights mid-exploration). Restore
   releases the lease; `restore-and-cleanup-session.py` keeps it across restore
   and releases an owned lease once CCS is safe again (even if resource cleanup
-  fails).   Foreign leases are left alone (including expired ones) for capture/restore.
-  Owner CCS commands heartbeat the lease. Stale leases older than
-  `EXPLORATORY_TESTER_CCS_LEASE_TTL_SECONDS` (default 4h) may be taken over only
-  by a later `break` acquire for crash recovery.
+  fails). Crash recovery of an abandoned *expired* lease requires an explicit
+  `break-remote-cluster.py --force-lease` after confirming the owning session is
+  dead; unexpired foreign leases can never be forced.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
 - If the session cap fires or the browser dies mid-scenario, run step 6 first
   from the persisted `SESSION_DIR`, then handle the timeout/loss. Restoration
