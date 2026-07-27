@@ -134,6 +134,13 @@ export function ServiceMap({
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
+  const { highlightedServiceNames: highlightedFromControls } = useServiceMapSearchContext();
+  const highlightedServiceNames = useMemo(() => {
+    if (highlightedFromControls.length > 0) {
+      return highlightedFromControls;
+    }
+    return serviceName ? [serviceName] : [];
+  }, [highlightedFromControls, serviceName]);
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/service-map',
@@ -337,7 +344,7 @@ export function ServiceMap({
               nodes={isLoading ? [] : nodesForGraph}
               edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
-              highlightedServiceName={serviceName}
+              highlightedServiceNames={highlightedServiceNames}
               environment={environment}
               kuery={kuery}
               start={start}

@@ -474,7 +474,7 @@ export function ServiceMapEmbeddable({
             onCollapse={onCollapse}
             onBaseMaxHopsChange={setBaseMaxHops}
             onMaxVisibleNodesChange={setMaxVisibleNodes}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={serviceName ? [serviceName] : undefined}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -492,7 +492,7 @@ export function ServiceMapEmbeddable({
             nodes={isLoading ? [] : nodesForGraph}
             edges={isLoading ? [] : data.edges}
             serviceName={serviceName}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={serviceName ? [serviceName] : undefined}
             environment={environment}
             kuery={kuery}
             start={start}

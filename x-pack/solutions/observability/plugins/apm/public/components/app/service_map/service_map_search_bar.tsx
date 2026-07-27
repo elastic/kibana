@@ -48,7 +48,7 @@ export function ServiceMapSearchBar() {
 
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
-  const { setEsQuery } = useServiceMapSearchContext();
+  const { setEsQuery, setHighlightedServiceNames } = useServiceMapSearchContext();
   const { services } = useKibana<ApmPluginStartDeps>();
   const { filterManager } = services.data.query;
   const location = useLocation();
@@ -198,6 +198,18 @@ export function ServiceMapSearchBar() {
         (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
     };
   });
+
+  // Seed context highlight from restored URL selections immediately (before Controls fire).
+  useEffect(() => {
+    setHighlightedServiceNames(initialSelections['service.name'] ?? []);
+  }, [initialSelections, setHighlightedServiceNames]);
+
+  // Keep context highlight in sync with the active Service name control.
+  useEffect(() => {
+    if (!hasControlsFired.current) return;
+    const selections = extractSelectionsFromFilters(panelFilters);
+    setHighlightedServiceNames(selections['service.name'] ?? []);
+  }, [panelFilters, extractSelectionsFromFilters, setHighlightedServiceNames]);
 
   // When the URL restores non-environment control selections (e.g. Explore →
   // global map with service.name), wait for Controls to apply them before

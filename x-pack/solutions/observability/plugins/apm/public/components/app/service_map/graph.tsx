@@ -129,10 +129,11 @@ interface GraphProps {
   /** Strip `kuery` from popover-built URLs (env still flows through). */
   clearKueryOnPopoverNavigation?: boolean;
   /**
-   * When set to a service name that exists on the map, that node gets context highlight
-   * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
+   * Service names that get context highlight (frame, fill, primary node ring).
+   * Blue edges/markers remain tied to explicit selection only.
+   * Driven by the active `service.name` filter / Controls selection (multi-valued).
    */
-  highlightedServiceName?: string;
+  highlightedServiceNames?: string[];
   /** Controlled initial / current orientation when supplied. Falls back to internal `useState` otherwise. */
   mapOrientation?: ServiceMapOrientation;
   /** Called when orientation changes (Options panel or any other host control). */
@@ -171,7 +172,7 @@ function GraphInner({
   showFocusMap,
   alwaysNavigateOnPopoverFocus,
   clearKueryOnPopoverNavigation,
-  highlightedServiceName,
+  highlightedServiceNames,
   mapOrientation: controlledOrientation,
   onMapOrientationChange,
   viewFilters: controlledViewFilters,
@@ -359,10 +360,10 @@ function GraphInner({
         if (!isServiceNode(n)) {
           return n;
         }
-        const contextHighlight = Boolean(highlightedServiceName && n.id === highlightedServiceName);
+        const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
         return { ...n, data: { ...n.data, contextHighlight } };
       }),
-    [nodesAfterFilters, highlightedServiceName]
+    [nodesAfterFilters, highlightedServiceNames]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithContextHighlight);
@@ -376,16 +377,17 @@ function GraphInner({
       selectedEdgeId: selectedEdgeForPopoverRef.current,
     });
 
-    const edgesWithContextHighlight = highlightedServiceName
-      ? highlightedEdges.map((edge) => ({
-          ...edge,
-          data: {
-            ...edge.data,
-            sourceContextHighlight: edge.source === highlightedServiceName,
-            targetContextHighlight: edge.target === highlightedServiceName,
-          },
-        }))
-      : highlightedEdges;
+    const edgesWithContextHighlight =
+      highlightedServiceNames && highlightedServiceNames.length > 0
+        ? highlightedEdges.map((edge) => ({
+            ...edge,
+            data: {
+              ...edge.data,
+              sourceContextHighlight: highlightedServiceNames.includes(edge.source),
+              targetContextHighlight: highlightedServiceNames.includes(edge.target),
+            },
+          }))
+        : highlightedEdges;
 
     setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
@@ -403,7 +405,7 @@ function GraphInner({
     handleFitView,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
-    highlightedServiceName,
+    highlightedServiceNames,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(

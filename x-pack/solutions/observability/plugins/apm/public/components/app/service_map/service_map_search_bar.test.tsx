@@ -12,6 +12,7 @@ import { Subject } from 'rxjs';
 import { ServiceMapSearchBar } from './service_map_search_bar';
 
 let mockSetEsQuery: jest.Mock;
+let mockSetHighlightedServiceNames: jest.Mock;
 let mockOnFiltersChange: (filters: Filter[]) => void;
 let mockHistoryReplace: jest.Mock;
 let mockLocationSearch: string;
@@ -56,6 +57,7 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
 jest.mock('./service_map_search_context', () => ({
   useServiceMapSearchContext: () => ({
     setEsQuery: (...args: unknown[]) => mockSetEsQuery(...args),
+    setHighlightedServiceNames: (...args: unknown[]) => mockSetHighlightedServiceNames(...args),
   }),
 }));
 
@@ -133,13 +135,14 @@ jest.mock('@kbn/es-query', () => ({
       .match_phrase;
     return Object.values(mp)[0];
   },
-  isPhrasesFilter: () => false,
+  isPhrasesFilter: (f: Filter) => f.meta?.type === 'phrases',
 }));
 
 describe('ServiceMapSearchBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSetEsQuery = jest.fn();
+    mockSetHighlightedServiceNames = jest.fn();
     mockHistoryReplace = jest.fn();
     mockLocationSearch = '?environment=production&kuery=service.name%3A%22opbeans-go%22';
     mockInitialAppFilters = [];
@@ -371,5 +374,29 @@ describe('ServiceMapSearchBar', () => {
         match_phrase: { 'service.name': 'value' },
       },
     ]);
+    expect(mockSetHighlightedServiceNames).toHaveBeenCalledWith(['frontend']);
+  });
+
+  it('updates highlightedServiceNames when the Service name control changes', async () => {
+    render(<ServiceMapSearchBar />);
+
+    const multiServiceFilter = {
+      meta: {
+        key: 'service.name',
+        negate: false,
+        disabled: false,
+        type: 'phrases',
+        params: ['frontend', 'checkout'],
+      },
+      query: {},
+    } as unknown as Filter;
+
+    act(() => {
+      mockOnFiltersChange([multiServiceFilter]);
+    });
+
+    await waitFor(() => {
+      expect(mockSetHighlightedServiceNames).toHaveBeenCalledWith(['frontend', 'checkout']);
+    });
   });
 });
