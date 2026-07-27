@@ -9,8 +9,14 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/p
 import type { ConcreteTaskInstance, IntervalSchedule } from '@kbn/task-manager-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
+import { getAPIKeyForSyntheticsService } from '../synthetics_service/get_api_key';
+import { getFakeKibanaRequest } from '../synthetics_service/utils/fake_kibana_request';
+import {
+  isConditionShardedLocation,
+  isEqlSafeLiteral,
+} from '../synthetics_service/private_location/assign_by_condition';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -34,6 +40,26 @@ export const STALE_CHECKIN_MS = 90_000;
 // bounce. Kept a few check-in intervals wide so it outlasts transient blips;
 // failover (evicting a *dead* agent's monitors) ignores this and stays immediate.
 export const RECOVERY_STABILITY_MS = 3 * 60_000;
+
+// Data-plane liveness veto. A Fleet check-in travels the control plane (agent →
+// Fleet Server long-poll), which is easily disrupted by proxy idle-timeouts,
+// Fleet Server restarts, policy-churn round-trips or network blips — none of
+// which stop the agent from actually running monitors and indexing results. So a
+// lagging `last_checkin` is a false "dead" signal: evicting such an agent moves
+// its monitors while it is still executing them, and the old + new host both run
+// the monitor until the old one applies the revised policy (a real at-most-once
+// break we reproduced). As a redundant proof-of-life we therefore also ask the
+// data plane: has this agent written any `synthetics-*` document recently? If so
+// it is provably alive and we must NOT evict it, regardless of check-in age.
+//
+// This window is only ever used to *keep* an agent (veto an eviction), never to
+// trigger one: an agent with no assigned monitors (or only long-schedule ones)
+// legitimately writes nothing, so absence of data is ambiguous and falls back to
+// the check-in signal. Kept wider than STALE_CHECKIN_MS to tolerate a missed run
+// plus scheduling jitter; the cost is that a genuinely dead agent's monitors are
+// not re-placed until BOTH its check-in and its data go stale (a bounded
+// coverage gap, which is the at-most-once-safe direction).
+export const STALE_DATA_MS = 3 * 60_000;
 
 interface RebalanceTaskState {
   /**
@@ -63,6 +89,12 @@ export interface AgentHostInfo {
    * hostname would otherwise both match). Null when the agent doesn't report it.
    */
   hostId: string | null;
+  /**
+   * Fleet `agent.id` of the freshest agent with this host name. Used to correlate
+   * the host against `synthetics-*` documents (which carry `agent.id`, not
+   * `host.name`) for the data-plane liveness veto. Null when unknown.
+   */
+  agentId: string | null;
 }
 
 /**
@@ -102,18 +134,23 @@ export const getAgentHostInfo = async (
       )?.host;
       const name = (host?.name ?? host?.hostname)?.toLowerCase();
       const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
-      if (name && !Number.isNaN(last)) {
+      // Skip EQL-unsafe host names: they can't be stamped into a condition, and
+      // including them would throw while building rebalance updates (aborting the
+      // whole location).
+      if (name && isEqlSafeLiteral(name) && !Number.isNaN(last)) {
         const memoryMib =
           typeof host?.memory === 'number' && host.memory > 0
             ? Math.round(host.memory / BYTES_PER_MIB)
             : null;
+        const safeId = host?.id && isEqlSafeLiteral(host.id) ? host.id : undefined;
         const prev = byHost.get(name);
         // Keep the id from the freshest check-in for this host name.
         const isFresher = last >= (prev?.lastCheckin ?? -1);
         byHost.set(name, {
           lastCheckin: Math.max(prev?.lastCheckin ?? 0, last),
           memoryMib: memoryMib ?? prev?.memoryMib ?? null,
-          hostId: (isFresher ? host?.id : undefined) ?? prev?.hostId ?? null,
+          hostId: (isFresher ? safeId : undefined) ?? prev?.hostId ?? null,
+          agentId: (isFresher ? agent.id : undefined) ?? prev?.agentId ?? null,
         });
       }
     }
@@ -122,7 +159,85 @@ export const getAgentHostInfo = async (
     page += 1;
   }
 
+  // Composite shard key: only hosts with a usable host.id can be pinned uniquely
+  // (host.name alone can't disambiguate two agents sharing a hostname). Drop the
+  // rest so they aren't offered as shard targets — mirrors getEnrolledAgentHosts.
+  for (const [name, info] of byHost) {
+    if (info.hostId == null) {
+      byHost.delete(name);
+    }
+  }
+
   return byHost;
+};
+
+/**
+ * Data-plane liveness signal: which of the given agents have written a
+ * `synthetics-*` document within `windowMs`. A running Heartbeat keeps indexing
+ * results even when its Fleet check-in is failing, so a recent write is proof an
+ * agent is alive and executing — used to veto a false-positive staleness
+ * eviction (see {@link STALE_DATA_MS}).
+ *
+ * The background task runs as `kibana_system`, which cannot read `synthetics-*`;
+ * we therefore query as the synthetics service API key (the same credential
+ * Heartbeat uses — it holds `read` on `synthetics-*`). Correlation is on
+ * `agent.id` because synthetics documents carry `agent.id`, not `host.name`.
+ *
+ * Best-effort: any failure (missing/invalid key, query error) returns an empty
+ * set so the caller falls back to the check-in signal alone. This never triggers
+ * an eviction, only prevents one.
+ */
+export const getRecentlyActiveAgentIds = async (
+  server: SyntheticsServerSetup,
+  agentIds: string[],
+  windowMs: number,
+  now: number
+): Promise<Set<string>> => {
+  const active = new Set<string>();
+  if (agentIds.length === 0) {
+    return active;
+  }
+
+  try {
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server });
+    if (!apiKey || !isValid) {
+      return active;
+    }
+
+    const esClient = server.coreStart.elasticsearch.client.asScoped(
+      getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey })
+    ).asCurrentUser;
+
+    const result = await esClient.search<unknown, { agents: { buckets: Array<{ key: string }> } }>({
+      index: SYNTHETICS_INDEX_PATTERN,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            { range: { '@timestamp': { gte: now - windowMs, format: 'epoch_millis' } } },
+            { terms: { 'agent.id': agentIds } },
+          ],
+        },
+      },
+      aggs: {
+        agents: { terms: { field: 'agent.id', size: agentIds.length } },
+      },
+    });
+
+    for (const bucket of result.aggregations?.agents.buckets ?? []) {
+      active.add(bucket.key);
+    }
+  } catch (e) {
+    server.logger.debug(
+      `[RebalancePrivateLocationShardsTask] synthetics-* liveness query failed; ` +
+        `falling back to check-in signal only: ${e.message}`
+    );
+  }
+
+  return active;
 };
 
 /**
@@ -195,8 +310,27 @@ export class RebalancePrivateLocationShardsTask {
           continue;
         }
 
+        // Redundant liveness: an agent whose check-in is stale but which is still
+        // writing synthetics results is provably alive — keep it (veto eviction)
+        // so we don't move monitors it is still running (which would double-run
+        // them). Absence of data is ambiguous (idle/slow-schedule/dead), so it
+        // never triggers an eviction; only a stale check-in does.
+        const agentIds = [...hostInfo.values()]
+          .map((info) => info.agentId)
+          .filter((id): id is string => id != null);
+        const activeAgentIds = await getRecentlyActiveAgentIds(
+          this.serverSetup,
+          agentIds,
+          STALE_DATA_MS,
+          now
+        );
+
         const healthyHosts = [...hostInfo.entries()]
-          .filter(([, info]) => now - info.lastCheckin <= STALE_CHECKIN_MS)
+          .filter(
+            ([, info]) =>
+              now - info.lastCheckin <= STALE_CHECKIN_MS ||
+              (info.agentId != null && activeAgentIds.has(info.agentId))
+          )
           .map(([host]) => host);
 
         // Capacity-aware placement: weight each host by its total RAM so bigger

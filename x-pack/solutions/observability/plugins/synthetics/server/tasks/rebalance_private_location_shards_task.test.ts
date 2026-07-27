@@ -10,16 +10,22 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { getAPIKeyForSyntheticsService } from '../synthetics_service/get_api_key';
 import {
   RebalancePrivateLocationShardsTask,
   RECOVERY_STABILITY_MS,
   STALE_CHECKIN_MS,
+  STALE_DATA_MS,
 } from './rebalance_private_location_shards_task';
 
 jest.mock('../synthetics_service/get_private_locations');
+jest.mock('../synthetics_service/get_api_key');
 
 const getPrivateLocationsMock = getPrivateLocations as jest.MockedFunction<
   typeof getPrivateLocations
+>;
+const getAPIKeyMock = getAPIKeyForSyntheticsService as jest.MockedFunction<
+  typeof getAPIKeyForSyntheticsService
 >;
 
 describe('Rebalance private location shards tasks', () => {
@@ -39,6 +45,7 @@ describe('Rebalance private location shards tasks', () => {
 
   let listAgents: jest.Mock;
   let rebalanceShards: jest.Mock;
+  let dataSearch: jest.Mock;
   let server: SyntheticsServerSetup;
   let monitorClient: SyntheticsMonitorClient;
 
@@ -48,7 +55,8 @@ describe('Rebalance private location shards tasks', () => {
       agents: Object.entries(checkins).map(([host, ms], i) => ({
         id: `agent-${i}`,
         policy_id: AGENT_POLICY,
-        local_metadata: { host: { name: host } },
+        // A usable host.id is required to be an assignable shard target (composite key).
+        local_metadata: { host: { name: host, id: `${host}-id` } },
         last_checkin: ms == null ? undefined : iso(ms),
       })),
     });
@@ -68,17 +76,37 @@ describe('Rebalance private location shards tasks', () => {
     });
   };
 
+  // Agent ids that have written a synthetics-* doc within STALE_DATA_MS. Enabling
+  // this also flips the (otherwise absent) service API key to valid so the
+  // data-plane veto path runs.
+  const setActiveAgentData = (agentIds: string[]) => {
+    getAPIKeyMock.mockResolvedValue({
+      isValid: true,
+      apiKey: { id: 'svc-key', apiKey: 'svc-secret' },
+    } as never);
+    dataSearch.mockResolvedValue({
+      aggregations: { agents: { buckets: agentIds.map((key) => ({ key })) } },
+    } as never);
+  };
+
   beforeEach(() => {
     jest.spyOn(Date, 'now').mockReturnValue(NOW);
     listAgents = jest.fn();
     rebalanceShards = jest.fn().mockResolvedValue({ total: 10, moved: 0 });
+    dataSearch = jest.fn().mockResolvedValue({ aggregations: { agents: { buckets: [] } } });
 
     getPrivateLocationsMock.mockResolvedValue([scalableLocation] as never);
+    // Default: no usable service API key → data-plane veto is skipped and
+    // liveness falls back to check-ins only (prior behavior).
+    getAPIKeyMock.mockResolvedValue({ isValid: false } as never);
 
     server = {
       logger: loggerMock.create(),
       coreStart: {
         savedObjects: { createInternalRepository: () => ({}) },
+        elasticsearch: {
+          client: { asScoped: () => ({ asCurrentUser: { search: dataSearch } }) },
+        },
       },
       fleet: {
         agentService: {
@@ -135,14 +163,14 @@ describe('Rebalance private location shards tasks', () => {
       const fullPage = Array.from({ length: PER_PAGE }, (_, i) => ({
         id: `a-${i}`,
         policy_id: AGENT_POLICY,
-        local_metadata: { host: { name: `p1h${i}` } },
+        local_metadata: { host: { name: `p1h${i}`, id: `p1h${i}-id` } },
         last_checkin: iso(FRESH),
       }));
       const overflowPage = [
         {
           id: 'a-overflow',
           policy_id: AGENT_POLICY,
-          local_metadata: { host: { name: 'overflow' } },
+          local_metadata: { host: { name: 'overflow', id: 'overflow-id' } },
           last_checkin: iso(FRESH),
         },
       ];
@@ -179,11 +207,72 @@ describe('Rebalance private location shards tasks', () => {
       expect(healthyHostsArg()).toEqual(['h1', 'h2']);
     });
 
+    describe('data-plane liveness veto', () => {
+      it('keeps a check-in-stale agent that is still writing synthetics data', async () => {
+        // h3's check-in lagged past the stale window (e.g. Fleet checkin EOF), but
+        // its Heartbeat kept indexing results → provably alive, must not be evicted.
+        setHostCheckins({ h1: FRESH, h2: FRESH, h3: STALE }); // h3 → agent-2
+        setActiveAgentData(['agent-2']);
+
+        await runTask();
+
+        expect(healthyHostsArg()).toEqual(['h1', 'h2', 'h3']);
+      });
+
+      it('still evicts a check-in-stale agent that has written no recent data', async () => {
+        setHostCheckins({ h1: FRESH, h2: FRESH, h3: STALE });
+        setActiveAgentData(['agent-0', 'agent-1']); // h3 (agent-2) absent → dead
+
+        await runTask();
+
+        expect(healthyHostsArg()).toEqual(['h1', 'h2']);
+      });
+
+      it('queries synthetics data only for the location agents, within the data window', async () => {
+        setHostCheckins({ h1: FRESH, h2: FRESH, h3: STALE });
+        setActiveAgentData(['agent-2']);
+
+        await runTask();
+
+        expect(dataSearch).toHaveBeenCalledTimes(1);
+        const body = dataSearch.mock.calls[0][0];
+        expect(body.query.bool.filter).toEqual(
+          expect.arrayContaining([
+            { terms: { 'agent.id': ['agent-0', 'agent-1', 'agent-2'] } },
+            { range: { '@timestamp': { gte: NOW - STALE_DATA_MS, format: 'epoch_millis' } } },
+          ])
+        );
+      });
+
+      it('falls back to check-ins when no service API key is available', async () => {
+        setHostCheckins({ h1: FRESH, h2: FRESH, h3: STALE });
+        // default getAPIKeyMock → { isValid: false }
+
+        await runTask();
+
+        expect(dataSearch).not.toHaveBeenCalled();
+        expect(healthyHostsArg()).toEqual(['h1', 'h2']);
+      });
+
+      it('falls back to check-ins when the data query fails', async () => {
+        setHostCheckins({ h1: FRESH, h2: FRESH, h3: STALE });
+        getAPIKeyMock.mockResolvedValue({
+          isValid: true,
+          apiKey: { id: 'svc-key', apiKey: 'svc-secret' },
+        } as never);
+        dataSearch.mockRejectedValue(new Error('no read privilege'));
+
+        await runTask();
+
+        expect(healthyHostsArg()).toEqual(['h1', 'h2']);
+      });
+    });
+
     it('passes per-host RAM (MiB) as capacities for capacity-aware placement', async () => {
       const GIB = 1024 * 1024 * 1024;
       setHostAgents({
-        h1: { checkin: FRESH, memoryBytes: 8 * GIB },
-        h2: { checkin: FRESH, memoryBytes: 16 * GIB },
+        h1: { checkin: FRESH, memoryBytes: 8 * GIB, hostId: 'h1-id' },
+        h2: { checkin: FRESH, memoryBytes: 16 * GIB, hostId: 'h2-id' },
       });
 
       await runTask();
@@ -199,8 +288,8 @@ describe('Rebalance private location shards tasks', () => {
     it('omits hosts without reported RAM from capacities (uniform fallback)', async () => {
       const GIB = 1024 * 1024 * 1024;
       setHostAgents({
-        h1: { checkin: FRESH, memoryBytes: 8 * GIB },
-        h2: { checkin: FRESH }, // no memory reported
+        h1: { checkin: FRESH, memoryBytes: 8 * GIB, hostId: 'h1-id' },
+        h2: { checkin: FRESH, hostId: 'h2-id' }, // no memory reported
       });
 
       await runTask();
@@ -211,11 +300,28 @@ describe('Rebalance private location shards tasks', () => {
     it('passes host.id per host as hostIds (for uniquely pinning same-named agents)', async () => {
       setHostAgents({
         h1: { checkin: FRESH, hostId: 'uid-1' },
-        h2: { checkin: FRESH }, // no id reported → omitted
+        h2: { checkin: FRESH, hostId: 'uid-2' },
       });
 
       await runTask();
 
+      expect(hostIdsArg()).toEqual(
+        new Map([
+          ['h1', 'uid-1'],
+          ['h2', 'uid-2'],
+        ])
+      );
+    });
+
+    it('drops a host with no usable host.id (a composite key is required to pin uniquely)', async () => {
+      setHostAgents({
+        h1: { checkin: FRESH, hostId: 'uid-1' },
+        h2: { checkin: FRESH }, // no host.id → not an assignable shard target
+      });
+
+      await runTask();
+
+      expect(healthyHostsArg()).toEqual(['h1']);
       expect(hostIdsArg()).toEqual(new Map([['h1', 'uid-1']]));
     });
 
