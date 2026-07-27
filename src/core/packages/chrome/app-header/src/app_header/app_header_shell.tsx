@@ -204,8 +204,8 @@ const useHeaderStyles = (
       flex-shrink: 0;
       align-items: center;
       gap: ${euiTheme.size.xs};
-      opacity: 0;
-      pointer-events: none;
+      opacity: ${hasTitleAppend ? 1 : 0};
+      pointer-events: ${hasTitleAppend ? 'auto' : 'none'};
       transition: opacity ${euiTheme.animation.fast} ease;
     `;
 

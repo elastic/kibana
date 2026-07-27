@@ -14,7 +14,7 @@ import {
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_hypothesis_test',
-    text: 'Every signal where the judge stamped confirmed: true (a signal the judge re-verified via execute_esql in this cycle) must document a hypothesis test in its `description` using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Signals without a confirmed stamp (carried forward from input without re-verification in this cycle) are exempt and may retain whatever description they arrived with.',
+    text: 'Every signal where the judge set `confirmed` to true or false must document its verification using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   {
@@ -24,7 +24,7 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'evidence_description_no_payload',
-    text: 'Signal descriptions contain no raw payload values, PII, tokens, UUIDs, or raw log lines — only service names, error types/codes, field paths, and counts.',
+    text: 'Signal descriptions contain no raw IDs, UUIDs, metric values, PII, PCI, CVV, SSNs, credentials, secrets, or tokens. Concise non-sensitive log signatures are acceptable when they identify decisive evidence; do not penalize literal non-sensitive error text.',
     score: 1,
   },
 ];

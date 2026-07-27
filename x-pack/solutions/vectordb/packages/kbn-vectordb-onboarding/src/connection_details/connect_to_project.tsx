@@ -46,7 +46,7 @@ export const ConnectToProject = ({
           <EuiSpacer size="s" />
         </>
       )}
-      <EuiFlexGroup gutterSize={isCompact ? 's' : 'm'} alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EndpointUrl
             elasticsearchUrl={elasticsearchUrl}
