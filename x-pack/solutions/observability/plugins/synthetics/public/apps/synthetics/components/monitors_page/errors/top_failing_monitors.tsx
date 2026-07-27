@@ -180,6 +180,9 @@ export const TopFailingMonitors = ({
               >
                 <div
                   tabIndex={0}
+                  aria-label={`${monitor.downChecks} errors, ${pct}% failure, ${formatDowntime(
+                    monitor.downtimeMs
+                  )} downtime`}
                   css={css`
                     position: relative;
                     height: 20px;

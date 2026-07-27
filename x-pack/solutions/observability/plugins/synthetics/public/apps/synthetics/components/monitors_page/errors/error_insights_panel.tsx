@@ -209,6 +209,7 @@ const MonitorTypeCard = ({
           >
             <EuiFlexGroup
               tabIndex={0}
+              role="button"
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -220,6 +221,12 @@ const MonitorTypeCard = ({
                   : ''}
               `}
               onClick={() => onFilter(t.monitorType)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilter(t.monitorType);
+                }
+              }}
             >
               <EuiFlexItem
                 grow={false}
@@ -491,6 +498,7 @@ const StatusCodesCard = ({
           >
             <EuiFlexGroup
               tabIndex={0}
+              role="button"
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -502,6 +510,12 @@ const StatusCodesCard = ({
                   : ''}
               `}
               onClick={() => onFilter(String(c.statusCode))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilter(String(c.statusCode));
+                }
+              }}
             >
               <EuiFlexItem grow={false}>
                 <EuiBadge color={codeColor} iconType={isSelected ? 'check' : undefined}>
@@ -580,6 +594,7 @@ const EmergingTermsCard = ({
               <EuiToolTip content={`${t.foregroundCount} occurrences — ${CLICK_TO_FILTER}`}>
                 <EuiFlexGroup
                   tabIndex={0}
+                  role="button"
                   alignItems="center"
                   gutterSize="s"
                   responsive={false}
@@ -588,6 +603,14 @@ const EmergingTermsCard = ({
                     const firstWord =
                       t.term.split(/\s+/).find((w) => w.length > 3) ?? t.term.split(/\s+/)[0];
                     onFilter(firstWord);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      const firstWord =
+                        t.term.split(/\s+/).find((w) => w.length > 3) ?? t.term.split(/\s+/)[0];
+                      onFilter(firstWord);
+                    }
                   }}
                 >
                   <EuiFlexItem grow={false}>
