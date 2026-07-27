@@ -467,6 +467,22 @@ export const GUARDRAILS_EMPTY_MESSAGE = i18n.translate(
   }
 );
 
+// -- Activity aggregate feed --
+
+export const COL_WATCH = i18n.translate('xpack.pnd.watches.activity.col.watch', {
+  defaultMessage: 'Watch',
+});
+
+export const ACTIVITY_EMPTY_MESSAGE = i18n.translate('xpack.pnd.watches.activity.emptyMessage', {
+  defaultMessage: 'No watch has run yet.',
+});
+
+export const ACTIVITY_TOTAL_COUNT = (count: number) =>
+  i18n.translate('xpack.pnd.watches.activity.totalCount', {
+    defaultMessage: '{count, plural, one {# run} other {# runs}} across all watches',
+    values: { count },
+  });
+
 export const NEW_WATCH = i18n.translate('xpack.pnd.watches.newWatch', {
   defaultMessage: 'New watch',
 });

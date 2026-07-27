@@ -34,6 +34,7 @@ import { WatchesSectionStubPage } from './pages/watches/section_stub';
 import { WatchesWorkflowsPage } from './pages/watches/watches_workflows_page';
 import { WatchesSkillsPage } from './pages/watches/watches_skills_page';
 import { WatchesGuardrailsPage } from './pages/watches/watches_guardrails_page';
+import { WatchesActivityPage } from './pages/watches/watches_activity_page';
 import { InvestigationDetailPage } from './pages/investigations/investigation_detail';
 
 interface RenderAppParams {
@@ -87,10 +88,7 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
                   <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
                   <Route path="/watches/workflows" component={WatchesWorkflowsPage} />
                   <Route path="/watches/skills" component={WatchesSkillsPage} />
-                  <Route
-                    path="/watches/activity"
-                    render={() => <WatchesSectionStubPage section="activity" />}
-                  />
+                  <Route path="/watches/activity" component={WatchesActivityPage} />
                   <Route
                     path="/watches/performance"
                     render={() => <WatchesSectionStubPage section="performance" />}
