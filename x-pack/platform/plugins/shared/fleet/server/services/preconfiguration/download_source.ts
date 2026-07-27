@@ -40,10 +40,10 @@ async function createOrUpdatePreconfiguredDownloadSources(
   esClient: ElasticsearchClient,
   preconfiguredSources: PreconfiguredDownloadSource[]
 ) {
-  const existingAll = await downloadSourceService.list();
+  const allExistingSources = await downloadSourceService.list();
 
   for (const preconfigured of preconfiguredSources) {
-    const existing = existingAll.items.find((ds) => ds.id === preconfigured.id);
+    const existing = allExistingSources.items.find((ds) => ds.id === preconfigured.id);
     if (!existing) {
       await downloadSourceService.create(soClient, esClient, preconfigured, {
         id: preconfigured.id,
@@ -66,8 +66,8 @@ async function cleanPreconfiguredDownloadSources(
   esClient: ElasticsearchClient,
   preconfiguredSources: PreconfiguredDownloadSource[]
 ) {
-  const all = await downloadSourceService.list();
-  const existingPreconfigured = all.items.filter((ds) => ds.is_preconfigured === true);
+  const allDownloadSources = await downloadSourceService.list();
+  const existingPreconfigured = allDownloadSources.items.filter((ds) => ds.is_preconfigured === true);
 
   for (const existing of existingPreconfigured) {
     const stillConfigured = preconfiguredSources.find((ds) => ds.id === existing.id);
