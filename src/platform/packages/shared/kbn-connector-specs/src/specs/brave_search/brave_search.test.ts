@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { BraveSearchConnector } from './brave_search';
 
 describe('BraveSearchConnector', () => {
@@ -164,11 +165,10 @@ describe('BraveSearchConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(BraveSearchConnector);
+
     it('should return success when API is accessible', async () => {
-      if (!BraveSearchConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await BraveSearchConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.search.brave.com/res/v1/web/search',
@@ -189,8 +189,7 @@ describe('BraveSearchConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!BraveSearchConnector.test) throw new Error('Test handler not defined');
-      await expect(BraveSearchConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

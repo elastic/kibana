@@ -9,6 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { Zoom } from './zoom';
 
 interface ZoomPaginatedResponse<T = unknown> {
@@ -782,16 +783,15 @@ describe('Zoom', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(Zoom);
+
     it('should return success with full name', async () => {
       const mockResponse = {
         data: { first_name: 'Matt', last_name: 'Nowzari', email: 'matt@example.com' },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Zoom.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Zoom.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/users/me');
       expect(result).toEqual({});
@@ -803,10 +803,7 @@ describe('Zoom', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Zoom.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Zoom.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -815,10 +812,7 @@ describe('Zoom', () => {
       const mockResponse = { data: {} };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Zoom.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Zoom.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -826,28 +820,19 @@ describe('Zoom', () => {
     it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!Zoom.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(Zoom.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!Zoom.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(Zoom.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on unexpected error type', async () => {
       mockClient.get.mockRejectedValue(new Error('unexpected string error'));
 
-      if (!Zoom.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(Zoom.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

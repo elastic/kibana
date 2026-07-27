@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { GoogleCloudStorageConnector } from './google_cloud_storage';
 
 describe('GoogleCloudStorageConnector', () => {
@@ -451,11 +452,12 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(GoogleCloudStorageConnector);
+
     it('should return {} on 200 success', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
 
-      if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
-      const result = await GoogleCloudStorageConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -464,8 +466,7 @@ describe('GoogleCloudStorageConnector', () => {
       // validateStatus accepts 400 — Axios resolves rather than rejects
       mockClient.get.mockResolvedValue({ status: 400, data: {} });
 
-      if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
-      const result = await GoogleCloudStorageConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -473,8 +474,7 @@ describe('GoogleCloudStorageConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GoogleCloudStorageConnector.test) throw new Error('Test handler not defined');
-      await expect(GoogleCloudStorageConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

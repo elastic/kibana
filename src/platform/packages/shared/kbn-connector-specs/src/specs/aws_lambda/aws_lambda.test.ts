@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { AwsLambdaConnector } from './aws_lambda';
 
 describe('AwsLambdaConnector', () => {
@@ -420,15 +421,14 @@ describe('AwsLambdaConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(AwsLambdaConnector);
+
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({
         data: { Functions: [] },
       });
 
-      if (!AwsLambdaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await AwsLambdaConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/2015-03-31/functions/'),
@@ -440,8 +440,7 @@ describe('AwsLambdaConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!AwsLambdaConnector.test) throw new Error('Test handler not defined');
-      await expect(AwsLambdaConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

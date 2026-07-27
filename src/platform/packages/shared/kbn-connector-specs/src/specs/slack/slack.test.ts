@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
+import { requireTestHandler } from '../../test_helpers';
 import { Slack } from './slack';
 import {
   SlackGetConversationHistoryInputSchema,
@@ -1503,6 +1504,8 @@ describe('Slack', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(Slack);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -1516,10 +1519,7 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/auth.test');
       expect(result).toEqual({});
@@ -1534,19 +1534,13 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(Slack.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(Slack.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

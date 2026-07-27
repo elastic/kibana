@@ -9,6 +9,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { SublimeSecurityConnector } from './sublime_security';
 import { SearchMessageGroupsInputSchema } from './types';
 import type { SublimeMessageGroupSummary } from './types';
@@ -523,16 +524,13 @@ describe('SublimeSecurityConnector', () => {
   });
 
   describe('test handler', () => {
-    const testDef = SublimeSecurityConnector.test;
-    if (!testDef) {
-      throw new Error('expected the Sublime Security spec to define a test handler');
-    }
+    const testSpec = requireTestHandler(SublimeSecurityConnector);
 
     it('is enabled and lists one mailbox on success', async () => {
-      expect(testDef.enabled).toBe(true);
+      expect(testSpec.enabled).toBe(true);
       (mockClient.get as jest.Mock).mockResolvedValue({ data: { mailboxes: [], total: 0 } });
 
-      const result = await testDef.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/mailboxes`, {
         params: { limit: 1 },
@@ -545,7 +543,7 @@ describe('SublimeSecurityConnector', () => {
         response: { status: 401, data: 'unauthorized', headers: {} },
       });
 
-      await expect(testDef.handler(mockContext)).rejects.toThrow(
+      await expect(testSpec.handler(mockContext)).rejects.toThrow(
         'Sublime Security API error (401): unauthorized'
       );
     });

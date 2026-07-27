@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { GcpCloudFunctionsConnector } from './gcp_cloud_functions';
 
 jest.mock('../../auth_types/gcp_jwt_helpers', () => {
@@ -381,13 +382,12 @@ describe('GcpCloudFunctionsConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(GcpCloudFunctionsConnector);
+
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({ data: { services: [] } });
 
-      if (!GcpCloudFunctionsConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GcpCloudFunctionsConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/v2/projects/my-gcp-project/locations/europe-west1/services'),
@@ -399,8 +399,7 @@ describe('GcpCloudFunctionsConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GcpCloudFunctionsConnector.test) throw new Error('Test handler not defined');
-      await expect(GcpCloudFunctionsConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

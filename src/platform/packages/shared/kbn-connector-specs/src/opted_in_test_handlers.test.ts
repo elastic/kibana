@@ -23,7 +23,11 @@ const createFailingContext = (): ActionContext => {
       delete: jest.fn(reject),
       request: jest.fn(reject),
     },
-    config: {},
+    // Provide minimal placeholder values so connectors that derive their URL from
+    // config/secrets (e.g. Sublime Security reads config.baseUrl, Salesforce reads
+    // secrets.tokenUrl) can reach the HTTP call rather than throwing on missing config.
+    config: { baseUrl: 'https://placeholder.example.com' },
+    secrets: { tokenUrl: 'https://placeholder.example.com' },
     log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
 };

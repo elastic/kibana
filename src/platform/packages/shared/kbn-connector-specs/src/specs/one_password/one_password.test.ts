@@ -9,6 +9,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { OnePasswordConnector } from './one_password';
 
 const BASE_URL = 'https://api.1password.com/v1beta1';
@@ -256,13 +257,12 @@ describe('OnePasswordConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(OnePasswordConnector);
+
     it('should return success when API is accessible', async () => {
       (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: { results: [] } });
 
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await OnePasswordConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
         params: { maxPageSize: 1 },
@@ -274,10 +274,7 @@ describe('OnePasswordConnector', () => {
     it('should throw on error', async () => {
       (mockClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(OnePasswordConnector.test.handler(mockContext)).rejects.toThrow('Network error');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Network error');
     });
 
     it('should surface structured API error body on non-2xx response', async () => {
@@ -286,12 +283,7 @@ describe('OnePasswordConnector', () => {
       });
       (mockClient.get as jest.Mock).mockRejectedValue(err);
 
-      if (!OnePasswordConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(OnePasswordConnector.test.handler(mockContext)).rejects.toThrow(
-        '1Password API error (403):'
-      );
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('1Password API error (403):');
     });
   });
 });

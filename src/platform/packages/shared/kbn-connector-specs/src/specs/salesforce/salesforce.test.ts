@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { SalesforceConnector } from './salesforce';
 
 describe('SalesforceConnector', () => {
@@ -292,15 +293,14 @@ describe('SalesforceConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(SalesforceConnector);
+
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({
         data: { totalSize: 1, done: true, records: [{ Id: '005xx000001' }] },
       });
 
-      if (!SalesforceConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SalesforceConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id FROM User LIMIT 1' },
@@ -311,10 +311,7 @@ describe('SalesforceConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid token'));
 
-      if (!SalesforceConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(SalesforceConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

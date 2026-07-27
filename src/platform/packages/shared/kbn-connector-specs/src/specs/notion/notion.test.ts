@@ -9,6 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { NotionConnector } from './notion';
 
 describe('NotionConnector', () => {
@@ -335,6 +336,8 @@ describe('NotionConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(NotionConnector);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -347,10 +350,7 @@ describe('NotionConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.notion.com/v1/users');
       expect(result).toEqual({});
@@ -359,10 +359,7 @@ describe('NotionConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API token'));
 
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(NotionConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

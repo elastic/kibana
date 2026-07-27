@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
+import { requireTestHandler } from '../../../test_helpers';
 import { JiraConnector } from './jira';
 
 describe('JiraConnector', () => {
@@ -307,11 +308,12 @@ describe('JiraConnector', () => {
   // ===========================================================================
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(JiraConnector);
+
     it('should call /rest/api/3/myself and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });
 
-      if (!JiraConnector.test) throw new Error('Test handler not defined');
-      const result = await JiraConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/rest/api/3/myself'
@@ -327,8 +329,7 @@ describe('JiraConnector', () => {
       } as unknown as ActionContext;
       mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });
 
-      if (!JiraConnector.test) throw new Error('Test handler not defined');
-      const result = await JiraConnector.test.handler(oauthContext);
+      const result = await testSpec.handler(oauthContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.atlassian.com/ex/jira/11223344-a1b2-3c33-d444-ef1234567890/rest/api/3/myself'
@@ -339,8 +340,7 @@ describe('JiraConnector', () => {
     it('should throw when the API call fails', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      if (!JiraConnector.test) throw new Error('Test handler not defined');
-      await expect(JiraConnector.test.handler(mockContext)).rejects.toThrow('Unauthorized');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Unauthorized');
     });
   });
 });

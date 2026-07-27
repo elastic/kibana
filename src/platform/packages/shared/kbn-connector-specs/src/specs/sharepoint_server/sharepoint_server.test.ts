@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { SharepointServer } from './sharepoint_server';
 
 const SITE_URL = 'https://sharepoint.company.com';
@@ -323,13 +324,12 @@ describe('SharepointServer', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(SharepointServer);
+
     it('should return {} on success', async () => {
       mockClient.get.mockResolvedValue({ data: { value: 'Team Site' } });
 
-      if (!SharepointServer.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SharepointServer.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${SITE_URL}/_api/web/title`, {
         headers: ODATA_HEADERS,
@@ -340,10 +340,7 @@ describe('SharepointServer', () => {
     it('should return {} when title is missing', async () => {
       mockClient.get.mockResolvedValue({ data: {} });
 
-      if (!SharepointServer.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SharepointServer.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -351,15 +348,13 @@ describe('SharepointServer', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!SharepointServer.test) throw new Error('Test handler not defined');
-      await expect(SharepointServer.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on network error', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!SharepointServer.test) throw new Error('Test handler not defined');
-      await expect(SharepointServer.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 

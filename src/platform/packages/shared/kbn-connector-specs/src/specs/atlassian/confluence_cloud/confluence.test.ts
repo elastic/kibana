@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
+import { requireTestHandler } from '../../../test_helpers';
 import { ConfluenceCloudConnector } from './confluence';
 
 describe('ConfluenceCloudConnector', () => {
@@ -195,11 +196,12 @@ describe('ConfluenceCloudConnector', () => {
   // ===========================================================================
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(ConfluenceCloudConnector);
+
     it('should call /wiki/api/v2/spaces and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { results: [] } });
 
-      if (!ConfluenceCloudConnector.test) throw new Error('Test handler not defined');
-      const result = await ConfluenceCloudConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/spaces',
@@ -211,10 +213,7 @@ describe('ConfluenceCloudConnector', () => {
     it('should throw when the API call fails', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      if (!ConfluenceCloudConnector.test) throw new Error('Test handler not defined');
-      await expect(ConfluenceCloudConnector.test.handler(mockContext)).rejects.toThrow(
-        'Unauthorized'
-      );
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Unauthorized');
     });
   });
 });

@@ -337,13 +337,19 @@ export const ServicenowSearch: ConnectorSpec = {
       const { instanceUrl } = ctx.config as { instanceUrl: string };
       // Fetch a minimal record from sys_user — readable by any authenticated user
       // regardless of role. Avoids relying on admin-only tables like sys_properties.
-      await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
+      const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
         params: {
           sysparm_query: 'sys_created_on!=NULL',
           sysparm_limit: 1,
           sysparm_fields: 'sys_id',
         },
       });
+      const results = response.data?.result ?? [];
+      if (results.length === 0) {
+        throw new Error(
+          'Connected to ServiceNow but no user records are visible — verify that the connector has the required role permissions.'
+        );
+      }
       return {};
     },
     enabled: true,

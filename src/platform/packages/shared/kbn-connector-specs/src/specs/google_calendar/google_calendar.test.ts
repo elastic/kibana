@@ -9,6 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { GoogleCalendar } from './google_calendar';
 
 const API_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -401,10 +402,12 @@ describe('GoogleCalendar', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(GoogleCalendar);
+
     it('should return {} on successful connection', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
 
-      const result = await GoogleCalendar.test?.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -412,8 +415,7 @@ describe('GoogleCalendar', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      if (!GoogleCalendar.test) throw new Error('Test handler not defined');
-      await expect(GoogleCalendar.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

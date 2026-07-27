@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { JinaReaderConnector } from './jina_reader';
 
 interface HttpError extends Error {
@@ -690,6 +691,8 @@ describe('JinaReaderConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(JinaReaderConnector);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         status: 200,
@@ -697,10 +700,7 @@ describe('JinaReaderConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await JinaReaderConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
       expect(result).toEqual({});
@@ -711,8 +711,7 @@ describe('JinaReaderConnector', () => {
       error.response = { status: 500, data: {} };
       mockClient.get.mockRejectedValue(error);
 
-      if (!JinaReaderConnector.test) throw new Error('Test handler not defined');
-      await expect(JinaReaderConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should use overrideBrowseUrl from config', async () => {
@@ -727,10 +726,7 @@ describe('JinaReaderConnector', () => {
         config: { overrideBrowseUrl: 'https://custom.jina.ai' },
       } as unknown as ActionContext;
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await JinaReaderConnector.test.handler(contextWithConfig);
+      await testSpec.handler(contextWithConfig);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://custom.jina.ai');
     });

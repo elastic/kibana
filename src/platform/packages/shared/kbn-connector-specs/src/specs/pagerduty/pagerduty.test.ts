@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { PagerdutyConnector } from './pagerduty';
 
 const mockCallTool = jest.fn();
@@ -247,11 +248,10 @@ describe('PagerdutyConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(PagerdutyConnector);
+
     it('returns {} on successful connection', async () => {
-      if (!PagerdutyConnector.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await PagerdutyConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({});
@@ -261,13 +261,7 @@ describe('PagerdutyConnector', () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!PagerdutyConnector.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(PagerdutyConnector.test.handler(mockContext)).rejects.toThrow(
-        'connection refused'
-      );
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 });

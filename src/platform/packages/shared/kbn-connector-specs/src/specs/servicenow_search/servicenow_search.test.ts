@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { ServicenowSearch } from './servicenow_search';
 
 interface ServiceNowListResponse {
@@ -693,6 +694,8 @@ describe('ServicenowSearch', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(ServicenowSearch);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -701,10 +704,7 @@ describe('ServicenowSearch', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!ServicenowSearch.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await ServicenowSearch.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://test-instance.service-now.com/api/now/table/sys_user',
@@ -719,34 +719,23 @@ describe('ServicenowSearch', () => {
       expect(result).toEqual({});
     });
 
-    it('should return success when user table returns no rows', async () => {
-      const mockResponse = {
-        data: {
-          result: [],
-        },
-      };
+    it('should throw when user table returns no rows (permission misconfiguration)', async () => {
+      const mockResponse = { data: { result: [] } };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!ServicenowSearch.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await ServicenowSearch.test.handler(mockContext);
-
-      expect(result).toEqual({});
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('no user records are visible');
     });
 
     it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!ServicenowSearch.test) throw new Error('Test handler not defined');
-      await expect(ServicenowSearch.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!ServicenowSearch.test) throw new Error('Test handler not defined');
-      await expect(ServicenowSearch.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

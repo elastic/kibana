@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { AlienVaultOTXConnector } from './alienvault_otx';
 
 describe('AlienVaultOTXConnector', () => {
@@ -189,16 +190,15 @@ describe('AlienVaultOTXConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(AlienVaultOTXConnector);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: { count: 1, results: [] },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!AlienVaultOTXConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await AlienVaultOTXConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://otx.alienvault.com/api/v1/pulses/subscribed',
@@ -212,8 +212,7 @@ describe('AlienVaultOTXConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Network error'));
 
-      if (!AlienVaultOTXConnector.test) throw new Error('Test handler not defined');
-      await expect(AlienVaultOTXConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

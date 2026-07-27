@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { FirecrawlConnector } from './firecrawl';
 
 describe('FirecrawlConnector', () => {
@@ -350,13 +351,12 @@ describe('FirecrawlConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(FirecrawlConnector);
+
     it('should return success when API is accessible', async () => {
       mockClient.post.mockResolvedValue({ data: { success: true } });
 
-      if (!FirecrawlConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await FirecrawlConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.post).toHaveBeenCalledWith('https://api.firecrawl.dev/v2/scrape', {
         url: 'https://example.com',
@@ -368,8 +368,7 @@ describe('FirecrawlConnector', () => {
     it('should throw on error when API is not accessible', async () => {
       mockClient.post.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!FirecrawlConnector.test) throw new Error('Test handler not defined');
-      await expect(FirecrawlConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw with specific message when API returns 401', async () => {
@@ -377,10 +376,7 @@ describe('FirecrawlConnector', () => {
       err.response = { status: 401 };
       mockClient.post.mockRejectedValue(err);
 
-      if (!FirecrawlConnector.test) throw new Error('Test handler not defined');
-      await expect(FirecrawlConnector.test.handler(mockContext)).rejects.toThrow(
-        'Invalid or missing API key'
-      );
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Invalid or missing API key');
     });
   });
 });

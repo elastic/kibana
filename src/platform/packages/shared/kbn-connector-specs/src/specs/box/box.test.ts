@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
+import { requireTestHandler } from '../../test_helpers';
 import { Box } from './box';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -587,11 +588,10 @@ describe('Box', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(Box);
+
     it('returns {} on successful connection', async () => {
-      if (!Box.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await Box.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({});
@@ -601,11 +601,7 @@ describe('Box', () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!Box.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(Box.test.handler(mockContext)).rejects.toThrow('connection refused');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 

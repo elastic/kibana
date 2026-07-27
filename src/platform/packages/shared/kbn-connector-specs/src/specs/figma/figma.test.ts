@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { FigmaConnector } from './figma';
 
 describe('FigmaConnector', () => {
@@ -268,29 +269,25 @@ describe('FigmaConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(FigmaConnector);
+
     it('should return success when API is accessible', async () => {
-      if (!FigmaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
       mockClient.get.mockResolvedValue({
         data: { handle: 'designer', email: 'designer@example.com' },
       });
 
-      const result = await FigmaConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.figma.com/v1/me');
       expect(result).toEqual({});
     });
 
     it('should fall back to email when handle is not present', async () => {
-      if (!FigmaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
       mockClient.get.mockResolvedValue({
         data: { email: 'designer@example.com' },
       });
 
-      const result = await FigmaConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -298,8 +295,7 @@ describe('FigmaConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid token'));
 
-      if (!FigmaConnector.test) throw new Error('Test handler not defined');
-      await expect(FigmaConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

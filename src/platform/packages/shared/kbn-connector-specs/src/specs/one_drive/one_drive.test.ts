@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
+import { requireTestHandler } from '../../test_helpers';
 import { OneDrive } from './one_drive';
 
 const mockGet = jest.fn();
@@ -468,13 +469,14 @@ describe('OneDrive', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(OneDrive);
+
     it('returns {} on success', async () => {
       mockGet.mockResolvedValue({
         data: { displayName: 'Test User', mail: 'test@example.com' },
       });
 
-      if (!OneDrive.test) throw new Error('test handler not defined');
-      const result = await OneDrive.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -482,8 +484,7 @@ describe('OneDrive', () => {
     it('should throw on error', async () => {
       mockGet.mockRejectedValue(new Error('401 Unauthorized'));
 
-      if (!OneDrive.test) throw new Error('test handler not defined');
-      await expect(OneDrive.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 

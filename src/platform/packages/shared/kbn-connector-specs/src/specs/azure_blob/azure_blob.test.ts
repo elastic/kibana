@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { AzureBlob } from './azure_blob';
 
 describe('AzureBlob', () => {
@@ -178,18 +179,14 @@ describe('AzureBlob', () => {
   });
 
   describe('test handler', () => {
-    const runTestHandler = async (ctx: ActionContext) => {
-      const testDef = AzureBlob.test;
-      if (!testDef) throw new Error('AzureBlob.test is undefined');
-      return testDef.handler(ctx);
-    };
+    const testSpec = requireTestHandler(AzureBlob);
 
     it('should succeed when list containers returns', async () => {
       mockClient.get.mockResolvedValue({
         data: '<EnumerationResults><Containers></Containers></EnumerationResults>',
       });
 
-      const result = await runTestHandler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -200,12 +197,12 @@ describe('AzureBlob', () => {
 
     it('should throw when accountUrl is missing', async () => {
       const ctxNoConfig = { ...mockContext, config: {} } as unknown as ActionContext;
-      await expect(runTestHandler(ctxNoConfig)).rejects.toThrow();
+      await expect(testSpec.handler(ctxNoConfig)).rejects.toThrow();
     });
 
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
-      await expect(runTestHandler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -1447,6 +1448,8 @@ describe('SharepointOnline', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(SharepointOnline);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -1458,10 +1461,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SharepointOnline.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/');
       expect(result).toEqual({});
@@ -1476,10 +1476,7 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SharepointOnline.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -1487,15 +1484,13 @@ describe('SharepointOnline', () => {
     it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!SharepointOnline.test) throw new Error('Test handler not defined');
-      await expect(SharepointOnline.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!SharepointOnline.test) throw new Error('Test handler not defined');
-      await expect(SharepointOnline.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

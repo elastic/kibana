@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 
 const mockListAmazonS3Buckets = jest.fn();
 const mockListAmazonS3BucketObjects = jest.fn();
@@ -334,11 +335,12 @@ describe('AmazonS3', () => {
   // ===========================================================================
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(AmazonS3);
+
     it('should return {} when buckets are listed successfully', async () => {
       mockListAmazonS3Buckets.mockResolvedValue({ buckets: [{ name: 'my-bucket' }] });
 
-      if (!AmazonS3.test) throw new Error('Test handler not defined');
-      const result = await AmazonS3.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListAmazonS3Buckets).toHaveBeenCalledTimes(1);
       expect(result).toEqual({});
@@ -347,8 +349,7 @@ describe('AmazonS3', () => {
     it('should throw when the API call fails', async () => {
       mockListAmazonS3Buckets.mockRejectedValue(new Error('AccessDenied'));
 
-      if (!AmazonS3.test) throw new Error('Test handler not defined');
-      await expect(AmazonS3.test.handler(mockContext)).rejects.toThrow('AccessDenied');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('AccessDenied');
     });
   });
 });

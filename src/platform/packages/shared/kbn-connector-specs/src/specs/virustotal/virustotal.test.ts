@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { VirusTotalConnector } from './virustotal';
 
 interface HttpError extends Error {
@@ -814,6 +815,8 @@ describe('VirusTotalConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(VirusTotalConnector);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -828,10 +831,7 @@ describe('VirusTotalConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!VirusTotalConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await VirusTotalConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8'
@@ -842,10 +842,7 @@ describe('VirusTotalConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!VirusTotalConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(VirusTotalConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

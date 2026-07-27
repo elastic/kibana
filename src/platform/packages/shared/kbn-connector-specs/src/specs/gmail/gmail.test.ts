@@ -9,6 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { GmailConnector } from './gmail';
 
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
@@ -350,6 +351,8 @@ describe('GmailConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(GmailConnector);
+
     it('should return ok: true when profile is fetched', async () => {
       const mockResponse = {
         status: 200,
@@ -357,10 +360,7 @@ describe('GmailConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!GmailConnector.test?.handler) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GmailConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${GMAIL_API_BASE}/profile`);
       expect(result).toEqual({});
@@ -369,10 +369,7 @@ describe('GmailConnector', () => {
     it('should fall back to generic user when emailAddress is missing', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: {} });
 
-      if (!GmailConnector.test?.handler) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GmailConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -380,8 +377,7 @@ describe('GmailConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GmailConnector.test) throw new Error('Test handler not defined');
-      await expect(GmailConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

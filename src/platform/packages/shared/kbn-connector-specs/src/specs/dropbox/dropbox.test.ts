@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
+import { requireTestHandler } from '../../test_helpers';
 import { Dropbox } from './dropbox';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -367,11 +368,10 @@ describe('Dropbox', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(Dropbox);
+
     it('returns empty object on successful connection', async () => {
-      if (!Dropbox.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await Dropbox.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({});
@@ -381,11 +381,7 @@ describe('Dropbox', () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!Dropbox.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(Dropbox.test.handler(mockContext)).rejects.toThrow('connection refused');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 

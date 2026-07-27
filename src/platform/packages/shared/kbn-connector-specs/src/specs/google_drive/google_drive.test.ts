@@ -13,6 +13,7 @@ import {
 } from '../../connector_utils';
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { GoogleDriveConnector } from './google_drive';
 
 describe('GoogleDriveConnector', () => {
@@ -792,6 +793,8 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(GoogleDriveConnector);
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         status: 200,
@@ -803,10 +806,7 @@ describe('GoogleDriveConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!GoogleDriveConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GoogleDriveConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://www.googleapis.com/drive/v3/about', {
         params: { fields: 'user' },
@@ -823,10 +823,7 @@ describe('GoogleDriveConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!GoogleDriveConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GoogleDriveConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -834,10 +831,7 @@ describe('GoogleDriveConnector', () => {
     it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GoogleDriveConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await expect(GoogleDriveConnector.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

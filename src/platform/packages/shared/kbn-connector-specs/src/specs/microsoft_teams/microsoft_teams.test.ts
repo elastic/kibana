@@ -9,6 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
+import { requireTestHandler } from '../../test_helpers';
 import { MicrosoftTeams } from './microsoft_teams';
 
 interface GraphCollectionResponse<T = unknown> {
@@ -910,6 +911,8 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = requireTestHandler(MicrosoftTeams);
+
     it('should use /me/joinedTeams for delegated auth (bearer)', async () => {
       const mockResponse = {
         data: {
@@ -922,10 +925,7 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await MicrosoftTeams.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
@@ -947,10 +947,7 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await MicrosoftTeams.test.handler(oauthCodeContext);
+      const result = await testSpec.handler(oauthCodeContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
@@ -975,10 +972,7 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await MicrosoftTeams.test.handler(appOnlyContext);
+      const result = await testSpec.handler(appOnlyContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
         params: { $select: 'id,displayName' },
@@ -992,10 +986,7 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await MicrosoftTeams.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(result).toEqual({});
     });
@@ -1003,8 +994,7 @@ describe('MicrosoftTeams', () => {
     it('should throw when Graph API response is missing value array', async () => {
       mockClient.get.mockResolvedValue({ data: {} });
 
-      if (!MicrosoftTeams.test) throw new Error('Test handler not defined');
-      await expect(MicrosoftTeams.test.handler(mockContext)).rejects.toThrow(
+      await expect(testSpec.handler(mockContext)).rejects.toThrow(
         'Unexpected Graph API response: missing value array'
       );
     });
@@ -1012,22 +1002,19 @@ describe('MicrosoftTeams', () => {
     it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!MicrosoftTeams.test) throw new Error('Test handler not defined');
-      await expect(MicrosoftTeams.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!MicrosoftTeams.test) throw new Error('Test handler not defined');
-      await expect(MicrosoftTeams.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should throw on unexpected error type', async () => {
-      mockClient.get.mockRejectedValue(new Error('string error'));
+    it('should throw on non-Error rejection (plain string)', async () => {
+      mockClient.get.mockRejectedValue('string error');
 
-      if (!MicrosoftTeams.test) throw new Error('Test handler not defined');
-      await expect(MicrosoftTeams.test.handler(mockContext)).rejects.toThrow();
+      await expect(testSpec.handler(mockContext)).rejects.toBeDefined();
     });
   });
 });
