@@ -46,6 +46,11 @@ const createMockLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
+const asAuthoringResponse = (
+  config: Record<string, unknown>,
+  authoringNote = 'Created a visualization using the requested data.'
+): string => `\`\`\`json\n${JSON.stringify({ authoring_note: authoringNote, config })}\n\`\`\``;
+
 describe('createVisualizationGraph', () => {
   const logger = createMockLogger();
   const events = {} as ToolEventEmitter;
@@ -55,7 +60,7 @@ describe('createVisualizationGraph', () => {
   // via `getDefaultModel()` for the config / time-range nodes; the ES|QL node resolves the
   // low-effort model via `selectModel()`. Both resolve to the same connector so the
   // default-model fallback in `generateVisualizationEsql` stays out of these tests.
-  const createMockModel = (invokeResult: string = '```json\n{"type":"metric"}\n```') => {
+  const createMockModel = (invokeResult: string = asAuthoringResponse({ type: 'metric' })) => {
     const scopedModel = {
       connector: { connectorId: 'default-connector' },
       chatModel: {
@@ -101,6 +106,76 @@ describe('createVisualizationGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(finalState.esqlQuery).toBe(esqlQuery);
+  });
+
+  it('returns the authoring note without storing it in the validated config', async () => {
+    const authoringNote = 'Created a titleless metric showing the total log count.';
+    const graph = await createVisualizationGraph(
+      createMockModel(
+        `\`\`\`json\n${JSON.stringify({
+          authoring_note: authoringNote,
+          config: { type: 'metric' },
+        })}\n\`\`\``
+      ) as never,
+      logger,
+      events,
+      esClient,
+      false
+    );
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Count logs',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(finalState.authoringNote).toBe(authoringNote);
+    expect(finalState.validatedConfig).toEqual({
+      type: 'metric',
+      data_source: { type: 'esql', query: esqlQuery },
+    });
+  });
+
+  it('accepts a valid config when the authoring note is missing', async () => {
+    const graph = await createVisualizationGraph(
+      createMockModel(
+        `\`\`\`json\n${JSON.stringify({ config: { type: 'metric' } })}\n\`\`\``
+      ) as never,
+      logger,
+      events,
+      esClient,
+      false
+    );
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Count logs',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(finalState.validatedConfig).toEqual({
+      type: 'metric',
+      data_source: { type: 'esql', query: esqlQuery },
+    });
+    expect(finalState.authoringNote).toBeNull();
   });
 
   it('regenerates esql for edits and includes the existing query as context', async () => {
@@ -183,13 +258,10 @@ describe('createVisualizationGraph', () => {
   it('injects the validated esql query, overwriting any query emitted by the config LLM', async () => {
     const canonicalQuery = 'TS metrics-* | STATS avg = AVG(cpu) BY host';
     // The config LLM corrupts the query (TS -> FROM) in the data_source it emits.
-    const corruptedConfig =
-      '```json\n' +
-      JSON.stringify({
-        type: 'metric',
-        data_source: { type: 'esql', query: 'FROM metrics-* | STATS avg = AVG(cpu) BY host' },
-      }) +
-      '\n```';
+    const corruptedConfig = asAuthoringResponse({
+      type: 'metric',
+      data_source: { type: 'esql', query: 'FROM metrics-* | STATS avg = AVG(cpu) BY host' },
+    });
 
     const graph = await createVisualizationGraph(
       createMockModel(corruptedConfig) as never,
@@ -221,7 +293,7 @@ describe('createVisualizationGraph', () => {
 
   it('injects data_source when the config LLM omits it (single-dataset config)', async () => {
     const canonicalQuery = 'FROM logs-* | STATS count = COUNT(*)';
-    const configWithoutDataSource = '```json\n' + JSON.stringify({ type: 'metric' }) + '\n```';
+    const configWithoutDataSource = asAuthoringResponse({ type: 'metric' });
 
     const graph = await createVisualizationGraph(
       createMockModel(configWithoutDataSource) as never,
@@ -254,13 +326,10 @@ describe('createVisualizationGraph', () => {
   it('injects data_source into every layer when the config LLM omits it (XY multi-layer)', async () => {
     const canonicalQuery =
       'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
-    const xyConfigWithoutDataSource =
-      '```json\n' +
-      JSON.stringify({
-        type: 'xy',
-        layers: [{ type: 'series' }, { type: 'series' }],
-      }) +
-      '\n```';
+    const xyConfigWithoutDataSource = asAuthoringResponse({
+      type: 'xy',
+      layers: [{ type: 'series' }, { type: 'series' }],
+    });
 
     const graph = await createVisualizationGraph(
       createMockModel(xyConfigWithoutDataSource) as never,
