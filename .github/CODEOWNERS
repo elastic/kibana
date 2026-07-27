@@ -2705,6 +2705,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sentry/** @elastic/nightshift-context-and-research-team
 
 
 # Connector Workflow Tests
