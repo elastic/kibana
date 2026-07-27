@@ -15,7 +15,26 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard, getEsErrorLogDetails } from './utils';
+import { escapeWildcard } from '../utils/escape_wildcard';
+import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
+
+/**
+ * Candidate projects the paging aggregation enumerates. `total` is clamped to
+ * this so callers cannot page past what the endpoint is able to return.
+ */
+export const MAX_TRACING_PROJECTS = 1000;
+
+/**
+ * Bucket budget for the trace-id aggregation, kept well below the 65,536 default
+ * `search.max_buckets` so token coverage degrades instead of the request failing.
+ */
+export const MAX_TRACE_ID_BUCKETS = 30_000;
+
+/** Ceiling for a single `terms` query, from the default `index.max_terms_count`. */
+const MAX_TERMS_PER_QUERY = 60_000;
+
+/** Ceiling per project, independent of how many projects share the budget. */
+const MAX_TRACE_IDS_PER_PROJECT = 10_000;
 
 export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -41,9 +60,6 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const { from, to, page, per_page: perPage, name: nameFilter } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-          const ES_MAX_TERMS_COUNT = 60_000;
-          const maxTraceIdsPerProject = Math.min(10_000, Math.floor(ES_MAX_TERMS_COUNT / perPage));
 
           const extraFilters: Array<Record<string, unknown>> = [];
           if (from || to) {
@@ -89,7 +105,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
               projects: {
                 terms: {
                   field: 'name',
-                  size: 1000,
+                  size: MAX_TRACING_PROJECTS,
                   order: { last_trace: 'desc' },
                 },
                 aggs: {
@@ -123,15 +139,22 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const aggs = pagingResponse.aggregations as Record<string, unknown> | undefined;
           const projectsAgg = aggs?.projects as { buckets: Array<Record<string, unknown>> };
           const projectCountAgg = aggs?.project_count as { value: number };
-          const totalProjects = projectCountAgg?.value ?? 0;
+          const totalProjects = Math.min(projectCountAgg?.value ?? 0, MAX_TRACING_PROJECTS);
 
           const allBuckets = projectsAgg?.buckets ?? [];
           const startIndex = (page - 1) * perPage;
           const pagedBuckets = allBuckets.slice(startIndex, startIndex + perPage);
           const pagedProjectNames = pagedBuckets.map((bucket) => bucket.key as string);
 
-          const traceIdToProject: Record<string, string> = {};
+          const traceIdsByProject: Record<string, string[]> = {};
           if (pagedProjectNames.length > 0) {
+            const maxTraceIdsPerProject = Math.min(
+              MAX_TRACE_IDS_PER_PROJECT,
+              Math.floor(
+                Math.min(MAX_TRACE_ID_BUCKETS, MAX_TERMS_PER_QUERY) / pagedProjectNames.length
+              )
+            );
+
             const traceIdsResponse = await esClient.search({
               index: TRACES_INDEX_PATTERN,
               size: 0,
@@ -151,19 +174,19 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
               },
             });
 
-            const traceIdsAgg = traceIdsResponse?.aggregations?.projects as
+            const traceIdsAgg = traceIdsResponse.aggregations?.projects as
               | { buckets: Array<{ key: string; trace_ids: { buckets: Array<{ key: string }> } }> }
               | undefined;
 
             for (const bucket of traceIdsAgg?.buckets ?? []) {
-              const projectName = bucket.key;
-              for (const tb of bucket.trace_ids?.buckets ?? []) {
-                traceIdToProject[tb.key] = projectName;
+              const traceIds = (bucket.trace_ids?.buckets ?? []).map(({ key }) => key);
+              if (traceIds.length > 0) {
+                traceIdsByProject[bucket.key] = traceIds;
               }
             }
           }
 
-          const allTraceIds = Object.keys(traceIdToProject);
+          const allTraceIds = Object.values(traceIdsByProject).flat();
           const tokensByProject: Record<string, number> = {};
 
           if (allTraceIds.length > 0) {
@@ -174,8 +197,15 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                 terms: { trace_id: allTraceIds },
               },
               aggs: {
-                per_trace: {
-                  terms: { field: 'trace_id', size: allTraceIds.length },
+                by_project: {
+                  filters: {
+                    filters: Object.fromEntries(
+                      Object.entries(traceIdsByProject).map(([projectName, traceIds]) => [
+                        projectName,
+                        { terms: { trace_id: traceIds } },
+                      ])
+                    ),
+                  },
                   aggs: {
                     input_tokens: {
                       sum: { field: 'attributes.gen_ai.usage.input_tokens' },
@@ -188,22 +218,18 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
               },
             });
 
-            const perTraceAgg = tokenResponse?.aggregations?.per_trace as {
-              buckets: Array<{
-                key: string;
-                input_tokens: { value: number };
-                output_tokens: { value: number };
-              }>;
-            };
+            const byProjectAgg = tokenResponse.aggregations?.by_project as
+              | {
+                  buckets: Record<
+                    string,
+                    { input_tokens: { value: number }; output_tokens: { value: number } }
+                  >;
+                }
+              | undefined;
 
-            for (const traceBucket of perTraceAgg?.buckets ?? []) {
-              const projectName = traceIdToProject[traceBucket.key];
-              if (projectName) {
-                tokensByProject[projectName] =
-                  (tokensByProject[projectName] ?? 0) +
-                  (traceBucket.input_tokens?.value ?? 0) +
-                  (traceBucket.output_tokens?.value ?? 0);
-              }
+            for (const [projectName, bucket] of Object.entries(byProjectAgg?.buckets ?? {})) {
+              tokensByProject[projectName] =
+                (bucket.input_tokens?.value ?? 0) + (bucket.output_tokens?.value ?? 0);
             }
           }
 

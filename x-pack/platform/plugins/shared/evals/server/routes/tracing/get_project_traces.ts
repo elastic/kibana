@@ -16,7 +16,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard } from './utils';
+import { escapeWildcard } from '../utils/escape_wildcard';
 
 interface RootSpanSource {
   trace_id?: string;

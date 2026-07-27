@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import { isResponseError } from '@kbn/es-errors';
 import type { LogMeta } from '@kbn/logging';
-
-/**
- * Escapes Elasticsearch wildcard metacharacters (`\`, `*`, `?`) in user input
- * so the literal characters are matched rather than interpreted as wildcards.
- */
-export const escapeWildcard = (input: string): string =>
-  input.replace(/[\\\*\?]/g, (ch) => `\\${ch}`);
 
 interface EsErrorBody {
   error?: {
@@ -34,25 +27,23 @@ export interface EsErrorLogDetails {
  * Elasticsearch `ResponseError`s.
  */
 export const getEsErrorLogDetails = (error: unknown): EsErrorLogDetails => {
-  if (error instanceof EsErrors.ResponseError) {
+  if (isResponseError(error)) {
     const esError = (error.body as EsErrorBody | undefined)?.error;
     const rootCause = esError?.root_cause?.[0];
     const type = rootCause?.type ?? esError?.type ?? error.name;
     const reason = rootCause?.reason ?? esError?.reason ?? error.message;
     const { statusCode } = error;
 
-    const message = [type, reason, statusCode ? `(status ${statusCode})` : undefined]
-      .filter(Boolean)
-      .join(': ');
-
     return {
-      message,
+      message:
+        statusCode === undefined
+          ? `${type}: ${reason}`
+          : `${type}: ${reason} (status ${statusCode})`,
       meta: {
         error: {
           type,
           message: reason,
           stack_trace: error.stack,
-          code: statusCode !== undefined ? String(statusCode) : undefined,
         },
       },
     };

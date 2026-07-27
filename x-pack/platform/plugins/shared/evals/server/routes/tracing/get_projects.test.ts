@@ -14,7 +14,11 @@ import { EVALS_TRACING_PROJECTS_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { registerGetTracingProjectsRoute } from './get_projects';
+import {
+  MAX_TRACE_ID_BUCKETS,
+  MAX_TRACING_PROJECTS,
+  registerGetTracingProjectsRoute,
+} from './get_projects';
 
 const buildProjectBucket = ({
   name,
@@ -56,15 +60,16 @@ const buildTraceIdsResponse = (projectTraceIds: Array<{ name: string; traceIds: 
 });
 
 const buildTokenResponse = (
-  traceTokens: Array<{ traceId: string; input: number; output: number }>
+  projectTokens: Array<{ name: string; input: number; output: number }>
 ) => ({
   aggregations: {
-    per_trace: {
-      buckets: traceTokens.map(({ traceId, input, output }) => ({
-        key: traceId,
-        input_tokens: { value: input },
-        output_tokens: { value: output },
-      })),
+    by_project: {
+      buckets: Object.fromEntries(
+        projectTokens.map(({ name, input, output }) => [
+          name,
+          { doc_count: 1, input_tokens: { value: input }, output_tokens: { value: output } },
+        ])
+      ),
     },
   },
 });
@@ -247,10 +252,7 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
 
     esClient.search.mockResolvedValueOnce(
-      buildTokenResponse([
-        { traceId: 'trace-1', input: 3000, output: 1500 },
-        { traceId: 'trace-2', input: 2000, output: 1500 },
-      ]) as any
+      buildTokenResponse([{ name: 'alert-summarization', input: 5000, output: 3000 }]) as any
     );
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
@@ -287,7 +289,7 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
 
     esClient.search.mockResolvedValueOnce(
-      buildTokenResponse([{ traceId: 'trace-abc', input: 500, output: 300 }]) as any
+      buildTokenResponse([{ name: 'my-project', input: 500, output: 300 }]) as any
     );
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
@@ -296,6 +298,48 @@ describe('GET /internal/evals/tracing/projects', () => {
     const tokenQuery = esClient.search.mock.calls[2][0] as any;
     expect(tokenQuery.query).toEqual({ terms: { trace_id: ['trace-abc'] } });
     expect(response.payload.projects[0].total_tokens).toBe(800);
+  });
+
+  it('sums tokens per project with a filters agg instead of one bucket per trace', async () => {
+    const { handler, context, esClient } = setup();
+
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 2 },
+        projects: {
+          buckets: [
+            buildProjectBucket({ name: 'project-a' }),
+            buildProjectBucket({ name: 'project-b' }),
+          ],
+        },
+      },
+    } as any);
+
+    esClient.search.mockResolvedValueOnce(
+      buildTraceIdsResponse([
+        { name: 'project-a', traceIds: ['trace-a1', 'trace-a2'] },
+        { name: 'project-b', traceIds: ['trace-b1'] },
+      ]) as any
+    );
+
+    esClient.search.mockResolvedValueOnce(
+      buildTokenResponse([
+        { name: 'project-a', input: 400, output: 100 },
+        { name: 'project-b', input: 10, output: 5 },
+      ]) as any
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    const tokenQuery = esClient.search.mock.calls[2][0] as any;
+    expect(tokenQuery.aggs.by_project.filters.filters).toEqual({
+      'project-a': { terms: { trace_id: ['trace-a1', 'trace-a2'] } },
+      'project-b': { terms: { trace_id: ['trace-b1'] } },
+    });
+    expect(tokenQuery.aggs.per_trace).toBeUndefined();
+
+    expect(response.payload.projects[0].total_tokens).toBe(500);
+    expect(response.payload.projects[1].total_tokens).toBe(15);
   });
 
   it('paginates aggregation buckets correctly', async () => {
@@ -336,7 +380,7 @@ describe('GET /internal/evals/tracing/projects', () => {
     await handler(context, makeRequest(), kibanaResponseFactory);
 
     const pagingCall = esClient.search.mock.calls[0][0] as any;
-    expect(pagingCall.aggs.projects.terms.size).toBe(1000);
+    expect(pagingCall.aggs.projects.terms.size).toBe(MAX_TRACING_PROJECTS);
     expect(pagingCall.aggs.projects.aggs.trace_ids).toBeUndefined();
   });
 
@@ -367,7 +411,7 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     expect(traceIdsCall.aggs.projects.terms.size).toBe(10);
     expect(traceIdsCall.aggs.projects.aggs.trace_ids.terms.field).toBe('trace_id');
-    expect(traceIdsCall.aggs.projects.aggs.trace_ids.terms.size).toBe(Math.floor(60_000 / 10));
+    expect(traceIdsCall.aggs.projects.aggs.trace_ids.terms.size).toBe(MAX_TRACE_ID_BUCKETS / 10);
   });
 
   it('succeeds with a large number of distinct projects (bucket count bounded by per_page)', async () => {
@@ -398,6 +442,20 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     const traceIdsCall = esClient.search.mock.calls[1][0] as any;
     expect(traceIdsCall.aggs.projects.terms.size).toBe(25);
+  });
+
+  it('clamps total to the number of projects it can actually page through', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 5000 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.payload.total).toBe(MAX_TRACING_PROJECTS);
   });
 
   it('returns empty projects when no aggregation buckets', async () => {
@@ -432,6 +490,7 @@ describe('GET /internal/evals/tracing/projects', () => {
         },
       },
     } as any);
+    esClient.search.mockResolvedValueOnce(buildTraceIdsResponse([]) as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -455,6 +514,7 @@ describe('GET /internal/evals/tracing/projects', () => {
         },
       },
     } as any);
+    esClient.search.mockResolvedValueOnce(buildTraceIdsResponse([]) as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -490,8 +550,8 @@ describe('GET /internal/evals/tracing/projects', () => {
         },
       },
       headers: {},
-      meta: {} as any,
       warnings: [],
+      meta: {} as ConstructorParameters<typeof EsErrors.ResponseError>[0]['meta'],
     });
     esClient.search.mockRejectedValueOnce(tooManyBuckets);
 
@@ -502,11 +562,12 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     const [logMessage, logMeta] = (logger.error as jest.Mock).mock.calls[0];
     expect(logMessage).toContain('too_many_buckets_exception');
+    expect(logMessage).toContain('status 503');
     expect(logMeta).toEqual(
       expect.objectContaining({
         error: expect.objectContaining({
           type: 'too_many_buckets_exception',
-          code: '503',
+          message: 'Trying to create too many buckets. Must be less than or equal to: [65536].',
         }),
       })
     );
