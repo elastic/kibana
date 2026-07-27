@@ -281,7 +281,7 @@ This auto-discovers connectors and creates one Playwright project per model so t
 
 #### `workers` — parallelising spec files
 
-By default each fanout CI agent runs all spec files in the suite serially (`workers: 1`). If your spec files are independent you can run several in parallel:
+By default Playwright runs all spec files in the suite serially (`workers: 1`). If your spec files are independent you can run several in parallel:
 
 ```ts
 export default createPlaywrightEvalsConfig({
