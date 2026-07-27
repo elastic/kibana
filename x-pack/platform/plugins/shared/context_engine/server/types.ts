@@ -7,6 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 
 export interface ContextEnginePluginSetup {
@@ -18,6 +19,7 @@ export interface ContextEnginePluginStart {}
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface ContextEngineStartDependencies {
