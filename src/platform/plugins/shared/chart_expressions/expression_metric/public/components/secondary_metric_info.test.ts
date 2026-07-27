@@ -73,6 +73,7 @@ describe('getSecondaryMetricInfo', () => {
   it('returns the column name as the label', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
+      showLabel: true,
     });
     expect(result.label).toBe(COLUMN_NAME);
   });
@@ -88,6 +89,7 @@ describe('getSecondaryMetricInfo', () => {
   it('returns info when staticColor is provided', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
+      showLabel: true,
       staticColor: STATIC_COLOR,
     });
     const expected: SecondaryMetricInfo = {
@@ -112,6 +114,7 @@ describe('getSecondaryMetricInfo', () => {
   it('returns info when trendConfig is provided and compareToPrimary is false', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
+      showLabel: true,
       trendConfig: defaultTrendConfig,
     });
 
@@ -144,6 +147,7 @@ describe('getSecondaryMetricInfo', () => {
   it('returns info when trendConfig is provided and compareToPrimary is true with decrease (↓)', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
+      showLabel: true,
       columns: [
         { id: 'secondary', name: COLUMN_NAME, meta: { type: 'number' } } as DatatableColumn,
         { id: 'primary', name: 'Primary column', meta: { type: 'number' } } as DatatableColumn,
@@ -216,6 +220,7 @@ describe('getSecondaryMetricInfo', () => {
   it('returns formatted value and label when no static color or trendConfig', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
+      showLabel: true,
     });
     const expected = { value: `${VALUE}`, label: COLUMN_NAME };
     expect(result).toEqual(expected);
