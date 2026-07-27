@@ -1013,7 +1013,6 @@ describe('RulesListPage', () => {
     expect(mockToggleEnabledMutate).toHaveBeenCalledWith({
       id: 'rule-1',
       enabled: false,
-      name: 'Rule One',
     });
   });
 
