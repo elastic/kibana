@@ -63,6 +63,10 @@ describe('PackagePolicyUpgradeCell', () => {
   });
 
   it('links to the legacy upgrade route for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      disableAgentlessLegacyAPI: false,
+    });
     const utils = renderCell({ packagePolicy: createPackagePolicy({ supports_agentless: true }) });
     const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
     // Flag off (default): the legacy edit-page upgrade still works, so the link is untouched.
