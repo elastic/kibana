@@ -11,11 +11,7 @@ import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kb
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import {
-  getIndexPatternFromESQLQuery,
-  parseTimeFieldFromESQLQuery,
-  ESQL_DATASET_FILTERING_FEATURE_FLAG,
-} from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
