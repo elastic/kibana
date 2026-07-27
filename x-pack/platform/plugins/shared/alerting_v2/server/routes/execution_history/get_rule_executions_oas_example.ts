@@ -32,7 +32,7 @@ export const GET_RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
 const INVALID_RULE_EXECUTIONS_QUERY_RESPONSE = invalidResponseExample({
   summary: 'Exceeds the max result window',
   message: 'page * perPage cannot exceed 10000.',
-  details: { errors: { '': ['page * perPage cannot exceed 10000.'] } },
+  details: { errors: { page: ['page * perPage cannot exceed 10000.'] } },
 });
 
 export const getRuleExecutionsOasExamples = (): AlertingOasOperationObject =>
