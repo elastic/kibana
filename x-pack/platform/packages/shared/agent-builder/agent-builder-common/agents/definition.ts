@@ -133,7 +133,7 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions`, `tools`, and `skill_ids` - other fields from AgentConfigurationOverrides
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
  * are internal implementation details.
  *
  * This type is used for:
