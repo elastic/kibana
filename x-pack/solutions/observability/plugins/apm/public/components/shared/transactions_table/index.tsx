@@ -118,7 +118,7 @@ export function TransactionsTable({
   );
 
   const latencyAggregationType = getLatencyAggregationType(latencyAggregationTypeFromQuery);
-
+debugger;
   const defaultComparisonEnabled = getComparisonEnabled({
     core,
     urlComparisonEnabled: comparisonEnabled,
@@ -270,7 +270,7 @@ export function TransactionsTable({
 
               {!hideViewTransactionsLink && (
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup direction="row">
+                  <EuiFlexGroup alignItems="center" direction="row">
                     <EuiFlexItem>
                       <TableRollupOptions
                         rollupInterval={undefined}

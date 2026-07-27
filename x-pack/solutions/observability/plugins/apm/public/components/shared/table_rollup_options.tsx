@@ -8,7 +8,10 @@
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiLink,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   EuiText,
@@ -98,7 +101,8 @@ export function TableRollupOptions({
       button={
         <EuiButtonEmpty
           size="s"
-          iconType="controlsHorizontal"
+          iconType="chevronSingleDown"
+          iconSide="right"
           onClick={() => setIsPopoverOpen((current) => !current)}
           data-test-subj="apmTableOptionsButton"
           style={{ whiteSpace: 'nowrap' }}
@@ -118,40 +122,48 @@ export function TableRollupOptions({
         title={i18n.translate('xpack.apm.tableOptions.rollup.menuTitle', {
           defaultMessage: 'Rollup interval',
         })}
+        style={{ maxWidth: 500 }}
       >
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.apm.tableRollupOptions.helpDescription"
-            defaultMessage="Table contents are generated from {link}. Shorter rollup periods provide more accurate data, but may take longer to load."
-            values={{
-              link: (
-                <EuiLink
-                  data-test-subj="TableRollupOptionsAggregatedMetricDataLink"
-                  external={true}
-                  href={docLinks.links.apm.metrics}
-                >
-                  <FormattedMessage
-                    id="xpack.apm.tableRollupOptions.helpLinkText"
-                    defaultMessage="aggregated metric data"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-
-        <EuiSelectable
-          aria-label={i18n.translate('xpack.apm.tableOptions.rollup.selectableAriaLabel', {
-            defaultMessage: 'Select rollup interval',
-          })}
-          singleSelection="always"
-          options={rollupOptions}
-          onChange={handleSelectableChange}
-          data-test-subj="apmTableOptionsRollupSelect"
-          searchable={false}
-        >
-          {(list) => list}
-        </EuiSelectable>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false} hasBorder={false}>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.apm.tableRollupOptions.helpDescription"
+                  defaultMessage="Table contents are generated from {link}. Shorter rollup periods provide more accurate data, but may take longer to load."
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-test-subj="TableRollupOptionsAggregatedMetricDataLink"
+                        external={true}
+                        href={docLinks.links.apm.metrics}
+                      >
+                        <FormattedMessage
+                          id="xpack.apm.tableRollupOptions.helpLinkText"
+                          defaultMessage="aggregated metric data"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSelectable
+              aria-label={i18n.translate('xpack.apm.tableOptions.rollup.selectableAriaLabel', {
+                defaultMessage: 'Select rollup interval',
+              })}
+              singleSelection="always"
+              options={rollupOptions}
+              onChange={handleSelectableChange}
+              data-test-subj="apmTableOptionsRollupSelect"
+              searchable={false}
+            >
+              {(list) => list}
+            </EuiSelectable>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiContextMenuPanel>
     </EuiPopover>
   );
