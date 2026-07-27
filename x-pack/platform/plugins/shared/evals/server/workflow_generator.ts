@@ -408,7 +408,8 @@ export const generateSavedWorkflowYaml = (
       })
     );
   });
-  // The compare step is opt-in (the "Compare models after run" checkbox): each model
+
+  // The compare step is opt-in (the "Add model comparison step" toggle): each model
   // is already its own experiment/row, so a pairwise comparison is only appended when
   // explicitly requested.
   if (params.compare) {

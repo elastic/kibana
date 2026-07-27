@@ -84,16 +84,31 @@ describe('buildResultsLink', () => {
     const url = new URL(`http://host${link}`);
     expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
     expect(url.searchParams.get('execution_id')).toBe('e1');
-    expect(url.searchParams.get('workflow_execution_id')).toBe('w1');
+    expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1']);
   });
 
   it('links cross-model runs to the run overview and honors base path + space', () => {
     const link = buildResultsLink('/base', 'team-a', crossModelRun, ['w1', 'w2']);
     const url = new URL(`http://host${link}`);
     expect(url.pathname).toBe('/base/s/team-a/app/management/ai/evals/runs');
-    expect(url.searchParams.get('execution_id')).toBe('launch::c1,launch::c2');
-    expect(url.searchParams.get('connector')).toBe('c1,c2');
-    expect(url.searchParams.get('workflow_execution_id')).toBe('w1,w2');
+    expect(url.searchParams.getAll('execution_id')).toEqual(['launch::c1', 'launch::c2']);
+    expect(url.searchParams.getAll('connector')).toEqual(['c1', 'c2']);
+    expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1', 'w2']);
+  });
+
+  it('keeps ids intact when a connector id contains a comma', () => {
+    const commaRun: GeneratedExperimentRun = {
+      ...crossModelRun,
+      executions: [
+        { yaml: '', connectorId: 'a,b', datasetIds: ['d1'], executionId: 'launch::a,b' },
+        { yaml: '', connectorId: 'c2', datasetIds: ['d1'], executionId: 'launch::c2' },
+      ],
+    };
+
+    const url = new URL(`http://host${buildResultsLink('', 'default', commaRun, ['w1', 'w2'])}`);
+
+    expect(url.searchParams.getAll('connector')).toEqual(['a,b', 'c2']);
+    expect(url.searchParams.getAll('execution_id')).toEqual(['launch::a,b', 'launch::c2']);
   });
 
   it('links dataset-fanout runs to the experiment detail page, not the run overview', () => {
@@ -101,7 +116,7 @@ describe('buildResultsLink', () => {
     const url = new URL(`http://host${link}`);
     expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
     expect(url.searchParams.get('execution_id')).toBe('e1');
-    expect(url.searchParams.get('workflow_execution_id')).toBe('w1,w2');
+    expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1', 'w2']);
   });
 });
 

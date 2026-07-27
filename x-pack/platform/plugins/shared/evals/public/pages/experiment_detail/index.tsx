@@ -203,7 +203,7 @@ export const ExperimentDetailPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const executionId = searchParams.get('execution_id') ?? undefined;
   const workflowExecutionIds = useMemo(
-    () => searchParams.get('workflow_execution_id')?.split(',').filter(Boolean) ?? [],
+    () => searchParams.getAll('workflow_execution_id'),
     [searchParams]
   );
 

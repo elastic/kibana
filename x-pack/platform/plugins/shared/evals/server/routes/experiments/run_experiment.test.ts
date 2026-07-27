@@ -121,8 +121,8 @@ describe('POST /internal/evals/experiments/_run', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('still returns 500 when the best-effort cancellation itself fails', async () => {
-    const { invoke, executeWorkflow, cancelWorkflowExecution } = setup();
+  it('logs the orphan and still returns 500 when the best-effort cancellation itself fails', async () => {
+    const { invoke, logger, executeWorkflow, cancelWorkflowExecution } = setup();
     generateExperimentRunMock.mockReturnValue(
       runOf([
         { executionId: 'e1', connectorId: 'c1', yaml: 'yaml-1' },
@@ -138,6 +138,10 @@ describe('POST /internal/evals/experiments/_run', () => {
 
     expect(response.status).toBe(500);
     expect(cancelWorkflowExecution).toHaveBeenCalledTimes(1);
+    // The client can no longer reach this run, so its id has to be recoverable from the logs.
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to cancel orphaned experiment workflow execution wf-1')
+    );
   });
 
   it('does not attempt cancellation when the first launch fails', async () => {

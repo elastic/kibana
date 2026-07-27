@@ -119,7 +119,7 @@ export const registerRunExperimentRoute = ({
             }`
           );
 
-          await Promise.allSettled(
+          const cancellations = await Promise.allSettled(
             workflowExecutionIds.map((workflowExecutionId) =>
               workflowsManagement.management.cancelWorkflowExecution(
                 workflowExecutionId,
@@ -128,6 +128,22 @@ export const registerRunExperimentRoute = ({
               )
             )
           );
+
+          // A cancellation that fails leaves a run consuming LLM quota that the client can
+          // no longer see or stop, so log the ids an operator needs to clean up by hand.
+          cancellations.forEach((cancellation, index) => {
+            if (cancellation.status === 'rejected') {
+              logger.error(
+                `Failed to cancel orphaned experiment workflow execution ${
+                  workflowExecutionIds[index]
+                }: ${
+                  cancellation.reason instanceof Error
+                    ? cancellation.reason.message
+                    : String(cancellation.reason)
+                }`
+              );
+            }
+          });
 
           return response.customError({
             statusCode: 500,

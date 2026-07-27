@@ -56,6 +56,9 @@ type BuiltInTarget = (typeof BUILT_IN_TARGETS)[number];
 const isBuiltInTarget = (value: string): value is BuiltInTarget =>
   (BUILT_IN_TARGETS as readonly string[]).includes(value);
 
+const isCountInRange = (value: number | undefined, max: number): boolean =>
+  value === undefined || (Number.isInteger(value) && value >= 1 && value <= max);
+
 interface SelectedEvaluator {
   name: string;
   version?: string;
@@ -258,12 +261,16 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   const missingJudge = evaluators.some((e) => e.kind === 'llm' && !e.connectorId);
   const missingAgent = taskTarget === 'agentBuilder.converse' && !agentId.trim();
+  const invalidRepetitions = !isCountInRange(repetitions, EXPERIMENT_LIMITS.maxRepetitions);
+  const invalidConcurrency = !isCountInRange(concurrency, EXPERIMENT_LIMITS.maxConcurrency);
   const isValid =
     connectorIds.length > 0 &&
     datasetIds.length > 0 &&
     evaluators.length > 0 &&
     !missingJudge &&
-    !missingAgent;
+    !missingAgent &&
+    !invalidRepetitions &&
+    !invalidConcurrency;
 
   const { mutate: mutatePreview } = preview;
   useEffect(() => {
@@ -329,11 +336,12 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         // land on, so route to the run overview, which shows per-model progress and
         // links to each model's detail (and a compare action) once results land.
         if (result.mode === 'cross-model') {
-          const params = new URLSearchParams({
-            workflow_execution_id: result.executions.map((e) => e.workflow_execution_id).join(','),
-            execution_id: result.executions.map((e) => e.execution_id).join(','),
-            connector: result.executions.map((e) => e.connector_id).join(','),
-          });
+          const params = new URLSearchParams();
+          for (const execution of result.executions) {
+            params.append('workflow_execution_id', execution.workflow_execution_id);
+            params.append('execution_id', execution.execution_id);
+            params.append('connector', execution.connector_id);
+          }
           history.push({
             pathname: '/runs',
             search: `?${params.toString()}`,
@@ -356,9 +364,10 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         // per launched execution while the run is in flight.
         const detailPathId = result.experiment_ids[0] ?? result.execution_id;
         const params = new URLSearchParams({ execution_id: result.execution_id });
-        if (result.workflow_execution_ids.length > 0) {
-          params.set('workflow_execution_id', result.workflow_execution_ids.join(','));
+        for (const workflowExecutionId of result.workflow_execution_ids) {
+          params.append('workflow_execution_id', workflowExecutionId);
         }
+
         history.push({
           pathname: `/experiments/${encodeURIComponent(detailPathId)}`,
           search: `?${params.toString()}`,
@@ -565,10 +574,19 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow label={newExperimentStrings.repetitionsLabel} fullWidth>
+              <EuiFormRow
+                label={newExperimentStrings.repetitionsLabel}
+                fullWidth
+                isInvalid={invalidRepetitions}
+                error={i18n.translate('xpack.evals.newExperiment.repetitionsRangeError', {
+                  defaultMessage: 'Enter a whole number between 1 and {max}.',
+                  values: { max: EXPERIMENT_LIMITS.maxRepetitions },
+                })}
+              >
                 <EuiFieldNumber
                   min={1}
                   max={EXPERIMENT_LIMITS.maxRepetitions}
+                  isInvalid={invalidRepetitions}
                   value={repetitions ?? ''}
                   onChange={(e) =>
                     setRepetitions(e.target.value ? Number(e.target.value) : undefined)
@@ -579,10 +597,19 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label={newExperimentStrings.concurrencyLabel} fullWidth>
+              <EuiFormRow
+                label={newExperimentStrings.concurrencyLabel}
+                fullWidth
+                isInvalid={invalidConcurrency}
+                error={i18n.translate('xpack.evals.newExperiment.concurrencyRangeError', {
+                  defaultMessage: 'Enter a whole number between 1 and {max}.',
+                  values: { max: EXPERIMENT_LIMITS.maxConcurrency },
+                })}
+              >
                 <EuiFieldNumber
                   min={1}
                   max={EXPERIMENT_LIMITS.maxConcurrency}
+                  isInvalid={invalidConcurrency}
                   value={concurrency ?? ''}
                   onChange={(e) =>
                     setConcurrency(e.target.value ? Number(e.target.value) : undefined)

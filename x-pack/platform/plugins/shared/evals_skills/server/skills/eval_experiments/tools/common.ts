@@ -159,20 +159,21 @@ export const buildResultsLink = (
   const appBase = `${serverBasePath}${spaceSegment}${APP_PATH}`;
 
   if (run.mode === 'cross-model') {
-    const params = new URLSearchParams({
-      execution_id: run.executions.map((execution) => execution.executionId).join(','),
-      connector: run.executions.map((execution) => execution.connectorId).join(','),
-    });
-    if (workflowExecutionIds.length > 0) {
-      params.set('workflow_execution_id', workflowExecutionIds.join(','));
+    const params = new URLSearchParams();
+    for (const execution of run.executions) {
+      params.append('execution_id', execution.executionId);
+      params.append('connector', execution.connectorId);
+    }
+    for (const workflowExecutionId of workflowExecutionIds) {
+      params.append('workflow_execution_id', workflowExecutionId);
     }
     return `${appBase}/runs?${params.toString()}`;
   }
 
   const detailPathId = run.experimentIds[0] ?? run.executionId;
   const params = new URLSearchParams({ execution_id: run.executionId });
-  if (workflowExecutionIds.length > 0) {
-    params.set('workflow_execution_id', workflowExecutionIds.join(','));
+  for (const workflowExecutionId of workflowExecutionIds) {
+    params.append('workflow_execution_id', workflowExecutionId);
   }
   return `${appBase}/experiments/${encodeURIComponent(detailPathId)}?${params.toString()}`;
 };

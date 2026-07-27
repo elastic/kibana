@@ -44,9 +44,6 @@ interface RunOverviewLocationState {
   connectorNamesById?: Record<string, string>;
 }
 
-const splitCsv = (value: string | null): string[] =>
-  value ? value.split(',').filter(Boolean) : [];
-
 const statusColor = (status: string): EuiBadgeProps['color'] => {
   switch (status) {
     case 'completed':
@@ -74,12 +71,9 @@ export const RunOverviewPage: React.FC = () => {
   const { search, state } = useLocation<RunOverviewLocationState | undefined>();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const workflowExecutionIds = useMemo(
-    () => splitCsv(params.get('workflow_execution_id')),
-    [params]
-  );
-  const executionIds = useMemo(() => splitCsv(params.get('execution_id')), [params]);
-  const connectorIds = useMemo(() => splitCsv(params.get('connector')), [params]);
+  const workflowExecutionIds = useMemo(() => params.getAll('workflow_execution_id'), [params]);
+  const executionIds = useMemo(() => params.getAll('execution_id'), [params]);
+  const connectorIds = useMemo(() => params.getAll('connector'), [params]);
 
   const { executions: views, allSettled } = useWorkflowExecutions(workflowExecutionIds);
 
