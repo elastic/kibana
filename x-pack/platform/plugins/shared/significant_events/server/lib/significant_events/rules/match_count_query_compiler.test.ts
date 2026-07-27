@@ -6,58 +6,9 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { canCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
+import { canCompileMatchMetric } from './can_compile_match_metric';
 import { compileMatchCountBreachQuery } from './match_count_query_compiler';
 import { METRIC_SERIES_CLOSED_BUCKETS, METRIC_SERIES_LIMIT } from './metric_series_contract';
-
-describe('stripTrailingPipeCommands', () => {
-  it('peels trailing SORT / LIMIT / KEEP from the end only', () => {
-    expect(
-      stripTrailingPipeCommands(
-        'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10'
-      )
-    ).toBe('FROM logs-* | WHERE level == "error"');
-  });
-
-  it('does not strip KEEP / SORT that sit before a WHERE', () => {
-    expect(stripTrailingPipeCommands('FROM logs-* | KEEP message | WHERE level == "error"')).toBe(
-      'FROM logs-* | KEEP message | WHERE level == "error"'
-    );
-    expect(
-      stripTrailingPipeCommands('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"')
-    ).toBe('FROM logs-* | SORT @timestamp DESC | WHERE level == "error"');
-  });
-
-  it('peels trailing SORT/LIMIT without corrupting a pipe inside a WHERE string literal', () => {
-    expect(
-      stripTrailingPipeCommands(
-        'FROM logs-* | WHERE message == "queue full | LIMIT exceeded" | SORT @timestamp DESC | LIMIT 10'
-      )
-    ).toBe('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"');
-  });
-
-  it('leaves a pipe inside a string literal untouched when there is nothing to peel', () => {
-    expect(
-      stripTrailingPipeCommands('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"')
-    ).toBe('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"');
-  });
-
-  it('drops a block comment sitting between the last kept command and the peel', () => {
-    expect(
-      stripTrailingPipeCommands(
-        'FROM logs-* | WHERE level == "error" | /* note */ SORT @timestamp DESC'
-      )
-    ).toBe('FROM logs-* | WHERE level == "error"');
-  });
-
-  it('drops a line comment sitting between the last kept command and the peel', () => {
-    expect(
-      stripTrailingPipeCommands(
-        'FROM logs-* | WHERE level == "error"\n// note\n| SORT @timestamp DESC'
-      )
-    ).toBe('FROM logs-* | WHERE level == "error"');
-  });
-});
 
 describe('canCompileMatchMetric', () => {
   it('accepts filter-only MATCH queries', () => {

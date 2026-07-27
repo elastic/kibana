@@ -91,14 +91,6 @@ function isReusableBase(base: string, expectedCommands: number): boolean {
 }
 
 /**
- * Peel trailing author SORT/LIMIT/KEEP so they cannot cap rows before COUNT.
- * Returns the input (trimmed) when it cannot be parsed.
- */
-export function stripTrailingPipeCommands(query: string): string {
-  return parseFilterOnly(query).base;
-}
-
-/**
  * Returns true when a stored MATCH KI can be compiled into a count metric-series
  * breach query. Eligible shape, after peeling trailing SORT/LIMIT/KEEP: `FROM`
  * plus zero or more `WHERE` clauses — no mid-pipeline STATS, KEEP, SORT, LIMIT,
