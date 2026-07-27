@@ -47,7 +47,7 @@ const INTERBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalett
   LIGHT: {
     canvas: '#EBEEF4',
     surface: '#FFFFFF',
-    surfaceNav: '#F5F7FA',
+    surfaceNav: '#F8F9FB',
     borderSubdued: 'rgba(81, 99, 129, 0.22)',
     textSubdued: 'rgba(81, 99, 129, 0.7)',
     textNav: '#333333',
@@ -56,7 +56,7 @@ const INTERBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalett
   DARK: {
     canvas: '#0B0F17',
     surface: '#161B22',
-    surfaceNav: '#1C2431',
+    surfaceNav: '#14171d',
     borderSubdued: 'rgba(255, 255, 255, 0.08)',
     textSubdued: 'rgba(139, 155, 180, 0.75)',
     textNav: '#E2E8F0',

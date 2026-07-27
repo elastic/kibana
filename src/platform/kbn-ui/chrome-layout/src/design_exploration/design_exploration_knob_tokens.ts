@@ -68,7 +68,7 @@ export const ATTBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
 export const INTERBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
   canvas: '#EBEEF4',
   surface: '#FFFFFF',
-  surfaceNav: '#F5F7FA',
+  surfaceNav: '#F8F9FB',
   padding: 24,
   gutter: 20,
   panelPadding: DESIGN_EXPLORATION_PADDING_COMPACT + 12,

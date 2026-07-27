@@ -45,6 +45,9 @@ const INTERBANA_TOP_BAR_HEIGHT = 80;
 const INTERBANA_APP_HEADER_TRANSITION_MS = 200;
 const INTERBANA_NAV_EXPANDED_WIDTH = 220;
 const INTERBANA_NAV_WIDE_WIDTH = 468;
+const INTERBANA_NAV_COLLAPSED_WIDTH = 56;
+const INTERBANA_SIDE_PANEL_WIDTH = 248;
+const INTERBANA_NAV_COLLAPSED_WIDE_WIDTH = INTERBANA_NAV_COLLAPSED_WIDTH + INTERBANA_SIDE_PANEL_WIDTH;
 
 const INTERBANA_NAV_EXPANDED_SELECTOR = `[data-test-subj='sideNavCollapseButton'][aria-pressed='true']`;
 
@@ -120,6 +123,34 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutNavigation {
       background-color: transparent !important;
       border-inline-end: none !important;
+    }
+
+    /* ----- Interbana collapsed nav — layout width + grid column sync ----- */
+    ${scope}:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR})) {
+      ${interbanaNavLayoutOverrides(INTERBANA_NAV_COLLAPSED_WIDTH)}
+    }
+
+    ${scope}:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR})) ${CHROME_LAYOUT_GRID_SELECTOR} {
+      grid-template-columns: ${interbanaGridTemplateColumns(
+        INTERBANA_NAV_COLLAPSED_WIDTH
+      )} !important;
+    }
+
+    ${scope}:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR})):has(.kbnChromeNav-sidePanel) {
+      ${interbanaNavLayoutOverrides(INTERBANA_NAV_COLLAPSED_WIDE_WIDTH)}
+    }
+
+    ${scope}:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR})):has(.kbnChromeNav-sidePanel)
+      ${CHROME_LAYOUT_GRID_SELECTOR} {
+      grid-template-columns: ${interbanaGridTemplateColumns(
+        INTERBANA_NAV_COLLAPSED_WIDE_WIDTH
+      )} !important;
+    }
+
+    ${scope}
+    .kbnChromeNav-root:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR}))[class*='getNavWrapperStyles'] {
+      width: ${INTERBANA_NAV_COLLAPSED_WIDTH}px !important;
+      flex-shrink: 0 !important;
     }
 
     /* ----- Interbana expanded nav — layout width + grid column sync ----- */
@@ -770,6 +801,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='appHeader'] {
       border-block-end: ${INTERBANA_HAIRLINE} !important;
+      background-color: ${knobVar('surface')} !important;
     }
 
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
