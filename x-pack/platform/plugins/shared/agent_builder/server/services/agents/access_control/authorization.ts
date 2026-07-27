@@ -47,7 +47,11 @@ export const isAgentOwner = ({
     return owner.id === currentUser.id;
   }
   // Legacy docs without created_by_id: fall back to username so the original owner keeps access.
-  if (owner.id === undefined && owner.username !== undefined && currentUser.username !== undefined) {
+  if (
+    owner.id === undefined &&
+    owner.username !== undefined &&
+    currentUser.username !== undefined
+  ) {
     return owner.username === currentUser.username;
   }
   return false;

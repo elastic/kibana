@@ -61,7 +61,17 @@ describe('hasReadAccess', () => {
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
-    expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(false);
+    expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
+  });
+
+  it('returns false for same username when the document stored a different created_by_id', () => {
+    const source = {
+      ...baseSource,
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_id: 'other-realm-id',
+      created_by_name: 'owner',
+    };
     expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(false);
   });
 
