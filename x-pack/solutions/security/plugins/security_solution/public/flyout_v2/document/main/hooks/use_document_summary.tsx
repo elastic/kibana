@@ -25,6 +25,10 @@ const NO_SUMMARY_AVAILABLE = i18n.translate(
     defaultMessage: 'No summary available',
   }
 );
+const INVALID_RESPONSE = i18n.translate('xpack.securitySolution.alertSummary.invalidResponse', {
+  defaultMessage:
+    'Due to an unexpected issue, the AI model returned an invalid response. Please try again.',
+});
 
 export interface UseDocumentSummaryParams {
   /**
@@ -202,18 +206,28 @@ export const useDocumentSummary = ({
         },
       });
 
-      let responseSummary;
-      let responseRecommendedActions;
+      let responseSummary: string | undefined;
+      let responseRecommendedActions: string | undefined;
+      let hasInvalidResponse = false;
+
       try {
         const parsedResponse = JSON.parse(rawResponse.response);
-        responseSummary = parsedResponse.summary;
-        responseRecommendedActions = parsedResponse.recommendedActions;
+        if (
+          typeof parsedResponse.summary === 'string' &&
+          parsedResponse.summary.trim().length > 0
+        ) {
+          responseSummary = parsedResponse.summary;
+          if (typeof parsedResponse.recommendedActions === 'string') {
+            responseRecommendedActions = parsedResponse.recommendedActions;
+          }
+        } else {
+          hasInvalidResponse = true;
+        }
       } catch (e) {
-        // AI did not return the expected JSON
-        responseSummary = rawResponse.response;
+        hasInvalidResponse = true;
       }
 
-      if (!rawResponse.isError) {
+      if (!rawResponse.isError && !hasInvalidResponse && responseSummary != null) {
         if (fetchedSummary.data.length > 0) {
           await bulkUpdate({
             documentSummary: {
@@ -247,10 +261,11 @@ export const useDocumentSummary = ({
         }
         await refetchSummary();
       } else {
-        if (responseSummary.includes('Failed to load action')) {
+        const errorResponse = rawResponse.response ?? '';
+        if (errorResponse.includes('Failed to load action')) {
           setIsConnectorMissing(true);
         } else {
-          setFetchError(rawResponse.response);
+          setFetchError(hasInvalidResponse ? INVALID_RESPONSE : errorResponse);
           setHasSummary(false);
         }
       }

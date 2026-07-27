@@ -158,6 +158,36 @@ describe('useDocumentSummary', () => {
     expect(result.current.recommendedActions).toBe('Generated actions');
   });
 
+  it('should surface an error when the AI response is not valid JSON', async () => {
+    const { result } = renderHook(() =>
+      useDocumentSummary({
+        documentId: 'test-document-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        showAnonymizedValues: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
+
+    mockSendMessage.mockResolvedValue({
+      response: 'not valid json {summary: broken',
+      isError: false,
+    });
+
+    await act(async () => {
+      await result.current.fetchAISummary();
+    });
+
+    expect(mockBulkUpdate).not.toHaveBeenCalled();
+    expect(result.current.hasSummary).toBe(false);
+    expect(result.current.fetchError).toBe(
+      'Due to an unexpected issue, the AI model returned an invalid response. Please try again.'
+    );
+  });
+
   it('should abort stream on unmount', () => {
     const { unmount } = renderHook(() =>
       useDocumentSummary({
