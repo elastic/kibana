@@ -2,7 +2,7 @@
 
 ## Setup
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
-- After creating a new git worktree, seed its build caches from the main worktree by running `bash scripts/seed_worktree_caches.sh` from inside the new worktree, then `yarn kbn bootstrap`. It copy-on-write clones `node_modules`, the optimizer/TypeScript `target/` caches, and `data/`, so the worktree starts warm instead of paying for a cold bootstrap, optimizer build, and type check. Requires the worktree to be on the same filesystem as the main worktree. If the `post-checkout` git hook is installed (`node scripts/register_git_hook`), this runs automatically in the background on `git worktree add`.
+- After creating a new git worktree, run `bash scripts/seed_worktree_caches.sh` inside it (copy-on-write clones build caches from the main worktree), then `yarn kbn bootstrap`.
 
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
