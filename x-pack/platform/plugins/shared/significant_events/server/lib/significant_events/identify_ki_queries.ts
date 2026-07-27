@@ -31,10 +31,7 @@ import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/
  */
 const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 10;
 
-type KiDiscoveryToolset =
-  | MemoryDiscoveryTools
-  | KiExtractionContextTools
-  | SemanticCodeSearchTools;
+type KiDiscoveryToolset = MemoryDiscoveryTools | KiExtractionContextTools | SemanticCodeSearchTools;
 
 interface Params {
   definition: Streams.all.Definition;
