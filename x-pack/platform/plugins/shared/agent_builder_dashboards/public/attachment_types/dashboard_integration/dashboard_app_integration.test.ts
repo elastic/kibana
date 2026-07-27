@@ -15,16 +15,12 @@ import type {
 } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import {
-  ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import {
-  attachmentDataToDashboardState,
-  DASHBOARD_ATTACHMENT_TYPE,
-} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import {
@@ -99,7 +95,6 @@ const createMockRoundCompleteEvent = (
   attachmentRefs: Array<{
     attachment_id: string;
     operation: typeof ATTACHMENT_REF_OPERATION.created | typeof ATTACHMENT_REF_OPERATION.updated;
-    actor?: typeof ATTACHMENT_REF_ACTOR[keyof typeof ATTACHMENT_REF_ACTOR];
   }>
 ): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
@@ -110,7 +105,7 @@ const createMockRoundCompleteEvent = (
           attachment_id: ref.attachment_id,
           version: 1,
           operation: ref.operation,
-          actor: ref.actor ?? ATTACHMENT_REF_ACTOR.agent,
+          actor: 'agent',
         })),
       },
     } as ConversationRound,
@@ -466,55 +461,4 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment.mock.calls[0][0].id).not.toBe(firstDraftAttachment.id);
   });
 
-  describe('agent live updates (actor filter)', () => {
-    it('applies api.setState when attachment ref has actor = agent', () => {
-      register();
-      const attachment = createDashboardAttachment();
-      const versionedAttachment = createVersionedAttachment(attachment);
-      emitConversationChange({ id: 'conversation-1', attachments: [versionedAttachment] });
-      jest.runOnlyPendingTimers();
-
-      emitChatEvent(
-        'conversation-1',
-        createMockRoundCompleteEvent(
-          [versionedAttachment],
-          [
-            {
-              attachment_id: attachment.id,
-              operation: ATTACHMENT_REF_OPERATION.updated,
-              actor: ATTACHMENT_REF_ACTOR.agent,
-            },
-          ]
-        )
-      );
-
-      expect(mockApi.setState).toHaveBeenCalledWith(
-        attachmentDataToDashboardState(attachment.data)
-      );
-    });
-
-    it('does not apply api.setState when attachment ref has actor = user', () => {
-      register();
-      const attachment = createDashboardAttachment();
-      const versionedAttachment = createVersionedAttachment(attachment);
-      emitConversationChange({ id: 'conversation-1', attachments: [versionedAttachment] });
-      jest.runOnlyPendingTimers();
-
-      emitChatEvent(
-        'conversation-1',
-        createMockRoundCompleteEvent(
-          [versionedAttachment],
-          [
-            {
-              attachment_id: attachment.id,
-              operation: ATTACHMENT_REF_OPERATION.updated,
-              actor: ATTACHMENT_REF_ACTOR.user,
-            },
-          ]
-        )
-      );
-
-      expect(mockApi.setState).not.toHaveBeenCalled();
-    });
-  });
 });

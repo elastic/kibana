@@ -183,7 +183,7 @@ export const EditCustomContentFlyout = ({
                 onClick={handleGenerateWithChat}
               >
                 {i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
-                  defaultMessage: 'Generate with chat',
+                  defaultMessage: 'Refine with chat',
                 })}
               </EuiButton>
             </EuiFlexItem>

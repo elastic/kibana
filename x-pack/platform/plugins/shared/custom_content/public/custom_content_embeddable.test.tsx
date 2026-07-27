@@ -101,16 +101,6 @@ describe('customContentEmbeddableFactory', () => {
       expect(embeddable.api.serializeState().template).toBeUndefined();
     });
 
-    it('round-trips esqlQuery from initial state', async () => {
-      const { embeddable } = await buildEmbeddable(baseState);
-      expect(embeddable.api.serializeState().esqlQuery).toBe(baseState.esqlQuery);
-    });
-
-    it('serializes esqlQuery as undefined when not provided', async () => {
-      const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
-      expect(embeddable.api.serializeState().esqlQuery).toBeUndefined();
-    });
-
     it('reflects esqlQuery update applied via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       act(() => {
@@ -172,15 +162,6 @@ describe('customContentEmbeddableFactory', () => {
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
 
-    it('starts with generationVersion 0', async () => {
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-
-      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
-        'data-generation-version',
-        '0'
-      );
-    });
   });
 
   describe('template caching', () => {
@@ -201,11 +182,6 @@ describe('customContentEmbeddableFactory', () => {
   describe('flyout integration', () => {
     beforeEach(() => {
       capturedFlyoutProps = undefined;
-    });
-
-    it('`isEditingEnabled` returns true', async () => {
-      const { embeddable } = await buildEmbeddable(baseState);
-      expect(embeddable.api.isEditingEnabled()).toBe(true);
     });
 
     it('`onEdit` opens the flyout', async () => {

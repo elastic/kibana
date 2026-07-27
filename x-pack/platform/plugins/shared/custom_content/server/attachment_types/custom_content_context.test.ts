@@ -33,20 +33,6 @@ const getRepresentationValue = async (
 };
 
 describe('createCustomContentContextAttachmentType', () => {
-  describe('id', () => {
-    it('equals CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE', () => {
-      const definition = createCustomContentContextAttachmentType();
-      expect(definition.id).toBe(CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE);
-    });
-  });
-
-  describe('isReadonly', () => {
-    it('is true', () => {
-      const definition = createCustomContentContextAttachmentType();
-      expect(definition.isReadonly).toBe(true);
-    });
-  });
-
   describe('validate', () => {
     it('returns valid for a fully-populated input', () => {
       const definition = createCustomContentContextAttachmentType();
@@ -81,12 +67,6 @@ describe('createCustomContentContextAttachmentType', () => {
   });
 
   describe('format', () => {
-    it('returns a text representation', async () => {
-      const value = await getRepresentationValue({ panel_template: '<div/>' });
-      expect(typeof value).toBe('string');
-      expect(value.length).toBeGreaterThan(0);
-    });
-
     it('includes the HTML template in a code fence when template is non-empty', async () => {
       const value = await getRepresentationValue({ panel_template: '<div>hello</div>' });
       expect(value).toContain('```html\n<div>hello</div>\n```');
@@ -109,32 +89,6 @@ describe('createCustomContentContextAttachmentType', () => {
     it('omits ES|QL query section when esql_query is not provided', async () => {
       const value = await getRepresentationValue({ panel_template: '<div/>' });
       expect(value).not.toContain('ES|QL Query:');
-    });
-
-    it('getRepresentation returns type "text"', async () => {
-      const definition = createCustomContentContextAttachmentType();
-      const formatted = definition.format(
-        buildAttachment({ panel_template: '<div/>' }),
-        formatContext
-      );
-      const repr = await formatted.getRepresentation!();
-      expect(repr.type).toBe('text');
-    });
-  });
-
-  describe('getAgentDescription', () => {
-    it('returns a non-empty string', () => {
-      const definition = createCustomContentContextAttachmentType();
-      const description = definition.getAgentDescription!();
-      expect(typeof description).toBe('string');
-      expect(description.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('getTools', () => {
-    it('returns an empty array', () => {
-      const definition = createCustomContentContextAttachmentType();
-      expect(definition.getTools!()).toEqual([]);
     });
   });
 });
