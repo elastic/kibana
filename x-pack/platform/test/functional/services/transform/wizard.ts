@@ -375,10 +375,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
-    async selectTransformFunction(transformFunction: 'pivot' | 'latest') {
-      await this.assertSelectedTransformFunction(transformFunction);
-    },
-
     async assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
       fieldName: string,
       fieldType: 'keyword' | 'date' | 'number'
