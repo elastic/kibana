@@ -42,7 +42,13 @@ Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <IS
 - Flows cut short by the session cap are a signal to either raise `Session-timeout:` or reduce the number / scope of flows
 
 **Token usage (Claude Code session):** input <N> · output <N> · cache-create <N> · cache-read <N> · **total <N>**
-_Populate from `scripts/session-token-usage.py` output (reformat: `cache_create=N` → `cache-create N`, etc.). If the script exits non-zero or prints nothing (non-Claude-Code harness, transcript unavailable), write:_ `**Token usage:** not available` _— never omit this line. In parallel mode, sub-agent tokens are not included — orchestrator session only._
+_Populate from `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py` output (reformat: `cache_create=N` → `cache-create N`, etc.). If the legacy script exits non-zero or prints nothing (non-Claude-Code harness, transcript unavailable), write:_ `**Token usage:** not available` _— never omit this line. In parallel mode, sub-agent tokens are not included unless the optional structured manifest identifies worker transcripts._
+
+**Browser/tool payload bytes:** tool-input <N> · tool-output <N> · browser-events <N>
+_Populate only from structured metrics `payload_bytes`. If its status is `not_available`, write:_ `**Browser/tool payload bytes:** not available` _— never infer bytes from tokens or artifact sizes._
+
+**Session artifact bytes:** findings <N> files / <N> bytes · report <N> files / <N> bytes · screenshots <N> files / <N> bytes · videos <N> files / <N> bytes · configuration <N> files / <N> bytes · detector-source <N> files / <N> bytes
+_Populate only from structured metrics `artifacts.by_kind`. If its status is `not_available`, write:_ `**Session artifact bytes:** not available` _— metrics must not affect finding classification or evidence._
 
 ## Summary
 - Level 1 (confirmed bugs): N
