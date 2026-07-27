@@ -10,6 +10,7 @@
 /* eslint-disable max-classes-per-file */
 
 import type { TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, KibanaLocation } from '.';
 import { UrlService } from '.';
 
@@ -41,7 +42,7 @@ export class MockUrlService extends UrlService {
 }
 
 type MockLocatorParams = SerializableRecord & {
-  timeRange: TimeRange;
+  timeRange?: TimeRange;
 };
 
 export class MockLocatorDefinition implements LocatorDefinition<MockLocatorParams> {
