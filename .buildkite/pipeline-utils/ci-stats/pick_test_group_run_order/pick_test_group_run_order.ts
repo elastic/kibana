@@ -22,7 +22,7 @@ import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
 import { shouldSkipFtrTests } from './selective_ftr';
-import { isScoutTestsOnlyDiff } from './selective_scout';
+import { isScoutPathOnlyDiff } from './selective_scout';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
@@ -55,12 +55,12 @@ export async function pickTestGroupRunOrder() {
       mergeBase: selectiveTestingMergeBase,
       commit: 'HEAD',
     });
-    if (isScoutTestsOnlyDiff(selectiveChangedFiles)) {
-      console.log('Scout-tests-only diff detected — skipping Jest/FTR test steps');
+    if (isScoutPathOnlyDiff(selectiveChangedFiles)) {
+      console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
       bk.setAnnotation(
         'selective-testing-scout-tests-only',
         'info',
-        'Selective testing: Scout-tests-only diff — Jest/FTR test steps were skipped.'
+        'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
       );
       return;
     }
