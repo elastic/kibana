@@ -81,7 +81,6 @@ import type {
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
-import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
@@ -358,13 +357,7 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      const historyAction =
-        result.historyActionsById[created.id] ?? WorkflowChangeHistoryAction.workflowCreate;
-      this.notifySml(
-        created.id,
-        historyAction === WorkflowChangeHistoryAction.workflowUpdate ? 'update' : 'create',
-        request
-      );
+      this.notifySml(created.id, 'create', request);
     }
     return result;
   }
