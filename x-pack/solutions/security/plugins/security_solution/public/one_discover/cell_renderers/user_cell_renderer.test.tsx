@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { IpCellRenderer } from './ip_cell_renderer';
+import { UserCellRenderer } from './user_cell_renderer';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import {
@@ -24,6 +24,7 @@ import {
 
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
+
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -41,11 +42,6 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: jest.fn(), location: { pathname: '/' } }),
 }));
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useStore: () => ({}),
-}));
-
 jest.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({
     ownFocus: false,
@@ -55,17 +51,12 @@ jest.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => ({
   }),
 }));
 
-jest.mock('../../flyout_v2/shared/utils/build_flyout_content', () => ({
-  buildFlyoutContent: jest.fn((field: string, value: string) => {
-    if (field === 'source.ip' && value) {
-      return <div data-test-subj="mock-network-flyout" />;
-    }
-    return null;
-  }),
-}));
-
 jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../flyout_v2/entity/user/main', () => ({
+  User: jest.fn(() => null),
 }));
 
 jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
@@ -78,16 +69,14 @@ const mockServices = {
 } as unknown as StartServices;
 const mockStore = {} as SecurityAppStore;
 
-const baseProps: DataGridCellValueElementProps = {
-  columnId: 'source.ip',
+const props: DataGridCellValueElementProps = {
+  columnId: 'user.name',
   isDetails: false,
   isExpanded: false,
   row: {
     id: '1',
     raw: {},
-    flattened: {
-      'source.ip': '192.168.1.1',
-    },
+    flattened: { 'user.name': 'user-1' },
   },
   dataView: dataViewMock,
   setCellProps: jest.fn(),
@@ -99,93 +88,26 @@ const baseProps: DataGridCellValueElementProps = {
   columnsMeta: undefined,
 };
 
-describe('IpCellRenderer', () => {
+describe('UserCellRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOpenSystemFlyout.mockReturnValue({ onClose: new Promise<void>(() => {}) });
   });
 
-  it('should render a single IP as a clickable link', () => {
+  it('reports telemetry when opening the user flyout', async () => {
     const { getByTestId } = render(
-      <IpCellRenderer {...baseProps} services={mockServices} store={mockStore} />
+      <UserCellRenderer {...props} services={mockServices} store={mockStore} />
     );
 
-    const link = getByTestId('one-discover-ip-link');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveTextContent('192.168.1.1');
-  });
+    await userEvent.click(getByTestId('one-discover-user-link'));
 
-  it('should open system flyout on click', async () => {
-    const { getByTestId } = render(
-      <IpCellRenderer {...baseProps} services={mockServices} store={mockStore} />
-    );
-
-    await userEvent.click(getByTestId('one-discover-ip-link'));
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
       surface: FLYOUT_SURFACE.FLYOUT,
-      flyoutType: FLYOUT_TYPE.NETWORK,
+      flyoutType: FLYOUT_TYPE.USER,
       tool: undefined,
       session: FLYOUT_SESSION_KIND.START,
       origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
     });
-  });
-
-  it('should render multiple IPs as separate links', () => {
-    const props = {
-      ...baseProps,
-      row: {
-        ...baseProps.row,
-        flattened: {
-          'source.ip': ['10.0.0.1', '10.0.0.2', '10.0.0.3'],
-        },
-      },
-    };
-
-    const { getAllByTestId } = render(
-      <IpCellRenderer {...props} services={mockServices} store={mockStore} />
-    );
-
-    const links = getAllByTestId('one-discover-ip-link');
-    expect(links).toHaveLength(3);
-    expect(links[0]).toHaveTextContent('10.0.0.1');
-    expect(links[1]).toHaveTextContent('10.0.0.2');
-    expect(links[2]).toHaveTextContent('10.0.0.3');
-  });
-
-  it('should render empty tag when value is null', () => {
-    const props = {
-      ...baseProps,
-      row: {
-        ...baseProps.row,
-        flattened: {
-          'source.ip': null,
-        },
-      },
-    };
-
-    const { container } = render(
-      <IpCellRenderer {...props} services={mockServices} store={mockStore} />
-    );
-
-    expect(container.querySelector('[data-test-subj="one-discover-ip-link"]')).toBeNull();
-  });
-
-  it('should render empty tag when value is an empty array', () => {
-    const props = {
-      ...baseProps,
-      row: {
-        ...baseProps.row,
-        flattened: {
-          'source.ip': [],
-        },
-      },
-    };
-
-    const { container } = render(
-      <IpCellRenderer {...props} services={mockServices} store={mockStore} />
-    );
-
-    expect(container.querySelector('[data-test-subj="one-discover-ip-link"]')).toBeNull();
   });
 });
