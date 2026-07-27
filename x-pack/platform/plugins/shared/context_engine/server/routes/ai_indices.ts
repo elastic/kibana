@@ -321,7 +321,7 @@ export const registerAiIndexRoutes = ({
           return response.ok({ body });
         } catch (error) {
           auditLogger?.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
-          throw error;
+          return handleAiIndexError(error, response);
         }
       })
     );
