@@ -39,6 +39,11 @@ export interface ContextualServiceMapSectionProps {
   rangeTo: string;
   environment: string;
   kuery: string;
+  /**
+   * Seeded as filter-bar pills on the global map Explore link (and embeddable
+   * full-map href). Use for non-Controls fields such as transaction.name/type.
+   */
+  filterPills?: Array<{ field: string; value: string }>;
   /** Fixed graph area height when `sectionHeight` is not set. */
   panelHeight?: number;
   /** Fixed outer panel height; map graph fills remaining space below header controls. */
@@ -56,6 +61,7 @@ export function ContextualServiceMapSection({
   rangeTo,
   environment,
   kuery,
+  filterPills,
   panelHeight = DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT,
   sectionHeight,
   embeddableMinHeight,
@@ -162,6 +168,7 @@ export function ContextualServiceMapSection({
     environment,
     kuery,
     serviceName,
+    filterPills,
   });
 
   const titleRow = (
@@ -207,6 +214,7 @@ export function ContextualServiceMapSection({
         environment={environment}
         kuery={kuery}
         serviceName={serviceName}
+        filterPills={filterPills}
         core={core}
         enableContextualMap
         contextualMapBaseMaxHops={baseMaxHops}

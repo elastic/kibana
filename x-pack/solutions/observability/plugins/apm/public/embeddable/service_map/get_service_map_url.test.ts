@@ -75,6 +75,7 @@ describe('getServiceMapUrl', () => {
       filterPills: [
         { field: SERVICE_NAME, value: 'my-service' },
         { field: 'transaction.type', value: 'request' },
+        { field: 'transaction.name', value: 'GET /api' },
       ],
     });
 
@@ -85,6 +86,10 @@ describe('getServiceMapUrl', () => {
         {
           meta: { key: 'transaction.type', negate: false, disabled: false },
           query: { match_phrase: { 'transaction.type': 'request' } },
+        },
+        {
+          meta: { key: 'transaction.name', negate: false, disabled: false },
+          query: { match_phrase: { 'transaction.name': 'GET /api' } },
         },
       ],
     });

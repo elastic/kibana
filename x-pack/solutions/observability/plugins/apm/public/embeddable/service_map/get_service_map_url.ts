@@ -18,10 +18,6 @@ export interface ServiceMapUrlParams {
   rangeTo: string;
   environment?: Environment;
   kuery?: string;
-  /**
-   * When set, seeded into the unified **Service name** control via
-   * `_a.controlSelections` on the global service map (not a filter-bar pill).
-   */
   serviceName?: string;
   serviceGroupId?: string;
   /**
@@ -31,8 +27,6 @@ export interface ServiceMapUrlParams {
   controlSelections?: ServiceMapControlSelections;
   /**
    * Field-value pairs to pre-populate as filter bar pills (`_a.filters`).
-   * Use for fields that are not Controls API dropdowns (e.g. transaction.name).
-   * `service.name` values are promoted into `controlSelections` instead.
    * Each `field` is used unescaped in a match_phrase query — only pass trusted
    * field names (e.g. TRANSACTION_NAME, TRANSACTION_TYPE constants).
    */
