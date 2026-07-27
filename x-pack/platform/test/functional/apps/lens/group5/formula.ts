@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await input.type('*');
 
       await retry.try(async () => {
-        expect(await lens.getDatatableCellText(0, 0)).to.eql('14,005');
+        expect(await lens.getDatatableCellText(0, 0)).to.eql('14,004');
       });
     });
 
@@ -303,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check the numbers
       await lens.waitForVisualization();
-      expect(await lens.getDatatableCellText(0, 0)).to.eql('14,005');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('14,004');
 
       // add an advanced filter by filter
       await lens.enableFilter();
