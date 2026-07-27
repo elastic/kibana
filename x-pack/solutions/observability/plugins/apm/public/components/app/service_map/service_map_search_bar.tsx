@@ -14,7 +14,7 @@ import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { TimeComparison } from '../../shared/time_comparison';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
@@ -23,7 +23,6 @@ import { ServiceMapControls } from './service_map_controls';
 import { SERVICE_MAP_CONTROLS_CONFIG } from './service_map_control_panels_config';
 import { useServiceMapSearchContext } from './service_map_search_context';
 import { useFilterUrlSync } from './use_filter_url_sync';
-import { useServiceName } from '../../../hooks/use_service_name';
 
 /**
  * Unified search bar for service map pages.
@@ -40,11 +39,7 @@ import { useServiceName } from '../../../hooks/use_service_name';
 export function ServiceMapSearchBar() {
   const {
     query: { rangeFrom, rangeTo, kuery, environment },
-  } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  } = useApmParams('/service-map');
 
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
@@ -53,23 +48,20 @@ export function ServiceMapSearchBar() {
   const { filterManager } = services.data.query;
   const location = useLocation();
   const history = useHistory();
-  const serviceName = useServiceName();
 
   const controlsConfig = useMemo(() => {
-    const base = serviceName
-      ? SERVICE_MAP_CONTROLS_CONFIG.filter((c) => c.field_name !== 'service.name')
-      : SERVICE_MAP_CONTROLS_CONFIG;
-
     const visible = dataView
-      ? base.filter((c) => dataView.fields.getByName(c.field_name) !== undefined)
-      : base;
+      ? SERVICE_MAP_CONTROLS_CONFIG.filter(
+          (c) => dataView.fields.getByName(c.field_name) !== undefined
+        )
+      : SERVICE_MAP_CONTROLS_CONFIG;
 
     if (visible.length <= 2) {
       return visible.map((c) => ({ ...c, width: 'medium' as const, grow: false }));
     }
 
     return visible;
-  }, [serviceName, dataView]);
+  }, [dataView]);
 
   // Persist filter-bar pills and control selections in the URL (_a) so they survive refresh.
   const { initialAppFilters, persistControlSelections, getRestoredControlSelections } =

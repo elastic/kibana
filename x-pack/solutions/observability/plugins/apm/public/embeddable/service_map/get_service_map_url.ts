@@ -18,6 +18,10 @@ export interface ServiceMapUrlParams {
   rangeTo: string;
   environment?: Environment;
   kuery?: string;
+  /**
+   * When set, seeded into the unified **Service name** control via
+   * `_a.controlSelections` on the global service map (not a filter-bar pill).
+   */
   serviceName?: string;
   serviceGroupId?: string;
   /**
@@ -27,6 +31,8 @@ export interface ServiceMapUrlParams {
   controlSelections?: ServiceMapControlSelections;
   /**
    * Field-value pairs to pre-populate as filter bar pills (`_a.filters`).
+   * Use for fields that are not Controls API dropdowns (e.g. transaction.name).
+   * `service.name` values are promoted into `controlSelections` instead.
    * Each `field` is used unescaped in a match_phrase query — only pass trusted
    * field names (e.g. TRANSACTION_NAME, TRANSACTION_TYPE constants).
    */
@@ -57,11 +63,10 @@ function mergeControlValue(
 }
 
 /**
- * Builds the URL to the global APM service map with the same context.
- * Used by embeddable / contextual "Explore in Service map" links.
- * Always targets `#/service-map` (not the per-service focused map route).
+ * Builds query params for the global service map (`/service-map`).
+ * Shared by `getServiceMapUrl` and focused-map route redirects.
  */
-export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): string {
+export function buildServiceMapSearchParams(params: ServiceMapUrlParams): URLSearchParams {
   const {
     rangeFrom,
     rangeTo,
@@ -128,6 +133,16 @@ export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): 
     searchParams.set('_a', encodeRison(appState));
   }
 
+  return searchParams;
+}
+
+/**
+ * Builds the URL to the global APM service map with the same context.
+ * Used by embeddable / contextual "Explore in Service map" links.
+ * Always targets `#/service-map` (not the per-service focused map route).
+ */
+export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): string {
+  const searchParams = buildServiceMapSearchParams(params);
   const path = `#/service-map?${searchParams.toString()}`;
   return core.application.getUrlForApp('apm', { path });
 }

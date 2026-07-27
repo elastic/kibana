@@ -23,7 +23,7 @@ let mockMissingFields: string[];
 const filterUpdates$ = new Subject<void>();
 
 jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
+  useApmParams: () => ({
     query: {
       rangeFrom: 'now-15m',
       rangeTo: 'now',

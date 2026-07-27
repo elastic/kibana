@@ -115,9 +115,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { query } = useAnyOfApmParams(
     '/services',
     '/services/{serviceName}',
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/service-map'
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');

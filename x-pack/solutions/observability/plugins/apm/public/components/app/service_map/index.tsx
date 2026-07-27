@@ -35,8 +35,7 @@ import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
@@ -84,30 +83,6 @@ export function ServiceMapHome() {
   );
 }
 
-export function ServiceMapServiceDetail() {
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { esQuery } = useServiceMapSearchContext();
-
-  return (
-    <ServiceMap
-      environment={environment}
-      kuery={kuery}
-      start={start}
-      end={end}
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      // Pass `null` through — `esQuery ?? undefined` would defeat search-bar fetch gating.
-      esQuery={esQuery}
-    />
-  );
-}
-
 export function ServiceMap({
   environment,
   kuery,
@@ -141,29 +116,6 @@ export function ServiceMap({
     }
     return serviceName ? [serviceName] : [];
   }, [highlightedFromControls, serviceName]);
-  const apmRouter = useApmRouter();
-  const { query } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
-
-  const fullMapHref =
-    serviceName && 'rangeFrom' in query && 'rangeTo' in query && query.rangeFrom && query.rangeTo
-      ? apmRouter.link('/service-map', {
-          query: {
-            rangeFrom: query.rangeFrom,
-            rangeTo: query.rangeTo,
-            environment: query.environment,
-            // Drop kuery when navigating to the full map — filtering moves to
-            // the Controls API / filter bar on the destination page.
-            kuery: '',
-            comparisonEnabled: query.comparisonEnabled,
-            offset: query.offset,
-            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
-          },
-        })
-      : undefined;
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
@@ -354,7 +306,6 @@ export function ServiceMap({
               serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
-              fullMapHref={fullMapHref}
             />
           </div>
         </EuiPanel>

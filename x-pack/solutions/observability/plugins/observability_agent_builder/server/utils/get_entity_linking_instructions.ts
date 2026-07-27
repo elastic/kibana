@@ -27,7 +27,7 @@ export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string 
   | Service Errors | [errors](${urlPrefix}/app/apm/services/<serviceName>/errors) | "Review all [errors](${urlPrefix}/app/apm/services/frontend/errors) for the [frontend](${urlPrefix}/app/apm/services/frontend) service." |
   | Service Logs | [logs](${urlPrefix}/app/apm/services/<serviceName>/logs) | "Check [logs](${urlPrefix}/app/apm/services/frontend/logs) for the [frontend](${urlPrefix}/app/apm/services/frontend) service." |
   | Host | [<hostName>](${urlPrefix}/app/metrics/detail/host/<hostName>) | "Host [web-01](${urlPrefix}/app/metrics/detail/host/web-01) is experiencing high CPU usage." |
-  | Service Map | [Service Map](${urlPrefix}/app/apm/services/<serviceName>/service-map) | "Check the [Service Map](${urlPrefix}/app/apm/services/payments/service-map) to see dependencies." |
+  | Service Map | [Service Map](${urlPrefix}/app/apm/service-map) | "Check the [Service Map](${urlPrefix}/app/apm/service-map) to see dependencies." |
   | Dependencies | [Dependencies](${urlPrefix}/app/apm/services/<serviceName>/dependencies) | "View [Dependencies](${urlPrefix}/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
   | Alert | [<alertId>](${urlPrefix}/app/observability/alerts/<alertId>) | "Alert [alert-uuid-123](${urlPrefix}/app/observability/alerts/alert-uuid-123) was triggered." |
   | Alert Rules | [<alertRuleId>](${urlPrefix}/app/rules/rule/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/rules/rule/alert-uuid-123)." |
