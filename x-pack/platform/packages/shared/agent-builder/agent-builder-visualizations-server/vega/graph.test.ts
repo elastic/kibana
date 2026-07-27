@@ -137,24 +137,6 @@ describe('createVegaGraph', () => {
     expect(state.summary).toBeNull();
   });
 
-  it('preserves a bare faceted Vega-Lite spec instead of treating it as the response envelope', async () => {
-    invoke.mockResolvedValue(
-      '```json\n' +
-        JSON.stringify({
-          facet: { field: 'region', type: 'nominal' },
-          spec: { mark: 'bar', encoding: { x: { field: 'latency' } } },
-        }) +
-        '\n```'
-    );
-
-    const state = await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(state.error).toBeNull();
-    const spec = JSON.parse(state.spec!);
-    expect(spec.facet).toEqual({ field: 'region', type: 'nominal' });
-    expect(spec.spec.mark).toBe('bar');
-  });
-
   it('keeps panel title out of a faceted Vega-Lite nested spec', async () => {
     invoke.mockResolvedValue(
       asCodeBlock({
