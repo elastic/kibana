@@ -289,6 +289,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             ? convertShardsToObject(currentPackSO.attributes.shards ?? [])
             : shards;
 
+        // A PUT that mentions neither `policy_ids` nor `shards` is not asking to
+        // retarget the pack, so both the SO references and the wire attachments
+        // must survive it. Drives the references guard and the wire detach from
+        // one predicate so the two can't disagree and leave the pack scheduled
+        // on agents it is no longer referenced by (or vice versa).
+        const targetingChangeRequested = Boolean(policy_ids) || !isEmpty(shards);
+
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
           effectivePolicyIds,
@@ -312,7 +319,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           (reference) => reference.type !== LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
         );
         const getUpdatedReferences = () => {
-          if (!policy_ids && isEmpty(shards)) {
+          if (!targetingChangeRequested) {
             return currentPackSO.references;
           }
 
@@ -511,6 +518,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             // rather than resolving the SO's agent-policy references keeps
             // detach correct even when references and wire attachments have
             // diverged (e.g. after a 9.4.3 → 9.5.0 upgrade); see #279224.
+            // Gated on an actual retarget request: in the same drift state an
+            // edit-only PUT resolves to zero write targets, and detaching on
+            // that would silently unschedule an enabled pack everywhere.
             const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
               policiesList,
               packagePolicies
@@ -521,23 +531,25 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               )
             );
 
-            await Promise.all(
-              currentPackagePolicies
-                .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
-                .map((packagePolicy) =>
-                  packagePolicyService?.update(
-                    spaceScopedClient,
-                    esClient,
-                    packagePolicy.id,
-                    produce<PackagePolicy>(packagePolicy, (draft) => {
-                      unset(draft, 'id');
-                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+            if (targetingChangeRequested) {
+              await Promise.all(
+                currentPackagePolicies
+                  .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
+                  .map((packagePolicy) =>
+                    packagePolicyService?.update(
+                      spaceScopedClient,
+                      esClient,
+                      packagePolicy.id,
+                      produce<PackagePolicy>(packagePolicy, (draft) => {
+                        unset(draft, 'id');
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
 
-                      return draft;
-                    })
+                        return draft;
+                      })
+                    )
                   )
-                )
-            );
+              );
+            }
 
             await Promise.all(
               Array.from(packagePolicyWriteTargets.values()).map(
