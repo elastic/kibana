@@ -25,8 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/228826
-  describe.skip('@ess @serverless @serverlessQA Delete API', () => {
+  describe('@ess @serverless @serverlessQA Delete API', () => {
     let migrationId: string;
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
