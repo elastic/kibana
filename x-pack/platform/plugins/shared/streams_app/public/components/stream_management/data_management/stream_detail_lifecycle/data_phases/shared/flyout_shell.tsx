@@ -29,6 +29,7 @@ export interface FlyoutShellProps {
   onClose: () => void;
   title: React.ReactNode;
   tabsRow: React.ReactNode;
+  banner?: React.ReactNode;
   children: React.ReactNode;
   isSubmitting: boolean;
   isSaving?: boolean;
@@ -42,6 +43,7 @@ export const FlyoutShell = ({
   onClose,
   title,
   tabsRow,
+  banner,
   children,
   isSubmitting,
   isSaving,
@@ -105,7 +107,7 @@ export const FlyoutShell = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup

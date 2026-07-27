@@ -56,6 +56,7 @@ export interface DiscoveryJudgeEvaluationExample {
   };
   output: ExampleOutputBase & {
     expected_ground_truth?: string;
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }

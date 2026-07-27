@@ -126,6 +126,8 @@ export {
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
   getRuleUrl,
+  getEnableRuleUrl,
+  getDisableRuleUrl,
   getBulkRulesUrl,
   BULK_ALERT_ACTION_URL,
   getBulkActionPoliciesUrl,

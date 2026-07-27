@@ -61,7 +61,7 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
       <p>
         <FormattedMessage
           id="xpack.contextEngine.aiIndexDetail.sources.description"
-          defaultMessage="ES|QL views, indices, Connectors and stream signals feeding this AI index."
+          defaultMessage="Sources that provide data for this AI index automations."
         />
       </p>
     </EuiText>
