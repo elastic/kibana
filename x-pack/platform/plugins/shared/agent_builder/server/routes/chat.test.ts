@@ -693,7 +693,7 @@ describe('registerChatRoutes', () => {
     it('rejects unknown skill ids with a 400', async () => {
       let converseHandler: Function | undefined;
       const executeAgent = jest.fn();
-      const skillRegistry = { has: jest.fn().mockResolvedValue(false) };
+      const skillRegistry = { bulkGet: jest.fn().mockResolvedValue(new Map()) };
 
       const router = buildRouter((h) => {
         converseHandler = h;
@@ -737,7 +737,9 @@ describe('registerChatRoutes', () => {
     it('proceeds when all skill ids are known', async () => {
       let converseHandler: Function | undefined;
       const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
-      const skillRegistry = { has: jest.fn().mockResolvedValue(true) };
+      const skillRegistry = {
+        bulkGet: jest.fn().mockResolvedValue(new Map([['known-skill', { id: 'known-skill' }]])),
+      };
 
       const router = buildRouter((h) => {
         converseHandler = h;
@@ -773,7 +775,7 @@ describe('registerChatRoutes', () => {
         response
       );
 
-      expect(skillRegistry.has).toHaveBeenCalledWith('known-skill');
+      expect(skillRegistry.bulkGet).toHaveBeenCalledWith(['known-skill']);
       expect(executeAgent).toHaveBeenCalled();
     });
   });

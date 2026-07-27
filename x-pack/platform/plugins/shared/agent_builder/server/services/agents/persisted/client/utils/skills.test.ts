@@ -11,7 +11,7 @@ import type { SkillRegistry } from '../../../../skills/skill_registry';
 const makeRegistry = (knownIds: string[]): SkillRegistry => {
   const set = new Set(knownIds);
   return {
-    has: jest.fn(async (id: string) => set.has(id)),
+    has: jest.fn(),
     bulkGet: jest.fn(async (ids: string[]) => {
       const map = new Map();
       for (const id of ids) {
@@ -38,9 +38,17 @@ describe('validateSkillIds', () => {
     ]);
   });
 
-  it('returns no errors for an empty list', async () => {
+  it('returns no errors for an empty list without calling bulkGet', async () => {
     const registry = makeRegistry([]);
     const errors = await validateSkillIds(registry, []);
     expect(errors).toEqual([]);
+    expect(registry.bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('issues a single bulkGet call regardless of how many ids are provided', async () => {
+    const registry = makeRegistry(['skill-a', 'skill-b', 'skill-c']);
+    await validateSkillIds(registry, ['skill-a', 'skill-b', 'skill-c']);
+    expect(registry.bulkGet).toHaveBeenCalledTimes(1);
+    expect(registry.has).not.toHaveBeenCalled();
   });
 });

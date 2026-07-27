@@ -11,12 +11,9 @@ export async function validateSkillIds(
   skillRegistry: SkillRegistry,
   skillIds: string[]
 ): Promise<string[]> {
-  const errors: string[] = [];
-  for (const skillId of skillIds) {
-    const exists = await skillRegistry.has(skillId);
-    if (!exists) {
-      errors.push(`Skill id '${skillId}' does not exist.`);
-    }
+  if (skillIds.length === 0) {
+    return [];
   }
-  return errors;
+  const found = await skillRegistry.bulkGet(skillIds);
+  return skillIds.filter((id) => !found.has(id)).map((id) => `Skill id '${id}' does not exist.`);
 }

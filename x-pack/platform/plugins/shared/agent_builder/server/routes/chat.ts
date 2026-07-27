@@ -280,7 +280,7 @@ export const conversePayloadSchema = schema.object({
           )
         ),
         skill_ids: schema.maybe(
-          schema.arrayOf(schema.string(), {
+          schema.arrayOf(schema.string({ maxLength: 256 }), {
             maxSize: 100,
             meta: { description: 'Skill IDs to enable for this execution.' },
           })
