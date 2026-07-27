@@ -18,8 +18,27 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
           <div
             class="css-p0ahs1-wrapper"
           >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to Filter lists"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/app/management/ml/ad_settings/filter_lists"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
             <div
-              class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+              class="css-xzqk95-titleWrapper-Title"
             >
               <h1
                 class="euiTitle emotion-euiTitle-s"
@@ -199,8 +218,27 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
           <div
             class="css-p0ahs1-wrapper"
           >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to Filter lists"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/app/management/ml/ad_settings/filter_lists"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
             <div
-              class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+              class="css-xzqk95-titleWrapper-Title"
             >
               <h1
                 class="euiTitle emotion-euiTitle-s"
@@ -392,8 +430,27 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
           <div
             class="css-p0ahs1-wrapper"
           >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to Filter lists"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/app/management/ml/ad_settings/filter_lists"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
             <div
-              class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+              class="css-xzqk95-titleWrapper-Title"
             >
               <h1
                 class="euiTitle emotion-euiTitle-s"
@@ -540,8 +597,27 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
           <div
             class="css-p0ahs1-wrapper"
           >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
+            >
+              <a
+                aria-label="Back to Filter lists"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/app/management/ml/ad_settings/filter_lists"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
             <div
-              class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+              class="css-xzqk95-titleWrapper-Title"
             >
               <h1
                 class="euiTitle emotion-euiTitle-s"

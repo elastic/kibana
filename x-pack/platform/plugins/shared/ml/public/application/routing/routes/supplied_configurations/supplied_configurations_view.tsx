@@ -20,7 +20,7 @@ import {
   getMlManagementBreadcrumb,
   getStackManagementBreadcrumb,
 } from '../../breadcrumbs';
-import { MlAppHeader } from '../../../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../components/ml_app_header';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
@@ -44,6 +44,7 @@ export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp)
 
 const PageWrapper: FC = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   return (
     <PageLoader context={context}>
@@ -51,6 +52,7 @@ const PageWrapper: FC = () => {
         title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
           defaultMessage: 'Supplied configurations',
         })}
+        back={anomalyDetectionJobsBack}
       />
       <EuiText data-test-subj="mlPageSuppliedConfigurations">
         {i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription', {

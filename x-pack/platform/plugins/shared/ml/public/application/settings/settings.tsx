@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
-import { MlAppHeader } from '../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../components/ml_app_header';
 
 export const Settings: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
   return (
     <Fragment>
       <EuiSpacer size="m" />
@@ -27,6 +28,7 @@ export const Settings: FC = () => {
           title={i18n.translate('xpack.ml.anomalyDetectionSettings.title', {
             defaultMessage: 'Anomaly Detection Settings',
           })}
+          back={anomalyDetectionJobsBack}
         />
         <AnomalyDetectionSettings />
       </div>
