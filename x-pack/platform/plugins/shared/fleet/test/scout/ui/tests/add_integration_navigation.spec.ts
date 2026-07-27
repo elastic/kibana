@@ -63,8 +63,6 @@ test.describe('Add integration navigation', { tag: tags.stateful.classic }, () =
 
     await integrationHome.getAddIntegrationPolicyButton().click();
 
-    await expect(page).toHaveURL(
-      new RegExp(`/app/integrations/detail/${nginxPkgkey}/add-integration`)
-    );
+    expect(page.url()).toContain(`/app/integrations/detail/${nginxPkgkey}/add-integration`);
   });
 });

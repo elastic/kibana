@@ -171,7 +171,7 @@ export const AppRoutes = memo(() => {
     );
   }
 
-  if (isAddIntegrationsPath && !authz.integrations.all) {
+  if (isAddIntegrationsPath && !authz.integrations.all && !authz.fleet.all) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         <PermissionsError callingApplication="Integrations" error={missingPrivilegesString} />
