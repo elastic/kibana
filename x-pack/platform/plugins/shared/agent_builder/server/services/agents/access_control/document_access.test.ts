@@ -55,7 +55,7 @@ describe('hasReadAccess', () => {
     expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns false for same username without matching stable ids (cross-realm unsafe)', () => {
+  it('returns true for legacy owners that only stored created_by_name', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },

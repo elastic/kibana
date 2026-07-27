@@ -38,26 +38,32 @@ describe('agent access-control authorization', () => {
       ).toBe(false);
     });
 
-    it('does not treat same username without ids as ownership (cross-realm unsafe)', () => {
+    it('falls back to username for legacy owners that never stored an id', () => {
       expect(
         isAgentOwner({
           owner: { username: 'alice' },
           currentUser: { username: 'alice' },
         })
-      ).toBe(false);
-    });
-
-    it('does not fall back to username when only one side has an id', () => {
+      ).toBe(true);
       expect(
         isAgentOwner({
           owner: { username: 'alice' },
-          currentUser: { id: 'owner-id', username: 'alice' },
+          currentUser: { id: 'realm:["file","file1","alice"]', username: 'alice' },
+        })
+      ).toBe(true);
+    });
+
+    it('does not fall back to username when the agent document stored an id', () => {
+      expect(
+        isAgentOwner({
+          owner: { id: 'owner-id', username: 'alice' },
+          currentUser: { username: 'alice' },
         })
       ).toBe(false);
       expect(
         isAgentOwner({
           owner: { id: 'owner-id', username: 'alice' },
-          currentUser: { username: 'alice' },
+          currentUser: { id: 'different-id', username: 'alice' },
         })
       ).toBe(false);
     });
