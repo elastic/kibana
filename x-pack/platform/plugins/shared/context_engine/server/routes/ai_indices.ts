@@ -167,14 +167,10 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security?.audit.asScoped(request);
         const { aiIndexId } = request.params;
         try {
-          auditLogger?.log(
-            aiIndexAuditEvent({
-              action: AiIndexAuditAction.CREATE_OR_UPDATE,
-              id: aiIndexId,
-              outcome: 'unknown',
-            })
-          );
           const status = await getAiIndexService().put(aiIndexId, request.body);
+          auditLogger?.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId })
+          );
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -288,14 +284,8 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security?.audit.asScoped(request);
         const { aiIndexId } = request.params;
         try {
-          auditLogger?.log(
-            aiIndexAuditEvent({
-              action: AiIndexAuditAction.DELETE,
-              id: aiIndexId,
-              outcome: 'unknown',
-            })
-          );
           await getAiIndexService().delete(aiIndexId);
+          auditLogger?.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });
         } catch (error) {
