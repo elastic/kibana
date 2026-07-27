@@ -27,13 +27,42 @@ const parseArgs = (argv) => {
   return args;
 };
 
+/**
+ * Wraps the task so it never runs as root: Kibana tooling refuses root
+ * without --allow-root and Elasticsearch refuses root outright, while most
+ * sandboxes (and docker) hand you a root shell. When root, the wrapper
+ * creates an unprivileged user, hands over the relevant env and workdir, and
+ * re-executes the inner script as that user.
+ */
 const buildPayload = (taskFile, env) => {
   const lib = readFileSync(join(TASKS_DIR, 'lib.sh'), 'utf8');
   const task = readFileSync(join(TASKS_DIR, taskFile), 'utf8');
   const preamble = Object.entries(env)
     .map(([k, v]) => `export ${k}=${JSON.stringify(String(v))}`)
     .join('\n');
-  return `${preamble}\n${lib}\n${task}`;
+  const inner = [
+    '[ -f /tmp/kbn_bench_env.sh ] && . /tmp/kbn_bench_env.sh',
+    preamble,
+    lib,
+    task,
+  ].join('\n');
+  const b64 = Buffer.from(inner).toString('base64');
+  return `#!/usr/bin/env bash
+set -euo pipefail
+echo '${b64}' | base64 -d > /tmp/kbn_bench_inner.sh
+chmod 755 /tmp/kbn_bench_inner.sh
+export -p | grep -E '^declare -x (KIBANA_|BENCH_|CLONE_MODE|ES_READY_TIMEOUT|KBN_READY_TIMEOUT|NVM_VERSION)' > /tmp/kbn_bench_env.sh || true
+chmod 644 /tmp/kbn_bench_env.sh
+if [[ "$(id -u)" == "0" ]]; then
+  id -u kbnbench >/dev/null 2>&1 || useradd -m -s /bin/bash kbnbench
+  if [[ -n "\${KIBANA_DIR:-}" ]]; then
+    mkdir -p "$(dirname "\$KIBANA_DIR")"
+    chown -R kbnbench "$(dirname "\$KIBANA_DIR")" 2>/dev/null || true
+  fi
+  exec su kbnbench -c 'bash /tmp/kbn_bench_inner.sh'
+fi
+exec bash /tmp/kbn_bench_inner.sh
+`;
 };
 
 const parseMarkers = (stdout) => {

@@ -19,10 +19,19 @@ export async function exec(handle, script, { timeoutMs }) {
   return new Promise((resolve) => {
     const child = spawn('bash', ['-s'], {
       env: { ...process.env, KIBANA_DIR: join(handle.dir, 'kibana') },
+      detached: true,
     });
     let stdout = '';
     let stderr = '';
-    const timer = setTimeout(() => child.kill('SIGKILL'), timeoutMs);
+    // Kill the whole process group: the payload re-execs itself via `su`
+    // when running as root, so killing only the direct child would leak it.
+    const timer = setTimeout(() => {
+      try {
+        process.kill(-child.pid, 'SIGKILL');
+      } catch {
+        child.kill('SIGKILL');
+      }
+    }, timeoutMs);
     child.stdout.on('data', (d) => (stdout += d));
     child.stderr.on('data', (d) => (stderr += d));
     child.on('close', (code) => {
