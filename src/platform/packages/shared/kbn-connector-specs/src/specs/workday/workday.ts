@@ -440,9 +440,8 @@ export const Workday: ConnectorSpec = {
     listInboxTasks: {
       isTool: true,
       description:
-        "Retrieve the authenticated user's Workday inbox tasks and pending action items. " +
-        'Returns task summaries including title, subject, business process, and status. ' +
-        'Only returns tasks for the currently authenticated OAuth user.',
+        "Retrieve the user's Workday inbox tasks and pending action items. " +
+        'Returns task summaries including title, subject, business process, and status. ',
       input: ListInboxTasksInputSchema,
       handler: async (ctx, input: ListInboxTasksInput) => {
         const { tenantUrl, tenantName } = ctx.config as {
