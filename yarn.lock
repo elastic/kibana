@@ -2356,10 +2356,10 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-test-helpers@1.1.0-snapshot.1784867115309":
-  version "1.1.0-snapshot.1784867115309"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.1.0-snapshot.1784867115309.tgz#9c56d24c69a07b86e831128bdc786045dbd61b78"
-  integrity sha512-+MtYNScpVOGMvUIHwgKEg60al8ouM7NhLh+/soCnXNZm+7UJD3byQVOGebDPf7l7uwEybmfhxL+SFX1GUybpDA==
+"@elastic/eui-test-helpers@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.2.0.tgz#60fb34fa36ba169a1ae639284f36b3be43d3c82a"
+  integrity sha512-1k27oE2Wkogh6yeXmUa0kp3D6bjm+8Cv4v8MniBMyLBHwKGK41YQebKAkfmGq4V2xHV5Jv+lAkuTYZf9Iyr0ww==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
