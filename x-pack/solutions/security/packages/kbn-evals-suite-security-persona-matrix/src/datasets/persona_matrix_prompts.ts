@@ -34,6 +34,16 @@ export interface PersonaMatrixExample {
   };
 }
 
+// Tool IDs below are the real registered `security.*` / `platform.core.*` /
+// `workflows.*` / `attachments.*` IDs, cross-referenced against:
+//   x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/**
+//   x-pack/platform/plugins/shared/agent_builder_platform/server/tools/**
+//   x-pack/platform/plugins/shared/agent_builder_workflows/common/constants.ts
+//   x-pack/platform/plugins/shared/cases/server/agent_builder/**
+//   x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts
+// as of PR #280812. Where a skill's own instructions document a hard single-tool
+// contract (e.g. alert-triage), expectedTools reflects that contract rather than
+// a plausible-sounding multi-tool guess.
 export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
   {
     id: 'alert-analysis-a',
@@ -56,10 +66,21 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         '  Timestamp: 2026-07-21T08:00:00Z\n' +
         '  Status: Open',
     },
-    output: { reference: 'alert-analysis-a expected response' },
+    output: {
+      reference:
+        'Explains that BluetoothService.exe loading log.dll from a non-standard location matches ' +
+        'T1574.002 DLL side-loading, a known defense-evasion technique; treats the alert as a likely ' +
+        'true positive given the high severity/risk score and recommends escalation/containment rather ' +
+        'than dismissal, citing entity risk context and any Security Labs research on the technique.',
+    },
     metadata: {
       expectedSkill: 'alert-analysis',
-      expectedTools: ['attachment_read', 'entity_risk_score', 'threat_intel_lookup'],
+      expectedTools: [
+        'attachments.read',
+        'security.alerts',
+        'security.entity_risk_score',
+        'security.security_labs_search',
+      ],
       severity: 'high',
       tags: ['triage', 'single-alert'],
     },
@@ -75,10 +96,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'for that host — are these related to the same incident, and which entities do they share? ' +
         'Give me a disposition.',
     },
-    output: { reference: 'alert-analysis-b expected response' },
+    output: {
+      reference:
+        'Pulls the open alert queue for srv-win-defend-01 via the alerts tool, groups alerts that ' +
+        'share entities (host/user/process), and correlates them into a single candidate incident, ' +
+        'using entity risk scoring to justify the disposition rather than treating each alert in isolation.',
+    },
     metadata: {
       expectedSkill: 'alert-analysis',
-      expectedTools: ['attachment_read', 'entity_risk_score', 'threat_intel_lookup'],
+      expectedTools: ['security.alerts', 'security.entity_risk_score'],
       severity: 'high',
       tags: ['triage', 'host-queue'],
     },
@@ -93,10 +119,19 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "I'm seeing noise on srv-win-defend-01. Is this a real threat or a false positive? " +
         'Pull in any threat intel that would help me decide.',
     },
-    output: { reference: 'alert-analysis-c expected response' },
+    output: {
+      reference:
+        'Retrieves the alert(s) for the host, checks entity risk to gauge whether the pattern is ' +
+        "consistent with the host's baseline, and searches Security Labs research for the relevant " +
+        'technique/malware family to ground the false-positive-vs-true-positive call in external evidence.',
+    },
     metadata: {
       expectedSkill: 'alert-analysis',
-      expectedTools: ['threat_intel_lookup', 'entity_risk_score'],
+      expectedTools: [
+        'security.alerts',
+        'security.security_labs_search',
+        'security.entity_risk_score',
+      ],
       severity: 'medium',
       tags: ['triage', 'noise'],
     },
@@ -111,10 +146,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'Build me a detection rule that catches BluetoothService.exe loading log.dll from ' +
         'a non-standard path. Map it to the relevant MITRE ATT&CK technique and set severity to high.',
     },
-    output: { reference: 'detection-rule-edit-a expected response' },
+    output: {
+      reference:
+        'Calls the create-detection-rule tool with a natural-language description of the side-loading ' +
+        'condition (process name + non-standard load path), high severity, and T1574.002 MITRE mapping; ' +
+        'renders the created rule attachment inline rather than describing the rule in prose only.',
+    },
     metadata: {
-      expectedSkill: 'detection-rule-creation',
-      expectedTools: ['detection_rule_create', 'mitre_lookup'],
+      expectedSkill: 'detection-rule-edit',
+      expectedTools: ['security.create_detection_rule'],
       severity: 'high',
       tags: ['rule-creation', 'mitre'],
     },
@@ -129,10 +169,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'I want a new rule to detect the Chrysalis side-loading pattern we just hunted down. ' +
         'Draft it as an ES|QL rule with appropriate tags and threat mappings.',
     },
-    output: { reference: 'detection-rule-edit-b expected response' },
+    output: {
+      reference:
+        'Calls create-detection-rule with an ES|QL-flavored natural-language query describing the ' +
+        'Chrysalis side-loading indicators, appropriate tags, and MITRE mapping; the tool itself ' +
+        'generates the underlying ES|QL rather than the agent hand-writing it separately.',
+    },
     metadata: {
-      expectedSkill: 'detection-rule-creation',
-      expectedTools: ['detection_rule_create', 'generate_esql'],
+      expectedSkill: 'detection-rule-edit',
+      expectedTools: ['security.create_detection_rule'],
       severity: 'high',
       tags: ['rule-creation', 'esql'],
     },
@@ -149,10 +194,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'from C:\\Users\\Public\\. Help me close the detection gap — create a rule ' +
         'so we catch this automatically next time, and ground it in the relevant Security Labs research.',
     },
-    output: { reference: 'detection-rule-edit-c expected response' },
+    output: {
+      reference:
+        'Searches Security Labs for prior research on this side-loading pattern/technique first, then ' +
+        'calls create-detection-rule with a description informed by that research (specific path, hash, ' +
+        'and technique), rather than creating a generic rule without grounding.',
+    },
     metadata: {
-      expectedSkill: 'detection-rule-creation',
-      expectedTools: ['detection_rule_create', 'mitre_lookup'],
+      expectedSkill: 'detection-rule-edit',
+      expectedTools: ['security.security_labs_search', 'security.create_detection_rule'],
       severity: 'high',
       tags: ['rule-creation', 'research'],
     },
@@ -167,10 +217,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'Show me what we know about the host srv-win-defend-01 — its risk score, ' +
         'asset criticality, and any unusual behavior tied to it.',
     },
-    output: { reference: 'entity-analytics-a expected response' },
+    output: {
+      reference:
+        "Looks up the host entity's risk score and details (including asset criticality if set) and " +
+        'summarizes recent risk-contributing activity for srv-win-defend-01.',
+    },
     metadata: {
       expectedSkill: 'entity-analytics',
-      expectedTools: ['entity_risk_score', 'entity_summary'],
+      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
       severity: 'medium',
       tags: ['entity', 'host-profile'],
     },
@@ -184,10 +238,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         'Which hosts and users in my environment are the riskiest right now? Profile the top one.',
     },
-    output: { reference: 'entity-analytics-b expected response' },
+    output: {
+      reference:
+        'Searches/ranks entities by risk score across the environment, identifies the top-ranked ' +
+        'entity, then looks up that entity in detail to produce a profile.',
+    },
     metadata: {
       expectedSkill: 'entity-analytics',
-      expectedTools: ['entity_risk_score', 'entity_summary'],
+      expectedTools: ['security.search_entities', 'security.get_entity'],
       severity: 'medium',
       tags: ['entity', 'risk-ranking'],
     },
@@ -202,10 +260,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "The SYSTEM user on srv-win-defend-01 keeps coming up. What's this entity's history " +
         'and risk profile — should I be escalating based on the entity itself?',
     },
-    output: { reference: 'entity-analytics-c expected response' },
+    output: {
+      reference:
+        "Looks up the SYSTEM-on-srv-win-defend-01 user entity's risk score and recent history, and " +
+        'gives an explicit escalate-or-not recommendation grounded in that risk data rather than a ' +
+        'generic answer.',
+    },
     metadata: {
       expectedSkill: 'entity-analytics',
-      expectedTools: ['entity_risk_score', 'entity_summary'],
+      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
       severity: 'medium',
       tags: ['entity', 'history'],
     },
@@ -214,13 +277,12 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     id: 'multi-step-a',
     category: 'multi-step',
     variant: 'A',
-    description: 'Triaged alert → VT → on-call → Slack',
+    description: 'Triaged alert → threat-intel grounding → escalation summary',
     input: {
       question:
-        'Analyze this alert. If it involves a file hash, verify the hash on VirusTotal. ' +
-        'Then check who is on call, and create a Slack channel with the on-call analyst that ' +
-        'includes your findings from this alert (verdict, IOCs, and the on-call owner). ' +
-        'Walk me through each step as you go.',
+        'Analyze this alert. If it involves a file hash, look into whether it is a known-bad indicator. ' +
+        'Then tell me whether this warrants escalation, and summarize your findings ' +
+        '(verdict, IOCs, and recommended next step).',
       attachment:
         'Alert Details:\n' +
         '  Rule: Suspicious BluetoothService Side-Load\n' +
@@ -232,15 +294,19 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         '  MITRE: T1574.002 (DLL Side-Loading)\n' +
         '  Timestamp: 2026-07-21T08:00:00Z',
     },
-    output: { reference: 'multi-step-a expected response' },
+    output: {
+      reference:
+        'Reads the attached alert, checks the file hash against Security Labs research / entity risk ' +
+        'signal for a verdict, and produces a step-by-step summary ending in an explicit escalate-or-not ' +
+        'recommendation with the IOCs called out.',
+    },
     metadata: {
       expectedSkill: 'security-multi-step',
-      allowSkills: ['alert-analysis', 'threat-intel', 'workflow-execute'],
+      allowSkills: ['alert-analysis'],
       expectedTools: [
-        'attachment_read',
-        'virustotal_lookup',
-        'on_call_lookup',
-        'workflow_execute_step',
+        'attachments.read',
+        'security.security_labs_search',
+        'security.entity_risk_score',
       ],
       severity: 'critical',
       tags: ['multi-step', 'orchestration'],
@@ -250,26 +316,25 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     id: 'multi-step-b',
     category: 'multi-step',
     variant: 'B',
-    description: 'Full incident response: VT → on-call → case → Slack',
+    description: 'Full incident response: case creation with grounded findings',
     input: {
       question:
         "There's a confirmed Chrysalis incident on srv-win-defend-01 — BluetoothService.exe " +
         'is side-loading log.dll (sha256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f). ' +
         'Run the full response: ' +
-        'verify the loader hash on VirusTotal, check the on-call schedule, open a critical Security case, ' +
-        'then spin up a Slack incident channel with the on-call responder and post the case summary and top IOCs. ' +
-        'Report what you did at each step.',
+        'ground this in any known research on the technique, open a critical Security case documenting ' +
+        'the incident, and report what you did at each step.',
     },
-    output: { reference: 'multi-step-b expected response' },
+    output: {
+      reference:
+        'Searches Security Labs for research on the side-loading pattern, then calls the cases-management ' +
+        'skill/tool to open a critical-severity case with a summary of the confirmed findings, reporting ' +
+        'each step taken.',
+    },
     metadata: {
       expectedSkill: 'security-multi-step',
-      allowSkills: ['alert-analysis', 'threat-intel', 'case-management', 'workflow-execute'],
-      expectedTools: [
-        'virustotal_lookup',
-        'on_call_lookup',
-        'create_case',
-        'workflow_execute_step',
-      ],
+      allowSkills: ['alert-analysis', 'cases-management'],
+      expectedTools: ['security.security_labs_search', 'platform.core.cases'],
       severity: 'critical',
       tags: ['multi-step', 'incident-response'],
     },
@@ -282,20 +347,24 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         'Triage srv-win-defend-01 end-to-end: pull the alerts for that host, hunt for the ' +
-        "Chrysalis IOCs (BluetoothService.exe, log.dll, C2 domains) to confirm, check who's on call, " +
-        "and if it's a true positive, create a Slack channel with the on-call analyst summarizing " +
-        "the confirmed findings and recommended actions. Don't escalate if it's benign.",
+        'Chrysalis IOCs (BluetoothService.exe, log.dll, C2 domains) to confirm, and ' +
+        "if it's a true positive, tell me who/what to escalate to and summarize the confirmed findings " +
+        "and recommended actions. Don't escalate if it's benign.",
     },
-    output: { reference: 'multi-step-c expected response' },
+    output: {
+      reference:
+        "Pulls the host's alert queue, hunts for the named IOCs via ES|QL over process/network telemetry " +
+        'to confirm or refute the hypothesis, and conditionally produces an escalation summary only if ' +
+        'the hunt confirms a true positive — explicitly stating when it does not escalate.',
+    },
     metadata: {
       expectedSkill: 'security-multi-step',
-      allowSkills: ['alert-analysis', 'threat-intel', 'workflow-execute'],
+      allowSkills: ['alert-analysis', 'threat-intel-hunt'],
       expectedTools: [
-        'attachment_read',
-        'entity_risk_score',
-        'threat_intel_lookup',
-        'on_call_lookup',
-        'workflow_execute_step',
+        'security.alerts',
+        'platform.core.generate_esql',
+        'platform.core.execute_esql',
+        'security.entity_risk_score',
       ],
       severity: 'critical',
       tags: ['multi-step', 'conditional-escalation'],
@@ -311,10 +380,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "I have a hypothesis that there's a malicious DLL being side-loaded on our Windows fleet. " +
         'Hunt for evidence of log.dll across process and file telemetry and tell me what you find.',
     },
-    output: { reference: 'threat-hunting-a expected response' },
+    output: {
+      reference:
+        'Generates and runs an ES|QL query against process/file event telemetry filtering for log.dll ' +
+        'load events across hosts, then reports which hosts/processes show the pattern (or that none do).',
+    },
     metadata: {
-      expectedSkill: 'threat-intel-hunt',
-      expectedTools: ['generate_esql', 'index_search'],
+      expectedSkill: 'threat-hunting',
+      expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'high',
       tags: ['hunt', 'hypothesis-driven'],
     },
@@ -329,10 +402,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'Hunt for signs of the Chrysalis backdoor on srv-win-defend-01 — look for BluetoothService.exe ' +
         'execution, suspicious DLL loads, and any C2 network or DNS activity. Walk me through what you discover.',
     },
-    output: { reference: 'threat-hunting-b expected response' },
+    output: {
+      reference:
+        'Runs ES|QL queries scoped to srv-win-defend-01 across process-start, file-load, and network/DNS ' +
+        'telemetry for the named IOAs, and narrates each query and its result as it builds the picture.',
+    },
     metadata: {
-      expectedSkill: 'threat-intel-hunt',
-      expectedTools: ['generate_esql', 'index_search', 'threat_intel_lookup'],
+      expectedSkill: 'threat-hunting',
+      expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'high',
       tags: ['hunt', 'ioc-driven'],
     },
@@ -347,10 +424,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "Something feels off on srv-win-defend-01 but I don't have a specific IOC. " +
         'Establish a baseline of normal process activity for that host and surface anything anomalous.',
     },
-    output: { reference: 'threat-hunting-c expected response' },
+    output: {
+      reference:
+        "Queries the host's historical process-execution telemetry via ES|QL to establish a normal-activity " +
+        'baseline, then compares recent activity against it and surfaces outliers rather than assuming ' +
+        'a specific IOC upfront.',
+    },
     metadata: {
-      expectedSkill: 'threat-intel-hunt',
-      expectedTools: ['generate_esql', 'index_search'],
+      expectedSkill: 'threat-hunting',
+      expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'medium',
       tags: ['hunt', 'baseline'],
     },
@@ -366,10 +448,15 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "a Chrysalis triage summary to Slack. Give it a manual trigger and a 'message' input, " +
         'and use an http step against the existing Slack connector with id d7306385-cbe6-4541-9726-49afdff59ba5.',
     },
-    output: { reference: 'workflow-authoring-a expected response' },
+    output: {
+      reference:
+        'Calls the generate-workflow tool with a natural-language description of the manual trigger, ' +
+        "'message' input, and http step targeting the given Slack connector ID, then validates and renders " +
+        'the resulting workflow attachment — it does not hand-write the YAML directly.',
+    },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: ['workflow_author', 'workflow_preview'],
+      expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
       severity: 'medium',
       tags: ['workflow', 'authoring'],
     },
@@ -385,10 +472,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "'Chrysalis hunt complete — see case for details' to Slack channel #general. " +
         'Use an http step targeting the Slack connector.',
     },
-    output: { reference: 'workflow-authoring-b expected response' },
+    output: {
+      reference:
+        'Calls generate-workflow with the fixed message text and target Slack channel described in natural ' +
+        'language, and validates the resulting workflow before rendering it inline.',
+    },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: ['workflow_author', 'workflow_preview'],
+      expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
       severity: 'low',
       tags: ['workflow', 'authoring-fixed'],
     },
@@ -404,10 +495,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "that takes a 'summary' string input and posts it to Slack #general via an http step on connector " +
         'd7306385-cbe6-4541-9726-49afdff59ba5.',
     },
-    output: { reference: 'workflow-authoring-c expected response' },
+    output: {
+      reference:
+        "Calls generate-workflow with the manual trigger, 'summary' string input, and http step against the " +
+        'given connector ID described in natural language, then validates and renders the workflow.',
+    },
     metadata: {
       expectedSkill: 'workflow-authoring',
-      expectedTools: ['workflow_author', 'workflow_preview'],
+      expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
       severity: 'medium',
       tags: ['workflow', 'authoring-parameterized'],
     },
@@ -422,9 +517,13 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'The Chrysalis loader hash is 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f. ' +
         'Check this hash against VirusTotal and tell me the verdict.',
     },
-    output: { reference: 'workflow-execution-a expected response' },
+    output: {
+      reference:
+        'Calls the virustotal_lookup tool with the given hash and reports the verdict from its response, ' +
+        'rather than reasoning about the hash without checking it or fabricating a verdict.',
+    },
     metadata: {
-      expectedSkill: 'security-tools',
+      expectedSkill: 'workflow-authoring',
       expectedTools: ['virustotal_lookup'],
       severity: 'high',
       tags: ['workflow', 'vt-check'],
@@ -437,12 +536,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'On-call schedule lookup',
     input: {
       question:
-        'Who is currently on call to own a Chrysalis incident response? Look up the on-call schedule ' +
-        'and tell me the primary responder and their contact.',
+        'Who is currently on call to own a Chrysalis incident response? Look up the on-call schedule and ' +
+        'tell me the primary responder.',
     },
-    output: { reference: 'workflow-execution-b expected response' },
+    output: {
+      reference:
+        'Calls the on_call_lookup tool and reports the current on-call assignee from its response, rather ' +
+        'than guessing or asking the user who is on call.',
+    },
     metadata: {
-      expectedSkill: 'security-tools',
+      expectedSkill: 'workflow-authoring',
       expectedTools: ['on_call_lookup'],
       severity: 'medium',
       tags: ['workflow', 'on-call'],
@@ -459,10 +562,14 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         "Title it 'Chrysalis backdoor — srv-win-defend-01', set severity to critical, " +
         'and put a short summary of the side-loading activity in the description.',
     },
-    output: { reference: 'workflow-execution-c expected response' },
+    output: {
+      reference:
+        'Calls the cases-management manage tool to create a case with the given title, critical severity, ' +
+        'and a description summarizing the side-loading activity, and confirms the case was created.',
+    },
     metadata: {
-      expectedSkill: 'security-tools',
-      expectedTools: ['create_case'],
+      expectedSkill: 'cases-management',
+      expectedTools: ['platform.core.cases.manage'],
       severity: 'critical',
       tags: ['workflow', 'case-creation'],
     },
