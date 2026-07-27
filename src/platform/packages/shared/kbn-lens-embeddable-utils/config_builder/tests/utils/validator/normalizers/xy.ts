@@ -260,18 +260,10 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     }
 
     // Add missing axis visibility/orientation settings with transform defaults
-    if (!viz.axisTitlesVisibilitySettings) {
-      viz.axisTitlesVisibilitySettings = { x: true, yLeft: true, yRight: true };
-    }
-    if (!viz.tickLabelsVisibilitySettings) {
-      viz.tickLabelsVisibilitySettings = { x: true, yLeft: true, yRight: true };
-    }
-    if (!viz.gridlinesVisibilitySettings) {
-      viz.gridlinesVisibilitySettings = { x: true, yLeft: true, yRight: true };
-    }
-    if (!viz.labelsOrientation) {
-      viz.labelsOrientation = { x: 0, yLeft: 0, yRight: 0 };
-    }
+    viz.axisTitlesVisibilitySettings ??= { x: true, yLeft: true, yRight: true };
+    viz.tickLabelsVisibilitySettings ??= { x: true, yLeft: true, yRight: true };
+    viz.gridlinesVisibilitySettings ??= { x: true, yLeft: true, yRight: true };
+    viz.labelsOrientation ??= { x: 0, yLeft: 0, yRight: 0 };
 
     // Determine layer presence for downstream default-filling (after yConfig rebuild above)
     const dataLayers = viz.layers.filter((l: any) => !l.layerType || l.layerType === 'data');
@@ -298,60 +290,53 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     }
 
     // The transform always emits these styling fields (overlays are always present in API output)
-    if (viz.hideEndzones == null) viz.hideEndzones = true;
-    if (viz.showCurrentTimeMarker == null) viz.showCurrentTimeMarker = false;
+    viz.hideEndzones ??= true;
+    viz.showCurrentTimeMarker ??= false;
 
     // Series-type-specific styling defaults the transform always emits when the series is present
-    if (hasBars && viz.minBarHeight == null) viz.minBarHeight = 1;
+    if (hasBars) viz.minBarHeight ??= 1;
     if (!hasBars) {
       delete viz.valueLabels;
-    } else if (viz.valueLabels == null || viz.valueLabels === 'hide') {
-      viz.valueLabels = 'hide';
     } else {
-      viz.valueLabels = 'show';
+      // any non-'hide' value (e.g. 'inside') round-trips as 'show', consistent with the 8.3 migration
+      viz.valueLabels = viz.valueLabels && viz.valueLabels !== 'hide' ? 'show' : 'hide';
     }
     if (hasLinesOrAreas) {
-      if (viz.pointVisibility == null) viz.pointVisibility = 'auto';
-      if (viz.curveType == null) viz.curveType = 'LINEAR';
+      viz.pointVisibility ??= 'auto';
+      viz.curveType ??= 'LINEAR';
     } else {
       delete viz.curveType; // curveType only preserved for line/area charts
     }
-    if (hasAreas && viz.fillOpacity == null) viz.fillOpacity = 0.3;
+    if (hasAreas) viz.fillOpacity ??= 0.3;
     if (!hasAreas) delete viz.fillOpacity; // fillOpacity only preserved for area charts
 
     // xExtent: X axis only supports fit/custom (full is coerced to fit=dataBounds by the transform)
     if (!viz.xExtent || viz.xExtent.mode === 'full') {
       viz.xExtent = { mode: 'dataBounds', niceValues: false };
     } else {
-      if (viz.xExtent.niceValues == null) viz.xExtent.niceValues = false;
+      viz.xExtent.niceValues ??= false;
     }
 
     // yLeftExtent: only present when there are left-axis accessors
     if (hasLeftAxisAccessors) {
-      if (!viz.yLeftExtent) {
-        viz.yLeftExtent = { mode: 'full', niceValues: true };
-      } else {
-        if (viz.yLeftExtent.niceValues == null) viz.yLeftExtent.niceValues = true;
-      }
+      viz.yLeftExtent ??= { mode: 'full', niceValues: true };
+      viz.yLeftExtent.niceValues ??= true;
     } else {
       delete viz.yLeftExtent;
     }
 
     // yRightExtent: only present when there are right-axis accessors
     if (hasRightAxisAccessors) {
-      if (!viz.yRightExtent) {
-        viz.yRightExtent = { mode: 'full', niceValues: true };
-      } else {
-        if (viz.yRightExtent.niceValues == null) viz.yRightExtent.niceValues = true;
-      }
+      viz.yRightExtent ??= { mode: 'full', niceValues: true };
+      viz.yRightExtent.niceValues ??= true;
     } else {
       delete viz.yRightExtent;
     }
 
     // Scale defaults: the transform emits 'linear' for each present axis
-    if (hasLeftAxisAccessors && viz.yLeftScale == null) viz.yLeftScale = 'linear';
+    if (hasLeftAxisAccessors) viz.yLeftScale ??= 'linear';
     if (!hasLeftAxisAccessors) delete viz.yLeftScale;
-    if (hasRightAxisAccessors && viz.yRightScale == null) viz.yRightScale = 'linear';
+    if (hasRightAxisAccessors) viz.yRightScale ??= 'linear';
     if (!hasRightAxisAccessors) delete viz.yRightScale;
 
     // When there are no right-axis accessors the transform uses y2=undefined → defaults for yRight
@@ -391,7 +376,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
             legend.horizontalAlignment != null));
 
       // isVisible is always emitted; missing = false (API round-trip: no isVisible → 'hidden' → false)
-      if (legend.isVisible == null) legend.isVisible = false;
+      legend.isVisible ??= false;
       // showSingleSeries is only emitted when visibility === 'auto', which requires isVisible === true
       if (legend.isVisible === false || legend.showSingleSeries === false)
         delete legend.showSingleSeries;
@@ -404,8 +389,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       if (isInsideLegend) {
         // Inside legends always get position: 'right' and default top/right alignment
         legend.position = 'right';
-        if (legend.verticalAlignment == null) legend.verticalAlignment = 'top';
-        if (legend.horizontalAlignment == null) legend.horizontalAlignment = 'right';
+        legend.verticalAlignment ??= 'top';
+        legend.horizontalAlignment ??= 'right';
       } else {
         // Outside legends: strip inside-only fields and legendSize for horizontal positions
         delete legend.horizontalAlignment;
@@ -414,7 +399,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         if (legend.position === 'top' || legend.position === 'bottom') delete legend.legendSize;
       }
       // maxLines is always emitted as 1 for grid-layout (non-list) legends
-      if (legend.layout !== 'list' && legend.maxLines == null) legend.maxLines = 1;
+      if (legend.layout !== 'list') legend.maxLines ??= 1;
       // "auto" is not a valid XYLegendSize in the API schema — the round-trip drops it
       if (legend.legendSize === 'auto') delete legend.legendSize;
     }
