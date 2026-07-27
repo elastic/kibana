@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { cloneDeep } from 'lodash';
 
 import type { ConstructorOptions } from './rules_client';
@@ -53,6 +54,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
