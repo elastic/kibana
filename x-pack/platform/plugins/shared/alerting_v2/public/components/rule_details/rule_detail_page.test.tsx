@@ -258,7 +258,6 @@ describe('RuleDetailPage', () => {
     expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
       id: 'rule-1',
       enabled: false,
-      name: 'Test Signal Rule',
     });
   });
 
@@ -270,7 +269,6 @@ describe('RuleDetailPage', () => {
     expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
       id: 'rule-1',
       enabled: true,
-      name: 'Test Signal Rule',
     });
   });
 
