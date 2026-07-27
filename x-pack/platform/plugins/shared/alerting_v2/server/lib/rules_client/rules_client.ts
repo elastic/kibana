@@ -816,6 +816,116 @@ export class RulesClient {
   }
 
   /**
+   * Rotates the executor task API key for each rule to one derived from the
+   * current user's credentials. The v2 executor authenticates against ES with a
+   * Task Manager-managed API key captured from whoever last created/updated the
+   * rule; that key never expires, so it can outlive the user's privileges. Re-
+   * scheduling the executor task with the current request re-provisions the key
+   * (see `bulkSchedule` → `grantApiKeysFromRequest`). The task's schedule
+   * interval and enabled state are carried over unchanged, but `bulkSchedule`
+   * overwrites the task document, so this also resets the task's next run time
+   * (a single rule re-runs immediately) and clears its stored state.
+   *
+   * Key rotation runs *before* the saved-object audit-metadata update: the
+   * rotation is the operation's real side effect, so `updatedBy`/`updatedAt`
+   * must only be stamped for rules whose key actually rotated. Rotation is
+   * all-or-nothing, so if it fails the error propagates and the whole request
+   * fails with no rule touched — rather than silently reporting success.
+   */
+  private async executeBulkUpdateApiKey(ids: string[]): Promise<BulkResponse> {
+    const { spaceId } = this.getSpaceContext();
+    const errors: BulkOperationError[] = [];
+    let affectedCount = 0;
+
+    if (ids.length === 0) {
+      return { affected_count: 0, errors: [] };
+    }
+
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+
+    const candidates: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+    }> = [];
+
+    for (const doc of fetchResults) {
+      if ('error' in doc) {
+        errors.push(toBulkError(doc.id, doc.error));
+        continue;
+      }
+
+      candidates.push({ id: doc.id, attrs: doc.attributes, version: doc.version });
+    }
+
+    if (candidates.length === 0) {
+      return { affected_count: 0, errors };
+    }
+
+    // 1) Rotate the keys first by re-scheduling the executor tasks with the
+    // current request. Carry over each rule's schedule interval and enabled
+    // state so rotation neither changes the cadence nor enables a disabled rule
+    // (or disables an enabled one). The re-schedule still resets the task's next
+    // run time and stored state, as `bulkSchedule` overwrites the task document.
+    const tasksToSchedule = candidates.map((candidate) => ({
+      id: getRuleExecutorTaskId({ ruleId: candidate.id, spaceId }),
+      taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+      schedule: { interval: candidate.attrs.schedule.every },
+      params: { ruleId: candidate.id, spaceId } satisfies RuleExecutorTaskParams,
+      state: {} as Record<string, unknown>,
+      scope: ['alerting'],
+      enabled: candidate.attrs.enabled,
+    }));
+
+    // Task Manager provisions the API key once per task type, and every executor
+    // task shares one type — so this is all-or-nothing: if that single key grant
+    // fails, `bulkSchedule` rejects and NO rule is re-keyed. Rotation is this
+    // operation's whole purpose (unlike enable/disable, there is no other side
+    // effect to report), so let the error propagate — the route maps it to a
+    // structured error response. Because rotation runs before the saved objects
+    // are touched, a failure leaves every rule fully untouched.
+    await this.taskManager.bulkSchedule(tasksToSchedule, {
+      request: this.request as unknown as CoreKibanaRequest,
+      cloneApiKey: true,
+    });
+
+    // 2) Keys rotated — stamp the audit metadata so the rotation is attributable
+    // to the current user. Per-rule save failures are reported as errors.
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const nowIso = new Date().toISOString();
+
+    const itemsToUpdate = candidates.map((candidate) => ({
+      id: candidate.id,
+      attrs: {
+        ...candidate.attrs,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      } satisfies RuleSavedObjectAttributes,
+      version: candidate.version,
+    }));
+
+    const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+    const updatedRules: EventRule[] = [];
+    for (let i = 0; i < updateResults.length; i++) {
+      const updateResult = updateResults[i];
+      const item = itemsToUpdate[i];
+
+      if (!updateResult.success) {
+        errors.push(toBulkError(updateResult.id, updateResult.error));
+        continue;
+      }
+
+      affectedCount += 1;
+      updatedRules.push({ id: item.id, spaceId });
+    }
+
+    this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
+
+    return { affected_count: affectedCount, errors };
+  }
+
+  /**
    * By-query dispatcher shared by delete / enable / disable. Always issues a
    * cheap `countByQuery` first (a `perPage: 0` aggregation, no doc streaming)
    * and only opens the PIT-based id stream when it's actually needed:
@@ -902,6 +1012,11 @@ export class RulesClient {
   @withApm
   public async disableRulesByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult> {
     return this.runByQuery(params, (ids) => this.executeBulkDisable(ids));
+  }
+
+  @withApm
+  public async bulkUpdateApiKey(params: BulkByIdsParams): Promise<BulkResponse> {
+    return this.executeBulkUpdateApiKey(params.ids);
   }
 
   @withApm
