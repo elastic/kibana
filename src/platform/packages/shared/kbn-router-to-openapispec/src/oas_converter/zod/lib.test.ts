@@ -331,33 +331,55 @@ describe('zod', () => {
 
     test.each([
       [
-        'meta after optional',
+        'schema > optional > meta',
         z
-          .union([z.string(), z.array(z.string())])
+          .string()
           .optional()
-          .meta({ openapi: { availability: { stability: 'stable', since: '9.6.0' } } }),
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
       ],
       [
-        'meta before optional',
+        'schema > meta > optional',
         z
-          .union([z.string(), z.array(z.string())])
-          .meta({ openapi: { availability: { stability: 'stable', since: '9.6.0' } } })
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .optional(),
+      ],
+      [
+        'schema > default > meta',
+        z
+          .string()
+          .default('foo')
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo'),
+      ],
+      [
+        'schema > default > optional > meta',
+        z
+          .string()
+          .default('foo')
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo')
           .optional(),
       ],
     ])('applies openapi availability x-state regardless of modifier order (%s)', (_name, tags) => {
       const result = convertQuery(z.object({ tags }));
-      expect(result.query).toEqual([
-        {
-          in: 'query',
-          name: 'tags',
-          required: false,
-          schema: {
-            type: 'array',
-            items: { type: 'string' },
-            'x-state': 'Generally available; added in 9.6.0',
-          },
-        },
-      ]);
+      expect(result.query.at(0)?.schema).toHaveProperty(
+        'x-state',
+        'Generally available; added in 9.5.0'
+      );
     });
 
     test('omits availability since from query param x-state in serverless mode', () => {
@@ -366,7 +388,7 @@ describe('zod', () => {
           tags: z
             .string()
             .optional()
-            .meta({ openapi: { availability: { stability: 'stable', since: '9.6.0' } } }),
+            .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
         }),
         { env: { serverless: true } }
       );
