@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
@@ -273,6 +274,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -285,6 +287,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
               sectionId: 'section-a',
               grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -433,12 +436,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -499,12 +504,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -627,6 +634,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -640,6 +648,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -726,6 +735,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show total requests',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -737,6 +747,7 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              chartType: SupportedChartType.Metric,
               query: 'show error rate',
               grid: { x: 0, y: 1, w: 24, h: 9 },
             },
@@ -808,6 +819,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
@@ -819,6 +831,7 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },
@@ -1124,12 +1137,14 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
                 sectionId: 'section-a',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
@@ -1372,12 +1387,14 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show p95 latency',
                 grid: { x: 24, y: 0, w: 24, h: 9 },
               },

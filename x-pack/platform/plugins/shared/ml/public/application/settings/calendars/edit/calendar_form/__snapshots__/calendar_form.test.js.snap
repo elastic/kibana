@@ -9,11 +9,11 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
     data-test-subj="mlCalendarTitle"
   >
     <div
-      class="css-1at6qh1-root-root-root-root"
+      class="css-ayyaqq-root-root-root-root"
       data-test-subj="appHeader"
     >
       <div
-        class="css-gc10uy-primaryRow-primaryRow-primaryRow"
+        class="css-t37kb7-primaryRow-primaryRow-primaryRow"
       >
         <div
           class="css-856hcb-titleCluster"
@@ -465,11 +465,11 @@ exports[`CalendarForm Renders calendar form 1`] = `
   data-test-subj="mlCalendarFormNew"
 >
   <div
-    class="css-1at6qh1-root-root-root-root"
+    class="css-ayyaqq-root-root-root-root"
     data-test-subj="appHeader"
   >
     <div
-      class="css-gc10uy-primaryRow-primaryRow-primaryRow"
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
     >
       <div
         class="css-856hcb-titleCluster"
