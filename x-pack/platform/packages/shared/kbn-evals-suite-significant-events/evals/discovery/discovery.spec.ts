@@ -9,7 +9,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-p
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Detection } from '@kbn/significant-events-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -36,7 +36,10 @@ import {
   createContinuationEvaluators,
 } from '../../src/evaluators/discovery';
 import { buildAvailableSnapshotsBySource } from '../shared';
-import { extractDiscoveriesFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
+import {
+  extractDiscoveriesFromToolCall,
+  extractRequestedEventIdsFromToolCall,
+} from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 
@@ -44,6 +47,7 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 /** Events data stream — the same index the judge writes to via events_write. */
 const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
+const SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM = '.significant_events-discoveries';
 
 evaluate.describe(
   'Significant Events Discovery - Discovery Agent',
@@ -86,6 +90,15 @@ evaluate.describe(
           scenario: DiscoveryScenario;
           detections: Detection[];
           snapshotKey: string;
+        }
+        interface ContinuationPlan {
+          path: string;
+          sequence: Detection[];
+          expectReuse?: boolean;
+          expectTopologyEventSearch?: boolean;
+          seedStatus?: 'closed';
+          stripSeedTopology?: boolean;
+          seedUnconfirmedDetection?: Detection;
         }
 
         const collectedExamples: CollectedExample[] = [];
@@ -182,15 +195,17 @@ evaluate.describe(
                   {
                     name: `sigevents: Discovery (${dataset.id})`,
                     description: `[${dataset.id}] discovery agent across scenarios`,
-                    examples: collectedExamples.map(({ scenario }) => ({
-                      id: scenario.input.scenario_id,
-                      input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
-                      output: { ...scenario.output, criteria: scenario.output.criteria },
-                      metadata: {
-                        ...scenario.metadata,
-                        test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                    examples: collectedExamples.flatMap(({ scenario }) => [
+                      {
+                        id: scenario.input.scenario_id,
+                        input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
+                        output: { ...scenario.output, criteria: scenario.output.criteria },
+                        metadata: {
+                          ...scenario.metadata,
+                          test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                        },
                       },
-                    })),
+                    ]),
                   },
                 ],
                 concurrency: 1,
@@ -206,7 +221,6 @@ evaluate.describe(
                   if (!snapshotSource) {
                     throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
                   }
-
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log);
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
@@ -274,209 +288,362 @@ evaluate.describe(
           }
         );
 
-        // Continuation over time — does a re-arriving incident fold into ONE event ID? We grade three
-        // matchers per scenario: rule-UUID re-detection (same rule re-fires) plus the declared
-        // `semantic` and `cascade` chains (different rules, same event). One experiment example
-        // per (scenario × path); each chain is ground truth, so event ID reuse is the correct answer
-        // and minting a new event ID is the defect.
-        evaluate(
-          'Discovery agent — continuation over time',
-          async ({
-            executorClient,
-            evaluators,
-            esClient,
-            agentBuilderClient,
-            apiServices,
-            log,
-          }) => {
-            // One run per (scenario × path): rule-uuid re-fires the anchor; semantic/cascade resolve
-            // the declared ordered rule_name chain to detections. Keep runs with ≥2 cycles (one
-            // establishing + one gradable follow-up).
-            const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
-              if (detections.length === 0) return [];
-              const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
+        const continuationSuites = [
+          {
+            title: 'continuation - open significant event with same rules',
+            description: 'same detection rule re-fires during an open significant event',
+            includesPath: (path: string) => path === 'rule-uuid-no-topology',
+          },
+          {
+            title: 'continuation - open significant events with topology-related rules',
+            description: 'topology-linked cascading rules join an open significant event',
+            includesPath: (path: string) => path === 'cascade',
+          },
+          {
+            title: 'continuation - unconfirmed rule on open significant event',
+            description: 'an unconfirmed candidate rule does not establish continuation',
+            includesPath: (path: string) => path === 'unconfirmed-rule',
+          },
+          {
+            title: 'continuation - closed significant event',
+            description: 'a detection starts a new significant event after the prior event closes',
+            includesPath: (path: string) => path === 'rule-uuid-closed',
+          },
+        ] as const;
 
-              const plans: Array<{ path: string; sequence: Detection[] }> = [
-                { path: 'rule-uuid', sequence: [detections[0], detections[0]] },
-                ...Object.entries(scenario.continuationChains ?? {}).map(([path, ruleNames]) => ({
-                  path,
-                  sequence: ruleNames
-                    .map((name) => byRuleName.get(name))
-                    .filter((d): d is Detection => Boolean(d)),
-                })),
-              ].filter((plan) => plan.sequence.length >= 2);
+        for (const continuationSuite of continuationSuites) {
+          evaluate(
+            `Discovery agent — ${continuationSuite.title}`,
+            async ({
+              executorClient,
+              evaluators,
+              esClient,
+              agentBuilderClient,
+              apiServices,
+              log,
+            }) => {
+              // One run per (scenario × path): rule-uuid re-fires the anchor; cascade resolves the
+              // declared ordered rule_name chain to detections. Keep runs with ≥2 cycles (one
+              // establishing + one gradable follow-up).
+              const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
+                if (detections.length === 0) return [];
+                const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
+                const continuationChains = Object.entries(scenario.continuationChains ?? {});
+                const confirmedAnchor = byRuleName.get(
+                  'Frontend → Ledger Writer Payment Submission Error'
+                );
+                const unrelatedDetection = byRuleName.get('Successful User Login');
 
-              return plans.map((plan) => ({
-                id: `${scenario.input.scenario_id}__${plan.path}`,
-                scenario,
-                sequence: plan.sequence,
-                snapshotKey,
-              }));
-            });
-
-            if (runs.length === 0) {
-              log.info(`No gradable continuation runs for dataset "${dataset.id}" — skipping`);
-              evaluate.skip();
-              return;
-            }
-
-            const runById = new Map(runs.map((run) => [run.id, run]));
-            let lastReplayedSnapshotKey: string | undefined;
-
-            await executorClient.runExperiment(
-              {
-                datasets: [
+                const allPlans: ContinuationPlan[] = [
                   {
-                    name: `sigevents: Discovery agent continuation (${dataset.id})`,
-                    description: `[${dataset.id}] discovery agent folds a re-arriving incident into one event ID across rule-UUID re-detection and the declared semantic/cascade chains`,
-                    examples: runs.map((run) => ({
-                      id: run.id,
-                      input: {
-                        ...run.scenario.input,
-                        snapshot_source: run.scenario.snapshot_source,
-                        continuation_run: run.id,
-                      },
-                      output: {},
-                      metadata: {
-                        ...run.scenario.metadata,
-                        test_index: MANAGED_STREAM_SEARCH_PATTERN,
-                      },
-                    })),
+                    path: 'rule-uuid-no-topology',
+                    sequence: [detections[0], detections[0]],
+                    stripSeedTopology: true,
                   },
-                ],
-                concurrency: 1,
-                trustUpstreamDataset: TRUST_UPSTREAM,
-                task: async ({
-                  input,
-                }: {
-                  input: DiscoveryScenario['input'] & { continuation_run: string };
-                }) => {
-                  const run = runById.get(input.continuation_run);
-                  if (!run) {
-                    throw new Error(`No continuation run "${input.continuation_run}"`);
-                  }
+                  {
+                    path: 'rule-uuid-closed',
+                    sequence: [detections[0], detections[0]],
+                    expectReuse: false,
+                    seedStatus: 'closed',
+                  },
+                  ...(confirmedAnchor && unrelatedDetection
+                    ? [
+                        {
+                          path: 'unconfirmed-rule',
+                          sequence: [confirmedAnchor, unrelatedDetection],
+                          expectReuse: false,
+                          seedUnconfirmedDetection: unrelatedDetection,
+                        },
+                      ]
+                    : []),
+                  ...continuationChains
+                    .filter(([path]) => path === 'cascade')
+                    .map(
+                      ([path, ruleNames]): ContinuationPlan => ({
+                        path,
+                        expectTopologyEventSearch: true,
+                        sequence: ruleNames
+                          .map((name) => byRuleName.get(name))
+                          .filter((d): d is Detection => Boolean(d)),
+                      })
+                    ),
+                ];
+                const plans = allPlans.filter(
+                  (plan) => plan.sequence.length >= 2 && continuationSuite.includesPath(plan.path)
+                );
 
-                  const snapshotSource = snapshotSources.get(input.scenario_id);
-                  if (!snapshotSource) {
-                    throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
-                  }
+                return plans.map((plan) => ({
+                  id: `${scenario.input.scenario_id}__${plan.path}`,
+                  scenario,
+                  sequence: plan.sequence,
+                  snapshotKey,
+                  expectReuse: plan.expectReuse,
+                  expectTopologyEventSearch: plan.expectTopologyEventSearch,
+                  seedStatus: plan.seedStatus,
+                  stripSeedTopology: plan.stripSeedTopology,
+                  seedUnconfirmedDetection: plan.seedUnconfirmedDetection,
+                }));
+              });
 
-                  if (run.snapshotKey !== lastReplayedSnapshotKey) {
-                    await cleanSignificantEventsDataStreams(esClient, log);
-                    for (const name of SIGEVENTS_WIRED_ROOTS) {
-                      await esClient.indices.deleteDataStream({ name }).catch(() => {});
-                      await esClient.indices
-                        .delete({ index: name, ignore_unavailable: true })
-                        .catch(() => {});
+              if (runs.length === 0) {
+                log.info(`No gradable continuation runs for dataset "${dataset.id}" — skipping`);
+                evaluate.skip();
+                return;
+              }
+
+              const runById = new Map(runs.map((run) => [run.id, run]));
+              let lastReplayedSnapshotKey: string | undefined;
+
+              await executorClient.runExperiment(
+                {
+                  datasets: [
+                    {
+                      name: `sigevents: Discovery agent ${continuationSuite.title} (${dataset.id})`,
+                      description: `[${dataset.id}] ${continuationSuite.description}`,
+                      examples: runs.map((run) => ({
+                        id: run.id,
+                        input: {
+                          ...run.scenario.input,
+                          snapshot_source: run.scenario.snapshot_source,
+                          continuation_run: run.id,
+                        },
+                        output: {},
+                        metadata: {
+                          ...run.scenario.metadata,
+                          test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                          continuation_expect_reuse: run.expectReuse ?? true,
+                          continuation_expect_topology_event_search:
+                            run.expectTopologyEventSearch ?? false,
+                          continuation_seed_status: run.seedStatus,
+                          continuation_without_topology: run.stripSeedTopology,
+                          continuation_unconfirmed_rule: run.seedUnconfirmedDetection?.rule_uuid,
+                        },
+                      })),
+                    },
+                  ],
+                  concurrency: 1,
+                  trustUpstreamDataset: TRUST_UPSTREAM,
+                  task: async ({
+                    input,
+                  }: {
+                    input: DiscoveryScenario['input'] & { continuation_run: string };
+                  }) => {
+                    const run = runById.get(input.continuation_run);
+                    if (!run) {
+                      throw new Error(`No continuation run "${input.continuation_run}"`);
                     }
 
-                    await ensureStreamsEnabled({ esClient, apiServices, log });
-                    const stats = await replayIntoManagedStream(
+                    // Continuation examples must not inherit discoveries or events from a previous
+                    // path. The cycles within this task still share state.
+                    await Promise.all(
+                      [
+                        SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
+                        SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                      ].map((index) =>
+                        esClient
+                          .deleteByQuery({
+                            index,
+                            query: { match_all: {} },
+                            refresh: true,
+                          })
+                          .catch(() => {})
+                      )
+                    );
+
+                    const snapshotSource = snapshotSources.get(input.scenario_id);
+                    if (!snapshotSource) {
+                      throw new Error(
+                        `No snapshot source found for scenario "${input.scenario_id}"`
+                      );
+                    }
+
+                    if (run.snapshotKey !== lastReplayedSnapshotKey) {
+                      await cleanSignificantEventsDataStreams(esClient, log);
+                      for (const name of SIGEVENTS_WIRED_ROOTS) {
+                        await esClient.indices.deleteDataStream({ name }).catch(() => {});
+                        await esClient.indices
+                          .delete({ index: name, ignore_unavailable: true })
+                          .catch(() => {});
+                      }
+
+                      await ensureStreamsEnabled({ esClient, apiServices, log });
+                      const stats = await replayIntoManagedStream(
+                        esClient,
+                        log,
+                        snapshotSource.snapshotName,
+                        snapshotSource.gcs
+                      );
+                      if (stats.created === 0) {
+                        throw new Error(
+                          `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
+                        );
+                      }
+
+                      await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+                      lastReplayedSnapshotKey = run.snapshotKey;
+                    }
+
+                    await replayKnowledgeIndicatorsSnapshot(
                       esClient,
                       log,
                       snapshotSource.snapshotName,
                       snapshotSource.gcs
                     );
-                    if (stats.created === 0) {
-                      throw new Error(
-                        `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
-                      );
-                    }
 
-                    await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
-                    lastReplayedSnapshotKey = run.snapshotKey;
-                  }
+                    const cycles: ContinuationCycle[] = [];
+                    // Tracks event_ids seeded by this run so they can be deleted after all cycles
+                    // complete. Without this cleanup the next run's cycle-0 event_search would
+                    // find the previous run's open episodes and either reuse a foreign event ID or
+                    // produce spurious noise. Deleting by explicit IDs is safer than wiping the
+                    // entire stream and works correctly even when concurrency > 1.
+                    const seededEventUuids: string[] = [];
 
-                  await replayKnowledgeIndicatorsSnapshot(
-                    esClient,
-                    log,
-                    snapshotSource.snapshotName,
-                    snapshotSource.gcs
-                  );
+                    try {
+                      // Feed one detection per cycle, oldest first. After each cycle, seed a
+                      // SignificantEvent into the events data stream for each produced discovery so the
+                      // next cycle's `event_search status: "open"` call finds it — mirroring what the
+                      // judge would write between discovery invocations in production.
+                      for (let i = 0; i < run.sequence.length; i++) {
+                        const base = run.sequence[i];
+                        const detection: Detection = {
+                          ...base,
+                          detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
+                        };
+                        const agentInput = buildDiscoveryInput({ detections: [detection] });
 
-                  const cycles: ContinuationCycle[] = [];
-                  // Tracks event_uuids seeded by this run so they can be deleted after all cycles
-                  // complete. Without this cleanup the next run's cycle-0 event_search would
-                  // find the previous run's open events and either reuse a foreign event ID or
-                  // produce spurious noise. Deleting by explicit IDs is safer than wiping the
-                  // entire stream and works correctly even when concurrency > 1.
-                  const seededEventUuids: string[] = [];
+                        const converseResult = await agentBuilderClient.converse({
+                          agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+                          input: agentInput,
+                        });
 
-                  try {
-                    // Feed one detection per cycle, oldest first. After each cycle, seed a
-                    // SignificantEvent into the events data stream for each produced discovery so the
-                    // next cycle's `event_search status: "open"` call finds it — mirroring what the
-                    // judge would write between discovery invocations in production.
-                    for (let i = 0; i < run.sequence.length; i++) {
-                      const base = run.sequence[i];
-                      const detection: Detection = {
-                        ...base,
-                        detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
-                      };
-                      const agentInput = buildDiscoveryInput({ detections: [detection] });
+                        const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
+                        if (discoveries.some((discovery) => discovery.event_id)) {
+                          await esClient.indices.refresh({
+                            index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
+                          });
+                        }
+                        const persistedDiscoveries = await Promise.all(
+                          discoveries.map(async (discovery): Promise<Discovery> => {
+                            if (!discovery.event_id) {
+                              return discovery;
+                            }
+                            const result = await esClient.search<Discovery>({
+                              index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
+                              size: 1,
+                              query: { term: { event_id: discovery.event_id } },
+                              sort: [{ '@timestamp': 'desc' }],
+                            });
+                            return result.hits.hits[0]?._source ?? discovery;
+                          })
+                        );
+                        const producedEventIds = discoveries
+                          .map((discovery) => discovery.event_id)
+                          .filter((eventId): eventId is string => Boolean(eventId));
 
-                      const converseResult = await agentBuilderClient.converse({
-                        agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-                        input: agentInput,
-                      });
+                        cycles.push({
+                          ruleName: detection.rule_name,
+                          producedEventIds,
+                          requestedEventIds: extractRequestedEventIdsFromToolCall(
+                            converseResult.steps
+                          ),
+                          expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
+                          expectTopologyEventSearch: run.expectTopologyEventSearch,
+                          steps: converseResult.steps,
+                        });
 
-                      const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
-                      const producedEventIds = discoveries
-                        .map((discovery) => discovery.event_id)
-                        .filter((eventId): eventId is string => Boolean(eventId));
-
-                      cycles.push({
-                        ruleName: detection.rule_name,
-                        producedEventIds,
-                        steps: converseResult.steps,
-                      });
-
-                      // Seed a SignificantEvent per produced discovery so event_search resolves it
-                      // as an open event in subsequent cycles.
-                      for (const [idx, discovery] of discoveries.entries()) {
-                        if (!discovery.event_id) continue;
-                        const eventUuid = `${discovery.event_id}-cycle-${i}-${idx}`;
-                        await esClient.index({
-                          index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                          document: canonicalSignificantEventFromGroundTruth({
+                        // Seed a SignificantEvent per produced discovery so event_search resolves it
+                        // as an open episode in subsequent cycles.
+                        for (const [idx, discovery] of persistedDiscoveries.entries()) {
+                          if (!discovery.event_id) continue;
+                          const eventUuid = `${discovery.event_id}-cycle-${i}-${idx}`;
+                          const canonicalEvent = canonicalSignificantEventFromGroundTruth({
                             discovery,
                             eventUuid,
-                          }),
-                        });
-                        seededEventUuids.push(eventUuid);
-                      }
-                      if (producedEventIds.length > 0) {
-                        await esClient.indices.refresh({
-                          index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                        });
-                      }
-                    }
-                  } finally {
-                    if (seededEventUuids.length > 0) {
-                      await esClient.deleteByQuery({
-                        index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                        query: { terms: { event_uuid: seededEventUuids } },
-                        refresh: true,
-                      });
-                    }
-                  }
+                          });
+                          const event = {
+                            ...canonicalEvent,
+                            ...(i === 0 && run.seedUnconfirmedDetection
+                              ? {
+                                  signals: [
+                                    ...(canonicalEvent.signals ?? []).map((signal) => ({
+                                      ...signal,
+                                      confirmed: true as const,
+                                    })),
+                                    {
+                                      type: 'detection' as const,
+                                      stream_name: run.seedUnconfirmedDetection.stream_name,
+                                      confirmed: false,
+                                      description:
+                                        'The judge found no evidence that this signal supports the event.',
+                                      metadata: {
+                                        detection_id: run.seedUnconfirmedDetection.detection_id,
+                                        rule_name: run.seedUnconfirmedDetection.rule_name,
+                                        rule_uuid: run.seedUnconfirmedDetection.rule_uuid,
+                                        change_point_type:
+                                          run.seedUnconfirmedDetection.change_point_type,
+                                        p_value: run.seedUnconfirmedDetection.p_value,
+                                      },
+                                    },
+                                  ],
+                                }
+                              : {}),
+                            ...(run.stripSeedTopology
+                              ? { causal_features: [], blast_radius: [] }
+                              : {}),
+                            ...(i === 0 && run.seedStatus ? { status: run.seedStatus } : {}),
+                          };
+                          if (i === 0 && run.seedStatus !== undefined) {
+                            await esClient.updateByQuery({
+                              index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
+                              query: { term: { event_id: discovery.event_id } },
+                              script: {
+                                lang: 'painless',
+                                source:
+                                  "ctx._source.kind = 'handled'; ctx._source.processed = true",
+                              },
+                              refresh: true,
+                            });
+                          }
 
-                  return { cycles, traceId: getCurrentTraceId() };
+                          await esClient.index({
+                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                            document: event,
+                          });
+                          seededEventUuids.push(eventUuid);
+                        }
+                        if (producedEventIds.length > 0) {
+                          await esClient.indices.refresh({
+                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                          });
+                        }
+                      }
+                    } finally {
+                      if (seededEventUuids.length > 0) {
+                        await esClient.deleteByQuery({
+                          index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                          query: { terms: { event_uuid: seededEventUuids } },
+                          refresh: true,
+                        });
+                      }
+                    }
+
+                    return { cycles, traceId: getCurrentTraceId() };
+                  },
                 },
-              },
-              [
-                // Task returns an event ID trajectory (not discoveries/steps), so only continuation
-                // check applies; trace-based evaluators aggregate across all cycles.
-                ...createContinuationEvaluators(),
-                evaluators.traceBasedEvaluators.inputTokens,
-                evaluators.traceBasedEvaluators.outputTokens,
-                evaluators.traceBasedEvaluators.cachedTokens,
-                evaluators.traceBasedEvaluators.toolCalls,
-                evaluators.traceBasedEvaluators.latency,
-              ]
-            );
-          }
-        );
+                [
+                  // Task returns an event ID trajectory (not discoveries/steps), so only the
+                  // continuation checks apply; trace-based evaluators aggregate across all cycles.
+                  ...createContinuationEvaluators(),
+                  evaluators.traceBasedEvaluators.inputTokens,
+                  evaluators.traceBasedEvaluators.outputTokens,
+                  evaluators.traceBasedEvaluators.cachedTokens,
+                  evaluators.traceBasedEvaluators.toolCalls,
+                  evaluators.traceBasedEvaluators.latency,
+                ]
+              );
+            }
+          );
+        }
 
         evaluate.afterAll(async ({ esClient, apiServices, log }) => {
           log.debug('Cleaning up discovery test data');

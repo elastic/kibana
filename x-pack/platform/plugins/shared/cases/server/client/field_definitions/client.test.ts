@@ -204,4 +204,63 @@ describe('createFieldDefinitionsSubClient', () => {
       );
     });
   });
+
+  describe('deleteFieldDefinition', () => {
+    it('deletes the field definition when no active templates reference it', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).toHaveBeenCalledWith('fd-1');
+    });
+
+    it('throws 409 when a single template references the field', async () => {
+      // FAILURE SCENARIO: user tries to delete "my_field" while "Incident Template" has $ref: my_field
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([
+        { name: 'Incident Template' },
+      ]);
+
+      await expect(client.deleteFieldDefinition('fd-1')).rejects.toThrow(
+        'Cannot delete field definition "my_field": it is referenced by 1 active template(s): "Incident Template"'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 listing all referencing templates when multiple templates reference the field', async () => {
+      // FAILURE SCENARIO: two templates both reference the field — error message lists all names
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([
+        { name: 'Template A' },
+        { name: 'Template B' },
+      ]);
+
+      await expect(client.deleteFieldDefinition('fd-1')).rejects.toThrow(
+        'Cannot delete field definition "my_field": it is referenced by 2 active template(s): "Template A", "Template B"'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('passes the field owner and name to the templates reference check', async () => {
+      const so = makeFieldDefinitionSO({ name: 'priority', owner: 'securitySolution' });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.templatesService.getActiveTemplatesReferencingField
+      ).toHaveBeenCalledWith('securitySolution', 'priority');
+    });
+  });
 });
