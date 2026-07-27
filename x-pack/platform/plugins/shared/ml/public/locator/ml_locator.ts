@@ -38,17 +38,18 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
     return pageState?.timeRange ?? pageState?.globalState?.time;
   };
 
-  public readonly setTimeRange = (params: MlLocatorParams, timeRange?: TimeRange) => ({
-    ...params,
-    ...(params.pageState
-      ? {
-          pageState: {
-            ...params.pageState,
-            timeRange,
-          },
-        }
-      : {}),
-  });
+  public readonly setTimeRange = (params: MlLocatorParams, timeRange?: TimeRange) =>
+    ({
+      ...params,
+      ...(params.pageState
+        ? {
+            pageState: {
+              ...params.pageState,
+              timeRange,
+            },
+          }
+        : {}),
+    } as MlLocatorParams);
 
   public readonly getLocation = async (params: MlLocatorParams): Promise<KibanaLocation> => {
     let path: string = '';
