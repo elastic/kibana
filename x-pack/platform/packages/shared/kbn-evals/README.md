@@ -197,8 +197,13 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:<model-group>`        | Select model(s) to evaluate (required -- evals skip without this) |
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
+| `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+
+PRs touching the eval framework get `evals:smoke-tests` automatically
+([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
+`evals:skip-smoke-tests` to skip it.
 
 When the labels match, PR CI triggers the dedicated
 [`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
