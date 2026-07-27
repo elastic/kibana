@@ -22,12 +22,15 @@ EOF
 - **Exit 1** (cap reached) → mark this flow and all remaining flows as `not started: session time cap reached` in `config.json → skipped_setup`, then **jump to Phase 3 immediately**. Do not start any more flows.
 
 If the browser session is lost and exploration cannot continue, preserve the
-findings and run the idempotent session cleanup command before stopping. Phase
-3 repeats cleanup, so this is safe to retry:
+findings and run the restore-and-cleanup command before stopping. It restores
+CCS before cleanup when required, and Phase 3 repeats the same operation, so
+this is safe to retry:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
 ```
+The wrapper invokes `cleanup-session-resources.py` only after CCS restoration
+has succeeded.
 
 ---
 

@@ -20,9 +20,13 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 ```
 The script persists only the writable update payload in
 `config.json → ccs_restore.payload`; it excludes read-only status fields from
-the GET response. Inspect that payload and show it to the user before
-continuing. Note `mode` (`proxy` or `sniff`), `proxyAddress` or `seeds`,
-`serverName`, and `skipUnavailable`.
+the GET response. It also persists the restoration provenance
+(`isConfiguredByNode` and `hasDeprecatedProxySetting`) so a node-configured
+cluster is restored by removing the temporary persistent override rather than
+being converted into a persistent configuration. Inspect the payload and
+provenance and show them to the user before continuing. Note `mode` (`proxy`
+or `sniff`), `proxyAddress` or `seeds`, `serverName`, `skipUnavailable`, and
+`hasDeprecatedProxySetting`.
 
 ### 2. Get user confirmation
 
@@ -95,12 +99,12 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   --session-dir "$SESSION_DIR"
 ```
 
-The script restores from the durable snapshot, verifies
-`<REMOTE_ALIAS>.connected == true`, and only then sets
-`ccs_state="restored"`. **Do not proceed to the next flow, and do not end the
-session, until this command succeeds.** If restore fails, tell the user
-immediately with the persisted snapshot so they can restore it manually —
-treat a broken shared deployment as urgent.
+The script restores from the durable snapshot, verifies the complete
+configuration and provenance, polls until `<REMOTE_ALIAS>.connected == true`,
+and only then sets `ccs_state="restored"`. **Do not proceed to the next flow,
+and do not end the session, until this command succeeds.** If restore fails,
+tell the user immediately with the persisted snapshot so they can restore it
+manually — treat a broken shared deployment as urgent.
 
 ## Notes
 

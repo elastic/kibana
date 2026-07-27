@@ -25,6 +25,7 @@ RESTORE_FIELDS = (
     "proxyAddress",
     "proxySocketConnections",
     "serverName",
+    "hasDeprecatedProxySetting",
 )
 
 
@@ -108,21 +109,33 @@ def main() -> int:
             )
             return 1
 
-        if not isinstance(cluster.get("mode"), str) or not isinstance(
-            cluster.get("skipUnavailable"), bool
+        is_configured_by_node = cluster.get("isConfiguredByNode")
+        has_deprecated_proxy_setting = cluster.get(
+            "hasDeprecatedProxySetting", False
+        )
+        if (
+            not isinstance(cluster.get("mode"), str)
+            or not isinstance(cluster.get("skipUnavailable"), bool)
+            or not isinstance(is_configured_by_node, bool)
+            or not isinstance(has_deprecated_proxy_setting, bool)
         ):
             print(
-                "Remote-cluster response is missing writable mode or "
-                "skipUnavailable fields.",
+                "Remote-cluster response is missing required writable or "
+                "provenance fields.",
                 file=sys.stderr,
             )
             return 1
 
         payload = {field: cluster.get(field) for field in RESTORE_FIELDS}
+        payload["hasDeprecatedProxySetting"] = has_deprecated_proxy_setting
         config["ccs_restore"] = {
             "remote_cluster_alias": args.alias,
             "endpoint": endpoint,
             "payload": payload,
+            "provenance": {
+                "is_configured_by_node": is_configured_by_node,
+                "has_deprecated_proxy_setting": has_deprecated_proxy_setting,
+            },
         }
 
     print(f"Persisted CCS restore snapshot for {args.alias!r}.")

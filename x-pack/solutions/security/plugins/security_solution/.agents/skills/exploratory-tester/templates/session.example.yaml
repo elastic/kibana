@@ -85,5 +85,6 @@ session-timeout: 90
 # state has been restored. The generated config.json tracks this as:
 #   ccs_state: unchanged
 #   ccs_restored: false
-# capture-remote-cluster.py persists the writable restore payload in:
-#   ccs_restore: { remote_cluster_alias, endpoint, payload }
+# capture-remote-cluster.py persists the writable restore payload and
+# restoration provenance in:
+#   ccs_restore: { remote_cluster_alias, endpoint, payload, provenance }

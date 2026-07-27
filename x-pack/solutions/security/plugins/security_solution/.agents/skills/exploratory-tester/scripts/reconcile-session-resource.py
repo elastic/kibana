@@ -39,39 +39,43 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    endpoint = validate_resource_endpoint(args.endpoint)
-    config_path = Path(args.session_dir) / "config.json"
+    try:
+        endpoint = validate_resource_endpoint(args.endpoint)
+        config_path = Path(args.session_dir) / "config.json"
 
-    with edit_session_config(config_path) as config:
-        auth_args = build_auth_args(config, base_url_key=args.base_url)
-        base_url = resolve_resource_base_url(config, args.base_url)
-        result = subprocess.run(
-            [
-                "curl",
-                "-s",
-                "-o",
-                "/dev/null",
-                "-w",
-                "\n%{http_code}",
-                *auth_args,
-                "-X",
-                args.probe_method,
-                f"{base_url}{endpoint}",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        status = http_status(result.stdout)
-        transition = reconcile_pending_resource(
-            config,
-            kind=args.kind,
-            resource_id=args.resource_id,
-            endpoint=endpoint,
-            base_url=args.base_url,
-            http_code=status,
-            track_flow_space=args.flow_space,
-        )
+        with edit_session_config(config_path) as config:
+            auth_args = build_auth_args(config, base_url_key=args.base_url)
+            base_url = resolve_resource_base_url(config, args.base_url)
+            result = subprocess.run(
+                [
+                    "curl",
+                    "-s",
+                    "-o",
+                    "/dev/null",
+                    "-w",
+                    "\n%{http_code}",
+                    *auth_args,
+                    "-X",
+                    args.probe_method,
+                    f"{base_url}{endpoint}",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            status = http_status(result.stdout)
+            transition = reconcile_pending_resource(
+                config,
+                kind=args.kind,
+                resource_id=args.resource_id,
+                endpoint=endpoint,
+                base_url=args.base_url,
+                http_code=status,
+                track_flow_space=args.flow_space,
+            )
+    except (OSError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
     if transition == "owned":
         print(f"Reconciled {args.kind} {args.resource_id!r} as owned.")

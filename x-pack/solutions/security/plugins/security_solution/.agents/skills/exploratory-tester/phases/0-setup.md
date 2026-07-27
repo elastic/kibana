@@ -87,6 +87,8 @@ Skip Scout startup. Resolve the `Environment` fields into
 KIBANA_URL="${ENVIRONMENT_URL:?Set ENVIRONMENT_URL to Environment.url}"
 # API_KEY is optional here so the browser-only fallback below remains reachable.
 API_KEY="${ENVIRONMENT_API_KEY:-}"
+API_KEY_WAS_SUPPLIED=false
+if [[ -n "$API_KEY" ]]; then API_KEY_WAS_SUPPLIED=true; fi
 SPACE_ID="${ENVIRONMENT_SPACE:-exploratory-testing}"
 # Check Kibana is reachable (public endpoint, no auth needed)
 curl -s "$KIBANA_URL/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
@@ -118,6 +120,7 @@ fi
 **No API key available?** If the invoker cannot provide a Kibana API key, fall back to browser-only setup:
 - Navigate to `<url>/app/management/kibana/spaces` as the logged-in admin and create the `exploratory-testing` space via the UI.
 - Navigate to `<url>/app/management/security/api_keys`, create a new API key with `All spaces / All privileges`, copy the `encoded` value, and use it for all subsequent curl calls.
+- Set the shell variable `ENVIRONMENT_API_KEY` to the copied `encoded` value before continuing. Keep it in the current shell only; Step 0e persists it atomically into `config.json`.
 - Record in `config.json → skipped_setup`: `{ "step": "api-key-browser-created", "reason": "no api-key provided in Environment block; created via UI" }`.
 
 Resolve env var references in credentials (`$VAR` → environment variable value) before using them.
@@ -305,6 +308,7 @@ AREA_SLUG="<area-slug from Step 0c>"
 SESSION_TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
 SESSION_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 SESSION_ID=$(python3 -c 'import secrets; print(secrets.token_hex(8))')
+TEST_USERNAME="exploratory-tester-$SESSION_ID"
 SESSION_DIR=".exploratory-session/${AREA_SLUG}-${SESSION_TIMESTAMP}"
 mkdir -p "$SESSION_DIR/screenshots" "$SESSION_DIR/videos"
 echo "SESSION_DIR: $SESSION_DIR"
@@ -337,7 +341,7 @@ Write `$SESSION_DIR/config.json`:
   "ccs_restored": false,
   "ccs_restore": null,
   "test_user": {
-    "username": "exploratory-tester",
+    "username": "<value of $TEST_USERNAME>",
     "password": "Exploratory123!"
   },
   "flows": [
@@ -363,7 +367,7 @@ Write `$SESSION_DIR/config.json`:
   "credentials": {
     "username": "<admin username — for browser login only>",
     "password": "<admin password — for browser login only>",
-    "api_key": "<Kibana-native API key encoded value — for all curl/API setup calls>"
+    "api_key": ""
   },
   "session_resources": [],
   "created_flow_spaces": [],
@@ -379,14 +383,50 @@ Write `$SESSION_DIR/config.json`:
 }
 ```
 
+Set `credentials.api_key` to the value of `ENVIRONMENT_API_KEY` when one is
+available; leave it as the empty string for agent-managed basic-auth fallback.
+Never leave a descriptive placeholder in this field.
+
 After `config.json` exists, every setup or exploration abort must run:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
 ```
-The cleanup command is idempotent and only acts on manifest entries marked
+The command restores CCS first when `ccs_state` is not safe for cleanup, and
+then invokes the idempotent cleanup. It only acts on manifest entries marked
 owned by this `session_id`; it must not be skipped because a later phase or
-knowledge update was not reached. Restore CCS state before running it.
+knowledge update was not reached.
+
+If a browser-created API key was needed, persist it immediately after writing
+the initial config:
+```bash
+if [[ -n "${ENVIRONMENT_API_KEY:-}" ]]; then
+  ENVIRONMENT_API_KEY="$ENVIRONMENT_API_KEY" \
+  API_KEY_WAS_SUPPLIED="${API_KEY_WAS_SUPPLIED:-false}" \
+  PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+  python3 - "$SESSION_DIR" <<'PY'
+import os
+import sys
+from pathlib import Path
+
+from session_resources import edit_session_config
+
+session_dir = Path(sys.argv[1])
+api_key = os.environ["ENVIRONMENT_API_KEY"]
+was_supplied = os.environ.get("API_KEY_WAS_SUPPLIED") == "true"
+with edit_session_config(session_dir / "config.json") as config:
+    config["credentials"]["api_key"] = api_key
+    if not was_supplied:
+        skipped_setup = config.setdefault("skipped_setup", [])
+        entry = {
+            "step": "api-key-browser-created",
+            "reason": "no api-key provided in Environment block; created via UI",
+        }
+        if entry not in skipped_setup:
+            skipped_setup.append(entry)
+PY
+fi
+```
 
 `data_setup` is `"skip"` when the invocation includes `data-setup: skip`; otherwise `"run"`.
 

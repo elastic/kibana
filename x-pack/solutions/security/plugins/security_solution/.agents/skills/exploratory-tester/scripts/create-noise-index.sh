@@ -226,7 +226,7 @@ if [[ "$INDEX_READY" != true ]]; then
 fi
 
 echo "Indexing noise documents into $INDEX ..."
-BULK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+BULK_RESPONSE=$(curl -s -w "\n%{http_code}" \
   -H "$AUTH_HEADER" \
   -X POST "$ES_URL/$INDEX/_bulk" \
   -H 'Content-Type: application/json' \
@@ -239,9 +239,33 @@ BULK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
 {"@timestamp":"$TS","host.name":"noise-host-3","message":"missing source and destination fields entirely"}
 NDJSON
 )
+BULK_STATUS="${BULK_RESPONSE##*$'\n'}"
+BULK_BODY="${BULK_RESPONSE%$'\n'*}"
 
 if [[ "$BULK_STATUS" != "200" ]]; then
   echo "Bulk index failed (HTTP $BULK_STATUS)." >&2
+  exit 1
+fi
+if ! printf '%s' "$BULK_BODY" | python3 -c '
+import json
+import sys
+
+try:
+    response = json.load(sys.stdin)
+except json.JSONDecodeError as exc:
+    print(f"Bulk index returned invalid JSON: {exc}", file=sys.stderr)
+    raise SystemExit(1)
+
+if not isinstance(response, dict):
+    print("Bulk index response was not a JSON object.", file=sys.stderr)
+    raise SystemExit(1)
+if response.get("errors") is True:
+    print("Bulk index reported item-level errors.", file=sys.stderr)
+    raise SystemExit(1)
+if response.get("errors") is not False:
+    print("Bulk index response omitted the errors flag.", file=sys.stderr)
+    raise SystemExit(1)
+'; then
   exit 1
 fi
 

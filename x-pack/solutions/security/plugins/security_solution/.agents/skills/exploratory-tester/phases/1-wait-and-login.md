@@ -6,7 +6,7 @@ If any setup step aborts after `config.json` exists, restore CCS first when
 `config.json → ccs_state` is `"modified"`. When it is `"unchanged"`, no CCS
 mutation occurred and cleanup can proceed immediately:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
 ```
 Do not rely on reaching the normal Phase 3 path for cleanup.
@@ -26,7 +26,12 @@ value: object = json.loads(
 )
 for key in sys.argv[2].split("."):
     value = value.get(key, "") if isinstance(value, dict) else ""
-print(value if isinstance(value, (str, int, float, bool)) else "")
+if isinstance(value, bool):
+    print(str(value).lower())
+elif isinstance(value, (str, int, float)):
+    print(value)
+else:
+    print("")
 PY
 }
 
@@ -37,6 +42,10 @@ ES_URL=$(session_config_value environment.es_url)
 API_KEY=$(session_config_value credentials.api_key)
 USERNAME=$(session_config_value credentials.username)
 PASSWORD=$(session_config_value credentials.password)
+TEST_USERNAME=$(session_config_value test_user.username)
+TEST_PASSWORD=$(session_config_value test_user.password)
+TEST_USERNAME="${TEST_USERNAME:-exploratory-tester-$SESSION_ID}"
+TEST_PASSWORD="${TEST_PASSWORD:-Exploratory123!}"
 SPACE_ID=$(session_config_value environment.space_id)
 SPACE_ID="${SPACE_ID:-exploratory-testing}"
 : "${KIBANA_URL:?config.json is missing environment.url}"
@@ -52,6 +61,24 @@ else
   AUTH_ARGS=(-u "$USERNAME:$PASSWORD")
   NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
 fi
+
+record_skipped_setup() {
+  PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+  python3 - "$SESSION_DIR" "$1" "$2" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+from session_resources import edit_session_config
+
+session_dir = Path(sys.argv[1])
+entry = {"step": sys.argv[2], "reason": sys.argv[3]}
+with edit_session_config(session_dir / "config.json") as config:
+    skipped_setup = config.setdefault("skipped_setup", [])
+    if entry not in skipped_setup:
+        skipped_setup.append(entry)
+PY
+}
 
 After every successful setup mutation, immediately register the resource with
 `register-session-resource.py`. A 200/201 response is owned; a 409 response
@@ -156,6 +183,7 @@ case "$CONNECTOR_STATUS" in
       --kind connector \
       --id "$CONNECTOR_ID" \
       --endpoint "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
+      --fail-on-absent \
       || exit 1
     ;;
 esac
@@ -208,17 +236,18 @@ the alias is retained in `config.json` for queries. On failure (empty
 ```bash
 # User-provided environments already have their browser/API credentials;
 # skip user provisioning there. Agent-managed environments use basic auth.
-# Probe the authoritative Elasticsearch resource before reserving it. A
-# pre-existing fixed-name user must never be deleted by this session.
+# The username is session-scoped, so concurrent sessions cannot claim or
+# delete one another's users.
+USER_PROVISIONING_SKIPPED=false
 USER_EXISTING_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-  "${AUTH_ARGS[@]}" -X GET "$ES_URL/_security/user/exploratory-tester")
+  "${AUTH_ARGS[@]}" -X GET "$ES_URL/_security/user/$TEST_USERNAME")
 case "$USER_EXISTING_STATUS" in
   200)
     python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
       --session-dir "$SESSION_DIR" \
       --kind kibana_user \
-      --id exploratory-tester \
-      --endpoint "/_security/user/exploratory-tester" \
+      --id "$TEST_USERNAME" \
+      --endpoint "/_security/user/$TEST_USERNAME" \
       --base-url es_url \
       --reused
     ;;
@@ -227,26 +256,25 @@ case "$USER_EXISTING_STATUS" in
     python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
       --session-dir "$SESSION_DIR" \
       --kind kibana_user \
-      --id exploratory-tester \
-      --endpoint "/_security/user/exploratory-tester" \
+      --id "$TEST_USERNAME" \
+      --endpoint "/_security/user/$TEST_USERNAME" \
       --base-url es_url \
       --pending
 
-    # POST through Kibana; 404 falls back to Elasticsearch. A 409 is reused,
-    # never owned, because the fixed-name user may belong to another session.
+    # POST through Kibana; 404 falls back to Elasticsearch.
     USER_RESPONSE=$(
       curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
-        -X POST "$KIBANA_URL/internal/security/users/exploratory-tester" \
+        -X POST "$KIBANA_URL/internal/security/users/$TEST_USERNAME" \
         -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
-        -d '{"username":"exploratory-tester","password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+        -d "{\"username\":\"$TEST_USERNAME\",\"password\":\"$TEST_PASSWORD\",\"roles\":[\"<resolved_role>\"],\"full_name\":\"Exploratory Tester\"}"
     )
     USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
     if [[ "$USER_HTTP_STATUS" == "404" ]]; then
       USER_RESPONSE=$(
         curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
-          -X POST "$ES_URL/_security/user/exploratory-tester" \
+          -X PUT "$ES_URL/_security/user/$TEST_USERNAME" \
           -H 'Content-Type: application/json' \
-          -d '{"password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+          -d "{\"password\":\"$TEST_PASSWORD\",\"roles\":[\"<resolved_role>\"],\"full_name\":\"Exploratory Tester\"}"
       )
       USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
     fi
@@ -255,8 +283,8 @@ case "$USER_EXISTING_STATUS" in
         python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
           --session-dir "$SESSION_DIR" \
           --kind kibana_user \
-          --id exploratory-tester \
-          --endpoint "/_security/user/exploratory-tester" \
+          --id "$TEST_USERNAME" \
+          --endpoint "/_security/user/$TEST_USERNAME" \
           --base-url es_url \
           --owned
         ;;
@@ -264,17 +292,29 @@ case "$USER_EXISTING_STATUS" in
         python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
           --session-dir "$SESSION_DIR" \
           --kind kibana_user \
-          --id exploratory-tester \
-          --endpoint "/_security/user/exploratory-tester" \
+          --id "$TEST_USERNAME" \
+          --endpoint "/_security/user/$TEST_USERNAME" \
           --base-url es_url \
           --reused
+        ;;
+      401|403)
+        python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+          --session-dir "$SESSION_DIR" \
+          --kind kibana_user \
+          --id "$TEST_USERNAME" \
+          --endpoint "/_security/user/$TEST_USERNAME" \
+          --base-url es_url \
+          --remove-pending
+        record_skipped_setup "user-provisioning" \
+          "Elasticsearch user-management API returned HTTP $USER_HTTP_STATUS"
+        USER_PROVISIONING_SKIPPED=true
         ;;
       *)
         python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/reconcile-session-resource.py \
           --session-dir "$SESSION_DIR" \
           --kind kibana_user \
-          --id exploratory-tester \
-          --endpoint "/_security/user/exploratory-tester" \
+          --id "$TEST_USERNAME" \
+          --endpoint "/_security/user/$TEST_USERNAME" \
           --base-url es_url \
           --probe-method GET \
           --fail-on-absent || exit 1
@@ -282,16 +322,22 @@ case "$USER_EXISTING_STATUS" in
         ;;
     esac
     ;;
+  401|403)
+    record_skipped_setup "user-provisioning" \
+      "Elasticsearch user-management API returned HTTP $USER_EXISTING_STATUS"
+    USER_PROVISIONING_SKIPPED=true
+    ;;
   *)
-    echo "Unable to probe exploratory-tester user (HTTP $USER_EXISTING_STATUS)." >&2
+    echo "Unable to probe session user (HTTP $USER_EXISTING_STATUS)." >&2
     exit 1
     ;;
 esac
 ```
 `environment.es_url`: replace `kb.` with `es.` in ECH URLs. If the configured
-Kibana key does not have Elasticsearch user-management privileges, add the
-failure to `skipped_setup` and continue with the provided admin credentials;
-do not fall back to browser credentials for API calls.
+Kibana key does not have Elasticsearch user-management privileges, the
+user-provisioning branch records `skipped_setup` and continues without
+switching to the unprovisioned test user. Do not fall back to browser
+credentials for API calls.
 
 Serverless: skip user creation — roles are pre-provisioned. Add `{ "step": "role-creation:<role>", "reason": "serverless" }` to `skipped_setup`.
 
@@ -317,15 +363,18 @@ endpoint. Built-in or pre-existing roles must not be registered as owned.
 ## Step 1d — Switch to test user
 
 _Skip for user-provided environments — provided credentials are the test credentials._
+If `USER_PROVISIONING_SKIPPED=true`, also skip this step and retain the
+authenticated setup session; `skipped_setup` is the source of truth for the
+report.
 
 1. Navigate to `<environment.url>/logout`
 2. Navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`
-3. Log in as `exploratory-tester` / `Exploratory123!`
+3. Log in as `$TEST_USERNAME` / `$TEST_PASSWORD`
 4. Dismiss any post-login dialogs
 5. Verify the session:
    ```bash
-   curl -s -u exploratory-tester:Exploratory123! http://localhost:5620/api/security/me \
-     | python3 -c "import sys,json; u=json.load(sys.stdin); exit(0 if u.get('username')=='exploratory-tester' else 1)"
+   curl -s -u "$TEST_USERNAME:$TEST_PASSWORD" "$KIBANA_URL/api/security/me" \
+     | TEST_USERNAME="$TEST_USERNAME" python3 -c "import os,sys,json; u=json.load(sys.stdin); exit(0 if u.get('username')==os.environ['TEST_USERNAME'] else 1)"
    ```
    Failure → **stop.** The `elastic` admin session is still available for debugging.
 6. Navigate to `<environment.url>/s/<space_id>/`

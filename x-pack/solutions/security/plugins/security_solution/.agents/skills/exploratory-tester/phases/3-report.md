@@ -162,30 +162,22 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 ## Step 3e — Clean up session resources
 
 Run cleanup regardless of whether the user accepted or refused the knowledge
-file update, and regardless of whether earlier report steps failed. If
-`config.json → ccs_state` is `"modified"`:
-
-1. Restore the remote-cluster state using the recorded CCS procedure.
-   The durable snapshot and verification command are:
-   ```bash
-   python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-remote-cluster.py \
-     --session-dir "$SESSION_DIR"
-   ```
-2. The command restores the writable payload from
-   `config.json → ccs_restore`, verifies the expected alias is connected via
-   `GET /_remote/info`, and marks the state restored only after verification.
-   If it fails, stop cleanup and tell the user to restore the shared cluster
-   using the persisted payload.
-
-Cleanup fails closed only while the CCS state is `"modified"`; a state of
-`"unchanged"` means no shared-cluster mutation occurred and is safe to clean.
-
+file update, and regardless of whether earlier report steps failed. Use the
+restore-and-cleanup wrapper:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
 ```
+When `config.json → ccs_state` is `"modified"` or otherwise unsafe, the
+wrapper invokes `restore-remote-cluster.py`. That command restores the
+durable snapshot from `config.json → ccs_restore`, compares the configuration
+and provenance, polls `GET /_remote/info` until connected, and marks the state
+restored only after verification. If it fails, the wrapper does not invoke
+`cleanup-session-resources.py`; tell the user to restore the shared cluster
+using the persisted payload.
 
-The command is idempotent: HTTP 404 means the resource is already gone. It
+After CCS is safe, the wrapped cleanup command is idempotent: HTTP 404 means
+the resource is already gone. It
 deletes only resources in `config.json → session_resources` with
 `owned: true` and the current session marker. Reused resources, the configured
 base space, and resources with a mismatched marker are never deleted. If a
