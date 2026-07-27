@@ -160,7 +160,52 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(' | ')}`
+          ),
+        };
+      }
+    }
+
+    // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
+    // Endpoint supports it (via the `kill_process_descendents` capability).
+    if (
+      actionRequest.command === 'kill-process' &&
+      actionRequest.parameters?.kill_descendants === true
+    ) {
+      if (
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointKillProcessDescendants
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            'kill-process `kill_descendants` parameter is not enabled',
+            400
+          ),
+        };
+      }
+
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const unsupportedAgents = endpointMetadata
+        .filter(
+          (endpointMeta) =>
+            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendents')
+        )
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support killing process descendents: ${unsupportedAgents.join(
+              ', '
+            )}`
           ),
         };
       }

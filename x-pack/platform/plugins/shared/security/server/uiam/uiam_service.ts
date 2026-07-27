@@ -30,6 +30,7 @@ import type {
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -432,6 +433,7 @@ export class UiamService implements UiamServicePublic {
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
 
+    const startTime = performance.now();
     try {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
@@ -454,8 +456,16 @@ export class UiamService implements UiamServicePublic {
         );
       }
 
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'success',
+      });
+
       return response.token;
     } catch (err) {
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'failure',
+      });
+
       this.#logger.error(
         () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );

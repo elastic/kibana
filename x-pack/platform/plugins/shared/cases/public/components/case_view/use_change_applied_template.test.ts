@@ -19,14 +19,16 @@ jest.mock('../../containers/api', () => ({
 
 const mockShowSuccessToast = jest.fn();
 const mockShowErrorToast = jest.fn();
+const mockShowInfoToast = jest.fn();
 jest.mock('../../common/use_cases_toast', () => ({
   useCasesToast: () => ({
     showSuccessToast: mockShowSuccessToast,
     showErrorToast: mockShowErrorToast,
+    showInfoToast: mockShowInfoToast,
   }),
 }));
 
-// The hook reloads the page on success; jsdom doesn't implement reload, so stub it.
+// The hook exposes a "Reload page" action on success; jsdom doesn't implement reload, so stub it.
 const originalLocation = window.location;
 const mockReload = jest.fn();
 beforeAll(() => {
@@ -284,7 +286,7 @@ describe('useChangeAppliedTemplate', () => {
     expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('reloads the page on success so all components reflect the applied template', async () => {
+  it('shows a reload notification on success instead of reloading automatically', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -294,11 +296,22 @@ describe('useChangeAppliedTemplate', () => {
     });
 
     await waitFor(() => {
-      expect(mockReload).toHaveBeenCalled();
+      expect(mockShowInfoToast).toHaveBeenCalled();
     });
+
+    // The page must not reload on its own; the user triggers it via the toast action.
+    expect(mockReload).not.toHaveBeenCalled();
+
+    // The toast exposes a persistent "Reload page" action that reloads when clicked.
+    const [, , actionProps, options] = mockShowInfoToast.mock.calls[0];
+    expect(options).toEqual({ toastLifeTimeMs: Infinity });
+    act(() => {
+      actionProps.primary.onClick();
+    });
+    expect(mockReload).toHaveBeenCalled();
   });
 
-  it('shows error toast on failure and does not reload', async () => {
+  it('shows error toast on failure and does not reload or notify success', async () => {
     mockPatchCase.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
@@ -313,6 +326,7 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockShowErrorToast).toHaveBeenCalled();
     });
 
+    expect(mockShowInfoToast).not.toHaveBeenCalled();
     expect(mockReload).not.toHaveBeenCalled();
   });
 });

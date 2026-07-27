@@ -89,7 +89,7 @@ spaceTest.describe.skip(
             )
             .click();
 
-          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 30_000 });
+          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 10_000 });
           await page.testSubj.click('fieldToggle-AvgTicketPrice');
           await pageObjects.lens.saveAndReturn();
           await dashboard.waitForRenderComplete();

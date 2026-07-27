@@ -35,6 +35,7 @@ interface TemplateFieldRowProps {
   Control: FC<Record<string, unknown>>;
   value: unknown;
   isRequired: boolean;
+  isRequiredOnClose: boolean;
   onFieldConfirm?: (fieldName: string, fieldType: string) => void;
   isSaving: boolean;
   isSaveDisabled: boolean;
@@ -68,6 +69,7 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
     Control,
     value,
     isRequired,
+    isRequiredOnClose,
     onFieldConfirm,
     isSaving,
     isSaveDisabled,
@@ -82,6 +84,7 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
       label: field.label ?? field.name,
       value,
       isRequired,
+      isRequiredOnClose,
       patternValidation: field.validation?.pattern,
       min: field.validation?.min,
       max: field.validation?.max,
@@ -154,6 +157,10 @@ export const FieldsRenderer: FC<{
               )
             : false);
 
+        // Required-on-close is not required *now* (so the field stays fillable), but the label must
+        // say so rather than "Optional". Only surfaced when the field isn't already required.
+        const isRequiredOnClose = !isRequired && field.validation?.required_on_close === true;
+
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         if (!Control) return null;
 
@@ -164,6 +171,7 @@ export const FieldsRenderer: FC<{
             Control={Control}
             value={fieldValues[field.name]}
             isRequired={isRequired}
+            isRequiredOnClose={isRequiredOnClose}
             onFieldConfirm={onFieldConfirm}
             isSaving={savingFieldKey === getFieldSnakeKey(field.name, field.type)}
             isSaveDisabled={savingFieldKey != null}

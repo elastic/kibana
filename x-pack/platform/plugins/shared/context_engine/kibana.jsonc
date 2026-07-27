@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/context-engine-plugin",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "contextEngine",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["features", "share", "esql"],
+    "optionalPlugins": ["console"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

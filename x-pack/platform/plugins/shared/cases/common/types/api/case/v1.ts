@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { either } from 'fp-ts/Either';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -53,6 +54,40 @@ import {
   CaseCustomFieldTextWithValidationValueRt,
   CaseCustomFieldNumberWithValidationValueRt,
 } from '../custom_field/v1';
+
+/**
+ * A positive integer template version (matches the `integer, minimum: 1` contract documented in
+ * the OpenAPI bundle and the zod mirror). Rejects zero, negatives and non-integers at the io-ts
+ * boundary rather than letting a bad value fall through to a generic "not found".
+ */
+const TemplateVersionRt = new rt.Type<number, number, unknown>(
+  'TemplateVersion',
+  rt.number.is,
+  (input, context) =>
+    either.chain(rt.number.validate(input, context), (value) => {
+      if (!Number.isSafeInteger(value) || value < 1) {
+        return rt.failure(input, context, 'The template version must be a positive integer.');
+      }
+      return rt.success(value);
+    }),
+  rt.identity
+);
+
+/**
+ * Template reference accepted on case CREATION. Unlike the stored/domain `CaseTemplate` (and the
+ * PATCH request, where switching templates is an explicit versioned action), `version` may be
+ * omitted here: the server resolves the template's latest version and pins it on the case.
+ */
+export const CaseRequestTemplateRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      version: TemplateVersionRt,
+    })
+  ),
+]);
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
@@ -227,7 +262,7 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: CaseRequestCustomFieldsRt,
-      template: rt.union([CaseTemplate, rt.null]),
+      template: rt.union([CaseRequestTemplateRt, rt.null]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),

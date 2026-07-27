@@ -330,6 +330,34 @@ describe('ManageRegionsModal', () => {
       });
     });
 
+    it('expands a zone when the region count text/icon is clicked', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
+        typeof useRegionPolicy
+      >);
+      mockUseEisModels.mockReturnValue({
+        data: [endpointWithRegions],
+        isLoading: false,
+      } as unknown as ReturnType<typeof useEisModels>);
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsZoneCountToggle-us')).toBeInTheDocument();
+      });
+
+      // Clicking the count/icon button (not the zone title) should expand the zone.
+      fireEvent.click(screen.getByTestId('manageRegionsZoneCountToggle-us'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
+      });
+    });
+
     it('shows "N of N selected" when there is no existing policy', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
