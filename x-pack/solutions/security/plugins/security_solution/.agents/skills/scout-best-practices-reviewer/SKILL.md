@@ -31,8 +31,8 @@ Security Solution tests commonly create resources that require explicit cleanup 
 
 ### Package imports
 
-- Import `spaceTest`, `test`, `tags`, `expect` from `@kbn/scout-security` — not from `@kbn/scout`
-- Import `expect` from `@kbn/scout-security/ui` (not the main entry point)
+- Import `spaceTest`, `test`, and `tags` from `@kbn/scout-security` — not from `@kbn/scout`
+- Import UI assertions from `@kbn/scout-security/ui` and API assertions from `@kbn/scout-security/api` (not the main entry point)
 - Import page objects and API services from `@kbn/scout-security` when they exist there
 
 ### Auth and roles

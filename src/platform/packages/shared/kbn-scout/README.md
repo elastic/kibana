@@ -156,7 +156,7 @@ export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & Synthtrace
 });
 ```
 
-Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), and `tags` / `expect` from `@kbn/scout` or `@kbn/scout/ui` as usual.
+Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), `tags` from `@kbn/scout`, and `expect` from `@kbn/scout/ui`.
 
 3. **Parallel / `spaceTest`** — same pattern with `spaceTest` from `@kbn/scout`:
 
@@ -370,11 +370,13 @@ UI tests are designed for browser-based integration testing and provide access t
 **Test Imports for UI Testing:**
 
 ```ts
+import { expect } from '@kbn/scout/ui';
+
 // For sequential UI tests
-import { test, expect } from '@kbn/scout';
+import { test } from '@kbn/scout';
 
 // For parallel UI tests that can be space-isolated
-import { spaceTest as test, expect } from '@kbn/scout';
+import { spaceTest as test } from '@kbn/scout';
 ```
 
 **When to use each:**
@@ -387,7 +389,8 @@ If you need **synthtrace** worker fixtures (`apmSynthtraceEsClient`, `logsSyntht
 **Example UI Test:**
 
 ```ts
-import { spaceTest as test, expect } from '@kbn/scout';
+import { spaceTest as test } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 test('should display dashboard', async ({ pageObjects, page }) => {
   await pageObjects.dashboard.goto();
@@ -403,13 +406,15 @@ API tests are designed for server-side testing and provide fixtures focused on A
 
 ```ts
 // For API integration tests (server-side only, no browser fixtures)
-import { apiTest as test, expect } from '@kbn/scout';
+import { apiTest as test } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 ```
 
 **Example API Test:**
 
 ```ts
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 apiTest('POST api/painless_lab/execute is disabled', async ({ apiClient, log }) => {
   const response = await apiClient.post('api/painless_lab/execute', {
