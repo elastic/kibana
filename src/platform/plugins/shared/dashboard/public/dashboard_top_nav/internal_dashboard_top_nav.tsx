@@ -39,7 +39,8 @@ import {
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge, AppHeaderFavoriteAction } from '@kbn/app-header';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
@@ -65,7 +66,7 @@ import {
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
-import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { DashboardFavoritesProvider, useFavorite } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
@@ -80,6 +81,69 @@ export interface InternalDashboardTopNavProps {
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
+
+interface DashboardChromeNextHeaderProps {
+  headerMode: 'inline' | 'registered';
+  title: string;
+  back: AppHeaderBack;
+  menu?: AppMenuConfig;
+  badges: AppHeaderBadge[];
+  dashboardId?: string;
+  viewMode: string;
+}
+
+/**
+ * Chrome Next header path: maps favorites domain state to the Core app-header action.
+ * Must render inside `DashboardFavoritesProvider`.
+ */
+const DashboardChromeNextHeader = ({
+  headerMode,
+  title,
+  back,
+  menu,
+  badges,
+  dashboardId,
+  viewMode,
+}: DashboardChromeNextHeaderProps) => {
+  const favoriteToggle = useFavorite({ id: dashboardId });
+  const favorite = useMemo<AppHeaderFavoriteAction | undefined>(() => {
+    if (!favoriteToggle) {
+      return undefined;
+    }
+
+    return {
+      status: favoriteToggle.status,
+      onToggle: favoriteToggle.onToggle,
+    };
+  }, [favoriteToggle]);
+
+  if (headerMode === 'inline') {
+    if (viewMode === 'print') {
+      return null;
+    }
+
+    return (
+      <AppHeader
+        title={title}
+        back={back}
+        menu={menu}
+        badges={badges}
+        favorite={favorite}
+        spacing="compact"
+      />
+    );
+  }
+
+  return (
+    <ChromeAppHeaderRegistration
+      title={title}
+      menu={menu}
+      badges={badges}
+      favorite={favorite}
+      spacing="compact"
+    />
+  );
+};
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
@@ -417,12 +481,6 @@ export function InternalDashboardTopNav({
     return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
   }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
 
-  // Stable identity so `ChromeAppHeaderRegistration` doesn't re-register on every top-nav re-render.
-  const favoriteButton = useMemo(
-    () => <DashboardFavoriteButton dashboardId={lastSavedId} />,
-    [lastSavedId]
-  );
-
   // Chrome Next hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
   const backToListing = useMemo<AppHeaderBack>(
     () => ({
@@ -442,24 +500,18 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      {headerMode === 'inline' && viewMode !== 'print' && (
-        <AppHeader
-          title={dashboardTitle}
-          back={backToListing}
-          menu={appMenuConfig}
-          badges={appHeaderBadges}
-          favorite={favoriteButton}
-          spacing="compact"
-        />
-      )}
-      {headerMode === 'registered' && (
-        <ChromeAppHeaderRegistration
-          title={dashboardTitle}
-          menu={appMenuConfig}
-          badges={appHeaderBadges}
-          favorite={favoriteButton}
-          spacing="compact"
-        />
+      {(headerMode === 'inline' || headerMode === 'registered') && (
+        <DashboardFavoritesProvider>
+          <DashboardChromeNextHeader
+            headerMode={headerMode}
+            title={dashboardTitle}
+            back={backToListing}
+            menu={appMenuConfig}
+            badges={appHeaderBadges}
+            dashboardId={lastSavedId}
+            viewMode={viewMode}
+          />
+        </DashboardFavoritesProvider>
       )}
       {headerMode === 'legacy' && (
         <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />

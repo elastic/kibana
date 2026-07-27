@@ -1385,6 +1385,8 @@
       "@kbn/failed-test-reporter-cli/*": ["./packages/kbn-failed-test-reporter-cli/*"],
       "@kbn/failure-store-modal": ["./x-pack/platform/packages/shared/kbn-failure-store-modal"],
       "@kbn/failure-store-modal/*": ["./x-pack/platform/packages/shared/kbn-failure-store-modal/*"],
+      "@kbn/favorite-button": ["./src/platform/packages/shared/content-management/favorites/favorite-button"],
+      "@kbn/favorite-button/*": ["./src/platform/packages/shared/content-management/favorites/favorite-button/*"],
       "@kbn/feature-controls-examples-plugin": ["./examples/feature_control_examples"],
       "@kbn/feature-controls-examples-plugin/*": ["./examples/feature_control_examples/*"],
       "@kbn/feature-flags-example-plugin": ["./examples/feature_flags_example"],
