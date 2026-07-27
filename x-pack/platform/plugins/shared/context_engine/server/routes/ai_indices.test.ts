@@ -618,7 +618,11 @@ describe('ai indices routes', () => {
           versionConfig: { validate: RegisteredRoute['validate'] },
           handler: RequestHandler
         ) => {
-          secureRoutes[`${method}:${config.path}`] = { config, handler, validate: versionConfig.validate };
+          secureRoutes[`${method}:${config.path}`] = {
+            config,
+            handler,
+            validate: versionConfig.validate,
+          };
         },
       });
 
@@ -702,7 +706,9 @@ describe('ai indices routes', () => {
           date_modified: '2026-07-01T00:00:00.000Z',
         });
 
-        await callSecureRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+        await callSecureRoute('GET', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+        });
 
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
@@ -812,7 +818,11 @@ describe('ai indices routes', () => {
       });
 
       const route = routesNoSecurity[`GET:${aiIndexByIdPath}`];
-      await route.handler(createContext(), httpServerMock.createKibanaRequest({ params: { aiIndexId: 'foo' } }), response);
+      await route.handler(
+        createContext(),
+        httpServerMock.createKibanaRequest({ params: { aiIndexId: 'foo' } }),
+        response
+      );
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });

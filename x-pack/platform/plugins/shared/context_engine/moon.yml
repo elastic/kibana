@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-management'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
