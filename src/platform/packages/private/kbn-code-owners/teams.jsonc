@@ -515,6 +515,7 @@
   {
     "id": "nightshift-sre-agent",
     "name": "Nightshift SRE Agent Team",
+    "areas": ["observability"],
     "github": {
       "team": "elastic/nightshift-sre-agent-team"
     }
