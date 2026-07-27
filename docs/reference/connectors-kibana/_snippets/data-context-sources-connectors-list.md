@@ -17,6 +17,7 @@
 * [Databricks](/reference/connectors-kibana/databricks-action-type.md): Execute SQL queries, discover tables and schemas, and poll async query results in Databricks.
 * [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
 * [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
+* [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
 * [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 * [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
