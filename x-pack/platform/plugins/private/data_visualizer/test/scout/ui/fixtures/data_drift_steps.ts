@@ -32,10 +32,7 @@ export const assertDataDriftPageContent = async ({
   // brushes exist (see data_drift_view requiresWindowParameters empty prompt).
   if ('chartClickCoordinates' in testData) {
     await dataDrift.clickDocumentCountChart('Reference', testData.chartClickCoordinates);
-    await dataDrift.clickDocumentCountChart(
-      'Comparison',
-      testData.comparisonChartClickCoordinates
-    );
+    await dataDrift.clickDocumentCountChart('Comparison', testData.comparisonChartClickCoordinates);
   }
 
   await expect.poll(() => dataDrift.isRunAnalysisButtonDisabled(), { timeout: 30_000 }).toBe(false);
