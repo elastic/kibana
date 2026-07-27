@@ -18,7 +18,9 @@
  *
  * V. 1.1: Fix error handling so e.g. parsing an empty string does
  * produce a color rather than just crashing.
- */ 
+ */
+
+import jQuery from 'jquery';
 
 (function($) {
     $.color = {};

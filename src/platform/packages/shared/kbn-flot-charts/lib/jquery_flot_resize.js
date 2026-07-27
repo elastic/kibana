@@ -11,6 +11,8 @@ can just fix the size of their placeholders.
 
 */
 
+import jQuery from 'jquery';
+
 /* Inline dependency:
  * jQuery resize event - v1.1 - 3/14/2010
  * http://benalman.com/projects/jquery-resize-plugin/

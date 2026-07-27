@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import type { BehaviorSubject } from 'rxjs';
 
+import $ from 'jquery';
 import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
