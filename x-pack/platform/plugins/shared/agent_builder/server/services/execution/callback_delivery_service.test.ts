@@ -358,7 +358,6 @@ describe('deliverStream', () => {
         {
           payload: {
             execution_id: 'execution-1',
-            status: ExecutionStatus.running,
             event,
           },
           makeRequest,

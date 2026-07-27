@@ -99,7 +99,7 @@ apiTest.describe(
     });
 
     const isEventPayload = (payload: ChatCallbackResponse): payload is ChatCallbackEventResponse =>
-      payload.status === ExecutionStatus.running;
+      'event' in payload;
 
     /**
      * Consumes streamed callback requests until one matches the predicate,
@@ -126,12 +126,9 @@ apiTest.describe(
     const collectCompletedRoundRequests = () =>
       collectCallbackRequestsUntil(isConversationEventPayload);
 
-    /** Waits for the terminal failure payload, skipping streamed running events. */
+    /** Waits for the terminal failure payload, skipping streamed event payloads. */
     const waitForFailurePayload = async (): Promise<ChatCallbackFailureResponse> => {
-      const requests = await collectCallbackRequestsUntil(
-        (payload) =>
-          payload.status === ExecutionStatus.failed || payload.status === ExecutionStatus.aborted
-      );
+      const requests = await collectCallbackRequestsUntil((payload) => !isEventPayload(payload));
       return requests[requests.length - 1].body as ChatCallbackFailureResponse;
     };
 
@@ -205,7 +202,6 @@ apiTest.describe(
 
         const payload = callbackRequest.body as ChatCallbackEventResponse;
         expect(payload.execution_id).toBe(accepted.execution_id);
-        expect(payload.status).toBe(ExecutionStatus.running);
         expect(payload.event).toBeDefined();
       }
 

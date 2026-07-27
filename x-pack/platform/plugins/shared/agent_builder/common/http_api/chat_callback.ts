@@ -39,7 +39,6 @@ export interface ChatCallbackAcceptedResponse {
 
 export interface ChatCallbackEventResponse {
   execution_id: string;
-  status: ExecutionStatus.running;
   event: ChatEvent;
 }
 

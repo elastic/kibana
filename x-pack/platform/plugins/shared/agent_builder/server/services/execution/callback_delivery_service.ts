@@ -168,7 +168,6 @@ export const deliverStream = ({
           const delivery = callbackDeliveryService.makeCallbackRequest({
             payload: {
               execution_id: execution.executionId,
-              status: ExecutionStatus.running,
               event,
             },
             makeRequest,
