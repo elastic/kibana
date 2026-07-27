@@ -14,8 +14,6 @@
     "@kbn/repo-info",
     "@kbn/human-readable-id",
     "@kbn/std",
-    "@kbn/logging-mocks",
-    "@kbn/es-mappings"
   ],
   "exclude": ["target/**/*"]
 }
