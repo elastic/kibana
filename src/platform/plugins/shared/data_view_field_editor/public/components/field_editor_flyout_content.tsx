@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
@@ -254,7 +254,7 @@ const FieldEditorFlyoutContentComponent = ({
                 </p>
               </EuiText>
               {dataView.managed && (
-                <KbnWarningCallout
+                <KbnInfoCallout
                   announceOnMount={false}
                   title={i18nTexts.disabledSaveCalloutMessage}
                   size="s"
