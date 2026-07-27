@@ -11,26 +11,23 @@ import type { ScoutPage } from '../scout_page';
 
 export interface RequestMatcher {
   endpoint: string;
-  method: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
 }
 
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
   async countMatchingRequests(
-    matcher: string | RequestMatcher,
+    matchOptions: RequestMatcher,
     action: () => Promise<void>
   ): Promise<number> {
     let count = 0;
     const listener = (request: { url: () => string; method: () => string }) => {
-      if (typeof matcher === 'string') {
-        if (request.url().includes(matcher)) {
-          count++;
-        }
-      } else {
-        if (request.url().includes(matcher.endpoint) && request.method() === matcher.method) {
-          count++;
-        }
+      if (
+        request.url().includes(matchOptions.endpoint) &&
+        (!matchOptions.method || request.method() === matchOptions.method)
+      ) {
+        count++;
       }
     };
 

@@ -90,7 +90,7 @@ spaceTest.describe(
         expect(tab2JsonContent).not.toStrictEqual(originalJsonContent);
 
         expect(
-          await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
+          await network.countMatchingRequests({ endpoint: ESE_SEARCH_ENDPOINT }, async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
           })
@@ -98,7 +98,7 @@ spaceTest.describe(
         expect(await docViewer.getJsonCodeEditorValue()).toBe(originalJsonContent);
 
         expect(
-          await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
+          await network.countMatchingRequests({ endpoint: ESE_SEARCH_ENDPOINT }, async () => {
             await unifiedTabs.selectTab(1);
             await discover.waitUntilTabIsLoaded();
           })
