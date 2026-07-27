@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FormSchema } from '../../../shared_imports';
 import { FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
+import { INVALID_TEMPLATE_NAME_CHARS } from '../../../../../../../common/constants';
 
 const { emptyField, containsCharsField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;
@@ -55,6 +56,20 @@ export const logisticsFormSchema: FormSchema = {
               defaultMessage: 'Spaces are not allowed in a component template name.',
             }
           ),
+        }),
+      },
+      {
+        validator: containsCharsField({
+          chars: INVALID_TEMPLATE_NAME_CHARS,
+          message: ({ charsFound }) =>
+            i18n.translate(
+              'xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.nameInvalidCharacterError',
+              {
+                defaultMessage:
+                  'A component template name must not contain the character "{invalidChar}"',
+                values: { invalidChar: charsFound[0] },
+              }
+            ),
         }),
       },
     ],
