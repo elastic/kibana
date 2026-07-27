@@ -100,7 +100,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   --session-dir "$SESSION_DIR" \
   --kind connector \
   --id "$CONNECTOR_ID" \
-  --endpoint "/api/actions/connector/$CONNECTOR_ID" \
+  --endpoint "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
   --owned
 ```
 
@@ -124,32 +124,29 @@ The script automatically falls back from `logs-exploratory.noise` to `explorator
 ```bash
 NOISE_OUTPUT=$(
   bash x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-noise-index.sh \
-    --es-url "$ES_URL" "${NOISE_AUTH_ARGS[@]}"
+    --es-url "$ES_URL" "${NOISE_AUTH_ARGS[@]}" \
+    --session-dir "$SESSION_DIR"
 )
+NOISE_INDEX_NAME=$(printf '%s\n' "$NOISE_OUTPUT" | grep '^NOISE_INDEX_NAME=' | cut -d= -f2)
 NOISE_INDEX_ALIAS=$(printf '%s\n' "$NOISE_OUTPUT" | grep '^NOISE_INDEX_ALIAS=' | cut -d= -f2)
-NOISE_INDEX_OWNED=$(printf '%s\n' "$NOISE_OUTPUT" | grep '^NOISE_INDEX_OWNED=' | cut -d= -f2)
-python3 -c "
-import json
-cfg = json.load(open('$SESSION_DIR/config.json'))
-cfg['noise_index'] = '$NOISE_INDEX_ALIAS'
-json.dump(cfg, open('$SESSION_DIR/config.json', 'w'), indent=2)
-print('noise_index set to:', '$NOISE_INDEX_ALIAS')
-"
-if [[ "$NOISE_INDEX_OWNED" == "true" ]]; then
-  OWNERSHIP_FLAG=--owned
-else
-  OWNERSHIP_FLAG=--reused
-fi
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
-  --session-dir "$SESSION_DIR" \
-  --kind es_index \
-  --id "$NOISE_INDEX_ALIAS" \
-  --endpoint "/$NOISE_INDEX_ALIAS" \
-  --base-url es_url \
-  "$OWNERSHIP_FLAG"
+PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+python3 - "$SESSION_DIR" "$NOISE_INDEX_ALIAS" <<'PY'
+import sys
+from pathlib import Path
+
+from session_resources import edit_session_config
+
+session_dir = Path(sys.argv[1])
+with edit_session_config(session_dir / "config.json") as config:
+    config["noise_index"] = sys.argv[2]
+print("noise_index set to:", sys.argv[2])
+PY
 ```
 
-On failure (empty `NOISE_INDEX_ALIAS` or non-zero exit): add `{ "step": "noise-index", "reason": "<error>" }` to `skipped_setup` — noise-index testing skipped for this session.
+The script registers the physical `NOISE_INDEX_NAME` before bulk indexing;
+the alias is retained in `config.json` for queries. On failure (empty
+`NOISE_INDEX_NAME` or non-zero exit): add `{ "step": "noise-index", "reason":
+"<error>" }` to `skipped_setup` — noise-index testing skipped for this session.
 
 > **Why:** Real customer data often has non-ECS field types and missing fields. Features that work with clean data can silently break on this class of data.
 

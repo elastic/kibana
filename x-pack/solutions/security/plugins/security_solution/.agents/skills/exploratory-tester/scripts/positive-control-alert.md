@@ -10,13 +10,48 @@ The cheap shortcut is to write a fake document straight into `.alerts-security.a
 
 ## Template
 
-Fill in `<SLUG>` (use `config.json → area_slug`), `<KIBANA_URL>`, `<ES_URL>`, `<SPACE_ID>` (the flow's space), and `<API_KEY>`.
+Fill in `<SLUG>` (use `config.json → area_slug`), `<SESSION_ID>`,
+`<KIBANA_URL>`, `<ES_URL>`, `<SPACE_ID>` (the flow's space), and `<API_KEY>`.
+The session suffix is required: it prevents repeated or parallel sessions
+from sharing a source index or rule name.
 
-### 1. Index a real source document into a `logs-*`-matching index
+```bash
+SOURCE_INDEX="logs-testing.<SLUG>-<SESSION_ID>-default"
+RULE_NAME="positive-control-<SLUG>-<SESSION_ID>"
+SOURCE_ES_URL="<ES_URL>"
+SOURCE_BASE_URL="es_url"
+```
+
+For CCS, the positive-control source is on REMOTE, not SOURCE:
+```bash
+SOURCE_ES_URL="<REMOTE_ES_URL>"
+SOURCE_BASE_URL="ccs_remote_es_url"
+```
+The `environment.ccs.remote.es_url` value must be present in `config.json`;
+`ccs_remote_es_url` makes cleanup target REMOTE rather than SOURCE.
+
+### 1. Ensure an owned or reused source index, then index a real document
+
+Check whether `"$SOURCE_INDEX"` exists before creating it. If the `HEAD`
+request returns 200, set `SOURCE_OWNERSHIP_FLAG=--reused`. If it returns 404,
+create the index and set the flag to `--owned` only after a 200/201 create
+response. Treat any other response as a setup failure.
+
+Register the physical source index before indexing the document:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind es_index \
+  --id "$SOURCE_INDEX" \
+  --endpoint "/$SOURCE_INDEX" \
+  --base-url "$SOURCE_BASE_URL" \
+  "$SOURCE_OWNERSHIP_FLAG"
+```
+Then index the document:
 ```bash
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
-  "<ES_URL>/logs-testing.<SLUG>-default/_doc?refresh=wait_for" \
+  "$SOURCE_ES_URL/$SOURCE_INDEX/_doc?refresh=wait_for" \
   -d "{ \"@timestamp\": \"$NOW\", \"host\": { \"name\": \"positive-control-host\" }, \"event\": { \"category\": \"process\", \"action\": \"positive-control\" }, \"message\": \"exploratory-tester positive control\" }"
 ```
 
@@ -24,17 +59,17 @@ curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: applicati
 ```bash
 curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" -H "kbn-xsrf: true" \
   "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
-  -d '{ "type": "query", "name": "positive-control-<SLUG>", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["logs-testing.<SLUG>-default"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
+  -d '{ "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$SOURCE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
 ```
-Record the returned rule `id` and register it immediately as an owned
-`detection_rule` resource:
+Register the returned rule only after checking its response. Use `--owned`
+for a 200/201 response and `--reused` for a 409/conflict:
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
   --session-dir "$SESSION_DIR" \
   --kind detection_rule \
   --id "$RULE_ID" \
   --endpoint "/s/$SPACE_ID/api/detection_engine/rules?id=$RULE_ID" \
-  --owned
+  "$RULE_OWNERSHIP_FLAG"
 ```
 
 ### 3. Force immediate execution
@@ -46,23 +81,20 @@ curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "kbn-xsrf: true" \
 ### 4. Confirm a genuine rule-fired alert appeared
 ```bash
 curl -s -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
-  "<ES_URL>/.alerts-security.alerts-<SPACE_ID>/_search?pretty" \
-  -d '{ "size": 1, "query": { "term": { "kibana.alert.rule.name": "positive-control-<SLUG>" } } }'
+  "$SOURCE_ES_URL/.alerts-security.alerts-<SPACE_ID>/_search?pretty" \
+  -d '{ "size": 1, "query": { "term": { "kibana.alert.rule.name": "'"$RULE_NAME"'" } } }'
 ```
-A real alert has `kibana.alert.status`, `kibana.alert.rule.rule_type_id: "siem.queryRule"`, and a populated `kibana.alert.rule.uuid`. If those fields are present, the local pipeline genuinely produced an alert — so if the feature under test still shows nothing, the gap is the feature, not the data. **For CCS:** index the step-1 document on the **REMOTE** cluster and point the rule's `index` at the CCS pattern `<remote_cluster_alias>:logs-testing.<SLUG>-default` to prove the remote data path specifically.
+A real alert has `kibana.alert.status`,
+`kibana.alert.rule.rule_type_id: "siem.queryRule"`, and a populated
+`kibana.alert.rule.uuid`. If those fields are present, the local pipeline
+genuinely produced an alert — so if the feature under test still shows
+nothing, the gap is the feature, not the data. For CCS, use the remote
+`SOURCE_ES_URL` and the CCS pattern
+`<remote_cluster_alias>:logs-testing.<SLUG>-<SESSION_ID>-default` in the rule
+index.
 
-### 5. Register source resource and clean up at end of session
-```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
-  --session-dir "$SESSION_DIR" \
-  --kind es_index \
-  --id "logs-testing.<SLUG>-default" \
-  --endpoint "/logs-testing.<SLUG>-default" \
-  --base-url es_url \
-  --owned
-```
-The central session cleanup deletes both owned resources. Do not manually
-delete a reused index or rule; register it with `--reused` instead.
+The central session cleanup deletes only resources marked `--owned` with the
+current session marker. Never manually delete a reused index or rule.
 
 ## Notes
 

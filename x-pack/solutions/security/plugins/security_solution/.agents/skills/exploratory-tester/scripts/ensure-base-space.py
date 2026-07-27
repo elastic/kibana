@@ -10,19 +10,13 @@ import sys
 from pathlib import Path
 from urllib.parse import quote
 
-from session_resources import build_auth_args, ensure_session_manifest, register_resource
-
-
-def _status(result: subprocess.CompletedProcess[str]) -> str:
-    return result.stdout.strip().splitlines()[-1] if result.stdout.strip() else "000"
-
-
-def _write_config(config_path: Path, config: dict[str, object]) -> None:
-    temporary_path = config_path.with_suffix(".json.tmp")
-    with temporary_path.open("w", encoding="utf-8") as config_file:
-        json.dump(config, config_file, indent=2)
-        config_file.write("\n")
-    temporary_path.replace(config_path)
+from session_resources import (
+    build_auth_args,
+    edit_session_config,
+    ensure_session_manifest,
+    http_status,
+    register_resource,
+)
 
 
 def main() -> int:
@@ -31,95 +25,39 @@ def main() -> int:
     args = parser.parse_args()
 
     config_path = Path(args.session_dir) / "config.json"
-    with config_path.open(encoding="utf-8") as config_file:
-        config = json.load(config_file)
+    with edit_session_config(config_path) as config:
+        session_id = ensure_session_manifest(config)
+        environment = config["environment"]
+        url = environment["url"].rstrip("/")
+        space_id = environment.get("space_id", "exploratory-testing")
+        endpoint = f"/api/spaces/space/{quote(space_id, safe='')}"
 
-    session_id = ensure_session_manifest(config)
-    environment = config["environment"]
-    url = environment["url"].rstrip("/")
-    space_id = environment.get("space_id", "exploratory-testing")
-    endpoint = f"/api/spaces/space/{quote(space_id, safe='')}"
+        try:
+            auth_args = build_auth_args(config)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
 
-    try:
-        auth_args = build_auth_args(config)
-    except ValueError as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
-
-    existing = subprocess.run(
-        [
-            "curl",
-            "-s",
-            "-o",
-            "/dev/null",
-            "-w",
-            "%{http_code}",
-            *auth_args,
-            "-X",
-            "GET",
-            f"{url}{endpoint}",
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    existing_status = _status(existing)
-
-    if existing_status == "200":
-        register_resource(
-            config,
-            kind="kibana_space",
-            resource_id=space_id,
-            owned=False,
-            endpoint=endpoint,
-            protected=True,
-            track_flow_space=False,
-        )
-        _write_config(config_path, config)
-        message = f"Base space {space_id!r} exists; reusing it."
-    elif existing_status == "404":
-        body = json.dumps(
-            {
-                "id": space_id,
-                "name": "Exploratory Testing",
-                "color": "#DD0A73",
-            }
-        )
-        created = subprocess.run(
+        existing = subprocess.run(
             [
                 "curl",
                 "-s",
+                "-o",
+                "/dev/null",
                 "-w",
-                "\n%{http_code}",
+                "%{http_code}",
                 *auth_args,
                 "-X",
-                "POST",
-                f"{url}/api/spaces/space",
-                "-H",
-                "kbn-xsrf: true",
-                "-H",
-                "Content-Type: application/json",
-                "-d",
-                body,
+                "GET",
+                f"{url}{endpoint}",
             ],
             capture_output=True,
             text=True,
             check=False,
         )
-        created_status = _status(created)
-        if created_status == "200":
-            register_resource(
-                config,
-                kind="kibana_space",
-                resource_id=space_id,
-                owned=True,
-                endpoint=endpoint,
-                protected=True,
-                track_flow_space=False,
-            )
-            _write_config(config_path, config)
-            message = f"Base space {space_id!r} created by session {session_id}."
-        elif created_status == "409":
+        existing_status = http_status(existing.stdout)
+
+        if existing_status == "200":
             register_resource(
                 config,
                 kind="kibana_space",
@@ -129,27 +67,80 @@ def main() -> int:
                 protected=True,
                 track_flow_space=False,
             )
-            _write_config(config_path, config)
-            message = f"Base space {space_id!r} already exists; reusing it."
+            message = f"Base space {space_id!r} exists; reusing it."
+        elif existing_status == "404":
+            body = json.dumps(
+                {
+                    "id": space_id,
+                    "name": "Exploratory Testing",
+                    "color": "#DD0A73",
+                }
+            )
+            created = subprocess.run(
+                [
+                    "curl",
+                    "-s",
+                    "-w",
+                    "\n%{http_code}",
+                    *auth_args,
+                    "-X",
+                    "POST",
+                    f"{url}/api/spaces/space",
+                    "-H",
+                    "kbn-xsrf: true",
+                    "-H",
+                    "Content-Type: application/json",
+                    "-d",
+                    body,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            created_status = http_status(created.stdout)
+            if created_status == "200":
+                register_resource(
+                    config,
+                    kind="kibana_space",
+                    resource_id=space_id,
+                    owned=True,
+                    endpoint=endpoint,
+                    protected=True,
+                    track_flow_space=False,
+                )
+                message = (
+                    f"Base space {space_id!r} created by session {session_id}."
+                )
+            elif created_status == "409":
+                register_resource(
+                    config,
+                    kind="kibana_space",
+                    resource_id=space_id,
+                    owned=False,
+                    endpoint=endpoint,
+                    protected=True,
+                    track_flow_space=False,
+                )
+                message = f"Base space {space_id!r} already exists; reusing it."
+            else:
+                print(
+                    f"Unable to create base space {space_id!r} (HTTP {created_status}).",
+                    file=sys.stderr,
+                )
+                return 1
+        elif existing_status == "401":
+            print("Configured API credentials were rejected (HTTP 401).", file=sys.stderr)
+            return 1
         else:
             print(
-                f"Unable to create base space {space_id!r} (HTTP {created_status}).",
+                f"Unable to inspect base space {space_id!r} (HTTP {existing_status}).",
                 file=sys.stderr,
             )
             return 1
-    elif existing_status == "401":
-        print("Configured API credentials were rejected (HTTP 401).", file=sys.stderr)
-        return 1
-    else:
-        print(
-            f"Unable to inspect base space {space_id!r} (HTTP {existing_status}).",
-            file=sys.stderr,
-        )
-        return 1
 
-    print(message)
-    return 0
+        print(message)
+        return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

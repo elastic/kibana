@@ -81,7 +81,8 @@ Environment:
 
 Skip Scout startup. Verify connectivity and API key in one step:
 ```bash
-SPACE_ID="<Environment.space or exploratory-testing>"
+# Set ENVIRONMENT_SPACE from Environment.space when one was provided.
+SPACE_ID="${ENVIRONMENT_SPACE:-exploratory-testing}"
 # Check Kibana is reachable (public endpoint, no auth needed)
 curl -s "<url>/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
   exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)"
@@ -90,7 +91,6 @@ curl -s "<url>/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin)
 # 200 means the key can read the configured space; 404 means the key is valid
 # but the space will need provisioning in Phase 1; 401 means the key is wrong
 # or is an Elasticsearch-origin key.
-SPACE_ID="${SPACE_ID:-exploratory-testing}"
 VALIDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   -H "Authorization: ApiKey $APIKEY" \
   -X GET "$KIBANA_URL/api/spaces/space/$SPACE_ID")

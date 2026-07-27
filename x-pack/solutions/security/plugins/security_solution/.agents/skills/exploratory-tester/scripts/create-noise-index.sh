@@ -6,6 +6,7 @@
 # Usage:
 #   bash <script> --es-url <url> --username <user> --password <pass>
 #   bash <script> --es-url <url> --api-key <base64-encoded-key>
+#   bash <script> ... --session-dir <session directory>
 #
 # On success: prints the alias name and exits 0.
 # On failure: prints the error and exits 1.
@@ -16,6 +17,7 @@ ES_URL=""
 USERNAME=""
 PASSWORD=""
 API_KEY=""
+SESSION_DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -23,6 +25,7 @@ while [[ $# -gt 0 ]]; do
     --username)  USERNAME="$2";  shift 2 ;;
     --password)  PASSWORD="$2";  shift 2 ;;
     --api-key)   API_KEY="$2";   shift 2 ;;
+    --session-dir) SESSION_DIR="$2"; shift 2 ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
 done
@@ -99,6 +102,23 @@ if [[ "$INDEX_READY" != true ]]; then
   exit 1
 fi
 
+# Register the physical index before bulk indexing. If bulk indexing fails,
+# cleanup still knows exactly which index was created by this session.
+if [[ -n "$SESSION_DIR" ]]; then
+  SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+  OWNERSHIP_FLAG="--reused"
+  if [[ "$INDEX_OWNED" == true ]]; then
+    OWNERSHIP_FLAG="--owned"
+  fi
+  python3 "$SCRIPT_DIR/register-session-resource.py" \
+    --session-dir "$SESSION_DIR" \
+    --kind es_index \
+    --id "$INDEX" \
+    --endpoint "/$INDEX" \
+    --base-url es_url \
+    "$OWNERSHIP_FLAG"
+fi
+
 echo "Indexing noise documents into $INDEX ..."
 BULK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   -H "$AUTH_HEADER" \
@@ -120,5 +140,6 @@ if [[ "$BULK_STATUS" != "200" ]]; then
 fi
 
 echo "Noise index ready: $ALIAS"
+echo "NOISE_INDEX_NAME=$INDEX"
 echo "NOISE_INDEX_ALIAS=$ALIAS"
 echo "NOISE_INDEX_OWNED=$INDEX_OWNED"

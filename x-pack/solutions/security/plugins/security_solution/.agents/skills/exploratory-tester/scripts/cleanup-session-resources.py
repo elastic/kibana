@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -13,7 +12,10 @@ from typing import Any
 from session_resources import (
     build_auth_args,
     cleanup_candidates,
+    edit_session_config,
+    http_status,
     require_session_id,
+    resolve_resource_base_url,
     validate_resource_endpoint,
 )
 
@@ -51,22 +53,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _load_config(config_path: Path) -> dict[str, Any]:
-    with config_path.open(encoding="utf-8") as config_file:
-        config = json.load(config_file)
-    if not isinstance(config, dict):
-        raise ValueError("Session config must be a JSON object")
-    return config
-
-
-def _write_config(config_path: Path, config: dict[str, Any]) -> None:
-    temporary_path = config_path.with_suffix(".json.tmp")
-    with temporary_path.open("w", encoding="utf-8") as config_file:
-        json.dump(config, config_file, indent=2)
-        config_file.write("\n")
-    temporary_path.replace(config_path)
-
-
 def _resource_url(config: dict[str, Any], resource: dict[str, Any]) -> str:
     endpoint = resource.get("endpoint")
     try:
@@ -75,21 +61,17 @@ def _resource_url(config: dict[str, Any], resource: dict[str, Any]) -> str:
         raise ValueError(f"Unsafe cleanup endpoint for {resource.get('id')!r}") from exc
 
     base_url_key = resource.get("base_url", "url")
-    environment = config.get("environment", {})
-    base_url = environment.get(base_url_key)
-    if not isinstance(base_url, str) or not base_url:
+    if not isinstance(base_url_key, str):
         raise ValueError(
-            f"Environment is missing {base_url_key!r} for resource {resource.get('id')!r}"
+            f"Invalid base URL key for resource {resource.get('id')!r}"
         )
+    try:
+        base_url = resolve_resource_base_url(config, base_url_key)
+    except ValueError as exc:
+        raise ValueError(
+            f"{exc} for resource {resource.get('id')!r}"
+        ) from exc
     return f"{base_url.rstrip('/')}{endpoint}"
-
-
-def _http_status(stdout: str) -> str:
-    value = stdout.strip()
-    if value.isdigit() and len(value) == 3:
-        return value
-    lines = value.rsplit("\n", 1)
-    return lines[-1] if len(lines) > 1 else "000"
 
 
 def _cleanup_order(resource: dict[str, Any]) -> tuple[int, str]:
@@ -143,24 +125,25 @@ def cleanup_session(
             errors.append(f"Unsupported cleanup method {method!r} for {resource_id!r}")
             continue
 
+        curl_args = [
+            "curl",
+            "-s",
+            "-w",
+            "\n%{http_code}",
+            *auth_args,
+            "-X",
+            method,
+            target_url,
+        ]
+        if resource.get("base_url", "url") == "url":
+            curl_args.extend(["-H", "kbn-xsrf: true"])
         result = subprocess.run(
-            [
-                "curl",
-                "-s",
-                "-w",
-                "\n%{http_code}",
-                *auth_args,
-                "-X",
-                method,
-                target_url,
-                "-H",
-                "kbn-xsrf: true",
-            ],
+            curl_args,
             capture_output=True,
             text=True,
             check=False,
         )
-        status = _http_status(result.stdout)
+        status = http_status(result.stdout)
         if status in SUCCESSFUL_DELETE_STATUSES:
             resource["cleanup_status"] = (
                 "already_gone" if status == "404" else "deleted"
@@ -183,9 +166,9 @@ def main() -> int:
     args = parse_args()
     config_path = Path(args.session_dir) / "config.json"
     try:
-        config = _load_config(config_path)
-        exit_code, messages = cleanup_session(config, args.dry_run, args.kind)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        with edit_session_config(config_path, persist=not args.dry_run) as config:
+            exit_code, messages = cleanup_session(config, args.dry_run, args.kind)
+    except (OSError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
@@ -195,8 +178,6 @@ def main() -> int:
     else:
         print(output)
 
-    if not args.dry_run:
-        _write_config(config_path, config)
     return exit_code
 
 

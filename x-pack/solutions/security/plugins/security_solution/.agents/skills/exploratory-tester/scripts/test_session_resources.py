@@ -14,6 +14,9 @@ CREATE_SCRIPT = SCRIPT_DIR / "create-flow-spaces.py"
 CLEANUP_SCRIPT = SCRIPT_DIR / "cleanup-session-resources.py"
 BASE_SPACE_SCRIPT = SCRIPT_DIR / "ensure-base-space.py"
 REGISTER_SCRIPT = SCRIPT_DIR / "register-session-resource.py"
+DELETE_SCRIPT = SCRIPT_DIR / "delete-flow-spaces.py"
+NOISE_SCRIPT = SCRIPT_DIR / "create-noise-index.sh"
+POSITIVE_CONTROL = SCRIPT_DIR / "positive-control-alert.md"
 FIXTURES_DIR = SCRIPT_DIR / "__tests__" / "fixtures"
 OWNED_REUSED_FIXTURE = FIXTURES_DIR / "session-resources-owned-reused.json"
 EARLY_EXIT_FIXTURE = FIXTURES_DIR / "session-resources-early-exit.json"
@@ -85,17 +88,38 @@ class SessionResourceContractTests(unittest.TestCase):
         setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
         login = (PHASES_DIR / "1-wait-and-login.md").read_text(encoding="utf-8")
         report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        positive_control = POSITIVE_CONTROL.read_text(encoding="utf-8")
         session_template = (
             TEMPLATE_DIR / "session.example.yaml"
         ).read_text(encoding="utf-8")
+        validation_section = setup[
+            setup.index("Skip Scout startup. Verify connectivity and API key")
+            : setup.index("**No API key available?**")
+        ]
 
-        self.assertIn('"session_resources": []', setup)
-        self.assertIn('"reused_flow_spaces": []', setup)
+        self.assertIn("session_resources", setup)
+        self.assertIn("reused_flow_spaces", setup)
         self.assertIn("-X GET", setup)
+        self.assertNotIn(
+            'SPACE_ID="<Environment.space or exploratory-testing>"',
+            validation_section,
+        )
+        self.assertIn(
+            'SPACE_ID="${ENVIRONMENT_SPACE:-exploratory-testing}"',
+            validation_section,
+        )
         self.assertIn("ensure-base-space.py", login)
         self.assertIn("register-session-resource.py", login)
+        self.assertIn(
+            "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID",
+            login,
+        )
+        self.assertIn("NOISE_INDEX_NAME", login)
         self.assertIn("cleanup-session-resources.py", report)
         self.assertIn("session_id", session_template)
+        self.assertIn("<SESSION_ID>", positive_control)
+        self.assertIn("ccs_remote_es_url", positive_control)
+        self.assertIn("--reused", positive_control)
 
     def test_cleanup_candidates_only_include_owned_resources_with_matching_marker(self):
         config = {"session_id": "abc12345", "session_resources": []}
@@ -216,6 +240,123 @@ print("200" if body["id"].endswith("flow-1") else "409")
                 "exploratory-testing-abc12345-flow-2",
             )
 
+    def test_rerunning_flow_setup_preserves_prior_owned_space(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "mode": "parallel",
+                        "environment": {
+                            "type": "user-provided",
+                            "url": "https://kibana.example.test",
+                            "space_id": "custom-base",
+                        },
+                        "credentials": {"api_key": "encoded-key"},
+                        "flows": [{"name": "created", "isolate": True}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            counter_path = root / "curl-count"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+counter_path = os.environ["FAKE_CURL_COUNTER"]
+count = int(open(counter_path).read()) if os.path.exists(counter_path) else 0
+with open(counter_path, "w") as counter:
+    counter.write(str(count + 1))
+body = json.loads(sys.argv[sys.argv.index("-d") + 1])
+print("ok")
+print("200" if count == 0 else "409")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_COUNTER"] = str(counter_path)
+
+            for _ in range(2):
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        str(CREATE_SCRIPT),
+                        "--session-dir",
+                        str(session_dir),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    env=environment,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+            config = json.loads(
+                (session_dir / "config.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                config["created_flow_spaces"],
+                ["exploratory-testing-abc12345-flow-1"],
+            )
+            self.assertEqual(config["reused_flow_spaces"], [])
+            self.assertTrue(config["session_resources"][0]["owned"])
+
+    def test_flow_space_creation_failure_is_not_reported_as_success(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "mode": "parallel",
+                        "environment": {
+                            "type": "user-provided",
+                            "url": "https://kibana.example.test",
+                            "space_id": "custom-base",
+                        },
+                        "credentials": {"api_key": "encoded-key"},
+                        "flows": [{"name": "failed", "isolate": True}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+print("error")
+print("500")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CREATE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+
     def test_base_space_validation_is_read_only_and_records_reuse(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
@@ -276,6 +417,67 @@ print("200")
             self.assertEqual(config["session_resources"][0]["owned"], False)
             self.assertTrue(config["session_resources"][0]["protected"])
 
+    def test_noise_index_is_registered_before_bulk_failure(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "es_url": "http://localhost:9220",
+                        },
+                        "session_resources": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import sys
+
+method = sys.argv[sys.argv.index("-X") + 1]
+print("200" if method == "PUT" else "500")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(NOISE_SCRIPT),
+                    "--es-url",
+                    "http://localhost:9220",
+                    "--username",
+                    "elastic",
+                    "--password",
+                    "changeme",
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            config = json.loads(
+                (session_dir / "config.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                config["session_resources"][0]["id"],
+                "logs-exploratory.noise-000001",
+            )
+            self.assertTrue(config["session_resources"][0]["owned"])
+
     def test_register_resource_cli_updates_the_manifest(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             session_dir = Path(raw_dir)
@@ -312,6 +514,163 @@ print("200")
             self.assertEqual(config["session_resources"][0]["kind"], "es_index")
             self.assertEqual(config["session_resources"][0]["owned"], True)
             self.assertEqual(config["session_resources"][0]["base_url"], "es_url")
+
+    def test_concurrent_resource_registrations_preserve_the_manifest(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            session_dir = Path(raw_dir)
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {"type": "stateful-classic"},
+                        "session_resources": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            processes = [
+                subprocess.Popen(
+                    [
+                        sys.executable,
+                        str(REGISTER_SCRIPT),
+                        "--session-dir",
+                        str(session_dir),
+                        "--kind",
+                        "es_index",
+                        "--id",
+                        f"resource-{index}",
+                        "--endpoint",
+                        f"/resource-{index}",
+                        "--owned",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                for index in range(20)
+            ]
+            results = [process.communicate() for process in processes]
+
+            self.assertTrue(
+                all(process.returncode == 0 for process in processes),
+                results,
+            )
+            config = json.loads(
+                (session_dir / "config.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                {resource["id"] for resource in config["session_resources"]},
+                {f"resource-{index}" for index in range(20)},
+            )
+
+    def test_cleanup_uses_remote_ccs_base_and_omits_kibana_xsrf_for_es(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {
+                                "remote": {
+                                    "es_url": "https://remote.es.test"
+                                }
+                            },
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "remote-index",
+                                "owned": True,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": "/remote-index",
+                                "base_url": "ccs_remote_es_url",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
+    log.write(" ".join(sys.argv[1:]))
+print("204")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            curl_args = log_path.read_text(encoding="utf-8")
+            self.assertIn("https://remote.es.test/remote-index", curl_args)
+            self.assertNotIn("kbn-xsrf", curl_args)
+
+    def test_legacy_space_cleanup_refuses_without_an_ownership_manifest(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            session_dir = Path(raw_dir)
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "http://localhost:5601",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "created_flow_spaces": ["exploratory-testing-flow-1"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(DELETE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("legacy", result.stderr.lower())
 
     def test_cleanup_dry_run_does_not_delete_or_include_reused_resources(self):
         with tempfile.TemporaryDirectory() as raw_dir:

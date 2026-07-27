@@ -3,9 +3,15 @@
 
 from __future__ import annotations
 
+import fcntl
+import json
+import os
 import re
 import secrets
-from typing import Any
+import tempfile
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Iterator
 
 
 SESSION_ID_PATTERN = re.compile(r"^[a-z0-9]{8,32}$")
@@ -22,6 +28,58 @@ RESOURCE_KINDS = frozenset(
         "ccs_remote_cluster_snapshot",
     }
 )
+
+
+def load_session_config(config_path: Path) -> dict[str, Any]:
+    with config_path.open(encoding="utf-8") as config_file:
+        config = json.load(config_file)
+    if not isinstance(config, dict):
+        raise ValueError("Session config must be a JSON object")
+    return config
+
+
+def write_session_config(config_path: Path, config: dict[str, Any]) -> None:
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=config_path.parent,
+            prefix=f".{config_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as config_file:
+            temporary_path = Path(config_file.name)
+            json.dump(config, config_file, indent=2)
+            config_file.write("\n")
+            config_file.flush()
+            os.fsync(config_file.fileno())
+        os.replace(temporary_path, config_path)
+        temporary_path = None
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
+@contextmanager
+def edit_session_config(
+    config_path: Path,
+    *,
+    persist: bool = True,
+) -> Iterator[dict[str, Any]]:
+    lock_path = config_path.with_name(f".{config_path.name}.lock")
+    with lock_path.open("a+", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        config = load_session_config(config_path)
+        try:
+            yield config
+        except BaseException:
+            raise
+        else:
+            if persist:
+                write_session_config(config_path, config)
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
 def validate_session_id(session_id: str) -> str:
@@ -104,6 +162,48 @@ def build_auth_args(config: dict[str, Any]) -> list[str]:
     return ["-u", f"{username}:{password}"]
 
 
+def resolve_resource_base_url(
+    config: dict[str, Any],
+    base_url_key: str,
+) -> str:
+    environment = config.get("environment", {})
+    if base_url_key == "ccs_remote_es_url":
+        ccs = environment.get("ccs", {})
+        remote = ccs.get("remote", {}) if isinstance(ccs, dict) else {}
+        base_url = remote.get("es_url") if isinstance(remote, dict) else None
+    else:
+        base_url = environment.get(base_url_key)
+    if not isinstance(base_url, str) or not base_url:
+        raise ValueError(f"Environment is missing {base_url_key!r}")
+    return base_url
+
+
+def http_status(stdout: str) -> str:
+    lines = stdout.strip().splitlines()
+    return lines[-1].strip() if lines else "000"
+
+
+def is_owned_resource(
+    config: dict[str, Any],
+    *,
+    kind: str,
+    resource_id: str,
+) -> bool:
+    session_id = require_session_id(config)
+    resources = config.get("session_resources")
+    if not isinstance(resources, list):
+        return False
+    expected_marker = resource_marker(session_id)
+    return any(
+        isinstance(resource, dict)
+        and resource.get("kind") == kind
+        and resource.get("id") == resource_id
+        and resource.get("owned") is True
+        and resource.get("marker") == expected_marker
+        for resource in resources
+    )
+
+
 def register_resource(
     config: dict[str, Any],
     *,
@@ -131,6 +231,12 @@ def register_resource(
         raise ValueError(
             "Owned non-protected Kibana spaces must use the session namespace"
         )
+    if not owned and is_owned_resource(
+        config,
+        kind=kind,
+        resource_id=resource_id,
+    ):
+        owned = True
     marker = resource_marker(session_id) if owned else None
     resource = {
         "kind": kind,
