@@ -15,8 +15,6 @@ import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-serv
  * - Built-in skills when `enable_elastic_capabilities` is true, excluding any
  *   marked `excludeFromElasticCapabilities` (those remain reachable via `skill_ids`)
  * - Additional skills from assigned plugins via `additionalSkillIds`
- * - When `isSkillIdsOverrideActive` is true, built-ins are restricted to those
- *   marked `includeWithSkillOverride` so the override acts as a strict filter.
  *
  * Returns the merged, deduplicated list.
  */
@@ -24,18 +22,11 @@ export const resolveAgentSkills = async ({
   skills,
   agentConfiguration,
   additionalSkillIds,
-  isSkillIdsOverrideActive = false,
 }: {
   // Allows SkillRegistry to be passed as well
   skills: Pick<SkillsService, 'bulkGet' | 'list'>;
   agentConfiguration: AgentConfiguration;
   additionalSkillIds?: string[];
-  /**
-   * When true, `skill_ids` was explicitly overridden at runtime. Built-in skills
-   * are restricted to those marked `includeWithSkillOverride` instead of the full
-   * `enable_elastic_capabilities` pool, so the override acts as a strict filter.
-   */
-  isSkillIdsOverrideActive?: boolean;
 }): Promise<InternalSkillDefinition[]> => {
   const skillIds = agentConfiguration.skill_ids ?? [];
   const enableElasticCapabilities = agentConfiguration.enable_elastic_capabilities ?? false;
@@ -51,30 +42,14 @@ export const resolveAgentSkills = async ({
     allExplicitIds.length > 0
       ? skills.bulkGet(allExplicitIds)
       : Promise.resolve(new Map<string, InternalSkillDefinition>()),
-    enableElasticCapabilities || isSkillIdsOverrideActive
+    enableElasticCapabilities
       ? skills.list({ type: 'built-in' })
       : Promise.resolve([] as InternalSkillDefinition[]),
   ]);
 
   const merged = new Map(explicitSkillsMap);
   for (const skill of builtinSkills) {
-    if (merged.has(skill.id)) continue;
-
-    // using explicit runtime override list
-    if (isSkillIdsOverrideActive) {
-      if (skill.includeWithSkillOverride) {
-        // Always include platform skills that opt in regardless of overrides.
-        merged.set(skill.id, skill);
-      } else if (
-        enableElasticCapabilities &&
-        !skill.excludeFromElasticCapabilities &&
-        skillIds.includes(skill.id)
-      ) {
-        // When the agent has elastic capabilities enabled, its built-in skill pool is still
-        // available — the override can name any of those skills to narrow to a subset.
-        merged.set(skill.id, skill);
-      }
-    } else if (!skill.excludeFromElasticCapabilities) {
+    if (!skill.excludeFromElasticCapabilities && !merged.has(skill.id)) {
       merged.set(skill.id, skill);
     }
   }
@@ -90,20 +65,13 @@ export const selectSkills = async ({
   skillsStore,
   agentConfiguration,
   additionalSkillIds,
-  isSkillIdsOverrideActive,
 }: {
   skills: SkillsService;
   skillsStore: WritableSkillsStore;
   agentConfiguration: AgentConfiguration;
   additionalSkillIds?: string[];
-  isSkillIdsOverrideActive?: boolean;
 }): Promise<InternalSkillDefinition[]> => {
-  const agentSkills = await resolveAgentSkills({
-    skills,
-    agentConfiguration,
-    additionalSkillIds,
-    isSkillIdsOverrideActive,
-  });
+  const agentSkills = await resolveAgentSkills({ skills, agentConfiguration, additionalSkillIds });
   for (const skill of agentSkills) {
     skillsStore.add(skill);
   }

@@ -138,23 +138,12 @@ export const runAgent = async ({
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId, { access: 'use' });
 
-  // When applying the skill_ids configuration override, we only want to use the intersection
-  // of overridden skills and skills available to the agent so that the skills override does
-  // not inadvertently grant the agent access to skills it wasn't originally configured with.
-
-  // When agent.configuration.skill_ids is undefined (all skills allowed), the intersection
-  // of "all skills" and the override is just the override itself.
-  const skillIdOverride = agentParams.configurationOverrides?.skill_ids;
-  const effectiveSkillIdsToUse =
-    skillIdOverride !== undefined && agent.configuration.skill_ids?.length
-      ? skillIdOverride.filter((id) => agent.configuration.skill_ids!.includes(id))
-      : skillIdOverride;
+  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
   const agentWithOverrides = {
     ...agent,
     configuration: {
       ...agent.configuration,
       ...(agentParams.configurationOverrides || {}),
-      ...(skillIdOverride !== undefined ? { skill_ids: effectiveSkillIdsToUse } : {}),
     },
   };
   const effectiveConfiguration = await agentsService.resolveAgentConfiguration({

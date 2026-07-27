@@ -142,5 +142,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools' | 'skill_ids'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;

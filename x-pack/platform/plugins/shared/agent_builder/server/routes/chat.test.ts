@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConversationOriginType, ExecutionStatus } from '@kbn/agent-builder-common';
 import { of } from 'rxjs';
-import { internalApiPath } from '../../common/constants';
+import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
   conversePayloadSchema,
@@ -80,6 +80,55 @@ describe('conversePayloadSchema', () => {
         },
       })
     ).toThrow(/access_mode/);
+  });
+
+  it('accepts configuration_overrides with skill_ids', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: {
+          skill_ids: ['skill-a', 'skill-b'],
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects configuration_overrides.skill_ids exceeding 100 entries', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: {
+          skill_ids: Array.from({ length: 101 }, (_, i) => `skill-${i}`),
+        },
+      })
+    ).toThrow(/skill_ids/);
+  });
+
+  it('accepts configuration_overrides with enable_elastic_capabilities true', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: { enable_elastic_capabilities: true },
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts configuration_overrides with enable_elastic_capabilities false', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: { enable_elastic_capabilities: false },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects configuration_overrides.enable_elastic_capabilities when not a boolean', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        configuration_overrides: { enable_elastic_capabilities: 'yes' },
+      })
+    ).toThrow(/enable_elastic_capabilities/);
   });
 });
 
@@ -614,5 +663,118 @@ describe('registerChatRoutes', () => {
       },
     });
     expect(executeAgent).not.toHaveBeenCalled();
+  });
+
+  describe('skill_ids override validation', () => {
+    const conversePath = `${publicApiPath}/converse`;
+
+    const buildRouter = (onConverse: (handler: Function) => void) => ({
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: Function) => {
+            if (config.path === conversePath) {
+              onConverse(handler);
+            }
+          }),
+        })),
+      },
+    });
+
+    const baseContext = {
+      core: Promise.resolve({}),
+      licensing: Promise.resolve({
+        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      }),
+      agentBuilder: Promise.resolve({
+        spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      }),
+    };
+
+    it('rejects unknown skill ids with a 400', async () => {
+      let converseHandler: Function | undefined;
+      const executeAgent = jest.fn();
+      const skillRegistry = { has: jest.fn().mockResolvedValue(false) };
+
+      const router = buildRouter((h) => {
+        converseHandler = h;
+      });
+
+      registerChatRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          execution: { executeAgent },
+          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
+        }),
+        coreSetup: {} as never,
+        pluginsSetup: {},
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      const response = {
+        ok: jest.fn(),
+        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+        forbidden: jest.fn(),
+        notFound: jest.fn(),
+      };
+
+      const result = await converseHandler!(
+        baseContext,
+        {
+          body: {
+            agent_id: 'agent-1',
+            input: 'Hello',
+            configuration_overrides: { skill_ids: ['unknown-skill'] },
+          },
+        },
+        response
+      );
+
+      expect(result).toMatchObject({ status: 400 });
+      expect(result.payload.message).toMatch(/unknown-skill/);
+      expect(executeAgent).not.toHaveBeenCalled();
+    });
+
+    it('proceeds when all skill ids are known', async () => {
+      let converseHandler: Function | undefined;
+      const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
+      const skillRegistry = { has: jest.fn().mockResolvedValue(true) };
+
+      const router = buildRouter((h) => {
+        converseHandler = h;
+      });
+
+      registerChatRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          execution: { executeAgent },
+          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
+        }),
+        coreSetup: {} as never,
+        pluginsSetup: {},
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      const response = {
+        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+        forbidden: jest.fn(),
+        notFound: jest.fn(),
+      };
+
+      await converseHandler!(
+        baseContext,
+        {
+          body: {
+            agent_id: 'agent-1',
+            input: 'Hello',
+            configuration_overrides: { skill_ids: ['known-skill'] },
+          },
+        },
+        response
+      );
+
+      expect(skillRegistry.has).toHaveBeenCalledWith('known-skill');
+      expect(executeAgent).toHaveBeenCalled();
+    });
   });
 });

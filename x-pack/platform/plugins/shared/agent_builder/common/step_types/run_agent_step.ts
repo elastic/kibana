@@ -114,6 +114,10 @@ export const InputSchema = z.object({
         .max(50)
         .optional()
         .describe('Skill IDs to enable for this execution, replacing the stored skill list.'),
+      enable_elastic_capabilities: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable built-in Elastic skills for this execution.'),
     })
     .optional()
     .describe(

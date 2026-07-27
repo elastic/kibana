@@ -138,19 +138,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
 
-  // If skills override is configured, we only want the intersection of plugin skills and
-  // explicit override
-  const overrideSkillIds = configurationOverrides?.skill_ids;
-  const isSkillIdsOverrideActive = overrideSkillIds !== undefined;
-  const filteredPluginSkillIds = isSkillIdsOverrideActive
-    ? pluginSkillIds.filter((id) => overrideSkillIds!.includes(id))
-    : pluginSkillIds;
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: filteredPluginSkillIds,
-    isSkillIdsOverrideActive,
+    additionalSkillIds: pluginSkillIds,
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
