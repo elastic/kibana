@@ -14,6 +14,7 @@ import { CreateHandler, FileKindRouter } from '../types';
 
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
 import type { FileKind, FileShareJSONWithToken } from '../../../../common/types';
+import { fileId as fileIdSchema } from '../../common_schemas';
 import { getById } from '../helpers';
 
 export const method = 'post' as const;
@@ -22,7 +23,7 @@ const nameRegex = /^[a-z0-9-_]+$/i;
 
 const rt = {
   params: schema.object({
-    fileId: schema.string(),
+    fileId: fileIdSchema,
   }),
   body: schema.object({
     validUntil: schema.maybe(schema.number()),
