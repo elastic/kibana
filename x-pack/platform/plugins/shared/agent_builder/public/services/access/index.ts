@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AgentBuilderAccessChecker } from './access';
+export { AgentBuilderAccessChecker, deniedEmbeddableChatAccess } from './access';
+export { createPublicEmbeddableChatAccess } from './create_public_embeddable_chat_access';

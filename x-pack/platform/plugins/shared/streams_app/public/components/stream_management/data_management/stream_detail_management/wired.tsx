@@ -97,7 +97,7 @@ function WiredStreamDetailManagementContent({
 
   const isProcessingEnabled = !definition.replicated;
   const {
-    features: { canvas, significantEventsDiscovery },
+    features: { canvas, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -120,7 +120,6 @@ function WiredStreamDetailManagementContent({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
@@ -155,7 +154,6 @@ function WiredStreamDetailManagementContent({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -178,7 +176,6 @@ function WiredStreamDetailManagementContent({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <PendingRootDataStreamCallout
@@ -313,7 +310,7 @@ function WiredStreamDetailManagementContent({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"

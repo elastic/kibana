@@ -75,12 +75,14 @@ export const toListExecutionHistoryArgs = ({
   search,
   rule_ids: ruleIds,
   outcome,
+  episode_ids: episodeIds,
 }: ListPolicyExecutionHistoryRequest): Omit<ListExecutionHistoryArgs, 'request'> => ({
   page,
   perPage,
   search,
   ruleIds,
   outcome,
+  episodeIds,
 });
 
 export const toCountNewEventsSinceArgs = ({

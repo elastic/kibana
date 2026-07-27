@@ -67,7 +67,6 @@ import {
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
-import { ComposeDiscoverTimeFieldContextProvider } from './compose_discover_time_field_context';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -181,14 +180,12 @@ export interface ComposeDiscoverFlyoutProps {
   /**
    * Called with id + update payload when the user submits in edit mode. When the user
    * configures simple actions, `notifications` carries the captured action draft list so
-   * the caller can create or update linked action policies; otherwise it is `undefined`.
-   * `notificationsDirty` is true only when the user changed the simple actions in this session.
+   * the caller can create linked action policies; otherwise it is `undefined`.
    */
   onUpdateRule?: (
     id: string,
     payload: ReturnType<typeof composeFormToUpdateRequest>,
-    notifications?: RuleNotificationsValue,
-    notificationsDirty?: boolean
+    notifications?: RuleNotificationsValue
   ) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
@@ -395,10 +392,6 @@ export function ComposeDiscoverFlyout({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
-  const notificationsDirtyRef = useRef(false);
-  if (methods.formState.dirtyFields.notifications) {
-    notificationsDirtyRef.current = true;
-  }
 
   /*
    * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
@@ -503,6 +496,7 @@ export function ComposeDiscoverFlyout({
     onTimeFieldChange: handleResolvedTimeFieldChange,
     http: baseServices.http,
     dataViews: baseServices.dataViews,
+    search: baseServices.data.search.search,
   });
 
   /*
@@ -872,12 +866,7 @@ export function ComposeDiscoverFlyout({
     if (isCreate) {
       onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(
-        ruleId,
-        composeFormToUpdateRequest(values, builderType),
-        values.notifications,
-        notificationsDirtyRef.current || Boolean(methods.formState.dirtyFields.notifications)
-      );
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
     }
   });
 
@@ -1191,7 +1180,7 @@ export function ComposeDiscoverFlyout({
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <ComposeDiscoverTimeFieldContextProvider value={{ timeFieldOptions, isTimeFieldResolved }}>
+        <>
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
@@ -1329,7 +1318,7 @@ export function ComposeDiscoverFlyout({
                 query={sandboxQuery}
                 onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
                 tabs={sandboxTabs}
-                timeField={sandboxTimeField || '@timestamp'}
+                timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
                 timeFieldOptions={timeFieldOptions}
                 isTimeFieldResolved={sandboxIsTimeFieldResolved}
@@ -1350,7 +1339,7 @@ export function ComposeDiscoverFlyout({
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
-        </ComposeDiscoverTimeFieldContextProvider>
+        </>
       </FormProvider>
     </RuleFormProvider>
   );

@@ -22,15 +22,7 @@ import type {
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
-  RuleRegistryPluginStartContract as RuleRegistryPluginStart,
-} from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -53,9 +45,9 @@ export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
-  ruleRegistry: RuleRegistryPluginSetup;
+  /** Setup only requires plugin presence; Alerting v2 exposes its usable contract at start. */
+  alertingVTwo: void;
   features: FeaturesPluginSetup;
   usageCollection: UsageCollectionSetup;
   fieldsMetadata: FieldsMetadataServerSetup;
@@ -72,11 +64,9 @@ export interface SignificantEventsPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
-  taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
-  alertingVTwo?: AlertingV2ServerStart;
+  alertingVTwo: AlertingV2ServerStart;
   inference: InferenceServerStart;
-  ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;

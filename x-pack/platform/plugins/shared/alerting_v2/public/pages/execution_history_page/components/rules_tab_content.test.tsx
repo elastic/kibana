@@ -16,6 +16,8 @@ const mockUseFetchRuleExecutions = jest.fn();
 const mockRefetch = jest.fn();
 const mockUseAlertingRulesCache = jest.fn();
 
+let mockCanReadRules = true;
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'settings') {
@@ -23,6 +25,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     }
     if (token === 'http') {
       return {};
+    }
+    if (typeof token === 'function') {
+      return {
+        canRead: () => mockCanReadRules,
+        canWrite: () => mockCanReadRules,
+        can: () => mockCanReadRules,
+      };
     }
     return {};
   },
@@ -78,6 +87,7 @@ const renderComponent = () =>
 describe('RulesTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanReadRules = true;
     mockUseAlertingRulesCache.mockReturnValue({
       rulesCache: {
         'rule-1': { id: 'rule-1', metadata: { name: 'My Rule' } },
@@ -293,5 +303,35 @@ describe('RulesTabContent', () => {
     renderComponent();
 
     expect(screen.getByText(/of 100/)).toBeInTheDocument();
+  });
+
+  describe('when the user cannot read rules', () => {
+    beforeEach(() => {
+      mockCanReadRules = false;
+    });
+
+    it('does not request rule names (empty ruleIds) and renders rule ids as plain text', () => {
+      // With an empty ruleIds list the real hook resolves no names, so the cache is empty.
+      mockUseAlertingRulesCache.mockReturnValue({
+        rulesCache: {},
+        loading: false,
+        error: undefined,
+      });
+      mockResult({
+        data: {
+          items: [buildItem()],
+          total: 1,
+          page: 1,
+          perPage: 10,
+        },
+      });
+      renderComponent();
+
+      expect(mockUseAlertingRulesCache).toHaveBeenLastCalledWith(
+        expect.objectContaining({ ruleIds: [] })
+      );
+      expect(screen.getByText('rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleExecutionHistoryRuleLink-rule-1')).not.toBeInTheDocument();
+    });
   });
 });

@@ -54,6 +54,20 @@ describe('ListExecutionHistoryRoute', () => {
     });
   });
 
+  it('forwards episode_ids from the query to the client as episodeIds', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { episode_ids: ['ep-1', 'ep-2'] },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+    );
+  });
+
   it('passes undefined params when query is empty (defaults applied by client)', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();
