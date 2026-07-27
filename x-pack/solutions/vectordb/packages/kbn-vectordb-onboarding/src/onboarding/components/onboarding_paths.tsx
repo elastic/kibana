@@ -22,7 +22,7 @@ export const OnboardingPaths = ({ origin }: { origin: string }) => {
 
   return (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size={origin === ONBOARDING_PATH ? 'xs' : 'xxxs'}>
         <h2>
           {i18n.translate('vectordbOnboarding.pathSelection.sectionHeader', {
             defaultMessage: 'Follow these guides to add embeddings:',
