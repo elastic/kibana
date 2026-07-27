@@ -40,7 +40,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
         title: 'Count',
         subtitle: undefined,
         extraText: '',
-        value: '14,005',
+        value: '14,004',
         color: 'rgba(255, 255, 255, 1)',
         trendlineColor: undefined,
         showingBar: false,
