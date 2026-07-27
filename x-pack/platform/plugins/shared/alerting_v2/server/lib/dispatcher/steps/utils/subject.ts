@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-/** Separator between the space id and the vendor name in an external subject. */
 export const SUBJECT_SEPARATOR = '::';
+
+export interface SubjectInput {
+  source?: string | null;
+  rule_id?: string | null;
+  space_id?: string | null;
+}
 
 /**
  * Returns the series identity subject for an alert episode.
@@ -19,17 +24,10 @@ export const SUBJECT_SEPARATOR = '::';
  * (see `buildGroupHash`), so the space is folded into the external subject to
  * keep episode identity, throttling and suppression isolated per space.
  *
- * Must stay in sync with `SUBJECT_EVAL` in `../../queries.ts`.
+ * Must stay in sync with `SUBJECT_EVAL` in `../../queries.ts`. Both queries drop
+ * rows whose subject is null, so the throws below are unreachable from query data.
  */
-export const episodeSubject = ({
-  source,
-  rule_id,
-  space_id,
-}: {
-  source?: string | null;
-  rule_id?: string | null;
-  space_id?: string | null;
-}): string => {
+export const episodeSubject = ({ source, rule_id, space_id }: SubjectInput): string => {
   if (source != null && source !== 'internal') {
     if (space_id == null) {
       throw new Error(

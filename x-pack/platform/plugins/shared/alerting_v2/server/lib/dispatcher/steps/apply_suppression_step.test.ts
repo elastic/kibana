@@ -229,7 +229,7 @@ describe('applySuppression', () => {
     expect(dispatchable[0].episode_id).toBe('ep-external');
   });
 
-  it('does not leak an external suppression across spaces', () => {
+  it('does not leak an external series suppression across spaces', () => {
     const externalEpisode = (spaceId: string) =>
       createAlertEpisode({
         source: 'pagerduty',
@@ -238,8 +238,8 @@ describe('applySuppression', () => {
         group_hash: 'pd-incident-1',
         episode_id: 'pd-ep-1',
       });
-    // Same vendor, same group_hash and same episode_id in both spaces: only the
-    // space-a series has been acked.
+    // Same vendor and group_hash in both spaces; the ack is series-scoped
+    // (episode_id: null) and applies to space-a only.
     const ackInSpaceA = createAlertEpisodeSuppression({
       source: 'pagerduty',
       rule_id: null,

@@ -118,7 +118,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     const unmatched = aggregateUnmatchedBySubject(
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
-    for (const [, group] of unmatched) {
+    for (const group of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, group });
     }
 
@@ -236,23 +236,22 @@ function aggregateByPolicy(
 
 function aggregateUnmatchedBySubject(
   unmatched: ReturnType<typeof getUnmatchedEpisodes>
-): Map<string, UnmatchedGroup> {
+): UnmatchedGroup[] {
   const bySubject = new Map<string, UnmatchedGroup>();
   for (const episode of unmatched) {
-    // Key by (subject, space_id) so external episodes from different spaces get separate log events.
-    const key = `${episodeSubject(episode)}:${episode.space_id}`;
-    let group = bySubject.get(key);
+    const subject = episodeSubject(episode);
+    let group = bySubject.get(subject);
     if (!group) {
       group = {
         episodeIds: new Set(),
         space_id: episode.space_id,
         ruleId: episode.rule_id,
       };
-      bySubject.set(key, group);
+      bySubject.set(subject, group);
     }
     group.episodeIds.add(episode.episode_id);
   }
-  return bySubject;
+  return [...bySubject.values()];
 }
 
 function ruleRef({ id, spaceId }: { id: string; spaceId: string | undefined }): SavedObjectRef {

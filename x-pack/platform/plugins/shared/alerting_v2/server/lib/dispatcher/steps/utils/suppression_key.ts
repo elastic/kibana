@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { episodeSubject } from './subject';
-
-interface SubjectInput {
-  source?: string | null;
-  rule_id?: string | null;
-  space_id?: string | null;
-}
+import { episodeSubject, type SubjectInput } from './subject';
 
 /**
  * Builds the episode-scoped composite suppression key:

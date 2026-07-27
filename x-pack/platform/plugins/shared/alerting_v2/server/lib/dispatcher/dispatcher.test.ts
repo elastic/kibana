@@ -73,26 +73,31 @@ function mockRulesFindByIds(
 
 function mockNpFindAllDecrypted(
   spy: jest.SpyInstance,
-  policyIds: string[],
+  policies: Array<string | { id: string; spaceId: string }>,
   overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
   spy.mockResolvedValue(
-    policyIds.map((id) => ({
-      id,
-      attributes: {
-        name: `Policy ${id}`,
-        description: `Description for ${id}`,
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-        auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
-        createdBy: null,
-        updatedBy: null,
-        createdAt: '2026-01-01T00:00:00.000Z',
-        updatedAt: '2026-01-01T00:00:00.000Z',
-        ...overrides,
-      },
-      namespaces: ['default'],
-    }))
+    policies.map((policy) => {
+      const { id, spaceId } =
+        typeof policy === 'string' ? { id: policy, spaceId: 'default' } : policy;
+
+      return {
+        id,
+        attributes: {
+          name: `Policy ${id}`,
+          description: `Description for ${id}`,
+          enabled: true,
+          destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
+          auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          ...overrides,
+        },
+        namespaces: [spaceId],
+      };
+    })
   );
 }
 
@@ -728,22 +733,10 @@ describe('DispatcherService', () => {
         },
       ];
 
-      mockFindAllDecrypted.mockResolvedValue(
-        ['policy_space_a', 'policy_space_b'].map((id, index) => ({
-          id,
-          attributes: {
-            name: `Policy ${id}`,
-            enabled: true,
-            destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-            auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
-            createdBy: null,
-            updatedBy: null,
-            createdAt: '2026-01-01T00:00:00.000Z',
-            updatedAt: '2026-01-01T00:00:00.000Z',
-          },
-          namespaces: [index === 0 ? 'space-a' : 'space-b'],
-        }))
-      );
+      mockNpFindAllDecrypted(mockFindAllDecrypted, [
+        { id: 'policy_space_a', spaceId: 'space-a' },
+        { id: 'policy_space_b', spaceId: 'space-b' },
+      ]);
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(

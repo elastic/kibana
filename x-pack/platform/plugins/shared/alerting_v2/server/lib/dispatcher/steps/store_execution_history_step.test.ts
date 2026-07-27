@@ -446,6 +446,23 @@ describe('StoreExecutionHistoryStep', () => {
       expect(episodeSets).toContainEqual(['dd-1']);
     });
 
+    it('same vendor in two spaces produces separate unmatched events', async () => {
+      const episodes = ['space-a', 'space-b'].map((spaceId) =>
+        createAlertEpisode({
+          source: 'pagerduty',
+          rule_id: null,
+          space_id: spaceId,
+          episode_id: `pd-${spaceId}`,
+        })
+      );
+
+      await step.execute(createDispatcherPipelineState({ dispatchable: episodes }));
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      const spaces = eventLogger.logEvent.mock.calls.map(([event]) => event?.kibana?.space_ids);
+      expect(spaces).toEqual([['space-a'], ['space-b']]);
+    });
+
     it('external episode uses episode.space_id for the event space, not a rule space', async () => {
       const pdEpisode = createAlertEpisode({
         source: 'pagerduty',

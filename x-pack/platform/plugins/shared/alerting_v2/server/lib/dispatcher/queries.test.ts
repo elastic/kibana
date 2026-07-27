@@ -425,7 +425,20 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
 
     expect(requests[0].query).toContain('source = LAST(source, @timestamp)');
     expect(requests[0].query).toContain('space_id = LAST(space_id, @timestamp)');
-    expect(requests[0].query).toContain('last_snooze_action, source, space_id');
+  });
+
+  it('keeps the expected output columns', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain(
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id'
+    );
+  });
+
+  it('drops rows whose subject could not be resolved', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('WHERE subject IS NOT NULL');
   });
 
   it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {

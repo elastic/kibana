@@ -59,9 +59,7 @@ const PAIR_SEPARATOR = '::';
 
 // Shared subject-derivation expression used in both dispatchable and suppression queries.
 // null/absent source is treated as 'internal' for backward compat with legacy action rows.
-// External subjects are prefixed with the space id because a vendor name is not space-aware:
-// without it, two spaces ingesting the same vendor with the same group_hash would share
-// throttling and suppression state. See `episodeSubject`, which must produce the same key.
+// Must produce the same key as `episodeSubject`, which documents why the space is folded in.
 const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, ${SUBJECT_SEPARATOR}, source))`;
 
 // ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
@@ -127,6 +125,7 @@ export const getAlertEpisodeSuppressionsQueries = (
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
         | EVAL ${SUBJECT_EVAL}
+        | WHERE subject IS NOT NULL
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
