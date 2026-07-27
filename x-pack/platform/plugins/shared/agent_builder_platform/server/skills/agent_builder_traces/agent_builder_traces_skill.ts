@@ -103,6 +103,7 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 - \`attributes.gen_ai.provider.name\` — provider name.
 - \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces).
 - \`attributes.gen_ai.conversation.id\` — conversation id (hashed unless \`agentBuilder:tracing:includeRealIds\` is on).
+- \`attributes.elastic.conversation.title\` — conversation title (omitted unless \`agentBuilder:tracing:includeRealIds\` is on).
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.
 - \`status.code\` — equals \`"Error"\` for failed spans.
 

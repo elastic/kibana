@@ -31,6 +31,7 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -229,8 +230,12 @@ const handleConversationExecution = async ({
       spaceId,
       opikHeaders,
     },
-    () =>
-      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+    (span) => {
+      title$.subscribe((title) => {
+        span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+      });
+
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
           try {
@@ -280,7 +285,8 @@ const handleConversationExecution = async ({
           conversationId: conversation.id,
           executionId: execution.executionId,
         })
-      )
+      );
+    }
   );
 };
 
