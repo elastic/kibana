@@ -11,19 +11,21 @@ import { test } from '../../fixtures';
 import { NO_CASES_ROLE } from '../../fixtures/roles';
 
 // Ported from the "no observability privileges" suite in the FTR
-// feature_controls/observability_security.ts. A user without any cases
-// privilege hits the "Kibana feature privileges required" page.
+// feature_controls/observability_security.ts. A user without Observability or
+// Cases privileges cannot access the Observability app at all.
 test.describe('Observability cases - no privileges', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(NO_CASES_ROLE);
   });
 
-  test('returns the feature-privileges-required page', async ({ pageObjects }) => {
+  test('returns Application not found when the Observability app is inaccessible', async ({
+    page,
+    pageObjects,
+  }) => {
     const { casesPage } = pageObjects;
     await casesPage.gotoCasesList();
-    await expect(casesPage.noFeaturePermissions).toBeVisible();
-    await expect(casesPage.noFeaturePermissions).toContainText(
-      'Kibana feature privileges required'
-    );
+    const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
+    await expect(notFoundContent).toBeVisible();
+    await expect(notFoundContent).toContainText('Application not found');
   });
 });

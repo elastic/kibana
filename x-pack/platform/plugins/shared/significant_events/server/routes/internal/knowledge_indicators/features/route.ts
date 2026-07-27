@@ -46,9 +46,9 @@ export const upsertFeatureRoute = createServerRoute({
     server,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -108,9 +108,9 @@ export const deleteFeatureRoute = createServerRoute({
     logger,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -160,9 +160,9 @@ export const listFeaturesRoute = createServerRoute({
     server,
   }): Promise<{ features: Feature[] }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
@@ -217,7 +217,6 @@ export const listAllFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({
       server,
       licensing: scopedClients.licensing,
-      uiSettingsClient: scopedClients.uiSettingsClient,
     });
 
     const streams = await scopedClients.streamsClient.listStreams();
@@ -288,9 +287,9 @@ export const bulkFeaturesRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const {
       path: { name },
@@ -359,9 +358,9 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { licensing, uiSettingsClient, streamsClient } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 

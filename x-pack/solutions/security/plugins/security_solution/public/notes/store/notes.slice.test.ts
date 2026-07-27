@@ -5,8 +5,8 @@
  * 2.0.
  */
 import * as uuid from 'uuid';
-import type { SerializedError } from '@reduxjs/toolkit';
-import { miniSerializeError } from '@reduxjs/toolkit';
+import type { SerializedError } from 'redux-toolkit-v1';
+import { miniSerializeError } from 'redux-toolkit-v1';
 import type { NotesState } from './notes.slice';
 import {
   createNote,

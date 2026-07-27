@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { parse as yamlParse } from 'yaml';
+import { isBoom } from '@hapi/boom';
 import {
   UpdateTemplateInputSchema,
   ParsedTemplateDefinitionSchema,
@@ -79,6 +80,12 @@ export const putTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to update template: ${error}`,
         error,

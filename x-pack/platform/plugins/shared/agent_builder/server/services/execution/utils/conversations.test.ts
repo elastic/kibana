@@ -10,7 +10,7 @@ import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationAccessControlMode,
-  ConversationSourceType,
+  createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
@@ -34,28 +34,27 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('CREATE');
       });
 
-      it('returns UPDATE operation when no conversationId is provided and source matches an existing conversation', async () => {
+      it('returns UPDATE operation when no conversationId is provided and origin matches an existing conversation', async () => {
         const conversationClient = createConversationClientMock();
-        const source = {
-          type: ConversationSourceType.Slack,
+        const origin = {
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         };
         const existingConversation = createEmptyConversation({
           id: 'existing-conversation',
-          source,
+          origin,
         });
-        conversationClient.getBySource.mockResolvedValue(existingConversation);
+        conversationClient.getByOrigin.mockResolvedValue(existingConversation);
 
         const result = await getConversation({
           agentId: 'test-agent',
           conversationId: undefined,
           conversationClient,
-          source,
+          origin,
         });
 
         expect(result.operation).toBe('UPDATE');
         expect(result.id).toBe('existing-conversation');
-        expect(conversationClient.getBySource).toHaveBeenCalledWith(source);
+        expect(conversationClient.getByOrigin).toHaveBeenCalledWith(origin);
       });
 
       it('defaults access control to private for new conversation placeholders', async () => {
@@ -131,6 +130,29 @@ describe('conversations utils', () => {
         });
 
         expect(result.operation).toBe('UPDATE');
+      });
+
+      it('throws not found instead of creating when autoCreateConversationWithId=true and the conversation exists but is not accessible', async () => {
+        // e.g. another user's private conversation with the same id: exists() reports
+        // physical existence, and the converse-gated get() denies access
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(true);
+        conversationClient.get.mockRejectedValue(
+          createConversationNotFoundError({ conversationId: 'existing-conversation' })
+        );
+
+        await expect(
+          getConversation({
+            agentId: 'test-agent',
+            conversationId: 'existing-conversation',
+            autoCreateConversationWithId: true,
+            conversationClient,
+          })
+        ).rejects.toMatchObject({
+          message: 'Conversation existing-conversation not found',
+        });
+
+        expect(conversationClient.create).not.toHaveBeenCalled();
       });
 
       it('ignores access control when auto-created conversation already exists', async () => {

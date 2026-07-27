@@ -27,6 +27,7 @@ import { useRefreshCases } from '../../../all_cases/use_on_refresh_cases';
 import { useBulkActions } from '../../../all_cases/use_bulk_actions';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
+import { VIEW_TOGGLE_LIST_ID, type ViewToggleId } from '../constants';
 
 interface Props {
   isSelectorView?: boolean;
@@ -36,6 +37,9 @@ interface Props {
   pagination: Pagination;
   onClearFilters: () => void;
   showClearFiltersButton: boolean;
+  viewMode: ViewToggleId;
+  onSelectAll: () => void;
+  totalOnPage: number;
 }
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
@@ -47,6 +51,9 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     pagination,
     onClearFilters,
     showClearFiltersButton,
+    viewMode,
+    onSelectAll,
+    totalOnPage,
   }) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
@@ -212,6 +219,34 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : null}
+                  {viewMode === VIEW_TOGGLE_LIST_ID &&
+                    !isSelectorView &&
+                    selectedCases.length > 0 && (
+                      <>
+                        {selectedCases.length < totalOnPage && (
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              size="xs"
+                              flush="left"
+                              onClick={onSelectAll}
+                              data-test-subj="all-cases-select-all-link"
+                            >
+                              {i18n.SELECT_ALL_CASES}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        )}
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            flush="left"
+                            onClick={deselectCases}
+                            data-test-subj="all-cases-clear-selection-link"
+                          >
+                            {i18n.CLEAR_SELECTION}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </>
+                    )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

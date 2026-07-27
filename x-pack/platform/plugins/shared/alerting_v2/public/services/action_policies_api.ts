@@ -12,9 +12,9 @@ import type {
   BulkActionActionPoliciesBody,
   CreateActionPolicyData,
   ActionPolicyResponse,
-  MatchActionPoliciesForRuleResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 export interface BulkActionActionPoliciesResponse {
@@ -58,13 +58,6 @@ export class ActionPoliciesApi {
         sortOrder: params.sortOrder,
       },
     });
-  }
-
-  public async matchActionPoliciesForRule(ruleId: string) {
-    return this.http.post<MatchActionPoliciesForRuleResponse>(
-      `${ALERTING_V2_ACTION_POLICY_API_PATH}/_match_for_rule`,
-      { body: JSON.stringify({ rule: { id: ruleId } }) }
-    );
   }
 
   public async createActionPolicy(data: CreateActionPolicyData) {
@@ -125,10 +118,10 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async fetchDataFields(matcher?: string) {
+  public async fetchRuleEventFields(matcher?: string) {
     const trimmed = matcher?.trim();
     return this.http.get<string[]>(
-      `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+      ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
       trimmed ? { query: { matcher: trimmed } } : {}
     );
   }

@@ -33,7 +33,9 @@ export const SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY = 'systemPromptTable';
 export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
 export const ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY =
   'anonymizationPromptContextTable';
-export const MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY = 'movingAttacksCallout';
+// The `.v2` suffix bumps the storage key for 9.5 so users who dismissed the moving-attacks
+// callout in 9.4 see the updated callout again.
+export const MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY = 'movingAttacksCallout.v2';
 
 /** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
 export const DEFAULT_LATEST_ALERTS = 100;

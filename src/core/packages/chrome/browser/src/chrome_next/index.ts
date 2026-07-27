@@ -18,6 +18,7 @@ export type {
   AppHeaderMetadataItem,
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
   AppHeaderTab,
   AppHeaderTabAction,
   AppHeaderTabActions,

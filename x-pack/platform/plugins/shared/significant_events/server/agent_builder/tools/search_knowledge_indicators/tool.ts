@@ -84,12 +84,11 @@ export function createSearchKnowledgeIndicatorsTool({
     tags: ['streams', 'significant_events'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
+      handler: async (): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({
             server,
             licensing: server.licensing,
-            uiSettingsClient: uiSettings,
           });
           return { status: 'available' };
         } catch (error) {
@@ -117,7 +116,6 @@ export function createSearchKnowledgeIndicatorsTool({
         await assertSignificantEventsAccess({
           server,
           licensing: scopedClients.licensing,
-          uiSettingsClient: scopedClients.uiSettingsClient,
         });
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

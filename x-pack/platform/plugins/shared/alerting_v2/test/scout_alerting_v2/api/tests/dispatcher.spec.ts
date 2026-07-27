@@ -61,6 +61,7 @@ const TEST_RULE_IDS = [
   'rule-006',
   'rule-007',
   'rule-008',
+  'rule-009',
   'rule-matcher',
   'rule-groupby',
   'rule-mw',
@@ -619,9 +620,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: eventTs(165),
         }),
-        // rule-004: two series, 4 events each
+        // rule-004: three series, 4 events each
         ...buildSeriesEvents('rule-004', 'rule-004-series-1', 'rule-004-series-1-episode-1', 180),
         ...buildSeriesEvents('rule-004', 'rule-004-series-2', 'rule-004-series-2-episode-1', 180),
+        ...buildSeriesEvents('rule-004', 'rule-004-series-3', 'rule-004-series-3-episode-1', 180),
         // rule-005: two series, 4 events each
         ...buildSeriesEvents('rule-005', 'rule-005-series-1', 'rule-005-series-1-episode-1', 180),
         ...buildSeriesEvents('rule-005', 'rule-005-series-2', 'rule-005-series-2-episode-1', 180),
@@ -632,7 +634,13 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // User actions:
       //  - rule-001 ack then unack → suppression cancelled → fire
       //  - rule-002 ack only → suppress
-      //  - rule-004 series-1+2 snoozed → suppress (no episode_id, expires far in future)
+      //  - rule-004 series-1 snoozed with a future expiry, series-2 snoozed
+      //    indefinitely (no expiry), series-3 has an expired snooze followed
+      //    by an indefinite one → all three suppress (no episode_id). The
+      //    indefinite snooze guards against the suppression query dropping
+      //    null-expiry rows (ES|QL null comparison); series-3 guards against
+      //    the latest-snooze aggregation skipping the null expiry and picking
+      //    up the older, expired one.
       //  - rule-005 series-1 deactivated → suppress; series-2 unaffected → fire
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
       const userActions: AlertAction[] = [
@@ -674,7 +682,24 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           actionType: 'snooze',
           lastSeriesEventTimestamp: eventTs(180),
           timestamp: actionTs(178),
-          expiry: futureExpiry,
+          // No expiry: an indefinite snooze. Must still suppress.
+        }),
+        buildAlertAction({
+          ruleId: 'rule-004',
+          groupHash: 'rule-004-series-3',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(180),
+          timestamp: actionTs(178),
+          // Expired long before the events: superseded by the snooze below.
+          expiry: new Date('2020-01-01T00:00:00.000Z').toISOString(),
+        }),
+        buildAlertAction({
+          ruleId: 'rule-004',
+          groupHash: 'rule-004-series-3',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(180),
+          timestamp: actionTs(176),
+          // No expiry: the latest snooze intent is indefinite. Must suppress.
         }),
         buildAlertAction({
           ruleId: 'rule-005',
@@ -695,10 +720,11 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       //  - rule-003 series-2 ep2:   fire     (latest active)
       //  - rule-004 series-1:       suppress (snoozed)
       //  - rule-004 series-2:       suppress (snoozed)
+      //  - rule-004 series-3:       suppress (snoozed)
       //  - rule-005 series-1:       suppress (deactivated)
       //  - rule-005 series-2:       fire
-      // Total: 5 fire + 4 suppress = 9.
-      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(9, {
+      // Total: 5 fire + 5 suppress = 10.
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(10, {
         actionTypes: ['fire', 'suppress'],
       });
 
@@ -711,7 +737,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       const fireActions = dispatched.filter((action) => action.action_type === 'fire');
       const suppressActions = dispatched.filter((action) => action.action_type === 'suppress');
       expect(fireActions).toHaveLength(5);
-      expect(suppressActions).toHaveLength(4);
+      expect(suppressActions).toHaveLength(5);
 
       // rule-001: fire (ack/unack cancels suppression). The fire action's
       // `reason` proves it was dispatched (not suppressed by the prior ack).
@@ -745,9 +771,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       const rule003Fires = fireActions.filter((action) => action.rule_id === 'rule-003');
       expect(rule003Fires).toHaveLength(3);
 
-      // rule-004: both series suppress (snoozed with null episode_id and
-      // expiry far in the future). Snoozes are series-scoped, so both series
-      // are suppressed with `reason: 'snooze'`.
+      // rule-004: all three series suppress (snoozed with null episode_id).
+      // series-1 has a future expiry; series-2 has no expiry (indefinite
+      // snooze) — a regression guard, since the suppression query previously
+      // dropped null-expiry rows and let indefinite snoozes fire; series-3
+      // has an expired snooze superseded by an indefinite one — a regression
+      // guard for the latest-snooze aggregation resurrecting the expired
+      // expiry. Snoozes are series-scoped, so all three series are suppressed
+      // with `reason: 'snooze'`.
       expect(dispatched).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -759,6 +790,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           expect.objectContaining({
             rule_id: 'rule-004',
             group_hash: 'rule-004-series-2',
+            action_type: 'suppress',
+            reason: 'snooze',
+          }),
+          expect.objectContaining({
+            rule_id: 'rule-004',
+            group_hash: 'rule-004-series-3',
             action_type: 'suppress',
             reason: 'snooze',
           }),
@@ -822,13 +859,22 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: eventTs(60),
         }),
+        buildAlertEvent({
+          ruleId: 'rule-009',
+          groupHash: 'rule-009-series-1',
+          episodeId: 'rule-009-series-1-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(60),
+        }),
       ];
       await apiServices.alertingV2.ruleEvents.seed(events);
 
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
-      // `expiry` for the expired-snooze must be strictly before the event's
-      // `@timestamp`. The dispatcher's suppression ESQL drops snooze rows
-      // whose `expiry` is at or before the batch's MIN episode timestamp.
+      // `expiry` for the expired-snoozes must be strictly before the event's
+      // `@timestamp`. The dispatcher's suppression ESQL classifies snooze rows
+      // whose `expiry` is at or before the batch's MIN episode timestamp as
+      // expired.
       const pastExpiry = new Date('2020-01-01T00:00:00.000Z').toISOString();
       const userActions: AlertAction[] = [
         // rule-006: snooze then unsnooze → last snooze action = "unsnooze" → fire
@@ -874,10 +920,30 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           lastSeriesEventTimestamp: eventTs(60),
           timestamp: actionTs(30),
         }),
+        // rule-009: indefinite snooze superseded by a snooze that has since
+        // expired → the latest snooze intent is expired → fire. Guards
+        // against expired snoozes being dropped before LAST(), which would
+        // resurrect the older indefinite snooze and suppress forever.
+        buildAlertAction({
+          ruleId: 'rule-009',
+          groupHash: 'rule-009-series-1',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(60),
+          timestamp: actionTs(50),
+          // No expiry: indefinite snooze, superseded below.
+        }),
+        buildAlertAction({
+          ruleId: 'rule-009',
+          groupHash: 'rule-009-series-1',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(60),
+          timestamp: actionTs(30),
+          expiry: pastExpiry,
+        }),
       ];
       await apiServices.alertingV2.alertActionsEvents.seed(userActions);
 
-      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(4, {
         actionTypes: ['fire'],
       });
 
@@ -886,7 +952,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
 
       // Each rule must produce exactly one fire and zero suppress.
-      for (const ruleId of ['rule-006', 'rule-007', 'rule-008']) {
+      for (const ruleId of ['rule-006', 'rule-007', 'rule-008', 'rule-009']) {
         const fires = dispatched.filter(
           (action) => action.rule_id === ruleId && action.action_type === 'fire'
         );

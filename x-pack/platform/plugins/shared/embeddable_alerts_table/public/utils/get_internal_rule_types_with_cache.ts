@@ -17,7 +17,7 @@ export const getInternalRuleTypesWithCache = async (http: CoreStart['http']) => 
   // This effectively acts as a prefetch for the subsequent rule type requests performed by the
   // embeddable panel renderers
   return queryClient.fetchQuery<InternalRuleType[]>({
-    queryKey: getInternalRuleTypesQueryKey(),
-    queryFn: () => getInternalRuleTypes({ http }),
+    queryKey: getInternalRuleTypesQueryKey({ includeAlertViewableTypes: true }),
+    queryFn: () => getInternalRuleTypes({ http, includeAlertViewableTypes: true }),
   });
 };

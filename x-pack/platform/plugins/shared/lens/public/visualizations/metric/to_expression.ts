@@ -6,7 +6,7 @@
  */
 
 import type { CustomPaletteParams, PaletteRegistry, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteColors } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
@@ -41,13 +41,16 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const stops = getOverridePaletteStops(paletteService, palette);
+  const colors = getOverridePaletteColors(paletteService, palette);
 
   return {
     ...palette.params,
-    // rewrite colors and stops as two distinct arguments
-    colors: stops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
+    colors,
+    // Positions are a custom-palette concept only. Named palettes distribute uniformly at render.
+    stops:
+      palette.params?.name === CUSTOM_PALETTE
+        ? palette.params?.stops?.map(({ stop }) => stop) ?? []
+        : [],
     reverse: false, // managed at UI level
   };
 }

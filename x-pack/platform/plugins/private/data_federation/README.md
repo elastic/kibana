@@ -6,7 +6,7 @@ Management UI for ES|QL data federation — the Elasticsearch feature that lets 
 
 Exposes two management screens under **Stack Management > Data**:
 
-- **Data sources** — connections to external storage (S3, GCS, Azure Blob). Each data source holds the credentials and endpoint config Elasticsearch needs to read files. Supports access key, service account, and federated identity (keyless) auth.
+- **Data sources** — connections to external storage (S3, GCS, Azure Blob, etc). Each data source holds the credentials and endpoint config Elasticsearch needs to read files. Supports access key, federated identity (keyless), and anonymous access.
 - **Data sets** — named references to a path or glob pattern within a data source, plus optional file format settings (Parquet, CSV, NDJSON, etc.). A data set is what you reference in an ES|QL `FROM` clause.
 
 The plugin proxies create/read/delete operations through Kibana's server to the Elasticsearch `/_query/datasource` and `/_query/data_sets` APIs.
@@ -21,6 +21,11 @@ The issuer URL is injected by the kibana-controller via `xpack.dataFederation.wo
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Show the federated identity auth option in the creation flyout |
+| `xpack.dataFederation.enabled` | `true` | Enables data federation management app | 
+| `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Enable federated identity auth option |
 | `xpack.dataFederation.enableGoogleCloudStorageDataSourceType` | `false` | Show GCS as a data source type |
 | `xpack.dataFederation.enableAzureDataSourceType` | `false` | Show Azure Blob as a data source type |
+
+## Config
+
+`xpack.dataFederation.workloadIdentityIssuerUrl` - JWT issuer URL used by federated identity

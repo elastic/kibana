@@ -22,6 +22,13 @@ interface Props {
   aiConnectors: AIConnector[] | undefined;
   data: GetAttackDiscoveryGenerationsResponse | undefined;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  /** Maximum number of non-dismissed generations to display. */
+  maxItems?: number;
+  /**
+   * When provided, "View details" on each generation delegates to this callback
+   * (used by the control center to swap its flyout body in place).
+   */
+  onViewDetails?: (executionUuid: string) => void;
   onRefresh?: () => void;
   refetchGenerations: () => void;
 }
@@ -30,6 +37,8 @@ const GenerationsComponent: React.FC<Props> = ({
   aiConnectors,
   data,
   localStorageAttackDiscoveryMaxAlerts,
+  maxItems = N_LATEST_NON_DISMISSED_GENERATIONS,
+  onViewDetails,
   onRefresh,
   refetchGenerations,
 }) => {
@@ -37,7 +46,7 @@ const GenerationsComponent: React.FC<Props> = ({
     () =>
       data?.generations
         .filter(({ status }) => status !== 'dismissed') // filter out dismissed generations
-        .slice(0, N_LATEST_NON_DISMISSED_GENERATIONS) // limit display to a handful of the latest, non-dismissed generations
+        .slice(0, maxItems) // limit display to a handful of the latest, non-dismissed generations
         .map((generation, i) => {
           const {
             alerts_context_count: alertsContextCount,
@@ -102,6 +111,7 @@ const GenerationsComponent: React.FC<Props> = ({
                 localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
                 loadingMessage={loadingMessage}
                 onRefresh={onRefresh}
+                onViewDetails={onViewDetails}
                 persistedCount={persistedCount}
                 refetchGenerations={refetchGenerations}
                 reason={reason}
@@ -121,6 +131,8 @@ const GenerationsComponent: React.FC<Props> = ({
       aiConnectors,
       data?.generations,
       localStorageAttackDiscoveryMaxAlerts,
+      maxItems,
+      onViewDetails,
       onRefresh,
       refetchGenerations,
     ]

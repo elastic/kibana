@@ -135,7 +135,18 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
-    await this.anomaliesExpandablePanelTitleLink.click();
+    // The anomalies section sits below the entity risk contributions section in the right
+    // panel and may be off-screen. Wait for the expandable panel to be in the DOM (anomaly
+    // data has loaded), then click.
+    await this.anomaliesExpandablePanel.waitFor({ state: 'attached' });
+    // In rare cases the entity store resolves fast enough that the flyout auto-navigates to
+    // both panels before this click fires. EUI's panel slide-in uses CSS transform, so the
+    // anomalies tab is already Playwright-visible during the animation. Skip the click if so.
+    if (!(await this.anomaliesTab.isVisible())) {
+      // noWaitAfter: true skips Playwright's post-click navigation wait — the URL update that
+      // opens the left panel triggers unmocked API calls that keep the tracker pending.
+      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true });
+    }
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
 
@@ -176,7 +187,11 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async openRowActionsMenu() {
-    await this.rowActionsButton.click();
+    await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
+    // noWaitAfter: true skips Playwright's post-click navigation wait — opening the popover
+    // triggers a URL update from the flyout's state management that Playwright misidentifies
+    // as a pending navigation. The caller's getRowAction assertions are the real check.
+    await this.rowActionsButton.click({ noWaitAfter: true });
   }
 
   /**

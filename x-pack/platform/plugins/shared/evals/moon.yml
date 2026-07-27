@@ -47,7 +47,6 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/inference-common'
   - '@kbn/zod'
-  - '@kbn/es-types'
 tags:
   - plugin
   - prod

@@ -13,6 +13,7 @@ import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledQueryResultsRoute } from './get_scheduled_query_results_route';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
@@ -121,7 +122,7 @@ describe('getScheduledQueryResultsRoute', () => {
         executionCount: 7,
         factoryQueryType: OsqueryQueries.results,
       }),
-      expect.objectContaining({ strategy: 'osquerySearchStrategy' })
+      expect.objectContaining({ strategy: OSQUERY_SEARCH_STRATEGY })
     );
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -302,7 +303,7 @@ describe('getScheduledQueryResultsRoute', () => {
       expect(getActiveSpace).toHaveBeenCalled();
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' }),
-        expect.objectContaining({ strategy: 'osquerySearchStrategy' })
+        expect.objectContaining({ strategy: OSQUERY_SEARCH_STRATEGY })
       );
     });
 

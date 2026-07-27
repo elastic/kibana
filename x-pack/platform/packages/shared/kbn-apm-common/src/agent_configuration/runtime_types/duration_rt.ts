@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { either } from 'fp-ts/Either';
 import { z } from '@kbn/zod/v4';
 import type { unitOfTime } from 'moment';
 import moment from 'moment';
@@ -27,31 +25,6 @@ function amountAndUnitToMilliseconds(value?: string) {
   }
 }
 
-export function getDurationRt({ min, max }: { min?: string; max?: string }) {
-  const minAsMilliseconds = amountAndUnitToMilliseconds(min) ?? -Infinity;
-  const maxAsMilliseconds = amountAndUnitToMilliseconds(max) ?? Infinity;
-  const message = getRangeTypeMessage(min, max);
-
-  return new t.Type<string, string, unknown>(
-    'durationRt',
-    t.string.is,
-    (input, context) => {
-      return either.chain(t.string.validate(input, context), (inputAsString) => {
-        const inputAsMilliseconds = amountAndUnitToMilliseconds(inputAsString);
-
-        const isValidAmount =
-          inputAsMilliseconds !== undefined &&
-          inputAsMilliseconds >= minAsMilliseconds &&
-          inputAsMilliseconds <= maxAsMilliseconds;
-
-        return isValidAmount ? t.success(inputAsString) : t.failure(input, context, message);
-      });
-    },
-    t.identity
-  );
-}
-
-// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
 export function getDurationSchema({ min, max }: { min?: string; max?: string }) {
   const minAsMilliseconds = amountAndUnitToMilliseconds(min) ?? -Infinity;
   const maxAsMilliseconds = amountAndUnitToMilliseconds(max) ?? Infinity;

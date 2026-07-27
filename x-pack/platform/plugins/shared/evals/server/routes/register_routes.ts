@@ -33,6 +33,8 @@ import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
 import { registerEvaluateRoute } from './evaluators/evaluate';
+import { registerResolveInstrumentationRoute } from './evaluators/resolve_instrumentation';
+import { registerValidateRoute } from './evaluators/validate';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -66,5 +68,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpsertDatasetRoute(dependencies);
   registerListEvaluatorsRoute(dependencies);
   registerEvaluateRoute(dependencies);
+  registerResolveInstrumentationRoute(dependencies);
+  registerValidateRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 };

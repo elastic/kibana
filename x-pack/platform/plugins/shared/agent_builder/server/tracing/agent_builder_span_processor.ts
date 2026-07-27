@@ -7,8 +7,13 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
-import { GenAISemanticConventions } from '@kbn/inference-tracing';
-import { omitBy } from 'lodash';
+import {
+  GenAISemanticConventions,
+  parseJsonAttr,
+  type GenAIInputMessage,
+  type GenAIOutputMessage,
+  type GenAIMessagePart,
+} from '@kbn/inference-tracing';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
@@ -139,75 +144,111 @@ function stripToolCallIO(attributes: Record<string, unknown>): Record<string, un
   return rest;
 }
 
-function stripToolCallsFromEventAttributes(eventAttributes: api.Attributes): api.Attributes {
-  return omitBy(
-    eventAttributes,
-    (_value, key) => key.startsWith('tool_calls.') || key.startsWith('message.tool_calls.')
-  );
+function isToolCallPart(part: GenAIMessagePart): part is GenAIMessagePart & { type: 'tool_call' } {
+  return part.type === 'tool_call';
 }
 
-// Matches `tool_calls.0.function.name` and `message.tool_calls.0.function.name`
-const TOOL_NAME_KEY_RE = /^(?:message\.)?tool_calls\.\d+\.function\.name$/;
-
-function anonymizeToolNamesInEventAttributes(eventAttributes: api.Attributes): api.Attributes {
-  const result: api.Attributes = {};
-  for (const [key, value] of Object.entries(eventAttributes)) {
-    if (
-      TOOL_NAME_KEY_RE.test(key) &&
-      typeof value === 'string' &&
-      !BUILTIN_TOOL_IDS.has(value) &&
-      !isInternalTool(value)
-    ) {
-      result[key] = 'custom';
-    } else {
-      result[key] = value;
+function anonymizeToolNamesInParts(parts: GenAIMessagePart[]): GenAIMessagePart[] {
+  return parts.map((part) => {
+    if (isToolCallPart(part)) {
+      const name = part.name;
+      const isBuiltin = BUILTIN_TOOL_IDS.has(name) || isInternalTool(name);
+      return isBuiltin ? part : { ...part, name: 'custom' };
     }
-  }
-  return result;
+    return part;
+  });
+}
+
+function stripToolCallPartsFromMessages<T extends GenAIInputMessage | GenAIOutputMessage>(
+  msgs: T[]
+): T[] {
+  return msgs.map((msg) => ({
+    ...msg,
+    parts: msg.parts.filter((part) => part.type !== 'tool_call'),
+  }));
 }
 
 /**
- * Filters and sanitizes span events based on privacy settings.
- * Drops entire events whose content category is disabled, and strips
- * `message.tool_calls.*` from assistant/choice events when tool details are off.
+ * Applies privacy settings to the structured message attributes (v1.37.0+ schema).
+ * Modifies `gen_ai.system_instructions`, `gen_ai.input.messages`, and
+ * `gen_ai.output.messages` in-place on the attributes object, returning a new copy.
  */
-function applyEventPrivacyFilters(
-  events: tracing.TimedEvent[],
+function applyMessageAttributePrivacy(
+  attributes: Record<string, unknown>,
   settings: TracingPrivacySettings
-): tracing.TimedEvent[] {
-  return events.reduce<tracing.TimedEvent[]>((acc, event) => {
-    if (!settings.includeSystemPrompt && event.name === 'gen_ai.system.message') return acc;
-    if (!settings.includeUserPrompts && event.name === 'gen_ai.user.message') return acc;
-    if (
-      !settings.includeLlmResponses &&
-      (event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice')
-    ) {
-      return acc;
+): Record<string, unknown> {
+  const result = { ...attributes };
+
+  if (!settings.includeSystemPrompt) {
+    delete result[GenAISemanticConventions.GenAISystemInstructions];
+  }
+
+  if (!settings.includeUserPrompts) {
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
+      const filtered = msgs.filter((m) => m.role !== 'user');
+      result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(filtered);
     }
-    if (!settings.includeToolDetails && event.name === 'gen_ai.tool.message') return acc;
+  }
 
-    const isAssistantOrChoice =
-      event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice';
+  if (!settings.includeLlmResponses) {
+    delete result[GenAISemanticConventions.GenAIOutputMessages];
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
+      const filtered = msgs.filter((m) => m.role !== 'assistant');
+      result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(filtered);
+    }
+  }
 
-    if (!settings.includeToolDetails && isAssistantOrChoice) {
-      acc.push({
-        ...event,
-        attributes: stripToolCallsFromEventAttributes(event.attributes ?? {}),
-      });
-      return acc;
+  if (!settings.includeToolDetails) {
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
+      const withoutToolMsgs = msgs.filter((m) => m.role !== 'tool');
+      const stripped = stripToolCallPartsFromMessages(withoutToolMsgs);
+      result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(stripped);
     }
 
-    if (!settings.includeRealNames && isAssistantOrChoice) {
-      acc.push({
-        ...event,
-        attributes: anonymizeToolNamesInEventAttributes(event.attributes ?? {}),
-      });
-      return acc;
+    const outputMsgs = parseJsonAttr<GenAIOutputMessage[]>(
+      result[GenAISemanticConventions.GenAIOutputMessages]
+    );
+    if (outputMsgs) {
+      result[GenAISemanticConventions.GenAIOutputMessages] = JSON.stringify(
+        stripToolCallPartsFromMessages(outputMsgs)
+      );
+    }
+  }
+
+  if (!settings.includeRealNames) {
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
+      const anonymized = msgs.map((msg) => ({
+        ...msg,
+        parts: anonymizeToolNamesInParts(msg.parts),
+      }));
+      result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(anonymized);
     }
 
-    acc.push(event);
-    return acc;
-  }, []);
+    const outputMsgs = parseJsonAttr<GenAIOutputMessage[]>(
+      result[GenAISemanticConventions.GenAIOutputMessages]
+    );
+    if (outputMsgs) {
+      const anonymized = outputMsgs.map((msg) => ({
+        ...msg,
+        parts: anonymizeToolNamesInParts(msg.parts),
+      }));
+      result[GenAISemanticConventions.GenAIOutputMessages] = JSON.stringify(anonymized);
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -245,8 +286,6 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
-    const filteredEvents = applyEventPrivacyFilters(span.events, settings);
-
     const {
       [SHOULD_TRACK_ATTR]: _,
       _should_track: __,
@@ -254,17 +293,19 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ...cleanAttributes
     } = span.attributes;
 
-    const processedAttributes = settings.includeRealIds
+    let processedAttributes: Record<string, unknown> = settings.includeRealIds
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
 
-    const attributesAfterToolIO = settings.includeToolDetails
+    processedAttributes = settings.includeToolDetails
       ? processedAttributes
       : stripToolCallIO(processedAttributes);
 
+    processedAttributes = applyMessageAttributePrivacy(processedAttributes, settings);
+
     const { attributes: finalAttributes, spanName: finalSpanName } = settings.includeRealNames
-      ? { attributes: attributesAfterToolIO, spanName: span.name }
-      : anonymizeNames(attributesAfterToolIO, span.name);
+      ? { attributes: processedAttributes, spanName: span.name }
+      : anonymizeNames(processedAttributes, span.name);
 
     const datasetResource = resources.resourceFromAttributes({
       'data_stream.dataset': 'agent_builder',
@@ -282,10 +323,6 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       },
       attributes: {
         value: finalAttributes,
-        enumerable: true,
-      },
-      events: {
-        value: filteredEvents,
         enumerable: true,
       },
     });

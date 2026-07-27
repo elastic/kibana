@@ -63,6 +63,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -109,6 +110,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
   private started = false;
+  private stopped = false;
 
   public pool: TaskPool;
 
@@ -246,10 +248,34 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.started) {
-        this.poller.start();
+        // set synchronously so repeat availability emissions (e.g. ES
+        // reconnects) can never trigger a second reconciliation or poller start
         this.started = true;
+        // fire-and-forget: reconcileAndStartPolling never rejects (it handles
+        // its own errors) and starts the poller when it settles
+        void this.reconcileAndStartPolling();
       }
     });
+  }
+
+  /**
+   * Before the first poll, reset tasks this node still owns from a previous run
+   * (e.g. after a crash) so they don't wait out their retryAt timeout.
+   * Best-effort: the poller starts regardless of the outcome, and the retryAt
+   * timeout remains the safety net.
+   */
+  private async reconcileAndStartPolling() {
+    try {
+      await resetInFlightTasksOwnedByThisNode({ logger: this.logger, taskStore: this.store });
+    } catch (e) {
+      this.logger.error(
+        `Failed to reconcile in-flight tasks on startup, starting the poller anyway: ${e.message}`
+      );
+    } finally {
+      if (!this.stopped) {
+        this.poller.start();
+      }
+    }
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -257,6 +283,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   }
 
   public stop() {
+    this.stopped = true;
     this.poller.stop();
   }
 

@@ -411,12 +411,28 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       });
     });
 
-    it('prunes stream filters that no longer match any indicator', () => {
+    it('preserves stream filters from URL when no indicators exist for that stream yet', () => {
       const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
       mockQuery = { stream: ['logs', 'metrics'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
+      waitFor(() => {
+        expect(result.current.selectedStreams).toEqual(['logs', 'metrics']);
+      });
+    });
+
+    it('prunes stream filters that no longer match any indicator and were not in the initial URL', () => {
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
+      mockQuery = { stream: ['logs'] };
+      const { result } = renderHook(() =>
+        useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
+      );
+
+      act(() => {
+        result.current.handleSelectedStreamsChange(['logs', 'metrics']);
+      });
+
       waitFor(() => {
         expect(result.current.selectedStreams).toEqual(['logs']);
       });

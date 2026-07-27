@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   QueryWithOccurrences,
   QueryOccurrencesResponse,
 } from '@kbn/significant-events-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
+import type { TracedElasticsearchClient, UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { chunk, isEmpty } from 'lodash';
 import pLimit from 'p-limit';
 import type { QueryLink, SearchMode } from '../../../common/queries';
@@ -21,7 +20,7 @@ import type { RuleUnbackedFilter } from '../knowledge_indicators';
 import { parseError } from '../streams/parse_error';
 import { SecurityError } from '../errors/security_error';
 import { getColumnIndex } from '../streams/esql';
-import { type ISignificantEventsAlertsReader, ALERTS_READER_V1 } from './alerting/alerts_reader';
+import { type ISignificantEventsAlertsReader, ALERTS_READER_V2 } from './alerting/alerts_reader';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 export interface SparseBucket {
@@ -49,7 +48,7 @@ export interface SignificantEventsParams {
 
 export interface SignificantEventsDependencies {
   kiClient: KnowledgeIndicatorClient;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: TracedElasticsearchClient;
 }
 
 export interface ComputeOccurrencesResult {
@@ -70,7 +69,7 @@ const EMPTY_OCCURRENCES: SparseBucket[] = [];
 const EMPTY_CHANGE_POINTS = { type: {} } as const;
 
 // ES|QL caps results at result_truncation_max_size (default 10k) per request.
-// Grouping by (rule_uuid × bucket) silently drops rules past the cap, so we
+// Grouping by (rule_id × bucket) silently drops rules past the cap, so we
 // batch rules under it and run batches in parallel.
 const RESULT_CEILING = 10_000;
 
@@ -134,7 +133,7 @@ export async function computeOccurrences(
     to,
     bucketSize,
     spaceId,
-    alertsReader = ALERTS_READER_V1,
+    alertsReader = ALERTS_READER_V2,
   }: {
     ruleIds: string[];
     from: Date;
@@ -143,7 +142,7 @@ export async function computeOccurrences(
     spaceId: string;
     alertsReader?: ISignificantEventsAlertsReader;
   },
-  { scopedClusterClient }: { scopedClusterClient: IScopedClusterClient }
+  { esClient }: { esClient: TracedElasticsearchClient }
 ): Promise<ComputeOccurrencesResult> {
   // "No data": empty per-rule map + empty (not zero-filled) aggregate.
   const emptyResult: ComputeOccurrencesResult = {
@@ -180,9 +179,9 @@ export async function computeOccurrences(
     },
   };
 
-  const runBatch = async (batchRuleIds: string[]): Promise<EsqlQueryResponse | null> => {
+  const runBatch = async (batchRuleIds: string[]): Promise<UnparsedEsqlResponse | null> => {
     try {
-      return await scopedClusterClient.asCurrentUser.esql.query({
+      return await esClient.esql('significant_events_alerts_occurrences', {
         ...alertsReader.buildOccurrencesEsqlRequest({
           ruleIds: batchRuleIds,
           value,
@@ -191,7 +190,6 @@ export async function computeOccurrences(
           spaceId,
         }),
         filter: timeRangeFilter,
-        drop_null_columns: true,
       });
     } catch (err) {
       const { type, message } = parseError(err);
@@ -259,8 +257,8 @@ export async function getQueryOccurrences(
   params: SignificantEventsParams,
   dependencies: SignificantEventsDependencies
 ): Promise<QueryOccurrences> {
-  const { kiClient, scopedClusterClient } = dependencies;
-  const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V1 } = params;
+  const { kiClient, esClient } = dependencies;
+  const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V2 } = params;
 
   const queryLinks = await fetchQueryLinks(params, kiClient);
   if (isEmpty(queryLinks)) {
@@ -275,7 +273,7 @@ export async function getQueryOccurrences(
   const ruleIds = [...new Set(queryLinks.map((queryLink) => queryLink.rule_id))];
   const occurrences = await computeOccurrences(
     { ruleIds, from, to, bucketSize, spaceId, alertsReader },
-    { scopedClusterClient }
+    { esClient }
   );
   return { queryLinks, ...occurrences };
 }

@@ -24,9 +24,28 @@ export interface ApiEndpointDefinition {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   getUrl: (context: ApiEndpointContext) => string | undefined;
+  usesManagedInput: (context: ApiEndpointContext) => boolean;
 }
 
 const trimTrailingSlashes = (url: string): string => url.replace(/\/+$/, '');
+const normalizeEndpointUrl = (url?: string): string | undefined => {
+  const trimmedUrl = url?.trim();
+  return trimmedUrl ? trimTrailingSlashes(trimmedUrl) : undefined;
+};
+const getManagedElasticsearchCompatibleUrl = ({
+  managedOtlpServiceUrl,
+}: ApiEndpointContext): string | undefined => {
+  const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
+
+  return managedUrl ? `${managedUrl}/_es` : undefined;
+};
+
+const elasticsearchLabel = i18n.translate(
+  'xpack.observability_onboarding.apiEndpoints.elasticsearch.label',
+  {
+    defaultMessage: 'Elasticsearch',
+  }
+);
 
 export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   {
@@ -35,6 +54,8 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Prometheus',
     }),
     logo: 'prometheus',
+    usesManagedInput: ({ isServerless, managedOtlpServiceUrl, managedOtlpPrwEndpointEnabled }) =>
+      Boolean(managedOtlpServiceUrl) && (isServerless || managedOtlpPrwEndpointEnabled),
     getUrl: ({
       isServerless,
       managedOtlpServiceUrl,
@@ -58,6 +79,8 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'OpenTelemetry',
     }),
     logo: 'opentelemetry',
+    usesManagedInput: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl }) =>
+      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl),
     getUrl: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl, elasticsearchUrl }) => {
       if (isManagedOtlpServiceAvailable && managedOtlpServiceUrl) {
         return managedOtlpServiceUrl;
@@ -70,10 +93,18 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   },
   {
     id: ApiEndpointId.Elasticsearch,
-    label: i18n.translate('xpack.observability_onboarding.apiEndpoints.elasticsearch.label', {
-      defaultMessage: 'Elasticsearch',
-    }),
+    label: elasticsearchLabel,
     euiIconType: 'logoElasticsearch',
-    getUrl: ({ elasticsearchUrl }) => elasticsearchUrl,
+    usesManagedInput: (context) => Boolean(getManagedElasticsearchCompatibleUrl(context)),
+    getUrl: (context) => {
+      const managedUrl = getManagedElasticsearchCompatibleUrl(context);
+      if (managedUrl) {
+        return managedUrl;
+      }
+      const { elasticsearchUrl } = context;
+      const fallbackUrl = normalizeEndpointUrl(elasticsearchUrl);
+
+      return fallbackUrl;
+    },
   },
 ];

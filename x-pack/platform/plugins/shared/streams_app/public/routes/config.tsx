@@ -39,13 +39,11 @@ const listViewQueryParams = t.partial({
 
 /**
  * Extended query params for management routes that may include
- * additional feature-specific params (e.g., significant events flyout).
+ * additional feature-specific params (e.g., data quality page state).
  */
 const managementQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
-  // Significant events flyout params
-  openFlyout: t.string,
   // Data quality page state
   pageState: t.string,
 });
@@ -103,6 +101,7 @@ const streamsAppRoutes = {
                   stream: t.union([t.string, t.array(t.string)]),
                   showComputed: t.string,
                   selectedItem: t.string,
+                  selectedEvent: t.string,
                 }),
               }),
             ]),

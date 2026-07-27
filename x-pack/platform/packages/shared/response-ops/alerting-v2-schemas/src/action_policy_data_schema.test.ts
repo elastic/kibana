@@ -6,8 +6,10 @@
  */
 
 import {
+  actionPolicyDestinationSchema,
   bulkActionActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
 
@@ -215,12 +217,38 @@ describe('createActionPolicyDataSchema', () => {
         })
       ).toThrow();
     });
+
+    it('rejects unknown top-level fields (strict)', () => {
+      expect(() =>
+        createActionPolicyDataSchema.parse({
+          ...base,
+          unknownField: 'x',
+        })
+      ).toThrow();
+    });
+
+    it('rejects unknown keys inside throttle (strict)', () => {
+      expect(() =>
+        createActionPolicyDataSchema.parse({
+          ...base,
+          throttle: { strategy: 'on_status_change', unknownField: 'x' },
+        })
+      ).toThrow();
+    });
   });
 });
 
 describe('updateActionPolicyDataSchema', () => {
   it('rejects any unknown key (strict)', () => {
-    expect(() => updateActionPolicyDataSchema.parse({ name: 'New', futureField: 'x' })).toThrow();
+    expect(() => updateActionPolicyDataSchema.parse({ name: 'New', unknownField: 'x' })).toThrow();
+  });
+
+  it('rejects unknown keys inside throttle (strict)', () => {
+    expect(() =>
+      updateActionPolicyDataSchema.parse({
+        throttle: { strategy: 'on_status_change', unknownField: 'x' },
+      })
+    ).toThrow();
   });
 
   describe('valid payloads', () => {
@@ -409,6 +437,46 @@ describe('bulkActionActionPoliciesBodySchema', () => {
     expect(() =>
       bulkActionActionPoliciesBodySchema.parse({
         actions: [],
+      })
+    ).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() =>
+      bulkActionActionPoliciesBodySchema.parse({
+        actions: [{ id: 'policy-1', action: 'delete' }],
+        unknownField: 'x',
+      })
+    ).toThrow();
+  });
+
+  it('rejects unknown fields on a bulk action variant (strict)', () => {
+    expect(() =>
+      bulkActionActionPoliciesBodySchema.parse({
+        actions: [{ id: 'policy-1', action: 'enable', unknownField: 'x' }],
+      })
+    ).toThrow();
+  });
+});
+
+describe('snoozeActionPolicyBodySchema', () => {
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() =>
+      snoozeActionPolicyBodySchema.parse({
+        snoozedUntil: '2026-04-01T10:00:00Z',
+        unknownField: 'x',
+      })
+    ).toThrow();
+  });
+});
+
+describe('actionPolicyDestinationSchema', () => {
+  it('rejects unknown fields on workflow destination (strict)', () => {
+    expect(() =>
+      actionPolicyDestinationSchema.parse({
+        type: 'workflow',
+        id: 'wf-1',
+        unknownField: 'x',
       })
     ).toThrow();
   });

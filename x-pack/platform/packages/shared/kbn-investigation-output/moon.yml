@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/investigation-output'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-sig-events-team'
+  defaultOwner: '@elastic/nightshift-context-and-research-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/investigation-output'
   description: Moon project for @kbn/investigation-output
   channel: ''
-  owner: '@elastic/obs-sig-events-team'
+  owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-investigation-output
 dependsOn:
   - '@kbn/core-http-browser'

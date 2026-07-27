@@ -174,6 +174,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: 'valid reason' },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
@@ -199,6 +200,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);

@@ -353,8 +353,17 @@ export class AttachmentService {
       const unifiedTypesToCount = [
         ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
         SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        // Custom externalReference/persistableState subtypes with no unified
+        // mapping (e.g. FTR `.test` types) are still written to
+        // `cases-attachments` but keep their legacy `type`, so count those too.
+        AttachmentType.persistableState,
+        AttachmentType.externalReference,
       ];
-      const unifiedTypeFilter = buildFilter({
+      // Files are stored with the migrated unified `file` type (not the legacy
+      // `.files` externalReference subtype), so excluding `file` from the type
+      // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
+      // isn't mapped on `cases-attachments`, so filtering on it would 400.
+      const unifiedFilter = buildFilter({
         filters: unifiedTypesToCount,
         field: 'type',
         operator: 'or',
@@ -369,7 +378,7 @@ export class AttachmentService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        filter: unifiedTypeFilter,
+        filter: unifiedFilter,
       });
 
       const [legacyResponse, unifiedResponse] = await Promise.all([
@@ -683,12 +692,26 @@ export class AttachmentService {
       if (soType === CASE_ATTACHMENT_SAVED_OBJECT) {
         const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
+        // Mirror `attachmentId` into references for SO-backed unified attachments
+        // (e.g. files) so a patch doesn't drop the dependency and blank out
+        // `attachmentId` on the next read. Matches the unified `create` path.
+        const {
+          attributes: extractedAttributes,
+          references: extractedReferences,
+          didDeleteOperation,
+        } = extractAttachmentSORefsFromAttributes(unifiedAttributes, options?.references ?? []);
+
+        // Same guard as the legacy branch: only overwrite references when we
+        // actually have some, otherwise a partial patch would wipe the existing
+        // (e.g. case) references.
+        const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
+
         const res =
           await this.context.unsecuredSavedObjectsClient.update<UnifiedAttachmentAttributes>(
             CASE_ATTACHMENT_SAVED_OBJECT,
             savedObjectId,
-            unifiedAttributes,
-            { ...options }
+            extractedAttributes as UnifiedAttachmentAttributes,
+            { ...options, references: shouldUpdateRefs ? extractedReferences : undefined }
           );
         // analyticsV2 mirror via a full re-read — see `mirrorUpdatedAttachments`.
         // Mirroring the partial `update` response directly would drop the

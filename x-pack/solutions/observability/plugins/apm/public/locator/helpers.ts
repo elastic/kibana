@@ -4,55 +4,68 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { isRight } from 'fp-ts/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { z } from '@kbn/zod/v4';
+import { anomalyThresholdSchema, environmentSchema } from '@kbn/apm-types';
 import type { Environment } from '../../common/environment_rt';
-import { environmentRt } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
 const SERVICE_OVERVIEW_TAB_PATHS = {
-  logs: '/services/{serviceName}/logs',
-  metrics: '/services/{serviceName}/metrics',
-  traces: '/services/{serviceName}/transactions',
-  transactions: '/services/{serviceName}/transactions/view',
-  errors: '/services/{serviceName}/errors',
-  default: '/services/{serviceName}/overview',
+  alerts: {
+    regular: '/services/{serviceName}/alerts',
+    mobile: '/mobile-services/{serviceName}/alerts',
+  },
+  logs: {
+    regular: '/services/{serviceName}/logs',
+    mobile: '/mobile-services/{serviceName}/logs',
+  },
+  metrics: { regular: '/services/{serviceName}/metrics' },
+  traces: {
+    regular: '/services/{serviceName}/transactions',
+    mobile: '/mobile-services/{serviceName}/transactions',
+  },
+  transactions: { regular: '/services/{serviceName}/transactions/view' },
+  errors: { regular: '/services/{serviceName}/errors' },
 } as const;
 
-export const APMLocatorPayloadValidator = t.union([
-  t.type({ serviceName: t.undefined }),
-  t.intersection([
-    t.type({ serviceName: t.string }),
-    t.type({ dashboardId: t.string }),
-    t.type({ query: environmentRt }),
-  ]),
-  t.intersection([
-    t.type({
-      serviceName: t.string,
-    }),
-    t.partial({ dashboardId: t.undefined }),
-    t.partial({
-      serviceOverviewTab: t.keyof({
-        traces: null,
-        metrics: null,
-        logs: null,
-        errors: null,
-        transactions: null,
-      }),
-      errorGroupId: t.string,
-    }),
-    t.type({
-      query: t.intersection([
-        environmentRt,
-        t.partial({ kuery: t.string, rangeFrom: t.string, rangeTo: t.string }),
-      ]),
-    }),
-  ]),
+export const APMLocatorPayloadValidator = z.union([
+  z.object({ serviceName: z.undefined() }),
+  z
+    .object({ serviceName: z.string() })
+    .merge(z.object({ dashboardId: z.string() }))
+    .merge(z.object({ query: environmentSchema })),
+  z
+    .object({
+      serviceName: z.string(),
+    })
+    .merge(z.object({ dashboardId: z.undefined().optional() }))
+    .merge(z.object({ isMobileAgentName: z.boolean().optional() }))
+    .merge(
+      z.object({
+        serviceOverviewTab: z
+          .enum(['alerts', 'traces', 'metrics', 'logs', 'errors', 'transactions'])
+          .optional(),
+        errorGroupId: z.string().optional(),
+      })
+    )
+    .merge(
+      z.object({
+        query: environmentSchema.merge(
+          z.object({
+            kuery: z.string().optional(),
+            rangeFrom: z.string().optional(),
+            rangeTo: z.string().optional(),
+            transactionType: z.string().optional(),
+            anomalyThreshold: anomalyThresholdSchema.optional(),
+            comparisonEnabled: z.boolean().optional(),
+            offset: z.string().optional(),
+          })
+        ),
+      })
+    ),
 ]);
 
-export type APMLocatorPayload = t.TypeOf<typeof APMLocatorPayloadValidator>;
+export type APMLocatorPayload = z.infer<typeof APMLocatorPayloadValidator>;
 
 export function getPathForServiceDetail(
   payload: APMLocatorPayload,
@@ -66,10 +79,14 @@ export function getPathForServiceDetail(
     defaultEnvironment: string;
   }
 ) {
-  const decodedPayload = APMLocatorPayloadValidator.decode(payload);
+  const decodedPayload = APMLocatorPayloadValidator.safeParse(payload);
 
-  if (!isRight(decodedPayload)) {
-    throw new Error(PathReporter.report(decodedPayload).join('\n'));
+  if (!decodedPayload.success) {
+    throw new Error(
+      decodedPayload.error.issues
+        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+        .join('\n')
+    );
   }
 
   const defaultQueryParams = {
@@ -100,9 +117,18 @@ export function getPathForServiceDetail(
     });
   }
 
+  // Destructure anomaly-specific fields separately to avoid widening comparisonEnabled and
+  // anomalyThreshold to types incompatible with the route query schemas.
+  const {
+    anomalyThreshold,
+    comparisonEnabled: payloadComparisonEnabled,
+    offset,
+    ...basePayloadQuery
+  } = payload.query;
+
   const query = {
     ...defaultQueryParams,
-    ...payload.query,
+    ...basePayloadQuery,
   };
 
   if (payload.serviceOverviewTab === 'errors' && payload.errorGroupId) {
@@ -111,14 +137,43 @@ export function getPathForServiceDetail(
         serviceName: payload.serviceName,
         groupId: payload.errorGroupId,
       },
-      query,
+      query: {
+        ...query,
+        comparisonEnabled: payloadComparisonEnabled ?? isComparisonEnabledByDefault,
+        ...{ offset },
+      },
     });
   }
 
-  const apmPath = SERVICE_OVERVIEW_TAB_PATHS[payload.serviceOverviewTab || 'default'];
+  if (!payload.serviceOverviewTab) {
+    const overviewQuery = {
+      ...query,
+      ...{ anomalyThreshold },
+      comparisonEnabled: payloadComparisonEnabled ?? isComparisonEnabledByDefault,
+      ...{ offset },
+    };
+    if (payload.isMobileAgentName) {
+      return apmRouter.link('/mobile-services/{serviceName}/overview', {
+        path: { serviceName: payload.serviceName },
+        query: overviewQuery,
+      });
+    }
+    return apmRouter.link('/services/{serviceName}/overview', {
+      path: { serviceName: payload.serviceName },
+      query: overviewQuery,
+    });
+  }
+
+  const tabPaths = SERVICE_OVERVIEW_TAB_PATHS[payload.serviceOverviewTab];
+  const apmPath =
+    payload.isMobileAgentName && 'mobile' in tabPaths ? tabPaths.mobile : tabPaths.regular;
 
   return apmRouter.link(apmPath, {
     path: { serviceName: payload.serviceName },
-    query,
+    query: {
+      ...query,
+      comparisonEnabled: payloadComparisonEnabled ?? isComparisonEnabledByDefault,
+      ...{ offset },
+    },
   });
 }

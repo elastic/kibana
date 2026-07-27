@@ -85,6 +85,16 @@ If there are any endpoints missing completely from the `generated` folder, this 
 Elasticsearch specifications. If for some reason, that is not possible, then additional definitions files 
 can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/manual)).
 
+### Kibana API doc links
+
+The [`generated_kibana_api_doc_links.json`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json) file maps Kibana API path templates to their OpenAPI `operationId`, and powers the "Open API reference" link for `kbn:` requests in Console. It's generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
+
+```
+node scripts/generate_kibana_api_doc_links.js
+```
+
+Run this whenever the Kibana OpenAPI bundle changes (e.g. after `node scripts/build_openapi_artifacts.js`). This is expected to be automated with a scheduled Buildkite job that regenerates and publishes the file on a regular cadence; until then, re-run it manually when the bundle changes.
+
 ### Top level keys
 Use following top level keys in the definitions objects.
 

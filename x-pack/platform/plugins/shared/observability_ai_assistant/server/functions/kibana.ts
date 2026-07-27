@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import { format } from 'url';
-import { pickBy } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-function isEnotfoundError(e: unknown, depth = 0): boolean {
-  if (depth > 5 || !(e instanceof Error)) {
-    return false;
+const getAccess = (pathname: string): 'public' | 'internal' => {
+  return pathname === '/internal' || pathname.startsWith('/internal/') ? 'internal' : 'public';
+};
+
+const getErrorTargetUrl = (error: unknown): string | undefined => {
+  if (error instanceof Error && 'request' in error) {
+    return (error as Error & { request?: Request }).request?.url;
   }
-  if ((e as NodeJS.ErrnoException).code === 'ENOTFOUND') {
-    return true;
-  }
-  if ('cause' in e && e.cause) {
-    return isEnotfoundError(e.cause, depth + 1);
-  }
-  return false;
-}
+};
 
 export function registerKibanaFunction({
   functions,
@@ -64,116 +58,34 @@ export function registerKibanaFunction({
     async ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request, logger } = resources;
       const core = await resources.plugins.core.start();
-
-      // request.basePath already encodes the server base path and the user's current
-      // space prefix (e.g. `/s/<spaceId>`), so prepending it to the AI-supplied
-      // pathname keeps the forwarded call in the same space without re-parsing the
-      // original URL.
-      const targetPathname = `${request.basePath}${pathname}`;
-
-      function getParsedPublicBaseUrl() {
-        const { publicBaseUrl } = core.http.basePath;
-        if (!publicBaseUrl) {
-          const errorMessage = `Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml`;
-          logger.error(errorMessage);
-          throw new Error(errorMessage);
-        }
-        return new URL(publicBaseUrl);
-      }
-
-      function getLocalServerUrl() {
-        const serverInfo = core.http.getServerInfo();
-        if (serverInfo.protocol === 'socket') {
-          return undefined;
-        }
-        const hostname =
-          serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
-            ? 'localhost'
-            : serverInfo.hostname;
-        return {
-          protocol: `${serverInfo.protocol}:`,
-          hostname,
-          port: serverInfo.port,
-          pathname: targetPathname,
-          query: query ? (query as Record<string, string>) : undefined,
-        };
-      }
-
-      const parsedPublicBaseUrl = getParsedPublicBaseUrl();
-      const nextUrl = {
-        host: parsedPublicBaseUrl.host,
-        protocol: parsedPublicBaseUrl.protocol,
-        pathname: targetPathname,
-        query: query ? (query as Record<string, string>) : undefined,
-      };
-
-      logger.info(
-        `Calling Kibana API by forwarding request from "${
-          request.rewrittenUrl ?? request.url
-        }" to: "${method} ${format(nextUrl)}"`
-      );
-
-      const copiedHeaderNames = [
-        'accept-encoding',
-        'accept-language',
-        'accept',
-        'authorization',
-        'content-type',
-        'cookie',
-        'kbn-build-number',
-        'kbn-version',
-        'origin',
-        'referer',
-        'user-agent',
-        'x-elastic-internal-origin',
-        'x-elastic-product-origin',
-        'x-kbn-context',
-      ];
-
-      const headers = pickBy(request.headers, (value, key) => {
-        return (
-          copiedHeaderNames.includes(key.toLowerCase()) || key.toLowerCase().startsWith('sec-')
-        );
-      });
-
-      const data = body ? JSON.stringify(body) : undefined;
-
-      const makeRequest = (url: string) =>
-        axios({ method, headers, url, data, signal }).then((response) => ({
-          content: response.data,
-        }));
-
-      const primaryUrl = format(nextUrl);
+      const fetchOptions = {
+        method,
+        query: query as HttpSelfFetchQuery | undefined,
+        body,
+        signal,
+        forwardRequestHeaders: true,
+        access: getAccess(pathname),
+        asResponse: true,
+      } as const;
 
       try {
-        return await makeRequest(primaryUrl);
-      } catch (e) {
-        // Fallback: when publicBaseUrl is not resolvable from Kibana's runtime
-        // retry using the local server address from core.http.getServerInfo().
-        // This will not work when server.ssl.clientAuthentication is set to 'required',
-        // as the outbound request won't present a client certificate.
-        const localUrl = isEnotfoundError(e) ? getLocalServerUrl() : undefined;
+        const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
 
-        if (!localUrl) {
-          logger.error(`Error calling Kibana API: ${method} ${primaryUrl}. Failed with ${e}`);
-          throw e;
-        }
-
-        const fallbackUrl = format(localUrl);
-        logger.warn(
-          `publicBaseUrl "${primaryUrl}" is not reachable from the Kibana server (ENOTFOUND). ` +
-            `Retrying with local server address: "${method} ${fallbackUrl}"`
+        logger.info(
+          `Called Kibana API by forwarding request from "${
+            request.rewrittenUrl ?? request.url
+          }" to: "${method} ${response.request.url}"`
         );
 
-        try {
-          return await makeRequest(fallbackUrl);
-        } catch (retryError) {
-          logger.error(
-            `Error calling Kibana API via local fallback: ${method} ${fallbackUrl}. ` +
-              `Failed with ${retryError}`
-          );
-          throw retryError;
-        }
+        return { content: response.body };
+      } catch (error) {
+        const targetUrl = getErrorTargetUrl(error) ?? pathname;
+        logger.error(
+          `Error calling Kibana API by forwarding request from "${
+            request.rewrittenUrl ?? request.url
+          }" to: "${method} ${targetUrl}". Failed with ${error}`
+        );
+        throw error;
       }
     }
   );

@@ -11,6 +11,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Logs UI routes', () => {
     loadTestFile(require.resolve('./log_views'));
     loadTestFile(require.resolve('./log_threshold_alert'));
-    loadTestFile(require.resolve('./log_analysis_validation_log_entry_datasets'));
   });
 }

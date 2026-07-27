@@ -339,6 +339,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               loading={isLogsLoading}
               items={logsData?.data ?? []}
               itemId="id"
+              tableCaption={i18n.GAP_AUTO_FILL_LOGS_TABLE_CAPTION}
               columns={columns as EuiBasicTableColumn<SchedulerLog>[]}
               pagination={{
                 pageIndex,

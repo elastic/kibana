@@ -64,9 +64,10 @@ const createMockMessageEditor = (): {
       ref: mockRef,
       onChange: jest.fn(),
       onFocus: jest.fn(),
-      commandMatch: { isActive: false, activeCommand: null },
+      commandMatch: { isActive: false, activeCommand: null, hasVisibleContent: true },
       dismissActionMenu: jest.fn(),
       handleCommandSelect: jest.fn(),
+      reportMenuContent: jest.fn(),
     },
     controller: {
       clear: jest.fn(),
@@ -312,6 +313,7 @@ describe('MessageEditor', () => {
         commandStartOffset: 0,
         query: 'test',
       },
+      hasVisibleContent: true,
     };
 
     rerender(
@@ -380,6 +382,7 @@ describe('MessageEditor', () => {
         commandStartOffset: 0,
         query: '',
       },
+      hasVisibleContent: true,
     };
 
     render(

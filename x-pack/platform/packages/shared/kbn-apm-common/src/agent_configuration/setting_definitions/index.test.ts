@@ -287,9 +287,8 @@ describe('settingDefinitions', () => {
             'includeAgents',
             'label',
             'validation',
-            'zodValidation',
           ]),
-          validationName: def.validation.name,
+          validationType: def.validation.def.type,
         };
       })
     ).toMatchSnapshot();

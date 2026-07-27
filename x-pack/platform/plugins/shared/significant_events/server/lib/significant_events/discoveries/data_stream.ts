@@ -6,6 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
+import { discoverySchema } from '@kbn/significant-events-schema';
 import type { Discovery } from '@kbn/significant-events-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
@@ -18,15 +19,26 @@ export const discoveriesMappings = {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     kind: mappings.keyword(),
     discovery_id: mappings.keyword(),
-    discovery_slug: mappings.keyword(),
-    parent_discovery_id: mappings.keyword(),
     event_id: mappings.keyword(),
-    grouped_discovery_ids: mappings.keyword(),
-    criticality: mappings.integer(),
-    closed_by_execution_id: mappings.keyword(),
-    detections: mappings.object({
+    stream_names: mappings.keyword(),
+    severity: mappings.keyword(),
+    signals: mappings.object({
       properties: {
-        rule_uuid: { type: 'keyword' as const },
+        type: { type: 'keyword' as const },
+        stream_name: { type: 'keyword' as const },
+        confirmed: { type: 'boolean' as const },
+        metadata: mappings.object({
+          properties: {
+            rule_uuid: { type: 'keyword' as const },
+            detection_id: { type: 'keyword' as const },
+          },
+        }),
+      },
+    }),
+    causal_features: mappings.object({
+      properties: {
+        feature_id: { type: 'keyword' as const },
+        stream_name: { type: 'keyword' as const },
       },
     }),
   },
@@ -35,12 +47,24 @@ export const discoveriesMappings = {
 export type StoredDiscovery = GetFieldsOf<typeof discoveriesMappings>;
 export type { Discovery };
 
+/**
+ * Stored form of a Discovery document:
+ * - `severity` is encoded as a sortable prefixed keyword (e.g. `"60-high"`)
+ * - `stream_names` is derived from `signals[].stream_name` when not provided
+ */
+export const storedDiscoverySchema = discoverySchema.omit({ processed: true }).transform((doc) => ({
+  ...doc,
+  stream_names: doc.stream_names?.length
+    ? doc.stream_names
+    : [...new Set((doc.signals ?? []).map((s) => s.stream_name).filter(Boolean))],
+}));
+
 export const discoveriesDataStream: DataStreamDefinition<
   typeof discoveriesMappings,
   StoredDiscovery
 > = {
   name: DISCOVERIES_DATA_STREAM,
-  version: 4,
+  version: 6,
   hidden: true,
   template: {
     priority: 500,

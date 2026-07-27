@@ -6,7 +6,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -17,6 +17,8 @@ import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyou
 import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
+import { getAttackTitleValue } from '../../flyout_v2/attack/utils/get_attack_title';
 
 export interface AttackFlyoutHeaderProps {
   hit: DataTableRecord;
@@ -36,6 +38,7 @@ export const AttackFlyoutHeader = ({
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
 
   const openNotesFlyout = useCallback(() => {
     if (!services || !store) {
@@ -52,9 +55,10 @@ export const AttackFlyoutHeader = ({
       {
         ...defaultToolsFlyoutProperties,
         historyKey,
+        title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
       }
     );
-  }, [history, historyKey, hit, services, store]);
+  }, [attackTitle, history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;

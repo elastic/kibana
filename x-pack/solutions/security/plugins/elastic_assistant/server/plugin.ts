@@ -107,6 +107,11 @@ export class ElasticAssistantPlugin
     registerEventLogProvider(plugins.eventLog);
     const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
 
+    const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
+      core,
+      plugins,
+    });
+
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
       ml: plugins.ml,
@@ -123,11 +128,7 @@ export class ElasticAssistantPlugin
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
       pluginStop$: this.pluginStop$,
-    });
-
-    const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
-      core,
-      plugins,
+      adhocAttackDiscoveryDataClient,
     });
 
     const requestContextFactory = new RequestContextFactory({

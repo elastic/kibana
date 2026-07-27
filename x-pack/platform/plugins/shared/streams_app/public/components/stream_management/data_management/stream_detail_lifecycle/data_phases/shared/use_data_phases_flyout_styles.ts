@@ -37,10 +37,6 @@ export const useDataPhasesFlyoutStyles = () => {
       }
     `;
 
-    const phaseDescriptionStyles = css`
-      padding: ${euiTheme.size.m} ${euiTheme.size.l};
-    `;
-
     const phaseDescriptionNoBottomPaddingStyles = css`
       padding: ${euiTheme.size.m} ${euiTheme.size.l} 0 ${euiTheme.size.l};
     `;
@@ -51,7 +47,6 @@ export const useDataPhasesFlyoutStyles = () => {
       footerStyles,
       tabsErrorSelectedUnderlineStyles,
       tabsWarningSelectedUnderlineStyles,
-      phaseDescriptionStyles,
       phaseDescriptionNoBottomPaddingStyles,
     };
   }, [euiTheme.colors.danger, euiTheme.colors.warning, euiTheme.size.l, euiTheme.size.m]);

@@ -24,14 +24,14 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
-import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 
-import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { useCurrentUser, useSecurityApiClients, useUserProfile } from '../components';
+import { useSecurityApiClients } from '../components';
 
 // Dev-only core API that swaps the active color theme in place (no page reload). Not part of the
 // public `ThemeServiceStart` type, so we access it defensively and fall back to a reload if absent.
@@ -102,11 +102,10 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
-  const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
+  const { user } = useCurrentUser();
 
-  const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
-  const email = currentUser.value?.email;
+  const displayName = user?.displayName ?? '';
+  const email = user?.email;
   const showEmail = Boolean(email) && email !== displayName;
 
   const coreTheme = useObservable(services.theme.theme$, services.theme.getTheme());
@@ -138,19 +137,17 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   );
 
   const toggleMenu = useCallback(
-    () => setIsPopoverOpen((value) => (currentUser.value ? !value : false)),
-    [currentUser.value]
+    () => setIsPopoverOpen((value) => (user ? !value : false)),
+    [user]
   );
 
-  const avatar = userProfile.value ? (
+  const avatar = user ? (
     <UserAvatar
-      user={userProfile.value.user}
-      avatar={userProfile.value.data.avatar}
+      user={{ username: user.username, email: user.email, full_name: user.fullName }}
+      avatar={user.avatar}
       size={avatarSize}
       data-test-subj="userMenuAvatar"
     />
-  ) : currentUser.value && userProfile.error ? (
-    <UserAvatar user={currentUser.value} size={avatarSize} data-test-subj="userMenuAvatar" />
   ) : (
     <EuiLoadingSpinner size="m" />
   );
@@ -187,7 +184,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
+  const isAnonymous = user?.isAnonymous ?? false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
   if (!isAnonymous && !hasCustomProfileLinks) {

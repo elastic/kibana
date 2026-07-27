@@ -142,7 +142,9 @@ export const buildResolutionGroupingQuery = ({
         },
         bucket_truncate: {
           bucket_sort: {
-            from: pageIndex * pageSize,
+            // the terms agg above never returns more than MAX_QUERY_SIZE buckets, so requesting
+            // an offset beyond that window would always come back empty
+            from: Math.min(pageIndex * pageSize, Math.max(MAX_QUERY_SIZE - pageSize, 0)),
             size: pageSize,
           },
         },
