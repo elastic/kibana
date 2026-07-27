@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import type {
   ActionPolicyResponse,
   BulkResponse,
@@ -66,6 +67,18 @@ import {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+/**
+ * Concurrency cap for {@link ActionPolicyClient.bulkUpdateActionPoliciesApiKey}.
+ * Unlike the other by-ID bulk endpoints, API-key rotation cannot be done in a
+ * single SO round-trip — each id creates a fresh ES API key (plus a decrypt and
+ * an SO write). Running them serially makes latency scale linearly with the
+ * batch size, so we fan out; but a batch is capped at `MAX_BULK_ITEMS` (100) and
+ * each item is heavy (ES `_security/api_key` create + crypto), so the peak load
+ * is kept modest. 10 already gives a ~10x speedup over sequential while bounding
+ * concurrent key creations and decrypts far more tightly than the batch cap.
+ */
+const MAX_API_KEY_UPDATES_IN_PARALLEL = 10;
 
 /** A single per-resource error entry in a bulk response. */
 type ActionPolicyBulkError = BulkResponse['errors'][number];
@@ -523,19 +536,27 @@ export class ActionPolicyClient {
   public async bulkUpdateActionPoliciesApiKey({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
-    const errors: ActionPolicyBulkError[] = [];
-    let affectedCount = 0;
+    // Each id rotates its own API key (SO get + decrypt + key create + write),
+    // so the work is per-item rather than a single SO round-trip. Fan out with a
+    // bounded concurrency; failures are isolated per id inside the mapper so one
+    // bad policy never aborts the rest of the batch. `pMap` preserves input
+    // order, keeping the `errors` ordering deterministic.
+    const results = await pMap(
+      ids,
+      async (id): Promise<ActionPolicyBulkError | null> => {
+        try {
+          await this.updateActionPolicyApiKey({ id });
+          return null;
+        } catch (e) {
+          return bulkErrorFromThrown(id, e);
+        }
+      },
+      { concurrency: MAX_API_KEY_UPDATES_IN_PARALLEL }
+    );
 
-    for (const id of ids) {
-      try {
-        await this.updateActionPolicyApiKey({ id });
-        affectedCount += 1;
-      } catch (e) {
-        errors.push(bulkErrorFromThrown(id, e));
-      }
-    }
+    const errors = results.filter((result): result is ActionPolicyBulkError => result !== null);
 
-    return { affected_count: affectedCount, errors };
+    return { affected_count: ids.length - errors.length, errors };
   }
 
   /**

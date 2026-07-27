@@ -2467,6 +2467,54 @@ describe('ActionPolicyClient', () => {
       expect(res.errors[0].id).toBe('policy-missing');
       expect(res.errors[0].error.code).toBe('ACTION_POLICY_NOT_FOUND');
     });
+
+    it('rotates keys concurrently instead of one-at-a-time', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'policy',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+
+      const ids = ['policy-1', 'policy-2', 'policy-3'];
+      let inFlight = 0;
+
+      // Every rotation parks on this shared gate until the test releases it, so
+      // they all stay in flight at once. `allInFlight` resolves only when the
+      // last rotation reaches the gate — which can only happen if they run
+      // concurrently. A sequential loop keeps `inFlight` at 1, never resolves
+      // `allInFlight`, and times the test out.
+      let releaseAll: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        releaseAll = resolve;
+      });
+
+      let markAllInFlight: () => void = () => {};
+      const allInFlight = new Promise<void>((resolve) => {
+        markAllInFlight = resolve;
+      });
+
+      apiKeyService.create.mockImplementation(async () => {
+        inFlight += 1;
+        if (inFlight === ids.length) {
+          markAllInFlight();
+        }
+        await gate;
+        return { apiKey: 'encoded-es-api-key', owner: 'test-user', createdByUser: false };
+      });
+
+      const resultPromise = client.bulkUpdateActionPoliciesApiKey({ ids });
+
+      await allInFlight;
+
+      // All rotations reached key creation before any of them completed.
+      expect(apiKeyService.create).toHaveBeenCalledTimes(ids.length);
+
+      releaseAll();
+
+      expect(await resultPromise).toEqual({ affected_count: 3, errors: [] });
+    });
   });
 
   describe('getAllTags', () => {
