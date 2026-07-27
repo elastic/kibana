@@ -3145,10 +3145,11 @@ module.exports = {
       ],
       excludedFiles: [
         'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
         'x-pack/solutions/observability/packages/**/*.stories.*',
         'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
         'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/__stories__/**',
       ],
       rules: {
         '@kbn/telemetry/ebt_props_should_be_present': 'warn',
