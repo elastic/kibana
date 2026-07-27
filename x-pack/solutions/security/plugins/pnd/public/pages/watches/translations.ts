@@ -323,6 +323,13 @@ export const COL_TRIGGER = i18n.translate('xpack.pnd.watches.detail.recentRuns.c
   defaultMessage: 'Trigger',
 });
 
+export const COL_INVESTIGATION = i18n.translate(
+  'xpack.pnd.watches.detail.recentRuns.col.investigation',
+  {
+    defaultMessage: 'Investigation',
+  }
+);
+
 export const SUBNAV_ARIA_LABEL = i18n.translate('xpack.pnd.watches.subnav.ariaLabel', {
   defaultMessage: 'Watches section',
 });
@@ -393,6 +400,72 @@ export const STUB_EMPTY_BODY = i18n.translate('xpack.pnd.watches.stub.emptyBody'
   defaultMessage:
     'This surface will load live Workflows, Skills, and Activity data once those APIs are wired in.',
 });
+
+// -- Workflows / Skills aggregate tables (shared by both sections) --
+
+export const COL_NAME = i18n.translate('xpack.pnd.watches.callables.col.name', {
+  defaultMessage: 'Name',
+});
+
+export const COL_USED_BY = i18n.translate('xpack.pnd.watches.callables.col.usedBy', {
+  defaultMessage: 'Used by',
+});
+
+export const COL_LAST_RUN = i18n.translate('xpack.pnd.watches.callables.col.lastRun', {
+  defaultMessage: 'Last run',
+});
+
+export const STATUS_ENABLED = i18n.translate('xpack.pnd.watches.callables.status.enabled', {
+  defaultMessage: 'Enabled',
+});
+
+export const STATUS_DISABLED = i18n.translate('xpack.pnd.watches.callables.status.disabled', {
+  defaultMessage: 'Disabled',
+});
+
+export const WORKFLOWS_EMPTY_MESSAGE = i18n.translate('xpack.pnd.watches.workflows.emptyMessage', {
+  defaultMessage: 'No watch references a managed workflow yet.',
+});
+
+export const SKILLS_EMPTY_MESSAGE = i18n.translate('xpack.pnd.watches.skills.emptyMessage', {
+  defaultMessage: 'No watch references a skill yet.',
+});
+
+export const WORKFLOWS_TOTAL_COUNT = (count: number) =>
+  i18n.translate('xpack.pnd.watches.workflows.totalCount', {
+    defaultMessage: '{count, plural, one {# workflow} other {# workflows}} across all watches',
+    values: { count },
+  });
+
+export const SKILLS_TOTAL_COUNT = (count: number) =>
+  i18n.translate('xpack.pnd.watches.skills.totalCount', {
+    defaultMessage: '{count, plural, one {# skill} other {# skills}} across all watches',
+    values: { count },
+  });
+
+// -- Guardrails aggregate view --
+
+export const COL_AUTONOMY = i18n.translate('xpack.pnd.watches.guardrails.col.autonomy', {
+  defaultMessage: 'Autonomy',
+});
+
+export const COL_GATED_CAPABILITIES = i18n.translate(
+  'xpack.pnd.watches.guardrails.col.gatedCapabilities',
+  {
+    defaultMessage: 'Gated capabilities',
+  }
+);
+
+export const COL_DATA_SCOPE = i18n.translate('xpack.pnd.watches.guardrails.col.dataScope', {
+  defaultMessage: 'Data scope',
+});
+
+export const GUARDRAILS_EMPTY_MESSAGE = i18n.translate(
+  'xpack.pnd.watches.guardrails.emptyMessage',
+  {
+    defaultMessage: 'No watches configured yet.',
+  }
+);
 
 export const NEW_WATCH = i18n.translate('xpack.pnd.watches.newWatch', {
   defaultMessage: 'New watch',

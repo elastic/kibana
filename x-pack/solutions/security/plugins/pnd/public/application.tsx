@@ -31,6 +31,9 @@ import { SettingsPage } from './pages/settings';
 import { WatchesPage } from './pages/watches';
 import { WatchDetailPage } from './pages/watches/watch_detail';
 import { WatchesSectionStubPage } from './pages/watches/section_stub';
+import { WatchesWorkflowsPage } from './pages/watches/watches_workflows_page';
+import { WatchesSkillsPage } from './pages/watches/watches_skills_page';
+import { WatchesGuardrailsPage } from './pages/watches/watches_guardrails_page';
 import { InvestigationDetailPage } from './pages/investigations/investigation_detail';
 
 interface RenderAppParams {
@@ -82,14 +85,8 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
                     render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />}
                   />
                   <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
-                  <Route
-                    path="/watches/workflows"
-                    render={() => <WatchesSectionStubPage section="workflows" />}
-                  />
-                  <Route
-                    path="/watches/skills"
-                    render={() => <WatchesSectionStubPage section="skills" />}
-                  />
+                  <Route path="/watches/workflows" component={WatchesWorkflowsPage} />
+                  <Route path="/watches/skills" component={WatchesSkillsPage} />
                   <Route
                     path="/watches/activity"
                     render={() => <WatchesSectionStubPage section="activity" />}
@@ -98,10 +95,7 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
                     path="/watches/performance"
                     render={() => <WatchesSectionStubPage section="performance" />}
                   />
-                  <Route
-                    path="/watches/guardrails"
-                    render={() => <WatchesSectionStubPage section="guardrails" />}
-                  />
+                  <Route path="/watches/guardrails" component={WatchesGuardrailsPage} />
                   <Route path="/watches/:watchId" component={WatchDetailPage} />
                   <Route path="/watches" exact component={WatchesPage} />
                   <Route path="/settings" component={SettingsPage} />
