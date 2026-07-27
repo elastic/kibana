@@ -22,6 +22,8 @@ from sharing a source index or rule name.
 ```bash
 SOURCE_INDEX="logs-testing.<SLUG>-<SESSION_ID>-default"
 RULE_NAME="positive-control-<SLUG>-<SESSION_ID>"
+RULE_ID="positive-control-<SLUG>-<SESSION_ID>"
+RULE_SAVED_OBJECT_ID=""
 SOURCE_ES_URL="<ES_URL>"
 SOURCE_API_KEY="<SOURCE_API_KEY>"
 DATA_API_KEY="$SOURCE_API_KEY"
@@ -61,7 +63,19 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 Create the index and set the flag to `--owned` only after a 200/201 response.
 If a pending reservation existed before this attempt and the create responds
 409, reconcile it as `--owned`; otherwise use `--reused`. Treat any other
-response as a setup failure.
+response as a setup failure after probing the deterministic endpoint:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/reconcile-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind es_index \
+  --id "$SOURCE_INDEX" \
+  --endpoint "/$SOURCE_INDEX" \
+  --base-url "$SOURCE_BASE_URL" \
+  --probe-method HEAD \
+  --fail-on-absent || exit 1
+```
+The probe adopts a resource that exists, removes a reservation confirmed
+absent, and leaves the reservation pending for any indeterminate response.
 
 Register the physical source index before indexing the document:
 ```bash
@@ -83,46 +97,107 @@ curl -s -X POST -H "Authorization: ApiKey $DATA_API_KEY" -H "Content-Type: appli
 
 ### 2. Create a real query detection rule against it
 ```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind detection_rule \
+  --id "$RULE_ID" \
+  --endpoint "/s/$SPACE_ID/api/detection_engine/rules?rule_id=$RULE_ID" \
+  --pending
+ALERT_DELETE_BODY=$(printf \
+  '{"query":{"term":{"kibana.alert.rule.rule_id":"%s"}}}' "$RULE_ID")
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind es_alerts \
+  --id "positive-control-alerts-$RULE_ID" \
+  --endpoint "/.alerts-security.alerts-$SPACE_ID/_delete_by_query" \
+  --base-url es_url \
+  --method POST \
+  --body-json "$ALERT_DELETE_BODY" \
+  --pending
 RULE_RESPONSE=$(
   curl -s -w '\n%{http_code}' -X POST \
     -H "Authorization: ApiKey $SOURCE_API_KEY" \
     -H "Content-Type: application/json" \
     -H "kbn-xsrf: true" \
+    -H "elastic-api-version: 2023-10-31" \
     "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
-    -d '{ "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$RULE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
+    -d '{ "rule_id": "'"$RULE_ID"'", "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$RULE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
 )
 RULE_HTTP_STATUS="${RULE_RESPONSE##*$'\n'}"
 RULE_BODY="${RULE_RESPONSE%$'\n'*}"
 case "$RULE_HTTP_STATUS" in
-  200|201) RULE_OWNERSHIP_FLAG="--owned" ;;
-  409) RULE_OWNERSHIP_FLAG="--reused" ;;
-  *) echo "Rule creation failed (HTTP $RULE_HTTP_STATUS)." >&2; exit 1 ;;
+  200|201|409) RULE_OWNERSHIP_FLAG="--owned" ;;
+  *)
+    echo "Rule creation failed (HTTP $RULE_HTTP_STATUS)." >&2
+    RULE_RECONCILIATION_OUTPUT=$(
+      python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/reconcile-session-resource.py \
+      --session-dir "$SESSION_DIR" \
+      --kind detection_rule \
+      --id "$RULE_ID" \
+      --endpoint "/s/$SPACE_ID/api/detection_engine/rules?rule_id=$RULE_ID" \
+      --probe-method GET \
+      2>&1
+    ) || true
+    printf '%s\n' "$RULE_RECONCILIATION_OUTPUT" >&2
+    case "$RULE_RECONCILIATION_OUTPUT" in
+      Removed\ absent\ pending\ *)
+        python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+          --session-dir "$SESSION_DIR" \
+          --kind es_alerts \
+          --id "positive-control-alerts-$RULE_ID" \
+          --endpoint "/.alerts-security.alerts-$SPACE_ID/_delete_by_query" \
+          --remove-pending
+        ;;
+    esac
+    exit 1
+    ;;
 esac
-RULE_ID=$(printf '%s' "$RULE_BODY" | python3 -c \
-  'import json,sys; p=json.load(sys.stdin); print(p.get("id") or p.get("rule_id") or "")')
-: "${RULE_ID:?Rule response did not contain a rule id}"
+if [[ "$RULE_HTTP_STATUS" == "409" ]]; then
+  RULE_LOOKUP_RESPONSE=$(
+    curl -s -w '\n%{http_code}' -X GET \
+      -H "Authorization: ApiKey $SOURCE_API_KEY" \
+      -H "elastic-api-version: 2023-10-31" \
+      "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules?rule_id=$RULE_ID"
+  )
+  RULE_LOOKUP_STATUS="${RULE_LOOKUP_RESPONSE##*$'\n'}"
+  RULE_LOOKUP_BODY="${RULE_LOOKUP_RESPONSE%$'\n'*}"
+  if [[ "$RULE_LOOKUP_STATUS" != "200" ]]; then
+    echo "Unable to look up the existing positive-control rule." >&2
+    exit 1
+  fi
+  RULE_SAVED_OBJECT_ID=$(printf '%s' "$RULE_LOOKUP_BODY" | python3 -c \
+    'import json,sys; p=json.load(sys.stdin); print(p.get("id") or "")')
+else
+  RESPONSE_RULE_ID=$(printf '%s' "$RULE_BODY" | python3 -c \
+    'import json,sys; p=json.load(sys.stdin); print(p.get("rule_id") or "")')
+  RULE_SAVED_OBJECT_ID=$(printf '%s' "$RULE_BODY" | python3 -c \
+    'import json,sys; p=json.load(sys.stdin); print(p.get("id") or "")')
+  if [[ "$RESPONSE_RULE_ID" != "$RULE_ID" ]]; then
+    echo "Rule response did not contain the deterministic rule id." >&2
+    exit 1
+  fi
+fi
+: "${RULE_SAVED_OBJECT_ID:?Rule response did not contain a saved-object id}"
 ```
-Register the returned rule only after checking its response. Use `--owned`
-for a 200/201 response and `--reused` for a 409/conflict:
+The deterministic `rule_id` and the pending reservation close the
+create-before-register window. Reconcile it as owned after a successful or
+conflict response:
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
   --session-dir "$SESSION_DIR" \
   --kind detection_rule \
   --id "$RULE_ID" \
-  --endpoint "/s/$SPACE_ID/api/detection_engine/rules?id=$RULE_ID" \
+  --endpoint "/s/$SPACE_ID/api/detection_engine/rules?rule_id=$RULE_ID" \
   "$RULE_OWNERSHIP_FLAG"
 ```
-
-Register targeted cleanup for alerts produced by this rule. This deletes only
-documents with this rule UUID from the shared alerts index:
+The targeted alert cleanup reservation was created before the rule request.
+Once the rule is owned, promote that reservation before execution:
 ```bash
-ALERT_DELETE_BODY=$(printf \
-  '{"query":{"term":{"kibana.alert.rule.uuid":"%s"}}}' "$RULE_ID")
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
   --session-dir "$SESSION_DIR" \
   --kind es_alerts \
   --id "positive-control-alerts-$RULE_ID" \
-  --endpoint "/.alerts-security.alerts-<SPACE_ID>/_delete_by_query" \
+  --endpoint "/.alerts-security.alerts-$SPACE_ID/_delete_by_query" \
   --base-url es_url \
   --method POST \
   --body-json "$ALERT_DELETE_BODY" \
@@ -131,8 +206,9 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 
 ### 3. Force immediate execution
 ```bash
-curl -s -X POST -H "Authorization: ApiKey $SOURCE_API_KEY" -H "kbn-xsrf: true" \
-  "<KIBANA_URL>/s/<SPACE_ID>/internal/alerting/rule/<RULE_ID>/_run_soon"
+curl -s -X POST -H "Authorization: ApiKey $SOURCE_API_KEY" \
+  -H "kbn-xsrf: true" -H "x-elastic-internal-origin: kibana" \
+  "<KIBANA_URL>/s/<SPACE_ID>/internal/alerting/rule/<RULE_SAVED_OBJECT_ID>/_run_soon"
 ```
 
 ### 4. Confirm a genuine rule-fired alert appeared
@@ -143,7 +219,7 @@ curl -s -H "Authorization: ApiKey $SOURCE_API_KEY" -H "Content-Type: application
 ```
 A real alert has `kibana.alert.status`,
 `kibana.alert.rule.rule_type_id: "siem.queryRule"`, and a populated
-`kibana.alert.rule.uuid`. If those fields are present, the local pipeline
+`kibana.alert.rule.rule_id` matching `$RULE_ID`. If those fields are present, the local pipeline
 genuinely produced an alert — so if the feature under test still shows
 nothing, the gap is the feature, not the data. For CCS, the data was indexed
 on REMOTE, the rule queried the remote-prefixed pattern, and the alert

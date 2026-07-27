@@ -11,10 +11,54 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 ```
 Do not rely on reaching the normal Phase 3 path for cleanup.
 
+Resolve the session environment before making any setup API call. These
+assignments deliberately read `config.json` rather than relying on variables
+from the launcher shell:
+```bash
+session_config_value() {
+  python3 - "$SESSION_DIR" "$1" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+value: object = json.loads(
+    (Path(sys.argv[1]) / "config.json").read_text(encoding="utf-8")
+)
+for key in sys.argv[2].split("."):
+    value = value.get(key, "") if isinstance(value, dict) else ""
+print(value if isinstance(value, (str, int, float, bool)) else "")
+PY
+}
+
+ENV_TYPE=$(session_config_value environment.type)
+SESSION_ID=$(session_config_value session_id)
+KIBANA_URL=$(session_config_value environment.url)
+ES_URL=$(session_config_value environment.es_url)
+API_KEY=$(session_config_value credentials.api_key)
+USERNAME=$(session_config_value credentials.username)
+PASSWORD=$(session_config_value credentials.password)
+SPACE_ID=$(session_config_value environment.space_id)
+SPACE_ID="${SPACE_ID:-exploratory-testing}"
+: "${KIBANA_URL:?config.json is missing environment.url}"
+: "${ES_URL:?config.json is missing environment.es_url}"
+
+if [[ "$ENV_TYPE" == "user-provided" || "$ENV_TYPE" == "serverless" ]]; then
+  : "${API_KEY:?user-provided and serverless setup requires credentials.api_key}"
+fi
+if [[ -n "$API_KEY" ]]; then
+  AUTH_ARGS=(-H "Authorization: ApiKey $API_KEY")
+  NOISE_AUTH_ARGS=(--api-key "$API_KEY")
+else
+  AUTH_ARGS=(-u "$USERNAME:$PASSWORD")
+  NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
+fi
+
 After every successful setup mutation, immediately register the resource with
 `register-session-resource.py`. A 200/201 response is owned; a 409 response
-is reused. If ownership cannot be established, record the resource as reused
-or skip cleanup rather than guessing.
+is reused only when no pending reservation belongs to this session. If a
+request fails unexpectedly, use `reconcile-session-resource.py` to probe the
+deterministic endpoint: 200/204 adopts it as owned, 404 removes the pending
+reservation, and any other status leaves the reservation pending.
 
 ## Step 1a — Wait for Kibana (agent-managed only)
 
@@ -82,42 +126,51 @@ This creates `exploratory-testing-<session_id>-flow-<N>` for each flow where `is
 
 **Connectors** (if required by Setup):
 ```bash
-# Set AUTH_ARGS from config: user-provided → (-H "Authorization: ApiKey $API_KEY");
-# agent-managed → (-u "$USERNAME:$PASSWORD"). Use the configured base space.
-curl -s "${AUTH_ARGS[@]}" -X POST "$KIBANA_URL/s/$SPACE_ID/api/actions/connector" \
-  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
-  -d '{"name":"Bedrock","connector_type_id":".bedrock","config":{"apiUrl":"https://bedrock.us-east-1.amazonaws.com"},"secrets":{"accessKey":"test","secret":"test"}}'
-```
-Capture the returned connector ID and register it with
-`register-session-resource.py` as an owned `connector`; a 409/conflict is
-reused and must not be deleted. Fake `accessKey: test` is sufficient for UI
-testing. For areas that actually call the AI model (e.g. SIEM Migrations
-translation), real AWS credentials are required — pass via
-`$AWS_ACCESS_KEY` / `$AWS_SECRET_KEY` in Setup.
-
-For an owned connector, record it immediately:
-```bash
+# The explicit ID makes the create/reconcile operation crash-safe.
+CONNECTOR_ID="exploratory-tester-$SESSION_ID"
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
   --session-dir "$SESSION_DIR" \
   --kind connector \
   --id "$CONNECTOR_ID" \
   --endpoint "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
-  --owned
+  --pending
+CONNECTOR_RESPONSE=$(
+  curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
+    -X POST "$KIBANA_URL/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
+    -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+    -d '{"name":"Bedrock","connector_type_id":".bedrock","config":{"apiUrl":"https://bedrock.us-east-1.amazonaws.com"},"secrets":{"accessKey":"test","secret":"test"}}'
+)
+CONNECTOR_STATUS="${CONNECTOR_RESPONSE##*$'\n'}"
+case "$CONNECTOR_STATUS" in
+  200|201|409)
+    python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+      --session-dir "$SESSION_DIR" \
+      --kind connector \
+      --id "$CONNECTOR_ID" \
+      --endpoint "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
+      --owned
+    ;;
+  *)
+    python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/reconcile-session-resource.py \
+      --session-dir "$SESSION_DIR" \
+      --kind connector \
+      --id "$CONNECTOR_ID" \
+      --endpoint "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
+      || exit 1
+    ;;
+esac
 ```
+The API supports POST with an explicit ID, so there is no server-generated ID
+window. Fake `accessKey: test` is sufficient for UI testing. For areas that
+actually call the AI model (e.g. SIEM Migrations translation), real AWS
+credentials are required — pass via
+`$AWS_ACCESS_KEY` / `$AWS_SECRET_KEY` in Setup.
 
 **esArchiver fixtures** (stateful only): load via Kibana API. Serverless → attempt; if 404/400, add to `skipped_setup`.
 
 **Non-ECS noise index** (all environment types):
 ```bash
-# Set one auth form from config:
-# user-provided/serverless → NOISE_AUTH_ARGS=(--api-key "$API_KEY")
-# agent-managed stateful → NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
-if [[ "${ENV_TYPE:-}" == "user-provided" || "${ENV_TYPE:-}" == "serverless" ]]; then
-  NOISE_AUTH_ARGS=(--api-key "$API_KEY")
-else
-  NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
-fi
-# ES_URL: http://localhost:9220 (agent-managed) or environment.es_url from config.json
+# ES_URL and NOISE_AUTH_ARGS were resolved from config.json above.
 ```
 
 The script automatically falls back from `logs-exploratory.noise` to `exploratory-noise` if the `logs-*` name is reserved by a data stream template (common on serverless). Capture the alias from the output and write it to `config.json`:
@@ -155,17 +208,85 @@ the alias is retained in `config.json` for queries. On failure (empty
 ```bash
 # User-provided environments already have their browser/API credentials;
 # skip user provisioning there. Agent-managed environments use basic auth.
-# POST first; if 409 use PUT:
-curl -s -u elastic:changeme -X POST http://localhost:5620/internal/security/users/exploratory-tester \
-  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
-  -d '{"username":"exploratory-tester","password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
-```
-If the Kibana internal user API returns **404** (common on ECH), fall back to the Elasticsearch Security API:
-```bash
-curl -s -H "Authorization: ApiKey <api_key>" \
-  -X POST "<environment.es_url>/_security/user/exploratory-tester" \
-  -H 'Content-Type: application/json' \
-  -d '{"password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+# Probe the authoritative Elasticsearch resource before reserving it. A
+# pre-existing fixed-name user must never be deleted by this session.
+USER_EXISTING_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+  "${AUTH_ARGS[@]}" -X GET "$ES_URL/_security/user/exploratory-tester")
+case "$USER_EXISTING_STATUS" in
+  200)
+    python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+      --session-dir "$SESSION_DIR" \
+      --kind kibana_user \
+      --id exploratory-tester \
+      --endpoint "/_security/user/exploratory-tester" \
+      --base-url es_url \
+      --reused
+    ;;
+  404)
+    # Reserve the final Elasticsearch resource before either creation path.
+    python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+      --session-dir "$SESSION_DIR" \
+      --kind kibana_user \
+      --id exploratory-tester \
+      --endpoint "/_security/user/exploratory-tester" \
+      --base-url es_url \
+      --pending
+
+    # POST through Kibana; 404 falls back to Elasticsearch. A 409 is reused,
+    # never owned, because the fixed-name user may belong to another session.
+    USER_RESPONSE=$(
+      curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
+        -X POST "$KIBANA_URL/internal/security/users/exploratory-tester" \
+        -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+        -d '{"username":"exploratory-tester","password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+    )
+    USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
+    if [[ "$USER_HTTP_STATUS" == "404" ]]; then
+      USER_RESPONSE=$(
+        curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
+          -X POST "$ES_URL/_security/user/exploratory-tester" \
+          -H 'Content-Type: application/json' \
+          -d '{"password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+      )
+      USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
+    fi
+    case "$USER_HTTP_STATUS" in
+      200|201)
+        python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+          --session-dir "$SESSION_DIR" \
+          --kind kibana_user \
+          --id exploratory-tester \
+          --endpoint "/_security/user/exploratory-tester" \
+          --base-url es_url \
+          --owned
+        ;;
+      409)
+        python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+          --session-dir "$SESSION_DIR" \
+          --kind kibana_user \
+          --id exploratory-tester \
+          --endpoint "/_security/user/exploratory-tester" \
+          --base-url es_url \
+          --reused
+        ;;
+      *)
+        python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/reconcile-session-resource.py \
+          --session-dir "$SESSION_DIR" \
+          --kind kibana_user \
+          --id exploratory-tester \
+          --endpoint "/_security/user/exploratory-tester" \
+          --base-url es_url \
+          --probe-method GET \
+          --fail-on-absent || exit 1
+        exit 1
+        ;;
+    esac
+    ;;
+  *)
+    echo "Unable to probe exploratory-tester user (HTTP $USER_EXISTING_STATUS)." >&2
+    exit 1
+    ;;
+esac
 ```
 `environment.es_url`: replace `kb.` with `es.` in ECH URLs. If the configured
 Kibana key does not have Elasticsearch user-management privileges, add the
@@ -174,26 +295,20 @@ do not fall back to browser credentials for API calls.
 
 Serverless: skip user creation — roles are pre-provisioned. Add `{ "step": "role-creation:<role>", "reason": "serverless" }` to `skipped_setup`.
 
-Capture the create response before continuing. Register a user only after a
-200/201 response; record a 409 response as reused. If the Elasticsearch
-fallback created the user, use `--base-url es_url` and endpoint
-`/_security/user/exploratory-tester`:
+If setup creates a custom role rather than using an existing role, reserve it
+before the create request:
 ```bash
+ROLE_ID="<session-scoped-role-id>"
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
   --session-dir "$SESSION_DIR" \
-  --kind kibana_user \
-  --id exploratory-tester \
-  --endpoint "/_security/user/exploratory-tester" \
-  --base-url es_url \
-  --owned
+  --kind kibana_role \
+  --id "$ROLE_ID" \
+  --endpoint "/api/security/role/$ROLE_ID" \
+  --pending
 ```
-Never register a user or role as owned when the response was 409 or when the
-resource predated this session.
-
-If setup creates a custom role rather than using an existing role, register it
-with kind `kibana_role` and endpoint
-`/api/security/role/<role-id>` using the same owned/reused rule. Built-in or
-pre-existing roles must not be registered as owned.
+After a 200/201/409 response, promote that reservation with `--owned`; for an
+unexpected response, use `reconcile-session-resource.py` against the same
+endpoint. Built-in or pre-existing roles must not be registered as owned.
 
 > **Pitfall:** Direct indexing into `.alerts-security.alerts-*` satisfies KPI aggregations but NOT the Alerts data grid — the grid requires full signal schema fields. To get rows in the Alerts table, enable and run a detection engine rule.
 

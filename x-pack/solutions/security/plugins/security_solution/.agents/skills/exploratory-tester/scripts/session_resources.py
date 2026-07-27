@@ -31,6 +31,7 @@ RESOURCE_KINDS = frozenset(
     }
 )
 RESOURCE_STATES = frozenset({"pending", "owned", "reused"})
+RESOURCE_PRESENT_STATUSES = frozenset({"200", "201", "204"})
 CCS_STATES = frozenset({"unchanged", "modified", "restored"})
 
 
@@ -406,6 +407,44 @@ def remove_pending_resource(
         )
     ]
     return True
+
+
+def reconcile_pending_resource(
+    config: dict[str, Any],
+    *,
+    kind: str,
+    resource_id: str,
+    endpoint: str,
+    http_code: str,
+    method: str = "DELETE",
+    protected: bool = False,
+    base_url: str = "url",
+    track_flow_space: bool = False,
+    body: str | None = None,
+) -> str:
+    if not is_pending_resource(config, kind=kind, resource_id=resource_id):
+        raise ValueError(
+            f"Session resource {kind} {resource_id!r} is not pending"
+        )
+    if http_code in RESOURCE_PRESENT_STATUSES:
+        register_resource(
+            config,
+            kind=kind,
+            resource_id=resource_id,
+            owned=True,
+            endpoint=endpoint,
+            method=method,
+            protected=protected,
+            base_url=base_url,
+            track_flow_space=track_flow_space,
+            body=body,
+            state="owned",
+        )
+        return "owned"
+    if http_code == "404":
+        remove_pending_resource(config, kind=kind, resource_id=resource_id)
+        return "removed"
+    return "pending"
 
 
 def cleanup_candidates(config: dict[str, Any]) -> list[dict[str, Any]]:

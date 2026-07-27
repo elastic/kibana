@@ -18,6 +18,9 @@ DELETE_SCRIPT = SCRIPT_DIR / "delete-flow-spaces.py"
 NOISE_SCRIPT = SCRIPT_DIR / "create-noise-index.sh"
 POSITIVE_CONTROL = SCRIPT_DIR / "positive-control-alert.md"
 BREAK_REMOTE = SCRIPT_DIR / "break-remote-cluster.md"
+CAPTURE_CCS_SCRIPT = SCRIPT_DIR / "capture-remote-cluster.py"
+RESTORE_CCS_SCRIPT = SCRIPT_DIR / "restore-remote-cluster.py"
+RECONCILE_SCRIPT = SCRIPT_DIR / "reconcile-session-resource.py"
 FIXTURES_DIR = SCRIPT_DIR / "__tests__" / "fixtures"
 OWNED_REUSED_FIXTURE = FIXTURES_DIR / "session-resources-owned-reused.json"
 EARLY_EXIT_FIXTURE = FIXTURES_DIR / "session-resources-early-exit.json"
@@ -30,6 +33,7 @@ from session_resources import (  # noqa: E402
     cleanup_candidates,
     ensure_session_manifest,
     namespaced_flow_space_id,
+    reconcile_pending_resource,
     register_resource,
 )
 
@@ -107,6 +111,312 @@ class SessionResourceContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "remote credentials"):
             build_auth_args(config, base_url_key="ccs_remote_es_url")
 
+    def test_reconcile_pending_resource_transitions_by_probe_status(self):
+        config = {
+            "session_id": "abc12345",
+            "session_resources": [],
+        }
+        register_resource(
+            config,
+            kind="es_index",
+            resource_id="created-index",
+            owned=False,
+            state="pending",
+            endpoint="/created-index",
+            base_url="es_url",
+        )
+
+        self.assertEqual(
+            reconcile_pending_resource(
+                config,
+                kind="es_index",
+                resource_id="created-index",
+                endpoint="/created-index",
+                base_url="es_url",
+                http_code="200",
+            ),
+            "owned",
+        )
+        self.assertTrue(config["session_resources"][0]["owned"])
+
+        register_resource(
+            config,
+            kind="es_index",
+            resource_id="absent-index",
+            owned=False,
+            state="pending",
+            endpoint="/absent-index",
+            base_url="es_url",
+        )
+        self.assertEqual(
+            reconcile_pending_resource(
+                config,
+                kind="es_index",
+                resource_id="absent-index",
+                endpoint="/absent-index",
+                base_url="es_url",
+                http_code="404",
+            ),
+            "removed",
+        )
+        self.assertNotIn(
+            "absent-index",
+            {resource["id"] for resource in config["session_resources"]},
+        )
+
+        register_resource(
+            config,
+            kind="es_index",
+            resource_id="unknown-index",
+            owned=False,
+            state="pending",
+            endpoint="/unknown-index",
+            base_url="es_url",
+        )
+        self.assertEqual(
+            reconcile_pending_resource(
+                config,
+                kind="es_index",
+                resource_id="unknown-index",
+                endpoint="/unknown-index",
+                base_url="es_url",
+                http_code="500",
+            ),
+            "pending",
+        )
+
+    def test_capture_remote_cluster_persists_only_writable_restore_fields(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "unchanged",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+
+print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "isConnected": True,
+        "securityModel": "api_key",
+        "skipUnavailable": False,
+        "proxyAddress": "old.remote.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+}]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            restore = config["ccs_restore"]
+            self.assertEqual(restore["endpoint"], "/api/remote_clusters/remote")
+            self.assertEqual(
+                restore["payload"],
+                {
+                    "skipUnavailable": False,
+                    "mode": "proxy",
+                    "seeds": None,
+                    "nodeConnections": None,
+                    "proxyAddress": "old.remote.test:9400",
+                    "proxySocketConnections": 3,
+                    "serverName": None,
+                },
+            )
+            self.assertNotIn("isConnected", restore["payload"])
+            self.assertNotIn("securityModel", restore["payload"])
+
+    def test_reconcile_resource_cli_adopts_a_pending_remote_resource(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "pending-index",
+                                "state": "pending",
+                                "owned": False,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": "/pending-index",
+                                "base_url": "es_url",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RECONCILE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "pending-index",
+                    "--endpoint",
+                    "/pending-index",
+                    "--base-url",
+                    "es_url",
+                    "--probe-method",
+                    "HEAD",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["session_resources"][0]["state"], "owned")
+            self.assertTrue(config["session_resources"][0]["owned"])
+
+    def test_restore_remote_cluster_uses_snapshot_and_marks_state_after_verify(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            payload = {
+                "skipUnavailable": False,
+                "mode": "proxy",
+                "seeds": None,
+                "nodeConnections": None,
+                "proxyAddress": "old.remote.test:9400",
+                "proxySocketConnections": 3,
+                "serverName": None,
+            }
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "modified",
+                        "ccs_restored": False,
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": payload,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
+    log.write(" ".join(sys.argv[1:]) + "\\n")
+if "PUT" in sys.argv:
+    print(json.dumps({"acknowledged": True}))
+else:
+    print(json.dumps({"remote": {"connected": True}}))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "restored")
+            self.assertTrue(config["ccs_restored"])
+            curl_log = log_path.read_text(encoding="utf-8")
+            self.assertIn("kbn-xsrf: true", curl_log)
+            self.assertIn("old.remote.test:9400", curl_log)
+            self.assertNotIn("isConnected", curl_log)
+            self.assertNotIn("securityModel", curl_log)
+
     def test_phase_contract_registers_resources_and_cleans_up_unconditionally(self):
         setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
         login = (PHASES_DIR / "1-wait-and-login.md").read_text(encoding="utf-8")
@@ -154,9 +464,12 @@ class SessionResourceContractTests(unittest.TestCase):
         self.assertIn('"ccs_state": "unchanged"', setup)
         self.assertIn("ccs_state", report)
         self.assertIn('config["ccs_state"] = "modified"', break_remote)
-        self.assertIn('config["ccs_state"] = "restored"', break_remote)
+        self.assertIn("capture-remote-cluster.py", break_remote)
+        self.assertIn("restore-remote-cluster.py", break_remote)
+        self.assertIn('ccs_state="restored"', break_remote)
         self.assertIn("session_id", session_template)
         self.assertIn("ccs_restored", session_template)
+        self.assertIn("ccs_restore", setup)
         self.assertIn("<SESSION_ID>", positive_control)
         self.assertIn("ccs_remote_es_url", positive_control)
         self.assertIn("--reused", positive_control)
@@ -168,10 +481,51 @@ class SessionResourceContractTests(unittest.TestCase):
         self.assertIn("Authorization: ApiKey $SOURCE_API_KEY", positive_control)
         self.assertIn('"$DATA_ES_URL/$SOURCE_INDEX/_doc', positive_control)
         self.assertIn('"$SOURCE_ES_URL/.alerts-security.alerts-', positive_control)
+        self.assertIn('x-elastic-internal-origin: kibana', positive_control)
+        self.assertIn('elastic-api-version: 2023-10-31', positive_control)
         self.assertNotIn('SOURCE_ES_URL="<REMOTE_ES_URL>"', positive_control)
         self.assertIn("--kind es_alerts", positive_control)
         self.assertIn("--method POST", positive_control)
-        self.assertIn("kibana.alert.rule.uuid", positive_control)
+        self.assertIn("kibana.alert.rule.rule_id", positive_control)
+        self.assertIn("reconcile-session-resource.py", positive_control)
+        rule_section = positive_control[
+            positive_control.index("### 2. Create a real query detection rule")
+            : positive_control.index("### 3. Force immediate execution")
+        ]
+        self.assertIn('RULE_ID="positive-control-', positive_control)
+        self.assertIn('"rule_id":', rule_section)
+        self.assertIn('"$RULE_ID"', rule_section)
+        self.assertIn("--kind detection_rule", rule_section)
+        self.assertIn("--kind es_alerts", rule_section)
+        self.assertIn("--pending", rule_section)
+        self.assertLess(
+            rule_section.index("--pending"),
+            rule_section.index("RULE_RESPONSE"),
+        )
+        connector_section = login[
+            login.index("**Connectors**")
+            : login.index("**esArchiver fixtures**")
+        ]
+        self.assertIn('CONNECTOR_ID="exploratory-tester-$SESSION_ID"', connector_section)
+        self.assertIn(
+            "/api/actions/connector/$CONNECTOR_ID",
+            connector_section,
+        )
+        self.assertIn("--pending", connector_section)
+        self.assertIn("AUTH_ARGS", connector_section)
+        self.assertIn("session_config_value", login)
+        for variable in (
+            "ENV_TYPE",
+            "KIBANA_URL",
+            "ES_URL",
+            "API_KEY",
+            "USERNAME",
+            "PASSWORD",
+            "SPACE_ID",
+        ):
+            self.assertIn(f"{variable}=$(session_config_value", login)
+        self.assertIn("AUTH_ARGS=(", login)
+        self.assertIn("NOISE_AUTH_ARGS=(", login)
         self.assertNotIn(
             "uses SOURCE `SOURCE_ES_URL`.\n"
             "`<remote_cluster_alias>:logs-testing.",
@@ -475,6 +829,66 @@ print("500")
 
             self.assertNotEqual(result.returncode, 0)
 
+    def test_flow_space_failure_reconciles_a_successful_remote_creation(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "mode": "parallel",
+                        "environment": {
+                            "type": "user-provided",
+                            "url": "https://kibana.example.test",
+                            "space_id": "custom-base",
+                        },
+                        "credentials": {"api_key": "encoded-key"},
+                        "flows": [{"name": "reconciled", "isolate": True}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import sys
+
+print("created" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST" else "")
+print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST" else "200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CREATE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                config["flows"][0]["space_id"],
+                "exploratory-testing-abc12345-flow-1",
+            )
+            self.assertEqual(
+                config["session_resources"][0]["state"],
+                "owned",
+            )
+
     def test_base_space_validation_is_read_only_and_records_reuse(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
@@ -595,6 +1009,70 @@ print("200" if method == "PUT" else "500")
                 "logs-exploratory.noise-abc12345-000001",
             )
             self.assertTrue(config["session_resources"][0]["owned"])
+
+    def test_noise_index_failure_reconciles_an_index_created_before_response_loss(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "es_url": "http://localhost:9220",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import sys
+
+method = sys.argv[sys.argv.index("-X") + 1]
+print({"PUT": "500", "HEAD": "200", "POST": "200"}.get(method, "500"))
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(NOISE_SCRIPT),
+                    "--es-url",
+                    "http://localhost:9220",
+                    "--username",
+                    "elastic",
+                    "--password",
+                    "changeme",
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["session_resources"][0]["state"], "owned")
+            self.assertIn(
+                "NOISE_INDEX_NAME=logs-exploratory.noise-abc12345-000001",
+                result.stdout,
+            )
 
     def test_rerunning_noise_setup_preserves_prior_owned_index(self):
         with tempfile.TemporaryDirectory() as raw_dir:

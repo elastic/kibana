@@ -14,10 +14,15 @@ Fill in `<REMOTE_ALIAS>` (from `config.json → environment.ccs.remote_cluster_a
 
 ### 1. Capture the exact live config — do this first
 ```bash
-curl -s -H "Authorization: ApiKey <API_KEY>" \
-  "<SOURCE_KIBANA_URL>/api/remote_clusters" | python3 -m json.tool
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/capture-remote-cluster.py \
+  --session-dir "$SESSION_DIR" \
+  --alias "<REMOTE_ALIAS>"
 ```
-Save the object for `<REMOTE_ALIAS>` verbatim — you will restore it byte-for-byte. Note `mode` (`proxy` or `sniff`), `proxyAddress` or `seeds`, `serverName`, and `skipUnavailable`.
+The script persists only the writable update payload in
+`config.json → ccs_restore.payload`; it excludes read-only status fields from
+the GET response. Inspect that payload and show it to the user before
+continuing. Note `mode` (`proxy` or `sniff`), `proxyAddress` or `seeds`,
+`serverName`, and `skipUnavailable`.
 
 ### 2. Get user confirmation
 
@@ -44,13 +49,35 @@ PY
 
 ### 4. Break it — invalid proxyAddress, everything else unchanged
 
-Keep `mode`, `serverName`, and `skipUnavailable` exactly as captured; change only the address to something that cannot resolve:
+Build the complete writable update payload from the persisted snapshot. Keep
+all fields unchanged except the address that makes the connection fail:
 ```bash
-curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
+CCS_BREAK_BODY=$(PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+python3 - "$SESSION_DIR" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+from session_resources import load_session_config
+
+config = load_session_config(Path(sys.argv[1]) / "config.json")
+payload = dict(config["ccs_restore"]["payload"])
+if payload["mode"] == "sniff":
+    payload["seeds"] = ["invalid.broken.example:9300"]
+    payload["proxyAddress"] = None
+    payload["proxySocketConnections"] = None
+else:
+    payload["proxyAddress"] = "invalid.broken.example:9400"
+    payload["seeds"] = None
+    payload["nodeConnections"] = None
+print(json.dumps(payload, separators=(",", ":")))
+PY
+)
+curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" \
+  -H "kbn-xsrf: true" -H "Content-Type: application/json" \
   "<SOURCE_KIBANA_URL>/api/remote_clusters/<REMOTE_ALIAS>" \
-  -d '{ "mode": "<captured mode>", "proxyAddress": "invalid.broken.example:9400", "serverName": "<captured serverName>", "skipUnavailable": <captured skipUnavailable> }'
+  -d "$CCS_BREAK_BODY"
 ```
-(For a `sniff`-mode cluster, replace `proxyAddress` with `"seeds": ["invalid.broken.example:9300"]`.)
 
 ### 5. Verify it is actually broken
 ```bash
@@ -64,34 +91,21 @@ Run the CCS "unreachable remote" flows now. Capture evidence exactly as for any 
 
 ### 7. Restore the exact original config
 ```bash
-curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
-  "<SOURCE_KIBANA_URL>/api/remote_clusters/<REMOTE_ALIAS>" \
-  -d '<the exact object captured in step 1>'
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-remote-cluster.py \
+  --session-dir "$SESSION_DIR"
 ```
 
-### 8. Verify reconnection before continuing
-```bash
-curl -s -H "Authorization: ApiKey <API_KEY>" "<SOURCE_ES_URL>/_remote/info?pretty"
-```
-Confirm `connected: true` again and that the socket/connection count matches what step 1 showed. **Do not proceed to the next flow, and do not end the session, until reconnection is verified.** If restore fails, tell the user immediately with the captured original config so they can restore it manually — treat a broken shared deployment as urgent.
-
-After reconnection is verified, mark the session state as restored:
-```bash
-PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
-python3 - "$SESSION_DIR" <<'PY'
-import sys
-from pathlib import Path
-
-from session_resources import edit_session_config
-
-with edit_session_config(Path(sys.argv[1]) / "config.json") as config:
-    config["ccs_state"] = "restored"
-    config["ccs_restored"] = True
-PY
-```
+The script restores from the durable snapshot, verifies
+`<REMOTE_ALIAS>.connected == true`, and only then sets
+`ccs_state="restored"`. **Do not proceed to the next flow, and do not end the
+session, until this command succeeds.** If restore fails, tell the user
+immediately with the persisted snapshot so they can restore it manually —
+treat a broken shared deployment as urgent.
 
 ## Notes
 
 - Only the SOURCE deployment holds the remote-cluster definition; run every command here against the SOURCE URLs, never the REMOTE cluster's.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
-- If the session cap fires or the browser dies mid-scenario, restore first (steps 7-8), then handle the timeout/loss. Restoration takes priority over logging.
+- If the session cap fires or the browser dies mid-scenario, run step 7 first
+  from the persisted `SESSION_DIR`, then handle the timeout/loss. Restoration
+  takes priority over logging.

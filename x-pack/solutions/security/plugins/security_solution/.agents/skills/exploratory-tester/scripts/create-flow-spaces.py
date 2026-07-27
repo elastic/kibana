@@ -15,6 +15,7 @@ from session_resources import (
     is_owned_resource,
     is_pending_resource,
     namespaced_flow_space_id,
+    reconcile_pending_resource,
     register_resource,
     resource_state,
     write_session_config,
@@ -77,6 +78,7 @@ def main() -> int:
                 kind="kibana_space",
                 resource_id=space_id,
             )
+            pending_reservation = pending_before_remote or existing_resource is None
             if existing_resource is None:
                 register_resource(
                     config,
@@ -153,21 +155,62 @@ def main() -> int:
                     f"space {space_id!r} already exists — reusing"
                 )
             else:
-                flow["space_id"] = base_space_id
-                errors.append(
-                    {
-                        "flow": flow_number,
-                        "space": space_id,
-                        "http_code": http_code,
-                        "body": lines[0] if lines else "",
-                    }
-                )
-                print(
-                    f"Flow {flow_number} ({flow['name']!r}): "
-                    f"space creation failed (HTTP {http_code}) — "
-                    f"falling back to shared space {base_space_id!r}",
-                    file=sys.stderr,
-                )
+                if pending_reservation:
+                    probe = subprocess.run(
+                        [
+                            "curl",
+                            "-s",
+                            "-o",
+                            "/dev/null",
+                            "-w",
+                            "\n%{http_code}",
+                            *auth_args,
+                            "-X",
+                            "GET",
+                            f"{url}{endpoint}",
+                        ],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    probe_status = http_status(probe.stdout)
+                    reconciliation = reconcile_pending_resource(
+                        config,
+                        kind="kibana_space",
+                        resource_id=space_id,
+                        endpoint=endpoint,
+                        http_code=probe_status,
+                        track_flow_space=True,
+                    )
+                else:
+                    reconciliation = "reused"
+                    probe_status = "not-probed"
+
+                if reconciliation == "owned":
+                    flow["space_id"] = space_id
+                    print(
+                        f"Flow {flow_number} ({flow['name']!r}): "
+                        f"space {space_id!r} found after HTTP {http_code}; "
+                        "reconciled as owned"
+                    )
+                else:
+                    flow["space_id"] = base_space_id
+                    errors.append(
+                        {
+                            "flow": flow_number,
+                            "space": space_id,
+                            "http_code": http_code,
+                            "probe_status": probe_status,
+                            "body": lines[0] if lines else "",
+                        }
+                    )
+                    print(
+                        f"Flow {flow_number} ({flow['name']!r}): "
+                        f"space creation failed (HTTP {http_code}) — "
+                        f"falling back to shared space {base_space_id!r}; "
+                        f"pending reconciliation: {reconciliation}",
+                        file=sys.stderr,
+                    )
 
             write_session_config(config_path, config)
 

@@ -335,6 +335,7 @@ Write `$SESSION_DIR/config.json`:
   },
   "ccs_state": "unchanged",
   "ccs_restored": false,
+  "ccs_restore": null,
   "test_user": {
     "username": "exploratory-tester",
     "password": "Exploratory123!"

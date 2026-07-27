@@ -187,6 +187,34 @@ PY
       continue
     fi
   else
+    if [[ -n "$SESSION_DIR" ]]; then
+      RECONCILIATION_STATUS=0
+      RECONCILIATION_OUTPUT=$(
+        python3 "$SCRIPT_DIR/reconcile-session-resource.py" \
+          --session-dir "$SESSION_DIR" \
+          --kind es_index \
+          --id "$INDEX" \
+          --endpoint "/$INDEX" \
+          --base-url es_url \
+          --probe-method HEAD \
+          2>&1
+      ) || RECONCILIATION_STATUS=$?
+      case "$RECONCILIATION_OUTPUT" in
+        Reconciled\ *)
+          echo "$RECONCILIATION_OUTPUT"
+          INDEX_READY=true
+          INDEX_OWNED=true
+          break
+          ;;
+        Removed\ absent\ pending\ *)
+          echo "$RECONCILIATION_OUTPUT"
+          continue
+          ;;
+      esac
+      if [[ "$RECONCILIATION_STATUS" -ne 0 ]]; then
+        printf '%s\n' "$RECONCILIATION_OUTPUT" >&2
+      fi
+    fi
     echo "Unexpected status $RESPONSE creating index $INDEX." >&2
     exit 1
   fi

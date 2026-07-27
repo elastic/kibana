@@ -166,22 +166,16 @@ file update, and regardless of whether earlier report steps failed. If
 `config.json → ccs_state` is `"modified"`:
 
 1. Restore the remote-cluster state using the recorded CCS procedure.
-2. Verify the expected alias and connection state with
-   `GET /api/remote_clusters` and the recorded remote-cluster status.
-3. Mark the restoration verified using the locked config helper:
+   The durable snapshot and verification command are:
    ```bash
-   PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
-   python3 - "$SESSION_DIR" <<'PY'
-   import sys
-   from pathlib import Path
-
-   from session_resources import edit_session_config
-
-   with edit_session_config(Path(sys.argv[1]) / "config.json") as config:
-       config["ccs_state"] = "restored"
-       config["ccs_restored"] = True
-   PY
+   python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-remote-cluster.py \
+     --session-dir "$SESSION_DIR"
    ```
+2. The command restores the writable payload from
+   `config.json → ccs_restore`, verifies the expected alias is connected via
+   `GET /_remote/info`, and marks the state restored only after verification.
+   If it fails, stop cleanup and tell the user to restore the shared cluster
+   using the persisted payload.
 
 Cleanup fails closed only while the CCS state is `"modified"`; a state of
 `"unchanged"` means no shared-cluster mutation occurred and is safe to clean.
