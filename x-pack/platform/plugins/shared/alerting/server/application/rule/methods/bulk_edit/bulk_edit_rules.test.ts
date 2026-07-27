@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -75,6 +76,7 @@ const isAuthenticationTypeApiKeyMock = jest.fn();
 const getAuthenticationApiKeyMock = jest.fn();
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,

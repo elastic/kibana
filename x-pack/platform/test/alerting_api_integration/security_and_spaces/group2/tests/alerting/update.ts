@@ -1406,5 +1406,57 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
+
+    describe('rule type params authorization', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      async function createValidationRule() {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData({ rule_type_id: 'test.validation', params: { param1: 'test' } }))
+          .expect(200);
+        objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+        return createdAlert.id;
+      }
+
+      const updateBody = (params: Record<string, unknown>) => ({
+        name: 'updated',
+        tags: [],
+        schedule: { interval: '1m' },
+        throttle: null,
+        notify_when: 'onActiveAlert',
+        actions: [],
+        params,
+      });
+
+      it('updates the rule when the rule type params authorization passes', async () => {
+        const id = await createValidationRule();
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(updateBody({ param1: 'updated' }))
+          .expect(200);
+      });
+
+      it('rejects the update when the rule type params authorization throws', async () => {
+        const id = await createValidationRule();
+
+        const response = await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(updateBody({ param1: 'updated', param2: true }));
+
+        expect(response.statusCode).to.eql(403);
+        expect(response.body).to.eql({
+          error: 'Forbidden',
+          message: 'Not authorized to set param2',
+          statusCode: 403,
+        });
+      });
+    });
   });
 }

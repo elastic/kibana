@@ -15,6 +15,7 @@ import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../..
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -137,6 +138,9 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
   const username = await context.getUserName();
 
   let createdAPIKey = null;
