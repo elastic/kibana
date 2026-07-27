@@ -75,9 +75,9 @@ describe('PackagePolicyUpgradeCell', () => {
 
   describe('with disableAgentlessLegacyAPI enabled', () => {
     beforeEach(() => {
+      // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         ...allowedExperimentalValues,
-        disableAgentlessLegacyAPI: true,
       });
     });
 

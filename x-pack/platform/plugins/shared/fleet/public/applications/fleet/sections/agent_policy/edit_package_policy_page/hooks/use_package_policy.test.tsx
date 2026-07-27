@@ -938,11 +938,10 @@ describe('usePackagePolicy - agentless with disableAgentlessLegacyAPI enabled', 
   beforeEach(() => {
     jest.clearAllMocks();
     // The legacy-block flag makes the package-policy upgrade dry-run 400 for agentless policies
-    // server-side. `enableAgentlessPoliciesUI` stays on (its default) so the save still routes
-    // through the agentless API.
+    // server-side. It (and `enableAgentlessPoliciesUI`) are on by default via
+    // allowedExperimentalValues, so the save still routes through the agentless API.
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
-      disableAgentlessLegacyAPI: true,
     });
   });
 

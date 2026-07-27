@@ -210,9 +210,9 @@ describe('PackagePolicyActionsMenu', () => {
   describe('agentless upgrade (disableAgentlessLegacyAPI enabled)', () => {
     beforeEach(() => {
       jest.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
+      // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         ...allowedExperimentalValues,
-        disableAgentlessLegacyAPI: true,
       });
     });
 
