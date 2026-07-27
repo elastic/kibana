@@ -53,10 +53,13 @@ export function DataIngestStatus({
   const { data, status, refetch } = useFetcher(
     (callApi) => {
       return callApi('GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data', {
-        params: { path: { onboardingId }, query: { start: startIso } },
+        params: {
+          path: { onboardingId },
+          query: { start: startIso, respectPreExistingData },
+        },
       });
     },
-    [onboardingId, startIso]
+    [onboardingId, startIso, respectPreExistingData]
   );
 
   const hasData = data?.hasData ?? false;
