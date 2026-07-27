@@ -51,7 +51,7 @@ Many Playwright actions auto-wait before executing. Do not add explicit waits be
 
 ## Page Objects
 
-Extract **all locators as `readonly` properties** initialized in the constructor — never create locators inline in methods. This keeps selectors centralized and makes them easy to audit or update.
+Define static locators as `readonly` properties initialized in the constructor. Use named methods for locators that depend on parameters, such as a row name or resource ID. Avoid repeatedly constructing static locators inside action methods.
 
 ```typescript
 class DashboardPage {

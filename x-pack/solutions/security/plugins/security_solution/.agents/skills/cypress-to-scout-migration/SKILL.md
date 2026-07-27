@@ -217,7 +217,7 @@ After migration, run the `scout-best-practices-reviewer` skill against the new t
 - [ ] No `loginAsAdmin()` — uses least-privileged role (`loginAsPlatformEngineer`, `loginAsT1Analyst`, or `loginAsSecurityRole`)
 - [ ] Imports from `@kbn/scout-security` (not `@kbn/scout`)
 - [ ] `expect` imported from `@kbn/scout-security/ui` (not main entry)
-- [ ] All locators extracted as `readonly` properties in page object constructor
+- [ ] Static locators are `readonly` constructor properties; parameterized locators use named methods
 - [ ] No EUI CSS class selectors (`.euiTableRow`, `.euiToolTipAnchor`) — use `getByRole()` or `data-test-subj`
 - [ ] All Security-specific resources cleaned in `afterAll`/`afterEach`
 - [ ] Tags include both stateful and serverless: `[...tags.stateful.classic, ...tags.serverless.security.complete]`
