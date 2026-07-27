@@ -3630,7 +3630,6 @@
     "expressionMetricVis.function.progressDirection.help": "Die Richtung, in die der Fortschrittsbalken wachsen soll. Muss bereitgestellt werden, um einen Fortschrittsbalken zu rendern.",
     "expressionMetricVis.function.secondaryAlign.help": "Die Ausrichtung der sekundären Metrik.",
     "expressionMetricVis.function.secondaryColor.help": "Eine statische Farbe zur Verwendung für die sekundäre Metrik",
-    "expressionMetricVis.function.secondaryLabelPosition.help": "Gibt die Position des sekundären Metrik-Labels an",
     "expressionMetricVis.function.secondaryMetric.help": "Die sekundäre Metrik.",
     "expressionMetricVis.function.secondaryTrend.baseline.help": "Legt die Baseline fest, die für den sekundären Metrik-Trend verwendet wird",
     "expressionMetricVis.function.secondaryTrend.palette.help": "Gibt die für den sekundären Metrik-Trend verwendete Palette an",

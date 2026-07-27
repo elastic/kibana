@@ -47,8 +47,8 @@ type NameVisibility = NonNullable<MetricVisualizationState['secondaryNameVisibil
 
 const NAME_VISIBILITY_TITLES: Record<NameVisibility, string> = {
   hidden: 'Hide',
-  before: 'Before value',
-  after: 'After value',
+  before: 'Before',
+  after: 'After',
 };
 
 describe('dimension editor', () => {
@@ -373,7 +373,7 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
-      const nameVisibilityGroup = screen.queryByRole('group', { name: /Name visibility/i });
+      const nameVisibilityGroup = screen.queryByRole('group', { name: /Name display/i });
       const getNameVisibilityOption = (visibility: NameVisibility) => {
         if (!nameVisibilityGroup) {
           throw new Error('Name visibility group not found');

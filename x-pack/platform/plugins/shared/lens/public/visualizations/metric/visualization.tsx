@@ -654,7 +654,7 @@ export const getMetricVisualization = ({
       case LENS_METRIC_GROUP_ID.SECONDARY_METRIC:
         updated.secondaryMetricAccessor = columnId;
         // Set explicitly so the legacy state migration cannot mistake this for a state
-        // predating `Name visibility` and turn the name on
+        // predating `Name display` and turn the name on
         updated.secondaryNameVisibility =
           prevState.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility;
         break;

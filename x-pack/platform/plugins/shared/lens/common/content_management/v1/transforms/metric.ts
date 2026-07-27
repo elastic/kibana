@@ -70,7 +70,7 @@ export const getUpdatedMetricState = (
       secondaryNameVisibility:
         legacyLabel === ''
           ? 'hidden'
-          : // A state without an explicit position predates `Name visibility`, where the label
+          : // A state without an explicit position predates `Name display`, where the label
             // was shown before the value by default. Newer states always set it explicitly.
             // `secondaryLabelPosition` is the pre-rename key: real saved objects created after
             // `#261247` but before the rename persist their explicit choice there.

@@ -3630,7 +3630,6 @@
     "expressionMetricVis.function.progressDirection.help": "La direction dans laquelle la barre de progression doit croître. Doit être fourni pour générer une barre de progression.",
     "expressionMetricVis.function.secondaryAlign.help": "L'alignement de l'indicateur secondaire.",
     "expressionMetricVis.function.secondaryColor.help": "Une couleur statique à utiliser pour la métrique secondaire",
-    "expressionMetricVis.function.secondaryLabelPosition.help": "Spécifie la position de l’étiquette de la métrique secondaire",
     "expressionMetricVis.function.secondaryMetric.help": "L’indicateur secondaire.",
     "expressionMetricVis.function.secondaryTrend.baseline.help": "Spécifie la ligne de base utilisée pour la tendance de l'indicateur secondaire",
     "expressionMetricVis.function.secondaryTrend.palette.help": "Spécifie la palette utilisée pour la tendance de l'indicateur secondaire",

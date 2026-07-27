@@ -160,7 +160,7 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
  * The secondary label is the operation name, so only its visibility and placement are
  * configurable. An explicit value is always written when there is a secondary metric,
  * otherwise the Lens state migration would read the missing value as a chart predating
- * `Name visibility` and turn the label on.
+ * `Name display` and turn the label on.
  */
 function getSecondaryNameVisibility(
   label: NonNullable<MetricStyling['secondary']>['label']

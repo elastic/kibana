@@ -490,21 +490,21 @@ function SecondaryMetricEditor({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.secondaryMetric.nameVisibility', {
-          defaultMessage: 'Name visibility',
+        label={i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay', {
+          defaultMessage: 'Name display',
         })}
       >
         <EuiButtonGroup
           isFullWidth
           buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.secondaryMetric.nameVisibility', {
-            defaultMessage: 'Name visibility',
+          legend={i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay', {
+            defaultMessage: 'Name display',
           })}
           data-test-subj="lnsMetric_secondaryNameVisibility_buttons"
           options={[
             {
               id: `${idPrefix}hidden`,
-              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameVisibility.hide', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.hide', {
                 defaultMessage: 'Hide',
               }),
               'data-test-subj': 'lnsMetric_secondaryNameVisibility_hidden',
@@ -512,16 +512,16 @@ function SecondaryMetricEditor({
             },
             {
               id: `${idPrefix}before`,
-              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameVisibility.before', {
-                defaultMessage: 'Before value',
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.before', {
+                defaultMessage: 'Before',
               }),
               'data-test-subj': 'lnsMetric_secondaryNameVisibility_before',
               value: 'before' as const,
             },
             {
               id: `${idPrefix}after`,
-              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameVisibility.after', {
-                defaultMessage: 'After value',
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.nameDisplay.after', {
+                defaultMessage: 'After',
               }),
               'data-test-subj': 'lnsMetric_secondaryNameVisibility_after',
               value: 'after' as const,

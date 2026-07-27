@@ -3646,7 +3646,6 @@
     "expressionMetricVis.function.progressDirection.help": "进度条推进的方向。必须提供以呈现进度条。",
     "expressionMetricVis.function.secondaryAlign.help": "次级指标的对齐方式。",
     "expressionMetricVis.function.secondaryColor.help": "用于次级指标的静态颜色",
-    "expressionMetricVis.function.secondaryLabelPosition.help": "指定次级指标标签的位置",
     "expressionMetricVis.function.secondaryMetric.help": "次级指标。",
     "expressionMetricVis.function.secondaryTrend.baseline.help": "指定用于次级指标趋势的基线。",
     "expressionMetricVis.function.secondaryTrend.palette.help": "指定用于次级指标趋势的调色板",

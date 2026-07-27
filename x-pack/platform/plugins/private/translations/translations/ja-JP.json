@@ -3648,7 +3648,6 @@
     "expressionMetricVis.function.progressDirection.help": "進行状況バーが拡大する方向。進行状況バーを表示するために指定する必要があります。",
     "expressionMetricVis.function.secondaryAlign.help": "副メトリックの配置。",
     "expressionMetricVis.function.secondaryColor.help": "副メトリックに使用する静的色",
-    "expressionMetricVis.function.secondaryLabelPosition.help": "副メトリックラベルの位置を指定します",
     "expressionMetricVis.function.secondaryMetric.help": "副メトリック。",
     "expressionMetricVis.function.secondaryTrend.baseline.help": "副メトリックトレンドに使用される基準線を指定します",
     "expressionMetricVis.function.secondaryTrend.palette.help": "副メトリックトレンドに使用されるパレットを指定します",
