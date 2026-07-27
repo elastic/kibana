@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getVegaInspectorView } from './vega_inspector';
-export type { VegaInspectorAdapters } from './vega_inspector_adapters';
-export { createInspectorAdapters } from './vega_inspector_adapters';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { VegaAdapter } from './vega_adapter';
+
+export interface VegaInspectorAdapters extends Adapters {
+  requests: RequestAdapter;
+  vega: VegaAdapter;
+}
+
+export const createInspectorAdapters = (): VegaInspectorAdapters => ({
+  requests: new RequestAdapter(),
+  vega: new VegaAdapter(),
+});

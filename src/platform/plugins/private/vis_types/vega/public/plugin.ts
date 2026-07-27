@@ -42,7 +42,7 @@ import type { IServiceSettings } from './vega_view/vega_map_view/service_setting
 
 import type { ConfigSchema } from '../server/config';
 
-import { getVegaInspectorView } from './vega_inspector';
+import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 import {
   ADD_VEGA_EMBEDDABLE_ACTION_ID,
