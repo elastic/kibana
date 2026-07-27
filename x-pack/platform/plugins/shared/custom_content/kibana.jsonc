@@ -11,7 +11,8 @@
     "server": true,
     "requiredPlugins": [
       "embeddable",
-      "inference"
+      "inference",
+      "data"
     ]
   }
 }

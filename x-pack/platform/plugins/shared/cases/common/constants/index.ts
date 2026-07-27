@@ -313,6 +313,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
   caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
   templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
+  templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
   showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
