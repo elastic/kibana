@@ -102,13 +102,12 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
           <EuiFlexItem
             css={css`
-              min-width: 0;
+              min-width: 330px;
             `}
           >
             <EuiPanel
               color="subdued"
               css={css`
-                min-width: 0;
                 max-width: 100%;
               `}
             >
