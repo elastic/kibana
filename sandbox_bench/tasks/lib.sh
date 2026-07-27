@@ -74,13 +74,15 @@ ensure_toolchain() {
       curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash \
         || bench_fail nvm_install_failed
     fi
-    # nvm is not set -u clean
-    set +u
+    # nvm is not clean under set -e / set -u (sourcing or using it under
+    # errexit exits 3), so relax both and check results explicitly.
+    set +eu
     # shellcheck disable=SC1091
     . "$NVM_DIR/nvm.sh"
-    nvm install "$want" >/dev/null || bench_fail node_install_failed
-    nvm use "$want" >/dev/null
-    set -u
+    nvm install "$want" >/dev/null 2>&1
+    nvm use "$want" >/dev/null 2>&1
+    set -eu
+    [[ "$(node -v 2>/dev/null || true)" == "v$want" ]] || bench_fail node_install_failed
   fi
   command -v yarn >/dev/null 2>&1 || npm install -g yarn >/dev/null || bench_fail yarn_install_failed
   bench_phase toolchain_done
