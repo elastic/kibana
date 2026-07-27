@@ -29,12 +29,12 @@ export const registerUpdateTagRoute = (router: TagsPluginRouter) => {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 256 }),
         }),
         body: schema.object({
-          name: schema.string(),
-          description: schema.string(),
-          color: schema.string(),
+          name: schema.string({ minLength: 1, maxLength: 256 }),
+          description: schema.string({ maxLength: 2048 }),
+          color: schema.string({ minLength: 1, maxLength: 256 }),
         }),
       },
     },

@@ -16,8 +16,10 @@ import {
   initializeStateApi,
   useBatchedPublishingSubjects,
   apiPublishesReload,
+  apiPublishesTimeRange,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CustomContentEmbeddableState } from '../server';
@@ -35,11 +37,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
+    const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       prompt: prompt$.getValue(),
+      esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
 
@@ -53,6 +57,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           skip(1),
           map(() => undefined)
         ),
+        esqlQuery$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
         template$.pipe(
           skip(1),
           map(() => undefined)
@@ -61,11 +69,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       getComparators: () => ({
         ...titleComparators,
         prompt: 'referenceEquality',
+        esqlQuery: 'referenceEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         prompt$.next(lastSaved?.prompt ?? '');
+        esqlQuery$.next(lastSaved?.esqlQuery);
         template$.next(lastSaved?.template);
       },
     });
@@ -83,12 +93,27 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
-        const [prompt, savedTemplate] = useBatchedPublishingSubjects(prompt$, template$);
+        const [prompt, esqlQuery, savedTemplate] = useBatchedPublishingSubjects(
+          prompt$,
+          esqlQuery$,
+          template$
+        );
         const [generationVersion, setGenerationVersion] = useState(0);
+        const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
+          apiPublishesTimeRange(parentApi)
+            ? parentApi.timeRange$.getValue() ?? undefined
+            : undefined
+        );
 
         useEffect(() => {
           if (!apiPublishesReload(parentApi)) return;
           const sub = parentApi.reload$.subscribe(() => setGenerationVersion((v) => v + 1));
+          return () => sub.unsubscribe();
+        }, []);
+
+        useEffect(() => {
+          if (!apiPublishesTimeRange(parentApi)) return;
+          const sub = parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined));
           return () => sub.unsubscribe();
         }, []);
 
@@ -100,6 +125,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           <CustomContentComponent
             embeddableId={uuid}
             prompt={prompt}
+            esqlQuery={esqlQuery}
+            timeRange={timeRange}
             generationVersion={generationVersion}
             savedTemplate={savedTemplate}
             onTemplateChange={onTemplateChange}
