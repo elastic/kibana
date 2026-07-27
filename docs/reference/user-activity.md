@@ -54,7 +54,7 @@ Each filter has:
 :::::{include} user-activity/_snippets/user-activity-actions-list.md
 :::::
 
-## Dashboard event fields
+## Dashboard event fields [dashboard-event-fields]
 
 All dashboard actions include the [common log fields](#logs-schema) and populate `object.id`, `object.name`, `object.type`, and `object.tags`. The `object.type` value is `dashboard`, and `object.tags` contains the dashboard tag names.
 
