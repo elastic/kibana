@@ -276,6 +276,31 @@ describe('RulesClient', () => {
       });
     });
 
+    it('does not schedule the executor task when updating a disabled rule', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, enabled: false },
+        version: 'WzEsMV0=',
+        id: 'rule-id-disabled',
+      });
+
+      await client.updateRule({
+        id: 'rule-id-disabled',
+        data: { schedule: { every: '5m' } },
+      });
+
+      // A disabled rule must never be re-armed by an unrelated property edit —
+      // lifecycle transitions are owned exclusively by enableRule/disableRule.
+      expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+      // The stored (disabled) state is still persisted.
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
+        id: 'rule-id-disabled',
+        attrs: expect.objectContaining({ enabled: false }),
+        version: 'WzEsMV0=',
+      });
+    });
+
     it('updates the description of a rule', async () => {
       const client = createClient();
 
@@ -1958,59 +1983,17 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('emits only ruleUpdated for an enable-only PATCH (no lifecycle event via the update path)', async () => {
+      it('emits only ruleUpdated for a content update on a disabled rule (no lifecycle event via the update path)', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-3', { ...workflowSoAttrs, enabled: false });
 
-        await client.updateRule({ id: 'rule-id-wf-3', data: { enabled: true } });
+        await client.updateRule({
+          id: 'rule-id-wf-3',
+          data: { metadata: { name: 'renamed' } },
+        });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
           { id: 'rule-id-wf-3', spaceId: 'space-1' },
-        ]);
-        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
-      });
-
-      it('emits only ruleUpdated for a disable-only PATCH (no lifecycle event via the update path)', async () => {
-        const client = createClient();
-        mockGetExistingRule('rule-id-wf-3b');
-
-        await client.updateRule({ id: 'rule-id-wf-3b', data: { enabled: false } });
-
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3b', spaceId: 'space-1' },
-        ]);
-        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
-      });
-
-      it('emits only ruleUpdated when content and enabled change together', async () => {
-        const client = createClient();
-        mockGetExistingRule('rule-id-wf-3c', { ...workflowSoAttrs, enabled: false });
-
-        await client.updateRule({
-          id: 'rule-id-wf-3c',
-          data: { metadata: { name: 'renamed' }, enabled: true },
-        });
-
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3c', spaceId: 'space-1' },
-        ]);
-        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
-      });
-
-      it('emits ruleUpdated only when enabled is set but unchanged in the PATCH', async () => {
-        const client = createClient();
-        mockGetExistingRule('rule-id-wf-3d');
-
-        await client.updateRule({
-          id: 'rule-id-wf-3d',
-          data: { enabled: true, metadata: { name: 'renamed' } },
-        });
-
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3d', spaceId: 'space-1' },
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
