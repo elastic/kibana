@@ -177,10 +177,7 @@ export const TopFailingMonitors = ({
                 {monitor.monitorName}
               </EuiLink>
 
-              <EuiToolTip
-                content={barLabel}
-                disableScreenReaderOutput
-              >
+              <EuiToolTip content={barLabel} disableScreenReaderOutput>
                 <div
                   tabIndex={0}
                   aria-label={barLabel}
