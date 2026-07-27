@@ -382,8 +382,8 @@ describe('createWithLocator()', () => {
     telemetry: jest.fn(),
     migrations: {},
     useUrl: jest.fn(),
-    getTimeRange: (params: { timeRange: TimeRange }) => params.timeRange,
-    setTimeRange: (params: { timeRange: TimeRange }, timeRange?: TimeRange) => ({
+    getTimeRange: (params: { timeRange?: TimeRange }) => params.timeRange,
+    setTimeRange: (params: { timeRange?: TimeRange }, timeRange?: TimeRange) => ({
       ...params,
       timeRange,
     }),
