@@ -15,6 +15,7 @@ const USER_ESQL_EXISTS = euid.esql.getEuidDocumentsContainsIdFilter('user');
 
 const accessesConfig: RelationshipIntegrationConfig = {
   kind: 'bucketed',
+  source: 'logs',
   id: 'elastic_defend',
   name: 'Elastic Defend',
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
@@ -31,6 +32,7 @@ const accessesConfig: RelationshipIntegrationConfig = {
 
 const commWithHostConfig: RelationshipIntegrationConfig = {
   kind: 'standard',
+  source: 'logs',
   id: 'jamf_pro',
   name: 'Jamf Pro',
   indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
@@ -42,6 +44,7 @@ const commWithHostConfig: RelationshipIntegrationConfig = {
 
 const commWithUserConfig: RelationshipIntegrationConfig = {
   kind: 'standard',
+  source: 'logs',
   id: 'okta',
   name: 'Okta',
   indexPattern: (ns) => `logs-okta.system-${ns}`,
@@ -57,6 +60,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
     const overrideConfig: RelationshipIntegrationConfig = {
       kind: 'override',
+      source: 'logs',
       id: 'test_override',
       name: 'Test Override',
       indexPattern: (ns) => `logs-test-${ns}`,
@@ -76,6 +80,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
   it('prepends the engine preamble exactly once on the override path (overrides must not include their own SET)', () => {
     const overrideConfig: RelationshipIntegrationConfig = {
       kind: 'override',
+      source: 'logs',
       id: 'test_override',
       name: 'Test Override',
       indexPattern: (ns) => `logs-test-${ns}`,

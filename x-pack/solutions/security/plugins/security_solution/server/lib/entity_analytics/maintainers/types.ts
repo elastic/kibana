@@ -13,7 +13,7 @@ export interface RelationshipMaintainerSourceResult {
   /** Records produced from ES|QL parse for this integration. */
   qualified: number;
   /** Terminal state for this integration's run. */
-  outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  outcome: 'index_missing' | 'empty' | 'aborted' | 'partial' | 'producing' | 'error';
 }
 
 /**

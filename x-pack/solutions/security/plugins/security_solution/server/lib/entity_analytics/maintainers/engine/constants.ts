@@ -10,7 +10,7 @@ export const LOOKBACK_WINDOW = 'now-30d';
 export const LOOKBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 export const COMPOSITE_PAGE_SIZE = 3500;
 export const MAX_ITERATIONS = 1000;
-/** Sampling probability for the actor slice probe query. Reads ~10% of docs to find the slice boundary cheaply. */
+/** Sampling probability for the actor slice probe query on large datasets. */
 export const SLICE_SAMPLE_PROBABILITY = 0.1;
 /** Timeout for the extract query (Step 3). The default ES|QL timeout is 30s, which is too short for large indices. */
 export const EXTRACT_QUERY_TIMEOUT_MS = 60_000;

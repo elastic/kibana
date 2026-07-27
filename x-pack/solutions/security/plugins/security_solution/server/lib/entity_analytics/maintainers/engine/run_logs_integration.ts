@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
 
-import type { RelationshipIntegrationConfig } from './types';
+import type { RelationshipIntegrationConfig, EntityRelationshipRecord } from './types';
 import {
   COMPOSITE_PAGE_SIZE,
   EXTRACT_QUERY_TIMEOUT_MS,
@@ -50,31 +50,45 @@ const ZERO_METADATA: WriteRelationshipMetadatasResult = {
   docsApplied: 0,
 };
 
-function mergeWriteResult(a: WriteEntityIdsResult, b: WriteEntityIdsResult): WriteEntityIdsResult {
-  const relationshipTypeApplied = { ...a.relationshipTypeApplied };
-  for (const [key, count] of Object.entries(b.relationshipTypeApplied)) {
-    relationshipTypeApplied[key] = (relationshipTypeApplied[key] ?? 0) + count;
-  }
-  return {
-    updated: a.updated + b.updated,
-    notFound: a.notFound + b.notFound,
-    errors: a.errors + b.errors,
-    droppedTargets: a.droppedTargets + b.droppedTargets,
-    relationshipTypeApplied,
-    validTargetIds: undefined, // not tracked across slices
-    succeededEntityIds: new Set([...a.succeededEntityIds, ...b.succeededEntityIds]),
-  };
+interface EsqlResponse {
+  columns: Array<{ name: string; type: string }>;
+  values: unknown[][];
 }
 
-function mergeMetadataResult(
-  a: WriteRelationshipMetadatasResult,
-  b: WriteRelationshipMetadatasResult
-): WriteRelationshipMetadatasResult {
-  return {
-    docsAttempted: a.docsAttempted + b.docsAttempted,
-    docsApplied: a.docsApplied + b.docsApplied,
-  };
-}
+/**
+ * Runs the probe query with SAMPLE first (cheap on large datasets). If SAMPLE
+ * returns no actors — which happens on sparse indices where sampling misses all
+ * docs — retries without SAMPLE to confirm there are genuinely no actors before
+ * stopping. This keeps the probe fast on large indices while correctly handling
+ * small/sparse ones.
+ */
+const runProbeWithFallback = async (
+  config: RelationshipIntegrationConfig,
+  esClient: ElasticsearchClient,
+  namespace: string,
+  sliceStart: string,
+  maxActors: number,
+  transportOpts: { signal: AbortSignal } | undefined
+) => {
+  const sampledQuery = buildActorSliceProbeQuery(config, namespace, sliceStart, true);
+  const sampledResponse = (await esClient.esql.query(
+    { query: sampledQuery },
+    transportOpts
+  )) as EsqlResponse;
+  const sampledResult = parseActorSliceProbeResult(
+    sampledResponse.columns,
+    sampledResponse.values,
+    maxActors
+  );
+  if (sampledResult.sliceBoundary !== null) return sampledResult;
+
+  const fullQuery = buildActorSliceProbeQuery(config, namespace, sliceStart, false);
+  const fullResponse = (await esClient.esql.query(
+    { query: fullQuery },
+    transportOpts
+  )) as EsqlResponse;
+  return parseActorSliceProbeResult(fullResponse.columns, fullResponse.values, maxActors);
+};
 
 export interface RunLogsIntegrationResult {
   slices: number;
@@ -100,8 +114,15 @@ export const runLogsIntegration = async (
 
   let slices = 0;
   let recordsCount = 0;
-  let totalWrite = ZERO_WRITE;
-  let totalMetadata = ZERO_METADATA;
+  let totalWrite: WriteEntityIdsResult = ZERO_WRITE;
+  let totalMetadata: WriteRelationshipMetadatasResult = ZERO_METADATA;
+
+  // Accumulates records across all slices before a single end-of-run write.
+  // An actor with events on day 1 and day 30 will appear in two separate slices;
+  // writing per-slice would overwrite the earlier slice's relationships (bulkUpdateEntity
+  // does a plain doc partial update, not a merge). Accumulating here ensures each actor's
+  // full 30-day relationship set is written in one call.
+  const accumulated = new Map<string, EntityRelationshipRecord>();
 
   // LOOKBACK_WINDOW is ES date math ('now-30d') and cannot be parsed as ISO.
   // Use LOOKBACK_WINDOW_MS for JS Date arithmetic so +1ms slice advances work correctly.
@@ -121,21 +142,18 @@ export const runLogsIntegration = async (
         };
       }
 
-      // Step 1: Probe — find the time boundary covering ~maxActors distinct actors
-      const probeQuery = buildActorSliceProbeQuery(config, namespace, sliceStart);
-      const probeResponse = (await esClient.esql.query({ query: probeQuery }, transportOpts)) as {
-        columns: Array<{ name: string; type: string }>;
-        values: unknown[][];
-      };
-
-      const probeResult = parseActorSliceProbeResult(
-        probeResponse.columns,
-        probeResponse.values,
-        maxActors
+      // Step 1: Probe — find the time boundary covering ~maxActors distinct actors.
+      const probeResult = await runProbeWithFallback(
+        config,
+        esClient,
+        namespace,
+        sliceStart,
+        maxActors,
+        transportOpts
       );
 
       if (probeResult.sliceBoundary === null) {
-        // No actors found — nothing left to process
+        // No actors found even without sampling — nothing left to process
         logger.info(`[${config.id}] No actors found in probe, finishing`);
         return {
           slices,
@@ -193,49 +211,25 @@ export const runLogsIntegration = async (
       );
       recordsCount += pageRecords.length;
 
-      // Step 4: Write — persist relationships and metadata for this slice
-      if (pageRecords.length > 0) {
-        const write = await writeEntityIds(
-          crudClient,
-          logger,
-          pageRecords,
-          esClient,
-          namespace,
-          config.validateTargetIds
-        );
-        totalWrite = mergeWriteResult(totalWrite, write);
-
-        const { validTargetIds, succeededEntityIds } = write;
-        const actorFilteredRecords = pageRecords.filter(
-          (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
-        );
-
-        // When target validation also ran, further restrict to the validated target set.
-        const metadataRecords = validTargetIds
-          ? actorFilteredRecords.flatMap((r) => {
-              const filteredRels: Record<string, string[]> = {};
-              for (const [relType, targetEuids] of Object.entries(r.relationships)) {
-                const valid = targetEuids.filter((id) => validTargetIds.has(id));
-                if (valid.length > 0) filteredRels[relType] = valid;
-              }
-              return Object.keys(filteredRels).length > 0
-                ? [{ ...r, relationships: filteredRels }]
-                : [];
-            })
-          : actorFilteredRecords;
-
-        const metadata = await writeRelationshipMetadatas(
-          entityMetadataClient,
-          logger,
-          metadataRecords,
-          {
-            scanId: metadataContext.scanId,
-            lookbackWindow: LOOKBACK_WINDOW,
-            entitySource: config.id,
-            observedAt: metadataContext.observedAt,
+      // Step 4: Accumulate — merge this slice's records into the cross-slice map.
+      // We do not write here because the same actor can appear in multiple slices
+      // (events on day 1 and day 30 land in different time windows). Writing per-slice
+      // would overwrite earlier relationship sets; accumulating ensures a single write
+      // per actor with their full 30-day relationship set.
+      for (const record of pageRecords) {
+        const { entityId } = record;
+        if (entityId !== null) {
+          const existing = accumulated.get(entityId);
+          if (!existing) {
+            accumulated.set(entityId, { ...record, relationships: { ...record.relationships } });
+          } else {
+            for (const [relType, targets] of Object.entries(record.relationships)) {
+              const merged = new Set(existing.relationships[relType] ?? []);
+              for (const t of targets) merged.add(t);
+              existing.relationships[relType] = Array.from(merged);
+            }
           }
-        );
-        totalMetadata = mergeMetadataResult(totalMetadata, metadata);
+        }
       }
 
       slices++;
@@ -247,6 +241,51 @@ export const runLogsIntegration = async (
 
       // Advance the window start by +1ms to avoid re-processing the boundary event
       sliceStart = new Date(new Date(toDate).getTime() + 1).toISOString();
+    }
+
+    // Step 5: Write — single pass over all accumulated records after all slices are processed.
+    const allRecords = Array.from(accumulated.values());
+
+    if (allRecords.length > 0) {
+      const write = await writeEntityIds(
+        crudClient,
+        logger,
+        allRecords,
+        esClient,
+        namespace,
+        config.validateTargetIds
+      );
+      totalWrite = write;
+
+      const { validTargetIds, succeededEntityIds } = write;
+      const actorFilteredRecords = allRecords.filter(
+        (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
+      );
+
+      const metadataRecords = validTargetIds
+        ? actorFilteredRecords.flatMap((r) => {
+            const filteredRels: Record<string, string[]> = {};
+            for (const [relType, targetEuids] of Object.entries(r.relationships)) {
+              const valid = targetEuids.filter((id) => validTargetIds.has(id));
+              if (valid.length > 0) filteredRels[relType] = valid;
+            }
+            return Object.keys(filteredRels).length > 0
+              ? [{ ...r, relationships: filteredRels }]
+              : [];
+          })
+        : actorFilteredRecords;
+
+      totalMetadata = await writeRelationshipMetadatas(
+        entityMetadataClient,
+        logger,
+        metadataRecords,
+        {
+          scanId: metadataContext.scanId,
+          lookbackWindow: LOOKBACK_WINDOW,
+          entitySource: config.id,
+          observedAt: metadataContext.observedAt,
+        }
+      );
     }
 
     const outcome = recordsCount === 0 ? 'empty' : 'producing';

@@ -41,7 +41,8 @@ export interface ActorSliceProbeResult {
 export const buildActorSliceProbeQuery = (
   config: RelationshipIntegrationConfig,
   namespace: string,
-  fromDate: string
+  fromDate: string,
+  useSample: boolean = true
 ): string => {
   const index = config.indexPattern(namespace);
   const maxActors = config.maxActorsPerSlice ?? COMPOSITE_PAGE_SIZE;
@@ -86,7 +87,7 @@ export const buildActorSliceProbeQuery = (
     `| WHERE @timestamp >= "${fromDate}" AND @timestamp < NOW()`,
     integrationFilter,
     `    AND (${actorPresenceFilter})`,
-    `| SAMPLE ${SLICE_SAMPLE_PROBABILITY}`,
+    useSample ? `| SAMPLE ${SLICE_SAMPLE_PROBABILITY}` : undefined,
     fieldEvalsLine,
     `| EVAL ${actorEuidEval}`,
     `| WHERE COALESCE(actorUserId, "") != ""`,
