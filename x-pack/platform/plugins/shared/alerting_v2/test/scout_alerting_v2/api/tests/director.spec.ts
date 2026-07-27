@@ -44,6 +44,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
   });
 
@@ -273,6 +274,131 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
         )
         .toBe(true);
+    }
+  );
+
+  apiTest(
+    'holds an episode active across engine recoveries when the last lifecycle action is activate',
+    async ({ apiServices }) => {
+      /**
+       * End-to-end coverage of the director user-lock contract:
+       *
+       *   1. Engine drives the episode active → recovering → inactive.
+       *   2. User reopens via `POST /_activate` (writes an `activate`
+       *      audit row AND a synthetic `.rule-events` doc that pins the
+       *      same episode id back to `active`).
+       *   3. With the breach source still empty, the executor keeps
+       *      emitting recovery signals for this group on every tick.
+       *   4. The director must NOT let those recoveries flip the
+       *      episode to `recovering` / `inactive`. It emits with
+       *      `status: 'recovered'` (raw engine signal) but forces
+       *      `episode.status: 'active'` for as long as the last
+       *      lifecycle action stays `activate`.
+       *
+       */
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-user-locked',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-user-locked' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-user-locked" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+        })
+      );
+
+      // 1. Wait for the initial `active` event and capture the identity
+      //    of the episode we'll later reopen. The activate handler will
+      //    reuse this episode id — reopen is continuity, not a new
+      //    incident.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      const [firstActive] = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        episodeStatus: 'active',
+      });
+
+      const groupHash = firstActive.group_hash;
+      const activeEpisodeId = firstActive.episode?.id;
+      expect(activeEpisodeId).toBeDefined();
+
+      // 2. Stop breaching and let the engine drive the episode all the
+      //    way to `inactive` — this is the "recover first" step in the
+      //    scenario. We wait for `inactive` (rather than `recovering`)
+      //    so the reopen is proven against a fully-closed episode.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-user-locked' } },
+      });
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'inactive',
+      });
+
+      // 3. User reopens the episode.
+      await apiServices.alertingV2.alertActions.activate({
+        groupHash,
+        reason: 'user-lock: holds active across engine recoveries',
+      });
+
+      // 4. Source is still empty, so on subsequent ticks the executor
+      //    keeps emitting recovery signals for this group. The
+      //    director must translate every one of those into an event
+      //    that carries `episode.status: 'active'` including
+      //    `status: 'recovered'` events.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        status: 'recovered',
+        episodeStatus: 'active',
+      });
+
+      // 5. The latest state for this group is `active`, pinned to the
+      //    orginal episode id. If the lock had leaked, the latest
+      //    would still show `inactive` (or `recovering`) from the
+      //    pre-reopen lifecycle.
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: activeEpisodeId, status: 'active' },
+      });
+
+      // 6. Every rule-events doc emitted from the reopen onward carries
+      //    `episode.status: 'active'` for this group. In particular,
+      //    the executor's continuing recovery signals never produced a
+      //    `recovering` or `inactive` doc. That's the whole point of
+      //    the lock.
+      const activateAction = (
+        await apiServices.alertingV2.alertActionsEvents.find({
+          ruleId: rule.id,
+          actionTypes: ['activate'],
+        })
+      )[0];
+
+      expect(activateAction).toBeDefined();
+      const activateTs = new Date(activateAction['@timestamp']).getTime();
+
+      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const postReopenGroupEvents = events.filter(
+        (event) =>
+          event.group_hash === groupHash && new Date(event['@timestamp']).getTime() >= activateTs
+      );
+
+      const offActive = postReopenGroupEvents.filter((event) => event.episode?.status !== 'active');
+      expect(offActive).toStrictEqual([]);
+
+      const postReopenEpisodeIds = new Set(postReopenGroupEvents.map((event) => event.episode?.id));
+      expect(postReopenEpisodeIds).toStrictEqual(new Set([activeEpisodeId]));
     }
   );
 
@@ -1291,6 +1417,127 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       for (const event of activeEvents) {
         expect(event.episode?.status_count).toBeUndefined();
+      }
+    }
+  );
+
+  apiTest(
+    "no_data_strategy 'last_known_status' preserves the prior episode status",
+    async ({ apiServices }) => {
+      const HOST = 'host-director-no-data-last-known';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-last-known' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            no_data: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+          // Use recovery_strategy 'none' so the recovery step never fires.
+          recovery_strategy: 'none',
+          no_data_strategy: 'last_known_status',
+          state_transition: { pending_count: 10 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'pending',
+      });
+
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        status: 'no_data',
+      });
+
+      const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'no_data',
+      });
+
+      expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
+      for (const event of noDataEvents) {
+        expect(event.episode?.status).toBe('pending');
+      }
+    }
+  );
+
+  apiTest(
+    "no_data_strategy 'recover' transitions the episode toward recovery via a no_data event",
+    async ({ apiServices }) => {
+      const HOST = 'host-director-no-data-recover';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      // Use recovery_strategy 'none' so the recovery step never fires.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-recover' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            no_data: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+          recovery_strategy: 'none',
+          no_data_strategy: 'recover',
+          state_transition: { pending_count: 0, recovering_count: 1 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        status: 'no_data',
+      });
+
+      const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'no_data',
+      });
+
+      expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
+      // The director applies the recovered FSM transition: active → recovering.
+      for (const event of noDataEvents) {
+        expect(event.episode?.status).toBe('recovering');
       }
     }
   );

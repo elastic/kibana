@@ -29,6 +29,7 @@ import {
   buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
 } from './entity_attachment_utils';
+import { fetchRiskScoreGrounding } from './risk_score_grounding';
 import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
@@ -39,7 +40,16 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
   executeEsql: jest.fn(),
 }));
 
+jest.mock('./risk_score_grounding', () => {
+  const actual = jest.requireActual('./risk_score_grounding');
+  return {
+    ...actual,
+    fetchRiskScoreGrounding: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as jest.Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
@@ -67,6 +77,7 @@ describe('searchEntitiesTool', () => {
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
+    mockFetchRiskScoreGrounding.mockResolvedValue(null);
   });
 
   describe('schema', () => {
@@ -1094,7 +1105,7 @@ describe('searchEntitiesTool', () => {
     });
 
     describe('telemetry', () => {
-      it('reports success=true and entitiesReturned=N when entities are found', async () => {
+      it('reports success=true and resultCount=N when entities are found', async () => {
         (executeEsql as jest.Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1'], ['user:alice'], ['host:server2']],
@@ -1109,16 +1120,18 @@ describe('searchEntitiesTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host', 'user'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 3,
+            resultCount: 3,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
 
-      it('reports success=true and entitiesReturned=0 when no entities are found', async () => {
+      it('reports success=true and resultCount=0 when no entities are found', async () => {
         (executeEsql as jest.Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [],
@@ -1133,11 +1146,13 @@ describe('searchEntitiesTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -1154,11 +1169,13 @@ describe('searchEntitiesTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['user'],
             spaceId: 'default',
             success: false,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: 'ES|QL failure',
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -1275,6 +1292,45 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
       expect(query).toContain('LIMIT 5');
+    });
+  });
+
+  describe('risk score grounding', () => {
+    const groundingOtherResult: OtherResult = {
+      tool_result_id: 'grounding-result-id',
+      type: ToolResultType.other,
+      data: {
+        riskScoreGrounding: { status: 'stopped', lastScoreTimeAgo: '2 days ago' },
+      },
+    };
+
+    it('omits the grounding result when the lookup fails', async () => {
+      mockFetchRiskScoreGrounding.mockResolvedValueOnce(undefined);
+      mockSingleEntityResponse();
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results.some((r) => r.type === ToolResultType.other)).toBe(false);
+      expect(result.results.some((r) => r.type === ToolResultType.esqlResults)).toBe(true);
+    });
+
+    it('still appends grounding when the entity search returns no rows so the agent can explain why', async () => {
+      mockFetchRiskScoreGrounding.mockResolvedValueOnce(groundingOtherResult);
+      (executeEsql as jest.Mock).mockResolvedValueOnce({ columns: [], values: [] });
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const errorResult = result.results.find(
+        (r): r is ErrorResult => r.type === ToolResultType.error
+      );
+      expect(errorResult).toBeDefined();
+      expect(result.results).toContainEqual(groundingOtherResult);
     });
   });
 

@@ -32,6 +32,8 @@ interface RunResolutionScoringParams {
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   targetEntityIds?: string[];
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** When true, populate `scores` in the result. Omit for full-population runs. */
+  collectScores?: boolean;
 }
 
 export const runResolutionScoringStep = async ({
@@ -51,6 +53,7 @@ export const runResolutionScoringStep = async ({
   writer,
   targetEntityIds,
   refresh,
+  collectScores,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
@@ -58,6 +61,7 @@ export const runResolutionScoringStep = async ({
   let pagesProcessed = 0;
   let scoresWrittenResolution = 0;
   let abortedBetweenPages = false;
+  const newScores: Record<string, number> = {};
 
   for await (const pageScores of calculateResolutionEntityScores({
     esClient,
@@ -95,6 +99,14 @@ export const runResolutionScoringStep = async ({
         scores: pageScores,
         enabled: idBasedRiskScoringEnabled,
       });
+
+      if (collectScores) {
+        for (const score of pageScores) {
+          if ((score.related_entities?.length ?? 0) > 0) {
+            newScores[score.id_value] = score.calculated_score_norm;
+          }
+        }
+      }
     }
   }
 
@@ -111,6 +123,7 @@ export const runResolutionScoringStep = async ({
       scoresWritten: 0,
       pagesProcessed,
       skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
+      scores: newScores,
     };
   }
 
@@ -121,5 +134,6 @@ export const runResolutionScoringStep = async ({
   return {
     scoresWritten: scoresWrittenResolution,
     pagesProcessed,
+    scores: newScores,
   };
 };

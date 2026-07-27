@@ -6,7 +6,7 @@
  */
 
 import { Parser } from '@elastic/esql';
-import type { RuleQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
 
 export type SplitConfidence = 'high' | 'low' | 'none';
 

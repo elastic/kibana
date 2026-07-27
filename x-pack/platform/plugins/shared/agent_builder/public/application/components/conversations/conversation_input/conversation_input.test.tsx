@@ -149,4 +149,25 @@ describe('ConversationInput', () => {
     expect(submitMessage).toHaveBeenCalledWith('hello agent');
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
+
+  describe('auto-focus', () => {
+    it('focuses the editor shortly after mount', () => {
+      jest.useFakeTimers();
+      render(<ConversationInput />);
+
+      jest.advanceTimersByTime(200);
+      expect(editorController.focus).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('does not steal focus from an open HITL prompt', () => {
+      jest.useFakeTimers();
+      mockedUseIsAwaitingPrompt.mockReturnValue(true);
+      render(<ConversationInput />);
+
+      jest.advanceTimersByTime(200);
+      expect(editorController.focus).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+  });
 });

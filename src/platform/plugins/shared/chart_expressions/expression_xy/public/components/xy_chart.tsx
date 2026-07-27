@@ -96,7 +96,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
-  getDecimalsFromFormat,
+  getMaximumFractionDigits,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -314,11 +314,11 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
-  const isTimeViz = isTimeChart(dataLayers);
+  const isTimeVis = isTimeChart(dataLayers);
 
   useEffect(() => {
     const chartSizeSpec: ChartSizeSpec =
-      isTimeViz && !isHorizontalChart(dataLayers)
+      isTimeVis && !isHorizontalChart(dataLayers)
         ? {
             aspectRatio: {
               x: 16,
@@ -337,7 +337,7 @@ export function XYChart({
           };
 
     setChartSize(chartSizeSpec);
-  }, [dataLayers, isTimeViz, setChartSize]);
+  }, [dataLayers, isTimeVis, setChartSize]);
 
   const formattedDatatables = useMemo(
     () =>
@@ -386,7 +386,7 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
-  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+  const xTickMfd = getMaximumFractionDigits(xAxisFormatter);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -438,9 +438,9 @@ export function XYChart({
       (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
     );
 
-  const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
+  const defaultXScaleType = isTimeVis ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
-  const isHistogramViz = dataLayers.every((l) => l.isHistogram);
+  const isHistogramVis = dataLayers.every((l) => l.isHistogram);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
   const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
 
@@ -448,8 +448,8 @@ export function XYChart({
     data.datatableUtilities,
     dataLayers,
     minInterval,
-    isTimeViz,
-    isHistogramViz,
+    isTimeVis,
+    isHistogramVis,
     hasBars,
     timeZone,
     xAxisConfig?.extent
@@ -471,7 +471,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const [rangeAnnotations, lineAnnotations] = isTimeViz
+  const [rangeAnnotations, lineAnnotations] = isTimeVis
     ? partition(annotations?.datatable.rows, isRangeAnnotation)
     : [[], []];
 
@@ -680,7 +680,7 @@ export function XYChart({
       return;
     }
     const [min, max] = x;
-    if (!xAxisColumn || !isHistogramViz) {
+    if (!xAxisColumn || !isHistogramVis) {
       return;
     }
 
@@ -717,7 +717,7 @@ export function XYChart({
       isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
   );
 
-  const isHorizontalTimeAxis = isTimeViz && isHistogramModeEnabled && !shouldRotate;
+  const isHorizontalTimeAxis = isTimeVis && isHistogramModeEnabled && !shouldRotate;
 
   const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
 
@@ -852,7 +852,7 @@ export function XYChart({
                           splitRowAccessor: splitRowId,
                         }}
                         layers={dataLayers}
-                        xDomain={isTimeViz ? rawXDomain : undefined}
+                        xDomain={isTimeVis ? rawXDomain : undefined}
                       />
                     )
                   : undefined
@@ -884,7 +884,7 @@ export function XYChart({
                 layout: legend.layout,
               })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-              legendValues={isHistogramViz ? legend.legendStats : []}
+              legendValues={isHistogramVis ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
               legendActionOnHover={interactive}
               theme={[
@@ -925,7 +925,7 @@ export function XYChart({
                   : [settingsThemeOverrides]),
               ]}
               baseTheme={chartBaseTheme}
-              allowBrushingLastHistogramBin={isTimeViz}
+              allowBrushingLastHistogramBin={isTimeVis}
               rotation={shouldRotate ? 90 : 0}
               xDomain={xDomain}
               // enable brushing only for time charts, for both ES|QL and DSL queries
@@ -957,7 +957,7 @@ export function XYChart({
               {...settingsOverrides}
             />
             <XYCurrentTime
-              enabled={Boolean(args.addTimeMarker && isTimeViz)}
+              enabled={Boolean(args.addTimeMarker && isTimeVis)}
               isDarkMode={darkMode}
               domain={rawXDomain}
             />
@@ -973,7 +973,7 @@ export function XYChart({
               gridLine={gridLineStyle}
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
               tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
-              maximumFractionDigits={xTickDecimals}
+              maximumFractionDigits={xTickMfd}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -994,10 +994,7 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
-              const tickDecimals = axis.formatter
-                ? getDecimalsFromFormat(axis.formatter)
-                : undefined;
-
+              const mfd = axis.formatter ? getMaximumFractionDigits(axis.formatter) : undefined;
               return (
                 <Axis
                   key={axis.groupId}
@@ -1010,7 +1007,7 @@ export function XYChart({
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
                   tickFormat={(d) => axis.formatter?.convertToText(d) || ''}
-                  maximumFractionDigits={tickDecimals}
+                  maximumFractionDigits={mfd}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
@@ -1082,7 +1079,7 @@ export function XYChart({
                 formatters={referenceLinesFormatters}
               />
             ) : null}
-            {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
+            {(rangeAnnotations.length || lineAnnotations.length) && isTimeVis ? (
               <Annotations
                 rangeAnnotations={rangeAnnotations}
                 groupedLineAnnotations={groupedLineAnnotations}

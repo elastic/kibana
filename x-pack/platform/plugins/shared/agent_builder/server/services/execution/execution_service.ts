@@ -36,6 +36,7 @@ import {
   type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
+import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
@@ -77,13 +78,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    if (providedExecutionId) {
-      const existing = await executionClient.peek(providedExecutionId);
-      if (existing) {
-        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
-      }
-    }
-
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments,
       request
@@ -92,15 +86,45 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const execution = await executionClient.create({
-      executionMode: mode,
-      executionId,
-      agentId,
-      spaceId,
-      agentParams: validatedParams,
-      parentExecutionId: params.parentExecutionId,
-      metadata,
-    });
+    let execution: AgentExecution;
+    try {
+      execution = await executionClient.create({
+        executionMode: mode,
+        executionId,
+        agentId,
+        spaceId,
+        agentParams: validatedParams,
+        parentExecutionId: params.parentExecutionId,
+        metadata,
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 409) {
+        if (metadata?.execution_idempotency_key) {
+          this.logger.debug(
+            `Duplicate idempotency key detected, returning existing execution ${executionId}`
+          );
+
+          // Repairs executions left in `scheduled` when the original delivery
+          // failed before scheduling the task.
+          const existing = await executionClient.peek(executionId);
+
+          if (existing?.status === ExecutionStatus.scheduled) {
+            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+              request,
+            });
+          }
+
+          return {
+            executionId,
+            events$: this.followExecution(executionId),
+          };
+        }
+
+        throw createBadRequestError(`Execution with id ${executionId} already exists`);
+      }
+
+      throw err;
+    }
 
     // Wire up external abort signal to execution abort
     if (abortSignal) {
@@ -161,6 +185,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
+  private buildRunAgentTask(executionId: string) {
+    return {
+      id: `agent-${executionId}`,
+      taskType: taskTypes.runAgent,
+      params: { executionId },
+      scope: ['agent-builder'],
+      enabled: true,
+      state: {},
+    };
+  }
+
   private async executeWithScheduledTask({
     executionId,
     agentId,
@@ -170,17 +205,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     agentId: string;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    await this.deps.taskManager.schedule(
-      {
-        id: `agent-${executionId}`,
-        taskType: taskTypes.runAgent,
-        params: { executionId },
-        scope: ['agent-builder'],
-        enabled: true,
-        state: {},
-      },
-      { request }
-    );
+    // ensureScheduled tolerates the task already existing: a concurrent idempotent
+    // replay may have re-issued this schedule while repairing a stuck execution.
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
@@ -207,13 +234,20 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // Update status to running
     await executionClient.updateStatus(executionId, ExecutionStatus.running);
 
-    // Set up abort monitoring (same mechanism as TM path)
+    // Set up abort monitoring and heartbeat reporting (same mechanism as TM path)
     const abortMonitor = new AbortMonitor({
       executionId,
       executionClient,
       logger: this.logger.get('abort-monitor'),
     });
     abortMonitor.start();
+
+    const heartbeatReporter = new HeartbeatReporter({
+      executionId,
+      executionClient,
+      logger: this.logger.get('heartbeat-reporter'),
+    });
+    heartbeatReporter.start();
 
     try {
       // Build the live event stream
@@ -228,12 +262,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       const events$ = rawEvents$.pipe(shareReplay());
 
       // Side-effect subscription: write events to ES and update execution status.
-      // The abortMonitor is stopped in the .finally() of this subscription.
+      // The abortMonitor and heartbeatReporter are stopped in the .finally() of this subscription.
       this.subscribeForPersistence({
         events$,
         execution,
         executionClient,
         abortMonitor,
+        heartbeatReporter,
       });
 
       this.logger.debug(
@@ -246,6 +281,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       };
     } catch (e) {
       abortMonitor.stop();
+      heartbeatReporter.stop();
       throw e;
     }
   }
@@ -259,11 +295,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     execution,
     executionClient,
     abortMonitor,
+    heartbeatReporter,
   }: {
     events$: Observable<ChatEvent>;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
     abortMonitor: AbortMonitor;
+    heartbeatReporter: HeartbeatReporter;
   }): void {
     const { executionId } = execution;
 
@@ -294,6 +332,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       })
       .finally(() => {
         abortMonitor.stop();
+        heartbeatReporter.stop();
       });
   }
 

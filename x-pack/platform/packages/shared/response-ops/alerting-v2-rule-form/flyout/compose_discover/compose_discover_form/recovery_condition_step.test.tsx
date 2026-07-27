@@ -14,14 +14,9 @@ import { createTestQueryClient, createMockServices } from '../../../test_utils';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
-import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
+import type { FormValues, RuleQuery } from '../../../form/types';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
-
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
 
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_SEGMENT = 'WHERE count > 100';
@@ -32,7 +27,7 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
   ...overrides,
 });
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
@@ -47,13 +42,13 @@ const createComposeFormWrapper = (
   services: RuleFormServices = createMockServices()
 ) => {
   const queryClient = createTestQueryClient();
-  const defaultValues: ComposeFormValues = {
+  const defaultValues: FormValues = {
     ...BASE_COMPOSE_VALUES,
     ...(queryOverride ? { query: queryOverride } : {}),
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues });
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -75,12 +70,6 @@ const CUSTOM_RECOVERY_QUERY: RuleQuery = {
   base: BASE_QUERY,
   breach: { segment: ALERT_SEGMENT },
   recovery: { segment: RECOVERY_SEGMENT },
-};
-
-const CUSTOM_NO_RECOVERY_QUERY: RuleQuery = {
-  format: 'composed',
-  base: BASE_QUERY,
-  breach: { segment: ALERT_SEGMENT },
 };
 
 const renderRecoveryStep = (
@@ -123,24 +112,20 @@ describe('RecoveryConditionStep', () => {
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
 
+  it('does not render custom recovery content when recovery type is none', () => {
+    renderRecoveryStep({ recoveryType: 'none' });
+
+    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
+  });
+
   it('renders query summaries and edit button in custom mode', () => {
     renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
 
     expect(screen.getByText('Base query')).toBeInTheDocument();
     expect(screen.getByText('Recovery condition')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
-  });
-
-  it('shows "Custom condition set" badge when recovery block is populated', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
-
-    expect(screen.getByText('Custom condition set')).toBeInTheDocument();
-  });
-
-  it('does not show badge when recovery block is empty', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_NO_RECOVERY_QUERY);
-
-    expect(screen.queryByText('Custom condition set')).not.toBeInTheDocument();
   });
 
   it('disables the edit button when the child flyout is open', () => {

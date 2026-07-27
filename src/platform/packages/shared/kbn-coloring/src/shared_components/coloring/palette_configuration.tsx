@@ -8,8 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useReducer, useMemo } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import isEqual from 'lodash/isEqual';
 import { css } from '@emotion/react';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { PalettePicker } from './palette_picker';
@@ -22,7 +23,7 @@ import type {
 } from '../../palettes';
 import { getFallbackDataBounds } from '../../palettes';
 
-import { toColorRanges } from './utils';
+import { changeColorPalette, toColorRanges } from './utils';
 import { ColorRanges, ColorRangesContext } from './color_ranges';
 import { allRangesValid } from './color_ranges/color_ranges_validation';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
@@ -37,6 +38,21 @@ export interface CustomizablePaletteProps {
   showExtraActions?: boolean;
 }
 
+function shouldSyncPaletteState(
+  localState: {
+    activePalette: PaletteOutput<CustomPaletteParams>;
+    colorRanges: ReturnType<typeof toColorRanges>;
+  },
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  colorRangesToShow: ReturnType<typeof toColorRanges>
+) {
+  return (
+    (!isEqual(localState.activePalette, activePalette) ||
+      !isEqual(colorRangesToShow, localState.colorRanges)) &&
+    allRangesValid(localState.colorRanges, localState.activePalette.params?.rangeType === 'percent')
+  );
+}
+
 export const CustomizablePalette = ({
   palettes,
   activePalette,
@@ -47,34 +63,57 @@ export const CustomizablePalette = ({
   disableSwitchingContinuity = false,
 }: CustomizablePaletteProps) => {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
-  const colorRangesToShow = toColorRanges(
-    palettes,
-    activePalette.params?.colorStops || [],
-    activePalette,
-    dataBounds
-  );
+  const colorRangesToShow = useMemo(() => {
+    return toColorRanges(
+      palettes,
+      activePalette.params?.colorStops || [],
+      activePalette,
+      dataBounds
+    );
+  }, [palettes, activePalette, dataBounds]);
 
   const [localState, dispatch] = useReducer(paletteConfigurationReducer, {
     activePalette,
     colorRanges: colorRangesToShow,
   });
+  // Preserve the latest callback without rearming the unmount cleanup on each render.
+  const setPaletteRef = useRef(setPalette);
+  const pendingPalette = useMemo(
+    () =>
+      shouldSyncPaletteState(localState, activePalette, colorRangesToShow)
+        ? localState.activePalette
+        : undefined,
+    [activePalette, colorRangesToShow, localState]
+  );
+  const pendingPaletteRef = useRef<PaletteOutput<CustomPaletteParams> | undefined>(pendingPalette);
+
+  useEffect(() => {
+    setPaletteRef.current = setPalette;
+  }, [setPalette]);
+
+  useEffect(() => {
+    pendingPaletteRef.current = pendingPalette;
+  }, [pendingPalette]);
 
   useDebounce(
     () => {
-      if (
-        (localState.activePalette !== activePalette ||
-          colorRangesToShow !== localState.colorRanges) &&
-        allRangesValid(
-          localState.colorRanges,
-          localState.activePalette.params?.rangeType === 'percent'
-        )
-      ) {
-        setPalette(localState.activePalette);
+      if (pendingPalette) {
+        pendingPaletteRef.current = undefined;
+        setPaletteRef.current(pendingPalette);
       }
     },
     250,
-    [localState]
+    [pendingPalette]
   );
+
+  useEffect(() => {
+    return () => {
+      // Closing the flyout should not drop local palette edits that have not debounced yet.
+      if (pendingPaletteRef.current) {
+        setPaletteRef.current(pendingPaletteRef.current);
+      }
+    };
+  }, []);
 
   const { euiTheme } = useEuiTheme();
 
@@ -99,12 +138,20 @@ export const CustomizablePalette = ({
           palettes={palettes}
           activePalette={localState.activePalette}
           setPalette={(newPalette) => {
-            const isPaletteChanged = newPalette.name !== activePalette.name;
+            const isPaletteChanged = newPalette.name !== localState.activePalette.name;
             if (isPaletteChanged) {
+              const resolvedPalette = changeColorPalette(
+                newPalette,
+                localState.activePalette,
+                palettes,
+                dataBounds,
+                disableSwitchingContinuity
+              );
               dispatch({
                 type: 'changeColorPalette',
                 payload: { palette: newPalette, dataBounds, palettes, disableSwitchingContinuity },
               });
+              setPalette(resolvedPalette);
             }
           }}
           showCustomPalette

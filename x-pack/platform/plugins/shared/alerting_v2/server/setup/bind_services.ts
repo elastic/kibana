@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
+import { once } from 'lodash';
+import type { CoreDiServiceStart } from '@kbn/core-di';
+import { OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
@@ -20,6 +22,10 @@ import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import {
+  ExecutionHistoryClient,
+  ExecutionHistoryClientToken,
+} from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
@@ -107,6 +113,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
@@ -157,11 +165,20 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
 
-  bind(TaskRunnerFactoryToken).toFactory((context) =>
-    createTaskRunnerFactory({
-      getInjection: () => context.get(CoreStart('injection')),
-    })
-  );
+  // Task Manager is a dependency of this plugin, so it can begin polling and run
+  // a task before this plugin's start lifecycle binds `CoreStart('injection')`.
+  // Resolving it eagerly would throw when the binding is not yet available. The
+  // promise resolves on the plugin's `OnStart` hook, at which point the injection
+  // service is guaranteed to be bound, so task runs wait until the plugin starts.
+  const injectionPromise = new Promise<CoreDiServiceStart>((resolve) => {
+    bind(OnStart).toConstantValue(
+      once((container) => {
+        resolve(container.get(CoreStart('injection')));
+      })
+    );
+  });
+
+  bind(TaskRunnerFactoryToken).toFactory(() => createTaskRunnerFactory({ injectionPromise }));
 
   bind(RuleSavedObjectsClientToken)
     .toResolvedValue(

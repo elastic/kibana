@@ -1,0 +1,140 @@
+version: '1'
+name: Security - Attack discovery - Custom validation example
+description: |
+  This example Attack Discovery validation workflow demonstrates how to compose
+  built-in steps with custom logic to validate and enrich generated discoveries.
+
+  It runs the standard validation step (hallucination detection and deduplication),
+  then applies a per-field transformation using a `data.map` step with Liquid
+  filters, and finally persists the results to Elasticsearch.
+
+  Use this as a starting point for adding your own custom validation or
+  enrichment. Replace the `| upcase` filters in the `data.map` step with any
+  Liquid transformation — such as truncation, custom labelling, or field
+  normalization — to build a post-validation pipeline tailored to your needs.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - Example
+  - attackDiscovery:custom_validation_example
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    alerts_context_count:
+      description: Number of alerts analyzed
+      type: integer
+    alerts_index_pattern:
+      description: >
+        Elasticsearch index pattern for security alerts. When not provided,
+        defaults to .alerts-security.alerts-<spaceId> using the current
+        Kibana space (via workflow.spaceId).
+      type: string
+    anonymized_alerts:
+      description: Anonymized alerts in Document format
+      items:
+        additionalProperties: true
+        type: object
+      type: array
+    api_config:
+      additionalProperties: false
+      description: LLM API configuration
+      properties:
+        action_type_id:
+          type: string
+        connector_id:
+          type: string
+        model:
+          type: string
+      required:
+        - connector_id
+      type: object
+    attack_discoveries:
+      description: Attack discoveries to validate
+      items:
+        additionalProperties: true
+        type: object
+      type: array
+    connector_name:
+      description: LLM connector name
+      type: string
+    enable_field_rendering:
+      default: true
+      description: Enable field rendering in UI
+      type: boolean
+    generation_uuid:
+      description: Generation execution UUID for tracking
+      type: string
+    replacements:
+      additionalProperties: true
+      description: Anonymization replacements
+      type: object
+    source:
+      description: How the generation was triggered (interactive, scheduled, or action)
+      enum:
+        - action
+        - interactive
+        - scheduled
+      type: string
+    with_replacements:
+      default: false
+      description: Include replacements in response
+      type: boolean
+  required:
+    - alerts_context_count
+    - anonymized_alerts
+    - api_config
+    - attack_discoveries
+    - generation_uuid
+
+steps:
+  # Step 1: Filter hallucinated alert IDs and deduplicate discoveries.
+  - name: validate_discoveries
+    type: security.attack-discovery.defaultValidation
+    timeout: '5m'
+    with:
+      alerts_context_count: ${{ inputs.alerts_context_count }}
+      alerts_index_pattern: '{%- if inputs.alerts_index_pattern -%}{{ inputs.alerts_index_pattern }}{%- else -%}.alerts-security.alerts-{{ workflow.spaceId }}{%- endif -%}'
+      anonymized_alerts: ${{ inputs.anonymized_alerts }}
+      api_config: ${{ inputs.api_config }}
+      attack_discoveries: ${{ inputs.attack_discoveries }}
+      connector_name: ${{ inputs.connector_name }}
+      generation_uuid: ${{ inputs.generation_uuid }}
+      replacements: ${{ inputs.replacements }}
+
+  # Step 2: Transform each validated discovery using `data.map`.
+  # This step iterates over discoveries and applies a per-field Liquid filter.
+  # Replace `| upcase` with any Liquid transformation for your use case.
+  - name: transform_discoveries
+    type: data.map
+    items: ${{ steps.validate_discoveries.output.validated_discoveries }}
+    with:
+      fields:
+        alert_ids: ${{ item.alert_ids }}
+        details_markdown: ${{ item.details_markdown | upcase }}
+        entity_summary_markdown: ${{ item.entity_summary_markdown | upcase }}
+        id: ${{ item.id }}
+        mitre_attack_tactics: ${{ item.mitre_attack_tactics }}
+        summary_markdown: ${{ item.summary_markdown | upcase }}
+        timestamp: ${{ item.timestamp }}
+        title: ${{ item.title | upcase }}
+
+  # Step 3: Persist the transformed discoveries to Elasticsearch.
+  - name: persist_discoveries
+    type: security.attack-discovery.persistDiscoveries
+    timeout: '5m'
+    with:
+      alerts_context_count: ${{ inputs.alerts_context_count }}
+      anonymized_alerts: ${{ inputs.anonymized_alerts }}
+      api_config: ${{ inputs.api_config }}
+      attack_discoveries: ${{ steps.transform_discoveries.output }}
+      connector_name: ${{ inputs.connector_name }}
+      enable_field_rendering: ${{ inputs.enable_field_rendering }}
+      generation_uuid: ${{ inputs.generation_uuid }}
+      replacements: ${{ inputs.replacements }}
+      source: ${{ inputs.source }}
+      with_replacements: ${{ inputs.with_replacements }}

@@ -24,6 +24,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 import {
   buildCategorizeWithSampleQuery,
@@ -36,7 +37,7 @@ const MAX_DOCS_TO_SAMPLE = 100_000;
 // bounded long tail from one ES|QL categorization query avoids reimplementing
 // the DSL helper's second rare-pattern aggregation, while still giving
 // selectLogPatternsForLlm enough sorted rows to take the head and tail.
-const SIG_EVENTS_CATEGORIZE_LIMIT = 1000;
+const SIGNIFICANT_EVENTS_PASS1_LIMIT = 1000;
 
 interface FieldPatternResultBase {
   field: string;
@@ -433,6 +434,7 @@ export async function getSigEventsLogPatternsEsql({
     index: samplingSource,
     start,
     end,
+    signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
   });
   // ES|QL normalizes the `text` family in `column.type`: both `text` and
   // `match_only_text` mappings report as `text`.
@@ -473,7 +475,7 @@ export async function getSigEventsLogPatternsEsql({
         kql,
         field,
         samplingProbability,
-        limit: SIG_EVENTS_CATEGORIZE_LIMIT,
+        limit: SIGNIFICANT_EVENTS_PASS1_LIMIT,
       });
 
       return rows.map((row) => ({

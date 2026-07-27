@@ -27,6 +27,7 @@
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
+    "@kbn/change-history",
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/features-plugin",
@@ -65,9 +66,6 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
-    "@kbn/entities-schema",
-    "@kbn/data-forge",
-    "@kbn/entityManager-plugin",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-server-schemas",
@@ -127,6 +125,8 @@
     "@kbn/embeddable-alerts-table-plugin",
     "@kbn/synthtrace",
     "@kbn/streams-schema",
+    "@kbn/significant-events-schema",
+    "@kbn/evals-common",
     "@kbn/streams-plugin",
     "@kbn/content-packs-schema",
     "@kbn/utility-types",
@@ -177,5 +177,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
     "@kbn/synthtrace-client",
+    "@kbn/significant-events-plugin",
+    "@kbn/alerting-v2-schemas",
   ]
 }

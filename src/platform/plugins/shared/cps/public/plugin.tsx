@@ -10,7 +10,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
 import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
 import { CPSManager } from './services/cps_manager';
@@ -49,12 +48,14 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
       // Register project picker only after the default project routing is known
       manager.whenReady().then(() =>
         import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
+          // register into solution-view chrome next header
+          core.chrome.next.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
+
+          // register into legacy chrome header
           core.chrome.navControls.registerLeft({
             mount: (element) => {
               ReactDOM.render(
-                <I18nProvider>
-                  <ProjectPickerContainer cpsManager={manager} />
-                </I18nProvider>,
+                core.rendering.addContext(<ProjectPickerContainer cpsManager={manager} />),
                 element,
                 () => {}
               );

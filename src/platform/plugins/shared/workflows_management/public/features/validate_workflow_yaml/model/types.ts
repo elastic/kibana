@@ -154,6 +154,24 @@ interface YamlValidationResultEsql extends YamlValidationResultBase {
   owner: 'esql-validation';
 }
 
+interface YamlValidationResultParallelFanOut extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'parallel-fan-out-validation';
+}
+
+interface YamlValidationResultParallelMode extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'parallel-mode-validation';
+}
+
+interface YamlValidationResultGraphBuild extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'graph-build-validation';
+}
+
 export type StepPropertyValidationResult =
   | YamlValidationResultStepPropertyError
   | YamlValidationResultStepPropertyValid;
@@ -177,6 +195,9 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'if-condition-validation',
   'deprecated-step-validation',
   'esql-validation',
+  'parallel-fan-out-validation',
+  'parallel-mode-validation',
+  'graph-build-validation',
 ] as const;
 
 export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
@@ -205,8 +226,23 @@ export type YamlValidationResult =
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError
   | YamlValidationResultDeprecatedStep
-  | YamlValidationResultEsql;
+  | YamlValidationResultEsql
+  | YamlValidationResultParallelFanOut
+  | YamlValidationResultParallelMode
+  | YamlValidationResultGraphBuild;
 
 export function validationResultFingerprint(r: YamlValidationResult): string {
   return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;
+}
+
+export function validationResultsFingerprint(results: YamlValidationResult[]): string {
+  return results.map(validationResultFingerprint).sort().join('\n');
+}
+
+export function filterHighlightableValidationResults(
+  validationResults: YamlValidationResult[]
+): YamlValidationResult[] {
+  return validationResults.filter(
+    (result) => result.severity === 'error' || result.severity === 'warning'
+  );
 }

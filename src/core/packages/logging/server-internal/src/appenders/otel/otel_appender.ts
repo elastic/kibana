@@ -119,7 +119,14 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
  * - When using the JSON layout, `meta` is already part of the structured body,
  *   so `log.meta` is omitted from attributes to avoid duplication.
  */
-const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes => {
+const toAttributes = (
+  record: LogRecord,
+  includeLogMeta: boolean,
+  fieldRenames?: Record<string, string | string[]>,
+  fieldDrops?: string[],
+  fieldDefaults?: Record<string, string | string[]>,
+  fieldUppercase?: string[]
+): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
   };
@@ -168,6 +175,41 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     });
   }
 
+  if (fieldRenames) {
+    for (const [oldKey, newKeys] of Object.entries(fieldRenames)) {
+      if (oldKey in attrs) {
+        const value = attrs[oldKey];
+        delete attrs[oldKey];
+        const targets = Array.isArray(newKeys) ? newKeys : [newKeys];
+        for (const newKey of targets) {
+          attrs[newKey] = value;
+        }
+      }
+    }
+  }
+
+  if (fieldDrops) {
+    for (const key of fieldDrops) {
+      delete attrs[key];
+    }
+  }
+
+  if (fieldDefaults) {
+    for (const [key, value] of Object.entries(fieldDefaults)) {
+      if (!(key in attrs)) {
+        attrs[key] = value;
+      }
+    }
+  }
+
+  if (fieldUppercase) {
+    for (const key of fieldUppercase) {
+      if (typeof attrs[key] === 'string') {
+        attrs[key] = (attrs[key] as string).toUpperCase();
+      }
+    }
+  }
+
   return attrs;
 };
 
@@ -194,6 +236,26 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    fieldRenames: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
+      )
+    ),
+    fieldDrops: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldUppercase: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldDefaults: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
+      )
+    ),
     ssl: schema.maybe(
       schema.object(
         {
@@ -234,6 +296,10 @@ export class OtelAppender implements DisposableAppender {
   private readonly layout: Layout;
   /** True when using JSON layout: the full LogRecord is sent as `body.structured`. */
   private readonly useStructuredBody: boolean;
+  private readonly fieldRenames?: Record<string, string | string[]>;
+  private readonly fieldDrops?: string[];
+  private readonly fieldDefaults?: Record<string, string | string[]>;
+  private readonly fieldUppercase?: string[];
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -242,9 +308,22 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = buildOtelResources().merge(
+    const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+    // When fieldDrops is configured, rebuild the resource excluding the specified keys
+    // so they are absent from resource.attributes in the OTLP export (not just from
+    // per-record log attributes). getRawAttributes() is used — not resource.attributes —
+    // because it preserves async-resolving entries (e.g. host.id from getMachineId).
+    // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
+    // them at export time, so the rebuilt resource retains all async-detected attributes.
+    const resource = config.fieldDrops?.length
+      ? resources.resourceFromAttributes(
+          Object.fromEntries(
+            baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
+          )
+        )
+      : baseResource;
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -258,6 +337,10 @@ export class OtelAppender implements DisposableAppender {
     // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
+    this.fieldRenames = config.fieldRenames;
+    this.fieldDrops = config.fieldDrops;
+    this.fieldDefaults = config.fieldDefaults;
+    this.fieldUppercase = config.fieldUppercase;
   }
 
   public append(record: LogRecord): void {
@@ -279,7 +362,14 @@ export class OtelAppender implements DisposableAppender {
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
-      attributes: toAttributes(record, !this.useStructuredBody),
+      attributes: toAttributes(
+        record,
+        !this.useStructuredBody,
+        this.fieldRenames,
+        this.fieldDrops,
+        this.fieldDefaults,
+        this.fieldUppercase
+      ),
     });
   }
 

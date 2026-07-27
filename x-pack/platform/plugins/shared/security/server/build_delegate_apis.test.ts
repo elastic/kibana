@@ -63,12 +63,13 @@ describe('buildSecurityApi', () => {
     it('returns the enriched override for fake requests when the enricher has bound a profile', () => {
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      api.fakeRequestEnricher(request, 'u_test_profile_123');
+      api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
 
       const user = api.authc.getCurrentUser(request);
 
       expect(authc.getCurrentUser).not.toHaveBeenCalled();
       expect(user!.profile_uid).toBe('u_test_profile_123');
+      expect(user!.username).toBe('jdoe');
     });
 
     it('falls back to the authentication service for fake requests without an enrichment', () => {
@@ -85,18 +86,19 @@ describe('buildSecurityApi', () => {
   });
 
   describe('fakeRequestEnricher', () => {
-    it('binds a profile_uid that is then surfaced via getCurrentUser', () => {
+    it('binds a profile_uid and username that are then surfaced via getCurrentUser', () => {
       const request = httpServerMock.createFakeKibanaRequest({});
 
-      api.fakeRequestEnricher(request, 'u_test_profile_123');
+      api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
 
       const user = api.authc.getCurrentUser(request);
       expect(user!.profile_uid).toBe('u_test_profile_123');
+      expect(user!.username).toBe('jdoe');
     });
 
     it('throws when called on a real (non-fake) request', () => {
       const request = httpServerMock.createKibanaRequest();
-      expect(() => api.fakeRequestEnricher(request, 'u_test_profile_123')).toThrow(
+      expect(() => api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123' })).toThrow(
         /must only be called on a fake request/
       );
     });
@@ -271,6 +273,26 @@ describe('buildUserProfileApi', () => {
       const returnValue = await api.getCurrent({ request, dataPath: 'dataPath' });
 
       expect(returnValue).toBe(null);
+    });
+  });
+
+  describe('getCurrentProfileId', () => {
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await api.getCurrentProfileId({ request });
+
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
+    });
+
+    it('returns the result from the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      userProfile.getCurrentProfileId.mockResolvedValue('some-uid');
+
+      const returnValue = await api.getCurrentProfileId({ request });
+
+      expect(returnValue).toBe('some-uid');
     });
   });
 

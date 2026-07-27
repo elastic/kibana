@@ -45,3 +45,7 @@ export * from './specs/tavily/tavily';
 export * from './specs/pagerduty/pagerduty';
 export * from './specs/snowflake/snowflake';
 export * from './specs/box/box';
+export * from './specs/dropbox/dropbox';
+export * from './specs/one_drive/one_drive';
+export * from './specs/sublime_security/sublime_security';
+export * from './specs/kubernetes/kubernetes';

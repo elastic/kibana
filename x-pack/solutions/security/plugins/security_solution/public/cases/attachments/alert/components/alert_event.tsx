@@ -14,6 +14,13 @@ import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../flyout_v2/shared/constants/flyout_titles';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -41,6 +48,8 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   rule,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openRuleFlyout } = useFlyoutApi();
   const {
     rulesPrivileges: {
       rules: { read: canReadRules },
@@ -73,9 +82,17 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
 
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
-      openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
+      if (enableNewFlyout) {
+        openRuleFlyout({
+          ruleId: resolvedRuleId,
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+          title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
+        });
+      } else {
+        openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
+      }
     }
-  }, [openFlyout, canReadRules, resolvedRuleId]);
+  }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
   if (loadingAlertData) {
     return <EuiLoadingSpinner size="m" />;

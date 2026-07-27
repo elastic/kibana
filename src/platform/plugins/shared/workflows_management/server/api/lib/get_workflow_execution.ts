@@ -91,6 +91,7 @@ function transformToWorkflowExecutionDetailDto(
   stepExecutions: EsWorkflowStepExecution[],
   logger: Logger
 ): WorkflowExecutionDto {
+  const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
   // backward compatibility for workflow executions created before yaml was added to the workflow execution object
   try {
@@ -102,7 +103,7 @@ function transformToWorkflowExecutionDetailDto(
     yaml = '';
   }
   return {
-    ...workflowExecution,
+    ...workflowExecutionDtoFields,
     id,
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,

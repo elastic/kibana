@@ -27,6 +27,7 @@ interface PrivilegesFromEs {
   delete_index: boolean;
   manage_data_stream_lifecycle: boolean;
   read_failure_store: boolean;
+  manage: boolean;
 }
 
 type Privileges = PrivilegesFromEs;
@@ -38,6 +39,12 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 export type Health = Lowercase<HealthStatus>;
 
 export type IndexMode = (typeof IndexMode)[keyof typeof IndexMode];
+
+/**
+ * Elasticsearch retention duration: either a duration string (e.g. `'7d'`) or `-1`, the sentinel
+ * Elasticsearch uses for "keep data indefinitely" (infinite retention).
+ */
+export type EsDataRetention = string | -1;
 
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   global_max_retention?: string;
@@ -51,16 +58,15 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
     delete_index: boolean;
     manage_data_stream_lifecycle: boolean;
     read_failure_store: boolean;
+    manage: boolean;
   };
   // Override failure_store to support lifecycle property
-  // Note: We narrow data_retention to string only,
-  // as the native es numeric Duration type values (-1, 0)
-  // from IndicesFailureStoreLifecycle['data_retention']
-  // are not used for data retention in our implementation.
   failure_store?: IndicesFailureStore & {
     lifecycle?: {
       enabled?: boolean;
-      data_retention?: string;
+      data_retention?: EsDataRetention;
+      retention_determined_by?: 'default_failures_retention' | 'data_stream_configuration';
+      effective_retention?: string;
     };
   };
 }
@@ -73,6 +79,10 @@ export interface DataStream {
   health: Health;
   indexTemplateName: string;
   ilmPolicyName?: string;
+  lifecycleSettings?: {
+    explicitIlmPolicyName?: string;
+    preferIlm?: boolean;
+  };
   storageSize?: ByteSize;
   storageSizeBytes?: number;
   maxTimeStamp?: number;
@@ -83,11 +93,20 @@ export interface DataStream {
   privileges: Privileges;
   hidden: boolean;
   nextGenerationManagedBy: string;
+  failureStoreSettings?: {
+    enabled?: boolean;
+    lifecycle?: {
+      enabled?: boolean;
+      dataRetention?: EsDataRetention;
+    };
+  };
+  matchesFailureStoreClusterPattern?: boolean;
   failureStoreEnabled?: boolean;
   failureStoreRetention?: {
-    customRetentionPeriod?: string;
+    customRetentionPeriod?: EsDataRetention;
     defaultRetentionPeriod?: string;
     retentionDisabled?: boolean;
+    retentionDeterminedBy?: 'default_failures_retention' | 'data_stream_configuration';
   };
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
@@ -120,6 +139,10 @@ export interface DataRetention {
 export interface DataStreamOptions {
   failure_store?: {
     enabled: boolean;
+    lifecycle?: {
+      enabled?: boolean;
+      data_retention?: string | -1;
+    };
   };
   [key: string]: unknown;
 }

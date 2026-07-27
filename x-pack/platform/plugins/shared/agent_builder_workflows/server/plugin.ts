@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { PluginConfig } from './config';
 import type {
   PluginSetupDependencies,
@@ -46,6 +47,7 @@ export class AgentBuilderWorkflowsPlugin
 {
   private readonly logger: Logger;
   private api: WorkflowsManagementApi | null = null;
+  private security?: SecurityPluginStart;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -55,9 +57,11 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    const { agentBuilder, agentContextLayer, workflowsManagement } = setupDeps;
+    const { agentBuilder, agentBuilderSml, workflowsManagement } = setupDeps;
     const api = workflowsManagement.management;
     this.api = api;
+
+    const getSecurity = () => this.security;
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
 
@@ -77,15 +81,15 @@ export class AgentBuilderWorkflowsPlugin
     agentBuilder.skills.register(workflowAuthoringSkill);
 
     // Workflow SML type for the agent context layer
-    agentContextLayer.registerType(createWorkflowSmlType(api));
+    agentBuilderSml.registerType(createWorkflowSmlType(api));
 
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
-      getWorkflowExecutionStatusTool({ workflowsManagement }),
+      getWorkflowExecutionStatusTool({ workflowsManagement, getSecurity }),
       resumeWorkflowExecutionTool({ workflowsManagement }),
-      listWorkflowExecutionsTool({ workflowsManagement }),
+      listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement }),
+      executeWorkflowTool({ workflowsManagement, getSecurity }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
@@ -96,9 +100,10 @@ export class AgentBuilderWorkflowsPlugin
     coreStart: CoreStart,
     startDeps: PluginStartDependencies
   ): AgentBuilderWorkflowsPluginStart {
+    this.security = startDeps.security;
     if (this.api) {
       this.api.setSmlIndexAttachment(
-        startDeps.agentContextLayer.indexAttachment,
+        startDeps.agentBuilderSml.indexAttachment,
         this.logger.get('sml')
       );
     }

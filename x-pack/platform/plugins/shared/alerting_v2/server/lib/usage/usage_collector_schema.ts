@@ -22,6 +22,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'long',
     _meta: { description: 'Number of enabled alerting v2 rules.' },
   },
+  count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of alerting v2 rules currently tagged as created/edited via Agent Builder.',
+    },
+  },
   count_by_kind: {
     alert: {
       type: 'long',
@@ -88,6 +95,48 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
   },
+  count_by_query_format: {
+    composed: {
+      type: 'long',
+      _meta: { description: 'Number of rules using the composed query format.' },
+    },
+    standalone: {
+      type: 'long',
+      _meta: { description: 'Number of rules using the standalone query format.' },
+    },
+  },
+  count_by_recovery_strategy: {
+    no_breach: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+    },
+    query: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy query.' },
+    },
+    none: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy none.' },
+    },
+  },
+  count_by_no_data_strategy: {
+    last_known_status: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy last_known_status.' },
+    },
+    emit: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy emit.' },
+    },
+    recover: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy recover.' },
+    },
+    none: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy none.' },
+    },
+  },
 
   executions_count_24hr: {
     type: 'long',
@@ -141,6 +190,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
   action_policies_count_with_matcher: {
     type: 'long',
     _meta: { description: 'Number of action policies with a matcher.' },
+  },
+  action_policies_count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of action policies currently tagged as created/edited via Agent Builder.',
+    },
   },
   action_policies_count_with_group_by: {
     type: 'long',

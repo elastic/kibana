@@ -106,4 +106,38 @@ export interface OtelAppenderConfig {
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
   ssl?: OtelAppenderTlsConfig;
+  /**
+   * Optional map of source attribute paths to target attribute path(s) applied after meta fields are
+   * flattened into OTel attributes. Use this to rename or fan-out fields without changing the
+   * upstream `AuditEvent` / `LogRecord` shape.
+   *
+   * - Single target: `{ 'kibana.space_id': 'kibana.space.id' }` — rename in place.
+   * - Multiple targets: `{ 'client.ip': ['source.address', 'source.ip'] }` — copy value to all
+   *   listed keys and remove the original.
+   *
+   * Keys absent from the log record are silently skipped. With JSON layout, meta-sourced keys
+   * (e.g. `kibana.*`, `client.ip`) are part of the structured body and not repeated as individual
+   * attributes, so renames targeting those fields have no effect under that layout.
+   */
+  fieldRenames?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys to remove from the OTLP output. Applied to both log record
+   * attributes and resource attributes. Keys absent from the output are silently skipped.
+   * Injected programmatically (e.g. by the audit service to satisfy Serverless field exclusions).
+   */
+  fieldDrops?: string[];
+  /**
+   * Optional default attribute values written only when the key is not already present in the log
+   * record attributes. Applied after `fieldRenames` and `fieldDrops`. Use to fill in fields that are
+   * absent from some event types (e.g. `event.type` on authentication events).
+   * Values may be a string or an array of strings.
+   */
+  fieldDefaults?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys whose string values should be uppercased at emit time.
+   * Applied after all other field transforms. Use for fields where OTel semantic conventions
+   * require uppercase but the upstream event carries lowercase (e.g. `http.request.method`).
+   * Non-string values and absent keys are silently skipped.
+   */
+  fieldUppercase?: string[];
 }
