@@ -18,7 +18,7 @@ export const registerResumeRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string(),
+    id: schema.string({ maxLength: 1000 }),
   });
 
   router.post(
