@@ -9,6 +9,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type { Feature } from '@kbn/significant-events-schema';
+import type { PromoteResult } from '../../../../../hooks/significant_events/use_queries_api';
 import {
   useKnowledgeIndicatorsTable,
   getKnowledgeIndicatorTitle,
@@ -19,6 +20,7 @@ const mockReplace = jest.fn();
 const mockToasts = {
   addSuccess: jest.fn(),
   addWarning: jest.fn(),
+  addInfo: jest.fn(),
   addError: jest.fn(),
 };
 
@@ -97,13 +99,16 @@ jest.mock('@kbn/react-hooks', () => ({
 
 let mockIsMutatingValue = 0;
 const mockMutate = jest.fn();
-let mockMutationCallbacks: { onSuccess?: () => Promise<void>; onError?: (e: Error) => void } = {};
+let mockMutationCallbacks: {
+  onSuccess?: (result: PromoteResult) => Promise<void>;
+  onError?: (e: Error) => void;
+} = {};
 
 jest.mock('@kbn/react-query', () => ({
   useIsMutating: () => mockIsMutatingValue,
   useMutation: (config: {
     mutationFn: (ids: string[]) => Promise<unknown>;
-    onSuccess?: () => Promise<void>;
+    onSuccess?: (result: PromoteResult) => Promise<void>;
     onError?: (e: Error) => void;
   }) => {
     mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
@@ -415,11 +420,52 @@ describe('useKnowledgeIndicatorsTable', () => {
       renderHook(() => useKnowledgeIndicatorsTable());
 
       await act(async () => {
-        await mockMutationCallbacks.onSuccess?.();
+        await mockMutationCallbacks.onSuccess?.({
+          promoted: 2,
+          skipped_stats: 0,
+          skipped_ineligible: 0,
+        });
       });
 
       expect(mockToasts.addSuccess).toHaveBeenCalled();
       expect(mockInvalidatePromoteRelatedQueries).toHaveBeenCalled();
+    });
+
+    it('reports the skip reason instead of success when nothing was promoted', async () => {
+      mockKnowledgeIndicators = [];
+      renderHook(() => useKnowledgeIndicatorsTable());
+
+      await act(async () => {
+        await mockMutationCallbacks.onSuccess?.({
+          promoted: 0,
+          skipped_stats: 0,
+          skipped_ineligible: 1,
+        });
+      });
+
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+      expect(mockToasts.addInfo).toHaveBeenCalledWith({
+        title: expect.stringContaining('filter-only'),
+      });
+    });
+
+    it('warns about partial success when some queries were skipped', async () => {
+      mockKnowledgeIndicators = [];
+      renderHook(() => useKnowledgeIndicatorsTable());
+
+      await act(async () => {
+        await mockMutationCallbacks.onSuccess?.({
+          promoted: 1,
+          skipped_stats: 1,
+          skipped_ineligible: 0,
+        });
+      });
+
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: expect.any(String),
+        text: expect.stringContaining('STATS'),
+      });
     });
 
     it('promote onError shows error toast', () => {

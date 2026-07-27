@@ -206,6 +206,11 @@ export const BULK_PROMOTE_SUCCESS_TOAST_TITLE = i18n.translate(
   { defaultMessage: 'Queries promoted' }
 );
 
+export const BULK_PROMOTE_PARTIAL_TOAST_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.bulkPromotePartialToastTitle',
+  { defaultMessage: 'Some queries could not be promoted' }
+);
+
 export const BULK_PROMOTE_ERROR_TITLE = i18n.translate(
   'xpack.streams.knowledgeIndicators.bulkPromoteErrorTitle',
   { defaultMessage: 'Failed to promote selected queries' }
