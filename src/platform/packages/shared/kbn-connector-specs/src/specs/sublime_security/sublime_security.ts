@@ -557,7 +557,6 @@ Gotchas:
   },
 
   test: {
-    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.test.description', {
       defaultMessage: 'Verifies the Sublime Security connection by listing one protected mailbox',
     }),

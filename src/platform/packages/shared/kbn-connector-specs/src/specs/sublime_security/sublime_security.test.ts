@@ -528,8 +528,7 @@ describe('SublimeSecurityConnector', () => {
       throw new Error('expected the Sublime Security spec to define a test handler');
     }
 
-    it('is enabled and lists one mailbox on success', async () => {
-      expect(testDef.enabled).toBe(true);
+    it('lists one mailbox on success', async () => {
       (mockClient.get as jest.Mock).mockResolvedValue({ data: { mailboxes: [], total: 0 } });
 
       const result = await testDef.handler(mockContext);
