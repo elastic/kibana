@@ -8,7 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { VersionedRouteResponseValidation } from '@kbn/core-http-server';
+import type {
+  VersionedRouteResponseValidation,
+  VersionedRouteValidation,
+} from '@kbn/core-http-server';
 import {
   isCustomValidation,
   unwrapVersionedResponseBodyValidation,
@@ -55,6 +58,58 @@ describe('prepareVersionedRouteValidation', () => {
           500: { description: 'just a description', body: undefined },
         },
       },
+    });
+  });
+
+  describe('deferred validation with onceCacheOnSuccess', () => {
+    it('defers construction and retries on failure', () => {
+      let attemptCount = 0;
+      const brokenFactory = jest.fn(() => {
+        attemptCount++;
+        throw new Error(`Attempt ${attemptCount}`);
+      });
+
+      const prepared = prepareVersionedRouteValidation({
+        version: '1',
+        validate: brokenFactory,
+      });
+
+      // Factory is not called yet
+      expect(brokenFactory).toHaveBeenCalledTimes(0);
+
+      // Call the validate function multiple times — each should throw
+      // (not cache the failure like lodash.once would)
+      for (let i = 0; i < 3; i++) {
+        expect(() => (prepared.validate as () => any)()).toThrow(`Attempt ${i + 1}`);
+      }
+
+      // Verify factory was called 3 times, not just once
+      expect(brokenFactory).toHaveBeenCalledTimes(3);
+    });
+
+    it('caches on success, returns same object on subsequent calls', () => {
+      const validation: VersionedRouteValidation<unknown, unknown, unknown> = {
+        request: { body: schema.string() },
+        response: { 200: { body: () => schema.string() } },
+      };
+      const factory = jest.fn(
+        (): VersionedRouteValidation<unknown, unknown, unknown> => validation
+      );
+
+      const prepared = prepareVersionedRouteValidation({
+        version: '1',
+        validate: factory,
+      });
+
+      // Call the validate function twice
+      const result1 = (prepared.validate as () => any)();
+      const result2 = (prepared.validate as () => any)();
+
+      // Factory should be called only once (memoized)
+      expect(factory).toHaveBeenCalledTimes(1);
+
+      // Both results should be the same cached object
+      expect(result1).toBe(result2);
     });
   });
 
