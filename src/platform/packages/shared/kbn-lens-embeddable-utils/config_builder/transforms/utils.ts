@@ -65,14 +65,6 @@ export type DataSourceStateLayer =
   | PersistedIndexPatternLayer
   | TextBasedPersistedState['layers'][0];
 
-function createDataViewReference(dataViewId: string, layerId: string): SavedObjectReference {
-  return {
-    type: INDEX_PATTERN_ID,
-    id: dataViewId,
-    name: `${LENS_LAYER_SUFFIX}${layerId}`,
-  };
-}
-
 /**
  * Reference name under which an XY by-value annotation layer persists its data
  * view. Must match the name produced by the Lens XY persistence logic
@@ -81,6 +73,18 @@ function createDataViewReference(dataViewId: string, layerId: string): SavedObje
  */
 export function getXYAnnotationLayerReferenceName(layerId: string): string {
   return `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`;
+}
+
+function getXYDataLayerReferenceName(layerId: string): string {
+  return `${LENS_LAYER_SUFFIX}${layerId}`;
+}
+
+function createDataViewReference(dataViewId: string, layerId: string): SavedObjectReference {
+  return {
+    type: INDEX_PATTERN_ID,
+    id: dataViewId,
+    name: getXYDataLayerReferenceName(layerId),
+  };
 }
 
 function createAnnotationLayerDataViewReference(
@@ -257,8 +261,47 @@ export function buildDataViewSpecDataSource(
   };
 }
 
-function getReferenceCriteria(layerId: string) {
-  return (ref: SavedObjectReference) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`;
+/**
+ * Resolves the data view id for a NoESQL layer. The id is taken, in priority
+ * order, from an ad hoc reference (`state.internalReferences`), a persisted
+ * reference (top-level `references`), or the layer's own inline `indexPatternId`.
+ * Data layers and XY annotation layers persist their data view under different
+ * reference names, hence the `referenceName` parameter.
+ */
+export function resolveDataViewId(
+  references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[],
+  referenceName: string,
+  inlineDataViewId?: string
+): string | undefined {
+  const matchesName = (ref: SavedObjectReference) => ref.name === referenceName;
+  return (
+    adhocReferences.find(matchesName)?.id ?? references.find(matchesName)?.id ?? inlineDataViewId
+  );
+}
+
+/**
+ * Builds the NoESQL `data_source` for a resolved data view id: an inline
+ * `data_view_spec` when the id points at an ad hoc data view, otherwise a
+ * `data_view_reference`. Shared by data layers and XY annotation layers so both
+ * emit the data view identically.
+ *
+ * `dataViewId` must be a non-empty id: an empty `ref_id` is not a valid data
+ * source, so callers are responsible for resolving the id (or handling its
+ * absence) before calling this.
+ */
+export function buildDataViewDataSource(
+  dataViewId: string,
+  adHocDataViews: Record<string, unknown>
+): DataSourceTypeNoESQL {
+  const dataViewSpec = adHocDataViews[dataViewId];
+  if (isDataViewSpecWithTitle(dataViewSpec)) {
+    return buildDataViewSpecDataSource(dataViewSpec);
+  }
+  return {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: dataViewId,
+  };
 }
 
 export function buildDataSourceStateNoESQL(
@@ -266,30 +309,20 @@ export function buildDataSourceStateNoESQL(
   layerId: string,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[] = []
+  adhocReferences: SavedObjectReference[] = [],
+  referenceName: string = getXYDataLayerReferenceName(layerId)
 ): DataSourceTypeNoESQL {
-  const referenceCriteria = getReferenceCriteria(layerId);
-  const adhocReference = adhocReferences?.find(referenceCriteria);
-
-  if (adhocReference && adHocDataViews?.[adhocReference.id]) {
-    const dataViewSpec = adHocDataViews[adhocReference.id];
-    if (isDataViewSpecWithTitle(dataViewSpec)) {
-      return buildDataViewSpecDataSource(dataViewSpec);
-    }
+  const inlineDataViewId = 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  const dataViewId = resolveDataViewId(
+    references,
+    adhocReferences,
+    referenceName,
+    inlineDataViewId
+  );
+  if (!dataViewId) {
+    throw new Error(`Cannot resolve the data view for layer "${layerId}".`);
   }
-
-  const reference = references?.find(referenceCriteria);
-  if (reference) {
-    return {
-      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      ref_id: reference.id,
-    };
-  }
-
-  return {
-    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    ref_id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
-  };
+  return buildDataViewDataSource(dataViewId, adHocDataViews);
 }
 
 /**

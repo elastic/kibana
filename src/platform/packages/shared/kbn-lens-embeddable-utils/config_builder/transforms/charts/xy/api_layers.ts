@@ -27,8 +27,6 @@ import {
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
-import type { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -40,7 +38,7 @@ import type {
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { DataSourceType } from '../../../schema/data_source';
+import type { DataSourceTypeNoESQL } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
@@ -59,14 +57,14 @@ import {
 } from '../../columns/utils';
 import {
   buildDataSourceState,
-  buildDataViewSpecDataSource,
+  buildDataViewDataSource,
   generateApiLayer,
   getXYAnnotationLayerReferenceName,
-  isDataViewSpecWithTitle,
   isFormBasedLayer,
   isTextBasedLayer,
   nonNullable,
   operationFromColumn,
+  resolveDataViewId,
 } from '../../utils';
 import { stripUndefined } from '../utils';
 import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
@@ -423,40 +421,6 @@ export function buildAPIReferenceLinesLayer(
   };
 }
 
-function findAnnotationDataViewId(
-  layerId: string,
-  references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[] = []
-) {
-  const name = getXYAnnotationLayerReferenceName(layerId);
-  // Persisted data views are referenced from the top-level `references`, while
-  // inline (ad hoc) data views are referenced from `state.internalReferences`.
-  // Both use the `xy-visualization-layer-<layerId>` name, so check both.
-  const ref =
-    references.find((r) => r.name === name) ?? adhocReferences.find((r) => r.name === name);
-  return ref?.id;
-}
-
-// Builds the API `data_source` for a query annotation layer. When the resolved
-// data view is an inline (ad hoc) one it is emitted as a `data_view_spec`
-// (mirroring `buildDataSourceStateNoESQL` for data layers); otherwise it is a
-// reference to a persisted data view.
-function buildAnnotationDataSource(
-  adHocDataView: unknown,
-  dataViewId: string
-): Extract<
-  DataSourceType,
-  { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
-> {
-  if (isDataViewSpecWithTitle(adHocDataView)) {
-    return buildDataViewSpecDataSource(adHocDataView);
-  }
-  return {
-    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    ref_id: dataViewId,
-  };
-}
-
 function getTextConfigurationForQueryAnnotation(
   annotation: XYByValueAnnotationLayerConfig['annotations'][number]
 ): Pick<
@@ -512,16 +476,17 @@ export function buildAPIAnnotationsLayer(
     };
   }
 
-  // If the layer is persisted, its data view id is the layer indexPatternId.
-  // If the data view is ad hoc, we need to find the data view id from the references.
-  const dataViewId =
-    'indexPatternId' in layer
-      ? layer.indexPatternId
-      : findAnnotationDataViewId(layer.layerId, references, adhocReferences);
-
-  // `adHocDataViews` is keyed by the (generated) data view id, so resolve it via
-  // the layer's data view id rather than the layer id.
-  const adHocDataView = dataViewId ? adHocDataViews[dataViewId] : undefined;
+  // XY annotation layers resolve their data view exactly like data layers, except
+  // it is persisted under the `xy-visualization-layer-<layerId>` reference name
+  // (in top-level `references` when persisted, in `state.internalReferences` when
+  // ad hoc), or carried inline via `indexPatternId` on a runtime by-value layer.
+  const inlineDataViewId = 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  const dataViewId = resolveDataViewId(
+    references,
+    adhocReferences ?? [],
+    getXYAnnotationLayerReferenceName(layer.layerId),
+    inlineDataViewId
+  );
 
   // Only query annotations actually query an index, so the data view is only
   // meaningful for them. Manual point/range annotations are positioned purely by
@@ -535,13 +500,8 @@ export function buildAPIAnnotationsLayer(
     throw new Error('XY visualization: cannot find data view ID for annotation layer.');
   }
 
-  const dataSource: Extract<
-    DataSourceType,
-    { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
-  > | null =
-    !hasQueryAnnotation || !dataViewId
-      ? null
-      : buildAnnotationDataSource(adHocDataView, dataViewId);
+  const dataSource: DataSourceTypeNoESQL | null =
+    !hasQueryAnnotation || !dataViewId ? null : buildDataViewDataSource(dataViewId, adHocDataViews);
   return {
     type: 'annotations',
     ...(dataSource ? { data_source: dataSource } : {}),
