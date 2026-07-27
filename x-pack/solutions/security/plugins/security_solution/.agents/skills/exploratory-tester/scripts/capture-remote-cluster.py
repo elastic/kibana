@@ -5,9 +5,7 @@ import argparse
 import json
 import subprocess
 import sys
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
 from urllib.parse import quote
 
 from session_resources import (
@@ -124,163 +122,182 @@ def _settings_snapshot(
     return settings, configuration_layer
 
 
-@contextmanager
-def _capture_session_config(config_path: Path) -> Iterator[dict[str, Any]]:
-    with session_operation_lock(config_path, "ccs-restore"):
-        with edit_session_config(config_path) as config:
-            yield config
+def _run_curl(curl_args: list[str]) -> tuple[str, str]:
+    result = subprocess.run(
+        curl_args,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return http_status(result.stdout), _response_body(result.stdout)
 
 
 def main() -> int:
     args = parse_args()
     config_path = Path(args.session_dir) / "config.json"
 
-    with _capture_session_config(config_path) as config:
-        if config.get("ccs_state") in {"mutation_pending", "modified"}:
-            print(
-                "Cannot capture CCS while a prior mutation is pending or modified.",
-                file=sys.stderr,
-            )
-            return 1
-        source_url = resolve_resource_base_url(config, "url")
-        es_url = resolve_resource_base_url(config, "es_url")
-        collection_endpoint = validate_resource_endpoint("/api/remote_clusters")
-        endpoint = validate_resource_endpoint(
-            f"/api/remote_clusters/{quote(args.alias, safe='')}"
-        )
-        result = subprocess.run(
-            [
-                "curl",
-                "-s",
-                "-w",
-                "\n%{http_code}",
-                *build_auth_args(config),
-                "-X",
-                "GET",
-                f"{source_url}{collection_endpoint}",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        status = http_status(result.stdout)
-        if status != "200":
-            print(
-                f"Unable to capture remote cluster {args.alias!r} "
-                f"(HTTP {status}).",
-                file=sys.stderr,
-            )
-            return 1
+    try:
+        with session_operation_lock(config_path, "ccs-restore"):
+            with edit_session_config(config_path, persist=False) as config:
+                if config.get("ccs_state") in {"mutation_pending", "modified"}:
+                    print(
+                        "Cannot capture CCS while a prior mutation is pending or "
+                        "modified.",
+                        file=sys.stderr,
+                    )
+                    return 1
+                auth_args = build_auth_args(config)
+                source_url = resolve_resource_base_url(config, "url")
+                es_url = resolve_resource_base_url(config, "es_url")
+                collection_endpoint = validate_resource_endpoint(
+                    "/api/remote_clusters"
+                )
+                endpoint = validate_resource_endpoint(
+                    f"/api/remote_clusters/{quote(args.alias, safe='')}"
+                )
 
-        try:
-            response_payload = json.loads(_response_body(result.stdout))
-        except json.JSONDecodeError as exc:
-            print(f"Invalid remote-cluster response: {exc}", file=sys.stderr)
-            return 1
+            status, body = _run_curl(
+                [
+                    "curl",
+                    "-s",
+                    "-w",
+                    "\n%{http_code}",
+                    *auth_args,
+                    "-X",
+                    "GET",
+                    f"{source_url}{collection_endpoint}",
+                ]
+            )
+            if status != "200":
+                print(
+                    f"Unable to capture remote cluster {args.alias!r} "
+                    f"(HTTP {status}).",
+                    file=sys.stderr,
+                )
+                return 1
 
-        cluster = _find_cluster(response_payload, args.alias)
-        if cluster is None:
-            print(
-                f"Remote cluster {args.alias!r} was not found in the response.",
-                file=sys.stderr,
-            )
-            return 1
+            try:
+                response_payload = json.loads(body)
+            except json.JSONDecodeError as exc:
+                print(f"Invalid remote-cluster response: {exc}", file=sys.stderr)
+                return 1
 
-        is_configured_by_node = cluster.get("isConfiguredByNode")
-        has_deprecated_proxy_setting = cluster.get(
-            "hasDeprecatedProxySetting", False
-        )
-        if (
-            not isinstance(cluster.get("mode"), str)
-            or not isinstance(cluster.get("skipUnavailable"), bool)
-            or not isinstance(is_configured_by_node, bool)
-            or not isinstance(has_deprecated_proxy_setting, bool)
-        ):
-            print(
-                "Remote-cluster response is missing required writable or "
-                "provenance fields.",
-                file=sys.stderr,
-            )
-            return 1
+            cluster = _find_cluster(response_payload, args.alias)
+            if cluster is None:
+                print(
+                    f"Remote cluster {args.alias!r} was not found in the response.",
+                    file=sys.stderr,
+                )
+                return 1
 
-        settings_result = subprocess.run(
-            [
-                "curl",
-                "-s",
-                "-w",
-                "\n%{http_code}",
-                *build_auth_args(config),
-                "-X",
-                "GET",
-                f"{es_url}/_cluster/settings?include_defaults=false",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        settings_status = http_status(settings_result.stdout)
-        if settings_status != "200":
-            print(
-                f"Unable to capture raw CCS settings (HTTP {settings_status}).",
-                file=sys.stderr,
+            is_configured_by_node = cluster.get("isConfiguredByNode")
+            has_deprecated_proxy_setting = cluster.get(
+                "hasDeprecatedProxySetting", False
             )
-            return 1
-        try:
-            settings_response = json.loads(_response_body(settings_result.stdout))
-        except json.JSONDecodeError as exc:
-            print(f"Invalid raw CCS settings response: {exc}", file=sys.stderr)
-            return 1
-        if not isinstance(settings_response, dict) or not isinstance(
-            settings_response.get("persistent", {}),
-            dict,
-        ) or not isinstance(settings_response.get("transient", {}), dict):
-            print("Raw CCS settings response has malformed layers.", file=sys.stderr)
-            return 1
-        settings, configuration_layer = _settings_snapshot(
-            settings_response,
-            alias=args.alias,
-        )
-        persistent_settings = _settings_for_alias(
-            settings_response,
-            layer="persistent",
-            alias=args.alias,
-        )
-        transient_settings = _settings_for_alias(
-            settings_response,
-            layer="transient",
-            alias=args.alias,
-        )
-        if is_configured_by_node and (
-            persistent_settings is not None or transient_settings is not None
-        ):
-            print(
-                "CCS provenance disagrees with raw persistent/transient settings.",
-                file=sys.stderr,
-            )
-            return 1
-        if not is_configured_by_node and (
-            persistent_settings is None and transient_settings is None
-        ):
-            print(
-                "CCS response is not node-configured but has no raw settings layer.",
-                file=sys.stderr,
-            )
-            return 1
+            if (
+                not isinstance(cluster.get("mode"), str)
+                or not isinstance(cluster.get("skipUnavailable"), bool)
+                or not isinstance(is_configured_by_node, bool)
+                or not isinstance(has_deprecated_proxy_setting, bool)
+            ):
+                print(
+                    "Remote-cluster response is missing required writable or "
+                    "provenance fields.",
+                    file=sys.stderr,
+                )
+                return 1
 
-        payload = {field: cluster.get(field) for field in RESTORE_FIELDS}
-        config["ccs_restore"] = {
-            "remote_cluster_alias": args.alias,
-            "endpoint": endpoint,
-            "payload": payload,
-            "provenance": {
-                "is_configured_by_node": is_configured_by_node,
-                "has_deprecated_proxy_setting": has_deprecated_proxy_setting,
-                "configuration_layer": configuration_layer,
-                "settings": settings,
-            },
-        }
-        config["ccs_state"] = "captured"
-        config["ccs_restored"] = False
+            settings_status, settings_body = _run_curl(
+                [
+                    "curl",
+                    "-s",
+                    "-w",
+                    "\n%{http_code}",
+                    *auth_args,
+                    "-X",
+                    "GET",
+                    f"{es_url}/_cluster/settings?include_defaults=false",
+                ]
+            )
+            if settings_status != "200":
+                print(
+                    f"Unable to capture raw CCS settings "
+                    f"(HTTP {settings_status}).",
+                    file=sys.stderr,
+                )
+                return 1
+            try:
+                settings_response = json.loads(settings_body)
+            except json.JSONDecodeError as exc:
+                print(f"Invalid raw CCS settings response: {exc}", file=sys.stderr)
+                return 1
+            if not isinstance(settings_response, dict) or not isinstance(
+                settings_response.get("persistent", {}),
+                dict,
+            ) or not isinstance(settings_response.get("transient", {}), dict):
+                print(
+                    "Raw CCS settings response has malformed layers.",
+                    file=sys.stderr,
+                )
+                return 1
+            settings, configuration_layer = _settings_snapshot(
+                settings_response,
+                alias=args.alias,
+            )
+            persistent_settings = _settings_for_alias(
+                settings_response,
+                layer="persistent",
+                alias=args.alias,
+            )
+            transient_settings = _settings_for_alias(
+                settings_response,
+                layer="transient",
+                alias=args.alias,
+            )
+            if is_configured_by_node and (
+                persistent_settings is not None or transient_settings is not None
+            ):
+                print(
+                    "CCS provenance disagrees with raw persistent/transient "
+                    "settings.",
+                    file=sys.stderr,
+                )
+                return 1
+            if not is_configured_by_node and (
+                persistent_settings is None and transient_settings is None
+            ):
+                print(
+                    "CCS response is not node-configured but has no raw "
+                    "settings layer.",
+                    file=sys.stderr,
+                )
+                return 1
+
+            payload = {field: cluster.get(field) for field in RESTORE_FIELDS}
+            with edit_session_config(config_path) as config:
+                if config.get("ccs_state") in {"mutation_pending", "modified"}:
+                    print(
+                        "Cannot capture CCS while a prior mutation is pending or "
+                        "modified.",
+                        file=sys.stderr,
+                    )
+                    return 1
+                config["ccs_restore"] = {
+                    "remote_cluster_alias": args.alias,
+                    "endpoint": endpoint,
+                    "payload": payload,
+                    "provenance": {
+                        "is_configured_by_node": is_configured_by_node,
+                        "has_deprecated_proxy_setting": has_deprecated_proxy_setting,
+                        "configuration_layer": configuration_layer,
+                        "settings": settings,
+                    },
+                }
+                config["ccs_state"] = "captured"
+                config["ccs_restored"] = False
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
     print(f"Persisted CCS restore snapshot for {args.alias!r}.")
     return 0

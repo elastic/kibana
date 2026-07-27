@@ -94,7 +94,7 @@ def _settings_for_alias(
     return alias_settings if isinstance(alias_settings, dict) else None
 
 
-def _settings_snapshot(settings: object, alias: str) -> dict[str, object] | None:
+def _settings_snapshot(settings: object) -> dict[str, object] | None:
     if not isinstance(settings, dict):
         return None
     if not isinstance(settings.get("persistent"), dict) or not isinstance(
@@ -165,7 +165,7 @@ def _validate_snapshot(
         or any(field not in payload for field in RESTORE_FIELDS)
     ):
         raise ValueError("CCS restore snapshot is malformed")
-    settings = _settings_snapshot(provenance.get("settings"), alias)
+    settings = _settings_snapshot(provenance.get("settings"))
     if settings is None:
         raise ValueError("CCS restore snapshot is malformed")
     expected_layer = "node" if provenance["is_configured_by_node"] else provenance[

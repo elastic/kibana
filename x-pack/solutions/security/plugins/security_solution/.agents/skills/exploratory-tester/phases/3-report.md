@@ -188,6 +188,6 @@ cleanup.
 
 For a preflight without mutations:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR" --dry-run
 ```

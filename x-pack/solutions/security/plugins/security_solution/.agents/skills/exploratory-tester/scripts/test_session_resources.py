@@ -437,6 +437,133 @@ print("200")
             self.assertEqual(restore["provenance"]["settings"], TRANSIENT_CCS_SETTINGS)
             self.assertEqual(config["ccs_state"], "captured")
 
+    def test_capture_does_not_hold_config_lock_during_http(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "unchanged",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            started_marker = root / "curl-started"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+import time
+
+if not os.path.exists(os.environ["STARTED_MARKER"]):
+    open(os.environ["STARTED_MARKER"], "w").close()
+    time.sleep(2)
+if "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy": "old.remote.test:9400",
+                        "skip_unavailable": "false",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+else:
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "isConnected": True,
+        "skipUnavailable": False,
+        "proxyAddress": "old.remote.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "seeds": None,
+        "nodeConnections": None,
+        "isConfiguredByNode": False,
+        "hasDeprecatedProxySetting": True,
+    }]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["STARTED_MARKER"] = str(started_marker)
+
+            capture_process = subprocess.Popen(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env=environment,
+            )
+            deadline = time.monotonic() + 2
+            while not started_marker.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(started_marker.exists())
+
+            register_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(REGISTER_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "lock-test-index",
+                    "--endpoint",
+                    "/lock-test-index",
+                    "--base-url",
+                    "es_url",
+                    "--owned",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+                timeout=1.5,
+            )
+            capture_stdout, capture_stderr = capture_process.communicate(timeout=5)
+
+            self.assertEqual(register_result.returncode, 0, register_result.stderr)
+            self.assertEqual(
+                capture_process.returncode,
+                0,
+                capture_stderr or capture_stdout,
+            )
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "captured")
+            self.assertIn(
+                "lock-test-index",
+                {resource["id"] for resource in config["session_resources"]},
+            )
+
     def test_reconcile_resource_cli_adopts_a_pending_remote_resource(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)

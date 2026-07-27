@@ -81,6 +81,6 @@ treat a broken shared deployment as urgent.
 
 - Only the SOURCE deployment holds the remote-cluster definition; run every command here against the SOURCE URLs, never the REMOTE cluster's.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
-- If the session cap fires or the browser dies mid-scenario, run step 7 first
+- If the session cap fires or the browser dies mid-scenario, run step 6 first
   from the persisted `SESSION_DIR`, then handle the timeout/loss. Restoration
   takes priority over logging.
