@@ -38,7 +38,6 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const COMMON_STATE_IGNORE_PATHS = [
   'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  'type', // misplaced type, see https://github.com/elastic/kibana/issues/245683
   'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
   // TODO: check missing properties striped out in transforms
@@ -483,6 +482,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     normalizeESQLQuery(attributes);
     normalizeEmptyQuery(attributes);
     normalizeDescription(attributes);
+
+    // 'type' is a leaked SO envelope field, never part of LensAttributes and dropped by the transform
+    // (fixed in https://github.com/elastic/kibana/pull/258250). Strip on the ORIGINAL side only so that
+    // if the transform ever re-emits it, transformed still carries it and the strict compare fails.
+    if ('type' in attributes && attributes.type === 'lens') {
+      delete attributes.type;
+    }
 
     // replace layer in reference name
     attributes.references = normalizeReferences(attributes, layerRemapping);
