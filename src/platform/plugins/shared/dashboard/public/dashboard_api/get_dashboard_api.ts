@@ -208,6 +208,8 @@ export function getDashboardApi({
     setState,
     getState,
     dataLoadingManager,
+    children$: layoutManager.api.children$,
+    childrenLoading$: layoutManager.internalApi.childrenLoading$,
   });
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);

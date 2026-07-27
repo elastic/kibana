@@ -38,6 +38,7 @@ export const initializeStateApi = <StateType extends object = object>({
       applySerializedState,
       hasUnsavedChanges$: of(false),
       serializeState,
+      getComparators,
     };
   }
 
@@ -68,5 +69,11 @@ export const initializeStateApi = <StateType extends object = object>({
     })
   );
 
-  return { anyStateChange$, applySerializedState, hasUnsavedChanges$, serializeState };
+  return {
+    anyStateChange$,
+    applySerializedState,
+    hasUnsavedChanges$,
+    serializeState,
+    getComparators,
+  };
 };

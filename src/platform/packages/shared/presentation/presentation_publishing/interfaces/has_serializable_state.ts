@@ -9,6 +9,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Observable } from 'rxjs';
+import type { StateComparators } from '../state_manager';
 
 export interface HasSerializableState<SerializedState extends object = object> {
   /**
@@ -29,6 +30,8 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Applies a serialized state snapshot owned by the parent container.
    */
   applySerializedState: (state: SerializedState) => MaybePromise<void>;
+
+  getComparators: () => StateComparators<SerializedState>;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
