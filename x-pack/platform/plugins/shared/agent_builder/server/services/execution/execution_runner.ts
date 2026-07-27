@@ -350,7 +350,7 @@ export const collectAndWriteEvents = ({
           }
           await flush();
         };
-        finalFlush().then(() => resolve(), reject);
+        finalFlush().then(resolve, reject);
       },
     });
   });
