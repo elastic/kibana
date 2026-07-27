@@ -55,13 +55,13 @@ export const detectionSchema = z.object({
   stream_name: z.string().max(MAX_ID_LENGTH),
   change_point_type: z.enum(CHANGE_POINT_TYPES).describe(
     dedent`
-        "spike" = Sudden increase in alert volume | Load surge, cascading failure, noisy rule. **Escalation.**
-        "dip" = Sudden decrease in alert volume | Service down (no data to alert on), rule disabled, data pipeline failure. **Escalation** — a drop to silence usually means the service went DOWN, not that it recovered.
-        "step_change" = Sustained level shift | Config change, new deployment, capacity change. **Direction decides:** a shift up is an escalation; a shift back down toward low volume is a recovery.
-        "trend_change" = Gradual directional shift | Growing workload, degrading performance, slow leak. **Direction decides:** an upward trend is an escalation; a downward trend toward low volume is a recovery.
-        "distribution_change" = Overall distribution shifted | Mixed traffic pattern change, deployment rollout. Escalation unless the shift is clearly back toward baseline.
-        "non_stationary" = No discrete change point, but not stationary | Gradual drift, chronic instability — weak signal.
-        "stationary" = The alert rate is flat — no recent change up or down | Steady state. Steady is **not** benign: a stationary rule can be an ongoing failure holding a flat rate. Confirm with a query (signature query if no exact-match KI) and score severity from the **evidence and user impact**, never from the shape or the raw \`alert_count\`. When observed **after a prior escalation** on the same rule, treat as candidate recovery (confirm with a recovery-lens query).
+        "spike" = Sudden increase in alert volume. May reflect increased failures, higher traffic or load, or a noisy rule.
+        "dip" = Sudden decrease in alert volume. May reflect recovery, lower traffic, a disabled rule, or missing telemetry.
+        "step_change" = Abrupt, sustained shift to a new alert-volume level. May reflect a deployment, configuration, capacity, or traffic-regime change.
+        "trend_change" = Change in the direction or rate of an alert-volume trend. May reflect evolving load, progressive degradation or recovery, or a resource leak.
+        "distribution_change" = Change in the overall distribution of alert volume. May reflect a traffic-mix change, rollout, or changed system behavior.
+        "non_stationary" = Alert volume varies without a stable baseline. May reflect drift, recurring bursts, or chronic instability.
+        "stationary" = Alert volume remains stable with no detected change. May represent either a healthy steady state or a sustained failure.
       `
   ),
   p_value: z
