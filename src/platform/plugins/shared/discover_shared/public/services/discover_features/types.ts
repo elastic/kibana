@@ -83,14 +83,18 @@ export interface ObservabilityCreateSLOFeature {
 }
 
 export interface ObservabilityServiceFlyoutFeatureRenderDeps {
-  serviceName: string;
-  agentName?: string;
-  environment: string;
-  rangeFrom: string;
-  rangeTo: string;
+  service: { name: string; agentName?: string };
+  filters: { environment: string; rangeFrom: string; rangeTo: string };
   source: string;
   onClose: () => void;
   flyoutHistoryKey?: symbol;
+  contextActions?: {
+    openInNewDiscoverTab?: (params: {
+      esqlQuery: string;
+      timeRange: TimeRange;
+      tabLabel: string;
+    }) => void;
+  };
 }
 
 export interface ObservabilityServiceFlyoutFeature {

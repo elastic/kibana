@@ -29,8 +29,8 @@ jest.mock('../footer/hooks/use_alerts_href', () => ({
 }));
 
 const mockUseFlyoutDiscoverHref = jest.fn();
-jest.mock('./use_flyout_discover_href', () => ({
-  useFlyoutDiscoverHref: (args: unknown) => mockUseFlyoutDiscoverHref(args),
+jest.mock('./use_flyout_discover_navigation', () => ({
+  useFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
 }));
 
 const mockGetRedirectUrl = jest.fn(
@@ -79,7 +79,9 @@ describe('useServiceFlyoutLinks', () => {
     mockUseServiceFlyoutContext.mockClear();
     mockUseServiceFlyoutContext.mockReturnValue(makeContext());
     mockUseFlyoutDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
-      indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
+      indexType === 'traces'
+        ? { href: '/app/discover/traces', esqlQuery: 'FROM traces-apm* | ...' }
+        : { href: '/app/discover/logs', esqlQuery: 'FROM logs-apm* | ...' }
     );
   });
 
@@ -157,8 +159,30 @@ describe('useServiceFlyoutLinks', () => {
     expect(result.current.apm.alertsTab).toEqual('/app/apm/services/opbeans-java/alerts');
     expect(result.current.slos).toEqual('/app/slos?serviceName=opbeans-java');
     expect(result.current.alerts).toEqual('/app/observability/alerts?mock');
-    expect(result.current.discover.traces).toEqual('/app/discover/traces');
-    expect(result.current.discover.logs).toEqual('/app/discover/logs');
+    expect(result.current.discover.traces.href).toEqual('/app/discover/traces');
+    expect(result.current.discover.logs.href).toEqual('/app/discover/logs');
+    expect(result.current.discover.traces.openInDiscoverTab).toBeUndefined();
+    expect(result.current.discover.logs.openInDiscoverTab).toBeUndefined();
+  });
+
+  it('builds openInDiscoverTab closures when openInNewDiscoverTab is in context', () => {
+    const mockOpenInNewDiscoverTab = jest.fn();
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...makeContext({ transactionType: 'request' }),
+      contextActions: { openInNewDiscoverTab: mockOpenInNewDiscoverTab },
+    });
+
+    const { result } = renderHook(() => useServiceFlyoutLinks());
+
+    expect(result.current.discover.traces.openInDiscoverTab).toBeDefined();
+    result.current.discover.traces.openInDiscoverTab!();
+    expect(mockOpenInNewDiscoverTab).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: 'FROM traces-apm* | ...',
+        timeRange: { from: 'now-15m', to: 'now' },
+        tabLabel: 'Traces - opbeans-java',
+      })
+    );
   });
 
   it('returns undefined slos when the slo.read capability is missing', () => {

@@ -31,7 +31,7 @@ function toIndexSettings(indices: APMIndices) {
   ];
 }
 
-export function useFlyoutDiscoverHref({
+export function useFlyoutDiscoverNavigation({
   share,
   indices,
   indexType,
@@ -45,9 +45,9 @@ export function useFlyoutDiscoverHref({
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
-}): string | undefined {
+}): { href: string | undefined; esqlQuery: string | null } {
   if (!indices) {
-    return undefined;
+    return { href: undefined, esqlQuery: null };
   }
 
   const indexSettings = toIndexSettings(indices);
@@ -59,11 +59,13 @@ export function useFlyoutDiscoverHref({
   });
 
   if (!esqlQuery) {
-    return undefined;
+    return { href: undefined, esqlQuery: null };
   }
 
-  return share?.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
+  const href = share?.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: { from: rangeFrom, to: rangeTo },
     query: { esql: esqlQuery },
   });
+
+  return { href, esqlQuery };
 }

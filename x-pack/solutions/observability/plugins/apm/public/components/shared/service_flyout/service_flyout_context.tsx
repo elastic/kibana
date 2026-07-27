@@ -36,6 +36,13 @@ export interface ServiceFlyoutContextValue {
     dataViews: DataViewsPublicPluginStart;
     alerting?: AlertingPluginPublicSetup;
   };
+  contextActions?: {
+    openInNewDiscoverTab?: (params: {
+      esqlQuery: string;
+      timeRange: { from: string; to: string };
+      tabLabel: string;
+    }) => void;
+  };
   // The service this flyout is showing
   service: ServiceFlyoutService;
   // Resolved once on open — drives conditional rendering throughout the flyout

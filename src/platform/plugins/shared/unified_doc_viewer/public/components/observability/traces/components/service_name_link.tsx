@@ -14,6 +14,7 @@ import { EBT_CLICK_ACTIONS, getEbtProps, type EbtClickAttrs } from '@kbn/ebt-cli
 import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
+import { useDocViewerExtensionActionsContext } from '../../../../hooks/use_doc_viewer_extension_actions';
 import { ServiceNameWithIcon } from './service_name_with_icon';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
@@ -46,6 +47,8 @@ export function ServiceNameLink({
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const flyoutHistoryKey = useFlyoutHistoryKey();
+  const docViewerActions = useDocViewerExtensionActionsContext();
+  const openInNewTab = docViewerActions?.openInNewTab;
 
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
@@ -68,14 +71,21 @@ export function ServiceNameLink({
         </EuiLink>
         {flyoutOpen &&
           serviceFlyoutFeature.renderServiceFlyout({
-            serviceName,
-            agentName,
-            environment: environment ?? ENVIRONMENT_ALL_VALUE,
-            rangeFrom: timeRangeFrom,
-            rangeTo: timeRangeTo,
+            service: { name: serviceName, agentName },
+            filters: {
+              environment: environment ?? ENVIRONMENT_ALL_VALUE,
+              rangeFrom: timeRangeFrom,
+              rangeTo: timeRangeTo,
+            },
             source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
             onClose: () => setFlyoutOpen(false),
             flyoutHistoryKey,
+            contextActions: {
+              openInNewDiscoverTab: openInNewTab
+                ? ({ esqlQuery, timeRange, tabLabel }) =>
+                    openInNewTab({ query: { esql: esqlQuery }, timeRange, tabLabel })
+                : undefined,
+            },
           })}
       </>
     );

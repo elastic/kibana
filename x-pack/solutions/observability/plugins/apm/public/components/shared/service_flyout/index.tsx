@@ -59,6 +59,7 @@ interface ServiceFlyoutProps {
   telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
   historyKey?: symbol;
+  contextActions?: ServiceFlyoutContextValue['contextActions'];
 }
 
 export function ServiceFlyout({
@@ -68,6 +69,7 @@ export function ServiceFlyout({
   telemetry,
   onClose,
   historyKey,
+  contextActions,
 }: ServiceFlyoutProps) {
   const { core, share, lens, dataViews, alerting } = deps;
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
@@ -112,6 +114,7 @@ export function ServiceFlyout({
     <ServiceFlyoutContextProvider
       value={{
         deps: { core, share, lens, dataViews, alerting },
+        contextActions,
         service,
         capabilities,
         filters: {

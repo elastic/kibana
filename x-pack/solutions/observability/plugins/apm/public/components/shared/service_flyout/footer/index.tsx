@@ -19,7 +19,10 @@ export function ServiceFlyoutFooter() {
   const {
     alerts: alertsHref,
     slos: slosHref,
-    discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
+    discover: {
+      traces: { href: tracesDiscoverHref, openInDiscoverTab: tracesOpenInDiscoverTab },
+      logs: { href: logsDiscoverHref, openInDiscoverTab: logsOpenInDiscoverTab },
+    },
   } = useServiceFlyoutLinks();
 
   const showAlerts = Boolean(alertsHref && capabilities.footer?.alerts);
@@ -35,10 +38,15 @@ export function ServiceFlyoutFooter() {
           tracesDiscoverHref
             ? {
                 id: 'openTracesInDiscover',
-                name: i18n.translate('xpack.apm.serviceFlyout.openTracesInDiscoverAction', {
-                  defaultMessage: 'Open traces in Discover',
-                }),
+                name: tracesOpenInDiscoverTab
+                  ? i18n.translate('xpack.apm.serviceFlyout.openTracesInDiscoverTabAction', {
+                      defaultMessage: 'Open traces in a Discover tab',
+                    })
+                  : i18n.translate('xpack.apm.serviceFlyout.openTracesInDiscoverAction', {
+                      defaultMessage: 'Open traces in Discover',
+                    }),
                 href: tracesDiscoverHref,
+                onClick: tracesOpenInDiscoverTab,
                 ebt: {
                   action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
@@ -49,10 +57,15 @@ export function ServiceFlyoutFooter() {
           logsDiscoverHref
             ? {
                 id: 'openLogsInDiscover',
-                name: i18n.translate('xpack.apm.serviceFlyout.openLogsInDiscoverAction', {
-                  defaultMessage: 'Open logs in Discover',
-                }),
+                name: logsOpenInDiscoverTab
+                  ? i18n.translate('xpack.apm.serviceFlyout.openLogsInDiscoverTabAction', {
+                      defaultMessage: 'Open logs in a Discover tab',
+                    })
+                  : i18n.translate('xpack.apm.serviceFlyout.openLogsInDiscoverAction', {
+                      defaultMessage: 'Open logs in Discover',
+                    }),
                 href: logsDiscoverHref,
+                onClick: logsOpenInDiscoverTab,
                 ebt: {
                   action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
@@ -109,7 +122,16 @@ export function ServiceFlyoutFooter() {
     }
 
     return groups;
-  }, [logsDiscoverHref, showAlerts, alertsHref, showSlos, slosHref, tracesDiscoverHref]);
+  }, [
+    logsDiscoverHref,
+    logsOpenInDiscoverTab,
+    showAlerts,
+    alertsHref,
+    showSlos,
+    slosHref,
+    tracesDiscoverHref,
+    tracesOpenInDiscoverTab,
+  ]);
 
   return (
     <EuiFlyoutFooter>

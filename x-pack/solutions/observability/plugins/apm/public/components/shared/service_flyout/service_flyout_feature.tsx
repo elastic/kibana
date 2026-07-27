@@ -16,7 +16,7 @@ import type {
   PluginStartContract as AlertingStartContract,
 } from '@kbn/alerting-plugin/public';
 import type { ObservabilityServiceFlyoutFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
-import type { ServiceFlyoutTelemetry } from '.';
+import type { ServiceFlyoutTelemetry, ServiceFlyoutService } from '.';
 
 const LazyServiceFlyout = dynamic(() => import('.').then((m) => ({ default: m.ServiceFlyout })));
 
@@ -44,12 +44,9 @@ export function createServiceFlyoutRenderer({
         dataViews,
         alerting: alerting as AlertingSetupContract | undefined,
       }}
-      service={{ name: deps.serviceName, agentName: deps.agentName }}
-      filters={{
-        environment: deps.environment,
-        rangeFrom: deps.rangeFrom,
-        rangeTo: deps.rangeTo,
-      }}
+      contextActions={deps.contextActions}
+      service={deps.service as ServiceFlyoutService}
+      filters={deps.filters}
       telemetry={{ client: telemetryClient, source: deps.source }}
       historyKey={deps.flyoutHistoryKey}
       onClose={deps.onClose}
