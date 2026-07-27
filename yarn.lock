@@ -3453,10 +3453,10 @@
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"
   integrity sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==
 
-"@hapi/inert@7.1.1":
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/@hapi/inert/-/inert-7.1.1.tgz#ea974c2462e5762c5eaa979a05d45eccbb7cd6ba"
-  integrity sha512-vKSTXYbk1cDt7sLdmRIj8CofJRCcjAH9fUCUJViVzqb7Vi+ajUSfz+pAdwwY315BddwGdoXk0H3i94S0JWEKGQ==
+"@hapi/inert@7.1.2":
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@hapi/inert/-/inert-7.1.2.tgz#b5b72448824e97247d31dcc3970c2e8e40e04f48"
+  integrity sha512-fr0XmsYTUhahIbioBemFlc+o4ro4bj1HPMKN3dG9m6XC+UkF9fdVYfb7uNoDj0vO+HdXendbKk6YEfZG9ToeTQ==
   dependencies:
     "@hapi/ammo" "^6.0.1"
     "@hapi/boom" "^10.0.1"
@@ -8707,6 +8707,10 @@
   uid ""
 
 "@kbn/response-ops-rules-apis@link:x-pack/platform/packages/shared/response-ops/rules-apis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-schedule-schema@link:x-pack/platform/packages/shared/response-ops/schedule-schema":
   version "0.0.0"
   uid ""
 
@@ -25815,10 +25819,10 @@ joi-to-json@5.0.0:
     combinations "^1.0.0"
     lodash "^4.17.21"
 
-joi@18.2.1:
-  version "18.2.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.1.tgz#a022e39496e25b010a6d4649975c160a4315bd79"
-  integrity sha512-2/OKlogiESf2Nh3TFCrRjrr9z1DRHeW0I+KReF67+4J0Ns+8hBtHRmoWAZ2OFU6I5+TWLEe6sVlSdXPjHm5UbQ==
+joi@18.2.3:
+  version "18.2.3"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.3.tgz#efdd1311496cd585730633fc57253a45641a3e85"
+  integrity sha512-N5A3KTWQpPWT4ExxxPlUx7WmykGXRzhNidWhV41d6Abu9YfI2NyWCJuxdPnslJCPWtbRpSVOWSnSS6GakLM/Rg==
   dependencies:
     "@hapi/address" "^5.1.1"
     "@hapi/formula" "^3.0.2"
@@ -26899,10 +26903,10 @@ lru-cache@11.2.6:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.6.tgz#356bf8a29e88a7a2945507b31f6429a65a192c58"
   integrity sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==
 
-lru-cache@11.5.1, lru-cache@^11.0.0:
-  version "11.5.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.5.1.tgz#f3daa3540847b9737ebc02499ddb36765e54db4a"
-  integrity sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A==
+lru-cache@11.5.2, lru-cache@^11.0.0:
+  version "11.5.2"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.5.2.tgz#00e16665c90c620fba14a3c368732a976493f760"
+  integrity sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g==
 
 lru-cache@^10.2.0, lru-cache@^10.4.3:
   version "10.4.3"

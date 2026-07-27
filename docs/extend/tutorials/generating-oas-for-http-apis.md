@@ -135,7 +135,7 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
         tags: ['oas-tag:my tag'],  // Each operation must have a tag that's used to group similar endpoints in the docs
         availability: {
           since: '1.0.0', // The version that the API was added.
-          stability: 'experimental', // The current lifecycle: experimental, beta, or stable
+          stability: 'experimental', // The current lifecycle: experimental, tech_preview, or stable
         },
       },
     })
