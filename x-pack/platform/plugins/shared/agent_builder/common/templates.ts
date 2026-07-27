@@ -13,11 +13,11 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
     name: 'Bug Investigation',
     description: 'Investigate a bug report — sets context for root-cause analysis.',
     definition: {
-      metadata: {
-        type: 'bug',
-        workflow: 'investigation',
-        priority: 'high',
-      },
+      fields: [
+        { name: 'type', type: 'keyword', value: 'bug' },
+        { name: 'workflow', type: 'keyword', value: 'investigation' },
+        { name: 'priority', type: 'keyword', value: 'high' },
+      ],
     },
   },
   {
@@ -25,11 +25,11 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
     name: 'Feature Planning',
     description: 'Plan a new feature — sets context for design and scoping discussions.',
     definition: {
-      metadata: {
-        type: 'feature',
-        workflow: 'planning',
-        phase: 'design',
-      },
+      fields: [
+        { name: 'type', type: 'keyword', value: 'feature' },
+        { name: 'workflow', type: 'keyword', value: 'planning' },
+        { name: 'phase', type: 'keyword', value: 'design' },
+      ],
     },
   },
 ];

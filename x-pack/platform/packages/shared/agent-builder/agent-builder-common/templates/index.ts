@@ -5,8 +5,25 @@
  * 2.0.
  */
 
+export type ConversationTemplateFieldType =
+  | 'keyword'
+  | 'text'
+  | 'integer'
+  | 'float'
+  | 'boolean'
+  | 'date';
+
+export interface ConversationTemplateField {
+  /** ES field name */
+  name: string;
+  /** ES mapping type for this field */
+  type: ConversationTemplateFieldType;
+  /** Default value applied to the conversation when the template is used */
+  value?: string;
+}
+
 export interface ConversationTemplateDefinition {
-  metadata?: Record<string, string>;
+  fields?: ConversationTemplateField[];
 }
 
 export interface ConversationTemplate {

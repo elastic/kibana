@@ -32,6 +32,7 @@ import type {
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
+import type { ConversationTemplateField } from '@kbn/agent-builder-common';
 import { getTemplate } from '../templates/registry';
 import {
   fromEs,
@@ -41,6 +42,14 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+
+const buildMetadataFromFields = (
+  fields: ConversationTemplateField[] | undefined
+): Record<string, string> =>
+  (fields ?? []).reduce<Record<string, string>>((acc, { name, value }) => {
+    if (value !== undefined) acc[name] = value;
+    return acc;
+  }, {});
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
@@ -188,10 +197,8 @@ class ConversationClientImpl implements ConversationClient {
     if (templateId) {
       const template = getTemplate(templateId);
       if (template) {
-        resolvedMetadata = {
-          ...(template.definition.metadata ?? {}),
-          ...(resolvedMetadata ?? {}),
-        };
+        const templateMetadata = buildMetadataFromFields(template.definition.fields);
+        resolvedMetadata = { ...templateMetadata, ...(resolvedMetadata ?? {}) };
       }
     }
 
@@ -271,10 +278,8 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError(`Template not found: ${templateId}`);
     }
 
-    const metadata: Record<string, string> = {
-      ...(template.definition.metadata ?? {}),
-      ...(existing.metadata ?? {}),
-    };
+    const templateMetadata = buildMetadataFromFields(template.definition.fields);
+    const metadata: Record<string, string> = { ...templateMetadata, ...(existing.metadata ?? {}) };
 
     return this.update({ id: conversationId, metadata }, { access: 'owner' });
   }
