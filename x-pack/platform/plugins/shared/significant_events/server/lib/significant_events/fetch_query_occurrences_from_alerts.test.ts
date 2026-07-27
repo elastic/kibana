@@ -319,6 +319,27 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(calledWith.query).not.toMatch(/BUCKET\([^)]*1m\)/);
   });
 
+  it('clamps a sub-minute bucket size up to 1m, grid and query together', async () => {
+    const link = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
+    const { kiClient, esClient, esql } = createMocks([link]);
+
+    esql.mockResolvedValueOnce(
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 5 }])
+    );
+
+    // Rules only emit closed-minute points, so a 30s grid would leave every
+    // other bucket zero-filled and render steady activity as a comb.
+    const queryOccurrences = await getQueryOccurrences(
+      { from: FROM, to: TO, bucketSize: '30s', spaceId: SPACE_ID },
+      { kiClient, esClient }
+    );
+
+    const calledWith = esql.mock.calls[0][1] as { query: string };
+    expect(calledWith.query).toContain('BUCKET(source_minute, 1 minutes)');
+    expect(calledWith.query).not.toContain('seconds');
+    expect(queryOccurrences.aggregatedOccurrences.map((b) => b.count)).toEqual([0, 5, 0, 0, 0, 0]);
+  });
+
   it('appends an explicit LIMIT (rules × buckets) to the rendered query', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });

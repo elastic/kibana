@@ -8,7 +8,7 @@
 import { Parser } from '@elastic/esql';
 import { canCompileMatchMetric, stripTrailingPipeCommands } from './can_compile_match_metric';
 import { compileMatchCountBreachQuery } from './match_count_query_compiler';
-import { METRIC_SERIES_LIMIT } from './metric_series_contract';
+import { METRIC_SERIES_CLOSED_BUCKETS, METRIC_SERIES_LIMIT } from './metric_series_contract';
 
 describe('stripTrailingPipeCommands', () => {
   it('peels trailing SORT / LIMIT / KEEP from the end only', () => {
@@ -40,6 +40,22 @@ describe('stripTrailingPipeCommands', () => {
     expect(
       stripTrailingPipeCommands('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"')
     ).toBe('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"');
+  });
+
+  it('drops a block comment sitting between the last kept command and the peel', () => {
+    expect(
+      stripTrailingPipeCommands(
+        'FROM logs-* | WHERE level == "error" | /* note */ SORT @timestamp DESC'
+      )
+    ).toBe('FROM logs-* | WHERE level == "error"');
+  });
+
+  it('drops a line comment sitting between the last kept command and the peel', () => {
+    expect(
+      stripTrailingPipeCommands(
+        'FROM logs-* | WHERE level == "error"\n// note\n| SORT @timestamp DESC'
+      )
+    ).toBe('FROM logs-* | WHERE level == "error"');
   });
 });
 
@@ -90,6 +106,17 @@ describe('canCompileMatchMetric', () => {
       canCompileMatchMetric('FROM logs-* | WHERE message == "queue full | LIMIT exceeded"')
     ).toBe(true);
   });
+
+  it('accepts comments around the peeled tail', () => {
+    expect(
+      canCompileMatchMetric(
+        'FROM logs-* | WHERE level == "error" | /* note */ SORT @timestamp DESC'
+      )
+    ).toBe(true);
+    expect(
+      canCompileMatchMetric('FROM logs-* | WHERE level == "error"\n// note\n| SORT @timestamp DESC')
+    ).toBe(true);
+  });
 });
 
 describe('compileMatchCountBreachQuery', () => {
@@ -104,7 +131,9 @@ describe('compileMatchCountBreachQuery', () => {
     expect(compiled).toContain(
       'STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)'
     );
-    expect(compiled).toContain('WHERE bucket < DATE_TRUNC(1 minute, NOW())');
+    expect(compiled).toContain(
+      `WHERE bucket < DATE_TRUNC(1 minute, NOW()) AND bucket >= DATE_TRUNC(1 minute, NOW()) - ${METRIC_SERIES_CLOSED_BUCKETS} minutes`
+    );
     expect(compiled).toContain('KEEP bucket, metric_value');
     expect(compiled).toContain('SORT bucket DESC');
     expect(compiled).toContain(`LIMIT ${METRIC_SERIES_LIMIT}`);
@@ -144,6 +173,17 @@ describe('compileMatchCountBreachQuery', () => {
     expect(() =>
       compileMatchCountBreachQuery('FROM logs-* | WHERE message == "queue full', '@timestamp')
     ).toThrow(/filter-only/);
+  });
+
+  it.each([
+    ['block comment', 'FROM logs-* | WHERE level == "error" | /* note */ SORT @timestamp DESC'],
+    ['line comment', 'FROM logs-* | WHERE level == "error"\n// note\n| SORT @timestamp DESC'],
+    ['trailing line comment', 'FROM logs-* | WHERE level == "error" // note\n| SORT @timestamp'],
+  ])('emits parseable ES|QL when a %s precedes the peeled tail', (_label, query) => {
+    const compiled = compileMatchCountBreachQuery(query, '@timestamp');
+
+    expect(compiled.split('\n| ')[0]).toBe('FROM logs-* | WHERE level == "error"');
+    expect(Parser.parse(compiled).errors).toHaveLength(0);
   });
 
   it('preserves a pipe inside a WHERE literal and emits valid ES|QL', () => {

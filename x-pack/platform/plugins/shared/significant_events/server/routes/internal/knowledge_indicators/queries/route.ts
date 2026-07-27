@@ -40,6 +40,7 @@ import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
+import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
@@ -74,9 +75,10 @@ const requestParamsSchema = baseRequestParamsSchema.extend({
 });
 
 /**
- * Promotes unbacked queries to rule-backed status. Returns
- * `{ promoted, skipped_stats }`. Ineligible queries (STATS until #265778, or
- * MATCH that is not filter-only) are skipped; `skipped_stats` counts those.
+ * Promotes unbacked queries to rule-backed status. Ineligible queries are
+ * skipped and counted by reason: `skipped_stats` for STATS (unbacked until
+ * #265778) and `skipped_ineligible` for MATCH that is not filter-only. The two
+ * are reported separately so the UI can tell the user which one they hit.
  */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
@@ -105,7 +107,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     maintenanceService,
-  }): Promise<{ promoted: number; skipped_stats: number }> => {
+  }): Promise<PromoteQueriesResult> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, licensing } = scopedClients;
 

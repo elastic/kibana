@@ -30,11 +30,16 @@ const commandName = (cmd: ESQLCommand): string =>
 
 /**
  * Parse the query once, then peel any trailing run of SORT / LIMIT / KEEP by
- * slicing the *source* at the AST start offset of the first peeled command.
+ * slicing the *source* at the AST end offset of the last retained command.
  *
  * Slicing on AST locations (never a text regex) is what keeps a `|` inside a
  * string literal safe — e.g. `WHERE message == "queue full | LIMIT exceeded"`,
  * where a regex would cut mid-literal and produce an unterminated string.
+ *
+ * Cutting at the *end of what we keep* rather than the start of what we drop
+ * also removes whatever sits between the two — the `|` separator plus any
+ * comment. Slicing at the peeled command's start instead would leave a base
+ * ending in `| <comment>`, whose dangling separator no cleanup can see.
  *
  * `Parser.parse` never throws on malformed input; it reports syntax errors in
  * an `errors` array. A query with errors must fail closed: compiling or
@@ -60,20 +65,29 @@ function parseFilterOnly(esqlQuery: string): FilterOnlyParse {
 
   let base = trimmed;
   if (cut < commands.length) {
-    base = trimmed.slice(0, commands[cut].location.min).trimEnd();
-    // Drop the `|` that piped into the first peeled command.
-    if (base.endsWith('|')) {
-      base = base.slice(0, -1).trimEnd();
-    }
+    // `location.max` is inclusive, hence the +1.
+    base = cut === 0 ? '' : trimmed.slice(0, commands[cut - 1].location.max + 1).trimEnd();
   }
 
   const commandNames = commands.slice(0, cut).map(commandName);
   const eligible =
     commandNames.length > 0 &&
     commandNames[0] === 'from' &&
-    commandNames.every((name) => ALLOWED_BASE_COMMANDS.has(name));
+    commandNames.every((name) => ALLOWED_BASE_COMMANDS.has(name)) &&
+    isReusableBase(base, cut);
 
   return { base, commandNames, parsed: true, eligible };
+}
+
+/**
+ * Eligibility must imply compilability: callers append `| STATS …` to `base`,
+ * and a base that no longer parses on its own — or that lost/gained a command
+ * during the slice — would produce a breach query that fails on every rule run
+ * while `canCompileMatchMetric` still reported true.
+ */
+function isReusableBase(base: string, expectedCommands: number): boolean {
+  const { root, errors } = Parser.parse(base);
+  return errors.length === 0 && (root.commands as ESQLCommand[]).length === expectedCommands;
 }
 
 /**

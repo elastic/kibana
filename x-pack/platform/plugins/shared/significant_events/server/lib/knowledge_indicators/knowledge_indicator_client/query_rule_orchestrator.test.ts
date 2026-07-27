@@ -187,7 +187,28 @@ describe('QueryRuleOrchestrator', () => {
 
       const result = await orchestrator.promoteQueries(definition, ['bad-match']);
 
-      expect(result).toEqual({ promoted: 0, skipped_stats: 1 });
+      // Counted apart from STATS: the user's remedy is to rewrite the query.
+      expect(result).toEqual({ promoted: 0, skipped_stats: 0, skipped_ineligible: 1 });
+      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+    });
+
+    it('counts skipped STATS queries under their own reason', async () => {
+      const stats = makeLink({
+        id: 'stats-ki',
+        type: 'stats',
+        ruleBacked: false,
+        esql: {
+          query:
+            'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+        },
+      });
+      const { orchestrator, rulesManagementClient } = createOrchestrator({
+        currentLinks: [stats],
+      });
+
+      const result = await orchestrator.promoteQueries(definition, ['stats-ki']);
+
+      expect(result).toEqual({ promoted: 0, skipped_stats: 1, skipped_ineligible: 0 });
       expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
     });
   });

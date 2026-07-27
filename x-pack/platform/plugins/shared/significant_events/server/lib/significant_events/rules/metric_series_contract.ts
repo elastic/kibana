@@ -24,18 +24,24 @@
  * current minute, so lookback is:
  *
  *   LOOKBACK = EVERY + JITTER_TOLERANCE + 1m (open-minute drop)
- *            = 5m + 1m + 1m = 7m → LIMIT 6 closed minutes
+ *            = 5m + 1m + 1m = 7m → 6 closed minutes emitted
+ *
+ * The compiled query picks its window from `DATE_TRUNC(1 minute, NOW())`, not
+ * from the row count: it emits the {@link METRIC_SERIES_CLOSED_BUCKETS} minutes
+ * below the open one. Every emitted minute is therefore fully inside the
+ * engine's lookback, so a run never stores a partial count. `SORT DESC + LIMIT`
+ * is only a safety cap on top of that.
  *
  * Why the extra minute of overlap (not just LOOKBACK = EVERY + 1m):
  *
- * - On-time run at 15:05:00 looks at source docs from 14:58:00–15:05:00.
- *   After DATE_TRUNC drops the open 15:05 minute, SORT DESC + LIMIT 6 keeps
- *   15:04 … 14:59. The previous on-time run already emitted 14:59, so that
- *   minute is intentionally duplicated.
+ * - On-time run at 15:05:00 looks at source docs from 14:58:00–15:05:00 and
+ *   emits 15:04 … 14:59. The previous on-time run already emitted 14:59, so
+ *   that minute is intentionally duplicated.
  * - Late run at 15:05:40 (crossed into a new minute) would otherwise miss
  *   14:59 if lookback were only 6m. With 7m lookback it still covers 14:59
  *   and emits 15:04 … 14:59, consuming the intentional overlap instead of
- *   leaving a gap.
+ *   leaving a gap. Its window opens mid-14:58, and the lower bound drops that
+ *   partial minute rather than recording an undercount for it.
  *
  * Adjacent runs therefore may write the same source minute twice. Every
  * reader collapses duplicates with MAX(metric_value) per rule / source minute
@@ -71,10 +77,12 @@ export const METRIC_SERIES_ANALYSIS_BUCKET_INTERVAL = '1m';
 /**
  * Execution schedule derived from the timing contract above.
  * LOOKBACK adds one more minute so DATE_TRUNC can drop the open current minute
- * and still fill LIMIT closed buckets.
+ * and still cover {@link METRIC_SERIES_CLOSED_BUCKETS} closed ones.
  */
 export const METRIC_SERIES_EVERY = `${METRIC_SERIES_CADENCE_MINUTES}m`;
 export const METRIC_SERIES_LOOKBACK = `${METRIC_SERIES_CLOSED_BUCKETS + 1}m`;
+
+/** Row cap on a run's output. The bucket bounds already select the same minutes. */
 export const METRIC_SERIES_LIMIT = METRIC_SERIES_CLOSED_BUCKETS;
 
 /**

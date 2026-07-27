@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { toRuleDefinition } from './rule_orchestration';
 import {
@@ -12,11 +13,11 @@ import {
   METRIC_SERIES_RULE_NAME_SUFFIX,
 } from '../../significant_events/rules/metric_series_contract';
 
-const makeQueryLink = (severityScore?: number): QueryLink => ({
+const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink => ({
   query: {
     id: 'query-1',
     type: 'match',
-    title: 'Error logs',
+    title,
     description: 'Matches error logs',
     esql: { query: 'FROM logs-* | WHERE level == "error"' },
     severity_score: severityScore,
@@ -37,5 +38,12 @@ describe('toRuleDefinition', () => {
       esqlQuery: 'FROM logs-* | WHERE level == "error"',
       schedule: { interval: METRIC_SERIES_EVERY },
     });
+  });
+
+  it('trims an overlong title so the name fits the Alerting v2 cap, suffix intact', () => {
+    const { name } = toRuleDefinition(makeQueryLink(85, 'A'.repeat(MAX_NAME_LENGTH + 50)));
+
+    expect(name).toHaveLength(MAX_NAME_LENGTH);
+    expect(name.endsWith(METRIC_SERIES_RULE_NAME_SUFFIX)).toBe(true);
   });
 });

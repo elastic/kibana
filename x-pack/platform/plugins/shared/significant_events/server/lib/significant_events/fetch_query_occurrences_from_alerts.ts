@@ -98,6 +98,22 @@ function buildTimeline({
   return timeline;
 }
 
+/**
+ * Rules emit one point per closed UTC minute, so a sub-minute chart interval
+ * can never fill more than one bucket per minute — the zero-fill paints the
+ * rest as gaps and steady activity renders as a spike/zero comb. Callers may
+ * still ask for seconds (`calculateAuto.near` does for short ranges); the floor
+ * is applied here, upstream of `intervalMs` / `timeline` / `limit`, so the
+ * whole grid stays consistent for every caller of the route.
+ */
+function clampToSourceResolution({ value, unit }: { value: number; unit: string }): {
+  value: number;
+  unit: string;
+} {
+  const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
+  return intervalMs < MS_PER_UNIT.m ? { value: 1, unit: 'm' } : { value, unit };
+}
+
 /** Projects a rule's firing buckets onto a shared {@link TimeBucket} grid, zero-filling gaps. */
 function fillTimeline({
   timeline,
@@ -157,7 +173,7 @@ export async function computeOccurrences(
     return emptyResult;
   }
 
-  const { value, unit } = parseBucketSize(bucketSize);
+  const { value, unit } = clampToSourceResolution(parseBucketSize(bucketSize));
   const esqlUnit = ESQL_UNITS[unit] ?? unit;
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
   const ruleIdColumn = alertsReader.ruleIdColumn;

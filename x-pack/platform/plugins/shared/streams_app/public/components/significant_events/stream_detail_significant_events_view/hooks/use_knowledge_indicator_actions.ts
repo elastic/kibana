@@ -18,6 +18,7 @@ import {
 import { useStreamFeaturesApi } from '../../../../hooks/significant_events/use_stream_features_api';
 import { getFormattedError } from '../../../../util/errors';
 import {
+  NOT_FILTER_ONLY_PROMOTE_DISABLED,
   PROMOTE_QUERY_ALREADY_PROMOTED,
   STATS_PROMOTE_DISABLED_TOOLTIP,
 } from '../../significant_events_discovery/components/queries_table/translations';
@@ -90,6 +91,8 @@ export function useKnowledgeIndicatorActions({
       await invalidateData();
       if (result.promoted > 0) {
         toasts.addSuccess({ title: PROMOTE_SUCCESS_TOAST });
+      } else if (result.skipped_ineligible > 0) {
+        toasts.addInfo({ title: NOT_FILTER_ONLY_PROMOTE_DISABLED });
       } else if (result.skipped_stats > 0) {
         toasts.addInfo({ title: STATS_PROMOTE_DISABLED_TOOLTIP });
       } else {

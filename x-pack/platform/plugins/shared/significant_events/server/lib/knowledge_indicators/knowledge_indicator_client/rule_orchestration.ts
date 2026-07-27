@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import {
@@ -17,11 +18,23 @@ import { getMetricSeriesRuleSchedule } from '../../significant_events/rules/sche
 
 const RULE_INSTALL_CONCURRENCY = 10;
 
+/**
+ * KI titles are uncapped but Alerting v2 rejects a `metadata.name` over
+ * {@link MAX_NAME_LENGTH}, so a long title would 400 on rule creation — and
+ * {@link installQueries} runs as a `Promise.all`, taking the rest of the batch
+ * with it. Trim the title, never the suffix: the suffix is how these rules are
+ * recognised as metric-series rules.
+ */
+function toRuleName(title: string): string {
+  const maxTitleLength = MAX_NAME_LENGTH - METRIC_SERIES_RULE_NAME_SUFFIX.length;
+  return `${title.slice(0, maxTitleLength)}${METRIC_SERIES_RULE_NAME_SUFFIX}`;
+}
+
 export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDefinition {
   const { query } = queryLink;
   const { every } = getMetricSeriesRuleSchedule();
   return {
-    name: `${query.title}${METRIC_SERIES_RULE_NAME_SUFFIX}`,
+    name: toRuleName(query.title),
     streamName: queryLink.stream_name,
     timestampField: TIMESTAMP,
     esqlQuery: query.esql.query,

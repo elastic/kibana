@@ -8,6 +8,7 @@
 import { buildMatchMetricBase } from './can_compile_match_metric';
 import {
   METRIC_SERIES_BUCKET_FIELD,
+  METRIC_SERIES_CLOSED_BUCKETS,
   METRIC_SERIES_LIMIT,
   METRIC_SERIES_VALUE_FIELD,
 } from './metric_series_contract';
@@ -26,13 +27,21 @@ export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: 
 
   // Keep `bucket` as a datetime (no TO_LONG here). Alerting persists the ES|QL
   // date value; readers project with TO_DATETIME(TO_LONG(FIELD_EXTRACT(...))).
-  // SORT DESC + LIMIT N takes the newest N closed minutes. With EVERY=5m,
-  // LOOKBACK=7m and LIMIT=6 the newest closed minutes include a 1m intentional
-  // overlap with the previous run (see metric_series_contract.ts).
+  //
+  // The window is bounded on both sides against the same DATE_TRUNC(NOW()):
+  // the upper bound drops the open current minute, the lower bound drops the
+  // oldest minute of the engine's LOOKBACK, which the run only covers in part.
+  // Emitting that partial minute would store an undercount that no later run
+  // revisits. The bound never reaches past the engine window because
+  // `floor(NOW()) - CLOSED_BUCKETS ≥ NOW() - LOOKBACK` for any run time.
+  //
+  // With EVERY=5m and LOOKBACK=7m that leaves 6 fully covered closed minutes,
+  // one of which intentionally overlaps the previous run (see
+  // metric_series_contract.ts). SORT DESC + LIMIT is then only a safety cap.
   return [
     base,
     `STATS ${METRIC_SERIES_VALUE_FIELD} = COUNT(*) BY ${METRIC_SERIES_BUCKET_FIELD} = BUCKET(${timestampField}, 1 minute)`,
-    `WHERE ${METRIC_SERIES_BUCKET_FIELD} < DATE_TRUNC(1 minute, NOW())`,
+    `WHERE ${METRIC_SERIES_BUCKET_FIELD} < DATE_TRUNC(1 minute, NOW()) AND ${METRIC_SERIES_BUCKET_FIELD} >= DATE_TRUNC(1 minute, NOW()) - ${METRIC_SERIES_CLOSED_BUCKETS} minutes`,
     `KEEP ${METRIC_SERIES_BUCKET_FIELD}, ${METRIC_SERIES_VALUE_FIELD}`,
     `SORT ${METRIC_SERIES_BUCKET_FIELD} DESC`,
     `LIMIT ${METRIC_SERIES_LIMIT}`,
