@@ -15,6 +15,7 @@ import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation'
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolCallStep } from './tool_call_step';
+import { FlyoutStackContext } from '../flyouts/flyout_stack_context';
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -79,6 +80,22 @@ describe('ToolCallStep', () => {
     const badge = screen.getByRole('status').querySelector('.euiBadge');
     expect(badge).toHaveTextContent('tool: search');
     expect(badge?.className).toContain('danger');
+  });
+
+  describe('with FlyoutStackContext', () => {
+    it('delegates click to context and renders no flyout', async () => {
+      const user = userEvent.setup();
+      const openToolStep = jest.fn();
+      const step = makeStep([otherResult('r1')]);
+      renderWithProviders(
+        <FlyoutStackContext.Provider value={{ openToolStep }}>
+          <ToolCallStep step={step} />
+        </FlyoutStackContext.Provider>
+      );
+      await user.click(screen.getByRole('button'));
+      expect(openToolStep).toHaveBeenCalledWith(step);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 
   it('is always clickable for a running sub-agent call', () => {

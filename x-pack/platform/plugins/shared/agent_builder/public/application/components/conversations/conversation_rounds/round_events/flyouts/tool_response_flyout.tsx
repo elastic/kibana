@@ -7,45 +7,63 @@
 
 import React, { Fragment } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
   EuiSpacer,
   EuiSteps,
+  EuiLoadingSpinner,
+  useEuiTheme,
+  useGeneratedHtmlId,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useBoolean } from '@kbn/react-hooks';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
+import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
+import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
+import { useSteppedFlyoutStyles } from './use_stepped_flyout_styles';
 
-const parametersLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.parametersLabel',
-  { defaultMessage: 'Parameters' }
+const backLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.back', {
+  defaultMessage: 'Back',
+});
+
+const subAgentExecutionLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.toolResponseFlyout.subAgentExecutionLabel',
+  { defaultMessage: 'Sub-agent execution' }
 );
 
-const executionLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.executionLabel',
-  { defaultMessage: 'Execution' }
-);
-
-const resultLabel = i18n.translate(
-  'xpack.agentBuilder.conversation.toolResponseFlyout.resultLabel',
-  { defaultMessage: 'Result' }
-);
+const toolLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.toolLabel', {
+  defaultMessage: 'tool',
+});
 
 interface ToolResponseFlyoutProps {
   step: ToolCallStepData;
   onClose: () => void;
+  onBack?: () => void;
 }
 
-export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, onClose }) => {
+export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
+  step,
+  onClose,
+  onBack,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
+  const titleId = useGeneratedHtmlId({ prefix: 'toolResponseFlyout' });
+  const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
+
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
-  const showExecutionSection = Boolean(subAgentExecutionId);
+  const showExecutionSection = isSubAgentCall;
+  const isSubAgentRunning = isSubAgentCall && step.results.length === 0;
   const showResultSection = step.results.length > 0;
   const hasErrorResult = step.results.some(isErrorResult);
 
@@ -53,27 +71,40 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
     {
       title: parametersLabel,
       status: 'complete' as const,
-      children: (
-        <>
-          <EuiSpacer size="s" />
-          <JsonCodeBlock data={step.params} />
-        </>
-      ),
+      children: <JsonCodeBlock data={step.params} />,
     },
     ...(showExecutionSection
       ? [
           {
             title: executionLabel,
-            status: 'complete' as const,
-            children: (
-              <>
-                <EuiSpacer size="s" />
-                {/* TODO: replace with sub-agent execution drill-down — elastic/search-team#15172 */}
-                {/* <EuiText size="s" color="subdued"><EuiCode>{subAgentExecutionId}</EuiCode></EuiText> */}
-                <EuiText size="s" color="subdued">
-                  TODO
-                </EuiText>
-              </>
+            status: (isSubAgentRunning ? 'loading' : 'complete') as 'loading' | 'complete',
+            children: !subAgentExecutionId ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <ul
+                css={css`
+                  list-style-type: disc;
+                  padding-inline-start: ${euiTheme.size.l};
+                  margin: 0;
+                `}
+              >
+                <li>
+                  <EuiButtonEmpty
+                    iconType="sortRight"
+                    iconSide="right"
+                    flush="left"
+                    size="s"
+                    css={css`
+                      color: ${euiTheme.colors.textDisabled};
+                    `}
+                    onClick={openSubFlyout}
+                  >
+                    <EuiText size="m" color={`${euiTheme.colors.textDisabled}`}>
+                      {subAgentExecutionLabel} {subAgentExecutionId}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                </li>
+              </ul>
             ),
           },
         ]
@@ -83,32 +114,53 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({ step, on
           {
             title: resultLabel,
             status: (hasErrorResult ? 'danger' : 'complete') as 'danger' | 'complete',
-            children: (
-              <>
-                <EuiSpacer size="s" />
-                {step.results.map((result, idx) => (
-                  <Fragment key={`flyout-result-${idx}`}>
-                    <ToolResult result={result} />
-                    {idx < step.results.length - 1 && <EuiSpacer size="s" />}
-                  </Fragment>
-                ))}
-              </>
-            ),
+            children: step.results.map((result, idx) => (
+              <Fragment key={`flyout-result-${idx}`}>
+                <ToolResult result={result} />
+                {idx < step.results.length - 1 && <EuiSpacer size="s" />}
+              </Fragment>
+            )),
           },
         ]
       : []),
   ];
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="toolResponseFlyoutTitle" size="m">
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={titleId}
+      size="m"
+      ownFocus={!onBack}
+      outsideClickCloses={onBack ? true : undefined}
+    >
+      {onBack && (
+        <EuiFlyoutHeader hasBorder css={backHeaderCss}>
+          <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
+            <EuiText size="xs" component="span">
+              {backLabel}
+            </EuiText>
+          </EuiButtonEmpty>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="toolResponseFlyoutTitle">tool: {step.tool_id}</h2>
+          <h2 id={titleId}>
+            {toolLabel}: {step.tool_id}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} />
+        <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} css={stepsCss} />
       </EuiFlyoutBody>
+      {isSubFlyoutOpen && subAgentExecutionId && (
+        <SubAgentExecutionFlyout
+          executionId={subAgentExecutionId}
+          params={step.params}
+          isCompleted={!isSubAgentRunning}
+          onBack={closeSubFlyout}
+          onClose={onClose}
+        />
+      )}
     </EuiFlyout>
   );
 };
