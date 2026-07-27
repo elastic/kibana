@@ -349,4 +349,59 @@ describe('hasActiveFleetServersForPolicies', () => {
       expect(hasFs).toBe(true);
     });
   });
+
+  describe('kuery includes versioned policy_id variants', () => {
+    it('passes a kuery matching both the base policy_id and versioned variants', async () => {
+      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+        other: 0,
+        events: 0,
+        total: 1,
+        all: 1,
+        active: 0,
+        updating: 0,
+        offline: 0,
+        inactive: 0,
+        unenrolled: 0,
+        online: 1,
+        error: 0,
+      });
+
+      await hasFleetServersForPolicies(mockEsClient, mockSoClient, [{ id: 'fleet-server-policy' }]);
+
+      const kuery = (getAgentStatusForAgentPolicy as jest.Mock).mock.calls[0][3] as string;
+      // Must match the base policy_id exactly
+      expect(kuery).toContain('policy_id:"fleet-server-policy"');
+      // Must also match versioned variants like fleet-server-policy#9.4
+      expect(kuery).toContain('policy_id:fleet-server-policy#*');
+    });
+
+    it('returns true when the Fleet Server agent is on a versioned policy_id', async () => {
+      // Simulate: agent has policy_id "fleet-server-policy#9.4" (no exact-match on base id).
+      // The old exact-match query returned all:0; the new kuery must return all:1.
+      (getAgentStatusForAgentPolicy as jest.Mock).mockImplementationOnce(
+        (_es, _so, _id, kuery: string) => {
+          // Simulate ES matching an agent whose policy_id is "fleet-server-policy#9.4"
+          const agentMatchesVersionedVariant = kuery.includes('fleet-server-policy#*');
+          return Promise.resolve({
+            other: 0,
+            events: 0,
+            total: agentMatchesVersionedVariant ? 1 : 0,
+            all: agentMatchesVersionedVariant ? 1 : 0,
+            active: 0,
+            updating: 0,
+            offline: 0,
+            inactive: 0,
+            unenrolled: 0,
+            online: agentMatchesVersionedVariant ? 1 : 0,
+            error: 0,
+          });
+        }
+      );
+
+      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, [
+        { id: 'fleet-server-policy' },
+      ]);
+      expect(hasFs).toBe(true);
+    });
+  });
 });
