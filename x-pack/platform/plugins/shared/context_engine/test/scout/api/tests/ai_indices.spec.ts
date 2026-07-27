@@ -50,10 +50,6 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
       name: DEST_INDEX_TEMPLATE,
       index_patterns: [`${DEST_DATA_STREAM}*`],
       data_stream: {},
-      // Higher than the global `ai-index-ds` template (priority 500) so this more
-      // specific template wins; equal priorities with overlapping patterns are
-      // rejected by Elasticsearch.
-      priority: 600,
     });
     await esClient.indices.createDataStream({ name: DEST_DATA_STREAM });
     await esClient.indices.create({ index: DEST_INDEX });

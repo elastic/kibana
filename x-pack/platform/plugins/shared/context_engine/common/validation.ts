@@ -16,5 +16,5 @@ export const validateAiIndexId = (value: string): string | undefined =>
     ? undefined
     : i18n.translate('xpack.contextEngine.aiIndexId.error.invalidFormat', {
         defaultMessage:
-          'Start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.',
+          'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.',
       });

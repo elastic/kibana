@@ -205,7 +205,7 @@ describe('CreateAiIndexPage', () => {
 
     expect(
       screen.getByText(
-        'Start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.'
+        'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.'
       )
     ).toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();

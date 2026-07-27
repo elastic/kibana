@@ -33,7 +33,7 @@ describe('validateAiIndexId', () => {
 
   it('returns an error message when the id contains invalid characters', () => {
     const error =
-      'Start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.';
+      'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.';
     expect(validateAiIndexId('index', 'Support triage')).toEqual({ error });
     expect(validateAiIndexId('index', 'bad id')).toEqual({ error });
     expect(validateAiIndexId('index', 'bad#id')).toEqual({ error });
@@ -41,7 +41,7 @@ describe('validateAiIndexId', () => {
 
   it('returns an error message when the id does not start with a letter or number', () => {
     const error =
-      'Start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.';
+      'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.';
     expect(validateAiIndexId('index', '-leading-hyphen')).toEqual({ error });
     expect(validateAiIndexId('index', '_leading_underscore')).toEqual({ error });
   });

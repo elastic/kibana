@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AI_INDEX_DATA_STREAM_PREFIX, AI_INDEX_INDEX_PREFIX } from '../../../common/constants';
+import {
+  AI_INDEX_DATA_STREAM_PREFIX,
+  AI_INDEX_INDEX_PREFIX,
+  MAX_INDEX_NAME_BYTES,
+} from '../../../common/constants';
 import type { AiIndexDest, AiIndexType } from '../../../common/http_api/ai_indices';
 import { validateAiIndexId as validateAiIndexIdFormat } from '../../../common/validation';
 
@@ -14,9 +18,6 @@ const PREFIX_BY_TYPE: Record<AiIndexType, string> = {
   data_stream: AI_INDEX_DATA_STREAM_PREFIX,
   index: AI_INDEX_INDEX_PREFIX,
 };
-
-// Elasticsearch caps index names at 255 bytes (not characters).
-const MAX_INDEX_NAME_BYTES = 255;
 
 export const getAiIndexDest = (type: AiIndexType, id: string): AiIndexDest => ({
   type,
@@ -42,7 +43,7 @@ export const validateAiIndexId = (type: AiIndexType, id: string): AiIndexIdValid
     return { error: formatError };
   }
 
-  const dest: AiIndexDest = { type, value: `${PREFIX_BY_TYPE[type]}${id}` };
+  const dest = getAiIndexDest(type, id);
   if (getByteLength(dest.value) > MAX_INDEX_NAME_BYTES) {
     return {
       error: i18n.translate('xpack.contextEngine.aiIndexId.error.tooLong', {

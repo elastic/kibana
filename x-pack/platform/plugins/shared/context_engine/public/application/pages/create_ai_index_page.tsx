@@ -134,7 +134,7 @@ export const CreateAiIndexPage = () => {
               destValue ? (
                 <FormattedMessage
                   id="xpack.contextEngine.createAiIndex.name.helpText"
-                  defaultMessage="uses {dest} to store pre-computed context"
+                  defaultMessage="Uses {dest} to store pre-computed context"
                   values={{ dest: <EuiCode>{destValue}</EuiCode> }}
                 />
               ) : (

@@ -51,11 +51,7 @@ export class AiIndexService {
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
   }
 
-  /**
-   * Creates a new AI index. An existing id is rejected with an
-   * {@link AiIndexAlreadyExistsError}; this is enforced atomically by
-   * Elasticsearch's `op_type: 'create'`, so it is race-free (no read needed).
-   */
+  /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
   async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
     await this.assertValidDest(properties.dest);
 
