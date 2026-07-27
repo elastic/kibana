@@ -19,7 +19,9 @@ from typing import Any, Iterator, Mapping
 
 DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS = 10.0
 DEFAULT_CURL_MAX_TIME_SECONDS = 30.0
+DEFAULT_CCS_LEASE_TTL_SECONDS = 4 * 60 * 60
 CCS_LOCK_DIR_ENV = "EXPLORATORY_TESTER_CCS_LOCK_DIR"
+CCS_LEASE_TTL_ENV = "EXPLORATORY_TESTER_CCS_LEASE_TTL_SECONDS"
 CURL_CONNECT_TIMEOUT_ENV = "EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT"
 CURL_MAX_TIME_ENV = "EXPLORATORY_TESTER_CURL_MAX_TIME"
 
@@ -363,6 +365,36 @@ def ccs_deployment_lease_path(
     return ccs_deployment_lock_path(config, env=env).with_suffix(".lease")
 
 
+def ccs_deployment_lease_ttl_seconds(
+    *,
+    env: Mapping[str, str] | None = None,
+) -> float:
+    environment = env if env is not None else os.environ
+    raw = environment.get(CCS_LEASE_TTL_ENV)
+    if raw is None or raw == "":
+        return float(DEFAULT_CCS_LEASE_TTL_SECONDS)
+    try:
+        ttl = float(raw)
+    except ValueError as exc:
+        raise ValueError(f"{CCS_LEASE_TTL_ENV} must be a positive number") from exc
+    if ttl <= 0:
+        raise ValueError(f"{CCS_LEASE_TTL_ENV} must be a positive number")
+    return ttl
+
+
+def ccs_deployment_lease_is_expired(
+    lease: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+    now: float | None = None,
+) -> bool:
+    acquired_at = lease.get("acquired_at")
+    if not isinstance(acquired_at, (int, float)):
+        return True
+    current = time.time() if now is None else now
+    return current - float(acquired_at) > ccs_deployment_lease_ttl_seconds(env=env)
+
+
 def read_ccs_deployment_lease(
     config: dict[str, Any],
     *,
@@ -381,21 +413,12 @@ def read_ccs_deployment_lease(
     return payload
 
 
-def acquire_ccs_deployment_lease(
+def _write_ccs_deployment_lease(
     config: dict[str, Any],
     *,
+    session_id: str,
     env: Mapping[str, str] | None = None,
 ) -> None:
-    session_id = require_session_id(config)
-    existing = read_ccs_deployment_lease(config, env=env)
-    if existing is not None:
-        owner = existing["session_id"]
-        if owner != session_id:
-            raise ValueError(
-                f"CCS deployment lease is held by session {owner!r}"
-            )
-        return
-
     lease_path = ccs_deployment_lease_path(config, env=env)
     payload = {
         "session_id": session_id,
@@ -423,6 +446,25 @@ def acquire_ccs_deployment_lease(
             temporary_path.unlink(missing_ok=True)
 
 
+def acquire_ccs_deployment_lease(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> None:
+    session_id = require_session_id(config)
+    existing = read_ccs_deployment_lease(config, env=env)
+    if existing is not None:
+        owner = existing["session_id"]
+        if owner == session_id:
+            _write_ccs_deployment_lease(config, session_id=session_id, env=env)
+            return
+        if not ccs_deployment_lease_is_expired(existing, env=env):
+            raise ValueError(
+                f"CCS deployment lease is held by session {owner!r}"
+            )
+    _write_ccs_deployment_lease(config, session_id=session_id, env=env)
+
+
 def assert_ccs_deployment_lease_allows_session(
     config: dict[str, Any],
     *,
@@ -433,25 +475,37 @@ def assert_ccs_deployment_lease_allows_session(
     if existing is None:
         return
     owner = existing["session_id"]
-    if owner != session_id:
-        raise ValueError(f"CCS deployment lease is held by session {owner!r}")
+    if owner == session_id:
+        return
+    if ccs_deployment_lease_is_expired(existing, env=env):
+        return
+    raise ValueError(f"CCS deployment lease is held by session {owner!r}")
 
 
 def release_ccs_deployment_lease(
     config: dict[str, Any],
     *,
     env: Mapping[str, str] | None = None,
-) -> None:
+    require_owner: bool = True,
+) -> bool:
+    """Release the deployment lease when owned by this session.
+
+    Returns True when a lease file was removed. When require_owner is False,
+    foreign leases are left untouched and False is returned instead of raising.
+    """
     session_id = require_session_id(config)
     existing = read_ccs_deployment_lease(config, env=env)
     if existing is None:
-        return
+        return False
     owner = existing["session_id"]
     if owner != session_id:
-        raise ValueError(
-            f"Cannot release CCS deployment lease held by session {owner!r}"
-        )
+        if require_owner:
+            raise ValueError(
+                f"Cannot release CCS deployment lease held by session {owner!r}"
+            )
+        return False
     ccs_deployment_lease_path(config, env=env).unlink(missing_ok=True)
+    return True
 
 
 def resource_state(resource: dict[str, Any]) -> str:

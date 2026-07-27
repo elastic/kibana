@@ -90,8 +90,11 @@ API_KEY="${ENVIRONMENT_API_KEY:-}"
 API_KEY_WAS_SUPPLIED=false
 if [[ -n "$API_KEY" ]]; then API_KEY_WAS_SUPPLIED=true; fi
 SPACE_ID="${ENVIRONMENT_SPACE:-exploratory-testing}"
+CURL_CONNECT_TIMEOUT="${EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT:-10}"
+CURL_MAX_TIME="${EXPLORATORY_TESTER_CURL_MAX_TIME:-30}"
+CURL_TIMEOUT_ARGS=(--connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIME")
 # Check Kibana is reachable (public endpoint, no auth needed)
-curl -s "$KIBANA_URL/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
+curl -s "${CURL_TIMEOUT_ARGS[@]}" "$KIBANA_URL/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
   exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)"
 
 # Validate the API key with a read-only request before any setup work begins.
@@ -101,7 +104,7 @@ curl -s "$KIBANA_URL/api/status" | python3 -c "import sys,json; s=json.load(sys.
 if [[ -z "$API_KEY" ]]; then
   echo "No API key supplied; continue with browser-only setup below."
 else
-  VALIDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+  VALIDATE_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
     -H "Authorization: ApiKey $API_KEY" \
     -X GET "$KIBANA_URL/api/spaces/space/$SPACE_ID")
 

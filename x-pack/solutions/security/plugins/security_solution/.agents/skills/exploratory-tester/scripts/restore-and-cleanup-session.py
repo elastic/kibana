@@ -18,6 +18,14 @@ from session_resources import (
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
+def _release_owned_lease_if_ccs_safe(config_path: Path) -> None:
+    with ccs_operation_lock(config_path):
+        with edit_session_config(config_path, persist=False) as config:
+            if ccs_cleanup_blocked(config):
+                return
+            release_ccs_deployment_lease(config, require_owner=False)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--session-dir", required=True)
@@ -84,18 +92,13 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
-    if cleanup_result.returncode != 0:
-        return cleanup_result.returncode
-
     try:
-        with ccs_operation_lock(config_path):
-            with edit_session_config(config_path, persist=False) as config:
-                release_ccs_deployment_lease(config)
+        _release_owned_lease_if_ccs_safe(config_path)
     except (OSError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
-    return 0
+    return cleanup_result.returncode
 
 
 if __name__ == "__main__":
