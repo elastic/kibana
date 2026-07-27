@@ -48,6 +48,10 @@ describe('isVisibleSearchSource', () => {
       // `.monitoring-*`.
       ['.monitoring-es-8-mb-2024.01.01'],
       ['.monitoring-kibana-8-2024.01.01'],
+      // Endpoint/Fleet troubleshooting resources.
+      ['.fleet-agents'],
+      ['.fleet-agents-000001'],
+      ['.metrics-endpoint.metadata_united_default'],
     ])('allows %p', (name) => {
       expect(isVisibleSearchSource(name)).toBe(true);
     });
@@ -121,5 +125,7 @@ describe('isVisibleSearchSource', () => {
     expect(patterns).toContain('.entities.*');
     expect(patterns).toContain('.siem-signals-*');
     expect(patterns).toContain('.monitoring-*');
+    expect(patterns).toContain('.fleet-agents*');
+    expect(patterns).toContain('.metrics-endpoint.metadata_united_*');
   });
 });

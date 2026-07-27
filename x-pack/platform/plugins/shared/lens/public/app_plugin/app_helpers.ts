@@ -189,9 +189,9 @@ export function useNavigateBackToApp({
   persistedDoc,
   isLensEqual,
 }: UseNavigateBackToAppProps) {
-  const [shouldShowGoBackToVizEditorModal, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const [shouldShowGoBackToVisEditorModal, setIsGoBackToVisEditorModalVisible] = useState(false);
   /** Shared logic to navigate back to the originating viz editor app */
-  const navigateBackToVizEditor = useCallback(() => {
+  const navigateBackToVisEditor = useCallback(() => {
     if (legacyEditorAppUrl) {
       onAppLeave((actions) => {
         return actions.default();
@@ -207,9 +207,9 @@ export function useNavigateBackToApp({
   const goBackToOriginatingApp = useCallback(() => {
     if (legacyEditorAppUrl) {
       if ([initialDocFromContext, persistedDoc].some(isLensEqual)) {
-        navigateBackToVizEditor();
+        navigateBackToVisEditor();
       } else {
-        setIsGoBackToVizEditorModalVisible(true);
+        setIsGoBackToVisEditorModalVisible(true);
       }
     }
   }, [
@@ -217,20 +217,20 @@ export function useNavigateBackToApp({
     initialDocFromContext,
     persistedDoc,
     isLensEqual,
-    navigateBackToVizEditor,
-    setIsGoBackToVizEditorModalVisible,
+    navigateBackToVisEditor,
+    setIsGoBackToVisEditorModalVisible,
   ]);
 
   // Used for Saving Modal
-  const navigateToVizEditor = useCallback(() => {
-    setIsGoBackToVizEditorModalVisible(false);
-    navigateBackToVizEditor();
-  }, [navigateBackToVizEditor, setIsGoBackToVizEditorModalVisible]);
+  const navigateToVisEditor = useCallback(() => {
+    setIsGoBackToVisEditorModalVisible(false);
+    navigateBackToVisEditor();
+  }, [navigateBackToVisEditor, setIsGoBackToVisEditorModalVisible]);
 
   return {
-    shouldShowGoBackToVizEditorModal,
+    shouldShowGoBackToVisEditorModal,
     goBackToOriginatingApp,
-    navigateToVizEditor,
-    closeGoBackToVizEditorModal: () => setIsGoBackToVizEditorModalVisible(false),
+    navigateToVisEditor,
+    closeGoBackToVisEditorModal: () => setIsGoBackToVisEditorModalVisible(false),
   };
 }

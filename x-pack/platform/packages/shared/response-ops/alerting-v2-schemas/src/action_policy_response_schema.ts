@@ -10,7 +10,6 @@ import { durationSchema } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
-  actionPolicyTypeSchema,
   throttleStrategySchema,
 } from './action_policy_data_schema';
 
@@ -19,11 +18,6 @@ export const actionPolicyResponseSchema = z.object({
   version: z.string().optional().describe('The version, used for optimistic concurrency control.'),
   name: z.string().describe('The name of the action policy.'),
   description: z.string().describe('A description of the action policy.'),
-  type: actionPolicyTypeSchema.describe('The action policy type.'),
-  ruleId: z
-    .string()
-    .nullable()
-    .describe('The linked rule id when type is "single_rule"; null otherwise.'),
   enabled: z.boolean().describe('Whether the action policy is enabled.'),
   destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
   matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
@@ -76,22 +70,3 @@ export const findActionPoliciesResponseSchema = z
   .describe('Paginated list of action policies.');
 
 export type FindActionPoliciesResponse = z.infer<typeof findActionPoliciesResponseSchema>;
-
-export const bulkActionActionPoliciesResponseSchema = z
-  .object({
-    processed: z.number().describe('The number of action policies processed.'),
-    total: z.number().describe('The total number of action policies targeted.'),
-    errors: z
-      .array(
-        z.object({
-          id: z.string().describe('The identifier of the action policy that failed.'),
-          message: z.string().describe('The error message.'),
-        })
-      )
-      .describe('Errors encountered during the bulk operation.'),
-  })
-  .describe('Result of a bulk action policy operation.');
-
-export type BulkActionActionPoliciesResponse = z.infer<
-  typeof bulkActionActionPoliciesResponseSchema
->;

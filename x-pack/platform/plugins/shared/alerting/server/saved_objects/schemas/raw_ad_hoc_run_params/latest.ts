@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { rawAdHocRunParamsSchema } from './v2';
+import type { rawAdHocRunParamsSchema } from './v4';
 
 export type RawAdHocRunParams = TypeOf<typeof rawAdHocRunParamsSchema>;

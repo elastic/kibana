@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetCompositeSLOSuggestions } from '../../services/composites/get_composite_slo_suggestions';
+import { getCompositeSloSuggestions } from '../../services/composites/get_composite_slo_suggestions';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
 export const getCompositeSLOSuggestionsRoute = createCompositeSloServerRoute({
@@ -16,10 +16,9 @@ export const getCompositeSLOSuggestionsRoute = createCompositeSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  handler: async ({ context, request, logger, plugins, getScopedClients }) => {
+  handler: async ({ request, logger, getScopedClients }) => {
     const { soClient } = await getScopedClients({ request, logger });
 
-    const service = new GetCompositeSLOSuggestions(soClient);
-    return await service.execute();
+    return await getCompositeSloSuggestions(soClient);
   },
 });

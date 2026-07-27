@@ -16,6 +16,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
+  apiPublishesApproximation,
   apiPublishesProjectRouting,
   apiPublishesUnifiedSearch,
   fetch$,
@@ -87,6 +88,10 @@ function getSearchContext(parentApi: unknown) {
     ? parentApi
     : { projectRouting$: undefined };
 
+  const { isApproximate$ } = apiPublishesApproximation(parentApi)
+    ? parentApi
+    : { isApproximate$: new BehaviorSubject(false) };
+
   return {
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
@@ -96,6 +101,7 @@ function getSearchContext(parentApi: unknown) {
       ? parentApi.esqlVariables$.getValue()
       : undefined,
     projectRouting: projectRouting$?.getValue(),
+    isApproximate: isApproximate$.getValue(),
   };
 }
 
@@ -186,7 +192,10 @@ export function loadEmbeddableData(
           type: 'lens',
           name: lastState.attributes.visualizationType ?? '',
           id: uuid || 'new',
-          description: lastState.attributes.title || lastState.title || '',
+          // Prefer the panel-level title when it is set, falling back to the
+          // chart's own title. With the `lens.apiFormat` path the chart title is
+          // stripped from the wire format, so the panel title is the source of truth.
+          description: lastState.title ?? lastState.attributes.title ?? '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
             lastState.ref_id
           )}`,

@@ -62,3 +62,11 @@ export const AttackDiscoveryUpsellingPageLazy = withSuspenseUpsell(
     }))
   )
 );
+
+export const AttacksUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/attacks').then(({ AttacksUpsellingPageServerless }) => ({
+      default: AttacksUpsellingPageServerless,
+    }))
+  )
+);

@@ -9,6 +9,7 @@
 
 import type { FS, LiquidOptions } from 'liquidjs';
 import { Liquid } from 'liquidjs';
+import { pickObjectFields } from '../pick_object_fields/pick_object_fields';
 
 /**
  * LiquidJS tags supported in workflow templates.
@@ -76,6 +77,8 @@ const removeDisallowedLiquidTags = (engine: Liquid): void => {
  * which are merged with the enforced defaults.
  */
 export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
+  const { parseLimit = 150_000, renderLimit = 1_000, memoryLimit = 15_000_000 } = options ?? {};
+
   const engine = new Liquid({
     ...options,
     // Only expose own properties of objects in templates (no prototype chain access)
@@ -86,13 +89,55 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     relativeReference: false,
     // Use an empty in-memory template store
     templates: {},
-    // Max total characters allowed in a single parse() call (150k)
-    parseLimit: 150_000,
-    // Max time in ms allowed for a single render() call (1s)
-    renderLimit: 1_000,
-    // Max object allocations (array ops, string ops) per render (15M)
-    memoryLimit: 15_000_000,
+    // Default max total characters allowed in a single parse() call
+    parseLimit,
+    // Default max time in ms allowed for a single render() call
+    renderLimit,
+    // Default max object allocations (array ops, string ops) per render
+    memoryLimit,
   });
   removeDisallowedLiquidTags(engine);
+  registerWorkflowLiquidFilters(engine);
   return engine;
+};
+
+/**
+ * Registers the custom filters required by workflow templates onto the given engine.
+ * Called automatically by {@link createWorkflowLiquidEngine}; exposed for testing.
+ *
+ * Registering centrally here ensures every engine instance (server-side execution,
+ * YAML validation, editor evaluation) uses identical filter implementations and
+ * eliminates the risk of divergence (e.g. a no-op stub instead of the real function).
+ */
+export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
+  // Converts a JSON string to a parsed object; passes non-strings through unchanged.
+  engine.registerFilter('json_parse', (value: unknown): unknown => {
+    if (typeof value !== 'string') {
+      return value;
+    }
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  });
+
+  // Converts a plain object to an array of { key, value } pairs.
+  engine.registerFilter('entries', (value: unknown): unknown => {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return value;
+    }
+    return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+  });
+
+  // Keeps only the given dotted-path fields of an object, preserving nested structure.
+  // Accepts a single array of paths (| pick: consts.fields) or several string args
+  // (| pick: "a", "b").
+  engine.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
+    const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+    return pickObjectFields(
+      value,
+      paths.filter((path): path is string => typeof path === 'string')
+    );
+  });
 };

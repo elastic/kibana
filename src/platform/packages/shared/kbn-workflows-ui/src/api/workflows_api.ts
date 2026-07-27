@@ -28,20 +28,28 @@ import type {
   WorkflowStatsDto,
   WorkflowStepExecutionListDto,
 } from '@kbn/workflows';
+import type { TemplateBody } from '@kbn/workflows-library';
 
 import type { z } from '@kbn/zod/v4';
 import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
+  CheckWorkflowIdConflictsParams,
+  CheckWorkflowIdConflictsResponse,
   ExportWorkflowsParams,
   ExportWorkflowsResponse,
   GetAggsParams,
+  GetCatalogParams,
+  GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetLibraryHealthResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
   MgetWorkflowsParams,
+  RestoreWorkflowVersionParams,
+  RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
   RunWorkflowOptions,
   SearchTriggerEventLogParams,
@@ -126,6 +134,25 @@ export class WorkflowApi {
   async mgetWorkflows({ ids, source }: MgetWorkflowsParams): Promise<WorkflowMgetResponseDto> {
     return this.http.post(`${BASE}/mget`, {
       body: JSON.stringify({ ids, source }),
+      version: API_VERSION,
+    });
+  }
+
+  /**
+   * Returns the subset of the given candidate workflow IDs that already exist
+   * in the index, including soft-deleted tombstones and cross-space documents.
+   * Used by the import preflight to detect conflicts before the user commits.
+   *
+   * Implemented as `dryRun=true` on the bulk-create endpoint so no new route
+   * is needed — the same import path is reused for both the preflight check and
+   * the actual import.
+   */
+  async checkWorkflowIdConflicts({
+    workflows,
+  }: CheckWorkflowIdConflictsParams): Promise<CheckWorkflowIdConflictsResponse> {
+    return this.http.post(BASE, {
+      query: { dryRun: true },
+      body: JSON.stringify({ workflows }),
       version: API_VERSION,
     });
   }
@@ -302,5 +329,44 @@ export class WorkflowApi {
       body: JSON.stringify(params),
       version: INTERNAL_API_VERSION,
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Workflow Template Library
+  // ---------------------------------------------------------------------------
+
+  async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {
+    return this.http.get(`${INTERNAL_BASE}/library/templates`, {
+      query: params as HttpFetchQuery,
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async getTemplate(slug: string): Promise<TemplateBody> {
+    return this.http.get(`${INTERNAL_BASE}/library/templates/${encodeURIComponent(slug)}`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async getLibraryHealth(): Promise<GetLibraryHealthResponse> {
+    return this.http.get(`${INTERNAL_BASE}/library/health`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async restoreWorkflowVersion(
+    workflowId: string,
+    eventId: string,
+    { signal }: RestoreWorkflowVersionParams = {}
+  ): Promise<RestoreWorkflowVersionResponseDto> {
+    return this.http.post(
+      `${INTERNAL_BASE}/workflow/${encodeURIComponent(workflowId)}/history/${encodeURIComponent(
+        eventId
+      )}/restore`,
+      {
+        version: INTERNAL_API_VERSION,
+        signal,
+      }
+    );
   }
 }

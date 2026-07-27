@@ -1,0 +1,47 @@
+{
+  "sha1": "f8ec4376d98434e7ffe20c28ba3dfcec9a542be1",
+  "tests": [
+    {
+      "id": "7e6ddec5039370c-37b029d2fd41663",
+      "title": "Snapshot & Restore — accessibility empty state: all tabs have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "7e6ddec5039370c-d1b3a8cef22bdaf",
+      "title": "Snapshot & Restore — accessibility table views with data: snapshots and repositories have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "7e6ddec5039370c-5c25299c70af110",
+      "title": "Snapshot & Restore — accessibility create policy wizard: all steps have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
+        "line": 121,
+        "column": 7
+      }
+    }
+  ]
+}

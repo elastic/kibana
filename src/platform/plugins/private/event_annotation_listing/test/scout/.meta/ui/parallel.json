@@ -1,5 +1,9 @@
 {
-  "sha1": "583820c80b76088375faa39fa902fe190edb096d",
+  "sha1": "5ae814a07c714add80860b8b3bc829d02d1b106f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "6f0ad80c78092f7-cdf015ba5f44d6f",
@@ -81,7 +85,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 98,
+        "line": 95,
         "column": 12
       }
     }

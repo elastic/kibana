@@ -31,16 +31,24 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
       });
 
-      await this.storageService.bulkIndexDocs({
+      const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
       });
 
       this.logger.debug({
-        message: `[${this.name}] Successfully stored alert events batch`,
+        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.docs.length})`,
       });
 
-      return { type: 'continue', state };
+      return {
+        type: 'continue',
+        state,
+        meta: {
+          observations: {
+            bulkIndexResult: bulkResult,
+          },
+        },
+      };
     });
   }
 }

@@ -103,14 +103,17 @@ describe('AttachmentBridge: workflow navigation', () => {
     const { manager: managerA } = createMockProposalManager();
 
     const bridge = new AttachmentBridge();
-    bridge.start(chat$, managerA, editorRefA, trackerA, { workflowId: 'workflow-a' });
+    bridge.start(chat$, managerA, editorRefA, trackerA, {
+      attachmentId: 'workflow-a',
+      workflowId: 'workflow-a',
+    });
 
     chat$.next(
       makeYamlChangedEvent({
         proposalId: 'proposal-a',
         beforeYaml: WORKFLOW_A_YAML,
         afterYaml: editedWorkflowAYaml,
-        workflowId: 'workflow-a',
+        attachmentId: 'workflow-a',
       })
     );
 
@@ -128,7 +131,10 @@ describe('AttachmentBridge: workflow navigation', () => {
     const trackerB = new ProposalTracker();
     const { manager: managerB } = createMockProposalManager();
 
-    bridge.start(chat$, managerB, editorRefB, trackerB, { workflowId: 'workflow-b' });
+    bridge.start(chat$, managerB, editorRefB, trackerB, {
+      attachmentId: 'workflow-b',
+      workflowId: 'workflow-b',
+    });
 
     const secondEditOnA = WORKFLOW_A_YAML.replace(
       'description: First workflow',
@@ -139,7 +145,7 @@ describe('AttachmentBridge: workflow navigation', () => {
         proposalId: 'proposal-a-late',
         beforeYaml: editedWorkflowAYaml,
         afterYaml: secondEditOnA,
-        workflowId: 'workflow-a',
+        attachmentId: 'workflow-a',
       })
     );
 
@@ -148,7 +154,7 @@ describe('AttachmentBridge: workflow navigation', () => {
         proposalId: 'proposal-b',
         beforeYaml: WORKFLOW_B_YAML,
         afterYaml: editedWorkflowBYaml,
-        workflowId: 'workflow-b',
+        attachmentId: 'workflow-b',
       })
     );
 
@@ -160,7 +166,7 @@ describe('AttachmentBridge: workflow navigation', () => {
 });
 
 describe('AttachmentBridge: onProposalReceived workflowId', () => {
-  it('does not fall back to attachmentId when event workflowId is undefined', () => {
+  it('passes the event workflowId through to onProposalReceived (unset when create-time)', () => {
     const chat$ = new Subject<BrowserChatEvent>();
     const editor = createMockEditor('yaml: content');
     const editorRef = { current: editor };
@@ -171,7 +177,7 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
 
     const bridge = new AttachmentBridge();
     bridge.start(chat$, manager, editorRef, tracker, {
-      workflowId: 'attachment-uuid-not-a-real-workflow-id',
+      attachmentId: 'attachment-uuid-not-a-real-workflow-id',
       onProposalReceived,
     });
 
@@ -180,6 +186,7 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
         proposalId: 'p1',
         beforeYaml: 'yaml: content',
         afterYaml: 'yaml: changed',
+        attachmentId: 'attachment-uuid-not-a-real-workflow-id',
         toolId: 'some.tool',
       })
     );
@@ -205,6 +212,7 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
 
     const bridge = new AttachmentBridge();
     bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'real-workflow-id',
       workflowId: 'real-workflow-id',
       onProposalReceived,
     });
@@ -214,6 +222,7 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
         proposalId: 'p1',
         beforeYaml: 'yaml: content',
         afterYaml: 'yaml: changed',
+        attachmentId: 'real-workflow-id',
         workflowId: 'real-workflow-id',
         toolId: 'some.tool',
       })
@@ -224,6 +233,222 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
       toolId: 'some.tool',
       workflowId: 'real-workflow-id',
     });
+
+    bridge.stop();
+  });
+
+  it('scopes edits by attachmentId even when payload workflowId is undefined (create-session)', () => {
+    // Simulates: user starts chat on /workflows/create (unsaved UUID X), navigates
+    // to workflow B before the agent replies. B's bridge must drop the late event
+    // whose attachmentId is X, not apply it to B.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: on-B');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'workflow-B',
+      workflowId: 'workflow-B',
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'late-from-create',
+        beforeYaml: 'yaml: on-create',
+        afterYaml: 'yaml: from-agent',
+        attachmentId: 'unsaved-uuid-X',
+        // no workflowId — create session had no saved id yet
+      })
+    );
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+
+    bridge.stop();
+  });
+
+  it('accepts the first server-minted attachmentId on a create-session bridge', () => {
+    // On /workflows/create the very first generate_workflow call omits
+    // attachmentId, so the server mints a fresh one and echoes it back. The
+    // client's unsavedWorkflowIdRef doesn't match, but the event has no
+    // saved workflowId, so it belongs to this create session and must apply.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: default');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'client-unsaved-uuid',
+      // workflowId omitted — create-session bridge
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'first-gen',
+        beforeYaml: 'yaml: default',
+        afterYaml: 'yaml: from-agent',
+        attachmentId: 'server-minted-uuid',
+        // no workflowId — first-generation create-session event
+      })
+    );
+
+    expect(manager.applyAfterYaml).toHaveBeenCalledWith('yaml: from-agent');
+
+    bridge.stop();
+  });
+
+  it('scopes to its own conversation via getChatEvents$ and ignores broad-stream workflow events after conversation_id is known', () => {
+    // With per-conversation scoping (getChatEvents$), events from other
+    // conversations cannot reach this bridge — regardless of ordering. Covers
+    // both "B receives its own event first" and "B receives A's late event
+    // first" scenarios of the create→create leak the bot flagged.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const perConversation$ = new Map<string, Subject<BrowserChatEvent>>();
+    const getChatEvents$ = jest.fn((conversationId: string) => {
+      let s = perConversation$.get(conversationId);
+      if (!s) {
+        s = new Subject<BrowserChatEvent>();
+        perConversation$.set(conversationId, s);
+      }
+      return s.asObservable();
+    });
+
+    const editor = createMockEditor('yaml: on-B');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'client-B-unsaved-uuid',
+      getChatEvents$,
+    });
+
+    // conversation_id_set for B lands on the broad chat$ → bridge switches to
+    // getChatEvents$('conv-B') for workflow events.
+    chat$.next({
+      type: ChatEventType.conversationIdSet,
+      data: { conversation_id: 'conv-B' },
+    } as unknown as BrowserChatEvent);
+
+    // A stale workflow event on the broad chat$ (from a previous session A)
+    // must NOT be picked up — the bridge no longer listens for workflow
+    // events on chat$ once scoped.
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'A-late',
+        beforeYaml: 'yaml: on-A',
+        afterYaml: 'yaml: from-A-agent',
+        attachmentId: 'server-A-id',
+      })
+    );
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+
+    // B's own event on the scoped stream is applied.
+    perConversation$.get('conv-B')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'B-first',
+        beforeYaml: 'yaml: on-B',
+        afterYaml: 'yaml: from-B-agent',
+        attachmentId: 'server-B-id',
+      })
+    );
+    expect(manager.applyAfterYaml).toHaveBeenLastCalledWith('yaml: from-B-agent');
+
+    bridge.stop();
+  });
+
+  it('drops workflow events arriving on the broad chat$ before conversation_id_set (deterministic stale-event guard)', () => {
+    // Reverse ordering of the create→create repro: A's late event arrives on
+    // chat$ *before* our conversation_id_set. Since our conversation hasn't
+    // started yet, any workflow:yaml_changed must be stale — drop.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const scoped$ = new Subject<BrowserChatEvent>();
+    const getChatEvents$ = jest.fn(() => scoped$.asObservable());
+    const editor = createMockEditor('yaml: on-B');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'client-B-unsaved-uuid',
+      getChatEvents$,
+    });
+
+    // A's late event arrives on the broad chat$ before we've seen our
+    // conversation_id_set — must be ignored.
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'A-late-first',
+        beforeYaml: 'yaml: on-A',
+        afterYaml: 'yaml: from-A-agent',
+        attachmentId: 'server-A-id',
+      })
+    );
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+
+    bridge.stop();
+  });
+
+  it('drops a late event from a previous saved workflow when the user has moved to /create', () => {
+    // User was on saved workflow A, opened a conversation, navigated to
+    // /workflows/create. Late event from A lands on the new create-session
+    // bridge — must be dropped, otherwise A's edits mutate the fresh /create.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: default');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'new-unsaved-uuid',
+      // no workflowId
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'late-from-A',
+        beforeYaml: 'yaml: on-A',
+        afterYaml: 'yaml: A-edit',
+        attachmentId: 'workflow-A',
+        workflowId: 'workflow-A',
+      })
+    );
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+
+    bridge.stop();
+  });
+
+  it('falls back to matching by workflowId when the event has no attachmentId (legacy)', () => {
+    // Older servers may emit events without attachmentId; the bridge falls back
+    // to matching by workflowId so the previously-working saved→saved guard
+    // does not regress.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: on-B');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, { attachmentId: 'workflow-B' });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'late-legacy',
+        beforeYaml: 'yaml: on-A',
+        afterYaml: 'yaml: from-agent',
+        workflowId: 'workflow-A',
+      })
+    );
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
 
     bridge.stop();
   });

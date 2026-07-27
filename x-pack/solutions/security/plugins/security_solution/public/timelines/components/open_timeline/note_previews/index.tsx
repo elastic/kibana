@@ -17,13 +17,15 @@ import {
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { userSelectedNotesForDeletion } from '../../../../notes';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import type { TimelineResultNote } from '../types';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
@@ -34,7 +36,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
@@ -56,23 +58,42 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
   const handleClick = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName: selectedPatterns.join(','),
-          scopeId: timelineId,
+    const indexName = selectedPatterns.join(',');
+    if (enableNewFlyout) {
+      openDocumentFlyoutFromPattern({
+        documentId: eventId,
+        indexName,
+        origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+      });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
         },
-      },
-    });
+      });
+    }
     telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: timelineId,
       panel: 'right',
     });
-  }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
+  }, [
+    eventId,
+    openFlyout,
+    selectedPatterns,
+    telemetry,
+    timelineId,
+    enableNewFlyout,
+    openDocumentFlyoutFromPattern,
+  ]);
 
   return (
     <EuiToolTip content={i18n.TOGGLE_EXPAND_EVENT_DETAILS} disableScreenReaderOutput>

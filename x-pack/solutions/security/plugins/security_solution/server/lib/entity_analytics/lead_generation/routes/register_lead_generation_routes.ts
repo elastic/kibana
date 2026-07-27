@@ -19,8 +19,9 @@ export const registerLeadGenerationRoutes = ({
   router,
   logger,
   getStartServices,
+  ml,
 }: EntityAnalyticsRoutesDeps) => {
-  generateLeadsRoute(router, logger, getStartServices);
+  generateLeadsRoute(router, logger, getStartServices, ml);
   getLeadsRoute(router, logger);
   getLeadGenerationStatusRoute(router, logger, getStartServices);
   dismissLeadRoute(router, logger);

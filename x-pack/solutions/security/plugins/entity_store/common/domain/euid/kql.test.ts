@@ -175,10 +175,12 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBeDefined();
-      expect(result).toBe(`user.name: "alice" AND host.id: "host-1"`);
       expect(result).toContain('user.name: "alice"');
       expect(result).toContain('host.id: "host-1"');
       expect(result).not.toContain('entity.namespace');
+      // The local condition is now appended to ensure only docs matching the condition
+      // contribute to this entity (more restrictive but correct).
+      expect(result).toMatchSnapshot();
     });
 
     it('escapes double quotes in user.email', () => {
@@ -228,7 +230,52 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
             type: 'Identity',
           },
         })
-      ).toBe(`user.name: "tyrese.goldner" AND host.id: "4a7a8b68-1814-487f-9e56-5e7bed425edc"`);
+      ).toMatchSnapshot();
+    });
+
+    it('generates distinct KQL filters for user:alice@aws vs user:alice@gcp (cloud.provider disambiguation)', () => {
+      const awsDoc = {
+        user: { name: 'alice' },
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+      };
+      const gcpDoc = {
+        user: { name: 'alice' },
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'gcp' },
+      };
+
+      const awsFilter = getEuidKqlFilterBasedOnDocument('user', awsDoc);
+      const gcpFilter = getEuidKqlFilterBasedOnDocument('user', gcpDoc);
+
+      expect(awsFilter).toBeDefined();
+      expect(gcpFilter).toBeDefined();
+
+      // Full-string snapshots: verify the exact KQL shape including the compound condition
+      // (event.kind=asset AND event.module=asset_discovery AND cloud.provider==<value>).
+      expect(awsFilter).toMatchSnapshot('aws filter');
+      expect(gcpFilter).toMatchSnapshot('gcp filter');
+
+      // No cross-contamination: the aws filter must not reference gcp and vice versa.
+      expect(awsFilter).not.toContain('"gcp"');
+      expect(gcpFilter).not.toContain('"aws"');
+
+      // The two filters are entirely different.
+      expect(awsFilter).not.toEqual(gcpFilter);
+    });
+
+    it('does not include cloud.provider filter when event.module is not asset_discovery', () => {
+      // Other integrations sending event.kind=asset must NOT be routed via cloud.provider.
+      const result = getEuidKqlFilterBasedOnDocument('user', {
+        user: { name: 'alice' },
+        event: { kind: 'asset', module: 'other_integration' },
+        cloud: { provider: 'aws' },
+      });
+
+      expect(result).toBeDefined();
+      expect(result).toContain('user.name: "alice"');
+      // cloud.provider must NOT appear — namespace is determined by event.module source value.
+      expect(result).not.toContain('cloud.provider');
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { getTabs } from '.';
-import { ALERTS_PREVIEW, ALERT_SUMMARY } from '../../translations';
+import { ALERTS_LIST, ALERTS_PREVIEW, ALERT_SUMMARY } from '../../translations';
 
 const mockProps = {
   alertsPreviewStackBy0: 'mockAlertsPreviewStackBy0',
@@ -33,5 +33,11 @@ describe('getTabs', () => {
     const tabs = getTabs(mockProps);
 
     expect(tabs[1].name).toBe(ALERTS_PREVIEW);
+  });
+
+  it('returns the alerts preview tab with an override label when provided', () => {
+    const tabs = getTabs({ ...mockProps, alertsPreviewTabLabel: ALERTS_LIST });
+
+    expect(tabs[1].name).toBe(ALERTS_LIST);
   });
 });

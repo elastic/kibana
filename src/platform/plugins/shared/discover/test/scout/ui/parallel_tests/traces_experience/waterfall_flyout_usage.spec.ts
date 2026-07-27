@@ -26,7 +26,7 @@ type DiscoverPage = PageObjects['discover'];
 const openTraceTimeline = async (pageObjects: {
   discover: DiscoverPage;
   tracesExperience: {
-    openOverviewTab: (d: DiscoverPage) => Promise<void>;
+    openOverviewTab: () => Promise<void>;
     flyout: TracesFlyout;
   };
 }) => {
@@ -34,7 +34,7 @@ const openTraceTimeline = async (pageObjects: {
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
-  await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+  await pageObjects.tracesExperience.openOverviewTab();
   const { flyout } = pageObjects.tracesExperience;
   await flyout.traceSummary.fullScreenButton.click();
   await expect(flyout.waterfallFlyout.container).toBeVisible();
@@ -205,7 +205,7 @@ spaceTest.describe(
           await pageObjects.discover.writeAndSubmitEsqlQuery(
             `${TRACES.ESQL_QUERY} | WHERE span.name == "${DEEP_TRACE.SCROLL_TARGET_SPAN_NAME}"`
           );
-          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+          await pageObjects.tracesExperience.openOverviewTab();
         });
 
         await spaceTest.step('Open the full-screen waterfall', async () => {
@@ -247,24 +247,28 @@ spaceTest.describe(
       }
     );
 
+    // Each "Open in Discover" flow opens a new tab and runs a fresh ES|QL search, so bundling all
+    // three into one test forces them to share a single 60s budget and tips past it on the slower
+    // serverless deployment. Splitting them gives each flow its own budget (they run in parallel).
+    const openInternalSpanChildFlyout = async (pageObjects: {
+      discover: DiscoverPage;
+      tracesExperience: { openOverviewTab: () => Promise<void>; flyout: TracesFlyout };
+    }) => {
+      await openTraceTimeline(pageObjects);
+      await pageObjects.tracesExperience.flyout.waterfallFlyout
+        .getWaterfallItem(RICH_TRACE.INTERNAL_SPAN_NAME)
+        .content.click();
+    };
+
     spaceTest(
-      'Open in Discover from child flyout sections navigates to the correct data',
+      'Open in Discover from errors section navigates to the correct data',
       async ({ browserAuth, pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
-        await spaceTest.step('setup: login and open trace timeline', async () => {
+        await spaceTest.step('setup: login and open internal span child flyout', async () => {
           await browserAuth.loginAsViewer();
-          await openTraceTimeline(pageObjects);
+          await openInternalSpanChildFlyout(pageObjects);
         });
-
-        await spaceTest.step(
-          'Internal span child flyout - click on the internal span row',
-          async () => {
-            await flyout.waterfallFlyout
-              .getWaterfallItem(RICH_TRACE.INTERNAL_SPAN_NAME)
-              .content.click();
-          }
-        );
 
         await spaceTest.step(
           'Internal span child flyout - errors Open in Discover shows the span error',
@@ -275,13 +279,18 @@ spaceTest.describe(
             );
           }
         );
+      }
+    );
 
-        await spaceTest.step(
-          'Internal span child flyout - switch back to original tab',
-          async () => {
-            await pageObjects.discover.navigateToTabByName('Untitled');
-          }
-        );
+    spaceTest(
+      'Open in Discover from logs section navigates to the correct data',
+      async ({ browserAuth, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open internal span child flyout', async () => {
+          await browserAuth.loginAsViewer();
+          await openInternalSpanChildFlyout(pageObjects);
+        });
 
         await spaceTest.step(
           'Internal span child flyout - logs Open in Discover shows the correlated logs',
@@ -298,13 +307,18 @@ spaceTest.describe(
             );
           }
         );
+      }
+    );
 
-        await spaceTest.step(
-          'Internal span child flyout - switch back to original tab',
-          async () => {
-            await pageObjects.discover.navigateToTabByName('Untitled');
-          }
-        );
+    spaceTest(
+      'Open in Discover from span links section navigates to the correct data',
+      async ({ browserAuth, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open internal span child flyout', async () => {
+          await browserAuth.loginAsViewer();
+          await openInternalSpanChildFlyout(pageObjects);
+        });
 
         await spaceTest.step(
           'Internal span child flyout - span links Open in Discover shows the linked span',

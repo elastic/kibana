@@ -1,0 +1,43 @@
+format_version: 3.0.0
+name: test_agentless_only
+title: 'Test Agentless Only'
+version: 1.0.0
+source:
+  license: 'Elastic-2.0'
+description: 'Test package that only supports agentless deployment'
+type: integration
+categories:
+  - custom
+conditions:
+  kibana:
+    version: '^9.0.0'
+  elastic:
+    subscription: 'basic'
+policy_templates:
+  - name: sample
+    title: Sample logs
+    description: Collect sample logs
+    deployment_modes:
+      default:
+        enabled: false
+      agentless:
+        enabled: true
+        organization: security
+        division: engineering
+        team: security-service-integrations
+    inputs:
+      - type: httpjson
+        title: Collect sample logs from instances
+        description: Collecting sample logs
+        vars:
+          - name: api_key
+            type: password
+            title: API Key
+            multi: false
+            required: true
+            show_user: true
+            description: A test API key secret
+            secret: true
+owner:
+  github: elastic/integrations
+  type: elastic

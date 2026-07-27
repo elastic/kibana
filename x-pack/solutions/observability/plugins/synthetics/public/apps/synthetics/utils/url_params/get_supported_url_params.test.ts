@@ -75,6 +75,7 @@ describe('getSupportedUrlParams', () => {
       packagePolicyId: undefined,
       projects: [],
       remoteName: undefined,
+      remoteNames: [],
       schedules: [],
       spaceId: undefined,
       statusCodes: [],
@@ -82,7 +83,7 @@ describe('getSupportedUrlParams', () => {
       useLogicalAndFor: [],
       view: undefined,
       browserResourceTypes: [],
-      party: [],
+      certOrigin: [],
       issuers: [],
       expiringWithin: undefined,
     });

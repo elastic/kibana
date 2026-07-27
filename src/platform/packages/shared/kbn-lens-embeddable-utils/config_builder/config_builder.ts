@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensEmbeddableInput } from '@kbn/lens-common';
+import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
@@ -55,7 +55,7 @@ import {
 } from './transforms/charts/datatable';
 import type { LensApiConfig, LensApiConfigChartType } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
-import { isLensLegacyFormat } from './utils';
+import { isLensLegacyFormat, isEsqlTableTypeDataSource } from './utils';
 
 const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsMetric: 'metric',
@@ -68,6 +68,34 @@ const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsPie: 'pie',
   lnsDatatable: 'data_table',
 };
+
+/**
+ * `lnsPie` is the Lens `visualizationType` for the partition plugin and is
+ * shared across all partition shapes. The API distinguishes them via `type`,
+ * except for `donut`, which is modeled as a pie with `styling.donut_hole` set.
+ */
+const partitionShapeToApiType: Record<string, LensApiConfigChartType> = {
+  pie: 'pie',
+  donut: 'pie',
+  treemap: 'treemap',
+  mosaic: 'mosaic',
+  waffle: 'waffle',
+};
+
+type PartitionLensAttributes = Extract<LensAttributes, { visualizationType: 'lnsPie' }>;
+
+function isPartitionAttributes(attributes: LensAttributes): attributes is PartitionLensAttributes {
+  return attributes.visualizationType === 'lnsPie';
+}
+
+function getPartitionShape(
+  attributes: LensAttributes
+): LensPartitionVisualizationState['shape'] | undefined {
+  if (!isPartitionAttributes(attributes)) {
+    return undefined;
+  }
+  return attributes.state.visualization?.shape;
+}
 
 /**
  * A minimal type to extend for type lookup
@@ -172,12 +200,28 @@ export class LensConfigBuilder {
     return type in this.apiConvertersByChart;
   }
 
-  getCompatibleType(type: string): LensApiConfigChartType {
-    const compatType = compatibilityMap[type];
+  /**
+   * Resolve the Lens API config type from full `LensAttributes`. Attributes are
+   * required to disambiguate `lnsPie`, which is shared by every partition
+   * shape (`pie`, `donut`, `treemap`, `mosaic`, `waffle`).
+   */
+  getCompatibleType(attributes: LensAttributes): LensApiConfigChartType {
+    const visType = attributes.visualizationType;
 
-    if (compatType) return compatType;
+    if (isPartitionAttributes(attributes)) {
+      const shape = getPartitionShape(attributes);
+      const apiType = shape ? partitionShapeToApiType[shape] : undefined;
+      if (apiType) {
+        return apiType;
+      }
+      throw new Error(`No compatible type found for lnsPie with shape: ${shape}`);
+    }
 
-    throw new Error(`No compatible type found for type: ${type}`);
+    if (visType && compatibilityMap[visType]) {
+      return compatibilityMap[visType];
+    }
+
+    throw new Error(`No compatible type found for visualizationType: ${visType}`);
   }
 
   getType<C extends ChartTypeLike>(config: C): string | undefined | null {
@@ -269,9 +313,21 @@ export class LensConfigBuilder {
       throw new Error(`No API converter found for chart type: ${visType} as ${type}`);
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
+    const chartConfig = converter.fromLensStateToAPI(config);
+    const panelFiltersAndQuery = filtersAndQueryToApiFormat(config);
+
+    // Omit panel-level query on ES|QL charts, query is on data_source
+    if ('data_source' in chartConfig && isEsqlTableTypeDataSource(chartConfig.data_source)) {
+      const { query: _, ...panelFiltersWithoutQuery } = panelFiltersAndQuery;
+      return {
+        ...chartConfig,
+        ...panelFiltersWithoutQuery,
+      };
+    }
+
     return {
-      ...converter.fromLensStateToAPI(config),
-      ...filtersAndQueryToApiFormat(config),
+      ...chartConfig,
+      ...panelFiltersAndQuery,
     };
   }
 }

@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { durationSchema, tagsSchema } from './common';
+import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
   VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
-  MAX_BULK_ITEMS,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
@@ -29,12 +29,14 @@ export const actionPolicyDestinationTypeSchema = z
 
 export type ActionPolicyDestinationType = z.infer<typeof actionPolicyDestinationTypeSchema>;
 
-const workflowActionPolicyDestinationSchema = z.object({
-  type: z
-    .literal(actionPolicyDestinationTypeSchema.enum.workflow)
-    .describe('The destination type.'),
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
-});
+const workflowActionPolicyDestinationSchema = z
+  .object({
+    type: z
+      .literal(actionPolicyDestinationTypeSchema.enum.workflow)
+      .describe('The destination type.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
+  })
+  .strict();
 
 export const actionPolicyDestinationSchema = z
   .discriminatedUnion('type', [workflowActionPolicyDestinationSchema])
@@ -48,28 +50,22 @@ export const groupingModeSchema = z
 
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
-export const actionPolicyTypeSchema = z
-  .enum(['global', 'single_rule'])
-  .describe(
-    'The action policy type. "global" matches alerts from any rule in the space (default). "single_rule" matches alerts only from the linked rule (requires ruleId).'
-  );
-
-export type ActionPolicyType = z.infer<typeof actionPolicyTypeSchema>;
-
 export const throttleStrategySchema = z
   .enum(['on_status_change', 'per_status_interval', 'time_interval', 'every_time'])
   .describe('The throttle strategy that controls how often notifications are sent.');
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
 
-const throttleSchema = z.object({
-  strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-  interval: durationSchema
-    .nullish()
-    .describe(
-      'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
-    ),
-});
+const throttleSchema = z
+  .object({
+    strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
+    interval: durationSchema
+      .nullish()
+      .describe(
+        'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+      ),
+  })
+  .strict();
 
 export const PER_EPISODE_STRATEGIES = new Set<string>([
   'on_status_change',
@@ -89,8 +85,6 @@ export interface ValidationPayload {
   value: {
     groupingMode?: string | null;
     throttle?: { strategy?: string; interval?: string | null } | null;
-    type?: string;
-    ruleId?: string;
   };
   issues: z.core.$ZodRawIssue[];
 }
@@ -129,150 +123,70 @@ const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   validateStrategyInterval(payload);
 };
 
-export const validateTypeAndRuleId = (payload: ValidationPayload) => {
-  const { value: data, issues } = payload;
-
-  if (data.type === 'single_rule') {
-    if (!data.ruleId) {
-      issues.push({
-        code: 'custom',
-        message: 'ruleId is required when type is "single_rule"',
-        path: ['ruleId'],
-        input: data,
-      });
-    }
-    return;
-  }
-
-  if (data.ruleId !== undefined) {
-    issues.push({
-      code: 'custom',
-      message: 'ruleId is only allowed when type is "single_rule"',
-      path: ['ruleId'],
-      input: data,
-    });
-  }
-};
-
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
 
-export const snoozeActionPolicyBodySchema = z.object({
-  snoozedUntil: z.iso
-    .datetime()
-    .describe('The ISO datetime until which the action policy should be snoozed.'),
-});
+export const snoozeActionPolicyBodySchema = z
+  .object({
+    snoozedUntil: z.iso
+      .datetime()
+      .describe('The ISO datetime until which the action policy should be snoozed.'),
+  })
+  .strict();
 
 export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema>;
 
-const bulkEnableActionSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-  action: z.literal('enable').describe('The bulk action type.'),
-});
+/**
+ * Request body for `POST /action_policies/_bulk_snooze`. Reuses the shared
+ * by-ID bulk body (`ids`, 1..MAX_BULK_ITEMS) and adds the snooze expiry so
+ * every action policy in the batch is snoozed until the same instant.
+ */
+export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
+  .extend({
+    snoozedUntil: z.iso
+      .datetime()
+      .describe('The ISO datetime until which the targeted action policies should be snoozed.'),
+  })
+  .strict();
 
-const bulkDisableActionSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-  action: z.literal('disable').describe('The bulk action type.'),
-});
+export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPoliciesBodySchema>;
 
-const bulkSnoozeActionSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-  action: z.literal('snooze').describe('The bulk action type.'),
-  snoozedUntil: z.iso
-    .datetime()
-    .describe('The ISO datetime until which the action policy should be snoozed.'),
-});
-
-const bulkUnsnoozeActionSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-  action: z.literal('unsnooze').describe('The bulk action type.'),
-});
-
-const bulkDeleteActionSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-  action: z.literal('delete').describe('The bulk action type.'),
-});
-
-const bulkUpdateApiKeyActionSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-  action: z.literal('update_api_key').describe('The bulk action type.'),
-});
-
-export const actionPolicyBulkActionSchema = z
-  .discriminatedUnion('action', [
-    bulkEnableActionSchema,
-    bulkDisableActionSchema,
-    bulkSnoozeActionSchema,
-    bulkUnsnoozeActionSchema,
-    bulkDeleteActionSchema,
-    bulkUpdateApiKeyActionSchema,
-  ])
-  .describe('A bulk action to perform on an action policy.');
-
-export type ActionPolicyBulkAction = z.infer<typeof actionPolicyBulkActionSchema>;
-
-export const bulkActionActionPoliciesBodySchema = z.object({
-  actions: z
-    .array(actionPolicyBulkActionSchema)
-    .min(1, 'At least one action is required')
-    .max(MAX_BULK_ITEMS)
-    .describe('The list of bulk actions to perform.'),
-});
-
-export type BulkActionActionPoliciesBody = z.infer<typeof bulkActionActionPoliciesBodySchema>;
-
-const createActionPolicyDataBaseSchema = z.object({
-  name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
-  description: z
-    .string()
-    .max(MAX_DESCRIPTION_LENGTH)
-    .describe('A description of the action policy.'),
-  type: actionPolicyTypeSchema
-    .default('global')
-    .describe('The action policy type. Defaults to "global" when omitted.'),
-  ruleId: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('The rule this policy is attached to. Required when type is "single_rule".'),
-  destinations: z
-    .array(actionPolicyDestinationSchema)
-    .min(1, 'At least one destination must be provided')
-    .max(ACTION_POLICY_MAX_DESTINATIONS)
-    .describe('The list of destinations. At least one is required.'),
-  matcher: z
-    .string()
-    .max(MAX_KQL_LENGTH)
-    .optional()
-    .describe('A KQL query string to match alerts.'),
-  groupBy: z
-    .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-    .max(MAX_GROUPING_FIELDS)
-    .optional()
-    .describe('The fields used to group alerts.'),
-  tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-  groupingMode: groupingModeSchema
-    .optional()
-    .describe('The grouping mode for alert notifications.'),
-  throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
-});
+const createActionPolicyDataBaseSchema = z
+  .object({
+    name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
+    description: z
+      .string()
+      .max(MAX_DESCRIPTION_LENGTH)
+      .describe('A description of the action policy.'),
+    destinations: z
+      .array(actionPolicyDestinationSchema)
+      .min(1, 'At least one destination must be provided')
+      .max(ACTION_POLICY_MAX_DESTINATIONS)
+      .describe('The list of destinations. At least one is required.'),
+    matcher: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe('A KQL query string to match alerts.'),
+    groupBy: z
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_GROUPING_FIELDS)
+      .optional()
+      .describe('The fields used to group alerts.'),
+    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
+    groupingMode: groupingModeSchema
+      .optional()
+      .describe('The grouping mode for alert notifications.'),
+    throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
+  })
+  .strict();
 
 export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema.check(
-  validateGroupingModeAndStrategy,
-  validateTypeAndRuleId
+  validateGroupingModeAndStrategy
 );
 
-export const actionPolicyTypeAndRuleIdSchema = createActionPolicyDataBaseSchema
-  .pick({ type: true, ruleId: true })
-  .check(validateTypeAndRuleId);
-
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
-// Caller-facing shape: `type` is optional because the schema defaults it to 'global'.
 export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
 
-// Note: `type` and `ruleId` are immutable after creation. The schema is
-// strict so attempts to send them through update return 400 instead of
-// silently stripping the fields. To change either, delete and recreate the
-// policy.
 export const updateActionPolicyDataSchema = z
   .object({
     name: z

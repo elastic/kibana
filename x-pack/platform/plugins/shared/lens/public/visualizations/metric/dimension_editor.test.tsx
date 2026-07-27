@@ -73,6 +73,7 @@ describe('dimension editor', () => {
     subtitle: faker.lorem.word(5),
     secondaryLabel: faker.lorem.word(3),
     secondaryTrend: { type: 'none' },
+    density: 'compact',
     progressDirection: 'vertical',
     maxCols: 5,
     color: faker.color.rgb(),

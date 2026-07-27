@@ -30,6 +30,11 @@ export class AlertsTablePage {
   public readonly flyoutViewInAppButton: Locator;
   public readonly flyoutAlertDetailsButton: Locator;
   public readonly flyoutViewRuleDetailsLink: Locator;
+  // Add-to-case row actions / dialogs
+  public readonly addToExistingCaseAction: Locator;
+  public readonly addToNewCaseAction: Locator;
+  public readonly createCaseFlyout: Locator;
+  public readonly addToExistingCaseModal: Locator;
   public readonly queryInput: Locator;
   public readonly dataGrid: EuiDataGridWrapper;
   public readonly groupSelector: Locator;
@@ -48,7 +53,7 @@ export class AlertsTablePage {
     this.pageWithData = this.page.testSubj.locator(SUBJ.PAGE_WITH_DATA);
     this.noDataState = this.page.testSubj.locator(SUBJ.TABLE_EMPTY_STATE);
     this.errorPrompt = this.page.testSubj.locator(SUBJ.TABLE_ERROR_PROMPT);
-    this.errorToast = this.page.testSubj.locator('errorToastMessage');
+    this.errorToast = this.page.testSubj.locator('errorToast');
     this.actionsMenu = this.page.testSubj.locator(SUBJ.ACTIONS_MENU);
     this.groupSelector = this.page.testSubj.locator('group-selector-dropdown');
     this.summaryWidget = this.page.testSubj.locator('alertSummaryWidgetFullSize');
@@ -65,6 +70,10 @@ export class AlertsTablePage {
     this.flyoutViewInAppButton = this.page.testSubj.locator('alertsFlyoutViewInAppButton');
     this.flyoutAlertDetailsButton = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
     this.flyoutViewRuleDetailsLink = this.page.testSubj.locator('viewRuleDetailsFlyout');
+    this.addToExistingCaseAction = this.page.testSubj.locator('add-to-existing-case-action');
+    this.addToNewCaseAction = this.page.testSubj.locator('add-to-new-case-action');
+    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
+    this.addToExistingCaseModal = this.page.testSubj.locator('all-cases-modal');
     this.queryInput = this.page.testSubj.locator('queryInput');
   }
 
@@ -105,8 +114,8 @@ export class AlertsTablePage {
       .locator(SUBJ.TABLE_LOADING)
       .waitFor({ state: 'hidden', timeout: 30_000 });
     await Promise.race([
-      this.table.waitFor({ state: 'visible' }),
-      this.noDataState.waitFor({ state: 'visible' }),
+      this.table.waitFor({ state: 'visible', timeout: 30_000 }),
+      this.noDataState.waitFor({ state: 'visible', timeout: 30_000 }),
     ]);
   }
 
@@ -131,23 +140,6 @@ export class AlertsTablePage {
     return ariaRowCount ? Number.parseInt(ariaRowCount, 10) : 0;
   }
 
-  /**
-   * Returns the human-readable time range shown by the super date picker. When
-   * an absolute/relative start-end range is active it joins the two popover
-   * button labels; otherwise it returns the quick-range "show dates" label.
-   */
-  async getTimeRangeText(): Promise<string> {
-    const startButton = this.page.testSubj.locator('superDatePickerstartDatePopoverButton');
-    if (await startButton.isVisible()) {
-      const start = (await startButton.innerText()).trim();
-      const end = (
-        await this.page.testSubj.locator('superDatePickerendDatePopoverButton').innerText()
-      ).trim();
-      return `${start} - ${end}`;
-    }
-    return (await this.page.testSubj.locator('superDatePickerShowDatesButton').innerText()).trim();
-  }
-
   // Query bar
   async submitQuery(query: string) {
     await this.queryInput.fill(query);
@@ -170,8 +162,30 @@ export class AlertsTablePage {
   }
 
   async closeFlyout() {
-    await this.flyout.locator('[data-test-subj="euiFlyoutCloseButton"]').click();
+    // A transient global toast (e.g. a background request failing for a
+    // low-privilege role) can overlap the flyout's close button and intercept
+    // the click. Dismiss any toasts first, then fall back to the Escape key if
+    // the button is still obscured, so closing the flyout stays deterministic.
+    await this.dismissToasts();
+    const closeButton = this.flyout.locator('[data-test-subj="euiFlyoutCloseButton"]');
+    try {
+      await closeButton.click({ timeout: 5_000 });
+    } catch {
+      await this.page.keyboard.press('Escape');
+    }
     await this.flyout.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Clears any visible global toasts so they cannot intercept pointer events on
+   * elements underneath them (e.g. the flyout close button). No-op when there
+   * are no toasts.
+   */
+  async dismissToasts() {
+    const toastCloseButtons = await this.page.locator('[data-test-subj="toastCloseButton"]').all();
+    for (const toastCloseButton of toastCloseButtons) {
+      await toastCloseButton.click({ timeout: 2_000 }).catch(() => {});
+    }
   }
 
   // Row actions
@@ -188,17 +202,13 @@ export class AlertsTablePage {
     await this.page.testSubj.click('viewRuleDetails');
   }
 
-  // Date picker
-  /**
-   * Opens the super date picker quick menu and selects a "commonly used" range
-   * (e.g. `Last 15 minutes`), then waits for the table to reload.
-   */
-  async selectCommonlyUsedDateRange(label: string) {
-    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
-    // EUI builds the commonly-used data-test-subj by replacing only the first
-    // space in the label (e.g. `Last 15 minutes` -> `Last_15 minutes`).
-    await this.page.testSubj.click(`superDatePickerCommonlyUsed_${label.replace(' ', '_')}`);
-    await this.waitForTableToLoad();
+  // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
+  async clickAddToNewCase() {
+    await this.addToNewCaseAction.click();
+  }
+
+  async clickAddToExistingCase() {
+    await this.addToExistingCaseAction.click();
   }
 
   // Pagination
@@ -271,6 +281,17 @@ export class AlertsTablePage {
       await button.click().catch(() => {});
     }
     return (allTitles[allTitles.length - 1] ?? '').trim();
+  }
+
+  /**
+   * Counts the muted/snoozed indicator badges (`bellSlash`) currently rendered
+   * in the table. The badge is shown by the alert status cell for every alert
+   * whose instance id is in the rule's muted/snoozed list, so it reflects the
+   * UI treatment of the muted state rather than the raw `kibana.alert.muted`
+   * field.
+   */
+  async getVisibleSnoozedBadgeCount(): Promise<number> {
+    return this.page.testSubj.locator('alertSnoozedBadge').count();
   }
 
   /**

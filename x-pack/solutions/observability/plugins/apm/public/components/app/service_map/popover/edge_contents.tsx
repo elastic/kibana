@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -18,7 +19,6 @@ import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { isEdge } from './utils';
@@ -68,7 +68,11 @@ export function EdgeContents({
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
   const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 

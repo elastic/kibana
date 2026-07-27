@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DEFAULT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   type CellActionFieldValue,
   CellActionsMode,
@@ -46,6 +49,31 @@ export const cellActionRenderer: CellActionRenderer = ({
     triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
     mode={CellActionsMode.HOVER_DOWN}
     visibleCellActions={5}
+    sourcererScopeId={getSourcererScopeId(scopeId)}
+    metadata={{ scopeId }}
+  >
+    {children}
+  </SecurityCellActions>
+);
+
+/**
+ * Cell action renderer for Cases.
+ * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
+ */
+export const casesCellActionRenderer: CellActionRenderer = ({
+  field,
+  value,
+  children,
+  scopeId,
+}: CellActionRendererProps) => (
+  <SecurityCellActions
+    data={{
+      field,
+      value: value ?? [],
+    }}
+    triggerId={SECURITY_CELL_ACTIONS_CASE_EVENTS}
+    mode={CellActionsMode.HOVER_DOWN}
+    visibleCellActions={2}
     sourcererScopeId={getSourcererScopeId(scopeId)}
     metadata={{ scopeId }}
   >

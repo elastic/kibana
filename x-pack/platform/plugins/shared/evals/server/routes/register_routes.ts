@@ -7,8 +7,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter } from '../types';
+import type { EvaluatorRegistry } from '../evaluators/types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
 import { registerGetExperimentRoute } from './experiments/get_experiment';
 import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
@@ -29,11 +31,17 @@ import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
+import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
+import { registerEvaluateRoute } from './evaluators/evaluate';
+import { registerResolveInstrumentationRoute } from './evaluators/resolve_instrumentation';
+import { registerValidateRoute } from './evaluators/validate';
 
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
   canEncrypt: boolean;
+  evaluatorRegistry: EvaluatorRegistry;
+  getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
 }
@@ -58,5 +66,9 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
+  registerListEvaluatorsRoute(dependencies);
+  registerEvaluateRoute(dependencies);
+  registerResolveInstrumentationRoute(dependencies);
+  registerValidateRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 };

@@ -52,7 +52,7 @@ export function ErrorBudgetHeader({
                 data-test-subj="sloActionsAddToDashboard"
               >
                 {i18n.translate('xpack.slo.item.actions.addToDashboard', {
-                  defaultMessage: 'Add to Dashboard',
+                  defaultMessage: 'Add to dashboard',
                 })}
               </EuiLink>
             </EuiFlexItem>

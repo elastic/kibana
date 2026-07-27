@@ -40,14 +40,6 @@ const breadcrumbGetters: {
   [key in Page]?: (values: DynamicPagePathValues) => Breadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
-  collectors: () => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.collectorsPageTitle', {
-        defaultMessage: 'Collectors',
-      }),
-    },
-  ],
   policies: () => [
     BASE_BREADCRUMB,
     {

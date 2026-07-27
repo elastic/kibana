@@ -9,12 +9,16 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { applySpacePrefix } from '@kbn/workflows';
 import {
   getOutboundEventChainHeaders,
+  KibanaApiCallError,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/workflows-extensions/server';
 import { getKibanaUrl } from '../utils/get_kibana_url';
 import { isTextContentType, readResponseStream } from '../utils/http_response';
+
+export { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 
 /**
  * Default cap on the response body size (bytes) when no per-step limit is supplied.
@@ -24,10 +28,11 @@ import { isTextContentType, readResponseStream } from '../utils/http_response';
 const DEFAULT_MAX_RESPONSE_BYTES = 10 * 1024 * 1024;
 
 /**
- * Maximum bytes captured from an error response body before being truncated and
- * appended to the thrown error message.
+ * Maximum number of characters of the (stringified) error body appended to the thrown
+ * error's `message`. This only caps the human-readable log string; the full parsed body
+ * (up to `maxResponseBytes`) is preserved on {@link KibanaApiCallError.body} for recovery.
  */
-const ERROR_BODY_TRUNCATION_BYTES = 1024 * 1024;
+const ERROR_MESSAGE_BODY_MAX_CHARS = 1024 * 1024;
 
 /**
  * Thrown by {@link callKibanaApi} when the response body exceeds the configured
@@ -50,7 +55,11 @@ export class CallKibanaApiResponseTooLargeError extends Error {
  */
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  /** Route path starting with `/`, e.g. `/api/cases`. Space prefix is added automatically. */
+  /**
+   * Space-relative route path starting with `/`, e.g. `/api/cases`. When `deps.spaceId`
+   * is a non-default space, it is prefixed with `/s/{spaceId}` automatically; pass the
+   * path without a space segment.
+   */
   path: string;
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined>;
@@ -77,6 +86,11 @@ export interface CallKibanaApiDeps {
   workflowRunId?: string;
   coreStart: CoreStart;
   cloudSetup?: CloudSetup;
+  /**
+   * Space the workflow is running in. When set to a non-default space, the request path is
+   * prefixed with `/s/{spaceId}`. When omitted or `'default'`, the path is used as-is.
+   */
+  spaceId?: string;
   /**
    * Cap on the size of the response body in bytes. `0` disables the limit. When omitted,
    * `DEFAULT_MAX_RESPONSE_BYTES` is used.
@@ -182,17 +196,38 @@ const parseResponseBody = async (
   }
 };
 
-const readErrorBody = async (response: Response): Promise<string> => {
-  if (!response.body) return '';
-  const { buffer, truncated } = await readResponseStream(response, ERROR_BODY_TRUNCATION_BYTES);
-  const text = buffer.toString('utf-8');
-  return truncated ? `${text}... [truncated]` : text;
+/**
+ * Builds the human-readable body fragment appended to {@link KibanaApiCallError.message}.
+ * Mirrors the previous `HTTP <status>: <body>` shape: objects are JSON-stringified, strings
+ * are used verbatim, Buffers are decoded as UTF-8. The result is capped at
+ * {@link ERROR_MESSAGE_BODY_MAX_CHARS} characters for log-safety; the full parsed value is
+ * still available on {@link KibanaApiCallError.body}.
+ */
+const stringifyErrorBodyForMessage = (body: unknown): string => {
+  if (body == null) return '';
+  let text: string;
+  if (typeof body === 'string') {
+    text = body;
+  } else if (Buffer.isBuffer(body)) {
+    text = body.toString('utf-8');
+  } else {
+    try {
+      text = JSON.stringify(body);
+    } catch {
+      text = String(body);
+    }
+  }
+  return text.length > ERROR_MESSAGE_BODY_MAX_CHARS
+    ? `${text.slice(0, ERROR_MESSAGE_BODY_MAX_CHARS)}... [truncated]`
+    : text;
 };
 
 /**
  * Calls a Kibana HTTP route on the running Kibana instance using the workflow's fake request
- * for authentication and origin marking. Throws on non-2xx responses (the thrown Error message
- * has the shape `HTTP <status>: <body>`).
+ * for authentication and origin marking. Throws a {@link KibanaApiCallError} on non-2xx
+ * responses (other than 304). Its `message` keeps the previous `HTTP <status>: <body>` shape,
+ * and it additionally exposes the parsed `status`, `headers`, and `body` so callers can recover
+ * a structured partial-success response via `try/catch` + `instanceof KibanaApiCallError`.
  *
  * This helper backs both the `kibana.request` YAML step (for its JSON-body / connector-definition
  * branches) and the `callKibanaApi` tool exposed to custom step handlers. Behavior is intentionally
@@ -203,11 +238,12 @@ export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
-  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride } = deps;
+  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride, spaceId } = deps;
   const maxResponseBytes = deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
   const baseUrl = baseUrlOverride ?? getKibanaUrl(coreStart, cloudSetup);
-  const url = `${baseUrl}${params.path}${buildQueryString(params.query)}`;
+  const path = applySpacePrefix(params.path, spaceId);
+  const url = `${baseUrl}${path}${buildQueryString(params.query)}`;
 
   const callerHeaders = stripReservedHeaders(params.headers);
   const outboundHeaders: Record<string, string> = {
@@ -231,8 +267,16 @@ export async function callKibanaApi<T = unknown>(
   // `Response.ok` is true only for 2xx; treat 304 Not Modified as a successful response with no body
   // so callers using conditional GETs see the same shape as a 204.
   if (!response.ok && response.status !== 304) {
-    const errorBody = await readErrorBody(response);
-    throw new Error(`HTTP ${response.status}: ${errorBody}`);
+    // Parse the error body via the same path (and size limit) as success so step authors can
+    // recover a structured partial-success response without string-parsing the message and
+    // without the previous separate 1 MB cap.
+    const errorBody = await parseResponseBody(response, maxResponseBytes);
+    throw new KibanaApiCallError({
+      status: response.status,
+      headers: headersToRecord(response.headers),
+      body: errorBody,
+      message: `HTTP ${response.status}: ${stringifyErrorBodyForMessage(errorBody)}`,
+    });
   }
 
   const body = (await parseResponseBody(response, maxResponseBytes)) as T;

@@ -41,12 +41,22 @@ interface ResolutionGroupTabProps {
   entityId: string;
   entityType: EntityType;
   scopeId: string;
+  /**
+   * When provided, clicking a related entity name is delegated to this callback (used by the
+   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   entityId,
   entityType,
   scopeId,
+  onShowEntity,
 }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
@@ -85,6 +95,16 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     (entity: Record<string, unknown>) => {
       const clickedEntityId = getEntityId(entity);
       const clickedEntityName = getEntityName(entity);
+
+      if (onShowEntity) {
+        onShowEntity({
+          engineType: entityType as string,
+          entityId: clickedEntityId,
+          entityName: clickedEntityName,
+        });
+        return;
+      }
+
       const panelKey = EntityPanelKeyByType[entityType as SecurityEntityType];
       const panelParam = EntityPanelParamByType[entityType as SecurityEntityType];
 
@@ -102,7 +122,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
         },
       });
     },
-    [openFlyout, entityType, scopeId]
+    [onShowEntity, openFlyout, entityType, scopeId]
   );
 
   const handleRemoveEntity = useCallback(

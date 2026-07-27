@@ -12,14 +12,32 @@ import {
   attachTimelineToExistingCase,
   addNewCase,
   selectCase,
+  getCasesAttachmentsEnabled,
+  createCaseFromTimelineFlyout,
+  navigateToCaseFromSuccessToaster,
 } from '../../../tasks/timeline';
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../../screens/create_new_case';
+import { TIMELINE_CASE_ATTACHMENT_LINK } from '../../../screens/timeline';
 import { getCase1 } from '../../../objects/case';
 import { getTimeline } from '../../../objects/timeline';
 import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { createCase, deleteCases } from '../../../tasks/api_calls/cases';
 
 const mockTimeline = getTimeline();
+
+// Attaching a timeline to a case behaves differently depending on the
+// `xpack.cases.attachments.enabled` feature flag:
+//  - flag off: a markdown `[title](url)` link is inserted into the case comment editor.
+//  - flag on: a structured `security.timeline` attachment is created on the case.
+// Each test reads the runtime flag and asserts the matching behavior.
+const expectLegacyTimelineLink = (input: string, timelineId: string, timelineTitle: string) => {
+  cy.location('origin').then((origin) => {
+    cy.get(input).should(
+      'have.text',
+      `[${timelineTitle}](${origin}/app/security/timelines?timeline=(id:%27${timelineId}%27,isOpen:!t))`
+    );
+  });
+};
 
 describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
@@ -34,26 +52,40 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
 
     it('attach timeline to a new case', function () {
       visitTimeline(this.myTimeline.savedObjectId);
-      attachTimelineToNewCase();
+      getCasesAttachmentsEnabled().then((attachmentsEnabled) => {
+        attachTimelineToNewCase();
 
-      cy.location('origin').then((origin) => {
-        cy.get(DESCRIPTION_INPUT).should(
-          'have.text',
-          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
-        );
+        if (attachmentsEnabled) {
+          createCaseFromTimelineFlyout();
+          navigateToCaseFromSuccessToaster();
+          cy.get(TIMELINE_CASE_ATTACHMENT_LINK(this.myTimeline.savedObjectId)).should('exist');
+        } else {
+          expectLegacyTimelineLink(
+            DESCRIPTION_INPUT,
+            this.myTimeline.savedObjectId,
+            this.myTimeline.title
+          );
+        }
       });
     });
 
     it('attach timeline to an existing case with no case', function () {
       visitTimeline(this.myTimeline.savedObjectId);
-      attachTimelineToExistingCase();
-      addNewCase();
+      getCasesAttachmentsEnabled().then((attachmentsEnabled) => {
+        attachTimelineToExistingCase();
+        addNewCase();
 
-      cy.location('origin').then((origin) => {
-        cy.get(DESCRIPTION_INPUT).should(
-          'have.text',
-          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
-        );
+        if (attachmentsEnabled) {
+          createCaseFromTimelineFlyout();
+          navigateToCaseFromSuccessToaster();
+          cy.get(TIMELINE_CASE_ATTACHMENT_LINK(this.myTimeline.savedObjectId)).should('exist');
+        } else {
+          expectLegacyTimelineLink(
+            DESCRIPTION_INPUT,
+            this.myTimeline.savedObjectId,
+            this.myTimeline.title
+          );
+        }
       });
     });
   });
@@ -69,14 +101,16 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
 
     it('attach timeline to an existing case', function () {
       visitTimeline(this.timelineId);
-      attachTimelineToExistingCase();
-      selectCase(this.caseId);
+      getCasesAttachmentsEnabled().then((attachmentsEnabled) => {
+        attachTimelineToExistingCase();
+        selectCase(this.caseId);
 
-      cy.location('origin').then((origin) => {
-        cy.get(ADD_COMMENT_INPUT).should(
-          'have.text',
-          `[${mockTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.timelineId}%27,isOpen:!t))`
-        );
+        if (attachmentsEnabled) {
+          navigateToCaseFromSuccessToaster();
+          cy.get(TIMELINE_CASE_ATTACHMENT_LINK(this.timelineId)).should('exist');
+        } else {
+          expectLegacyTimelineLink(ADD_COMMENT_INPUT, this.timelineId, mockTimeline.title);
+        }
       });
     });
 

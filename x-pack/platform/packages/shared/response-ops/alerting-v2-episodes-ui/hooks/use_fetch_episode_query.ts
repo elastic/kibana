@@ -43,7 +43,10 @@ export const useFetchEpisodeQuery = ({ episodeId, services }: UseFetchEpisodeQue
     select: (rows): AlertEpisode | undefined => {
       const row = esqlResponseToObjectRows<AlertEpisodeEsqlRow>(rows)[0];
       if (!row) return undefined;
-      return { ...row, last_tags: normalizeTags(row.last_tags) };
+      return {
+        ...row,
+        last_tags: normalizeTags(row.last_tags),
+      };
     },
     enabled: Boolean(episodeId),
     staleTime: QUERY_STALE_TIME,

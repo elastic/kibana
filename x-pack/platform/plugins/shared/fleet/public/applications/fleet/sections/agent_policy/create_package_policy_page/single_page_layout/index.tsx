@@ -83,6 +83,7 @@ import {
   type VarGroupSelection,
 } from '../services/var_group_helpers';
 import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
+import { applyIlmPolicyChange } from '../services/apply_ilm_policy';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
@@ -223,6 +224,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
   } = useOnSubmit({
@@ -294,8 +296,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
   );
 
-  // Namespace-level customization. Toggle state lives inside StepDefinePackagePolicy's hook;
-  // the parent only tracks the latest value via ref for the deferred post-save update.
+  // Namespace-level customization and ILM policy. Toggle/picker state live inside
+  // StepDefinePackagePolicy's hook; the parent only tracks the latest values via refs for the
+  // deferred post-save update.
   const installedNamespaceCustomizationEnabledFor = useMemo(() => {
     if (packageInfo && 'installationInfo' in packageInfo) {
       return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
@@ -303,29 +306,49 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     return [];
   }, [packageInfo]);
   const namespaceCustomizationEnabledRef = useRef<boolean>(false);
+  const ilmPolicyRef = useRef<string | undefined>(undefined);
   const namespaceCustomizationAppliedRef = useRef<string | undefined>(undefined);
 
-  // After policy save: sync the package's namespace_customization_enabled_for list (deferred update).
+  // After policy save: sync the package's namespace_customization_enabled_for list, then its
+  // ILM policy (deferred updates, applied as two separate API calls). The opt-in call must be
+  // awaited before the ILM call is sent: the server rejects an ILM policy for a namespace that
+  // isn't (yet) in namespace_customization_enabled_for, and since these are independent requests,
+  // firing them concurrently lets the ILM call race ahead of the opt-in one and get rejected.
   useEffect(() => {
     if (!savedPackagePolicy || !packageInfo) {
       return;
     }
-    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.id) {
+    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.policy.id) {
       return;
     }
-    namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
-    // Capture and reset the toggle value so stale state doesn't carry over if the form is reused.
+    namespaceCustomizationAppliedRef.current = savedPackagePolicy.policy.id;
+    // Capture and reset the toggle/picker values so stale state doesn't carry over if the form
+    // is reused.
     const wasEnabled = namespaceCustomizationEnabledRef.current;
     namespaceCustomizationEnabledRef.current = false;
-    void applyNamespaceCustomizationChange(
-      packageInfo.name,
-      packageInfo.version,
-      savedPackagePolicy.namespace,
-      wasEnabled,
-      installedNamespaceCustomizationEnabledFor,
-      notifications,
-      packageInfo.title ?? packageInfo.name
-    );
+    const selectedIlmPolicy = ilmPolicyRef.current;
+    ilmPolicyRef.current = undefined;
+
+    void (async () => {
+      await applyNamespaceCustomizationChange(
+        packageInfo.name,
+        packageInfo.version,
+        savedPackagePolicy.policy.namespace,
+        wasEnabled,
+        installedNamespaceCustomizationEnabledFor,
+        notifications,
+        packageInfo.title ?? packageInfo.name
+      );
+      await applyIlmPolicyChange(
+        packageInfo.name,
+        packageInfo.version,
+        savedPackagePolicy.policy.namespace,
+        selectedIlmPolicy,
+        packageInfo,
+        notifications,
+        packageInfo.title ?? packageInfo.name
+      );
+    })();
   }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
 
   // Retrieve agent count
@@ -494,6 +517,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
   );
+  const createBottomExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-create-bottom'
+  );
 
   // PLI auth blocks are registered to UI Extension context and are used to display upselling components.
   // Upselling components are rendered conditionally based on their availability from the PLI upselling service.
@@ -594,16 +621,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults}
-            submitAttempted={formState === 'INVALID'}
+            submitAttempted={submitAttempted}
             isAgentlessSelected={isAgentlessSelected}
             agentPolicies={agentPolicies}
             onNamespaceCustomizationEnabledChange={(enabled) => {
               namespaceCustomizationEnabledRef.current = enabled;
             }}
+            onIlmPolicyChange={(ilmPolicy) => {
+              ilmPolicyRef.current = ilmPolicy;
+            }}
+            deploymentSelector={
+              !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
+            }
           />
-
-          {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
-          {!useCheckableCardsForSetupTechnologySelector && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -613,9 +643,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
-              submitAttempted={formState === 'INVALID'}
+              submitAttempted={submitAttempted}
               isAgentlessSelected={isAgentlessSelected}
               varGroupSelections={varGroupSelections}
+              bottomExtension={
+                createBottomExtensionView && packagePolicy.package?.name ? (
+                  <ExtensionWrapper>
+                    <createBottomExtensionView.Component newPolicy={packagePolicy} />
+                  </ExtensionWrapper>
+                ) : undefined
+              }
             />
           )}
 
@@ -641,8 +678,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       packagePolicy,
       updatePackagePolicy,
       validationResults,
-      formState,
+      submitAttempted,
       extensionView,
+      createBottomExtensionView,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
@@ -657,6 +695,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const steps: EuiStepProps[] = [
     ...(addIntegrationFlyoutProps?.selectIntegrationStep
       ? [addIntegrationFlyoutProps?.selectIntegrationStep]
+      : []),
+    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
+              {
+                defaultMessage: 'Deployment',
+              }
+            ),
+            children: setupTechnologySelector,
+            headingElement: 'h2',
+          },
+        ]
       : []),
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
@@ -679,20 +731,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
-      ? [
-          {
-            title: i18n.translate(
-              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
-              {
-                defaultMessage: 'Deployment',
-              }
-            ),
-            children: setupTechnologySelector,
-            headingElement: 'h2',
-          },
-        ]
-      : []),
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {
@@ -840,30 +878,30 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               )}
             {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallAzureArmTemplateModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
             {formState === 'SUBMITTED_CLOUD_FORMATION' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallCloudFormationModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
             {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallGoogleCloudShellModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />

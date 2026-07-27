@@ -8,10 +8,10 @@
  */
 
 import { esql } from '@elastic/esql';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { sanitazeESQLInput, isSingleSource } from '@kbn/esql-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 import { firstNonNullable } from '../first_null_nullable';
-import type { ParsedMetricItem } from '../../../types';
+import type { ParsedMetricItem, MetricsGridSettings } from '../../../types';
 
 /**
  * Formats a single-line ES|QL query into a multi-line format where each
@@ -26,19 +26,7 @@ interface CreateESQLQueryParams {
   splitAccessors?: string[];
   whereStatements?: string[];
   originalSource?: string;
-}
-
-/**
- * METRICS_INFO returns the parent source name (index or data stream), even
- * when invoked against a single backing index. Naively reusing that for the
- * rebuilt chart query widens the scope back to the whole source and
- * re-introduces any cross backing-index field-type conflicts that
- * METRICS_INFO had already filtered out at the narrower scope. When the user
- * typed a single concrete source (no glob, no comma list), prefer it so the
- * chart query stays at the same scope METRICS_INFO actually scanned.
- */
-function isConcreteSingleSource(source: string | undefined): source is string {
-  return !!source && !source.includes('*') && !source.includes(',');
+  gridSettings?: MetricsGridSettings;
 }
 
 /**
@@ -52,6 +40,7 @@ function isConcreteSingleSource(source: string | undefined): source is string {
  * @param originalSource - The source the user typed in their query. When it is a single
  *   concrete index (e.g., a backing index), it is used as the chart query source instead
  *   of `metricItem.indexName` so the chart's scope matches the scope METRICS_INFO scanned.
+ * @param gridSettings - Optional per-metric_type aggregation overrides.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
@@ -59,9 +48,10 @@ export function createESQLQuery({
   splitAccessors = [],
   whereStatements = [],
   originalSource,
+  gridSettings,
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
-  const index = isConcreteSingleSource(originalSource) ? originalSource : indexName;
+  const index = isSingleSource(originalSource) ? originalSource : indexName;
   const instrument = firstNonNullable(metricTypes);
 
   if (fieldTypes.length === 0 || !instrument) {
@@ -73,6 +63,7 @@ export function createESQLQuery({
     instrument,
     metricName,
     placeholderName: 'metricName',
+    gridSettings,
   });
 
   if (!metricAggregation) {

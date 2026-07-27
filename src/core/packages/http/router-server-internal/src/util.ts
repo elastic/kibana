@@ -8,6 +8,7 @@
  */
 
 import { once } from 'lodash';
+import { onceCacheOnSuccess } from '@kbn/std';
 import {
   isFullValidatorContainer,
   type RouteValidatorFullConfigResponse,
@@ -59,7 +60,7 @@ export function prepareRouteConfigValidation<P, Q, B>(
     const validate = config.validate;
     return {
       ...config,
-      validate: once(() => prepareValidation(validate())),
+      validate: onceCacheOnSuccess(() => prepareValidation(validate())),
     };
   } else if (typeof config.validate === 'object' && typeof config.validate !== null) {
     return {
@@ -138,7 +139,14 @@ export function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
+  // When `validate` is a function (thunk), it is deferred to first request time for schema
+  // construction. Calling `getRequestValidation(validate)` on a function would immediately trigger
+  // the thunk, breaking the deferral strategy. So we check if it's a function first, and if so,
+  // skip the inspection and assume body may exist. This is safe: body will be parsed, which is
+  // correct for routes with body schemas, and only minor overhead for routes without one.
+  const shouldValidateBody =
+    (validate && (typeof validate === 'function' || !!getRequestValidation(validate).body)) ||
+    !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {

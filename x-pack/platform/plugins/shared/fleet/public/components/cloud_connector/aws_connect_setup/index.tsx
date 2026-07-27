@@ -6,7 +6,16 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  type IconType,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AccountType } from '../../../../common/types';
@@ -31,7 +40,12 @@ export interface AwsConnectSetupProps {
   initialStaticKeys?: Partial<AwsStaticKeyCredentials>;
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
   showIdentityFederation?: boolean;
-  onNext?: () => void;
+  staticKeysContent?: React.ReactNode;
+  onBack?: () => void;
+  onContinue?: () => void;
+  isContinueButtonLoading?: boolean;
+  continueButtonLabel?: React.ReactNode;
+  continueButtonIconType?: IconType;
   onConnectorIdChange?: (connectorId: string | undefined) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
   onTemporaryKeysChange?: (keys: AwsTemporaryKeyCredentials | undefined) => void;
@@ -46,7 +60,12 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialStaticKeys,
   initialTemporaryKeys,
   showIdentityFederation = true,
-  onNext,
+  staticKeysContent,
+  onBack,
+  onContinue,
+  isContinueButtonLoading = false,
+  continueButtonLabel,
+  continueButtonIconType,
   onConnectorIdChange,
   onStaticKeysChange,
   onTemporaryKeysChange,
@@ -92,7 +111,6 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         onChange={handleAuthTypeChange}
       />
       <EuiSpacer size="l" />
-      {/* TODO: for IDF and static keys, generate a CFN template to download and show instructions to run it (AWS CLI) */}
       {authType === 'identity_federation' && (
         <AwsIdentityFederationSetup
           cloud={cloud}
@@ -105,12 +123,15 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         />
       )}
       {authType === 'static_keys' && (
-        <AwsStaticKeysForm
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          initialValues={initialStaticKeys}
-          onReadyChange={setIsFormReady}
-          onFieldsChange={onStaticKeysChange}
-        />
+        <>
+          {staticKeysContent}
+          <AwsStaticKeysForm
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            initialValues={initialStaticKeys}
+            onReadyChange={setIsFormReady}
+            onFieldsChange={onStaticKeysChange}
+          />
+        </>
       )}
       {authType === 'temporary_keys' && (
         <AwsTemporaryKeysForm
@@ -120,22 +141,43 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
           onFieldsChange={onTemporaryKeysChange}
         />
       )}
-      {onNext && (
+      {(onBack || onContinue) && (
         <>
           <EuiSpacer size="l" />
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isDisabled={!isFormReady}
-                onClick={onNext}
-                data-test-subj="awsConnectSetup-nextButton"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.awsConnectSetup.nextButton"
-                  defaultMessage="Next"
-                />
-              </EuiButton>
+              {onBack && (
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  iconSide="left"
+                  onClick={onBack}
+                  data-test-subj="awsConnectSetup-backButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.awsConnectSetup.backButton"
+                    defaultMessage="Back"
+                  />
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {onContinue && (
+                <EuiButton
+                  fill
+                  isDisabled={!isFormReady || isContinueButtonLoading}
+                  isLoading={isContinueButtonLoading}
+                  onClick={onContinue}
+                  iconType={continueButtonIconType}
+                  data-test-subj="awsConnectSetup-continueButton"
+                >
+                  {continueButtonLabel ?? (
+                    <FormattedMessage
+                      id="xpack.fleet.awsConnectSetup.continueButton"
+                      defaultMessage="Continue"
+                    />
+                  )}
+                </EuiButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

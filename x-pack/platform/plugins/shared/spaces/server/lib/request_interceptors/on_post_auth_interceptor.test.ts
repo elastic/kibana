@@ -36,6 +36,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   let postAuthHandler: OnPostAuthHandler;
   let getSpacesService: jest.Mock;
   let getCurrent: jest.Mock;
+  let getCurrentProfileId: jest.Mock;
   let update: jest.Mock;
   let getAll: jest.Mock;
   let getSpaceId: jest.Mock;
@@ -44,6 +45,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
 
   const setup = () => {
     getCurrent = jest.fn();
+    getCurrentProfileId = jest.fn();
     update = jest.fn().mockResolvedValue(undefined);
     getAll = jest.fn();
     getSpaceId = jest.fn();
@@ -51,6 +53,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
     const coreStart = coreMock.createStart();
     coreStart.userProfile = {
       getCurrent,
+      getCurrentProfileId,
       bulkGet: jest.fn(),
       suggest: jest.fn(),
       update,

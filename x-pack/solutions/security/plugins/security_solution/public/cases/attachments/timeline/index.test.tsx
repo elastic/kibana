@@ -27,6 +27,10 @@ jest.mock('./timeline_link', () => ({
   ),
 }));
 
+jest.mock('./case_view_timelines', () => ({
+  CaseViewTimelines: () => <div data-test-subj="case-view-timelines-mock" />,
+}));
+
 const baseProps = {
   savedObjectId: 'saved-object-id-1',
   caseData: { id: 'case-1', title: 'Case 1' },
@@ -58,5 +62,21 @@ describe('Timeline attachment', () => {
     expect(attachmentType.getAttachmentRemovalObject?.(baseProps)).toEqual({
       event: REMOVED_TIMELINE_LABEL,
     });
+  });
+
+  it('exposes the case view timelines tab via getAttachmentTabViewObject', async () => {
+    const attachmentType = getTimelineAttachment();
+    const tabViewObject = attachmentType.getAttachmentTabViewObject?.();
+    expect(tabViewObject?.children).toBeDefined();
+
+    const Tab = tabViewObject!.children!;
+    render(
+      <Tab
+        caseData={{ id: 'case-1', title: 'Case 1', comments: [] } as never}
+        searchTerm={undefined}
+      />
+    );
+
+    expect(await screen.findByTestId('case-view-timelines-mock')).toBeInTheDocument();
   });
 });

@@ -33,8 +33,8 @@ import fastIsEqual from 'fast-deep-equal';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -109,13 +109,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ = ((initialState.query
-        ? new BehaviorSubject(initialState.query)
-        : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
+      const query$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.query$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ = ((initialState.filters
-        ? new BehaviorSubject(initialState.filters)
-        : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
+      const filters$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.filters$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const titleManager = initializeTitleManager(initialState);
@@ -140,17 +136,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           swimlaneManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...swimLaneComparators,
-            id: 'skip',
-            query: 'skip',
-            refreshConfig: 'skip',
-            filters: 'skip',
-          };
-        },
+        getComparators: () => ({
+          ...titleComparators,
+          ...timeRangeComparators,
+          ...swimLaneComparators,
+        }),
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

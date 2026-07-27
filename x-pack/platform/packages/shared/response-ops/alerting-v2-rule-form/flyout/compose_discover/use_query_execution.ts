@@ -39,7 +39,22 @@ interface UseQueryExecutionParams {
   timeField: string;
   timeRange: TimeRange;
   data: DataPublicPluginStart;
+  /**
+   * The active tab. Each tab remembers its own last-executed query/time
+   * range/time field, so switching tabs shows that tab's own cached result —
+   * never another tab's — without re-running or clearing anything. Defaults
+   * to a single shared tab for callers with no tab concept.
+   */
+  tab?: string;
 }
+
+interface TabExecution {
+  query: string;
+  timeRange: TimeRange;
+  timeField: string;
+}
+
+const DEFAULT_TAB = 'default';
 
 function formatCellValue(value: unknown): string | null {
   if (value === null || value === undefined) return null;
@@ -79,11 +94,15 @@ export const useQueryExecution = ({
   timeField,
   timeRange,
   data,
+  tab = DEFAULT_TAB,
 }: UseQueryExecutionParams): QueryExecutionResult => {
   const queryClient = useQueryClient();
-  const [executionQuery, setExecutionQuery] = useState<string | null>(null);
-  const [executionTimeRange, setExecutionTimeRange] = useState<TimeRange | null>(null);
-  const [executionTimeField, setExecutionTimeField] = useState<string | null>(null);
+  const [executionsByTab, setExecutionsByTab] = useState<Record<string, TabExecution>>({});
+
+  const activeExecution = executionsByTab[tab];
+  const executionQuery = activeExecution?.query ?? null;
+  const executionTimeRange = activeExecution?.timeRange ?? null;
+  const executionTimeField = activeExecution?.timeField ?? null;
 
   const canExecute = Boolean(executionQuery?.trim() && executionTimeField?.trim());
 
@@ -118,36 +137,34 @@ export const useQueryExecution = ({
     retry: false,
   });
 
-  // Refs ensure run() always reads the latest param values, avoiding stale
-  // closures when the user switches tabs and immediately clicks Run.
-  const paramsRef = useRef({ query, timeField, timeRange });
-  paramsRef.current = { query, timeField, timeRange };
+  /*
+   * Refs ensure run() always reads the latest param values, avoiding stale
+   * closures when the user switches tabs and immediately clicks Run.
+   */
+  const paramsRef = useRef({ query, timeField, timeRange, tab });
+  paramsRef.current = { query, timeField, timeRange, tab };
 
-  const execRef = useRef({
-    query: executionQuery,
-    timeRange: executionTimeRange,
-    timeField: executionTimeField,
-  });
-  execRef.current = {
-    query: executionQuery,
-    timeRange: executionTimeRange,
-    timeField: executionTimeField,
-  };
+  const execRef = useRef(activeExecution);
+  execRef.current = activeExecution;
 
   const run = useCallback(() => {
-    const { query: q, timeField: tf, timeRange: tr } = paramsRef.current;
+    const { query: q, timeField: tf, timeRange: tr, tab: activeTab } = paramsRef.current;
     const exec = execRef.current;
     const trimmed = q.trim();
     if (!trimmed) return;
 
-    const rangeChanged = exec.timeRange?.from !== tr.from || exec.timeRange?.to !== tr.to;
-    const fieldChanged = exec.timeField !== tf;
-    if (trimmed === exec.query && !rangeChanged && !fieldChanged) {
-      queryClient.invalidateQueries({ queryKey: ['composeDiscoverQuery'] });
+    const rangeChanged = exec?.timeRange.from !== tr.from || exec?.timeRange.to !== tr.to;
+    const fieldChanged = exec?.timeField !== tf;
+    if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged) {
+      queryClient.invalidateQueries({
+        queryKey: ['composeDiscoverQuery', exec.query, exec.timeRange, exec.timeField],
+        exact: true,
+      });
     } else {
-      setExecutionQuery(trimmed);
-      setExecutionTimeRange({ ...tr });
-      setExecutionTimeField(tf);
+      setExecutionsByTab((prev) => ({
+        ...prev,
+        [activeTab]: { query: trimmed, timeRange: { ...tr }, timeField: tf },
+      }));
     }
   }, [queryClient]);
 

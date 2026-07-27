@@ -33,17 +33,17 @@ import {
   PrivilegeFormCalculator,
   constants as UI_CONSTANTS,
 } from '@kbn/security-ui-components';
-import type { Space } from '@kbn/spaces-plugin/public';
 
 import { SpaceSelector } from './space_selector';
 import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import { copyRole } from '../../../../../../../common/model';
+import type { DisplaySpace } from '../display_space';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
-  spaces: Space[];
+  spaces: DisplaySpace[];
   privilegeIndex: number;
   canCustomizeSubFeaturePrivileges: boolean;
   onChange: (role: Role) => void;

@@ -45,7 +45,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security, workflowsManagement } = setupDeps;
+    const { serverless, navigation, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -55,16 +55,16 @@ export class ServerlessObservabilityPlugin
     ]).pipe(
       map(([{ status }, chatExperience]) => {
         return createNavigationTree({
+          core,
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         });
       })
     );
-    serverless.initNavigation('oblt', navigationTree$);
+    navigation.initNavigation('oblt', navigationTree$);
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

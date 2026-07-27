@@ -26,11 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
 import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
 import { constants, type PrivilegeFormCalculator } from '@kbn/security-ui-components';
-import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
 import { copyRole } from '../../../../../../../common/model';
+import type { DisplaySpace } from '../display_space';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -39,7 +39,7 @@ interface Props {
   privilegeCalculator: PrivilegeFormCalculator;
   onChange: (role: Role) => void;
   onEdit: (privilegeIndex: number) => void;
-  displaySpaces: Space[];
+  displaySpaces: DisplaySpace[];
   disabled?: boolean;
 }
 
@@ -47,7 +47,7 @@ interface State {
   expandedSpacesGroups: number[];
 }
 
-type TableSpace = Space &
+type TableSpace = DisplaySpace &
   Partial<{
     deleted: boolean;
   }>;
@@ -80,14 +80,14 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, privilegeIndex) => {
       const spaces = spacePrivs.spaces.map(
-        (spaceId) =>
+        (spaceId): TableSpace =>
           displaySpaces.find((space) => space.id === spaceId) || {
             id: spaceId,
             name: spaceId,
             disabledFeatures: [],
             deleted: true,
           }
-      ) as Space[];
+      );
 
       return {
         spaces,

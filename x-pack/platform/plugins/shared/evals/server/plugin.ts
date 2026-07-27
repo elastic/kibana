@@ -15,6 +15,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import { PLUGIN_ID, PLUGIN_NAME, EVALS_API_PRIVILEGES, EVALS_UI_PRIVILEGES } from '../common';
 import type { EvalsConfig } from './config';
+import { createEvaluatorRegistry } from './evaluators/registry';
+import type { EvaluatorRegistry } from './evaluators/types';
 import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
   evalsRemoteKibanaConfigSavedObjectType,
@@ -38,6 +40,7 @@ export class EvalsPlugin
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private readonly isServerless: boolean;
+  private evaluatorRegistry?: EvaluatorRegistry;
   private datasetService?: DatasetService;
   private evaluationScoreService?: EvaluationScoreService;
 
@@ -65,17 +68,19 @@ export class EvalsPlugin
       attributesToEncrypt: new Set(['apiKey']),
       attributesToIncludeInAAD: new Set(['createdAt', 'url']),
     });
+    this.evaluatorRegistry = createEvaluatorRegistry();
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
       async () => {
-        if (!this.datasetService || !this.evaluationScoreService) {
+        if (!this.datasetService || !this.evaluationScoreService || !this.evaluatorRegistry) {
           throw new Error('Evals storage services have not been initialized');
         }
 
         return {
           datasetService: this.datasetService,
           evaluationScoreService: this.evaluationScoreService,
+          evaluatorRegistry: this.evaluatorRegistry,
         };
       }
     );
@@ -122,6 +127,9 @@ export class EvalsPlugin
       router,
       logger: this.logger,
       canEncrypt: encryptedSavedObjects.canEncrypt,
+      evaluatorRegistry: this.evaluatorRegistry,
+      getInferenceStart: () =>
+        coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.inference),
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
@@ -141,6 +149,26 @@ export class EvalsPlugin
       this.isServerless
     );
     this.evaluationScoreService = new EvaluationScoreService(this.logger, coreStart.dataStreams);
+
+    // Fire-and-forget backfill of the denormalized `examples_count` for datasets
+    // created before the field existed. Idempotent and a no-op once complete (and
+    // on fresh/empty deployments), so it is safe to run on every start. Only runs
+    // when the plugin is enabled, since we early-return above otherwise.
+    this.datasetService
+      .getClient()
+      .backfillDatasetCounts()
+      .then(({ updated }) => {
+        if (updated > 0) {
+          this.logger.info(`Backfilled examples_count for ${updated} evaluation dataset(s)`);
+        }
+      })
+      .catch((error) => {
+        this.logger.warn(
+          `Failed to backfill evaluation dataset example counts: ${
+            error instanceof Error ? error.message : error
+          }`
+        );
+      });
 
     return {
       datasetService: this.datasetService,

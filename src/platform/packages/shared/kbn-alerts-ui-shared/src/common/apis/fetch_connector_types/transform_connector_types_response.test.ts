@@ -26,6 +26,7 @@ describe('transformConnectorTypesResponse', () => {
         allow_multiple_system_actions: true,
         description: 'Card subtitle from list API',
         is_experimental: true,
+        is_testable: true,
       },
       {
         id: 'actionType2Id',
@@ -37,6 +38,7 @@ describe('transformConnectorTypesResponse', () => {
         supported_feature_ids: ['stackAlerts'],
         is_system_action_type: false,
         is_deprecated: false,
+        is_testable: false,
       },
     ]);
 
@@ -55,6 +57,7 @@ describe('transformConnectorTypesResponse', () => {
         allowMultipleSystemActions: true,
         description: 'Card subtitle from list API',
         isExperimental: true,
+        isTestable: true,
       },
       {
         id: 'actionType2Id',
@@ -66,6 +69,7 @@ describe('transformConnectorTypesResponse', () => {
         supportedFeatureIds: ['stackAlerts'],
         isSystemActionType: false,
         isDeprecated: false,
+        isTestable: false,
       },
     ]);
   });

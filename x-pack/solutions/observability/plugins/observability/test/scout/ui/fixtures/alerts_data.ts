@@ -16,7 +16,13 @@ import { ALERT_COUNTS, ALERT_TABLE_DATE_RANGE } from './constants';
  * indices are always created by Kibana on startup, so the archive would never be
  * ingested.
  */
-const OBSERVABILITY_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+export const OBSERVABILITY_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+
+/**
+ * `kibana.alert.uuid` of the first generated *active* alert. Useful as a stable
+ * target when attaching an alert to a case (see the cases attachment specs).
+ */
+export const FIRST_ACTIVE_ALERT_ID = 'scout-alert-active-0';
 
 // Matches the rule that produced the active alerts in the legacy archive so the
 // rendered table content (reason, rule name, category) stays representative.

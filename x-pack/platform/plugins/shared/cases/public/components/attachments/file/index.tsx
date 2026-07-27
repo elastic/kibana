@@ -20,7 +20,7 @@ import {
 import * as i18n from './translations';
 import { getFileFromReferenceMetadata, isImage, isValidFileMetadata } from './utils';
 
-type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+export type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
 
 const FileAttachmentEvent = lazy(() =>
   import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
@@ -115,4 +115,7 @@ export const getFileAttachmentType = () =>
     getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
     getAttachmentTabViewObject: () => ({ children: CaseViewFiles }),
     schema: FileAttachmentPayloadSchema,
+    // File attachments reference uploaded files by id; workflow authors can't
+    // produce that id from YAML, so file is excluded from workflow steps.
+    workflowSchema: false,
   });

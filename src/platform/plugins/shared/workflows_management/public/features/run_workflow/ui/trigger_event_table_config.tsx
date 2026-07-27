@@ -10,23 +10,20 @@
 import {
   EuiCodeBlock,
   type EuiDataGridCellPopoverElementProps,
-  euiFontSize,
   EuiIconTip,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
-  type SortOrder,
   type UnifiedDataTableRenderCustomToolbar,
   type UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
@@ -43,11 +40,17 @@ import type {
   UseTriggerEventTableConfigOptions,
   UseTriggerEventTableConfigResult,
 } from './trigger_event_table_config_types';
+import { WorkflowExecuteDataGridCellPopover } from './workflow_execute_data_grid_cell_popover';
 import {
   TriggerEventRunPayloadSelectionSync,
   TriggerEventTableSelectionCountSync,
 } from './workflow_execute_event_selection_sync';
-import { WorkflowTriggerEventDataGridCellPopover } from './workflow_trigger_event_data_grid_cell_popover';
+import {
+  buildUnifiedDataTableServices,
+  getNoUnifiedDataTableCellActions,
+  useUnifiedDataTableColumnState,
+  useUnifiedDataTableTimestampTypography,
+} from './workflow_execute_unified_table_base';
 
 export type {
   UseTriggerEventTableConfigOptions,
@@ -88,14 +91,22 @@ export function useTriggerEventTableConfig(
     onTriggerEventTableSelectionCountChange,
   } = options;
 
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
 
-  const [visibleTableColumns, setVisibleTableColumns] = useState<string[]>(() => [
-    ...DEFAULT_TRIGGER_EVENT_TABLE_COLUMNS,
-  ]);
-  const [showTimeColumn, setShowTimeColumn] = useState(true);
-  const [sort, setSort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
+  const {
+    visibleTableColumns,
+    showTimeColumn,
+    sort,
+    handleSortChange,
+    handleUnifiedDataTableSetColumns,
+  } = useUnifiedDataTableColumnState({
+    defaultColumns: [...DEFAULT_TRIGGER_EVENT_TABLE_COLUMNS],
+    dataView,
+    fallbackColumns: VISIBLE_COLUMNS_FALLBACK,
+    ensureColumnWhenOnlyTimeField: 'summary',
+  });
+
+  const timestampCellTypography = useUnifiedDataTableTimestampTypography();
 
   const dataTableRows = useMemo<DataTableRecord[]>(
     () =>
@@ -216,63 +227,8 @@ export function useTriggerEventTableConfig(
   );
 
   const unifiedDataTableServices = useMemo(
-    () => ({
-      theme: services.theme,
-      fieldFormats: services.fieldFormats,
-      uiSettings: services.uiSettings,
-      toastNotifications: services.notifications.toasts,
-      storage: services.storage,
-      data: {
-        ...services.data,
-        dataViews: services.dataViews,
-      },
-    }),
-    [
-      services.data,
-      services.dataViews,
-      services.fieldFormats,
-      services.notifications.toasts,
-      services.storage,
-      services.theme,
-      services.uiSettings,
-    ]
-  );
-
-  const getNoCellActions = useCallback<UiActionsStart['getTriggerCompatibleActions']>(
-    async () => [],
-    []
-  );
-
-  const handleSortChange = useCallback((nextSort: string[][]) => {
-    setSort(
-      nextSort
-        .filter(
-          (value): value is [string, 'asc' | 'desc'] =>
-            Array.isArray(value) &&
-            value.length === 2 &&
-            typeof value[0] === 'string' &&
-            (value[1] === 'asc' || value[1] === 'desc')
-        )
-        .map(([field, direction]) => [field, direction])
-    );
-  }, []);
-
-  const handleUnifiedDataTableSetColumns = useCallback(
-    (columns: string[], hideTimeColumn: boolean) => {
-      let nextColumns = columns.length > 0 ? [...columns] : [...VISIBLE_COLUMNS_FALLBACK];
-      const timeFieldName = dataView?.timeFieldName;
-      if (timeFieldName && nextColumns.length === 1 && nextColumns[0] === timeFieldName) {
-        nextColumns = [...nextColumns, 'summary'];
-      }
-      setVisibleTableColumns(nextColumns);
-      setShowTimeColumn(!hideTimeColumn);
-    },
-    [dataView]
-  );
-
-  const timestampCellTypography = useMemo(
-    () => euiFontSize(euiThemeContext, 'xs'),
-    [euiThemeContext]
+    () => buildUnifiedDataTableServices(services),
+    [services]
   );
 
   const leftToolbarContent = useMemo(() => {
@@ -365,7 +321,7 @@ export function useTriggerEventTableConfig(
   ]);
 
   const renderCellPopover = useCallback((popoverProps: EuiDataGridCellPopoverElementProps) => {
-    return <WorkflowTriggerEventDataGridCellPopover {...popoverProps} />;
+    return <WorkflowExecuteDataGridCellPopover {...popoverProps} />;
   }, []);
 
   return {
@@ -377,7 +333,7 @@ export function useTriggerEventTableConfig(
     externalCustomRenderers,
     customGridColumnsConfiguration,
     unifiedDataTableServices,
-    getNoCellActions,
+    getNoCellActions: getNoUnifiedDataTableCellActions,
     handleSortChange,
     handleUnifiedDataTableSetColumns,
     timestampCellTypography,

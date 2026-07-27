@@ -44,8 +44,6 @@ interface AttackDetailsContainerProps {
   attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
-  /** Filters applied from grouping */
-  groupingFilters: Filter[];
   /** Default filters to apply to the alerts table */
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
@@ -59,7 +57,7 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
+  ({ attack, defaultFilters, isTableLoading, showAnonymized }) => {
     const {
       services: { telemetry },
     } = useKibana();
@@ -93,7 +91,6 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
               <EuiSpacer size="s" />
               <AlertsTab
                 attackAlertIds={attack.alertIds}
-                groupingFilters={groupingFilters}
                 defaultFilters={defaultFilters}
                 isTableLoading={isTableLoading}
               />
@@ -106,7 +103,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
           ) : undefined,
         },
       ],
-      [attack, showAnonymized, groupingFilters, defaultFilters, isTableLoading]
+      [attack, showAnonymized, defaultFilters, isTableLoading]
     );
 
     const selectedTabContent = useMemo(() => {

@@ -86,6 +86,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Navigate directly to a new Lens editor, skipping the visualize
+     * listing page and the visualization-type selection modal. Prefer this
+     * over `visualize.navigateToNewVisualization() + visualize.clickVisType('lens')`
+     * when the test builds a chart from scratch.
+     */
+    async openNewEditor() {
+      await common.navigateToApp('lens');
+      await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
+    },
+
+    /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
@@ -812,12 +823,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     },
 
     /**
@@ -1384,9 +1390,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-      const label = coloringType.charAt(0).toUpperCase() + coloringType.slice(1);
-      await this.selectOptionFromComboBox('lnsDatatable_dynamicColoring_groups', label);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge' | 'progress') {
+      // The "Cell decoration" combo box label diverges from the stored value
+      // (the `cell` value is surfaced as "Background"), so map explicitly rather
+      // than title-casing the stored value.
+      const labelByColoringType: Record<typeof coloringType, string> = {
+        none: 'None',
+        cell: 'Background',
+        text: 'Text',
+        badge: 'Badge',
+        progress: 'Progress bar',
+      };
+      await this.selectOptionFromComboBox(
+        'lnsDatatable_dynamicColoring_groups',
+        labelByColoringType[coloringType]
+      );
     },
 
     async openPalettePanel() {

@@ -52,6 +52,11 @@ interface GenericEntityFlyoutContentProps {
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
   identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
+  /**
+   * Overrides forwarded to the underlying {@link FlyoutBody} (e.g. `panelProps` for compact spacing
+   * in the EUI system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutBodyProps?: Omit<React.ComponentProps<typeof FlyoutBody>, 'children'>;
 }
 
 export const GenericEntityFlyoutContent = ({
@@ -59,6 +64,7 @@ export const GenericEntityFlyoutContent = ({
   openGenericEntityDetailsPanelByPath,
   identityFields,
   onAssetCriticalityChange,
+  flyoutBodyProps,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
   const entityDisplayValue = Object.values(identityFields)[0] ?? '';
@@ -90,7 +96,7 @@ export const GenericEntityFlyoutContent = ({
   }, [source, pinnedFields]);
 
   return (
-    <FlyoutBody>
+    <FlyoutBody {...flyoutBodyProps}>
       <AssetCriticalityAccordion
         entity={{
           name: entityDisplayValue as string,

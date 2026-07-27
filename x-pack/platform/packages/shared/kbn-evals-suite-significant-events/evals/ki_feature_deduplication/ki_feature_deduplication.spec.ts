@@ -9,13 +9,11 @@ import { identifyFeatures, toPreviouslyIdentifiedFeature } from '@kbn/streams-ai
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { createSpanLatencyEvaluator, getCurrentTraceId } from '@kbn/evals';
-import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/streams-schema';
-import { v4 as uuidv4 } from 'uuid';
+import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
-  listAvailableSnapshots,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -33,6 +31,7 @@ import {
   type KIFeatureExtractionScenario,
   type KIFeatureDeduplicationScenario,
 } from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
 
 interface AvailableDeduplicationScenario {
@@ -48,22 +47,13 @@ evaluate.describe(
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, log }) => {
-      const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const dataset of activeDatasets) {
-        for (const scenario of dataset.kiFeatureDeduplication) {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
-          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-        }
-      }
-
-      for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-        const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-        availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-      }
+      const snapshots = await buildAvailableSnapshotsBySource(
+        activeDatasets,
+        (dataset) => dataset.kiFeatureDeduplication,
+        esClient,
+        log
+      );
+      snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
     for (const dataset of activeDatasets) {
@@ -228,19 +218,9 @@ evaluate.describe(
                         }
                         const merged = mergeFeature(existing, baseFeature);
 
-                        accumulated.update({
-                          ...merged,
-                          uuid: existing.uuid,
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.update(merged);
                       } else {
-                        accumulated.add({
-                          ...baseFeature,
-                          uuid: uuidv4(),
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.add(baseFeature);
                       }
                     }
                   }
@@ -265,7 +245,7 @@ evaluate.describe(
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
-                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+                createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
               ]
             );
           }

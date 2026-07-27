@@ -110,6 +110,12 @@ export const EventSchema = schema.maybe(
             type: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(

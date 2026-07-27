@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { Dimension, NullableMetricUnit } from '../../../types';
+import type { Dimension, MetricsGridSettings, NullableMetricUnit } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
@@ -38,6 +38,7 @@ interface UseChartLayersParams {
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
+  gridSettings?: MetricsGridSettings;
 }
 
 /**
@@ -51,6 +52,7 @@ export const useChartLayers = ({
   color,
   seriesType,
   customFunction,
+  gridSettings,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const fieldTypes = metricItem.fieldTypes;
@@ -66,6 +68,7 @@ export const useChartLayers = ({
       instrument,
       metricName: metricItem.metricName,
       customFunction,
+      gridSettings,
     });
     const hasDimensions = dimensions.length > 0;
 
@@ -90,6 +93,7 @@ export const useChartLayers = ({
       },
     ];
   }, [
+    gridSettings,
     color,
     customFunction,
     dimensions,

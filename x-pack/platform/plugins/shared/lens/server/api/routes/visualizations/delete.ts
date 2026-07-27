@@ -47,6 +47,10 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   deleteRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('./oas_examples')).deleteLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           params: lensDeleteRequestParamsSchema,
@@ -74,7 +78,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for<LensSavedObject>(LENS_CONTENT_TYPE);

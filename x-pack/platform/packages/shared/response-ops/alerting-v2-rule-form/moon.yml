@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
-  - '@kbn/esql'
   - '@kbn/esql-utils'
   - '@kbn/esql-types'
   - '@kbn/es-query'
@@ -34,6 +33,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/yaml-rule-editor'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/react-hooks'
@@ -45,6 +45,17 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/workflows'
+  - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/core-di-browser'
+  - '@kbn/core-di'
+  - '@kbn/announcement-banner'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/cps-utils'
+  - '@kbn/cps'
 tags:
   - shared-browser
   - package
@@ -56,6 +67,8 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
+    - .storybook/**/*.ts
+    - .storybook/**/*.tsx
     - '!target/**/*'
   jest-config:
     - jest.config.js

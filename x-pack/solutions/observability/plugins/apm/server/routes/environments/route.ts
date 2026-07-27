@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import type { Environment } from '../../../common/environment_rt';
+import { routeDefinitions, type EnvironmentsResponse } from '@kbn/apm-api-shared';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getEnvironments } from './get_environments';
-import { rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const environmentsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/environments',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-      }),
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.environments.environments.endpoint,
+  params: routeDefinitions.environments.environments.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    environments: Environment[];
-  }> => {
+  handler: async (resources): Promise<EnvironmentsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;
     const { serviceName, start, end } = params.query;

@@ -9,7 +9,15 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension } from '../../../../../types';
+import type {
+  Dimension,
+  MetricsGridSettings,
+  MetricsSort,
+  UnifiedMetricsGridProps,
+} from '../../../../../types';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_grid_settings_flyout/constants';
+import { DEFAULT_METRICS_SORT } from '../../../../../common/constants';
+import { useRecentlyExploredMetrics } from '../../hooks';
 import {
   type FlyoutState,
   type FlyoutTabId,
@@ -19,12 +27,17 @@ import {
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
+  gridSettings: MetricsGridSettings;
+  recentlyExploredMetrics: readonly string[];
+  onMetricExplored?: (metricUniqueKey: string) => void;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
+  onMetricsSortChange: (value: MetricsSort) => void;
   onToggleFullscreen: () => void;
   onFlyoutStateChange: (value: FlyoutState | undefined) => void;
   onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
+  onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -33,15 +46,34 @@ export const MetricsExperienceStateContext =
 export function MetricsExperienceStateProvider({
   children,
   profileId,
+  gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
+  onGridSettingsChange,
+  getRecentlyExploredMetrics,
+  onMetricExplored,
+  discoverFetch$,
 }: {
   children: React.ReactNode;
   profileId: string;
+  gridSettings?: MetricsGridSettings;
+  onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  getRecentlyExploredMetrics?: () => readonly string[];
+  onMetricExplored?: (metricUniqueKey: string) => void;
+  discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
+  const [metricsSort, setMetricsSort] = useRestorableState('metricsSort', DEFAULT_METRICS_SORT);
+
+  const recentlyExploredMetrics = useRecentlyExploredMetrics({
+    getRecentlyExploredMetrics,
+    discoverFetch$,
+    metricsSort,
+    searchTerm,
+    selectedDimensions,
+  });
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
@@ -69,6 +101,20 @@ export function MetricsExperienceStateProvider({
     [setSearchTerm, setCurrentPage]
   );
 
+  const onMetricsSortChange = useCallback(
+    (nextSort: MetricsSort) => {
+      setMetricsSort((prevSort) => {
+        const [prevSortBy, prevDirection] = prevSort;
+        const [nextSortBy, nextDirection] = nextSort;
+        if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
+          setCurrentPage(0);
+        }
+        return nextSort;
+      });
+    },
+    [setMetricsSort, setCurrentPage]
+  );
+
   const onToggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
@@ -87,21 +133,34 @@ export function MetricsExperienceStateProvider({
     [setFlyoutState]
   );
 
+  const handleGridSettingsChange = useCallback(
+    (update: Partial<MetricsGridSettings>) => {
+      onGridSettingsChange?.(update);
+    },
+    [onGridSettingsChange]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
         profileId,
+        gridSettings,
+        recentlyExploredMetrics,
+        onMetricExplored,
         currentPage,
         isFullscreen,
         searchTerm,
         selectedDimensions,
+        metricsSort,
         flyoutState,
         onPageChange,
         onDimensionsChange,
         onSearchTermChange,
+        onMetricsSortChange,
         onToggleFullscreen,
         onFlyoutStateChange,
         onFlyoutSelectedTabChange,
+        onGridSettingsChange: handleGridSettingsChange,
       }}
     >
       {children}

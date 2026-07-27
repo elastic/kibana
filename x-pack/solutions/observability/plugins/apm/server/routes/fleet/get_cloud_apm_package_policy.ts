@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { Maybe } from '../../../typings/common';
+import type { Maybe } from '@kbn/apm-types-shared';
 import type { APMPluginStartDependencies } from '../../types';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 

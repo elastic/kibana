@@ -25,7 +25,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LatencyAggregationType } from '@kbn/apm-types';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { TRANSACTIONS_TABLE_EBT_ACTIONS, TRANSACTIONS_TABLE_EBT_ELEMENTS } from './ebt_constants';
 import { asMillisecondDuration, asTransactionRate } from '../../utils/formatters/duration';
 import { asPercent } from '../../utils/formatters/numeric';
 import { Sparkline } from '../sparkline';
@@ -82,19 +83,22 @@ function MetricCell({
   color,
   comparisonColor,
   showSparkline,
+  isSparklineLoading = false,
 }: {
   valueLabel: string;
   series?: TransactionGroup['latency']['series'];
   color: string;
   comparisonColor: string;
   showSparkline: boolean;
+  isSparklineLoading?: boolean;
 }) {
-  if (!series || !showSparkline) {
+  if (!showSparkline || (!series && !isSparklineLoading)) {
     return <>{valueLabel}</>;
   }
 
   return (
     <EuiFlexGroup
+      data-test-subj="transactionSparklineChart"
       justifyContent="flexEnd"
       gutterSize="xs"
       alignItems="flexEnd"
@@ -112,6 +116,7 @@ function MetricCell({
           series={series?.value ?? null}
           comparisonSeries={series?.comparison}
           comparisonSeriesColor={comparisonColor}
+          isLoading={isSparklineLoading && !series}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -181,12 +186,14 @@ export function getBuiltInColumns({
   nameInteraction,
   alertsInteraction,
   showSparklines = true,
+  isSparklineLoading = false,
   remainingTransactionsCellTooltipContent,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   nameInteraction?: TransactionGroupInteraction;
   alertsInteraction?: TransactionGroupInteraction;
   showSparklines?: boolean;
+  isSparklineLoading?: boolean;
   remainingTransactionsCellTooltipContent?: ReactNode;
 }): Record<ColumnId, EuiBasicTableColumn<TransactionGroup>> {
   return {
@@ -214,7 +221,11 @@ export function getBuiltInColumns({
                     { defaultMessage: 'View active alerts' }
                   ),
                 })}
-            {...getEbtProps({ action: 'viewAlerts', element: 'transactionsTableAlertsBadge' })}
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+              element:
+                alertsInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_ALERTS_BADGE,
+            })}
           >
             {item.alertsCount}
           </EuiBadge>
@@ -249,8 +260,8 @@ export function getBuiltInColumns({
         }
         const nameHref = nameInteraction?.href?.(item);
         const ebtNameProps = getEbtProps({
-          action: 'viewTransactionGroup',
-          element: 'transactionsTableName',
+          action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
+          element: nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME,
         });
         if (nameHref) {
           return (
@@ -304,6 +315,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.latency.current}
           comparisonColor={SPARKLINE_COLORS.latency.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },
@@ -324,6 +336,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.throughput.current}
           comparisonColor={SPARKLINE_COLORS.throughput.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },
@@ -352,6 +365,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.errorRate.current}
           comparisonColor={SPARKLINE_COLORS.errorRate.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },

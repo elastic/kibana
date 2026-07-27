@@ -15,38 +15,50 @@ jest.mock('./lifecycle_handlers', () => {
     createBuildNrMismatchLoggerPreResponseHandler: jest.fn(
       actual.createBuildNrMismatchLoggerPreResponseHandler
     ),
+    createXsrfPostAuthHandler: jest.fn(actual.createXsrfPostAuthHandler),
   };
 });
 
 import { createTestEnv } from '@kbn/config-mocks';
 import type { HttpConfig } from './http_config';
+import type { CoreHandlerDependencies } from './http_server';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 
 import {
   createVersionCheckPostAuthHandler,
   createBuildNrMismatchLoggerPreResponseHandler,
+  createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
 import { loggerMock } from '@kbn/logging-mocks';
 
+const createRegistrarMock = (authGet = jest.fn()) =>
+  ({
+    registerAuth: jest.fn(),
+    registerOnPostAuth: jest.fn(),
+    registerOnPreAuth: jest.fn(),
+    registerOnPreResponse: jest.fn(),
+    registerOnPreRouting: jest.fn(),
+    auth: { get: authGet, isAuthenticated: jest.fn() },
+  } as unknown as CoreHandlerDependencies);
+
+const createConfigMock = () =>
+  ({
+    csp: { header: '' },
+    xsrf: { disableProtection: false, allowlist: [], allowedSchemes: [] },
+    versioned: {
+      versionResolution: 'newest',
+      strictClientVersionCheck: false,
+    },
+  } as unknown as HttpConfig);
+
 describe('registerCoreHandlers', () => {
-  it('will not register client version checking if disabled via config', () => {
-    const registrarMock = {
-      registerAuth: jest.fn(),
-      registerOnPostAuth: jest.fn(),
-      registerOnPreAuth: jest.fn(),
-      registerOnPreResponse: jest.fn(),
-      registerOnPreRouting: jest.fn(),
-    };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    const config = {
-      csp: { header: '' },
-      xsrf: {},
-      versioned: {
-        versionResolution: 'newest',
-        strictClientVersionCheck: false,
-      },
-    } as unknown as HttpConfig;
-
+  it('registers client version checking only when strictClientVersionCheck is enabled', () => {
+    const registrarMock = createRegistrarMock();
+    const config = createConfigMock();
     const logger = loggerMock.create();
 
     registerCoreHandlers(registrarMock, config, createTestEnv(), logger);
@@ -57,5 +69,16 @@ describe('registerCoreHandlers', () => {
     registerCoreHandlers(registrarMock, config, createTestEnv(), logger);
     expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(1);
     expect(createBuildNrMismatchLoggerPreResponseHandler).toHaveBeenCalledTimes(1); // logger registration should not be called again
+  });
+
+  it('gives the xsrf post-auth handler the registrar auth accessor', () => {
+    const authGet = jest.fn();
+    const registrarMock = createRegistrarMock(authGet);
+    const config = createConfigMock();
+    const logger = loggerMock.create();
+
+    registerCoreHandlers(registrarMock, config, createTestEnv(), logger);
+
+    expect(createXsrfPostAuthHandler).toHaveBeenCalledWith(config, authGet);
   });
 });

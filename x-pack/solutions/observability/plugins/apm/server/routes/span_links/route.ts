@@ -4,31 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import type { SpanLinkDetails } from '@kbn/apm-types';
+import {
+  routeDefinitions,
+  type LinkedParentsResponse,
+  type LinkedChildrenResponse,
+  type SpanLinksResponse,
+} from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSpanLinksDetails } from './get_span_links_details';
 import { getLinkedChildrenOfSpan } from './get_linked_children';
-import { kueryRt, rangeRt } from '../default_api_types';
 import { getLinkedParentsOfSpan } from './get_linked_parents';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { processorEventRt } from '../../../common/processor_event';
 
 const linkedParentsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
-    }),
-    query: t.intersection([kueryRt, rangeRt, t.type({ processorEvent: processorEventRt })]),
-  }),
+  endpoint: routeDefinitions.spanLinks.linkedParents.endpoint,
+  params: routeDefinitions.spanLinks.linkedParents.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    spanLinksDetails: SpanLinkDetails[];
-  }> => {
+  handler: async (resources): Promise<LinkedParentsResponse> => {
     const {
       params: { query, path },
     } = resources;
@@ -55,20 +48,10 @@ const linkedParentsRoute = createApmServerRoute({
 });
 
 const linkedChildrenRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
-    }),
-    query: t.intersection([kueryRt, rangeRt]),
-  }),
+  endpoint: routeDefinitions.spanLinks.linkedChildren.endpoint,
+  params: routeDefinitions.spanLinks.linkedChildren.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    spanLinksDetails: SpanLinkDetails[];
-  }> => {
+  handler: async (resources): Promise<LinkedChildrenResponse> => {
     const {
       params: { query, path },
     } = resources;
@@ -94,21 +77,10 @@ const linkedChildrenRoute = createApmServerRoute({
 });
 
 const spanLinksRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
-    }),
-    query: t.intersection([kueryRt, rangeRt, t.partial({ processorEvent: processorEventRt })]),
-  }),
+  endpoint: routeDefinitions.spanLinks.spanLinks.endpoint,
+  params: routeDefinitions.spanLinks.spanLinks.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    outgoingSpanLinks: SpanLinkDetails[];
-    incomingSpanLinks: SpanLinkDetails[];
-  }> => {
+  handler: async (resources): Promise<SpanLinksResponse> => {
     const {
       params: { query, path },
     } = resources;

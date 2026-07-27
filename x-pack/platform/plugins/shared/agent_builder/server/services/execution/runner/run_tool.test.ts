@@ -163,6 +163,61 @@ describe('runTool', () => {
     });
   });
 
+  it('caps an oversized tool result before it is returned or stored', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    // Handler returns a result whose serialized size far exceeds the 2 MB storage limit.
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { text: 'x'.repeat(3 * 1024 * 1024) } }],
+    });
+
+    const result = await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    // Returned results are replaced with a single `other` carrying the truncation notice.
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.other);
+    expect((result.results![0].data as { content: string }).content).toContain(
+      'Tool result truncated'
+    );
+
+    // resultStore received the capped result, never the original oversized data.
+    const resultStoreAdd = runnerDeps.resultStore.add as jest.MockedFunction<
+      typeof runnerDeps.resultStore.add
+    >;
+    expect(resultStoreAdd).toHaveBeenCalledTimes(1);
+    const stored = resultStoreAdd.mock.calls[0][0];
+    expect(stored.results).toHaveLength(1);
+    expect((stored.results[0].data as { content: string }).content).toContain(
+      'Tool result truncated'
+    );
+  });
+
+  it('does not cap oversized results for MCP-initiated calls', async () => {
+    const bigData = { text: 'x'.repeat(3 * 1024 * 1024) };
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: bigData }],
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        source: 'mcp',
+      } as ScopedRunnerRunInternalToolParams,
+      parentManager: runnerManager,
+    });
+
+    // MCP is exempt: the original oversized result passes through unchanged.
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].data).toEqual(bigData);
+  });
+
   it('exposes a context with the expected shape to the tool handler', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
@@ -325,6 +380,22 @@ describe('runTool', () => {
         toolHandlerContext: expect.any(Object),
       })
     );
+  });
+
+  it('scopes the ES client with space-level project routing for CPS support', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'space',
+    });
   });
 });
 

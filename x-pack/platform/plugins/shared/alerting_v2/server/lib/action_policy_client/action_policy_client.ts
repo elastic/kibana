@@ -6,9 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import type {
-  ActionPolicyBulkAction,
   ActionPolicyResponse,
+  BulkResponse,
   CreateActionPolicyDataInput,
   MatchedActionPolicy,
   MatcherContext,
@@ -25,7 +26,6 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import { partition } from 'lodash';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
@@ -40,14 +40,15 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { buildSoSearch } from '../build_so_search';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
 import type {
-  BulkActionActionPoliciesParams,
-  BulkActionActionPoliciesResponse,
+  BulkActionPoliciesByIdsParams,
+  BulkSnoozeActionPoliciesParams,
   CreateActionPolicyParams,
   FindActionPoliciesParams,
   FindActionPoliciesResponse,
@@ -64,23 +65,57 @@ import {
   validateDateString,
 } from './utils';
 
-const resolveActionAttrs = (
-  action: Exclude<ActionPolicyBulkAction, { action: 'delete' } | { action: 'update_api_key' }>
-): Partial<ActionPolicySavedObjectAttributes> => {
-  switch (action.action) {
-    case 'enable':
-      return { enabled: true };
-    case 'disable':
-      return { enabled: false };
-    case 'snooze':
-      return { snoozedUntil: action.snoozedUntil };
-    case 'unsnooze':
-      return { snoozedUntil: null };
-  }
-};
-
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+/**
+ * Concurrency cap for {@link ActionPolicyClient.bulkUpdateActionPoliciesApiKey}.
+ * Unlike the other by-ID bulk endpoints, API-key rotation cannot be done in a
+ * single SO round-trip — each id creates a fresh ES API key (plus a decrypt and
+ * an SO write). Running them serially makes latency scale linearly with the
+ * batch size, so we fan out; but a batch is capped at `MAX_BULK_ITEMS` (100) and
+ * each item is heavy (ES `_security/api_key` create + crypto), so the peak load
+ * is kept modest. 10 already gives a ~10x speedup over sequential while bounding
+ * concurrent key creations and decrypts far more tightly than the batch cap.
+ */
+const MAX_API_KEY_UPDATES_IN_PARALLEL = 10;
+
+/** A single per-resource error entry in a bulk response. */
+type ActionPolicyBulkError = BulkResponse['errors'][number];
+
+/**
+ * Maps a saved-object (or Boom) status code to the stable, machine-readable
+ * bulk-error `code` returned in the response body. Keeps the bulk endpoints
+ * aligned with the single-action-policy error codes so a client can dispatch
+ * on `error.code` uniformly.
+ */
+const actionPolicyBulkErrorCodeForStatus = (statusCode: number): string => {
+  if (statusCode === 404) {
+    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
+  }
+  if (statusCode === 409) {
+    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
+  }
+  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+};
+
+const toActionPolicyBulkError = (
+  id: string,
+  err: { statusCode: number; message: string }
+): ActionPolicyBulkError => ({
+  id,
+  error: { code: actionPolicyBulkErrorCodeForStatus(err.statusCode), message: err.message },
+});
+
+/**
+ * Normalises a thrown error (Boom or otherwise) raised while processing a
+ * single id inside a bulk loop into a per-resource bulk error entry.
+ */
+const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
+  const statusCode = Boom.isBoom(e) ? e.output.statusCode : 500;
+  const message = e instanceof Error ? e.message : String(e);
+  return toActionPolicyBulkError(id, { statusCode, message });
+};
 
 @injectable()
 export class ActionPolicyClient {
@@ -178,10 +213,6 @@ export class ActionPolicyClient {
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
-
-    if (parsed.type === 'single_rule' && parsed.ruleId) {
-      await this.assertRuleExists(parsed.ruleId);
-    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
@@ -315,10 +346,12 @@ export class ActionPolicyClient {
     const filter = this.buildFindFilter(params);
     const sortField = this.mapSortField(params.sortField);
 
+    const search = buildSoSearch(params.search);
+
     const res = await this.actionPolicySavedObjectService.find({
       page,
       perPage,
-      search: params.search,
+      search,
       filter,
       sortField,
       sortOrder: params.sortOrder,
@@ -341,19 +374,20 @@ export class ActionPolicyClient {
   public async matchActionPoliciesForRule(
     params: MatchActionPoliciesForRuleParams
   ): Promise<MatchActionPoliciesForRuleResponse> {
-    const { ruleId, ruleName: ruleNameParam, ruleTags: ruleTagsParam } = params;
+    const { ruleId, ruleName, ruleTags } = params;
 
-    let resolvedName = ruleNameParam ?? '';
-    let resolvedTags = ruleTagsParam ?? [];
+    let resolvedName = ruleName ?? '';
+    let resolvedTags = ruleTags ?? [];
 
-    if (ruleId && (ruleNameParam === undefined || ruleTagsParam === undefined)) {
+    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
+    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
       try {
         const rule = await this.rulesSavedObjectService.get(ruleId);
-        resolvedName = ruleNameParam ?? rule.attributes.metadata.name;
-        resolvedTags = ruleTagsParam ?? rule.attributes.metadata.tags ?? [];
+        resolvedName = ruleName ?? rule.attributes.metadata.name;
+        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
       } catch (e) {
         if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return { items: [] };
+          return { items: [], total: 0 };
         }
         throw e;
       }
@@ -373,19 +407,8 @@ export class ActionPolicyClient {
 
     const items: MatchedActionPolicy[] = [];
 
-    if (ruleId) {
-      const singleRuleResult = await this.findActionPolicies({
-        type: 'single_rule',
-        ruleId,
-        perPage: 100,
-      });
-      for (const actionPolicy of singleRuleResult.items) {
-        items.push({ actionPolicy, category: 'direct' });
-      }
-    }
-
-    const globalResult = await this.findActionPolicies({ type: 'global', perPage: 100 });
-    for (const actionPolicy of globalResult.items) {
+    const allPolicies = await this.findActionPolicies({ perPage: 100 });
+    for (const actionPolicy of allPolicies.items) {
       if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
         items.push({ actionPolicy, category: 'global' });
         continue;
@@ -411,7 +434,7 @@ export class ActionPolicyClient {
       }
     }
 
-    return { items };
+    return { items, total: allPolicies.total };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -458,103 +481,129 @@ export class ActionPolicyClient {
     this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
   }
 
-  public async bulkActionActionPolicies({
-    actions,
-  }: BulkActionActionPoliciesParams): Promise<BulkActionActionPoliciesResponse> {
-    const [deleteActions, remainingActions] = partition(actions, (a) => a.action === 'delete');
-    const [updateApiKeyActions, updateActions] = partition(
-      remainingActions,
-      (a) => a.action === 'update_api_key'
-    );
-
-    const errors: Array<{ id: string; message: string }> = [];
-    let processed = 0;
-
-    if (updateActions.length > 0) {
-      const userProfileUid = await this.userService.getCurrentUserProfileUid();
-      const now = new Date().toISOString();
-
-      const objects = updateActions.map((action) => ({
-        id: action.id,
-        attrs: {
-          ...resolveActionAttrs(action),
-          updatedBy: userProfileUid,
-          updatedAt: now,
-        },
-      }));
-
-      const updateResults = await this.actionPolicySavedObjectService.bulkUpdate({
-        objects,
-      });
-
-      for (const result of updateResults) {
-        if ('error' in result) {
-          errors.push({ id: result.id, message: result.error.message });
-        } else {
-          processed++;
-        }
-      }
-    }
-
-    for (const action of updateApiKeyActions) {
-      try {
-        await this.updateActionPolicyApiKey({ id: action.id });
-        processed++;
-      } catch (e) {
-        errors.push({ id: action.id, message: e.message });
-      }
-    }
-
-    if (deleteActions.length > 0) {
-      const deleteIds = deleteActions.map((a) => a.id);
-      const authMap = await this.getBulkDecryptedAuth(deleteIds);
-
-      const deleteResults = await this.actionPolicySavedObjectService.bulkDelete({
-        ids: deleteIds,
-      });
-
-      for (const result of deleteResults) {
-        if ('error' in result) {
-          errors.push({ id: result.id, message: result.error.message });
-        } else {
-          processed++;
-          const auth = authMap.get(result.id);
-          this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
-        }
-      }
-    }
-
-    return { processed, total: actions.length, errors };
+  public async bulkEnableActionPolicies({
+    ids,
+  }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    return this.executeBulkUpdate(ids, { enabled: true });
   }
 
-  private async assertRuleExists(ruleId: string): Promise<void> {
-    try {
-      await this.rulesSavedObjectService.get(ruleId);
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.badRequest(
-          `Cannot create single_rule action policy: rule "${ruleId}" not found in this space.`,
-          {
-            code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND_FOR_POLICY,
-            details: { rule_id: ruleId },
-          }
-        );
-      }
-      throw e;
+  public async bulkDisableActionPolicies({
+    ids,
+  }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    return this.executeBulkUpdate(ids, { enabled: false });
+  }
+
+  public async bulkSnoozeActionPolicies({
+    ids,
+    snoozedUntil,
+  }: BulkSnoozeActionPoliciesParams): Promise<BulkResponse> {
+    validateDateString(snoozedUntil);
+    return this.executeBulkUpdate(ids, { snoozedUntil });
+  }
+
+  public async bulkUnsnoozeActionPolicies({
+    ids,
+  }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    return this.executeBulkUpdate(ids, { snoozedUntil: null });
+  }
+
+  public async bulkDeleteActionPolicies({
+    ids,
+  }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    if (ids.length === 0) {
+      return { affected_count: 0, errors: [] };
     }
+
+    const authMap = await this.getBulkDecryptedAuth(ids);
+    const deleteResults = await this.actionPolicySavedObjectService.bulkDelete({ ids });
+
+    const errors: ActionPolicyBulkError[] = [];
+    let affectedCount = 0;
+
+    for (const result of deleteResults) {
+      if ('error' in result) {
+        errors.push(toActionPolicyBulkError(result.id, result.error));
+        continue;
+      }
+      affectedCount += 1;
+      const auth = authMap.get(result.id);
+      this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+    }
+
+    return { affected_count: affectedCount, errors };
+  }
+
+  public async bulkUpdateActionPoliciesApiKey({
+    ids,
+  }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    // Each id rotates its own API key (SO get + decrypt + key create + write),
+    // so the work is per-item rather than a single SO round-trip. Fan out with a
+    // bounded concurrency; failures are isolated per id inside the mapper so one
+    // bad policy never aborts the rest of the batch. `pMap` preserves input
+    // order, keeping the `errors` ordering deterministic.
+    const results = await pMap(
+      ids,
+      async (id): Promise<ActionPolicyBulkError | null> => {
+        try {
+          await this.updateActionPolicyApiKey({ id });
+          return null;
+        } catch (e) {
+          return bulkErrorFromThrown(id, e);
+        }
+      },
+      { concurrency: MAX_API_KEY_UPDATES_IN_PARALLEL }
+    );
+
+    const errors = results.filter((result): result is ActionPolicyBulkError => result !== null);
+
+    return { affected_count: ids.length - errors.length, errors };
+  }
+
+  /**
+   * Shared executor for the state-mutating by-ID bulk endpoints (enable /
+   * disable / snooze / unsnooze). Applies the same `stateUpdate` to every
+   * targeted policy in a single SO `bulkUpdate`, stamps audit metadata, and
+   * maps per-object SO failures to the canonical bulk-error shape.
+   */
+  private async executeBulkUpdate(
+    ids: string[],
+    stateUpdate: Partial<ActionPolicySavedObjectAttributes>
+  ): Promise<BulkResponse> {
+    if (ids.length === 0) {
+      return { affected_count: 0, errors: [] };
+    }
+
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const now = new Date().toISOString();
+
+    const objects = ids.map((id) => ({
+      id,
+      attrs: {
+        ...stateUpdate,
+        updatedBy: userProfileUid,
+        updatedAt: now,
+      },
+    }));
+
+    const updateResults = await this.actionPolicySavedObjectService.bulkUpdate({ objects });
+
+    const errors: ActionPolicyBulkError[] = [];
+    let affectedCount = 0;
+
+    for (const result of updateResults) {
+      if ('error' in result) {
+        errors.push(toActionPolicyBulkError(result.id, result.error));
+        continue;
+      }
+      affectedCount += 1;
+    }
+
+    return { affected_count: affectedCount, errors };
   }
 
   private buildFindFilter(params: FindActionPoliciesParams): KueryNode | undefined {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
-
-    if (params.destinationType) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.destinations.type`, params.destinationType));
-    }
-
-    if (params.createdBy) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
-    }
 
     if (params.enabled !== undefined) {
       conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
@@ -565,14 +614,6 @@ export class ActionPolicyClient {
       conditions.push(
         tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
       );
-    }
-
-    if (params.ruleId) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.ruleId`, params.ruleId));
-    }
-
-    if (params.type) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.type`, params.type));
     }
 
     if (conditions.length === 0) {
@@ -589,8 +630,8 @@ export class ActionPolicyClient {
 
     const sortFieldMap: Record<string, string> = {
       name: 'name.keyword',
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     };
 
     return sortFieldMap[sortField];
@@ -612,24 +653,6 @@ export class ActionPolicyClient {
     const auth = await this.getDecryptedAuth(id);
     await this.actionPolicySavedObjectService.delete({ id });
     this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
-  }
-
-  public async deleteActionPoliciesByFilter(
-    filter: Pick<FindActionPoliciesParams, 'ruleId' | 'type' | 'destinationType' | 'tags'>
-  ): Promise<BulkActionActionPoliciesResponse> {
-    const ids: string[] = [];
-    const PAGE_SIZE = 100;
-    for (let page = 1; ; page++) {
-      const result = await this.findActionPolicies({ ...filter, page, perPage: PAGE_SIZE });
-      ids.push(...result.items.map((p) => p.id));
-      if (page * PAGE_SIZE >= result.total) break;
-    }
-    if (ids.length === 0) {
-      return { processed: 0, total: 0, errors: [] };
-    }
-    return this.bulkActionActionPolicies({
-      actions: ids.map((id) => ({ id, action: 'delete' as const })),
-    });
   }
 
   private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {

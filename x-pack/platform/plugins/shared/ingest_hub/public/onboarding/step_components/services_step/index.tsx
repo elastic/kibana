@@ -31,7 +31,8 @@ import { useServicesStep, CATEGORY_ORDER } from './use_services_step';
 import type { SignalFilter } from './use_services_step';
 
 interface ServicesStepProps {
-  onNext: () => void;
+  onContinue: () => void;
+  onBack?: () => void;
 }
 
 const SIGNAL_FILTER_OPTIONS = [
@@ -58,7 +59,7 @@ function categoryColor(category: string): string {
   return CATEGORY_COLORS[Math.max(0, index)];
 }
 
-export function ServicesStep({ onNext }: ServicesStepProps) {
+export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
   const {
     signalFilter,
     setSignalFilter,
@@ -77,7 +78,7 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
-  } = useServicesStep({ onNext });
+  } = useServicesStep({ onContinue });
 
   return (
     <div data-test-subj="onboardingStep-services">
@@ -230,15 +231,28 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
 
       <EuiSpacer size="l" />
 
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {onBack && (
+            <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.backButton"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             onClick={handleNext}
             isDisabled={!isReady}
-            data-test-subj="servicesStep-nextButton"
+            data-test-subj="servicesStep-continueButton"
           >
-            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.continueButton"
+              defaultMessage="Continue"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

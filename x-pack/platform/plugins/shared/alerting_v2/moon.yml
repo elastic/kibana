@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
@@ -101,23 +102,37 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/datemath'
+  - '@kbn/rison'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/esql-types'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
-  - '@kbn/code-editor'
-  - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
   - '@kbn/core-spaces-common'
   - '@kbn/datemath'
-  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/css-utils'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/es-types'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
 tags:
   - plugin
   - prod
@@ -131,6 +146,7 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - public/**/*
+    - test/scout/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'

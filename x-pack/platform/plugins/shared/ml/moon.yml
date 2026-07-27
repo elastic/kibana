@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-ml'
+  - '@kbn/content-management-utils'
   - '@kbn/embeddable-plugin'
   - '@kbn/es-query'
   - '@kbn/es-types'
@@ -154,6 +155,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/zod'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod

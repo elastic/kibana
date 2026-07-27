@@ -20,7 +20,7 @@ export class IndexManagement extends AbstractPageObject {
   }
 
   async sectionHeadingText() {
-    return await this.page.testSubj.locator('appTitle').textContent();
+    return await this.page.testSubj.locator('appHeaderTitle').textContent();
   }
 
   async changeTabs(
@@ -74,7 +74,7 @@ export class IndexManagement extends AbstractPageObject {
     await indexLinks.nth(indexOfRow).click();
 
     // Wait for index details page to load using web-first assertion
-    await expect(this.page.testSubj.locator('indexDetailsHeader')).toBeVisible();
+    await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
   }
 
   async navigateToIndexManagementTab(
@@ -95,24 +95,6 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator('nextButton').click();
   }
 
-  /**
-   * Custom combobox interaction for non-clearable comboboxes.
-   * Note: Cannot use EuiComboBoxWrapper here because the fieldType combobox
-   * has isClearable={false} (in type_parameter.tsx), and EuiComboBoxWrapper.selectSingleOption()
-   * attempts to clear() first, which fails when trying to click the non-existent comboBoxClearButton.
-   */
-  async setComboBox(testSubject: string, value: string) {
-    const comboBox = this.page.testSubj.locator(testSubject);
-    await comboBox.click();
-
-    // Type the value
-    const input = comboBox.locator('input');
-    await input.fill(value);
-
-    // Wait for and click the option
-    await this.page.locator(`[role="option"]`).filter({ hasText: value }).click();
-  }
-
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
     const tabMap = {
       fields: 'fieldsTab',
@@ -126,7 +108,7 @@ export class IndexManagement extends AbstractPageObject {
     expectIndexDetailsPageIsLoaded: async () => {
       await expect(this.page.testSubj.locator('indexDetailsTab-overview')).toBeVisible();
       await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
-      await expect(this.page.testSubj.locator('indexDetailsBackToIndicesButton')).toBeVisible();
+      await expect(this.page.testSubj.locator('appHeaderBack')).toBeVisible();
     },
   };
 

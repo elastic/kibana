@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -88,6 +89,49 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export interface DiscoveryScenario {
+  input: {
+    scenario_id: string;
+    stream_name: string;
+    detections: Array<Partial<Detection>>;
+  };
+  /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
+  continuationChains?: Record<string, string[]>;
+  output: {
+    criteria: SamplingCriterion[];
+    expected_min_evidence_count?: number;
+    /** Human-readable summary of expected output for quick orientation (e.g. `discoveries=[cascade, benign-auth]`). */
+    expected_ground_truth?: string;
+    /**
+     * The discoveries the agent is expected to generate — same shape as the judge's
+     * `input.discoveries` (signals + causal_features + blast_radius). This is the canonical ground
+     * truth: the grouping check derives its expected groups from these `signals[].metadata.rule_uuid`s,
+     * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
+     */
+    expected_discoveries: Array<Partial<Discovery>>;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
+  snapshot_source?: SnapshotSourceOverride;
+}
+
+export interface DiscoveryJudgeScenario {
+  id?: string;
+  input: {
+    scenario_id: string;
+    discoveries: Array<Partial<Discovery>>;
+  };
+  output: {
+    criteria: SamplingCriterion[];
+    /** Human-readable summary of the expected status for each event ID, e.g. `event_id=open (reason); event_id=dismissed (reason)`. */
+    expected_ground_truth: string;
+    /** Expected judge-confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
+    expect_assessment_note?: boolean;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
+  snapshot_source?: SnapshotSourceOverride;
+}
+
 export interface DatasetConfig {
   id: string;
   description: string;
@@ -96,4 +140,6 @@ export interface DatasetConfig {
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
+  discovery: DiscoveryScenario[];
+  discoveryJudge: DiscoveryJudgeScenario[];
 }

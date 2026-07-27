@@ -17,6 +17,7 @@ import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
   CASE_EXTENDED_FIELDS_LABELS,
   CASE_SAVED_OBJECT,
@@ -38,6 +39,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_WRITER,
+} from '../../cases_analytics_v2';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
@@ -60,6 +66,7 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import { transformSavedObjectToExternalModel } from './transform';
 import type { ConfigType } from '../../config';
 
 const createUpdateSOResponse = ({
@@ -172,6 +179,7 @@ describe('CasesService', () => {
     log: mockLogger,
     unsecuredSavedObjectsClient,
     config: {} as ConfigType,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
   });
 
   let service: CasesService;
@@ -182,6 +190,11 @@ describe('CasesService', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      // Tests don't exercise the analytics v2 path; the no-op writers
+      // keep every hook a tight no-op.
+      analyticsV2Writer: V2_NOOP_WRITER,
+      analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   });
 
@@ -269,9 +282,9 @@ describe('CasesService', () => {
               },
               Object {
                 "error": Object {
-                  "error": "error",
-                  "message": "message",
-                  "statusCode": 500,
+                  "error": "Not Found",
+                  "message": "Saved object not found",
+                  "statusCode": 404,
                 },
                 "id": "1",
                 "references": Array [],
@@ -2336,6 +2349,12 @@ describe('CasesService', () => {
           total: 1,
           per_page: 1,
           page: 1,
+          aggregations: {
+            references: {
+              doc_count: 0,
+              caseIds: { buckets: [] },
+            },
+          },
         });
       });
 
@@ -2369,25 +2388,7 @@ describe('CasesService', () => {
           },
         });
 
-        it('does not query cases-attachments when the unified attachments flag is off', async () => {
-          jest
-            .spyOn(attachmentService, 'isUnifiedAttachmentsEnabled', 'get')
-            .mockReturnValue(false);
-
-          unsecuredSavedObjectsClient.find.mockResolvedValueOnce(buildAggsResponse(['legacy-1']));
-
-          const res = await service.getCaseIdsByAlertId({ alertId: '1' });
-
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-            expect.objectContaining({ type: 'cases-comments' })
-          );
-          expect(CasesService.getCaseIDsFromAlertAggs(res)).toEqual(['legacy-1']);
-        });
-
-        it('runs an additional cases-attachments find when the flag is on and merges deduped case ids', async () => {
-          jest.spyOn(attachmentService, 'isUnifiedAttachmentsEnabled', 'get').mockReturnValue(true);
-
+        it('always issues both cases-comments and cases-attachments finds and merges deduped case ids', async () => {
           unsecuredSavedObjectsClient.find
             .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'legacy-only']))
             .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'unified-only']));
@@ -2398,12 +2399,10 @@ describe('CasesService', () => {
           });
 
           expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
-            1,
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
             expect.objectContaining({ type: 'cases-comments' })
           );
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
-            2,
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
             expect.objectContaining({ type: 'cases-attachments' })
           );
 
@@ -3658,6 +3657,222 @@ describe('CasesService', () => {
           { match: { 'cases-comments.alertId': search } },
           { match_phrase: { 'cases-comments.comment': search } },
         ]);
+      });
+    });
+  });
+
+  describe('cases-analytics v2 writer integration', () => {
+    // The default service fixture uses V2_NOOP_WRITER; for these assertions
+    // we need a writer we can spy on.
+    const makeServiceWithMockWriter = () => {
+      const analyticsV2Writer = {
+        upsertCase: jest.fn(),
+        deleteCase: jest.fn(),
+        bulkUpsertCases: jest.fn(),
+        bulkDeleteCases: jest.fn(),
+        bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const analyticsV2ActivityWriter = {
+        upsertAction: jest.fn(),
+        bulkUpsertActions: jest.fn(),
+        bulkDeleteActionsByCaseIds: jest.fn(),
+        bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const analyticsV2AttachmentsWriter = {
+        upsertAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
+        bulkUpsertAttachments: jest.fn(),
+        bulkDeleteAttachments: jest.fn(),
+        bulkDeleteAttachmentsByCaseIds: jest.fn(),
+        bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const svc = new CasesService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        attachmentService,
+        analyticsV2Writer,
+        analyticsV2ActivityWriter,
+        analyticsV2AttachmentsWriter,
+      });
+      return { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter };
+    };
+
+    describe('bulkDeleteCaseEntities', () => {
+      it('removes the analytics doc only for cases whose SO delete succeeded', async () => {
+        // case-A delete succeeds; case-B fails with 409. Without inspecting
+        // the per-entity status, the analytics doc for case-B would be
+        // removed while the SO survives — and reconciliation can't repair
+        // it (the surviving SO's updated_at didn't change).
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'case-A', type: CASE_SAVED_OBJECT, success: true },
+            {
+              id: 'case-B',
+              type: CASE_SAVED_OBJECT,
+              success: false,
+              error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({
+          entities: [
+            { type: CASE_SAVED_OBJECT, id: 'case-A' },
+            { type: CASE_SAVED_OBJECT, id: 'case-B' },
+          ],
+        });
+
+        // Single bulk dispatch with only the successful case id — the
+        // individual `deleteCase` path is unused on bulk operations now.
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // The activity surface cascades the same successful-case-id set:
+        // deleting a case cascades to its user-action SOs at the SO layer,
+        // and reconciliation can't see that gap, so the activity docs are
+        // dropped explicitly here.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledTimes(1);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+
+      it('skips analytics writes for non-case entity types', async () => {
+        // Comments, user-actions, etc. are tracked by their own analytics
+        // surfaces (PR 2). The case-surface writer only handles cases.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'comment-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            { id: 'case-A', type: CASE_SAVED_OBJECT, success: true },
+          ],
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({
+          entities: [
+            { type: CASE_COMMENT_SAVED_OBJECT, id: 'comment-1' },
+            { type: CASE_SAVED_OBJECT, id: 'case-A' },
+          ],
+        });
+
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // Activity cascade is keyed by case id and likewise skips the
+        // non-case entity — only `case-A` is passed through.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+    });
+
+    describe('deleteCase', () => {
+      it('cascades the deleted case id to the activity surface', async () => {
+        unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.deleteCase({ id: 'case-A', refresh: false });
+
+        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith('case-A');
+        // Deleting the case cascades to its user-action SOs at the SO
+        // layer; reconciliation can't detect that, so the activity docs
+        // are dropped explicitly by case id.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+    });
+
+    describe('patchCase', () => {
+      it('dispatches the persisted model to the analytics writer even when status/severity are not part of the patch', async () => {
+        // `originalCase` is the external model (string status/severity,
+        // external_service.connector_id). When the patch only touches `title`,
+        // the base must be converted to the persisted model before merging —
+        // otherwise `status`/`severity` silently become `undefined` (the
+        // *_TO_STRING maps are keyed by the numeric enum) and any pushed case
+        // carries `external_service.connector_id` into the strict mapping.
+        const persistedSO = createCaseSavedObjectResponse({
+          externalService: createExternalService({ connector_id: 'push-connector-1' }),
+        });
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { title: 'Updated Title' },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { title: 'Updated Title' },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.upsertCase).toHaveBeenCalledTimes(1);
+        const dispatchedDoc = analyticsV2Writer.upsertCase.mock.calls[0][0];
+
+        // status/severity must be the numeric persisted values, not the
+        // string external-model values.
+        expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
+        expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
+
+        // connector_id must not appear — it's stored as a reference, not a
+        // mapping field. Its presence in the doc triggers a
+        // strict_dynamic_mapping_exception on the .cases index.
+        expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
+      });
+    });
+
+    describe('patchCases', () => {
+      it('dispatches the persisted model to the analytics writer even when status/severity are not part of the bulk patch', async () => {
+        // Same model-mixing hazard as patchCase — both sites use the same
+        // synthesize-from-originalCase pattern and need the same fix.
+        const persistedSO = createCaseSavedObjectResponse({
+          externalService: createExternalService({ connector_id: 'push-connector-2' }),
+        });
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: persistedSO.id,
+              type: CASE_SAVED_OBJECT,
+              attributes: { title: 'Bulk Updated Title' },
+              references: persistedSO.references,
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCases({
+          cases: [
+            {
+              caseId: persistedSO.id,
+              updatedAttributes: { title: 'Bulk Updated Title' },
+              originalCase: externalModelOriginalCase,
+              version: 'WzAsMV0=',
+            },
+          ],
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.bulkUpsertCases).toHaveBeenCalledTimes(1);
+        const [mirrors] = analyticsV2Writer.bulkUpsertCases.mock.calls[0];
+        expect(mirrors).toHaveLength(1);
+        const dispatchedDoc = mirrors[0];
+
+        expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
+        expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
+        expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
       });
     });
   });

@@ -17,8 +17,8 @@ import type {
 import { loadSkillTools } from '../../../skills/load_skill_tools';
 import { resolveSkill } from '../../../skills/utils';
 import {
-  getSkillEntryPath,
-  getSkillReferencedContentEntryPath,
+  getSkillAbsolutePath,
+  getSkillReferencedContentAbsolutePath,
 } from '../../runner/store/volumes/skills/utils';
 
 const schema = z.object({
@@ -50,6 +50,8 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
   schema,
   tags: ['skills'],
   summarizeToolReturn: preserveResults,
+  // greater limit for skill content
+  maxResultTokens: 100_000,
   handler: async ({ skill: skillInput }, ctx) => {
     const { skills, toolProvider, toolManager, request, logger, runContext } = ctx;
 
@@ -88,12 +90,12 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
           skill: {
             id: skill.id,
             name: skill.name,
-            path: getSkillEntryPath({ skill }),
+            path: getSkillAbsolutePath({ skill }),
           },
           content: skill.content,
           referenced_files: (skill.referencedContent ?? []).map((rc) => ({
             name: rc.name,
-            path: getSkillReferencedContentEntryPath({ skill, referencedContent: rc }),
+            path: getSkillReferencedContentAbsolutePath({ skill, referencedContent: rc }),
           })),
           loaded_tools: loadedToolIds,
         }),

@@ -14,6 +14,7 @@ export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
   GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
+  SYNTHETICS_MONITORS_BULK_UPDATE = '/api/synthetics/monitors/_bulk_update',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
   LATEST_TEST_RUN = '/api/synthetics/latest_test_run',
@@ -40,6 +41,7 @@ export enum SYNTHETICS_API_URLS {
   MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
   OVERVIEW_TRENDS = '/internal/synthetics/overview_trends',
   OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
+  OVERVIEW_STATUS_STALE = `/internal/synthetics/overview_status/stale`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,

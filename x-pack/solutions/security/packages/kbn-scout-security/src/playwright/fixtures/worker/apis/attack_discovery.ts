@@ -29,10 +29,12 @@ export const getAttackDiscoveryApiService = ({
   kbnClient,
   log,
   scoutSpace,
+  esClient,
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
+  esClient?: ScoutParallelWorkerFixtures['esClient'];
 }): AttackDiscoveryApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace.id}` : '';
   const spaceId = scoutSpace?.id ?? 'default';
@@ -44,7 +46,7 @@ export const getAttackDiscoveryApiService = ({
           method: 'GET',
           path: `${basePath}/api/attack_discovery/_find`,
           query: {
-            per_page: 1,
+            per_page: 2,
             search: SEEDED_ATTACK_TITLE,
             scheduled: true,
             shared: true,
@@ -54,11 +56,11 @@ export const getAttackDiscoveryApiService = ({
         const responseBody = findSeededResponse.data as { total?: unknown };
         const total = typeof responseBody.total === 'number' ? responseBody.total : 0;
 
-        if (total > 0) {
+        if (total >= 2) {
           return;
         }
 
-        await kbnClient.request({
+        const createResponse = await kbnClient.request({
           method: 'POST',
           path: `${basePath}/internal/elastic_assistant/data_generator/attack_discoveries/_create`,
           headers: {
@@ -84,6 +86,15 @@ export const getAttackDiscoveryApiService = ({
                 title: SEEDED_ATTACK_TITLE,
                 timestamp: new Date().toISOString(),
               },
+              {
+                alertIds: ['seed-alert-3', 'seed-alert-4'],
+                detailsMarkdown: 'Seeded by Scout attacks space setup (manual).',
+                entitySummaryMarkdown: 'Seeded entity summary (manual)',
+                mitreAttackTactics: ['Execution'],
+                summaryMarkdown: 'Seeded with synthetic alert IDs (manual)',
+                title: `${SEEDED_ATTACK_TITLE} (Manual)`,
+                timestamp: new Date().toISOString(),
+              },
             ],
             connectorName: 'Synthetic (Scout attacks space setup)',
             enableFieldRendering: true,
@@ -91,6 +102,57 @@ export const getAttackDiscoveryApiService = ({
             withReplacements: false,
           },
         });
+
+        const responseBodyData = createResponse.data as { data?: unknown[] };
+        if (esClient && responseBodyData && Array.isArray(responseBodyData.data)) {
+          const createdDocs = responseBodyData.data;
+          const manualDoc = createdDocs.find(
+            (doc) =>
+              typeof doc === 'object' &&
+              doc !== null &&
+              'title' in doc &&
+              (doc as { title?: unknown }).title === `${SEEDED_ATTACK_TITLE} (Manual)`
+          ) as { id?: string; index?: string } | undefined;
+
+          const scheduledDoc = createdDocs.find(
+            (doc) =>
+              typeof doc === 'object' &&
+              doc !== null &&
+              'title' in doc &&
+              (doc as { title?: unknown }).title === SEEDED_ATTACK_TITLE
+          ) as { id?: string; index?: string } | undefined;
+
+          if (manualDoc && manualDoc.id && manualDoc.index) {
+            // The `_create` API uses a temporary rule to generate the attacks, which overwrites the
+            // `alertRuleUuid` with the temporary rule's UUID. To properly simulate a manually generated
+            // attack, we must directly update the document in Elasticsearch to restore the ad-hoc sentinel
+            // value and user details.
+            await esClient.update({
+              index: manualDoc.index,
+              id: manualDoc.id,
+              refresh: true,
+              doc: {
+                'kibana.alert.rule.uuid': 'attack_discovery_ad_hoc_rule_id',
+                'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
+                'attack_discovery.user.name': 'scout_user',
+                'attack_discovery.user.id': 'scout_user_id',
+              },
+            });
+          }
+
+          if (scheduledDoc && scheduledDoc.id && scheduledDoc.index) {
+            // Similarly, update the scheduled doc to have the correct rule type ID
+            // so that it is properly recognized as a scheduled attack.
+            await esClient.update({
+              index: scheduledDoc.index,
+              id: scheduledDoc.id,
+              refresh: true,
+              doc: {
+                'kibana.alert.rule.rule_type_id': 'attack-discovery',
+              },
+            });
+          }
+        }
       });
     },
 
