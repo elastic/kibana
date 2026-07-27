@@ -10,12 +10,12 @@ import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core/s
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
+  AI_INDEX_API_VERSION,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
-  MAX_AI_INDEX_NAME_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
@@ -23,20 +23,21 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import type {
+  CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
 import { apiPrivileges } from '../../common/features';
+import { validateAiIndexId } from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
   AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-
-const API_VERSION = '2023-10-31';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -46,23 +47,18 @@ const WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
 };
 
-const aiIndexIdParamsSchema = schema.object({
-  aiIndexId: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_ID_LENGTH,
-    meta: { description: 'The unique identifier of the AI index.' },
-  }),
+const aiIndexIdSchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_AI_INDEX_ID_LENGTH,
+  validate: validateAiIndexId,
+  meta: { description: 'The unique identifier of the AI index.' },
 });
 
-const putAiIndexBodySchema = schema.object({
-  name: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_NAME_LENGTH,
-    meta: {
-      description:
-        'Display name for the AI index. Separate from the id so it can be renamed if necessary.',
-    },
-  }),
+const aiIndexIdParamsSchema = schema.object({
+  aiIndexId: aiIndexIdSchema,
+});
+
+const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -81,7 +77,7 @@ const putAiIndexBodySchema = schema.object({
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
       meta: {
         description:
-          'The data stream or index (e.g. `.ai-index-ds-foo`, `.ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `.ai-index-ds-` (for `data_stream`) or `.ai-index-idx-` (for `index`). System indices are not allowed.',
+          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',
       },
     }),
   }),
@@ -109,7 +105,10 @@ const putAiIndexBodySchema = schema.object({
       meta: { description: 'Additional sources that provide context for the AI index.' },
     }
   ),
-});
+};
+
+const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
+const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
 const withContextEngineFeatureFlag =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
@@ -130,7 +129,7 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (error instanceof AiIndexNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexConflictError) {
+  if (error instanceof AiIndexConflictError || error instanceof AiIndexAlreadyExistsError) {
     return response.conflict({ body: { message: error.message } });
   }
   throw error;
@@ -143,6 +142,41 @@ export const registerAiIndexRoutes = ({
   router: IRouter;
   getAiIndexService: () => AiIndexService;
 }) => {
+  // Create an AI index
+  router.versioned
+    .post({
+      path: aiIndexPath,
+      security: WRITE_SECURITY,
+      access: 'public',
+      summary: 'Create an AI index',
+      description:
+        'Creates an AI index record attached to a data stream or index pattern. Fails with a 409 if an AI index with the same id already exists.',
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: {
+            body: createAiIndexBodySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        try {
+          const { id, ...properties } = request.body;
+          await getAiIndexService().create(id, properties);
+          const body: CreateAiIndexResponse = { status: 'created' };
+          return response.created({ body });
+        } catch (error) {
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
   // Create or update an AI index
   router.versioned
     .put({
@@ -151,7 +185,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Create or update an AI index',
       description:
-        'Creates or updates an AI index record attached to an existing data stream or index pattern.',
+        'Creates or updates an AI index record attached to a data stream or index pattern.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -159,7 +193,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
@@ -193,7 +227,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
@@ -225,7 +259,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: false,
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -252,7 +286,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: AI_INDEX_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,

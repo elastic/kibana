@@ -118,7 +118,11 @@ test.describe(
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible({
+        // Cases list title: legacy header (`cases-all-title`) or the cases-redesign app
+        // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
+        await expect(
+          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
+        ).toHaveText('Cases', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -142,7 +146,7 @@ test.describe(
       });
     });
 
-    test('footer-panel children navigate and update breadcrumbs', async ({ pageObjects }) => {
+    test('footer-panel children navigate to the expected pages', async ({ pageObjects, page }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('data_management → Integrations', async () => {
@@ -155,7 +159,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-integrations"]')
           .click();
-        await expect(nav.breadcrumb({ deepLinkId: 'integrations' })).toBeVisible({
+        await expect(page.testSubj.locator('epmList.integrationCards')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -217,6 +221,7 @@ test.describe(
 
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
+      page,
     }) => {
       const nav = pageObjects.observabilityNavigation;
 
@@ -235,7 +240,7 @@ test.describe(
       await test.step('Agents via More', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreById('agent_builder').click();
-        await expect(nav.breadcrumb({ text: 'Agents' })).toBeVisible({
+        await expect(page.testSubj.locator('agentBuilderWrapper')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

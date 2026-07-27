@@ -51,21 +51,13 @@ export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
   ...SIGEVENTS_OPTIONAL_STREAMS,
 ] as const;
 
-export const VALID_SYSTEM_INDICES = ['.kibana_streams_tasks-*'] as const;
-
 export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;
 
-type ValidStreamsSystemIndices = (typeof VALID_SYSTEM_INDICES)[number];
 type ValidStreamsAlertIndices = (typeof VALID_ALERT_INDICES)[number];
-type ValidStreamsIndices = ValidStreamsSystemIndices | ValidStreamsAlertIndices;
 
 export type StreamsIndexAliasConfig = Pick<IndicesUpdateAliasesAddAction, 'alias' | 'is_hidden'>;
 
-export const INDEX_ALIAS_CONFIG: Record<ValidStreamsIndices, StreamsIndexAliasConfig> = {
-  '.kibana_streams_tasks-*': {
-    alias: '.kibana_streams_tasks',
-    is_hidden: true,
-  },
+export const INDEX_ALIAS_CONFIG: Record<ValidStreamsAlertIndices, StreamsIndexAliasConfig> = {
   '.internal.alerts-streams.alerts-default-*': {
     alias: '.alerts-streams.alerts-default',
   },

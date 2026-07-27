@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { Environment } from '../../common/environment_rt';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { getPathForServiceDetail, type APMLocatorPayload } from './helpers';
@@ -68,6 +69,7 @@ describe('getPathForServiceDetail', () => {
     const baseQuery = { environment: 'prod' as Environment };
 
     it.each([
+      ['alerts', '/services/svc/alerts'],
       ['logs', '/services/svc/logs'],
       ['metrics', '/services/svc/metrics'],
       ['traces', '/services/svc/transactions'],
@@ -152,6 +154,172 @@ describe('getPathForServiceDetail', () => {
 
       expect(splitPath(path).query.get('errorGroupId')).toBeNull();
     });
+
+    it('forwards comparisonEnabled and offset to the error group deep-link', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          serviceOverviewTab: 'errors',
+          errorGroupId: 'group-1',
+          query: {
+            environment: 'prod' as Environment,
+            comparisonEnabled: true,
+            offset: 'expected_bounds',
+          },
+        },
+        defaultOptions
+      );
+      const { query } = splitPath(path);
+
+      expect(query.get('comparisonEnabled')).toBe('true');
+      expect(query.get('offset')).toBe('expected_bounds');
+    });
+  });
+
+  describe('isMobileAgentName routing', () => {
+    const baseQuery = { environment: 'prod' as Environment };
+
+    it('routes to the mobile overview when no tab is provided', () => {
+      const path = getPathForServiceDetail(
+        { serviceName: 'svc', isMobileAgentName: true, query: baseQuery },
+        defaultOptions
+      );
+
+      expect(splitPath(path).pathname).toBe('/mobile-services/svc/overview');
+    });
+
+    it.each([
+      ['alerts', '/mobile-services/svc/alerts'],
+      ['logs', '/mobile-services/svc/logs'],
+      ['traces', '/mobile-services/svc/transactions'],
+    ] as const)('routes the %s tab to the mobile path', (serviceOverviewTab, expectedPath) => {
+      const path = getPathForServiceDetail(
+        { serviceName: 'svc', isMobileAgentName: true, serviceOverviewTab, query: baseQuery },
+        defaultOptions
+      );
+
+      expect(splitPath(path).pathname).toBe(expectedPath);
+    });
+
+    it('falls back to the regular path for tabs without a mobile equivalent', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          isMobileAgentName: true,
+          serviceOverviewTab: 'metrics',
+          query: baseQuery,
+        },
+        defaultOptions
+      );
+
+      expect(splitPath(path).pathname).toBe('/services/svc/metrics');
+    });
+  });
+
+  describe('anomaly param forwarding', () => {
+    it('forwards comparisonEnabled from payload, overriding the default', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          query: {
+            environment: 'prod' as Environment,
+            comparisonEnabled: true,
+          },
+        },
+        { ...defaultOptions, isComparisonEnabledByDefault: false }
+      );
+
+      expect(splitPath(path).query.get('comparisonEnabled')).toBe('true');
+    });
+
+    it('falls back to isComparisonEnabledByDefault when comparisonEnabled is not in payload', () => {
+      const path = getPathForServiceDetail(
+        { serviceName: 'svc', query: { environment: 'prod' as Environment } },
+        { ...defaultOptions, isComparisonEnabledByDefault: true }
+      );
+
+      expect(splitPath(path).query.get('comparisonEnabled')).toBe('true');
+    });
+
+    it('forwards offset and anomalyThreshold to the overview URL', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          query: {
+            environment: 'prod' as Environment,
+            offset: 'expected_bounds',
+            anomalyThreshold: ML_ANOMALY_SEVERITY.CRITICAL,
+          },
+        },
+        defaultOptions
+      );
+      const { pathname, query } = splitPath(path);
+
+      expect(pathname).toBe('/services/svc/overview');
+      expect(query.get('offset')).toBe('expected_bounds');
+      expect(query.get('anomalyThreshold')).toBe('critical');
+    });
+
+    it('forwards offset and anomalyThreshold to the mobile overview URL', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          isMobileAgentName: true,
+          query: {
+            environment: 'prod' as Environment,
+            offset: 'expected_bounds',
+            anomalyThreshold: ML_ANOMALY_SEVERITY.MAJOR,
+          },
+        },
+        defaultOptions
+      );
+      const { pathname, query } = splitPath(path);
+
+      expect(pathname).toBe('/mobile-services/svc/overview');
+      expect(query.get('offset')).toBe('expected_bounds');
+      expect(query.get('anomalyThreshold')).toBe('major');
+    });
+
+    it.each(['alerts', 'logs', 'metrics', 'traces', 'transactions', 'errors'] as const)(
+      'forwards comparisonEnabled and offset to the %s tab route',
+      (serviceOverviewTab) => {
+        const path = getPathForServiceDetail(
+          {
+            serviceName: 'svc',
+            serviceOverviewTab,
+            query: {
+              environment: 'prod' as Environment,
+              comparisonEnabled: true,
+              offset: 'expected_bounds',
+            },
+          },
+          defaultOptions
+        );
+        const { query } = splitPath(path);
+
+        expect(query.get('comparisonEnabled')).toBe('true');
+        expect(query.get('offset')).toBe('expected_bounds');
+      }
+    );
+
+    it.each(['alerts', 'logs', 'metrics', 'traces', 'transactions', 'errors'] as const)(
+      'does not forward anomalyThreshold to the %s tab route',
+      (serviceOverviewTab) => {
+        const path = getPathForServiceDetail(
+          {
+            serviceName: 'svc',
+            serviceOverviewTab,
+            query: {
+              environment: 'prod' as Environment,
+              anomalyThreshold: ML_ANOMALY_SEVERITY.CRITICAL,
+            },
+          },
+          defaultOptions
+        );
+
+        expect(splitPath(path).query.get('anomalyThreshold')).not.toBe('critical');
+      }
+    );
   });
 
   describe('query merging', () => {
