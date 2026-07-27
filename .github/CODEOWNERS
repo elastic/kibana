@@ -49,6 +49,7 @@ src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-signals-traces-team
+x-pack/solutions/observability/plugins/client_apps @elastic/apm-agent-approvers
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-signals-traces-team
