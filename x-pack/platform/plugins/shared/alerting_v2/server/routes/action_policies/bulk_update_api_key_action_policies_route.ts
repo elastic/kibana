@@ -5,43 +5,37 @@
  * 2.0.
  */
 
+import { bulkByIdsSchema, bulkResponseSchema, errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import {
-  bulkCreateAlertActionBodySchema,
-  bulkResponseSchema,
-  errorResponseSchema,
-  type BulkCreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
-import { AlertActionsClient } from '../../lib/alert_actions_client';
+import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_ALERT_API_PATH } from '../constants';
-import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 @injectable()
-export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
+export class BulkUpdateApiKeyActionPoliciesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_ALERT_API_PATH}/_bulk_action`;
+  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk_update_api_key`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
     },
   };
   static routeOptions = {
-    summary: 'Bulk create alert actions',
-    description: 'Create actions for multiple alert groups in a single request.',
+    summary: 'Rotate API keys for action policies in bulk by ID',
   } as const;
   static schemas = {
     request: {
-      body: bulkCreateAlertActionBodySchema,
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
         body: () => bulkResponseSchema,
-        description:
-          'Returns the number of created actions and per-item errors for actions that were not created.',
+        description: 'Returns the result of the bulk API key rotation.',
       },
       400: {
         body: () => errorResponseSchema,
@@ -50,20 +44,21 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'bulk create alert action';
+  protected readonly routeName = 'bulk update action policy api keys';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkCreateAlertActionBody>,
-    @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
+    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const result = await this.alertActionsClient.createBulkActions(this.request.body);
-
+    const result = await this.actionPolicyClient.bulkUpdateActionPoliciesApiKey({
+      ids: this.request.body.ids,
+    });
     return this.ctx.response.ok({ body: result });
   }
 }
