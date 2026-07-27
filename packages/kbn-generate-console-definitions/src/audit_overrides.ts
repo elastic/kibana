@@ -89,6 +89,12 @@ const addConflict = ({
   conflicts[`${endpointName}::${key}`] = fingerprintConflict(generatedValue);
 };
 
+const isPlainObjectRule = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const isAtomicRule = (value: unknown): boolean =>
+  !isPlainObjectRule(value) || OVERRIDE_ATOMIC_RULE_KEYS.some((key) => Object.hasOwn(value, key));
+
 const collectDefinitionConflicts = ({
   endpointName,
   generated,
@@ -105,7 +111,7 @@ const collectDefinitionConflicts = ({
   if (!generatedRules || !overrideRules) {
     return;
   }
-  if (OVERRIDE_ATOMIC_RULE_KEYS.some((key) => Object.hasOwn(overrideRules, key))) {
+  if (isAtomicRule(generatedRules) || isAtomicRule(overrideRules)) {
     if (!isEqual(generatedRules, overrideRules)) {
       addConflict({
         conflicts,

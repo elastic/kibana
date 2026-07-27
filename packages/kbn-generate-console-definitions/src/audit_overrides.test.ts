@@ -290,6 +290,27 @@ describe('override conflict audit', () => {
     ).toEqual(['endpoint::<body>']);
   });
 
+  it.each([
+    ['__scope_link', { __scope_link: 'GLOBAL.query' }],
+    ['__one_of', { __one_of: [{ generated: '' }, { other: '' }] }],
+    ['__any_of', { __any_of: ['first', 'second'] }],
+  ])('WHEN generated top-level %s is replaced SHOULD fingerprint the whole body', (_, rules) => {
+    writeDefinition({
+      folder: generatedFolder,
+      endpoint: 'endpoint',
+      description: { data_autocomplete_rules: rules },
+    });
+    writeDefinition({
+      folder: overridesFolder,
+      endpoint: 'endpoint',
+      description: { data_autocomplete_rules: { curated: '' } },
+    });
+
+    expect(
+      Object.keys(createOverrideAuditState({ generatedFolder, overridesFolder }).conflicts)
+    ).toEqual(['endpoint::<body>']);
+  });
+
   it('WHEN an override has no generated counterpart SHOULD report an orphan', () => {
     writeDefinition({
       folder: overridesFolder,

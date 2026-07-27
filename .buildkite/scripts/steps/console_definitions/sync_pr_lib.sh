@@ -13,12 +13,10 @@ create_sync_pr() {
   shift 7
   local labels=("$@")
 
-  # No diff, nothing to do.
-  set +e
-  git diff --exit-code --quiet $git_scope
-  local diff_status=$?
-  set -e
-  if [ $diff_status -eq 0 ]; then
+  # No tracked or untracked changes, nothing to do.
+  local changes
+  changes=$(git status --porcelain --untracked-files=all -- "$git_scope")
+  if [ -z "$changes" ]; then
     echo "No differences found for '$pr_title'. Exiting.."
     return 0
   fi
@@ -48,7 +46,7 @@ create_sync_pr() {
 
   local branch_name="${branch_prefix}_$(date +%s)"
   git checkout -b "$branch_name"
-  git add $git_scope
+  git add -- "$git_scope"
   git commit -m "$commit_msg"
 
   echo "Changes committed. Creating pull request."

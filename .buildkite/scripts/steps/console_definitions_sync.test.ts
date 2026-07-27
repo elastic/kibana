@@ -26,10 +26,12 @@ const runSync = ({
   auditStatus,
   existingPr = false,
   script = SYNC_SCRIPT,
+  statusOutput = ' M src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/search.json',
 }: {
   auditStatus: number;
   existingPr?: boolean;
   script?: string;
+  statusOutput?: string;
 }) => {
   const root = fs.mkdtempSync(Path.join(os.tmpdir(), 'console-definitions-sync-'));
   const fakeBin = Path.resolve(root, 'bin');
@@ -46,8 +48,9 @@ const runSync = ({
   writeExecutable(
     Path.resolve(fakeBin, 'git'),
     `#!/usr/bin/env bash
-if [[ "\${1:-} \${2:-}" == "diff --exit-code" ]]; then
-  exit 1
+if [[ "\${1:-} \${2:-}" == "status --porcelain" ]]; then
+  printf '%s\n' "\${TEST_STATUS_OUTPUT}"
+  exit 0
 fi
 exit 0
 `
@@ -105,6 +108,7 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
       TEST_AUDIT_STATUS: String(auditStatus),
       TEST_EXISTING_PR: String(existingPr),
       TEST_PR_TITLE: PR_TITLE,
+      TEST_STATUS_OUTPUT: statusOutput,
     },
   });
 
@@ -142,6 +146,21 @@ describe('WHEN Console definitions are synchronized', () => {
       expect(result.prCreateArgs).not.toContain('Override conflict audit');
       expect(result.autoMergeCalled).toBe(true);
       expect(result.prCreateArgs).toContain('--label backport:skip');
+    } finally {
+      result.cleanup();
+    }
+  });
+
+  it('SHOULD open a PR when generation only adds new scoped files', () => {
+    const result = runSync({
+      auditStatus: 0,
+      statusOutput:
+        '?? src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/new_endpoint.json',
+    });
+    try {
+      expect(result.status).toBe(0);
+      expect(result.prCreateArgs).toContain('[Console] Update console definitions (main)');
+      expect(result.autoMergeCalled).toBe(true);
     } finally {
       result.cleanup();
     }
