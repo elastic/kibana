@@ -6,10 +6,7 @@
  */
 
 /**
- * A minimal, valid workflow definition used to seed a new automation. It mirrors
- * the Workflows app default template so the create API accepts it. The name and
- * description are embedded as double-quoted scalars via `JSON.stringify` so an
- * arbitrary AI index name cannot break the YAML.
+ * A minimal, valid workflow definition used to seed a new automation.
  */
 export const buildStarterWorkflowYaml = (aiIndexName: string): string => {
   // JSON.stringify yields a double-quoted, escaped string that is also a valid

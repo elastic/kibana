@@ -256,6 +256,42 @@ describe('AiIndexDetailPage', () => {
     expect(mockMgetWorkflows).not.toHaveBeenCalled();
   });
 
+  it('enables the automations edit button once the AI index has loaded', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
+    expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+  });
+
+  it('discards the draft when editing is cancelled', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    fireEvent.click(await screen.findByTestId('mockWorkflowSelector'));
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextCancelEditingAutomationsButton'));
+
+    expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
+    expect(services.http.put).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+
+    expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
+  });
+
   it('lists existing automations with the resolved workflow name and status', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue({
@@ -285,8 +321,9 @@ describe('AiIndexDetailPage', () => {
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextAddAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
     fireEvent.click(await screen.findByTestId('mockWorkflowSelector'));
+    fireEvent.click(screen.getByTestId('contextSaveAutomationsButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
@@ -313,7 +350,8 @@ describe('AiIndexDetailPage', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
-    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    fireEvent.click(await screen.findByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(mockCreateWorkflow).toHaveBeenCalledWith({
@@ -353,7 +391,9 @@ describe('AiIndexDetailPage', () => {
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
     fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextSaveAutomationsButton'));
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(

@@ -11,11 +11,7 @@ import { useCallback, useState } from 'react';
 import { getErrorMessage } from '../utils/get_error_message';
 import { useKibana } from './use_kibana';
 
-/**
- * Creates a workflow from a YAML definition and returns its id, surfacing an
- * error toast on failure. Used by the "Create automation" action to author a
- * new workflow that is then attached to the AI index.
- */
+/** Creates a workflow from a YAML definition and returns its id, or `undefined` on failure. */
 export const useCreateWorkflow = () => {
   const api = useWorkflowsApi();
   const {

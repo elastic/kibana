@@ -6,122 +6,27 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowListDto } from '@kbn/workflows';
-import { WorkflowSelector } from '@kbn/workflows-ui';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
-import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { useCreateWorkflow } from '../../hooks/use_create_workflow';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSaveAiIndexAutomations } from '../../hooks/use_save_ai_index_automations';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
-import { buildStarterWorkflowYaml } from '../../utils/starter_workflow_yaml';
-
-const WORKFLOWS_APP_ID = 'workflows';
-
-const AutomationRow = ({
-  automation,
-  name,
-  enabled,
-  editHref,
-  editable,
-  onRemove,
-  isRemoving,
-}: {
-  automation: AiIndexAutomation;
-  name: string | undefined;
-  enabled: boolean | undefined;
-  editHref: string;
-  editable: boolean;
-  onRemove: () => void;
-  isRemoving: boolean;
-}) => (
-  <EuiPanel hasBorder paddingSize="m" data-test-subj="contextAiIndexAutomationRow">
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="indexRuntime" size="l" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem css={{ minWidth: 0 }}>
-        <EuiText size="s" className="eui-textTruncate">
-          {name ?? automation.value}
-        </EuiText>
-      </EuiFlexItem>
-      {enabled !== undefined && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={enabled ? 'success' : 'hollow'}>
-            {enabled
-              ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.enabledBadge', {
-                  defaultMessage: 'Enabled',
-                })
-              : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.disabledBadge', {
-                  defaultMessage: 'Disabled',
-                })}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="popout"
-          iconSide="right"
-          href={editHref}
-          target="_blank"
-          data-test-subj="contextOpenWorkflowButton"
-        >
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editWorkflowButton', {
-            defaultMessage: 'Edit workflow',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      {editable && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.contextEngine.aiIndexDetail.automations.removeButtonAriaLabel',
-              {
-                defaultMessage: 'Remove automation {name}',
-                values: { name: name ?? automation.value },
-              }
-            )}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              onClick={onRemove}
-              isDisabled={isRemoving}
-              data-test-subj="contextRemoveAutomationButton"
-              aria-label={i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.automations.removeButtonAriaLabel',
-                {
-                  defaultMessage: 'Remove automation {name}',
-                  values: { name: name ?? automation.value },
-                }
-              )}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+import { AddAutomationControls } from './add_automation_controls';
+import { AutomationRow } from './automation_row';
 
 interface AutomationsPanelProps {
   isLoading: boolean;
@@ -133,92 +38,32 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
   const {
     services: { application },
   } = useKibana();
-  const { saveAutomations, isSaving } = useSaveAiIndexAutomations();
-  const { createWorkflow, isCreating } = useCreateWorkflow();
-  const [isEditing, setIsEditing] = useState(false);
-  // While editing, changes accumulate in this draft and are persisted on Save.
-  const [draftAutomations, setDraftAutomations] = useState<AiIndexAutomation[]>([]);
-
-  const savedAutomations = aiIndex?.automations ?? [];
-  const automations = isEditing ? draftAutomations : savedAutomations;
-  const workflowIds = automations
-    .filter((automation) => automation.type === 'workflow')
-    .map((automation) => automation.value);
+  const {
+    isEditing,
+    automations,
+    workflowIds,
+    isSaving,
+    isCreating,
+    isBusy,
+    startEditing,
+    stopEditing,
+    addAutomation,
+    removeAutomation,
+    save,
+    createAndAttach,
+  } = useAutomationsEditor({ aiIndex, onSaved });
   const { summaries, isLoading: isLoadingSummaries } = useWorkflowSummaries(workflowIds);
 
-  // Exclude already-attached workflows so they can't be picked twice.
-  const selectorConfig = useMemo(
-    () => ({
-      label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.selectorLabel', {
-        defaultMessage: 'Select an existing workflow',
-      }),
-      filterFunction: (workflows: WorkflowListDto['results']) =>
-        workflows.filter((workflow) => !workflowIds.includes(workflow.id)),
-      hideTopRowHeader: true,
-    }),
-    [workflowIds]
-  );
-
-  const openWorkflow = (workflowId: string) => {
-    application.navigateToApp(WORKFLOWS_APP_ID, { path: `/${encodeURIComponent(workflowId)}` });
-  };
-
-  const startEditing = () => {
-    setDraftAutomations(savedAutomations);
-    setIsEditing(true);
-  };
-
-  const cancelEditing = () => {
-    setIsEditing(false);
-  };
-
-  const handleAdd = (workflowId: string) => {
-    if (!workflowId || workflowIds.includes(workflowId)) {
-      return;
-    }
-    setDraftAutomations((current) => [...current, { type: 'workflow', value: workflowId }]);
-  };
-
-  const handleRemove = (value: string) => {
-    setDraftAutomations((current) => current.filter((automation) => automation.value !== value));
-  };
-
-  const handleSave = async () => {
-    if (!aiIndex) {
-      return;
-    }
-    const saved = await saveAutomations(aiIndex, draftAutomations);
-    if (saved) {
-      setIsEditing(false);
-      onSaved();
-    }
-  };
-
-  // Creating a workflow is a real backend action that navigates away, so it
-  // persists the draft (including the new automation) before leaving.
   const handleCreate = async () => {
-    if (!aiIndex) {
-      return;
-    }
-    const workflowId = await createWorkflow(buildStarterWorkflowYaml(aiIndex.id));
-    if (!workflowId) {
-      return;
-    }
-    const next: AiIndexAutomation[] = [
-      ...draftAutomations,
-      { type: 'workflow', value: workflowId },
-    ];
-    const saved = await saveAutomations(aiIndex, next);
-    if (saved) {
-      setIsEditing(false);
-      onSaved();
-      openWorkflow(workflowId);
+    const workflowId = await createAndAttach();
+    if (workflowId) {
+      application.navigateToApp(WORKFLOWS_APP_ID, {
+        path: `/${encodeURIComponent(workflowId)}`,
+      });
     }
   };
 
-  const isBusy = isSaving || isCreating;
-  const canModify =
-    aiIndex !== undefined && !isBusy && automations.length < MAX_AI_INDEX_AUTOMATIONS;
+  const canAddMore = automations.length < MAX_AI_INDEX_AUTOMATIONS;
 
   return (
     <EuiPanel hasBorder paddingSize="l">
@@ -238,7 +83,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="s"
-                  onClick={cancelEditing}
+                  onClick={stopEditing}
                   isDisabled={isBusy}
                   data-test-subj="contextCancelEditingAutomationsButton"
                 >
@@ -251,9 +96,9 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
                 <EuiButton
                   fill
                   size="s"
-                  onClick={handleSave}
+                  onClick={save}
                   isLoading={isSaving}
-                  isDisabled={aiIndex === undefined || isCreating}
+                  isDisabled={isCreating}
                   data-test-subj="contextSaveAutomationsButton"
                 >
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.saveButton', {
@@ -292,46 +137,13 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
       ) : (
         <>
           {isEditing && (
-            <>
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.automations.addExistingLabel',
-                    {
-                      defaultMessage: 'Add an existing automation',
-                    }
-                  )}
-                </strong>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <WorkflowSelector onWorkflowChange={handleAdd} config={selectorConfig} />
-              <EuiSpacer size="m" />
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    iconType="popout"
-                    iconSide="right"
-                    onClick={handleCreate}
-                    isLoading={isCreating}
-                    isDisabled={!canModify}
-                    data-test-subj="contextCreateAutomationButton"
-                  >
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
-                      defaultMessage: 'Create a new automation',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createHint', {
-                      defaultMessage: 'Opens the workflow editor in a new page.',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiHorizontalRule margin="m" />
-            </>
+            <AddAutomationControls
+              attachedWorkflowIds={workflowIds}
+              isCreating={isCreating}
+              isCreateDisabled={isBusy || !canAddMore}
+              onAdd={addAutomation}
+              onCreate={handleCreate}
+            />
           )}
           {automations.length === 0 && !isEditing ? (
             <EuiEmptyPrompt
@@ -348,33 +160,31 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               body={
                 <p>
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
-                    defaultMessage: 'Add an existing workflow to keep this AI index up to date.',
+                    defaultMessage: 'Add an existing workflow.',
                   })}
                 </p>
               }
             />
           ) : (
-            <>
-              {automations.map((automation, index) => {
-                const summary = summaries.get(automation.value);
-                return (
-                  <React.Fragment key={`${automation.type}-${automation.value}-${index}`}>
-                    <AutomationRow
-                      automation={automation}
-                      name={summary?.name}
-                      enabled={summary?.enabled}
-                      editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {
-                        path: `/${encodeURIComponent(automation.value)}`,
-                      })}
-                      editable={isEditing}
-                      onRemove={() => handleRemove(automation.value)}
-                      isRemoving={isBusy}
-                    />
-                    {index < automations.length - 1 && <EuiSpacer size="s" />}
-                  </React.Fragment>
-                );
-              })}
-            </>
+            automations.map((automation, index) => {
+              const summary = summaries.get(automation.value);
+              return (
+                <React.Fragment key={`${automation.type}-${automation.value}-${index}`}>
+                  <AutomationRow
+                    automation={automation}
+                    name={summary?.name}
+                    enabled={summary?.enabled}
+                    editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {
+                      path: `/${encodeURIComponent(automation.value)}`,
+                    })}
+                    isEditing={isEditing}
+                    isRemoveDisabled={isBusy}
+                    onRemove={() => removeAutomation(automation.value)}
+                  />
+                  {index < automations.length - 1 && <EuiSpacer size="s" />}
+                </React.Fragment>
+              );
+            })
           )}
         </>
       )}
