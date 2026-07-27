@@ -7082,6 +7082,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-runner@link:x-pack/platform/packages/shared/kbn-evals-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-skills-plugin@link:x-pack/platform/plugins/shared/evals_skills":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-agent-builder-dashboards@link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards":
   version "0.0.0"
   uid ""
