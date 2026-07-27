@@ -72,16 +72,29 @@ const parseAuthoringResponse = (
 
   const record = parsed as Record<string, unknown>;
   const nestedSpec = record.spec;
-  if (nestedSpec === null || typeof nestedSpec !== 'object' || Array.isArray(nestedSpec)) {
-    throw new Error('Response must include a valid "spec" object');
+  const isEnvelope =
+    nestedSpec !== null &&
+    typeof nestedSpec === 'object' &&
+    !Array.isArray(nestedSpec) &&
+    !hasRenderableView(record);
+
+  if (isEnvelope) {
+    const summary = typeof record.summary === 'string' ? record.summary.trim() : '';
+    const title = typeof record.title === 'string' ? record.title.trim() || undefined : undefined;
+    return {
+      spec: nestedSpec as Record<string, unknown>,
+      ...(title ? { title } : {}),
+      ...(summary ? { summary } : {}),
+    };
   }
-  const summary = typeof record.summary === 'string' ? record.summary.trim() : '';
-  const title = typeof record.title === 'string' ? record.title.trim() || undefined : undefined;
-  return {
-    spec: nestedSpec as Record<string, unknown>,
-    ...(title ? { title } : {}),
-    ...(summary ? { summary } : {}),
-  };
+
+  if (!hasRenderableView(record)) {
+    throw new Error(
+      'Response must be { "title"?: string, "summary"?: string, "spec": <Vega-Lite> } or a Vega-Lite object with a mark/composite view'
+    );
+  }
+
+  return { spec: record };
 };
 
 const VegaStateAnnotation = Annotation.Root({
