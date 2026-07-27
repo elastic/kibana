@@ -27,8 +27,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  DESIGN_EXPLORATION_KNOB_DEFINITIONS,
   applyDesignExplorationKnobCssVars,
+  getDesignExplorationKnobDefinitions,
   getDesignExplorationKnobValues,
   notifyDesignExplorationKnobsChanged,
   resetDesignExplorationKnobValues,
@@ -88,6 +88,10 @@ export const DesignExplorationKnobsPanel = () => {
   const [revision, setRevision] = useState(0);
   const panelTitleId = useGeneratedHtmlId({ prefix: 'designExplorationKnobsTitle' });
   const activeVariant = getActiveDesignExplorationVariant();
+  const knobDefinitions = useMemo(
+    () => getDesignExplorationKnobDefinitions(activeVariant.disabledKnobIds),
+    [activeVariant.disabledKnobIds]
+  );
   const knobValues = useMemo(
     () => getDesignExplorationKnobValues(activeVariant.id),
     [activeVariant.id, revision]
@@ -146,7 +150,7 @@ export const DesignExplorationKnobsPanel = () => {
           </EuiText>
           <EuiSpacer size="m" />
           <EuiForm>
-            {DESIGN_EXPLORATION_KNOB_DEFINITIONS.map(({ id, label, min, max, step, ticks }) => (
+            {knobDefinitions.map(({ id, label, min, max, step, ticks }) => (
               <EuiFormRow key={id} label={label} fullWidth>
                 {ticks ? (
                   <EuiButtonGroup

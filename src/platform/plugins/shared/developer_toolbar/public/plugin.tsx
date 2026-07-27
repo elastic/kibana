@@ -97,7 +97,7 @@ export class DeveloperToolbarPlugin
         this.registerItem({
           id: 'Chrome Next',
           children: <ChromeNextToggle featureFlags={core.featureFlags} />,
-          priority: 1,
+          priority: 10,
         });
       });
     }
@@ -108,7 +108,7 @@ export class DeveloperToolbarPlugin
           this.registerItem({
             id: 'Design exploration',
             children: <DesignExplorationVariantToggle />,
-            priority: 1,
+            priority: 9,
           });
         }
       );
@@ -117,7 +117,7 @@ export class DeveloperToolbarPlugin
         this.registerItem({
           id: 'Design exploration knobs',
           children: <DesignExplorationKnobsPanel />,
-          priority: 1,
+          priority: 8,
         });
       });
     }

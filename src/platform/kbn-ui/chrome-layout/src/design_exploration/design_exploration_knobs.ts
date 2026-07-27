@@ -26,6 +26,9 @@ export const DESIGN_EXPLORATION_STEP_MULTIPLIERS = [0.875, 1, 1.125] as const;
 /** Density is inverse of spacing — less density = more padding, more density = less padding. */
 export const DESIGN_EXPLORATION_DENSITY_STEP_MULTIPLIERS = [1.125, 1, 0.875] as const;
 
+/** Wider gutter swing than density/roundness — base (50) unchanged. Less/More: 0.8× / 1.2× (e.g. 16 / 20 / 24 at base 20). */
+export const DESIGN_EXPLORATION_GUTTER_STEP_MULTIPLIERS = [0.8, 1, 1.2] as const;
+
 export const DESIGN_EXPLORATION_KNOB_IDS = [
   'surfaceContrast',
   'density',
@@ -87,6 +90,11 @@ export const DESIGN_EXPLORATION_KNOB_DEFINITIONS: DesignExplorationKnobDefinitio
   },
   { id: 'shellShadow', label: 'Shell shadow', min: 0, max: 100, step: 1 },
 ];
+
+export const getDesignExplorationKnobDefinitions = (
+  disabledKnobIds: DesignExplorationKnobId[] = []
+): DesignExplorationKnobDefinition[] =>
+  DESIGN_EXPLORATION_KNOB_DEFINITIONS.filter(({ id }) => !disabledKnobIds.includes(id));
 
 /** Base visual tokens for a variant before knob scaling (knob = 50). */
 export interface DesignExplorationKnobTokens {
@@ -170,6 +178,8 @@ const steppedKnobMultiplier = (knobId: DesignExplorationSteppedKnobId, knobValue
   const multipliers =
     knobId === 'density'
       ? DESIGN_EXPLORATION_DENSITY_STEP_MULTIPLIERS
+      : knobId === 'gutter'
+      ? DESIGN_EXPLORATION_GUTTER_STEP_MULTIPLIERS
       : DESIGN_EXPLORATION_STEP_MULTIPLIERS;
 
   return multipliers[index >= 0 ? index : 1] ?? 1;

@@ -14,7 +14,7 @@ import {
   getDesignExplorationVariant,
   isDesignExplorationVariantId,
 } from '@kbn/core-chrome-feature-flags';
-import type { DesignExplorationKnobTokens } from './design_exploration_knobs';
+import type { DesignExplorationKnobId, DesignExplorationKnobTokens } from './design_exploration_knobs';
 import {
   ATTBANA_KNOB_TOKENS,
   BASELINE_KNOB_TOKENS,
@@ -33,21 +33,24 @@ export interface DesignExplorationVariantDefinition {
   id: string;
   label: string;
   knobTokens: DesignExplorationKnobTokens;
+  /** Knobs hidden in the dev toolbar panel for variants that do not consume them. */
+  disabledKnobIds?: DesignExplorationKnobId[];
   createStyles: (euiTheme: UseEuiTheme) => SerializedStyles;
 }
 
 export const DESIGN_EXPLORATION_VARIANTS: DesignExplorationVariantDefinition[] = [
   {
-    id: VERBANA_VARIANT_ID,
-    label: 'Verbana',
-    knobTokens: VERBANA_KNOB_TOKENS,
-    createStyles: createVerbanaStyles,
-  },
-  {
     id: BASELINE_VARIANT_ID,
     label: 'Baseline',
     knobTokens: BASELINE_KNOB_TOKENS,
     createStyles: createBaselineStyles,
+  },
+  {
+    id: VERBANA_VARIANT_ID,
+    label: 'Verbana',
+    knobTokens: VERBANA_KNOB_TOKENS,
+    disabledKnobIds: ['surfaceContrast'],
+    createStyles: createVerbanaStyles,
   },
   {
     id: LINBANA_VARIANT_ID,

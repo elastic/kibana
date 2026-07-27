@@ -15,14 +15,12 @@ import {
   DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR,
   DESIGN_EXPLORATION_BORDER_WIDTH,
   DESIGN_EXPLORATION_GAP,
-  DESIGN_EXPLORATION_PADDING,
-  DESIGN_EXPLORATION_PADDING_COMPACT,
-  DESIGN_EXPLORATION_RADIUS_CONTROL,
   DESIGN_EXPLORATION_SCROLLED_BODY_ATTR,
   DESIGN_EXPLORATION_TOP_BAR_HEIGHT,
   designExplorationVariantScope,
   getEmbeddablePanelShadow,
 } from './design_exploration_shared';
+import { designExplorationKnobVar as knobVar } from './design_exploration_knobs';
 
 export const VERBANA_VARIANT_ID = 'verbana';
 
@@ -31,7 +29,6 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
   const { colors, levels } = euiTheme.euiTheme;
   const appHeaderStackZIndex = Number(levels.mask) + 1;
   const embeddablePanelShadow = getEmbeddablePanelShadow(euiTheme);
-  const scrolledBarBorderRadius = `${DESIGN_EXPLORATION_RADIUS_CONTROL}px`;
 
   return css`
     ${scope} {
@@ -53,12 +50,12 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='kbnGridLayout'] {
-      --kbnGridGutterSize: 12 !important;
-      padding: ${DESIGN_EXPLORATION_PADDING}px 20px !important;
+      --kbnGridGutterSize: ${knobVar('gridGutter')} !important;
+      padding: ${knobVar('padding')} !important;
     }
 
     ${scope} [data-test-subj='embeddablePanel'] {
-      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusPanel')} !important;
       border: none !important;
       box-shadow: ${embeddablePanelShadow} !important;
     }
@@ -77,17 +74,17 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer'],
     ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer'] {
-      padding: 0 ${DESIGN_EXPLORATION_PADDING_COMPACT}px ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      padding: 0 ${knobVar('panelPadding')} ${knobVar('panelPadding')} !important;
     }
 
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
     ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:has(.echMetricText) {
-      padding: 8px 4px 4px !important;
+      padding: ${knobVar('panelPadding')} ${DESIGN_EXPLORATION_GAP}px ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
       border: none !important;
-      border-radius: calc(${DESIGN_EXPLORATION_RADIUS_CONTROL}px * 0.5) !important;
+      border-radius: calc(${knobVar('radiusControl')} * 0.5) !important;
       box-shadow: ${embeddablePanelShadow} !important;
     }
 
@@ -148,26 +145,26 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
-      padding: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      padding: ${knobVar('panelPadding')} !important;
       padding-bottom: ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
-      padding-inline: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
-      padding-bottom: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      padding-inline: ${knobVar('panelPadding')} !important;
+      padding-bottom: ${knobVar('panelPadding')} !important;
     }
 
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) [data-test-subj='controls-group-wrapper'] {
-      padding-top: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding-top: ${knobVar('padding')} !important;
     }
 
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
       [data-test-subj='appHeader'] {
-      padding-inline: 12px !important;
+      padding-inline: ${knobVar('panelPadding')} !important;
       padding-block: 4px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
-      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       border: none !important;
       box-shadow: ${embeddablePanelShadow} !important;
     }
@@ -220,9 +217,9 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) [data-test-subj='appHeader'] {
-      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       border: none !important;
-      box-shadow: ${embeddablePanelShadow} !important;
+      box-shadow: ${knobVar('shellShadow')} !important;
       background-color: color-mix(
         in srgb,
         ${colors.backgroundBaseSubdued} 80%,
@@ -233,7 +230,7 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
+      width: calc(100% - ${knobVar('padding')}) !important;
       margin: 8px !important;
       min-height: 48px !important;
     }
@@ -280,10 +277,10 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
-      margin: ${DESIGN_EXPLORATION_PADDING}px 8px !important;
-      border-radius: ${scrolledBarBorderRadius} !important;
-      box-shadow: ${embeddablePanelShadow} !important;
+      width: calc(100% - ${knobVar('padding')}) !important;
+      margin: ${knobVar('padding')} 8px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: ${knobVar('shellShadow')} !important;
       background-color: color-mix(
         in srgb,
         ${colors.backgroundBasePlain} 75%,
@@ -295,7 +292,7 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen)[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} .dshDashboardViewportWrapper,

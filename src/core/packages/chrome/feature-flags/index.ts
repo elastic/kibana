@@ -16,7 +16,7 @@ export const DESIGN_EXPLORATION_FEATURE_FLAG_KEY = 'core.chrome.designExploratio
 
 export const DESIGN_EXPLORATION_VARIANT_SESSION_KEY = 'dev.core.chrome.designExploration.variant';
 
-export const DEFAULT_DESIGN_EXPLORATION_VARIANT_ID = 'verbana';
+export const DEFAULT_DESIGN_EXPLORATION_VARIANT_ID = 'interbana';
 
 export interface DesignExplorationVariantOption {
   id: string;
@@ -25,8 +25,8 @@ export interface DesignExplorationVariantOption {
 
 /** Keep in sync with design exploration variant style files in @kbn/ui-chrome-layout. */
 export const DESIGN_EXPLORATION_VARIANT_OPTIONS: DesignExplorationVariantOption[] = [
-  { id: 'verbana', label: 'Verbana' },
   { id: 'baseline', label: 'Baseline' },
+  { id: 'verbana', label: 'Verbana' },
   { id: 'linbana', label: 'Linbana' },
   { id: 'attbana', label: 'Attbana' },
   { id: 'interbana', label: 'Interbana' },
