@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export const CONTEXT_ENGINE_PATHS = {
-  landing: '/',
-  create: '/ai_index/create',
-  detail: '/ai_index/:id',
-} as const;
-
-export const getAiIndexDetailPath = (id: string): string => `/ai_index/${id}`;
+export class AiIndexAlreadyExistsError extends Error {
+  constructor(aiIndexId: string) {
+    super(`AI index '${aiIndexId}' already exists`);
+    this.name = 'AiIndexAlreadyExistsError';
+  }
+}
