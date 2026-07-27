@@ -436,7 +436,6 @@
     "github": {
       "team": "elastic/kibana-telemetry",
       "label": "Team:Core"
-      
     }
   },
   {
@@ -511,6 +510,14 @@
       "Observability observed asset model",
       "Evals"
     ]
+  },
+  {
+    "id": "nightshift-sre-agent",
+    "name": "Nightshift SRE Agent Team",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-sre-agent-team"
+    }
   },
   {
     "id": "obs-cloudnative-monitoring",
