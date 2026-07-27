@@ -10,18 +10,18 @@
 import { type Container, ContainerModule } from 'inversify';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { Analytics, CoreSetup } from '@kbn/core-di-server';
+import { Analytics, CoreStart } from '@kbn/core-di-server';
 import { loadAnalytics } from './analytics';
 
 describe('loadAnalytics', () => {
   let container: Container;
-  let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceSetup>;
+  let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
 
   beforeEach(() => {
-    analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
     container = injectionServiceMock.createStartContract().getContainer();
     container.load(new ContainerModule(loadAnalytics));
-    container.bind(CoreSetup('analytics')).toConstantValue(analytics);
+    container.bind(CoreStart('analytics')).toConstantValue(analytics);
   });
 
   it('should resolve the analytics service', () => {
