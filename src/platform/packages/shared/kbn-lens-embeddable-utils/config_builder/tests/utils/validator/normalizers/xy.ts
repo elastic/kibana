@@ -391,6 +391,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       }
       // maxLines is always emitted as 1 for grid-layout (non-list) legends
       if (legend.layout !== 'list') legend.maxLines ??= 1;
+      // shouldTruncate is not preserved through list layouts
+      if (legend.layout === 'list') delete legend.shouldTruncate;
       // "auto" is not a valid XYLegendSize in the API schema — the round-trip drops it
       if (legend.legendSize === 'auto') delete legend.legendSize;
     }
@@ -549,10 +551,10 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       }
     }
 
-    // "auto" legendSize is not a valid API value — drop it from transformed too so the
-    // comparison is symmetric regardless of whether original also carried it.
-    const legend = viz.legend as any;
-    if (legend?.legendSize === 'auto') delete legend.legendSize;
+    // drop phantom keys
+    const legend = viz.legend;
+    if (legend?.shouldTruncate === undefined) delete legend.shouldTruncate;
+    if (legend?.legendSize === undefined || legend?.legendSize === 'auto') delete legend.legendSize;
 
     // The transform adds an empty kuery filter to annotation events — drop it when empty
     for (const layer of viz.layers ?? []) {
