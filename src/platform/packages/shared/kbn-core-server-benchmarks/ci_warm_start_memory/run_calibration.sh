@@ -91,6 +91,8 @@ resolve_orientation() {
 
   case "${orientation}" in
     aa)
+      LEFT_ID="A"
+      LEFT_LABEL="fixed"
       LEFT_BUILD_ID="${A_BUILD_ID}"
       LEFT_BUILD_NUMBER="${A_BUILD_NUMBER}"
       LEFT_COMMIT="${A_COMMIT}"
@@ -98,6 +100,8 @@ resolve_orientation() {
       LEFT_SHA1="${A_SHA1}"
       LEFT_SHA256="${A_SHA256}"
       LEFT_BUILD_URL="${A_BUILD_URL}"
+      RIGHT_ID="A"
+      RIGHT_LABEL="fixed"
       RIGHT_BUILD_ID="${A_BUILD_ID}"
       RIGHT_BUILD_NUMBER="${A_BUILD_NUMBER}"
       RIGHT_COMMIT="${A_COMMIT}"
@@ -108,6 +112,8 @@ resolve_orientation() {
       SEED="${SEED:-calibration-linux-aa}"
       ;;
     ab)
+      LEFT_ID="A"
+      LEFT_LABEL="fixed"
       LEFT_BUILD_ID="${A_BUILD_ID}"
       LEFT_BUILD_NUMBER="${A_BUILD_NUMBER}"
       LEFT_COMMIT="${A_COMMIT}"
@@ -115,6 +121,8 @@ resolve_orientation() {
       LEFT_SHA1="${A_SHA1}"
       LEFT_SHA256="${A_SHA256}"
       LEFT_BUILD_URL="${A_BUILD_URL}"
+      RIGHT_ID="B"
+      RIGHT_LABEL="regressed"
       RIGHT_BUILD_ID="${B_BUILD_ID}"
       RIGHT_BUILD_NUMBER="${B_BUILD_NUMBER}"
       RIGHT_COMMIT="${B_COMMIT}"
@@ -125,6 +133,8 @@ resolve_orientation() {
       SEED="${SEED:-calibration-linux-ab}"
       ;;
     ba)
+      LEFT_ID="B"
+      LEFT_LABEL="regressed"
       LEFT_BUILD_ID="${B_BUILD_ID}"
       LEFT_BUILD_NUMBER="${B_BUILD_NUMBER}"
       LEFT_COMMIT="${B_COMMIT}"
@@ -132,6 +142,8 @@ resolve_orientation() {
       LEFT_SHA1="${B_SHA1}"
       LEFT_SHA256="${B_SHA256}"
       LEFT_BUILD_URL="${B_BUILD_URL}"
+      RIGHT_ID="A"
+      RIGHT_LABEL="fixed"
       RIGHT_BUILD_ID="${A_BUILD_ID}"
       RIGHT_BUILD_NUMBER="${A_BUILD_NUMBER}"
       RIGHT_COMMIT="${A_COMMIT}"
@@ -172,40 +184,37 @@ verify_checksums() {
 download_side_artifact() {
   local side="$1"
   local build_id="$2"
-  local artifact_id="$3"
-  local expected_sha1="$4"
-  local expected_sha256="$5"
-  local stage_dir="$6"
-  local artifact_path="$7"
-  local extract_dir="$8"
+  local build_number="$3"
+  local artifact_id="$4"
+  local expected_sha1="$5"
+  local expected_sha256="$6"
+  local stage_dir="$7"
+  local artifact_path="$8"
+  local extract_dir="$9"
 
-  echo "--- Download ${side} artifact (${artifact_id}) from build ${build_id}"
-  rm -rf "${stage_dir}" "${extract_dir}"
-  mkdir -p "${stage_dir}" "${extract_dir}"
+  echo "--- Download ${side} artifact (${artifact_id}) from build ${build_number} (${build_id})"
 
   if [[ "${DRY_RUN}" == "true" ]]; then
     echo "[dry-run] would download ${ARTIFACT_FILENAME} to ${artifact_path}"
+    echo "[dry-run] would extract ${side} distributable to ${extract_dir}"
     return 0
   fi
+
+  rm -rf "${stage_dir}" "${extract_dir}"
+  mkdir -p "${stage_dir}" "${extract_dir}"
 
   if declare -F download_tmp_artifact >/dev/null; then
     download_tmp_artifact "${ARTIFACT_FILENAME}" "${stage_dir}" "${build_id}"
     mv "${stage_dir}/${ARTIFACT_FILENAME}" "${artifact_path}"
   elif command -v bk >/dev/null 2>&1; then
-    local download_url
-    download_url="$(
-      bk api "/pipelines/${PIPELINE_SLUG}/builds/${build_id}/artifacts" \
-        | node -e "
-          const artifacts = JSON.parse(require('fs').readFileSync(0, 'utf8'));
-          const match = artifacts.find((artifact) => artifact.id === process.argv[1]);
-          if (!match) {
-            console.error('Artifact not found: ' + process.argv[1]);
-            process.exit(1);
-          }
-          process.stdout.write(match.download_url);
-        " "${artifact_id}"
-    )"
-    curl -fsSL "${download_url}" -o "${artifact_path}"
+    (
+      cd "${stage_dir}"
+      bk artifacts download "${artifact_id}" \
+        --build "${build_number}" \
+        --pipeline "${PIPELINE_SLUG}" \
+        --quiet
+    )
+    mv "${stage_dir}/${ARTIFACT_FILENAME}" "${artifact_path}"
   else
     echo "Neither download_tmp_artifact nor bk is available to download ${artifact_id}" >&2
     exit 1
@@ -219,43 +228,74 @@ download_side_artifact() {
 }
 
 write_manifest() {
+  if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "[dry-run] would write manifest to ${MANIFEST_PATH}"
+    return 0
+  fi
+
   local generated_at
   generated_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
   mkdir -p "${WORK_DIR}"
-  cat >"${MANIFEST_PATH}" <<EOF
-{
-  "version": 1,
-  "orientation": "${ORIENTATION}",
-  "seed": "${SEED}",
-  "generatedAt": "${generated_at}",
-  "pipelineSlug": "${PIPELINE_SLUG}",
-  "left": {
-    "buildId": "${LEFT_BUILD_ID}",
-    "buildNumber": ${LEFT_BUILD_NUMBER},
-    "commitSha": "${LEFT_COMMIT}",
-    "artifactId": "${LEFT_ARTIFACT_ID}",
-    "artifactPath": "${ARTIFACT_FILENAME}",
-    "buildUrl": "${LEFT_BUILD_URL}",
-    "sha1": "${LEFT_SHA1}",
-    "sha256": "${LEFT_SHA256}"
+  MANIFEST_PATH="${MANIFEST_PATH}" \
+    ORIENTATION="${ORIENTATION}" \
+    SEED="${SEED}" \
+    GENERATED_AT="${generated_at}" \
+    PIPELINE_SLUG="${PIPELINE_SLUG}" \
+    LEFT_ID="${LEFT_ID}" \
+    LEFT_LABEL="${LEFT_LABEL}" \
+    LEFT_BUILD_ID="${LEFT_BUILD_ID}" \
+    LEFT_BUILD_NUMBER="${LEFT_BUILD_NUMBER}" \
+    LEFT_COMMIT="${LEFT_COMMIT}" \
+    LEFT_ARTIFACT_ID="${LEFT_ARTIFACT_ID}" \
+    LEFT_BUILD_URL="${LEFT_BUILD_URL}" \
+    LEFT_SHA1="${LEFT_SHA1}" \
+    LEFT_SHA256="${LEFT_SHA256}" \
+    RIGHT_ID="${RIGHT_ID}" \
+    RIGHT_LABEL="${RIGHT_LABEL}" \
+    RIGHT_BUILD_ID="${RIGHT_BUILD_ID}" \
+    RIGHT_BUILD_NUMBER="${RIGHT_BUILD_NUMBER}" \
+    RIGHT_COMMIT="${RIGHT_COMMIT}" \
+    RIGHT_ARTIFACT_ID="${RIGHT_ARTIFACT_ID}" \
+    RIGHT_BUILD_URL="${RIGHT_BUILD_URL}" \
+    RIGHT_SHA1="${RIGHT_SHA1}" \
+    RIGHT_SHA256="${RIGHT_SHA256}" \
+    LEFT_BUILD_DIR="${LEFT_BUILD_DIR}" \
+    RIGHT_BUILD_DIR="${RIGHT_BUILD_DIR}" \
+    REPORT_PATH="${REPORT_PATH}" \
+    ARTIFACT_FILENAME="${ARTIFACT_FILENAME}" \
+    node <<'EOF'
+const fs = require('fs');
+
+const side = (id, label, prefix) => ({
+  id,
+  label,
+  buildId: process.env[`${prefix}_BUILD_ID`],
+  buildNumber: Number(process.env[`${prefix}_BUILD_NUMBER`]),
+  commitSha: process.env[`${prefix}_COMMIT`],
+  artifactId: process.env[`${prefix}_ARTIFACT_ID`],
+  artifactPath: process.env.ARTIFACT_FILENAME,
+  buildUrl: process.env[`${prefix}_BUILD_URL`],
+  sha1: process.env[`${prefix}_SHA1`],
+  sha256: process.env[`${prefix}_SHA256`],
+});
+
+const manifest = {
+  version: 1,
+  orientation: process.env.ORIENTATION,
+  seed: process.env.SEED,
+  generatedAt: process.env.GENERATED_AT,
+  pipelineSlug: process.env.PIPELINE_SLUG,
+  left: side(process.env.LEFT_ID, process.env.LEFT_LABEL, 'LEFT'),
+  right: side(process.env.RIGHT_ID, process.env.RIGHT_LABEL, 'RIGHT'),
+  extractDirs: {
+    left: process.env.LEFT_BUILD_DIR,
+    right: process.env.RIGHT_BUILD_DIR,
   },
-  "right": {
-    "buildId": "${RIGHT_BUILD_ID}",
-    "buildNumber": ${RIGHT_BUILD_NUMBER},
-    "commitSha": "${RIGHT_COMMIT}",
-    "artifactId": "${RIGHT_ARTIFACT_ID}",
-    "artifactPath": "${ARTIFACT_FILENAME}",
-    "buildUrl": "${RIGHT_BUILD_URL}",
-    "sha1": "${RIGHT_SHA1}",
-    "sha256": "${RIGHT_SHA256}"
-  },
-  "extractDirs": {
-    "left": "${LEFT_BUILD_DIR}",
-    "right": "${RIGHT_BUILD_DIR}"
-  },
-  "reportPath": "${REPORT_PATH}"
-}
+  reportPath: process.env.REPORT_PATH,
+};
+
+fs.writeFileSync(process.env.MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 EOF
 }
 
@@ -285,6 +325,11 @@ run_benchmark() {
     --config-from-cwd \
     --left-build-dir "${LEFT_BUILD_DIR}" \
     --right-build-dir "${RIGHT_BUILD_DIR}"
+
+  if [[ ! -f "${REPORT_PATH}" ]]; then
+    echo "Warm-start calibration report missing at ${REPORT_PATH}" >&2
+    exit 1
+  fi
 }
 
 upload_calibration_artifacts() {
@@ -300,9 +345,7 @@ upload_calibration_artifacts() {
 
   echo "--- Upload warm-start calibration manifest and report"
   buildkite-agent artifact upload "${MANIFEST_PATH}"
-  if [[ -f "${REPORT_PATH}" ]]; then
-    buildkite-agent artifact upload "${REPORT_PATH}"
-  fi
+  buildkite-agent artifact upload "${REPORT_PATH}"
 }
 
 cd "${REPO_ROOT}"
@@ -326,6 +369,7 @@ export_report_context
 download_side_artifact \
   left \
   "${LEFT_BUILD_ID}" \
+  "${LEFT_BUILD_NUMBER}" \
   "${LEFT_ARTIFACT_ID}" \
   "${LEFT_SHA1}" \
   "${LEFT_SHA256}" \
@@ -336,6 +380,7 @@ download_side_artifact \
 download_side_artifact \
   right \
   "${RIGHT_BUILD_ID}" \
+  "${RIGHT_BUILD_NUMBER}" \
   "${RIGHT_ARTIFACT_ID}" \
   "${RIGHT_SHA1}" \
   "${RIGHT_SHA256}" \
