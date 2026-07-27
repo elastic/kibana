@@ -41,6 +41,7 @@ import {
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
+import { StreamsMarketingToast } from './marketing_toast';
 
 /**
  * Appends the list-view query params (including the active `tab`) to the base
@@ -176,6 +177,13 @@ export function StreamListView() {
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
   const [isPrototypeCalloutVisible, setIsPrototypeCalloutVisible] = React.useState(true);
+
+  // Prototype behavior: show the "marketing" toast on every (hard) refresh of the
+  // Streams landing page, rather than persisting a "seen" flag.
+  const [isMarketingToastVisible, setIsMarketingToastVisible] = React.useState(
+    viewMode !== 'secondaryNav'
+  );
+
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
@@ -328,6 +336,13 @@ export function StreamListView() {
             />
           </div>
         </EuiPortal>
+      )}
+      {isMarketingToastVisible && (
+        <StreamsMarketingToast
+          isCalloutVisible={isPrototypeCalloutVisible}
+          exploreHref={buildListTabHref(router.link('/'), { ...restQuery, tab: 'canvas' })}
+          onClose={() => setIsMarketingToastVisible(false)}
+        />
       )}
       <StreamsAppHeader
         title={pageTitle}
