@@ -589,17 +589,17 @@ export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesParamsSchema = z.object({
+export const findRulesRequestSchema = z.object({
   page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  perPage: z.coerce
+  per_page: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
     .describe('The number of rules to return per page. Defaults to 20.'),
   filter: z.string().optional().describe('The filter to apply to the rules.'),
-  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+  sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
   search: z
     .string()
     .trim()
@@ -608,7 +608,7 @@ export const findRulesParamsSchema = z.object({
     .describe('A text string to search across rule fields.'),
 });
 
-export type FindRulesParams = z.infer<typeof findRulesParamsSchema>;
+export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z

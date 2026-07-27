@@ -54,7 +54,7 @@ import type {
   BulkRulesParams,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesParams,
+  FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
   RuleResponse,
@@ -530,7 +530,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
+  public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;

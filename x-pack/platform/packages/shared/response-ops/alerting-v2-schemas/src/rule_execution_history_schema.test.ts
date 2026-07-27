@@ -10,7 +10,7 @@ import {
   RULE_EXECUTIONS_MAX_PER_PAGE,
   RULE_EXECUTIONS_MAX_RESULT_WINDOW,
   RULE_EXECUTIONS_MAX_RULE_ID_FILTER,
-  getRuleExecutionsQuerySchema,
+  getRuleExecutionsRequestSchema,
   getRuleExecutionsResponseSchema,
   ruleExecutionOutcomeSchema,
   ruleExecutionViewSchema,
@@ -52,64 +52,64 @@ describe('rule_execution_history_schema', () => {
     });
   });
 
-  describe('getRuleExecutionsQuerySchema', () => {
+  describe('getRuleExecutionsRequestSchema', () => {
     describe('defaults', () => {
       it('fills in defaults when no fields are provided', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({});
+        const parsed = getRuleExecutionsRequestSchema.parse({});
         expect(parsed).toEqual({
-          sort: 'startedAt',
-          sortOrder: 'desc',
+          sort: 'started_at',
+          sort_order: 'desc',
           page: 1,
-          perPage: RULE_EXECUTIONS_DEFAULT_PER_PAGE,
+          per_page: RULE_EXECUTIONS_DEFAULT_PER_PAGE,
         });
       });
 
-      it('does not inject ruleId / outcome / from / to when missing', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({});
-        expect(parsed).not.toHaveProperty('ruleId');
+      it('does not inject rule_id / outcome / from / to when missing', () => {
+        const parsed = getRuleExecutionsRequestSchema.parse({});
+        expect(parsed).not.toHaveProperty('rule_id');
         expect(parsed).not.toHaveProperty('outcome');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
       });
     });
 
-    describe('ruleId', () => {
+    describe('rule_id', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({ ruleId: 'rule-x' });
-        expect(parsed.ruleId).toEqual(['rule-x']);
+        const parsed = getRuleExecutionsRequestSchema.parse({ rule_id: 'rule-x' });
+        expect(parsed.rule_id).toEqual(['rule-x']);
       });
 
-      it('accepts an array of valid rule ids (repeated `?ruleId=…` style)', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({
-          ruleId: ['rule-x', 'rule-y'],
+      it('accepts an array of valid rule ids (repeated `?rule_id=…` style)', () => {
+        const parsed = getRuleExecutionsRequestSchema.parse({
+          rule_id: ['rule-x', 'rule-y'],
         });
-        expect(parsed.ruleId).toEqual(['rule-x', 'rule-y']);
+        expect(parsed.rule_id).toEqual(['rule-x', 'rule-y']);
       });
 
       it('rejects an empty string', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: '' }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ rule_id: '' }).success).toBe(false);
       });
 
       it('rejects an empty array', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: [] }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ rule_id: [] }).success).toBe(false);
       });
 
       it('rejects an array entry that is an empty string', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: ['rule-x', ''] }).success).toBe(
+        expect(getRuleExecutionsRequestSchema.safeParse({ rule_id: ['rule-x', ''] }).success).toBe(
           false
         );
       });
 
       it('rejects strings longer than 256 chars', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: 'a'.repeat(257) }).success).toBe(
+        expect(getRuleExecutionsRequestSchema.safeParse({ rule_id: 'a'.repeat(257) }).success).toBe(
           false
         );
       });
 
       it('rejects an array entry longer than 256 chars', () => {
         expect(
-          getRuleExecutionsQuerySchema.safeParse({
-            ruleId: ['rule-x', 'a'.repeat(257)],
+          getRuleExecutionsRequestSchema.safeParse({
+            rule_id: ['rule-x', 'a'.repeat(257)],
           }).success
         ).toBe(false);
       });
@@ -119,7 +119,7 @@ describe('rule_execution_history_schema', () => {
           { length: RULE_EXECUTIONS_MAX_RULE_ID_FILTER + 1 },
           (_, i) => `rule-${i}`
         );
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: tooMany }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ rule_id: tooMany }).success).toBe(false);
       });
 
       it('accepts an array at the exact rule-id filter cap', () => {
@@ -127,40 +127,40 @@ describe('rule_execution_history_schema', () => {
           { length: RULE_EXECUTIONS_MAX_RULE_ID_FILTER },
           (_, i) => `rule-${i}`
         );
-        const parsed = getRuleExecutionsQuerySchema.parse({ ruleId: justRight });
-        expect(parsed.ruleId).toHaveLength(RULE_EXECUTIONS_MAX_RULE_ID_FILTER);
+        const parsed = getRuleExecutionsRequestSchema.parse({ rule_id: justRight });
+        expect(parsed.rule_id).toHaveLength(RULE_EXECUTIONS_MAX_RULE_ID_FILTER);
       });
     });
 
     describe('outcome', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({ outcome: 'success' });
+        const parsed = getRuleExecutionsRequestSchema.parse({ outcome: 'success' });
         expect(parsed.outcome).toEqual(['success']);
       });
 
       it('accepts an array of valid outcomes', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({
+        const parsed = getRuleExecutionsRequestSchema.parse({
           outcome: ['success', 'failure'],
         });
         expect(parsed.outcome).toEqual(['success', 'failure']);
       });
 
       it('rejects an empty array', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ outcome: [] }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ outcome: [] }).success).toBe(false);
       });
 
       it('rejects outcome values Task Manager does not emit (incl. ECS `unknown`)', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ outcome: ['skipped'] }).success).toBe(
+        expect(getRuleExecutionsRequestSchema.safeParse({ outcome: ['skipped'] }).success).toBe(
           false
         );
-        expect(getRuleExecutionsQuerySchema.safeParse({ outcome: ['unknown'] }).success).toBe(
+        expect(getRuleExecutionsRequestSchema.safeParse({ outcome: ['unknown'] }).success).toBe(
           false
         );
       });
 
       it('rejects arrays longer than the number of distinct outcomes', () => {
         expect(
-          getRuleExecutionsQuerySchema.safeParse({
+          getRuleExecutionsRequestSchema.safeParse({
             outcome: ['success', 'failure', 'success'],
           }).success
         ).toBe(false);
@@ -169,7 +169,7 @@ describe('rule_execution_history_schema', () => {
 
     describe('from / to (ISO datetime)', () => {
       it('accepts a Z-suffixed ISO datetime', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({
+        const parsed = getRuleExecutionsRequestSchema.parse({
           from: '2026-06-01T00:00:00Z',
           to: '2026-06-02T00:00:00Z',
         });
@@ -178,105 +178,113 @@ describe('rule_execution_history_schema', () => {
       });
 
       it('rejects free-form date expressions', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ from: 'yesterday' }).success).toBe(false);
-        expect(getRuleExecutionsQuerySchema.safeParse({ to: 'now' }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ from: 'yesterday' }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ to: 'now' }).success).toBe(false);
       });
 
       it('rejects date-only strings without a time component', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ from: '2026-06-01' }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ from: '2026-06-01' }).success).toBe(
+          false
+        );
       });
     });
 
-    describe('sort / sortOrder', () => {
+    describe('sort / sort_order', () => {
       it('accepts the supported sort fields', () => {
-        expect(getRuleExecutionsQuerySchema.parse({ sort: 'startedAt' }).sort).toBe('startedAt');
-        expect(getRuleExecutionsQuerySchema.parse({ sort: 'duration' }).sort).toBe('duration');
+        expect(getRuleExecutionsRequestSchema.parse({ sort: 'started_at' }).sort).toBe(
+          'started_at'
+        );
+        expect(getRuleExecutionsRequestSchema.parse({ sort: 'duration' }).sort).toBe('duration');
       });
 
       it('rejects unknown sort fields', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ sort: 'createdAt' }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ sort: 'createdAt' }).success).toBe(false);
       });
 
       it('accepts asc and desc as sort order', () => {
-        expect(getRuleExecutionsQuerySchema.parse({ sortOrder: 'asc' }).sortOrder).toBe('asc');
-        expect(getRuleExecutionsQuerySchema.parse({ sortOrder: 'desc' }).sortOrder).toBe('desc');
+        expect(getRuleExecutionsRequestSchema.parse({ sort_order: 'asc' }).sort_order).toBe('asc');
+        expect(getRuleExecutionsRequestSchema.parse({ sort_order: 'desc' }).sort_order).toBe(
+          'desc'
+        );
       });
 
       it('rejects unknown sort orders', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ sortOrder: 'random' }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ sort_order: 'random' }).success).toBe(
+          false
+        );
       });
     });
 
     describe('page', () => {
       it('coerces a numeric string into a number', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({ page: '3' });
+        const parsed = getRuleExecutionsRequestSchema.parse({ page: '3' });
         expect(parsed.page).toBe(3);
       });
 
       it('rejects page below 1', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ page: 0 }).success).toBe(false);
-        expect(getRuleExecutionsQuerySchema.safeParse({ page: -1 }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ page: 0 }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ page: -1 }).success).toBe(false);
       });
 
       it('rejects non-integer pages', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ page: 1.5 }).success).toBe(false);
+        expect(getRuleExecutionsRequestSchema.safeParse({ page: 1.5 }).success).toBe(false);
       });
 
       it('rejects page above the result-window cap', () => {
         expect(
-          getRuleExecutionsQuerySchema.safeParse({
+          getRuleExecutionsRequestSchema.safeParse({
             page: RULE_EXECUTIONS_MAX_RESULT_WINDOW + 1,
-            perPage: 1,
+            per_page: 1,
           }).success
         ).toBe(false);
       });
 
-      it('accepts page equal to the result-window cap when perPage=1', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({
+      it('accepts page equal to the result-window cap when per_page=1', () => {
+        const parsed = getRuleExecutionsRequestSchema.parse({
           page: RULE_EXECUTIONS_MAX_RESULT_WINDOW,
-          perPage: 1,
+          per_page: 1,
         });
         expect(parsed.page).toBe(RULE_EXECUTIONS_MAX_RESULT_WINDOW);
-        expect(parsed.perPage).toBe(1);
+        expect(parsed.per_page).toBe(1);
       });
     });
 
-    describe('perPage', () => {
+    describe('per_page', () => {
       it('coerces a numeric string into a number', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({ perPage: '25' });
-        expect(parsed.perPage).toBe(25);
+        const parsed = getRuleExecutionsRequestSchema.parse({ per_page: '25' });
+        expect(parsed.per_page).toBe(25);
       });
 
-      it('rejects perPage below 1', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ perPage: 0 }).success).toBe(false);
+      it('rejects per_page below 1', () => {
+        expect(getRuleExecutionsRequestSchema.safeParse({ per_page: 0 }).success).toBe(false);
       });
 
-      it('rejects perPage above the maximum', () => {
+      it('rejects per_page above the maximum', () => {
         expect(
-          getRuleExecutionsQuerySchema.safeParse({
-            perPage: RULE_EXECUTIONS_MAX_PER_PAGE + 1,
+          getRuleExecutionsRequestSchema.safeParse({
+            per_page: RULE_EXECUTIONS_MAX_PER_PAGE + 1,
           }).success
         ).toBe(false);
       });
 
-      it('rejects non-integer perPage', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ perPage: 20.5 }).success).toBe(false);
+      it('rejects non-integer per_page', () => {
+        expect(getRuleExecutionsRequestSchema.safeParse({ per_page: 20.5 }).success).toBe(false);
       });
     });
 
-    describe('deep-pagination guard (page * perPage <= max result window)', () => {
+    describe('deep-pagination guard (page * per_page <= max result window)', () => {
       it('accepts the exact boundary', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({
+        const parsed = getRuleExecutionsRequestSchema.parse({
           page: RULE_EXECUTIONS_MAX_RESULT_WINDOW / RULE_EXECUTIONS_MAX_PER_PAGE,
-          perPage: RULE_EXECUTIONS_MAX_PER_PAGE,
+          per_page: RULE_EXECUTIONS_MAX_PER_PAGE,
         });
         expect(parsed.page).toBe(RULE_EXECUTIONS_MAX_RESULT_WINDOW / RULE_EXECUTIONS_MAX_PER_PAGE);
       });
 
       it('rejects combinations whose product exceeds the cap', () => {
-        const result = getRuleExecutionsQuerySchema.safeParse({
+        const result = getRuleExecutionsRequestSchema.safeParse({
           page: RULE_EXECUTIONS_MAX_RESULT_WINDOW / RULE_EXECUTIONS_MAX_PER_PAGE + 1,
-          perPage: RULE_EXECUTIONS_MAX_PER_PAGE,
+          per_page: RULE_EXECUTIONS_MAX_PER_PAGE,
         });
         expect(result.success).toBe(false);
       });
@@ -284,16 +292,16 @@ describe('rule_execution_history_schema', () => {
 
     it('round-trips a fully populated query (with already-array fields)', () => {
       const input = {
-        ruleId: ['rule-x', 'rule-y'],
+        rule_id: ['rule-x', 'rule-y'],
         outcome: ['success', 'failure'] as const,
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
         sort: 'duration' as const,
-        sortOrder: 'asc' as const,
+        sort_order: 'asc' as const,
         page: 2,
-        perPage: 25,
+        per_page: 25,
       };
-      expect(getRuleExecutionsQuerySchema.parse(input)).toEqual(input);
+      expect(getRuleExecutionsRequestSchema.parse(input)).toEqual(input);
     });
   });
 

@@ -10,7 +10,7 @@ import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
 import {
-  countPolicyExecutionEventsQuerySchema,
+  countPolicyExecutionEventsRequestSchema,
   countPolicyExecutionEventsResponseSchema,
   errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -36,7 +36,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      query: countPolicyExecutionEventsQuerySchema,
+      query: countPolicyExecutionEventsRequestSchema,
     },
     response: {
       200: {
@@ -57,7 +57,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof countPolicyExecutionEventsQuerySchema>,
+      z.infer<typeof countPolicyExecutionEventsRequestSchema>,
       unknown
     >,
     @inject(ActionPolicyExecutionHistoryClient)
@@ -67,7 +67,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { since, search, ruleIds, outcome } = this.request.query;
+    const { since, search, rule_ids: ruleIds, outcome } = this.request.query;
 
     const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,

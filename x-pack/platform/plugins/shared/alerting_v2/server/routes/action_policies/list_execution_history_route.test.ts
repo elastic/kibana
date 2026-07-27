@@ -39,7 +39,7 @@ describe('ListExecutionHistoryRoute', () => {
   it('forwards page, perPage, search and outcome from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { page: 2, perPage: 25, search: 'foo', outcome: 'throttled' },
+      query: { page: 2, per_page: 25, search: 'foo', outcome: 'throttled' },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 

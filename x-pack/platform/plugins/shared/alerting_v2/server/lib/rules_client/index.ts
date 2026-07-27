@@ -12,7 +12,7 @@ export type {
   BulkRulesParams,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesParams,
+  FindRulesArgs,
   FindRulesResponse,
   RuleResponse,
   UpdateRuleData,

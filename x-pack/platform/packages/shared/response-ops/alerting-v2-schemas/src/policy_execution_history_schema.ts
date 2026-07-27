@@ -27,7 +27,7 @@ const sharedFilterFields = {
     .describe(
       'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
     ),
-  ruleIds: z
+  rule_ids: z
     .preprocess(
       (v) => (v === undefined || Array.isArray(v) ? v : [v]),
       z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
@@ -43,9 +43,9 @@ const sharedFilterFields = {
     ),
 };
 
-export const listPolicyExecutionHistoryQuerySchema = z.object({
+export const listPolicyExecutionHistoryRequestSchema = z.object({
   page: z.coerce.number().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
-  perPage: z.coerce
+  per_page: z.coerce
     .number()
     .min(1)
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
@@ -53,16 +53,16 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
     .describe('Number of events per page. Defaults to 100.'),
   ...sharedFilterFields,
 });
-export type ListPolicyExecutionHistoryParams = z.infer<
-  typeof listPolicyExecutionHistoryQuerySchema
+export type ListPolicyExecutionHistoryRequest = z.infer<
+  typeof listPolicyExecutionHistoryRequestSchema
 >;
 
-export const countPolicyExecutionEventsQuerySchema = z.object({
+export const countPolicyExecutionEventsRequestSchema = z.object({
   since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
   ...sharedFilterFields,
 });
-export type CountPolicyExecutionEventsParams = z.infer<
-  typeof countPolicyExecutionEventsQuerySchema
+export type CountPolicyExecutionEventsRequest = z.infer<
+  typeof countPolicyExecutionEventsRequestSchema
 >;
 
 const namedRefSchema = z.object({

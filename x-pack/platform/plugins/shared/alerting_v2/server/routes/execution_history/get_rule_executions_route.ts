@@ -9,13 +9,16 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import {
   errorResponseSchema,
-  getRuleExecutionsQuerySchema,
+  getRuleExecutionsRequestSchema,
   getRuleExecutionsResponseSchema,
-  type GetRuleExecutionsQuery,
+  type GetRuleExecutionsRequest,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ExecutionHistoryClientToken } from '../../lib/execution_history_client';
-import type { ExecutionHistoryClientContract } from '../../lib/execution_history_client';
+import type {
+  ExecutionHistoryClientContract,
+  GetRuleExecutionsArgs,
+} from '../../lib/execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -36,7 +39,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      query: getRuleExecutionsQuerySchema,
+      query: getRuleExecutionsRequestSchema,
     },
     response: {
       200: {
@@ -55,7 +58,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, GetRuleExecutionsQuery, unknown>,
+    private readonly request: KibanaRequest<unknown, GetRuleExecutionsRequest, unknown>,
     @inject(ExecutionHistoryClientToken)
     private readonly executionHistoryClient: ExecutionHistoryClientContract
   ) {
@@ -63,7 +66,29 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const result = await this.executionHistoryClient.getRuleExecutions(this.request.query);
+    const {
+      rule_id: ruleIds,
+      outcome: outcomes,
+      from,
+      to,
+      sort,
+      sort_order: sortOrder,
+      page,
+      per_page: perPage,
+    } = this.request.query;
+
+    const args: GetRuleExecutionsArgs = {
+      ruleIds,
+      outcomes,
+      from,
+      to,
+      sort: sort === 'started_at' ? 'startedAt' : sort,
+      sortOrder,
+      page,
+      perPage,
+    };
+
+    const result = await this.executionHistoryClient.getRuleExecutions(args);
     return this.ctx.response.ok({ body: result });
   }
 }

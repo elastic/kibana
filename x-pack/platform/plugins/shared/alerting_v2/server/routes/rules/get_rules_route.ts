@@ -11,7 +11,7 @@ import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
   errorResponseSchema,
-  findRulesParamsSchema,
+  findRulesRequestSchema,
   findRulesResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 
@@ -35,7 +35,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      query: findRulesParamsSchema,
+      query: findRulesRequestSchema,
     },
     response: {
       200: {
@@ -56,7 +56,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof findRulesParamsSchema>,
+      z.infer<typeof findRulesRequestSchema>,
       unknown
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
@@ -67,11 +67,11 @@ export class GetRulesRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.rulesClient.findRules({
       page: this.request.query.page,
-      perPage: this.request.query.perPage,
+      perPage: this.request.query.per_page,
       filter: this.request.query.filter,
       search: this.request.query.search,
-      sortField: this.request.query.sortField,
-      sortOrder: this.request.query.sortOrder,
+      sortField: this.request.query.sort_field,
+      sortOrder: this.request.query.sort_order,
     });
     return this.ctx.response.ok({ body: result });
   }

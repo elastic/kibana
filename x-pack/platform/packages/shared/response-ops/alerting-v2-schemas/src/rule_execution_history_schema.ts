@@ -58,9 +58,9 @@ const ruleIdArraySchema = arrayOrSingleSchema(
   RULE_EXECUTIONS_MAX_RULE_ID_FILTER
 );
 
-export const getRuleExecutionsQuerySchema = z
+export const getRuleExecutionsRequestSchema = z
   .object({
-    ruleId: ruleIdArraySchema.optional().describe(`Rule id filter. `),
+    rule_id: ruleIdArraySchema.optional().describe(`Rule id filter. `),
     outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
     from: z.iso
       .datetime()
@@ -68,10 +68,10 @@ export const getRuleExecutionsQuerySchema = z
       .describe('Inclusive ISO datetime lower bound on event.start.'),
     to: z.iso.datetime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
     sort: z
-      .enum(['startedAt', 'duration'])
-      .default('startedAt')
-      .describe('Sort field. Defaults to startedAt.'),
-    sortOrder: z.enum(['asc', 'desc']).default('desc').describe('Sort direction.'),
+      .enum(['started_at', 'duration'])
+      .default('started_at')
+      .describe('Sort field. Defaults to started_at.'),
+    sort_order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction.'),
     page: z.coerce
       .number()
       .int()
@@ -79,7 +79,7 @@ export const getRuleExecutionsQuerySchema = z
       .max(RULE_EXECUTIONS_MAX_RESULT_WINDOW)
       .default(1)
       .describe(`Page number.`),
-    perPage: z.coerce
+    per_page: z.coerce
       .number()
       .int()
       .min(1)
@@ -87,11 +87,11 @@ export const getRuleExecutionsQuerySchema = z
       .default(RULE_EXECUTIONS_DEFAULT_PER_PAGE)
       .describe(`Number of results per page.`),
   })
-  .refine(({ page, perPage }) => page * perPage <= RULE_EXECUTIONS_MAX_RESULT_WINDOW, {
-    message: `page * perPage cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
+  .refine(({ page, per_page: perPage }) => page * perPage <= RULE_EXECUTIONS_MAX_RESULT_WINDOW, {
+    message: `page * per_page cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
-export type GetRuleExecutionsQuery = z.infer<typeof getRuleExecutionsQuerySchema>;
+export type GetRuleExecutionsRequest = z.infer<typeof getRuleExecutionsRequestSchema>;
 
 export const ruleExecutionViewSchema = z.object({
   id: z.string(),

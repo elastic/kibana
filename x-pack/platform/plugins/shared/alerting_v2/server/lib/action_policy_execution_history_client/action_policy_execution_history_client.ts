@@ -49,7 +49,7 @@ const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
 const SEARCH_ID_CAP = 500;
 const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
 
-export interface ListExecutionHistoryParams {
+export interface ListExecutionHistoryArgs {
   request: KibanaRequest;
   page?: number;
   perPage?: number;
@@ -66,7 +66,7 @@ export interface ListExecutionHistoryResult {
   searchMatches: SearchMatchCounts | null;
 }
 
-export interface CountNewEventsSinceParams {
+export interface CountNewEventsSinceArgs {
   request: KibanaRequest;
   since: string;
   search?: string;
@@ -98,7 +98,7 @@ export class ActionPolicyExecutionHistoryClient {
     search,
     ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
-  }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
+  }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
     const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
@@ -147,7 +147,7 @@ export class ActionPolicyExecutionHistoryClient {
     search,
     ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
-  }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
+  }: CountNewEventsSinceArgs): Promise<CountNewEventsSinceResult> {
     const spaceId = this.spaces.spacesService.getSpaceId(request);
 
     const searchIds = await this.resolveSearchIds(search);

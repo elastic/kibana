@@ -31,7 +31,7 @@ export interface CreateRuleParams {
   options?: { id?: string };
 }
 
-export interface FindRulesParams {
+export interface FindRulesArgs {
   page?: number;
   perPage?: number;
   filter?: string;

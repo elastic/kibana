@@ -11,7 +11,7 @@ import type { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
 import {
   errorResponseSchema,
-  listPolicyExecutionHistoryQuerySchema,
+  listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
@@ -36,7 +36,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      query: listPolicyExecutionHistoryQuerySchema,
+      query: listPolicyExecutionHistoryRequestSchema,
     },
     response: {
       200: {
@@ -57,7 +57,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof listPolicyExecutionHistoryQuerySchema>,
+      z.infer<typeof listPolicyExecutionHistoryRequestSchema>,
       unknown
     >,
     @inject(ActionPolicyExecutionHistoryClient)
@@ -67,7 +67,13 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { page, perPage, search, ruleIds, outcome } = this.request.query ?? {};
+    const {
+      page,
+      per_page: perPage,
+      search,
+      rule_ids: ruleIds,
+      outcome,
+    } = this.request.query ?? {};
 
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,

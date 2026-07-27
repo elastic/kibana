@@ -50,7 +50,7 @@ import type {
   BulkActionActionPoliciesParams,
   BulkActionActionPoliciesResponse,
   CreateActionPolicyParams,
-  FindActionPoliciesParams,
+  FindActionPoliciesArgs,
   FindActionPoliciesResponse,
   MatchActionPoliciesForRuleParams,
   MatchActionPoliciesForRuleResponse,
@@ -304,7 +304,7 @@ export class ActionPolicyClient {
   }
 
   public async findActionPolicies(
-    params: FindActionPoliciesParams = {}
+    params: FindActionPoliciesArgs = {}
   ): Promise<FindActionPoliciesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
@@ -516,7 +516,7 @@ export class ActionPolicyClient {
     return { processed, total: actions.length, errors };
   }
 
-  private buildFindFilter(params: FindActionPoliciesParams): KueryNode | undefined {
+  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
 
