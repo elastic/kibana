@@ -49,6 +49,7 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      metadata: types.object({ dynamic: false, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -69,6 +70,7 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;
+  metadata?: Record<string, string>;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

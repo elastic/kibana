@@ -25,13 +25,15 @@ export type ConversationCreateRequest = Omit<
   'id' | 'created_at' | 'updated_at' | 'user'
 > & {
   id?: string;
+  /** ID of a hardcoded template to apply at creation time. Consumed by the client; never persisted. */
+  template_id?: string;
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'workspace_id'
+      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'workspace_id' | 'metadata'
     >
   >;
 

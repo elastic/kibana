@@ -12,6 +12,7 @@ import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
+  createBadRequestError,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationNotFoundError,
@@ -31,6 +32,7 @@ import type {
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
+import { getTemplate } from '../templates/registry';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -51,6 +53,7 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
+  applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
 }
 
 export const createClient = ({
@@ -179,8 +182,21 @@ class ConversationClientImpl implements ConversationClient {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
+    const { template_id: templateId, ...conversationWithoutTemplateId } = conversation;
+
+    let resolvedMetadata = conversationWithoutTemplateId.metadata;
+    if (templateId) {
+      const template = getTemplate(templateId);
+      if (template) {
+        resolvedMetadata = {
+          ...(template.definition.metadata ?? {}),
+          ...(resolvedMetadata ?? {}),
+        };
+      }
+    }
+
     const attributes = createRequestToEs({
-      conversation,
+      conversation: { ...conversationWithoutTemplateId, metadata: resolvedMetadata },
       currentUser: this.user,
       creationDate: now,
       space: this.space,
@@ -244,6 +260,23 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
+  }
+
+  async applyTemplate(conversationId: string, templateId: string): Promise<Conversation> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const existing = fromEs(document);
+
+    const template = getTemplate(templateId);
+    if (!template) {
+      throw createBadRequestError(`Template not found: ${templateId}`);
+    }
+
+    const metadata: Record<string, string> = {
+      ...(template.definition.metadata ?? {}),
+      ...(existing.metadata ?? {}),
+    };
+
+    return this.update({ id: conversationId, metadata }, { access: 'owner' });
   }
 
   private async _get(conversationId: string): Promise<Document | undefined> {

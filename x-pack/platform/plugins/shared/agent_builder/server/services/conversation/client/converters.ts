@@ -65,6 +65,7 @@ const convertBaseFromEs = (document: Document) => {
     access_control: document._source.access_control ?? getDefaultConversationAccessControl(),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
+    ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
   };
 };
 
@@ -242,6 +243,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.metadata ? { metadata: conversation.metadata } : {}),
   };
 };
 
@@ -293,5 +295,6 @@ export const createRequestToEs = ({
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.metadata ? { metadata: conversation.metadata } : {}),
   };
 };
