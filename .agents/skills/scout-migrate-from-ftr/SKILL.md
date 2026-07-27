@@ -30,7 +30,7 @@ Before starting, collect or confirm:
 
 Follow [`references/generate-plan.md`](references/generate-plan.md) to produce a migration plan in the target Scout module root. The plan answers _what_ should change and _why_; the executor answers _how_.
 
-If a plan already exists for this source directory and matches the current FTR contents, skip to step 2.
+If a plan already exists for this source directory, validate its file inventory, FTR configs, hooks, referenced services/page objects, and stateful/serverless mirrors against the current source tree before reusing it. Update and re-surface the plan if anything changed; an existing plan filename alone is not evidence that the plan is current. Only skip to step 2 after this validation passes.
 
 ## Step 2 — Review gate (stop)
 
@@ -84,6 +84,7 @@ Address `blocker` and `major` findings before considering the migration done. Su
 
 ## Guardrails
 
+- **All five steps are mandatory and ordered**: do not execute without a current migration plan and explicit approval. Do not declare the migration complete until the migrated tests have run successfully and the parity/best-practices review is complete. If work is blocked, report it as blocked at the current step rather than skipping later steps.
 - **The review gate is non-negotiable**: never proceed from step 1 to step 3 without explicit user approval, even if the plan looks obviously correct.
 - **Step 1 is read-only**: do not create, modify, or delete any test files during planning.
 - **Loop discipline (step 4)**: don't paper over a real failure by skipping the test, loosening the assertion, or adding a sleep. Diagnose, then fix.
