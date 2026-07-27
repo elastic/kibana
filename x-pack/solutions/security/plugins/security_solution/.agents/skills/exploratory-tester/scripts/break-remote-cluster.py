@@ -82,12 +82,17 @@ def _break_settings(
         broken["server_name"] = None
         broken["node_connections"] = None
     elif mode == "proxy":
-        broken["proxy_address"] = "invalid.broken.example:9400"
+        if has_deprecated_proxy_setting:
+            broken["proxy"] = "invalid.broken.example:9400"
+            if "proxy_address" in broken:
+                broken["proxy_address"] = "invalid.broken.example:9400"
+        else:
+            broken["proxy_address"] = "invalid.broken.example:9400"
         broken["proxy_socket_connections"] = None
         broken["server_name"] = None
         broken["seeds"] = None
         broken["node_connections"] = None
-        if has_deprecated_proxy_setting or "proxy" in broken:
+        if "proxy" in broken and not has_deprecated_proxy_setting:
             broken["proxy"] = "invalid.broken.example:9400"
     else:
         raise ValueError(f"Unsupported CCS mode {mode!r}")
