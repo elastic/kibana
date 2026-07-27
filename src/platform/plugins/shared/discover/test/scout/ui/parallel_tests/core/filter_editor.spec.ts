@@ -112,6 +112,7 @@ spaceTest.describe('Discover filter editor', { tag: '@local-stateful-classic' },
     expect(
       await filterBar.hasFilter({ field: 'nestedField.child', value: 'nestedValue', enabled: true })
     ).toBe(true);
+    await discover.waitUntilSearchingHasFinished();
     expect(await discover.getHitCount()).toBe('1');
   });
 

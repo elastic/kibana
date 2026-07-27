@@ -142,7 +142,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
             method,
             route,
             router: this,
-            isDevMode: this.options.env.mode.dev,
+            isDev: this.options.env.mode.dev,
           })
         );
       };

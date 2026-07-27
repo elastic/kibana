@@ -226,7 +226,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         onRequestValidationError,
         responseFactory,
         log: this.log,
-        isDevMode: this.env.mode.dev,
+        isDev: this.env.mode.dev,
         validateResponse: validation?.response
           ? (response) => validateOnRequestValidationErrorResponse(validation.response, response)
           : undefined,

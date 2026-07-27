@@ -39,6 +39,7 @@ describe('handle', () => {
         method: 'get',
         route: { path: '/test', validate },
         routeSchemas: RouteValidator.from(validate),
+        isDev: false,
       });
       // Failure
       await handle(createRequest({ body: { foo: 'bar' } }), {
@@ -58,6 +59,7 @@ describe('handle', () => {
           },
         },
         routeSchemas: RouteValidator.from(validate),
+        isDev: false,
       });
 
       expect(handler).toHaveBeenCalledTimes(1);
@@ -97,6 +99,60 @@ describe('handle', () => {
           },
         },
         routeSchemas: undefined,
+        isDev: false,
+      });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(router.emitPostValidate).toHaveBeenCalledTimes(1);
+
+      expect(router.emitPostValidate).toHaveBeenCalledWith(expect.any(Object), {
+        deprecated: {
+          severity: 'warning',
+          reason: { type: 'bump', newApiVersion: '123' },
+          documentationUrl: 'http://test.foo',
+        },
+        isInternalApiRequest: false,
+        isPublicAccess: false,
+      });
+    });
+  });
+
+  describe('isDev: true (development mode)', () => {
+    it('emits with validation schemas provided', async () => {
+      const validate = { body: schema.object({ foo: schema.number() }) };
+      await handle(createRequest({ body: { foo: 1 } }), {
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: { path: '/test', validate },
+        routeSchemas: RouteValidator.from(validate),
+        isDev: true,
+      });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(router.emitPostValidate).toHaveBeenCalledTimes(1);
+    });
+
+    it('emits with no validation schemas provided', async () => {
+      await handle(createRequest({ body: { foo: 1 } }), {
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: {
+          path: '/test',
+          validate: false,
+          options: {
+            deprecated: {
+              severity: 'warning',
+              reason: { type: 'bump', newApiVersion: '123' },
+              documentationUrl: 'http://test.foo',
+            },
+          },
+        },
+        routeSchemas: undefined,
+        isDev: true,
       });
 
       expect(handler).toHaveBeenCalledTimes(1);
@@ -140,7 +196,7 @@ describe('handle', () => {
         },
       },
       routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
-      isDevMode: true,
+      isDev: true,
     });
 
     expect(handler).not.toHaveBeenCalled();
@@ -350,7 +406,7 @@ describe('handle', () => {
       handler,
       log,
       method: 'get',
-      isDevMode: true,
+      isDev: true,
       route: {
         path: '/test',
         validate: {
@@ -381,7 +437,7 @@ describe('handle', () => {
       handler,
       log,
       method: 'get',
-      isDevMode: true,
+      isDev: true,
       route: {
         path: '/test',
         validate: {
@@ -419,7 +475,7 @@ describe('handle', () => {
       handler,
       log,
       method: 'get',
-      isDevMode: false,
+      isDev: false,
       route: {
         path: '/test',
         validate: {
@@ -448,7 +504,7 @@ describe('handle', () => {
       handler,
       log,
       method: 'get',
-      isDevMode: true,
+      isDev: true,
       route: {
         path: '/test',
         validate: {
