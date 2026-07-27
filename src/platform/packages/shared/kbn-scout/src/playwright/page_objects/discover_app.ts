@@ -1072,8 +1072,11 @@ export class DiscoverApp {
 
   /**
    * Persists the requested Discover query mode in localStorage on the next
-   * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
-   * feature flag being toggled at the project level.
+   * page load. The persisted value is only honored by Discover if its
+   * `isEsqlDefault` snapshot matches the `discover.isEsqlDefault` feature
+   * flag value active for the test - pass `isEsqlDefault` to match a config
+   * that overrides the flag, otherwise it defaults to the flag's own
+   * default (`false`).
    *
    * Note: this is not idempotent. Each call registers an additional init
    * script via Playwright's `addInitScript`, and on subsequent page loads
@@ -1081,12 +1084,15 @@ export class DiscoverApp {
    * last call wins. Avoid calling it multiple times in the same test
    * unless that stacking behavior is intentional.
    */
-  public setQueryMode(mode: DiscoverQueryMode) {
+  public setQueryMode(mode: DiscoverQueryMode, isEsqlDefault = false) {
     return this.page.addInitScript(
-      ([_mode, _discoverQueryModeKey]) => {
-        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      ({ storageKey, storageValue }) => {
+        window.localStorage.setItem(storageKey, storageValue);
       },
-      [mode, DISCOVER_QUERY_MODE_KEY]
+      {
+        storageKey: DISCOVER_QUERY_MODE_KEY,
+        storageValue: JSON.stringify({ mode, isEsqlDefault }),
+      }
     );
   }
 

@@ -1291,12 +1291,21 @@ export class DiscoverPageObject extends FtrService {
     return this.browser.removeLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
   }
 
-  public getQueryMode() {
-    return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  public async getQueryMode() {
+    const storedValue = await this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+    if (storedValue == null) return null;
+    try {
+      return JSON.parse(storedValue)?.mode ?? null;
+    } catch {
+      return null;
+    }
   }
 
-  public setQueryMode(mode: string) {
-    return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
+  public setQueryMode(mode: string, isEsqlDefault = false) {
+    return this.browser.setLocalStorageItem(
+      DISCOVER_QUERY_MODE_KEY,
+      JSON.stringify({ mode, isEsqlDefault })
+    );
   }
 
   /** Discover Embeddable helper methods   */
