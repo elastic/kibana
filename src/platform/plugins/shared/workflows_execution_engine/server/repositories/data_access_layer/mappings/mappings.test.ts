@@ -97,7 +97,12 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     expect(properties.createdBy).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.executedBy).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.triggeredBy).toEqual({ type: 'keyword', ignore_above: 1024 });
-    expect(properties.workflowDefinition).toEqual({ type: 'object', dynamic: false, enabled: false, properties: {} });
+    expect(properties.workflowDefinition).toEqual({
+      type: 'object',
+      dynamic: false,
+      enabled: false,
+      properties: {},
+    });
     expect(properties.version).toEqual({ type: 'long' });
   });
 
