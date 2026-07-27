@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiLoadingElastic, EuiPortal } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -303,19 +303,31 @@ export function StreamListView() {
   return (
     <>
       {isPrototypeCalloutVisible && (
-        <EuiCallOut
-          size="s"
-          color="primary"
-          iconType="info"
-          onDismiss={() => setIsPrototypeCalloutVisible(false)}
-          title={i18n.translate('xpack.streams.streamsListView.prototypeCalloutTitle', {
-            defaultMessage:
-              'This is a UX prototype using hardcoded dummy data. Scope and capabilities are limited.',
-          })}
-          className={css`
-            border-radius: 0;
-          `}
-        />
+        <EuiPortal>
+          <div
+            className={css`
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              z-index: 100;
+            `}
+          >
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="info"
+              onDismiss={() => setIsPrototypeCalloutVisible(false)}
+              title={i18n.translate('xpack.streams.streamsListView.prototypeCalloutTitle', {
+                defaultMessage:
+                  'This is a UX prototype using hardcoded dummy data. Scope and capabilities are limited.',
+              })}
+              className={css`
+                border-radius: 0;
+              `}
+            />
+          </div>
+        </EuiPortal>
       )}
       <StreamsAppHeader
         title={pageTitle}

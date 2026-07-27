@@ -18,7 +18,6 @@ import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import type { ConfigType } from './config';
-import { RoleSwitcher } from './role_switcher';
 
 export interface PluginSetupDependencies {
   cloud?: CloudSetup;
@@ -65,15 +64,8 @@ export const plugin: PluginInitializer<
     });
   },
   start(coreStart, plugins) {
-    // Register role switcher dropdown menu in the top right navigation of the Kibana UI
-    coreStart.chrome.navControls.registerRight({
-      order: 4000 + 1, // Make sure it comes after the user menu
-      content: (
-        <KibanaContextProvider services={coreStart}>
-          <RoleSwitcher />
-        </KibanaContextProvider>
-      ),
-    });
+    // The role switcher header control is intentionally not registered: this environment always
+    // signs in as admin, so switching roles from the header isn't needed.
   },
   stop() {},
 });
