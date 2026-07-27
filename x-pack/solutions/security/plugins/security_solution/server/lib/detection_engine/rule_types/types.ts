@@ -32,6 +32,7 @@ import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { DocLinksServiceSetup, KibanaRequest } from '@kbn/core/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { CheckOsqueryResponseActionAuthz } from '../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
@@ -159,6 +160,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
+  endpointAppContextService: EndpointAppContextService;
   /**
    * Returns a request-scoped osquery response action authorization checker, used
    * when authorizing rule `responseActions` on write paths. Optional because
