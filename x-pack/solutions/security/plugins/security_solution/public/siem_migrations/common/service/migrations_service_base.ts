@@ -27,7 +27,15 @@ import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
   `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
 
-export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
+/**
+ * Stats shape used by the shared migrations service base.
+ * Vendor is widened to `string` so domain vendors (e.g. `tines`) are allowed.
+ */
+export type MigrationsServiceTaskStats = Omit<MigrationTaskStats, 'vendor'> & {
+  vendor?: string;
+};
+
+export abstract class SiemMigrationsServiceBase<T extends MigrationsServiceTaskStats> {
   protected abstract startMigrationFromStats(params: {
     connectorId: string;
     taskStats: T;

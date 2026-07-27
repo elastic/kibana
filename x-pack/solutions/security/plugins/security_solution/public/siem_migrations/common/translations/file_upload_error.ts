@@ -55,4 +55,19 @@ export const FILE_UPLOAD_ERROR = {
         'The file does not contain valid Sentinel rules. Rules file must conform to ARM templates exported by Sentinel',
     }
   ),
+  INVALID_TINES_STORY: i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidTinesStory',
+    {
+      defaultMessage:
+        'The file does not contain a valid Tines story export. Expected a JSON object with name and agents.',
+    }
+  ),
+  INVALID_TINES_STORY_WITH_REASON: (reason: string) =>
+    i18n.translate(
+      'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidTinesStoryWithReason',
+      {
+        defaultMessage: 'The file does not contain a valid Tines story export: {reason}',
+        values: { reason },
+      }
+    ),
 };

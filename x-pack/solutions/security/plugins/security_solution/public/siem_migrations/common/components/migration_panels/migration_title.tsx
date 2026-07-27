@@ -30,13 +30,13 @@ import type { MigrationType } from '../../../../../common/siem_migrations/types'
 import { useDeleteMigration } from '../../hooks/use_delete_migrations';
 import { useUpdateSiemMigration } from '../../hooks/use_update_siem_migration';
 import * as i18n from './translations';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type { MigrationsServiceTaskStats } from '../../service/migrations_service_base';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 
 export interface MigrationPanelTitleProps {
-  migrationStats: MigrationTaskStats;
+  migrationStats: MigrationsServiceTaskStats;
   migrationType: MigrationType;
 }
 
