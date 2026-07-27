@@ -99091,6 +99091,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
           maxItems: 1000
           type: array
@@ -99956,6 +99957,176 @@ components:
         - type
         - config
       title: Image
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app:
+      additionalProperties: false
+      properties:
+        config:
+          anyOf:
+            - anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyChartNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyChartESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleNoESQLByValuePanel'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleESQLByValuePanel'
+              description: Panel configuration stored inline
+              title: By value
+            - additionalProperties: false
+              description: Panel configuration stored in a linked library item
+              properties:
+                description:
+                  description: A short description of the panel.
+                  type: string
+                drilldowns:
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        default:
+                          open_in_new_tab: false
+                          use_filters: true
+                          use_time_range: true
+                        properties:
+                          dashboard_id:
+                            type: string
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: false
+                            description: When enabled, the dashboard opens in a new browser tab.
+                            type: boolean
+                          trigger:
+                            enum:
+                              - on_apply_filter
+                            type: string
+                          type:
+                            enum:
+                              - dashboard_drilldown
+                            type: string
+                          use_filters:
+                            default: true
+                            description: When enabled, filters are passed to the opening dashboard.
+                            type: boolean
+                          use_time_range:
+                            default: true
+                            description: When enabled, time range is passed to the opening dashboard.
+                            type: boolean
+                        required:
+                          - dashboard_id
+                          - label
+                          - trigger
+                          - type
+                        title: dashboard_drilldown
+                        type: object
+                      - additionalProperties: false
+                        properties:
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            enum:
+                              - on_apply_filter
+                            type: string
+                          type:
+                            enum:
+                              - discover_drilldown
+                            type: string
+                        required:
+                          - label
+                          - trigger
+                          - type
+                        title: discover_drilldown
+                        type: object
+                      - additionalProperties: false
+                        properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            enum:
+                              - on_click_row
+                              - on_click_value
+                              - on_open_panel_menu
+                              - on_select_range
+                            type: string
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
+                        title: url_drilldown
+                        type: object
+                  maxItems: 100
+                  type: array
+                hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
+                  type: boolean
+                hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
+                  type: boolean
+                ref_id:
+                  type: string
+                references:
+                  items:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+                  maxItems: 10000
+                  type: array
+                time_range:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                title:
+                  description: The panel title.
+                  type: string
+              required:
+                - ref_id
+              title: By reference
+              type: object
+          description: Lens embeddable schema
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - lens-dashboard-app
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Visualization (dashboard application)
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-links:
       additionalProperties: false
@@ -100835,6 +101006,7 @@ components:
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
+                lens-dashboard-app: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
                 ml_anomaly_charts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
@@ -100875,6 +101047,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
           maxItems: 1000
           type: array
         title:
