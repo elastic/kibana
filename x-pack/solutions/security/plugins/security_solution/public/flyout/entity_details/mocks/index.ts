@@ -8,6 +8,7 @@
 import type { HostMetadataInterface } from '../../../../common/endpoint/types';
 import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import type {
   HostItem,
   HostRiskScore,
@@ -17,7 +18,7 @@ import type {
 } from '../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import type { HostEntity } from '../../../../common/api/entity_analytics';
 
 const userRiskScore: UserRiskScore = {
@@ -199,6 +200,46 @@ export const mockServiceRiskScoreState: RiskScoreState<EntityType.service> = {
   hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
+};
+
+export const mockHostEntityRiskScores: EntityRiskScoresState<EntityType.host> = {
+  base: { ...mockHostRiskScoreState },
+  resolution: {
+    state: { ...mockHostRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
+};
+
+export const mockHostEntityRiskScoresWithResolution: EntityRiskScoresState<EntityType.host> = {
+  base: { ...mockHostRiskScoreState },
+  resolution: {
+    state: { ...mockHostRiskScoreState },
+    hasResolutionGroup: true,
+    resolutionTargetEntityId: 'host:target-entity',
+  },
+  refetch: () => {},
+};
+
+export const mockUserEntityRiskScores: EntityRiskScoresState<EntityType.user> = {
+  base: { ...mockUserRiskScoreState },
+  resolution: {
+    state: { ...mockUserRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
+};
+
+export const mockServiceEntityRiskScores: EntityRiskScoresState<EntityType.service> = {
+  base: { ...mockServiceRiskScoreState },
+  resolution: {
+    state: { ...mockServiceRiskScoreState, data: undefined },
+    hasResolutionGroup: false,
+    resolutionTargetEntityId: undefined,
+  },
+  refetch: () => {},
 };
 
 const hostMetadata: HostMetadataInterface = {

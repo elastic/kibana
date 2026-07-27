@@ -33,6 +33,7 @@ export type Evaluation = CustomMetricExpressionParams & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
+  shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   flattenGrouping?: Record<string, any>;
@@ -113,6 +114,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
+            warn: false,
             bucketKey: missingGroup.bucketKey,
           };
         }
@@ -129,12 +131,13 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.value === null) {
+        if (result.trigger || result.warn || result.value === null) {
           evaluations[key] = {
             ...criterion,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
+            shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             flattenGrouping: result.flattenGrouping,

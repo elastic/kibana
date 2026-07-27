@@ -20,6 +20,7 @@
     "@kbn/core",
     "@kbn/streamlang",
     "@kbn/streams-schema",
+    "@kbn/significant-events-schema",
     "@kbn/inference-common",
     "@kbn/zod",
     "@kbn/inference-prompt-utils",
@@ -28,5 +29,7 @@
     "@kbn/apm-utils",
     "@kbn/i18n",
     "@kbn/traced-es-client",
+    "@kbn/es-types",
+    "@kbn/logging",
   ]
 }

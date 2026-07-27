@@ -32,46 +32,31 @@ const makeDeps = () => ({
 describe('createResolveAction', () => {
   beforeEach(() => jest.restoreAllMocks());
 
-  it('compatible when some episode is not deactivated and not already INACTIVE', () => {
+  it('compatible when at least one episode is not already INACTIVE', () => {
     expect(
       createResolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: undefined })],
+        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.ACTIVE })],
       })
     ).toBe(true);
   });
 
-  it('not compatible when every episode is already deactivated', () => {
+  it.each([ALERT_EPISODE_STATUS.RECOVERING, ALERT_EPISODE_STATUS.PENDING] as const)(
+    'compatible when the episode status is %s',
+    (status) => {
+      expect(
+        createResolveAction(makeDeps()).isCompatible({
+          episodes: [makeEpisode({ 'episode.status': status })],
+        })
+      ).toBe(true);
+    }
+  );
+
+  it('not compatible when every episode is already INACTIVE', () => {
     expect(
       createResolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: 'deactivate' })],
+        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE })],
       })
     ).toBe(false);
-  });
-
-  it('not compatible when every episode has status INACTIVE', () => {
-    expect(
-      createResolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
-            last_deactivate_action: undefined,
-          }),
-        ],
-      })
-    ).toBe(false);
-  });
-
-  it('compatible when last_deactivate_action is activate even if episode.status is stale INACTIVE', () => {
-    expect(
-      createResolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.INACTIVE, // stale — not yet refreshed from ES
-            last_deactivate_action: 'activate',
-          }),
-        ],
-      })
-    ).toBe(true);
   });
 
   it('not compatible on empty selection', () => {

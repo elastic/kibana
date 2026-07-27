@@ -82,7 +82,7 @@ export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>
+  trackPanel: ReturnType<typeof initializeTrackPanel>['api']
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager

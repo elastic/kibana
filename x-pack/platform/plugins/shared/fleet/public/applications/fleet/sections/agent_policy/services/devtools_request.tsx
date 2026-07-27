@@ -17,9 +17,14 @@ import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   UpdateAgentPolicyRequest,
+  RegistryVarGroup,
+  PackageInfo,
 } from '../../../types';
 import { canUseMultipleAgentPolicies } from '../../../hooks';
-import { agentlessPolicyRouteService } from '../../../../../../common/services';
+import {
+  agentlessPolicyRouteService,
+  toNewAgentlessPolicy,
+} from '../../../../../../common/services';
 
 function generateKibanaDevToolsRequest(method: string, path: string, body: any) {
   return `${method} kbn:${path}\n${JSON.stringify(body, null, 2)}\n`;
@@ -66,22 +71,40 @@ export function generateCreatePackagePolicyDevToolsRequest(
 }
 
 export function generateCreateAgentlessPolicyDevToolsRequest(
-  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean }
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean },
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ) {
-  return generateKibanaDevToolsRequest('POST', agentlessPolicyRouteService.getCreatePath(), {
-    package: formatPackage(packagePolicy.package),
-    ...omit(
-      packagePolicy,
-      'package',
-      'enabled',
-      'policy_ids',
-      'policy_id',
-      'supports_agentless',
-      'supports_cloud_connector'
-    ),
-    inputs: formatInputs(packagePolicy.inputs, true),
-    vars: formatVars(packagePolicy.vars),
-  });
+  return generateKibanaDevToolsRequest(
+    'POST',
+    agentlessPolicyRouteService.getCreatePath(),
+    // Pass `packageInfo` so the preview matches the request the form actually sends (template-aware
+    // input allow-check), mirroring the read path (`agentlessPolicyToPackagePolicy`).
+    toNewAgentlessPolicy(packagePolicy, varGroups, packageInfo)
+  );
+}
+
+/**
+ * Generate a request to update an agentless policy that can be used in Kibana Dev tools
+ * @param policyId
+ * @param packagePolicy
+ * @param varGroups
+ * @param packageInfo
+ * @returns
+ */
+export function generateUpdateAgentlessPolicyDevToolsRequest(
+  policyId: string,
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean },
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
+) {
+  return generateKibanaDevToolsRequest(
+    'PUT',
+    agentlessPolicyRouteService.getUpdatePath(policyId),
+    // Pass `packageInfo` so the preview matches the PUT the edit form actually sends (template-aware
+    // input allow-check), mirroring the read path (`agentlessPolicyToPackagePolicy`).
+    toNewAgentlessPolicy(packagePolicy, varGroups, packageInfo)
+  );
 }
 
 /**

@@ -42,6 +42,43 @@ describe('createFieldDefinitionsSubClient', () => {
     clientArgs.authorization.ensureAuthorized.mockResolvedValue();
   });
 
+  describe('getFieldDefinitions', () => {
+    it('throws 400 when no owner is provided', async () => {
+      await expect(client.getFieldDefinitions({})).rejects.toThrow('owner is required');
+      expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
+      expect(
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+      ).not.toHaveBeenCalled();
+    });
+
+    it('returns field definitions for a valid owner', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [so.attributes],
+        total: 1,
+      });
+
+      const result = await client.getFieldDefinitions({ owner: 'securitySolution' });
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalled();
+      expect(result.fieldDefinitions).toHaveLength(1);
+    });
+
+    it('forwards isGlobal to fieldDefinitionsService', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+
+      await client.getFieldDefinitions({ owner: 'securitySolution', isGlobal: true });
+
+      expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith(
+        ['securitySolution'],
+        { isGlobal: true }
+      );
+    });
+  });
+
   describe('createFieldDefinition', () => {
     const input = {
       name: 'my_field',
@@ -165,6 +202,65 @@ describe('createFieldDefinitionsSubClient', () => {
       ).rejects.toThrow(
         'A field definition with name "Other_Field" already exists for this owner.'
       );
+    });
+  });
+
+  describe('deleteFieldDefinition', () => {
+    it('deletes the field definition when no active templates reference it', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).toHaveBeenCalledWith('fd-1');
+    });
+
+    it('throws 409 when a single template references the field', async () => {
+      // FAILURE SCENARIO: user tries to delete "my_field" while "Incident Template" has $ref: my_field
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([
+        { name: 'Incident Template' },
+      ]);
+
+      await expect(client.deleteFieldDefinition('fd-1')).rejects.toThrow(
+        'Cannot delete field definition "my_field": it is referenced by 1 active template(s): "Incident Template"'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 listing all referencing templates when multiple templates reference the field', async () => {
+      // FAILURE SCENARIO: two templates both reference the field — error message lists all names
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([
+        { name: 'Template A' },
+        { name: 'Template B' },
+      ]);
+
+      await expect(client.deleteFieldDefinition('fd-1')).rejects.toThrow(
+        'Cannot delete field definition "my_field": it is referenced by 2 active template(s): "Template A", "Template B"'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('passes the field owner and name to the templates reference check', async () => {
+      const so = makeFieldDefinitionSO({ name: 'priority', owner: 'securitySolution' });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.templatesService.getActiveTemplatesReferencingField
+      ).toHaveBeenCalledWith('securitySolution', 'priority');
     });
   });
 });

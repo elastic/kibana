@@ -29,16 +29,18 @@ import {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
+import {
+  aggregatePrebuiltRuleErrors,
+  type PrebuiltRulesUpgradeError,
+} from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
-import { PREBUILT_RULE_BATCH_SIZE } from '../../constants';
+import { PREBUILT_RULES_UPGRADE_BATCH_SIZE } from '../../constants';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
 import { validatePerformRuleUpgradeRequest } from './validate_perform_rule_upgrade_request';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
-import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
@@ -84,7 +86,7 @@ export const performRuleUpgradeHandler = async (
 
     const skippedRules: SkippedRuleUpgrade[] = [];
     const updatedRules: UpgradedRuleBasicInfo[] = [];
-    const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
+    const ruleErrors: PrebuiltRulesUpgradeError[] = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
     const ruleUpgradeContextsMap = new Map<string, RuleUpgradeContext>();
 
@@ -122,7 +124,7 @@ export const performRuleUpgradeHandler = async (
     }
 
     while (ruleUpgradeQueue.length > 0) {
-      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
+      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, PREBUILT_RULES_UPGRADE_BATCH_SIZE);
 
       const [currentRules, latestRulesResult] = await Promise.all([
         ruleObjectsClient.fetchInstalledRulesByIds({

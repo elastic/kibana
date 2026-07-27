@@ -9,10 +9,13 @@ import React from 'react';
 import type { RuleBuilderDefinition } from './types';
 import type { ThresholdFormValues } from './threshold/form_types';
 import {
-  AGGREGATIONS_REQUIRING_FIELD,
+  areAllStatsValid,
   DEFAULT_THRESHOLD_FORM_VALUES,
   generateId,
+  getAvailableMetricLabels,
+  reconcileAlertConditionMetrics,
 } from './threshold/form_types';
+import { getInvalidExpressionReferences } from './threshold/validate_metric_references';
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
 import { parseThresholdEsql } from './threshold/parse_esql';
@@ -21,13 +24,19 @@ import { THRESHOLD_STEP_TITLE } from './threshold/translations';
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
   def as RuleBuilderDefinition;
 
+const areAllEvaluationReferencesValid = (values: ThresholdFormValues): boolean => {
+  const availableLabels = getAvailableMetricLabels(values.stats, values.evaluations);
+  return values.evaluations.every(
+    (e) => getInvalidExpressionReferences(e.expression, availableLabels).length === 0
+  );
+};
+
 const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   if (!values.indexPattern.trim()) return false;
 
-  const hasValidStat = values.stats.some(
-    (s) => s.label.trim() && (!AGGREGATIONS_REQUIRING_FIELD.includes(s.aggregation) || s.field)
-  );
-  if (!hasValidStat) return false;
+  if (!areAllStatsValid(values.stats)) return false;
+
+  if (!areAllEvaluationReferencesValid(values)) return false;
 
   const hasValidCondition = values.alertConditions.some(
     (c) => c.metric.trim() && c.threshold.length > 0
@@ -43,6 +52,15 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
 
   return true;
 };
+
+const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdFormValues => ({
+  ...values,
+  alertConditions: reconcileAlertConditionMetrics(
+    values.alertConditions,
+    values.stats,
+    values.evaluations
+  ),
+});
 
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
@@ -68,8 +86,10 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
       state: props.state,
       dispatch: props.dispatch,
     }),
-  validate: (state, builderState) =>
-    state.queryCommitted && (builderState ? isThresholdFormValid(builderState) : true),
+  validate: (_state, builderState) =>
+    // No builder state means the step cannot be valid yet (unlike ES|QL mode, which can proceed
+    // on queryCommitted alone before builder state is initialized).
+    builderState ? isThresholdFormValid(getValidatedThresholdValues(builderState)) : false,
   parseState: parseThresholdEsql,
 });
 

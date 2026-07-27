@@ -16,6 +16,8 @@ import {
   touchedCriticalFiles,
 } from '../../affected-packages';
 
+import { expandJestImplicitConsumers } from './jest_implicit_consumers';
+
 /**
  * The shared inputs both per-variant filters need: which packages the PR
  * affects and which files it changed. Returned as `null` when affected-packages
@@ -49,9 +51,13 @@ export async function resolveSelectiveTestingContext(
     return null;
   }
 
-  console.log('Filtering Jest unit/integration tests for affected packages:', affectedPackages);
   const prChangedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
-  return { affectedPackages, prChangedFiles };
+  const expandedAffectedPackages = expandJestImplicitConsumers(affectedPackages, prChangedFiles);
+  console.log(
+    'Filtering Jest unit/integration tests for affected packages:',
+    expandedAffectedPackages
+  );
+  return { affectedPackages: expandedAffectedPackages, prChangedFiles };
 }
 
 /** Narrow Jest unit configs to those owned by affected packages, unless a critical file changed. */

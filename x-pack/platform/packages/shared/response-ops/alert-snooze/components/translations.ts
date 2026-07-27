@@ -164,9 +164,9 @@ export const CONDITION_VALUE_PLACEHOLDER = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValuePlaceholder',
   { defaultMessage: 'Value' }
 );
-export const FIELD_NAME_PLACEHOLDER = i18n.translate(
-  'responseOpsAlertSnooze.conditionalSnoozePanel.fieldNamePlaceholder',
-  { defaultMessage: 'Field name' }
+export const SELECT_FIELD_PLACEHOLDER = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.selectFieldPlaceholder',
+  { defaultMessage: 'Select a field' }
 );
 export const CONDITION_VALUE_ARIA_LABEL = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValueAriaLabel',
@@ -188,6 +188,10 @@ export const SEVERITY_CRITICAL = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityCritical',
   { defaultMessage: 'Critical' }
 );
+export const SEVERITY_MAJOR = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMajor',
+  { defaultMessage: 'Major' }
+);
 export const SEVERITY_HIGH = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityHigh',
   { defaultMessage: 'High' }
@@ -196,9 +200,17 @@ export const SEVERITY_MEDIUM = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityMedium',
   { defaultMessage: 'Medium' }
 );
+export const SEVERITY_MINOR = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMinor',
+  { defaultMessage: 'Minor' }
+);
 export const SEVERITY_LOW = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityLow',
   { defaultMessage: 'Low' }
+);
+export const SEVERITY_WARNING = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityWarning',
+  { defaultMessage: 'Warning' }
 );
 export const SEVERITY_INFO = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityInfo',

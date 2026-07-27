@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import { entityRecordToLeadEntity, fetchCandidateEntities } from './entity_conversion';
+import {
+  entityRecordToLeadEntity,
+  fetchCandidateEntities,
+  resolveDisplayName,
+} from './entity_conversion';
 
 type EntityRecord = Parameters<typeof entityRecordToLeadEntity>[0];
 
@@ -64,6 +68,64 @@ describe('entityRecordToLeadEntity', () => {
     const record = buildRecord({ id: '', type: 'user', name: 'Alice' });
 
     expect(entityRecordToLeadEntity(record)).toBeUndefined();
+  });
+
+  it('prefers the type-specific ECS name over entity.name for users', () => {
+    const record = {
+      entity: { id: 'user:8c67cb16', type: 'user', name: '8c67cb16' },
+      user: { name: 'alice.smith', email: ['alice@corp.example'] },
+    } as unknown as EntityRecord;
+
+    expect(entityRecordToLeadEntity(record)?.name).toBe('alice.smith');
+  });
+
+  it('prefers the type-specific ECS name over entity.name for hosts', () => {
+    const record = {
+      entity: { id: 'host:guid', EngineMetadata: { Type: 'host' }, name: 'guid' },
+      host: { name: 'web-server-01', hostname: ['web-server-01.corp'] },
+    } as unknown as EntityRecord;
+
+    expect(entityRecordToLeadEntity(record)?.name).toBe('web-server-01');
+  });
+});
+
+describe('resolveDisplayName', () => {
+  const build = (record: object) => record as Parameters<typeof resolveDisplayName>[0];
+
+  it('uses user.name when present', () => {
+    const record = build({ entity: { name: 'guid' }, user: { name: 'jane.doe' } });
+    expect(resolveDisplayName(record, 'user', 'user:guid')).toBe('jane.doe');
+  });
+
+  it('falls back to user.email when user.name is absent', () => {
+    const record = build({ entity: { name: 'guid' }, user: { email: ['jane@corp.example'] } });
+    expect(resolveDisplayName(record, 'user', 'user:guid')).toBe('jane@corp.example');
+  });
+
+  it('uses host.name, then host.hostname for hosts', () => {
+    expect(resolveDisplayName(build({ host: { name: 'h1' } }), 'host', 'host:x')).toBe('h1');
+    expect(resolveDisplayName(build({ host: { hostname: ['h1.corp'] } }), 'host', 'host:x')).toBe(
+      'h1.corp'
+    );
+  });
+
+  it('uses service.name for services', () => {
+    const record = build({ service: { name: 'billing-api' } });
+    expect(resolveDisplayName(record, 'service', 'service:x')).toBe('billing-api');
+  });
+
+  it('falls back to entity.name when no type-specific name exists', () => {
+    const record = build({ entity: { name: 'Generic Name' } });
+    expect(resolveDisplayName(record, 'user', 'user:x')).toBe('Generic Name');
+  });
+
+  it('falls back to the id when nothing else is available', () => {
+    expect(resolveDisplayName(build({ entity: {} }), 'user', 'user:x')).toBe('user:x');
+  });
+
+  it('ignores blank strings when resolving', () => {
+    const record = build({ entity: { name: '   ' }, user: { name: '' } });
+    expect(resolveDisplayName(record, 'user', 'user:x')).toBe('user:x');
   });
 });
 

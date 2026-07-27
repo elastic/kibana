@@ -15,20 +15,61 @@ import * as i18n from './translations';
 import { getThreatsDetectedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
+import { SampleMetric } from './sample_metric';
+import { SAMPLE_VALUE_METRICS } from './sample_data';
+import { formatThousands } from './metrics';
 
 interface Props {
+  isSample: boolean;
   from: string;
   to: string;
 }
 const ID = 'ThreatsDetectedMetricQuery';
-const ThreatsDetectedMetricComponent: React.FC<Props> = ({ from, to }) => {
+
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
+
+interface LiveContentProps {
+  from: string;
+  to: string;
+}
+
+const LiveThreatsDetectedMetricContent: React.FC<LiveContentProps> = ({ from, to }) => {
+  const spaceId = useSpaceId();
+  return (
+    <VisualizationEmbeddable
+      data-test-subj="threats-detected-metric"
+      getLensAttributes={(args) =>
+        getThreatsDetectedMetricLensAttributes({ ...args, spaceId: spaceId ?? 'default' })
+      }
+      timerange={{ from, to }}
+      id={`${ID}-area-embeddable`}
+      inspectTitle={i18n.THREATS_DETECTED}
+      withActions={VISUALIZATION_ACTIONS}
+    />
+  );
+};
+
+const SampleThreatsDetectedMetricContent: React.FC = () => (
+  <SampleMetric
+    id={`${ID}-sample`}
+    title={i18n.THREATS_DETECTED}
+    value={SAMPLE_VALUE_METRICS.attackDiscoveryCount} // Lens is pulling the live data, but we have to pull the sample value
+    valueFormatter={formatThousands}
+    icon="crosshairs"
+  />
+);
+
+const ThreatsDetectedMetricComponent: React.FC<Props> = ({ isSample, from, to }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
   const aiValueExportContext = useAIValueExportContext();
   const isExportMode = aiValueExportContext?.isExportMode === true;
 
-  const spaceId = useSpaceId();
   return (
     <div
       css={css`
@@ -66,20 +107,11 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = ({ from, to }) => {
         }
       `}
     >
-      <VisualizationEmbeddable
-        data-test-subj="threats-detected-metric"
-        getLensAttributes={(args) =>
-          getThreatsDetectedMetricLensAttributes({ ...args, spaceId: spaceId ?? 'default' })
-        }
-        timerange={{ from, to }}
-        id={`${ID}-area-embeddable`}
-        inspectTitle={i18n.THREATS_DETECTED}
-        withActions={[
-          VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
-          VisualizationContextMenuActions.inspect,
-        ]}
-      />
+      {isSample ? (
+        <SampleThreatsDetectedMetricContent />
+      ) : (
+        <LiveThreatsDetectedMetricContent from={from} to={to} />
+      )}
     </div>
   );
 };

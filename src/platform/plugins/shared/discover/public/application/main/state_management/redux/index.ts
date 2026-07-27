@@ -45,6 +45,7 @@ export const internalStateActions = {
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
+    'setProfileState',
     'syncProfileStateSnapshot'
   ),
   ...actions,
@@ -90,6 +91,8 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   selectDataSourceProfileId,
+  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileUrlState,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,

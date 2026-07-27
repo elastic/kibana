@@ -59,7 +59,7 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
 export const LOGS_TAB_TEST_SUBJECTS = {
   LOGS_TAB: 'logsTab',
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
-  RULE_DETAILS: 'ruleDetailsTitle',
+  RULE_DETAILS: 'appHeaderTitle',
 } as const;
 
 /**
@@ -79,6 +79,7 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // Rule Form
   RULE_FORM: 'ruleForm',
   RULE_NAME_INPUT: 'ruleDetailsNameInput',
+  RULE_DETAILS_TAGS_INPUT: 'ruleDetailsTagsInput',
 
   // Data View Selection
   DATA_VIEW_EXPRESSION: 'selectDataViewExpression',
@@ -116,6 +117,9 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // KQL Filter
   KQL_SEARCH_FIELD: 'o11ySearchField',
   KQL_SUGGESTIONS_PANEL: 'o11ySuggestionsPanel',
+
+  // Preview chart
+  PREVIEW_CHART: 'thresholdRulePreviewChart',
 
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
@@ -172,14 +176,14 @@ export const ALERTS_TABLE_TEST_SUBJECTS = {
  */
 export const RULE_DETAILS_TEST_SUBJECTS = {
   // Page elements
-  RULE_DETAILS: 'ruleDetailsTitle',
-  RULE_NAME: 'ruleName',
+  RULE_DETAILS: 'appHeaderTitle',
+  RULE_NAME: 'appHeaderTitle',
   RULE_TYPE: 'ruleSummaryRuleType',
   RULE_STATUS_PANEL: 'ruleStatusPanel',
   RULE_DEFINITION: 'ruleSummaryRuleDefinition',
 
   // Actions
-  ACTIONS_BUTTON: 'ruleActionsButton',
+  ACTIONS_BUTTON: 'app-menu-overflow-button',
   EDIT_RULE_BUTTON: 'openEditRuleFlyoutButton',
   DELETE_RULE_BUTTON: 'deleteRuleButton',
 

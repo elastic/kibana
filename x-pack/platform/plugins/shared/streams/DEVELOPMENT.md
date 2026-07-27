@@ -165,7 +165,6 @@ The `GET /api/streams/{name}` response enriches the raw stream definition with d
   privileges: { manage, read_failure_store, ... },
   dashboards: ["id1", "id2"],
   rules: ["id3"],
-  queries: [{ ... }],
   index_mode: "...",
 }
 ```
@@ -320,7 +319,6 @@ Key services and their clients:
 - `SystemService` → `SystemClient`
 - `ContentService` → `ContentClient`
 - `QueryService` → `QueryClient`
-- `TaskService` → `TaskClient`
 
 #### State Management (Server)
 

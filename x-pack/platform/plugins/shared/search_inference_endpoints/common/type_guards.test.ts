@@ -9,6 +9,7 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 import {
   isInferenceEndpointWithKibanaConnectorHeuristic,
   isInferenceEndpointWithDisplayNameMetadata,
+  isCspRegion,
 } from './type_guards';
 
 const baseEndpoint = (overrides: Partial<InferenceInferenceEndpointInfo> = {}) =>
@@ -53,5 +54,40 @@ describe('isInferenceEndpointWithKibanaConnectorHeuristic', () => {
     } as unknown as InferenceInferenceEndpointInfo;
 
     expect(isInferenceEndpointWithKibanaConnectorHeuristic(endpoint)).toBe(false);
+  });
+});
+
+describe('isCspRegion', () => {
+  it('returns true for a valid object with csp and region strings', () => {
+    expect(isCspRegion({ csp: 'aws', region: 'eu-west-1' })).toBe(true);
+  });
+
+  it('returns true when optional geo field is also present', () => {
+    expect(isCspRegion({ csp: 'gcp', region: 'europe-west1', geo: 'eu' })).toBe(true);
+  });
+
+  it('returns false for null', () => {
+    expect(isCspRegion(null)).toBe(false);
+  });
+
+  it('returns false for a non-object primitive', () => {
+    expect(isCspRegion('aws::eu-west-1')).toBe(false);
+    expect(isCspRegion(42)).toBe(false);
+  });
+
+  it('returns false when csp is missing', () => {
+    expect(isCspRegion({ region: 'eu-west-1' })).toBe(false);
+  });
+
+  it('returns false when region is missing', () => {
+    expect(isCspRegion({ csp: 'aws' })).toBe(false);
+  });
+
+  it('returns false when csp is not a string', () => {
+    expect(isCspRegion({ csp: 1, region: 'eu-west-1' })).toBe(false);
+  });
+
+  it('returns false when region is not a string', () => {
+    expect(isCspRegion({ csp: 'aws', region: null })).toBe(false);
   });
 });

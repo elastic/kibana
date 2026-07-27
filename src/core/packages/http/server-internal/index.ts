@@ -11,7 +11,7 @@ export { config, HttpConfig } from './src/http_config';
 export type { HttpConfigType } from './src/http_config';
 export { HttpService } from './src/http_service';
 export { HttpServer } from './src/http_server';
-export type { HttpServerSetup, LifecycleRegistrar } from './src/http_server';
+export type { HttpServerSetup } from './src/http_server';
 export type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,

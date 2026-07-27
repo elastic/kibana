@@ -5,246 +5,273 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
+  LENS_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq } from '../../../../common/lib/mock';
 import {
-  defaultUser,
-  persistableStateAttachment,
-  postCaseReq,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
   createCase,
-  createComment,
-  removeServerGeneratedPropertiesFromSavedObject,
-  getSOFromKibanaIndex,
+  deleteAllCaseItems,
   bulkCreateAttachments,
-  updateComment,
-  findCaseUserActions,
+  getComment,
+  deleteComment,
 } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  /**
-   * Attachment types are being registered in
-   * x-pack/platform/test/cases_api_integration/common/plugins/cases/server/plugin.ts
-   */
-  describe('Persistable state attachments', () => {
-    describe('references', () => {
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
+  describe('Unified Persistable State — lens/ML/AIOps CRUD with flag ON', () => {
+    afterEach(async () => {
+      await deleteAllCaseItems(es);
+    });
+
+    describe('Lens', () => {
+      const lensPayload = {
+        type: LENS_ATTACHMENT_TYPE,
+        data: {
+          state: {
+            attributes: { title: 'My visualization' },
+            timeRange: { from: 'now-15m', to: 'now' },
+          },
+        },
+        owner: 'securitySolutionFixture',
+      };
+
+      it('creates a lens attachment via v2 payload', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [lensPayload],
+        });
+
+        expect(updatedCase.comments?.length).to.be(1);
+
+        const attachment = updatedCase.comments![0];
+        expect(['lens', 'persistableState']).to.contain(attachment.type);
       });
 
-      it('should create a persistable state attachment type', async () => {
+      it('writes lens to cases-attachments SO when flag is ON', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
+        const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-        const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
-
-        expect(comment).to.eql({
-          ...persistableStateAttachment,
-          created_by: defaultUser,
-          pushed_at: null,
-          pushed_by: null,
-          updated_by: null,
-          owner: 'securitySolutionFixture',
-        });
-      });
-
-      it('should create a persistable state user action', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
+          params: [lensPayload],
         });
 
-        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
-        const commentUserAction = userActions[1];
+        const attachmentId = updatedCase.comments![0].id;
 
-        expect(commentUserAction.type).to.eql('comment');
-        expect(commentUserAction.action).to.eql('create');
-        expect(commentUserAction.payload).to.eql({ comment: persistableStateAttachment });
-      });
-
-      it('should create references and attributes correctly', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: patchedCase.comments![0].id,
-        });
-
-        const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-
-        const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-
-        expect(comment).to.eql({
-          ...persistableStateAttachment,
-          created_by: defaultUser,
-          pushed_at: null,
-          pushed_by: null,
-          updated_by: null,
-        });
-      });
-
-      it('should create attributes correctly on user actions', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-
-        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
-        const createCommentUserAction = userActions[1];
-
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_USER_ACTION_SAVED_OBJECT,
-          soId: createCommentUserAction.id,
-        });
-
-        const commentOnES =
-          esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-
-        expect(commentOnES).to.eql(persistableStateAttachment);
-      });
-
-      it('should create attributes correctly when bulk create', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [postCommentUserReq, persistableStateAttachment],
-        });
-
-        const externalRefComment = patchedCase.comments?.find(
-          (comment) => comment.type === AttachmentType.persistableState
-        );
-
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: externalRefComment!.id,
-        });
-
-        const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-
-        const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-
-        expect(comment).to.eql({
-          ...persistableStateAttachment,
-          created_by: defaultUser,
-          pushed_at: null,
-          pushed_by: null,
-          updated_by: null,
-        });
-      });
-
-      it('should persist the updated state correctly when updating the attachment', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-
-        await updateComment({
-          supertest,
-          caseId: postedCase.id,
-          req: {
-            id: patchedCase.comments![0].id,
-            version: patchedCase.comments![0].version,
-            ...persistableStateAttachment,
-            persistableStateAttachmentState: { foo: 'bar' },
+        const unifiedSOs = await es.search({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              must: [
+                { term: { type: CASE_ATTACHMENT_SAVED_OBJECT } },
+                { term: { _id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${attachmentId}` } },
+              ],
+            },
           },
         });
 
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: patchedCase.comments![0].id,
+        expect(unifiedSOs.hits.hits.length).to.be(1);
+
+        const legacySOs = await es.search({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              must: [
+                { term: { type: CASE_COMMENT_SAVED_OBJECT } },
+                { term: { _id: `${CASE_COMMENT_SAVED_OBJECT}:${attachmentId}` } },
+              ],
+            },
+          },
         });
 
-        const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-        const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-
-        expect(comment).to.eql({
-          ...persistableStateAttachment,
-          persistableStateAttachmentState: { foo: 'bar' },
-          created_by: defaultUser,
-          pushed_at: null,
-          pushed_by: null,
-          updated_by: defaultUser,
-        });
+        expect(legacySOs.hits.hits.length).to.be(0);
       });
 
-      it('should return 400 when missing attributes for persistable state attachment type', async () => {
+      it('retrieves lens attachment by id', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const reqKeys = Object.keys(persistableStateAttachment);
-        for (const key of reqKeys) {
-          await createComment({
-            supertest,
-            caseId: postedCase.id,
-            // @ts-expect-error
-            params: omit(key, persistableStateAttachment),
-            expectedHttpCode: 400,
-          });
-        }
-      });
-
-      it('400s when adding excess attributes for persistable state attachment type', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await createComment({
+        const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          // @ts-expect-error
-          params: { ...persistableStateAttachment, notValid: 'test' },
-          expectedHttpCode: 400,
+          params: [lensPayload],
         });
-      });
 
-      it('400s when creating a non registered persistable state attachment type', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await createComment({
+        const attachmentId = updatedCase.comments![0].id;
+        const fetched = await getComment({
           supertest,
           caseId: postedCase.id,
-          params: { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
-          expectedHttpCode: 400,
+          commentId: attachmentId,
         });
+
+        expect(fetched.id).to.be(attachmentId);
+        expect(['lens', 'persistableState']).to.contain(fetched.type);
       });
 
-      it('400s when bulk creating a non registered persistable state attachment type', async () => {
+      it('can be retrieved individually after creation', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await bulkCreateAttachments({
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [lensPayload],
+        });
+
+        const attachmentId = updatedCase.comments![0].id;
+        const fetched = await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: attachmentId,
+        });
+
+        expect(fetched.id).to.be(attachmentId);
+        expect(fetched.owner).to.be('securitySolutionFixture');
+      });
+
+      it('deletes lens attachment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [lensPayload],
+        });
+
+        const attachmentId = updatedCase.comments![0].id;
+        await deleteComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: attachmentId,
+        });
+
+        await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: attachmentId,
+          expectedHttpCode: 404,
+        });
+      });
+    });
+
+    // TODO: Enable when https://github.com/elastic/kibana/pull/262597 is merged
+    describe.skip('ML anomaly swimlane', () => {
+      const mlPayload = {
+        type: 'ml.anomaly_swimlane',
+        data: {
+          state: {
+            jobIds: ['test-job-1'],
+            swimlaneType: 'overall',
+          },
+        },
+        owner: 'securitySolutionFixture',
+      };
+
+      it('creates an ML anomaly swimlane attachment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [mlPayload],
+        });
+
+        expect(updatedCase.comments?.length).to.be(1);
+        expect(['ml.anomaly_swimlane', 'persistableState']).to.contain(
+          updatedCase.comments![0].type
+        );
+      });
+
+      it('retrieves ML attachment by id', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [mlPayload],
+        });
+
+        const fetched = await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: updatedCase.comments![0].id,
+        });
+
+        expect(['ml.anomaly_swimlane', 'persistableState']).to.contain(fetched.type);
+      });
+    });
+
+    // TODO: Enable when https://github.com/elastic/kibana/pull/262597 is merged
+    describe.skip('AIOps change point chart', () => {
+      const aiopsPayload = {
+        type: 'aiops.change_point_chart',
+        data: {
+          state: {
+            dataViewId: 'test-data-view',
+            fn: 'avg',
+            metricField: 'response_time',
+            splitField: 'host.name',
+          },
+        },
+        owner: 'securitySolutionFixture',
+      };
+
+      it('creates an AIOps change point chart attachment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [aiopsPayload],
+        });
+
+        expect(updatedCase.comments?.length).to.be(1);
+        expect(['aiops.change_point_chart', 'persistableState']).to.contain(
+          updatedCase.comments![0].type
+        );
+      });
+
+      it('retrieves AIOps attachment by id', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [aiopsPayload],
+        });
+
+        const fetched = await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: updatedCase.comments![0].id,
+        });
+
+        expect(['aiops.change_point_chart', 'persistableState']).to.contain(fetched.type);
+      });
+    });
+
+    // TODO: Enable when https://github.com/elastic/kibana/pull/262597 is merged
+    describe.skip('mixed persistable state types', () => {
+      it('creates lens and ML in bulk on the same case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
-            persistableStateAttachment,
-            { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
+            {
+              type: LENS_ATTACHMENT_TYPE,
+              data: { state: { attributes: { title: 'viz 1' } } },
+              owner: 'securitySolutionFixture',
+            },
+            {
+              type: 'ml.anomaly_swimlane',
+              data: { state: { jobIds: ['job-1'] } },
+              owner: 'securitySolutionFixture',
+            },
           ],
-          expectedHttpCode: 400,
         });
+
+        expect(updatedCase.comments?.length).to.be(2);
       });
     });
   });

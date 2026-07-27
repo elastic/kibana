@@ -14,9 +14,11 @@ import { SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS } from '../../../common/embeddables
 
 const ErrorBudgetCustomSchema = schema.object({
   slo_id: schema.string({
+    maxLength: 64,
     meta: { description: 'The ID of the SLO to display the error budget for' },
   }),
   slo_instance_id: schema.string({
+    maxLength: 512,
     defaultValue: ALL_VALUE,
     meta: {
       description:

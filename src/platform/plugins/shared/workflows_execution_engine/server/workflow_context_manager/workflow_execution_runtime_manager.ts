@@ -153,6 +153,17 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   /**
+   * Replaces the global scope stack outright. Unlike {@link enterScope} /
+   * {@link exitScope}, this is not guarded by the current node type. It exists
+   * for control-flow nodes (e.g. the parallel fan-out node) that drive nested
+   * branch steps in-process and must temporarily install — then restore — a
+   * branch's scope so per-branch context (e.g. {{ foreach.item }}) resolves.
+   */
+  public setScopeStack(scopeStack: StackFrame[]): void {
+    this.workflowExecutionState.updateWorkflowExecution({ scopeStack: [...scopeStack] });
+  }
+
+  /**
    * Enters a new scope in the workflow execution context.
    *
    * This method creates a new scope frame and pushes it onto the scope stack, establishing

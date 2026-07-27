@@ -12,6 +12,7 @@ import type {
   DataSetGraphNode,
   ElasticsearchGraphNode,
   KibanaGraphNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
   WorkflowOutputGraphNode,
@@ -41,6 +42,7 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
 } from './nodes/on_failure_nodes';
+import type { EnterParallelNode, ExitParallelNode } from './nodes/parallel_nodes';
 import type {
   EnterCaseBranchNode,
   EnterDefaultBranchNode,
@@ -65,6 +67,9 @@ export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type
 
 export const isWaitForInput = (node: GraphNodeUnion): node is WaitForInputGraphNode =>
   node.type === 'waitForInput';
+
+export const isWaitForApproval = (node: GraphNodeUnion): node is WaitForApprovalGraphNode =>
+  node.type === 'waitForApproval';
 
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
   node.type === 'data.set';
@@ -98,6 +103,12 @@ export const isLoopEnterNode = (node: GraphNodeUnion): node is LoopEnterNode =>
 
 export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
   node.type === 'exit-while';
+
+export const isEnterParallel = (node: GraphNodeUnion): node is EnterParallelNode =>
+  node.type === 'enter-parallel';
+
+export const isExitParallel = (node: GraphNodeUnion): node is ExitParallelNode =>
+  node.type === 'exit-parallel';
 
 export const isEnterRetry = (node: GraphNodeUnion): node is EnterRetryNode =>
   node.type === 'enter-retry';
