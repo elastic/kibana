@@ -292,6 +292,33 @@ describe('Timeline', () => {
         bar: barWithPopulatedColumns,
       });
     });
+
+    test('should reset isSuperTimeline and superTimelineSourceIds when creating a new timeline from a Super Timeline', () => {
+      // WHY: Super Timeline is a transient, read-only view. Clicking "New" must return the user to
+      // a normal editable timeline. Without explicit resets in timelineDefaults, the stale
+      // isSuperTimeline: true flag would survive the spread in addNewTimeline and the new timeline
+      // would still render in read-only mode (tabs hidden, save disabled).
+      const superTimelineById: TimelineById = {
+        foo: {
+          ...basicTimeline,
+          isSuperTimeline: true,
+          superTimelineSourceIds: ['source-id-1', 'source-id-2'],
+        },
+      };
+
+      const update = addNewTimeline({
+        id: 'foo',
+        columns: timelineDefaults.columns,
+        dataViewId: null,
+        indexNames: [],
+        timelineById: superTimelineById,
+        timelineType: TimelineTypeEnum.default,
+        savedSearchId: null,
+      });
+
+      expect(update.foo.isSuperTimeline).toBe(false);
+      expect(update.foo.superTimelineSourceIds).toEqual([]);
+    });
   });
 
   describe('#updateTimelineShowTimeline', () => {

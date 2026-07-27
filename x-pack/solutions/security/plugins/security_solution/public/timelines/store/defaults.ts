@@ -102,6 +102,8 @@ export const timelineDefaults: SubsetTimelineModel &
   isDataProviderVisible: false,
   sampleSize: 500,
   rowHeight: 3,
+  isSuperTimeline: false,
+  superTimelineSourceIds: [],
 };
 
 export const getTimelineManageDefaults = (id: string) => ({
