@@ -59,6 +59,18 @@ export class DiscoverPageObject extends FtrService {
     return !newButton && !openButton;
   }
 
+  /**
+   * Whether we're in a standalone Discover session (vs. editing a session embedded in a dashboard).
+   * Classic chrome tells these apart via the first breadcrumb ("Discover" vs "Dashboards"); next-project
+   * chrome has no breadcrumbs, so we rely on the new/open buttons, which are hidden only while editing.
+   */
+  private async isStandaloneDiscoverSession(): Promise<boolean> {
+    if (await this.globalNav.isNextProjectChrome()) {
+      return !(await this.isOnDashboardsEditMode());
+    }
+    return (await this.globalNav.getFirstBreadcrumb()) === 'Discover';
+  }
+
   public async getChartTimespan() {
     const getHistogramChartDataTimeRange = async () =>
       await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
@@ -98,7 +110,7 @@ export class DiscoverPageObject extends FtrService {
     saveAsNew?: boolean,
     { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
-    const isEmbeddedEditor = await this.isOnDashboardsEditMode();
+    const isStandaloneSession = await this.isStandaloneDiscoverSession();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -145,9 +157,7 @@ export class DiscoverPageObject extends FtrService {
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
 
-    // Skip the persist-verification wait only in the embedded Dashboards editor, where the last
-    // breadcrumb is `Editing {title}` and never matches searchName. See loadSavedSearch above.
-    if (!isEmbeddedEditor) {
+    if (isStandaloneSession) {
       await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
         const last = await this.getCurrentQueryName();
 
@@ -300,16 +310,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
-    const isEmbeddedEditor = await this.isOnDashboardsEditMode();
+    const isStandaloneSession = await this.isStandaloneDiscoverSession();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
-    // Skip the load-verification wait only in the embedded Dashboards editor, where the last
-    // breadcrumb is `Editing {title}` and never matches searchName. The previous `getFirstBreadcrumb`
-    // check also skipped it in serverless standalone Discover (first breadcrumb = solution name),
-    // leaving the load race unguarded there.
-    if (!isEmbeddedEditor) {
+    if (isStandaloneSession) {
       await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
         const currentName = await this.getCurrentQueryName();
         return currentName === searchName;

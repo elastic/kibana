@@ -33,6 +33,7 @@ import { noop } from 'lodash/fp';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { HuntingLead } from './types';
+import { GeneratedOnLabel } from './generated_on_label';
 import { LeadCard } from './lead_card';
 import { LeadsBanner } from './leads_banner';
 import * as i18n from './translations';
@@ -307,7 +308,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             {leads.length > 0 && lastRunTimestamp && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="leadsGeneratedTimestamp">
-                  {i18n.getGeneratedOnLabel(lastRunTimestamp)}
+                  <GeneratedOnLabel timestamp={lastRunTimestamp} />
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -373,7 +374,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
                       <EuiSkeletonTitle size="xs" />
                       <EuiSpacer size="s" />
-                      <EuiSkeletonText lines={3} size="s" />
+                      <EuiSkeletonText lines={4} size="s" />
                     </EuiPanel>
                   </EuiFlexItem>
                 ))}
