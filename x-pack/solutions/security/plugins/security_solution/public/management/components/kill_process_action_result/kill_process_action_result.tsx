@@ -77,7 +77,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.entity_id) {
         if (processResultData.length > 0) {
-          processResultData.push(<EuiTextColor color="subdued">{' | '}</EuiTextColor>);
+          processResultData.push(<EuiTextColor key={`${agentId}-entityId-sep`} color="subdued">{' | '}</EuiTextColor>);
         }
 
         processResultData.push(
