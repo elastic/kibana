@@ -96,7 +96,7 @@ describe('runWorkflowSync', () => {
     expect(workflowExecutionLoop).toHaveBeenCalledWith(
       expect.objectContaining({
         executionMode: 'sync',
-        taskAbortController: abortController,
+        signal: abortController.signal,
         fakeRequest: request,
         workflowExecutionRepository: setup.workflowExecutionPersistence,
       })
