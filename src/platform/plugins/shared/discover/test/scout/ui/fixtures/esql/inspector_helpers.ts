@@ -62,20 +62,39 @@ export const switchToRequestsView = async (page: ScoutPage): Promise<void> => {
   await page.testSubj.click('inspectorViewChooserRequests');
 };
 
+const openInspectorRequestChooser = async (page: ScoutPage): Promise<void> => {
+  const chooser = page.testSubj.locator('inspectorRequestChooser');
+  await expect(chooser).toBeVisible();
+  await chooser.click();
+};
+
+export const getInspectorRequestNames = async (page: ScoutPage): Promise<string[]> => {
+  await openInspectorRequestChooser(page);
+  const names = await page
+    .locator(
+      '[data-test-subj^="inspectorRequestChooser"]:not([data-test-subj="inspectorRequestChooser"])'
+    )
+    .evaluateAll((elements) =>
+      elements
+        .map((element) => element.textContent?.trim())
+        .filter((text): text is string => Boolean(text))
+    );
+  await page.keyboard.press('Escape');
+  return names;
+};
+
 /**
  * Checks whether the inspector's request chooser combo box has a request
  * named `name`, identified by its own `inspectorRequestChooser<Name>` test
  * subject rendered in the dropdown (see `RequestSelector.renderRequestCombobox`).
  */
 export const hasInspectorRequest = async (page: ScoutPage, name: string): Promise<boolean> => {
-  const chooser = page.testSubj.locator('inspectorRequestChooser');
-  await expect(chooser).toBeVisible();
-  await chooser.click();
+  await openInspectorRequestChooser(page);
   const option = page.testSubj.locator(`inspectorRequestChooser${name}`);
-  // Wait briefly for the combo-box dropdown to render before probing the option.
   const found = await option
     .waitFor({ state: 'visible', timeout: 3_000 })
     .then(() => true)
     .catch(() => false);
+  await page.keyboard.press('Escape');
   return found;
 };

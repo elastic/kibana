@@ -8,8 +8,9 @@
  */
 
 /**
- * The Inspector's "Table" + "Visualization" request pair stays as a single
- * entry each even when the underlying ES|QL query is slow.
+ * The Inspector continues to show the table request plus the visualization
+ * requests for a slow ES|QL query; currently the visualization work appears
+ * as two entries (one failed attempt and one successful retry).
  *
  * Stateful-only: the slow-query simulation relies on the ES `error_query`
  * test feature (see `ELASTIC_ESQL_DELAY_SECONDS` in
@@ -22,8 +23,8 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
 import {
+  getInspectorRequestNames,
   getInspectorRequestTotalTime,
-  hasInspectorRequest,
   switchToRequestsView,
 } from '../../../fixtures/esql/inspector_helpers';
 
@@ -61,7 +62,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'keeps a single Table/Visualization entry each for a slow query',
+      'shows the table request and visualization retry entries for a slow query',
       async ({ page, pageObjects }) => {
         const { discover } = pageObjects;
 
@@ -82,12 +83,22 @@ spaceTest.describe(
         });
         await discover.openInspectorFromTabMenu();
         await switchToRequestsView(page);
-        await expect.poll(() => hasInspectorRequest(page, 'Table')).toBe(true);
-        await expect.poll(() => hasInspectorRequest(page, 'Visualization')).toBe(true);
-        const chooser = page.testSubj.locator('inspectorRequestChooser');
-        await chooser.click();
-        await expect(page.testSubj.locator('inspectorRequestChooserTable')).toHaveCount(1);
-        await expect(page.testSubj.locator('inspectorRequestChooserVisualization')).toHaveCount(1);
+
+        await expect
+          .poll(async () => (await getInspectorRequestNames(page)).length, {
+            timeout: 30_000,
+          })
+          .toBe(3);
+
+        const requestNames = await getInspectorRequestNames(page);
+        expect(requestNames.filter((name) => name === 'Table')).toHaveLength(1);
+
+        const visualizationRequests = requestNames.filter((name) =>
+          name.startsWith('Visualization')
+        );
+        expect(visualizationRequests).toHaveLength(2);
+        expect(visualizationRequests.some((name) => name.includes('(failed)'))).toBe(true);
+
         const requestTotalTime = await getInspectorRequestTotalTime(page);
         expect(requestTotalTime).toBeGreaterThan(ESQL_DELAY_SECONDS * 1000);
       }

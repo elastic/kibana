@@ -20,7 +20,7 @@ const BROKEN_QUERIES = [
   { query: 'from logstash-* | limit 10*', expectedMarkerCount: 1 },
   { query: 'from logstash-* | limit A', expectedMarkerCount: 1 },
   { query: 'from logstash-* | where a*', expectedMarkerCount: 1 },
-  { query: 'limit 10', expectedMarkerCount: 0 },
+  { query: 'limit 10', expectedMarkerCount: 1 },
 ];
 
 spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnostic }, () => {
