@@ -26,6 +26,7 @@ interface PinnedConversationListProps {
   isDropDisabled?: boolean;
   backgroundColor?: string;
   onItemClick?: (id: string) => void;
+  isDragging?: boolean;
 }
 
 export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
@@ -35,68 +36,96 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
   isDropDisabled,
   backgroundColor = 'transparent',
   onItemClick,
+  isDragging = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isDragActive = backgroundColor !== 'transparent';
+  const isEmpty = pinnedConversations.length === 0;
+  const showOverlay = isDragging && !isEmpty;
 
-  if (pinnedConversations.length === 0) {
-    return (
+  const placeholderLabel = (
+    <EuiText size="xs" color="subdued">
+      {dragToPinLabel}
+    </EuiText>
+  );
+
+  const sharedPlaceholderCss = css`
+    border-radius: ${euiTheme.border.radius.small};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  return (
+    <div style={{ position: 'relative' }}>
       <EuiDroppable
         droppableId={DROPPABLE_IDS.PINNED}
         spacing="none"
         grow={false}
         isDropDisabled={isDropDisabled}
-        style={{ backgroundColor: 'transparent' }}
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: ${isEmpty ? 0 : euiTheme.size.xs};
+          border-radius: ${euiTheme.border.radius.small};
+          background-color: ${isEmpty ? 'transparent' : backgroundColor};
+          transition: background-color 0.15s;
+          & > [data-rfd-placeholder-context-id] {
+            display: none !important;
+          }
+        `}
       >
-        <div
-          css={css`
-            border: 1px dashed
-              ${isDragActive ? euiTheme.colors.borderBasePrimary : euiTheme.colors.borderBasePlain};
-            border-radius: ${euiTheme.border.radius.small};
-            padding: ${euiTheme.size.s};
-            text-align: center;
-            min-height: ${euiTheme.size.xxl};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: ${backgroundColor};
-            transition: background-color 0.15s, border-color 0.15s;
-          `}
-        >
-          <EuiText size="xs" color="subdued">
-            {dragToPinLabel}
-          </EuiText>
-        </div>
+        <>
+          {isEmpty && (
+            <div
+              css={[
+                sharedPlaceholderCss,
+                css`
+                  border: 1px dashed
+                    ${isDragging
+                      ? euiTheme.colors.borderBasePrimary
+                      : euiTheme.colors.borderBasePlain};
+                  padding: ${euiTheme.size.s};
+                  text-align: center;
+                  min-height: ${euiTheme.size.xxl};
+                  background-color: ${isDragging ? backgroundColor : 'transparent'};
+                  transition: background-color 0.15s, border-color 0.15s;
+                `,
+              ]}
+            >
+              {placeholderLabel}
+            </div>
+          )}
+          {pinnedConversations.map((conversation, index) => (
+            <DraggableConversationItem
+              key={conversation.id}
+              agentId={agentId}
+              conversation={conversation}
+              index={index}
+              isActive={currentConversationId === conversation.id}
+              routeConversationId={currentConversationId}
+              onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
+            />
+          ))}
+        </>
       </EuiDroppable>
-    );
-  }
 
-  return (
-    <EuiDroppable
-      droppableId={DROPPABLE_IDS.PINNED}
-      spacing="none"
-      grow={false}
-      isDropDisabled={isDropDisabled}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: euiTheme.size.xs,
-        borderRadius: euiTheme.border.radius.small,
-        backgroundColor,
-        transition: 'background-color 0.15s',
-      }}
-    >
-      {pinnedConversations.map((conversation, index) => (
-        <DraggableConversationItem
-          key={conversation.id}
-          agentId={agentId}
-          conversation={conversation}
-          index={index}
-          isActive={currentConversationId === conversation.id}
-          routeConversationId={currentConversationId}
-          onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
-        />
-      ))}
-    </EuiDroppable>
+      {showOverlay && (
+        <div
+          css={[
+            sharedPlaceholderCss,
+            css`
+              position: absolute;
+              inset: 0;
+              pointer-events: none;
+              border: 1px dashed ${euiTheme.colors.borderBasePrimary};
+              background-color: ${backgroundColor};
+              transition: background-color 0.15s;
+            `,
+          ]}
+        >
+          {placeholderLabel}
+        </div>
+      )}
+    </div>
   );
 };

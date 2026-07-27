@@ -297,6 +297,7 @@ export const ConversationSidebarView: React.FC = () => {
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
                           onItemClick={handleConversationItemClick}
+                          isDragging={draggingFromId !== null}
                         />
                       </EuiFlexItem>
 
