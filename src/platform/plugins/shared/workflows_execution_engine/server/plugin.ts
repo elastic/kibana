@@ -1141,6 +1141,7 @@ export class WorkflowsExecutionEnginePlugin
           options,
           logger: this.logger,
           dependencies,
+          syncLogDrain: this.syncLogDrain,
           getWorkflowsExecutionEngine: async () => {
             const [, , workflowsExecutionEngine] = await coreSetup.getStartServices();
             return workflowsExecutionEngine;

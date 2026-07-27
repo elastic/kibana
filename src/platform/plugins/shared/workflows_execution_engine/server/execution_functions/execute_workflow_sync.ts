@@ -21,6 +21,7 @@ import type {
   WorkflowsExecutionEnginePluginStart,
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
+import type { SyncLogDrain } from '../workflow_event_logger/sync_log_drain';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -42,6 +43,7 @@ export const executeWorkflowSync = async ({
   options,
   logger,
   dependencies,
+  syncLogDrain,
   getWorkflowsExecutionEngine,
 }: {
   workflow: WorkflowExecutionEngineModel;
@@ -50,6 +52,7 @@ export const executeWorkflowSync = async ({
   options: ExecuteWorkflowOptions;
   logger: Logger;
   dependencies: ContextDependencies;
+  syncLogDrain?: SyncLogDrain;
   getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
 }): Promise<ExecuteWorkflowResponse> => {
   const { coreStart, workflowRepository, config } = dependencies;
@@ -154,6 +157,7 @@ export const executeWorkflowSync = async ({
       workflowsExecutionEngine,
       workflowExecutionRepository: syncExecutionPersistence,
       stepExecutionRepository: syncExecutionPersistence,
+      syncLogDrain,
     });
 
     const output = getSynchronousWorkflowOutput(result.context?.output);
