@@ -308,6 +308,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     if (hasLeftAxisAccessors) {
       viz.yLeftExtent ??= { mode: 'full', niceValues: true };
       viz.yLeftExtent.niceValues ??= true;
+      // enforce is not preserved through the round-trip for full mode
+      if (viz.yLeftExtent.mode === 'full') delete viz.yLeftExtent.enforce;
     } else {
       delete viz.yLeftExtent;
     }
@@ -316,6 +318,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     if (hasRightAxisAccessors) {
       viz.yRightExtent ??= { mode: 'full', niceValues: true };
       viz.yRightExtent.niceValues ??= true;
+      // enforce is not preserved through the round-trip for full mode
+      if (viz.yRightExtent.mode === 'full') delete viz.yRightExtent.enforce;
     } else {
       delete viz.yRightExtent;
     }
