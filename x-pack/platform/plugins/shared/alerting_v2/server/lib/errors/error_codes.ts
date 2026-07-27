@@ -67,6 +67,18 @@ export const ALERTING_V2_ERROR_CODES = {
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
+  /**
+   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
+   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
+   * superseded episode) so a client can tell the two apart per item.
+   */
+  ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
+  /**
+   * The `group_hash` resolved to a latest alert event, but its `episode_id`
+   * did not match the one the item targeted (the episode was superseded).
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   */
+  ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
   /** The requested action is incompatible with the episode's current `episode.status`. */
   INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
