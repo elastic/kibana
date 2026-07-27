@@ -39,7 +39,6 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-security-common",
-    "@kbn/core-security-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-user-profile-common",
   ]
