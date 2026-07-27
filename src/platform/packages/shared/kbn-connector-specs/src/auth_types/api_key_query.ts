@@ -69,12 +69,13 @@ export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: NormalizedAuthSchemaType
   ): Promise<AxiosInstance> => {
-    // set global defaults
+    // Exclude framework-injected metadata keys that should not become query params.
+    const FRAMEWORK_SECRET_KEYS = new Set(['authType']);
     axiosInstance.defaults.params = {
       ...axiosInstance.defaults.params,
       ...Object.fromEntries(
         Object.keys(secret)
-          .filter((key) => key !== 'authType')
+          .filter((key) => !FRAMEWORK_SECRET_KEYS.has(key))
           .map((key) => [key, secret[key]])
       ),
     };

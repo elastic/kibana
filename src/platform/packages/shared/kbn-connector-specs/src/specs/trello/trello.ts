@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { RETRY_RATE_LIMIT } from '../../connector_spec';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
+  EmptyInputSchema,
   BoardIdInputSchema,
   ListListCardsInputSchema,
   CardIdInputSchema,
@@ -31,6 +31,11 @@ import type {
 } from './types';
 
 const BASE_URL = 'https://api.trello.com/1';
+
+const fetchCurrentMember = async (ctx: ActionContext) => {
+  const response = await ctx.client.get(`${BASE_URL}/members/me`);
+  return response.data;
+};
 
 export const Trello: ConnectorSpec = {
   metadata: {
@@ -88,18 +93,15 @@ export const Trello: ConnectorSpec = {
       isTool: true,
       description:
         'Get the currently authenticated Trello member. Returns the member record for the API key/token in use. Useful for verifying which account is connected or resolving your own member ID.',
-      input: lazySchema(() => z.object({})),
-      handler: async (ctx) => {
-        const response = await ctx.client.get(`${BASE_URL}/members/me`);
-        return response.data;
-      },
+      input: EmptyInputSchema,
+      handler: fetchCurrentMember,
     },
 
     listBoards: {
       isTool: true,
       description:
         'List all boards the authenticated member belongs to. Use to discover boards and their IDs before drilling into lists or cards.',
-      input: lazySchema(() => z.object({})),
+      input: EmptyInputSchema,
       handler: async (ctx) => {
         const response = await ctx.client.get(`${BASE_URL}/members/me/boards`);
         return response.data;
@@ -295,9 +297,6 @@ export const Trello: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.trello.test.description', {
       defaultMessage: 'Verifies Trello connection by fetching the current member',
     }),
-    handler: async (ctx) => {
-      const response = await ctx.client.get(`${BASE_URL}/members/me`);
-      return response.data;
-    },
+    handler: fetchCurrentMember,
   },
 };

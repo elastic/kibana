@@ -9,7 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { Trello } from './trello';
-import { UpdateCardInputSchema } from './types';
+import { SearchInputSchema, CreateCardInputSchema, UpdateCardInputSchema } from './types';
 
 const BASE_URL = 'https://api.trello.com/1';
 
@@ -263,6 +263,73 @@ describe('Trello', () => {
         closed: true,
       });
       expect(result.success).toBe(true);
+    });
+
+    it('rejects pos: 0 (only positive numbers are valid positions)', () => {
+      const result = UpdateCardInputSchema.safeParse({
+        cardId: 'abc123def456abc123def456',
+        pos: 0,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects pos: -1', () => {
+      const result = UpdateCardInputSchema.safeParse({
+        cardId: 'abc123def456abc123def456',
+        pos: -1,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects due: "" (empty string is not a valid date)', () => {
+      const result = UpdateCardInputSchema.safeParse({
+        cardId: 'abc123def456abc123def456',
+        due: '',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects idMembers: "" to prevent silently clearing all assignments', () => {
+      const result = UpdateCardInputSchema.safeParse({
+        cardId: 'abc123def456abc123def456',
+        idMembers: '',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects idLabels: ""', () => {
+      const result = UpdateCardInputSchema.safeParse({
+        cardId: 'abc123def456abc123def456',
+        idLabels: '',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('CreateCardInputSchema validation', () => {
+    it('rejects pos: 0', () => {
+      const result = CreateCardInputSchema.safeParse({
+        listId: 'abc123def456abc123def456',
+        name: 'Test card',
+        pos: 0,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects due: ""', () => {
+      const result = CreateCardInputSchema.safeParse({
+        listId: 'abc123def456abc123def456',
+        name: 'Test card',
+        due: '',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('SearchInputSchema validation', () => {
+    it('rejects modelTypes: "" (empty string must not override the default)', () => {
+      const result = SearchInputSchema.safeParse({ query: 'login bug', modelTypes: '' });
+      expect(result.success).toBe(false);
     });
   });
 

@@ -18,7 +18,10 @@ const trelloId = (label: string) =>
       `Trello ${label} ID (24-character hex string, e.g. "5f8a1b2c3d4e5f6a7b8c9d0e"), as returned by listBoards, search, or another action.`
     );
 
-const cardPosition = z.union([z.enum(['top', 'bottom']), z.number()]);
+const cardPosition = z.union([z.enum(['top', 'bottom']), z.number().positive()]);
+
+export const EmptyInputSchema = lazySchema(() => z.object({}));
+export type EmptyInput = z.infer<typeof EmptyInputSchema>;
 
 // Shared by getBoard, listBoardLists, and listBoardCards — all three take only a board ID.
 export const BoardIdInputSchema = lazySchema(() =>
@@ -56,6 +59,7 @@ export const SearchInputSchema = lazySchema(() =>
       ),
     modelTypes: z
       .string()
+      .min(1)
       .max(100)
       .optional()
       .describe(
@@ -100,6 +104,7 @@ export const CreateCardInputSchema = lazySchema(() =>
       .describe('Card description text. Supports Trello-flavored Markdown.'),
     due: z
       .string()
+      .min(1)
       .max(100)
       .optional()
       .describe('Due date as an ISO 8601 datetime string, e.g. "2024-06-15T17:00:00.000Z".'),
@@ -110,11 +115,13 @@ export const CreateCardInputSchema = lazySchema(() =>
       ),
     idMembers: z
       .string()
+      .min(1)
       .max(2000)
       .optional()
       .describe('Comma-separated Trello member IDs to assign to the card.'),
     idLabels: z
       .string()
+      .min(1)
       .max(2000)
       .optional()
       .describe('Comma-separated Trello label IDs to apply to the card.'),
@@ -130,6 +137,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
       desc: z.string().max(16384).optional().describe('New description text for the card.'),
       due: z
         .string()
+        .min(1)
         .max(100)
         .nullable()
         .optional()
@@ -151,6 +159,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
         ),
       idMembers: z
         .string()
+        .min(1)
         .max(2000)
         .optional()
         .describe(
@@ -158,6 +167,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
         ),
       idLabels: z
         .string()
+        .min(1)
         .max(2000)
         .optional()
         .describe(
