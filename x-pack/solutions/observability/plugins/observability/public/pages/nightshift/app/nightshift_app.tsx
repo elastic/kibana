@@ -321,9 +321,10 @@ export function NightshiftApp(): React.ReactElement {
         box-sizing: border-box;
         gap: ${isEmptyState ? euiTheme.size.xl : 0};
         justify-content: ${isEmptyState ? 'center' : 'flex-start'};
-        margin-top: ${euiTheme.size.l};
+        /* The page section contributes 24px; non-loading states add 12px for a 36px gap. */
+        margin-top: ${isLoading ? euiTheme.size.l : euiTheme.size.m};
         min-height: ${isEmptyState || isTransitioningFromLoading ? 'calc(100vh - 140px)' : 'auto'};
-        padding: ${euiTheme.size.xxl} ${isEmptyState ? euiTheme.size.xl : 0}
+        padding: ${isEmptyState ? euiTheme.size.xxl : 0} ${isEmptyState ? euiTheme.size.xl : 0}
           calc(${euiTheme.size.xxl} * 1.5);
         position: relative;
       `}

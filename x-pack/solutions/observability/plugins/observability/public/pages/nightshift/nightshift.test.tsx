@@ -27,6 +27,7 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockUsePluginContext = usePluginContext as jest.Mock;
 
 const getBooleanValue = jest.fn();
+const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => `/app/${appId}${path}`);
 
 function renderPage() {
   return render(
@@ -42,13 +43,25 @@ describe('NightshiftPage', () => {
     getBooleanValue.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
+        application: { getUrlForApp },
         http: { basePath: { prepend: (path: string) => path } },
         featureFlags: { getBooleanValue },
         serverless: undefined,
       },
     });
     mockUsePluginContext.mockReturnValue({
-      ObservabilityPageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      ObservabilityPageTemplate: ({
+        children,
+        pageHeader,
+      }: {
+        children: React.ReactNode;
+        pageHeader: { children: React.ReactNode };
+      }) => (
+        <>
+          {pageHeader.children}
+          {children}
+        </>
+      ),
     });
   });
 
@@ -62,6 +75,16 @@ describe('NightshiftPage', () => {
   it('renders the app when the availability flag is enabled', () => {
     renderPage();
     expect(mockReplace).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Nightshift' })).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+  });
+
+  it('links to Streams settings with EBT tracking', () => {
+    renderPage();
+
+    const settingsLink = screen.getByRole('link', { name: 'Settings' });
+    expect(settingsLink).toHaveAttribute('href', '/app/streams/_discovery/settings');
+    expect(settingsLink).toHaveAttribute('data-ebt-action', 'viewSettings');
+    expect(settingsLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
   });
 });

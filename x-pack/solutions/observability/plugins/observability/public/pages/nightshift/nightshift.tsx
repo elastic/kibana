@@ -11,18 +11,23 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { NightshiftApp } from './app/nightshift_app';
+import { NightshiftPageHeader } from './app/nightshift_page_header';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
+    application,
     http: { basePath },
     featureFlags,
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
+  const settingsHref = application.getUrlForApp('streams', {
+    path: '/_discovery/settings',
+  });
 
   // Availability is owned by this flag alone — the /available endpoint is the same
   // gate on the server, so a second client probe would only duplicate it.
@@ -54,6 +59,12 @@ export function NightshiftPage(): React.ReactElement | null {
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
+      pageHeader={{
+        children: <NightshiftPageHeader settingsHref={settingsHref} />,
+        paddingSize: 's',
+        responsive: false,
+        restrictWidth: false,
+      }}
       restrictWidth="900px"
       pageSectionProps={{
         color: 'subdued',

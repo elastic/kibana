@@ -93,7 +93,7 @@ export function NightshiftHeader({
     <EuiFlexItem
       grow={false}
       css={css`
-        padding: ${euiTheme.size.m} 0;
+        padding: ${isEmptyState ? euiTheme.size.m : 0} 0 ${euiTheme.size.m};
       `}
     >
       <EuiFlexGroup

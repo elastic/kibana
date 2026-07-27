@@ -17,6 +17,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_DETECTION: 'viewDetection',
   VIEW_ENTITY: 'viewEntity',
   VIEW_INVESTIGATION: 'viewInvestigation',
+  VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
 } as const;
