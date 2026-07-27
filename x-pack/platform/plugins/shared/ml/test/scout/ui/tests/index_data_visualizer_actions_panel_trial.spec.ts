@@ -16,11 +16,12 @@ import {
 test.describe('index based actions panel on trial license', { tag: tags.stateful.classic }, () => {
   let dataViewId: string;
 
-  test.beforeAll(async ({ esArchiver, apiServices, kbnClient }) => {
+  test.beforeAll(async ({ esArchiver, apiServices, kbnClient, esClient }) => {
     dataViewId = await setupFarequoteDataVisualizerFixtures({
       esArchiver,
       apiServices,
       kbnClient,
+      esClient,
     });
   });
 

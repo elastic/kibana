@@ -89,8 +89,17 @@ export class MlDataVisualizerActions {
     await this.loadSearchForm.waitFor({ state: 'visible' });
     await this.savedObjectFinderSearchInput.waitFor({ state: 'visible' });
 
+    // SavedObjectFinder fires an async fetch on mount; wait for the initial load to settle.
+    await this.page.testSubj
+      .locator('savedObjectsFinderTable')
+      .locator('table:not([aria-busy="true"])')
+      .waitFor({ state: 'visible', timeout: 40_000 });
+
     await this.savedObjectFinderSearchInput.fill(name);
-    await this.page.testSubj.click(`savedObjectTitle${name}`);
+    // fill() triggers a 300 ms debounced search — wait for the match explicitly.
+    const resultItem = this.page.testSubj.locator(`savedObjectTitle${name}`);
+    await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
+    await resultItem.click();
     await this.loadSearchForm.waitFor({ state: 'hidden' });
 
     await this.page.waitForURL(/savedSearchId/, { timeout: 10_000 });

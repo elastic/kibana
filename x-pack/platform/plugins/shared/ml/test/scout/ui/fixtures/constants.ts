@@ -32,6 +32,26 @@ export const ADVANCED_JOB_DATAFEED_QUERY = JSON.stringify(
   2
 );
 
+const farequoteKuerySearchSourceJSON = JSON.stringify({
+  highlightAll: true,
+  version: true,
+  query: {
+    query: EXPECTED_DISCOVER_QUERY,
+    language: 'kuery',
+  },
+  filter: [],
+  indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+});
+
+/**
+ * Creates the ft_farequote_kuery Discover session.
+ * Must include `tabs` — Discover model version 13 requires it on create, and the
+ * SavedObjectFinder / content-management search path expects the tabbed shape
+ * (see data_visualizer Scout fixtures and FTR ml test_resources_data).
+ *
+ * Top-level columns/sort/kibanaSavedObjectMeta were removed from the create
+ * schema in v13; they live under tabs[].attributes only.
+ */
 export const createFarequoteKuerySavedSearch = async (
   kbnClient: ScoutWorkerFixtures['kbnClient'],
   dataViewId: string
@@ -43,20 +63,19 @@ export const createFarequoteKuerySavedSearch = async (
     attributes: {
       title: SAVED_SEARCH_TITLE,
       description: '',
-      columns: ['_source'],
-      sort: ['@timestamp', 'desc'],
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({
-          highlightAll: true,
-          version: true,
-          query: {
-            query: EXPECTED_DISCOVER_QUERY,
-            language: 'kuery',
+      tabs: [
+        {
+          id: 'tab_0',
+          label: 'My Tab',
+          attributes: {
+            columns: ['_source'],
+            sort: ['@timestamp', 'desc'],
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: farequoteKuerySearchSourceJSON,
+            },
           },
-          filter: [],
-          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        }),
-      },
+        },
+      ],
     },
     references: [
       {
