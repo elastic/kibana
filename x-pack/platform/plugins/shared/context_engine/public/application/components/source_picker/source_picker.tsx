@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
+import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlTab } from './esql_tab';
 import type { SelectedSource } from './types';
@@ -31,9 +32,16 @@ interface SourcePickerProps {
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('esql');
+  const { connectors, connectorNameById, isLoading: isLoadingConnectors } = useDataConnectors();
 
   const selectedEsqlCount = useMemo(
     () => selectedSources.filter((source) => source.type === 'esql').length,
+    [selectedSources]
+  );
+
+  const selectedConnectorIds = useMemo(
+    () =>
+      selectedSources.filter((source) => source.type === 'connector').map((source) => source.value),
     [selectedSources]
   );
 
@@ -44,6 +52,30 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
   };
 
+  const toggleConnectorSource = ({
+    id,
+    name,
+    checked,
+  }: {
+    id: string;
+    name: string;
+    checked: boolean;
+  }) => {
+    const isSelected = selectedSources.some(
+      (current) => current.type === 'connector' && current.value === id
+    );
+    if (checked) {
+      if (isSelected) {
+        return;
+      }
+      onChange([...selectedSources, { type: 'connector', id, label: name, value: id }]);
+      return;
+    }
+    onChange(
+      selectedSources.filter((current) => !(current.type === 'connector' && current.value === id))
+    );
+  };
+
   const removeSource = (source: SelectedSource) => {
     onChange(
       selectedSources.filter(
@@ -52,35 +84,45 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     );
   };
 
+  // Connector chips store the connector id; resolve it to a human-readable name
+  // once the space connectors have loaded.
+  const getSourceLabel = (source: SelectedSource): string =>
+    source.type === 'connector'
+      ? connectorNameById.get(source.value) ?? source.label
+      : source.label;
+
   return (
     <div data-test-subj="contextSourcePicker">
       {selectedSources.length > 0 && (
         <>
           <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-            {selectedSources.map((source) => (
-              <EuiFlexItem grow={false} key={`${source.type}-${source.id}`}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="cross"
-                  iconSide="right"
-                  // Cap the width so a long ES|QL query truncates instead of
-                  // stretching the badge across the modal.
-                  css={{ maxWidth: 260 }}
-                  title={source.label}
-                  data-test-subj={`contextSelectedSource-${source.id}`}
-                  iconOnClick={() => removeSource(source)}
-                  iconOnClickAriaLabel={i18n.translate(
-                    'xpack.contextEngine.sourcePicker.removeSourceAriaLabel',
-                    {
-                      defaultMessage: 'Remove {label}',
-                      values: { label: source.label },
-                    }
-                  )}
-                >
-                  {source.label}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
+            {selectedSources.map((source) => {
+              const label = getSourceLabel(source);
+              return (
+                <EuiFlexItem grow={false} key={`${source.type}-${source.id}`}>
+                  <EuiBadge
+                    color="hollow"
+                    iconType="cross"
+                    iconSide="right"
+                    // Cap the width so a long ES|QL query truncates instead of
+                    // stretching the badge across the modal.
+                    css={{ maxWidth: 260 }}
+                    title={label}
+                    data-test-subj={`contextSelectedSource-${source.id}`}
+                    iconOnClick={() => removeSource(source)}
+                    iconOnClickAriaLabel={i18n.translate(
+                      'xpack.contextEngine.sourcePicker.removeSourceAriaLabel',
+                      {
+                        defaultMessage: 'Remove {label}',
+                        values: { label },
+                      }
+                    )}
+                  >
+                    {label}
+                  </EuiBadge>
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
         </>
@@ -107,6 +149,11 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           isSelected={selectedTab === 'connectors'}
           onClick={() => setSelectedTab('connectors')}
           prepend={<EuiIcon type="plugs" aria-hidden={true} />}
+          append={
+            selectedConnectorIds.length > 0 ? (
+              <EuiNotificationBadge>{selectedConnectorIds.length}</EuiNotificationBadge>
+            ) : undefined
+          }
           data-test-subj="contextSourcePickerTab-connectors"
         >
           <FormattedMessage
@@ -119,7 +166,14 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       <EuiSpacer size="m" />
 
       {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
-      {selectedTab === 'connectors' && <ConnectorsTab />}
+      {selectedTab === 'connectors' && (
+        <ConnectorsTab
+          connectors={connectors}
+          isLoading={isLoadingConnectors}
+          selectedConnectorIds={selectedConnectorIds}
+          onToggle={toggleConnectorSource}
+        />
+      )}
     </div>
   );
 };

@@ -9,7 +9,8 @@ import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React, { useState } from 'react';
 import { SourcePicker } from './source_picker';
 import type { SelectedSource } from './types';
@@ -30,23 +31,45 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
-const Harness = () => {
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
+// The action connectors endpoint returns every connector in the space; the
+// picker filters to the data-retrieval subset. `.slack` should be excluded.
+const CONNECTORS = [
+  { id: 'connector-gdrive', name: 'Google Drive', connector_type_id: '.google_drive' },
+  { id: 'connector-github', name: 'GitHub', connector_type_id: '.github' },
+  { id: 'connector-slack', name: 'Slack', connector_type_id: '.slack' },
+];
+
+const createServices = () => {
+  const services = coreMock.createStart();
+  services.http.get.mockResolvedValue(CONNECTORS);
+  return services;
+};
+
+const Harness = ({ initialSources = [] }: { initialSources?: SelectedSource[] }) => {
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(initialSources);
   return <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />;
 };
 
-const renderWithProviders = (ui: React.ReactElement) =>
-  render(
+const renderWithProviders = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={coreMock.createStart()}>{ui}</KibanaContextProvider>
+        <KibanaContextProvider services={createServices()}>
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+};
 
 const addEsqlSource = (query: string) => {
   fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+};
+
+const openConnectorsTab = () => {
+  fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
 };
 
 describe('SourcePicker', () => {
@@ -87,11 +110,48 @@ describe('SourcePicker', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows the connectors placeholder when its tab is selected', () => {
+  it('lists only the data-retrieval connectors in the connectors tab', async () => {
     renderWithProviders(<Harness />);
 
-    fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
+    openConnectorsTab();
 
-    expect(screen.getByTestId('contextConnectorsPlaceholder')).toBeInTheDocument();
+    expect(await screen.findByText('Google Drive')).toBeInTheDocument();
+    expect(screen.getByText('GitHub')).toBeInTheDocument();
+    // Slack is not a data-retrieval connector, so it must be filtered out.
+    expect(screen.queryByText('Slack')).not.toBeInTheDocument();
+  });
+
+  it('adds a connector as a source when selected', async () => {
+    renderWithProviders(<Harness />);
+
+    openConnectorsTab();
+
+    fireEvent.click(await screen.findByText('Google Drive'));
+
+    const chip = await screen.findByTestId('contextSelectedSource-connector-gdrive');
+    expect(chip).toHaveTextContent('Google Drive');
+  });
+
+  it('resolves connector names for restored connector sources', async () => {
+    renderWithProviders(
+      <Harness
+        initialSources={[
+          {
+            type: 'connector',
+            id: 'connector-github',
+            label: 'connector-github',
+            value: 'connector-github',
+          },
+        ]}
+      />
+    );
+
+    // The stored source only knows the connector id; once connectors load its
+    // chip should show the human-readable name.
+    await waitFor(() =>
+      expect(screen.getByTestId('contextSelectedSource-connector-github')).toHaveTextContent(
+        'GitHub'
+      )
+    );
   });
 });

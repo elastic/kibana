@@ -395,6 +395,30 @@ describe('ai indices routes', () => {
       ).toThrow();
     });
 
+    it('accepts a connector source', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'connector', value: 'connector-1' }] })
+      ).not.toThrow();
+    });
+
+    it('accepts a mix of ES|QL and connector sources', () => {
+      expect(() =>
+        validateBody({
+          ...validBody,
+          sources: [
+            { type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' },
+            { type: 'connector', value: 'connector-1' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a connector source with an empty value', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'connector', value: '' }] })
+      ).toThrow();
+    });
+
     it('rejects an automation with a disallowed type', () => {
       expect(() =>
         validateBody({ ...validBody, automations: [{ type: 'cron', value: 'nightly-refresh' }] })

@@ -40,6 +40,14 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
+jest.mock('../hooks/use_data_connectors', () => ({
+  useDataConnectors: () => ({
+    connectors: [],
+    connectorNameById: new Map(),
+    isLoading: false,
+  }),
+}));
+
 const mockMgetWorkflows = jest.fn();
 const mockCreateWorkflow = jest.fn();
 

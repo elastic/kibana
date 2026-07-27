@@ -14,6 +14,7 @@ import type { SelectedSource, SourceType } from '../components/source_picker';
  */
 const AI_INDEX_SOURCE_TYPE_TO_SOURCE_TYPE: Record<AiIndexSourceType, SourceType> = {
   esql: 'esql',
+  connector: 'connector',
 };
 
 export const toSourceType = (type: AiIndexSourceType): SourceType =>
@@ -27,19 +28,22 @@ export const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSour
     switch (source.type) {
       case 'esql':
         return { type: 'esql', value: source.value };
+      case 'connector':
+        return { type: 'connector', value: source.value };
       default:
         throw new Error(`Unsupported AI index source type: ${source.type}`);
     }
   });
 
 /**
- * Rebuilds source picker selections from the sources stored on an AI index.
- * Stored sources are plain ES|QL queries, so they are restored as raw `esql`
- * sources.
+ * Rebuilds source picker selections from the sources stored on an AI index. An
+ * ES|QL source restores to its raw query; a connector source restores to its
+ * connector id. The connector label is resolved to a human-readable name later,
+ * once the space connectors are loaded.
  */
 export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
   sources.map((source) => ({
-    type: 'esql',
+    type: toSourceType(source.type),
     id: source.value,
     label: source.value,
     value: source.value,

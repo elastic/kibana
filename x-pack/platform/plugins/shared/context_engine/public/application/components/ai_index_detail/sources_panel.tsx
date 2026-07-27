@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { SourceRow } from './source_row';
 
 interface SourcesPanelProps {
@@ -28,75 +29,83 @@ interface SourcesPanelProps {
   onEditSources: () => void;
 }
 
-export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: SourcesPanelProps) => (
-  <EuiPanel hasBorder paddingSize="l">
-    <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h2>
+export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: SourcesPanelProps) => {
+  const { connectorNameById } = useDataConnectors();
+  return (
+    <EuiPanel hasBorder paddingSize="l">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.title"
+                defaultMessage="Sources"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="pencil"
+            onClick={onEditSources}
+            isDisabled={!canEdit}
+            data-test-subj="contextEditSourcesButton"
+          >
             <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.title"
-              defaultMessage="Sources"
+              id="xpack.contextEngine.aiIndexDetail.sources.editButton"
+              defaultMessage="Edit"
             />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="pencil"
-          onClick={onEditSources}
-          isDisabled={!canEdit}
-          data-test-subj="contextEditSourcesButton"
-        >
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>
           <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.sources.editButton"
-            defaultMessage="Edit"
+            id="xpack.contextEngine.aiIndexDetail.sources.description"
+            defaultMessage="Sources that provide data for this AI index automations."
           />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
-      <p>
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.sources.description"
-          defaultMessage="Sources that provide data for this AI index automations."
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      {isLoading ? (
+        <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
+      ) : sources.length === 0 ? (
+        <EuiEmptyPrompt
+          iconType="editorCodeBlock"
+          titleSize="xs"
+          data-test-subj="contextAiIndexSourcesEmpty"
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.emptyTitle"
+                defaultMessage="No sources yet"
+              />
+            </h3>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.emptyBody"
+                defaultMessage="Add a source to start building context for this AI index."
+              />
+            </p>
+          }
         />
-      </p>
-    </EuiText>
-    <EuiSpacer size="m" />
-    {isLoading ? (
-      <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
-    ) : sources.length === 0 ? (
-      <EuiEmptyPrompt
-        iconType="editorCodeBlock"
-        titleSize="xs"
-        data-test-subj="contextAiIndexSourcesEmpty"
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.emptyTitle"
-              defaultMessage="No sources yet"
+      ) : (
+        sources.map((source, index) => (
+          <React.Fragment key={`${source.type}-${index}`}>
+            <SourceRow
+              source={source}
+              connectorName={
+                source.type === 'connector' ? connectorNameById.get(source.value) : undefined
+              }
             />
-          </h3>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.emptyBody"
-              defaultMessage="Add a source to start building context for this AI index."
-            />
-          </p>
-        }
-      />
-    ) : (
-      sources.map((source, index) => (
-        <React.Fragment key={`${source.type}-${index}`}>
-          <SourceRow source={source} />
-          {index < sources.length - 1 && <EuiSpacer size="s" />}
-        </React.Fragment>
-      ))
-    )}
-  </EuiPanel>
-);
+            {index < sources.length - 1 && <EuiSpacer size="s" />}
+          </React.Fragment>
+        ))
+      )}
+    </EuiPanel>
+  );
+};

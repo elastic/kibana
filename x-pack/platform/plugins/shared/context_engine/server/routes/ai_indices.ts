@@ -93,14 +93,24 @@ const aiIndexPropertiesSchema = {
     }
   ),
   sources: schema.arrayOf(
-    schema.object({
-      type: schema.literal('esql'),
-      value: schema.string({
-        minLength: 0,
-        maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-        meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
+    schema.oneOf([
+      schema.object({
+        type: schema.literal('esql'),
+        value: schema.string({
+          minLength: 0,
+          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+          meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
+        }),
       }),
-    }),
+      schema.object({
+        type: schema.literal('connector'),
+        value: schema.string({
+          minLength: 1,
+          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+          meta: { description: 'The source value; a connector id when `type` is `connector`.' },
+        }),
+      }),
+    ]),
     {
       maxSize: MAX_AI_INDEX_SOURCES,
       meta: { description: 'Additional sources that provide context for the AI index.' },

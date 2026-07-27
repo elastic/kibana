@@ -5,30 +5,144 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiHorizontalRule,
+  EuiSelectable,
+  EuiSkeletonText,
+  EuiSpacer,
+} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import type { DataConnector } from '../../hooks/use_data_connectors';
 
-export const ConnectorsTab = () => (
-  <EuiEmptyPrompt
-    iconType="plugs"
-    titleSize="xs"
-    data-test-subj="contextConnectorsPlaceholder"
-    title={
-      <h3>
-        <FormattedMessage
-          id="xpack.contextEngine.sourcePicker.connectors.placeholderTitle"
-          defaultMessage="Connectors coming soon"
-        />
-      </h3>
+// Deep link to the connectors list in Stack Management, where connectors are
+// created and managed.
+const MANAGEMENT_APP_ID = 'management';
+const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors/connectors';
+
+interface ConnectorsTabProps {
+  connectors: DataConnector[];
+  isLoading: boolean;
+  selectedConnectorIds: string[];
+  onToggle: (params: { id: string; name: string; checked: boolean }) => void;
+}
+
+/**
+ * Lists the connectors configured in the space and lets the user select them
+ * as AI index sources. Selection state mirrors the picker's connector chips.
+ */
+export const ConnectorsTab = ({
+  connectors,
+  isLoading,
+  selectedConnectorIds,
+  onToggle,
+}: ConnectorsTabProps) => {
+  const {
+    services: { application },
+  } = useKibana();
+
+  const selectedIds = useMemo(() => new Set(selectedConnectorIds), [selectedConnectorIds]);
+
+  const options = useMemo<EuiSelectableOption[]>(
+    () =>
+      connectors.map((connector) => ({
+        key: connector.id,
+        label: connector.name,
+        checked: selectedIds.has(connector.id) ? 'on' : undefined,
+        'data-test-subj': `contextConnectorOption-${connector.id}`,
+      })),
+    [connectors, selectedIds]
+  );
+
+  const handleChange = (
+    _options: EuiSelectableOption[],
+    _event: unknown,
+    changedOption: EuiSelectableOption
+  ) => {
+    if (!changedOption.key) {
+      return;
     }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.contextEngine.sourcePicker.connectors.placeholderBody"
-          defaultMessage="Support for adding connectors as a source is not available yet."
-        />
-      </p>
-    }
-  />
-);
+    onToggle({
+      id: changedOption.key,
+      name: changedOption.label,
+      checked: changedOption.checked === 'on',
+    });
+  };
+
+  const createConnectorButton = (
+    <EuiButtonEmpty
+      iconType="plusInCircle"
+      onClick={() =>
+        application.navigateToApp(MANAGEMENT_APP_ID, { path: CONNECTORS_MANAGEMENT_PATH })
+      }
+      data-test-subj="contextCreateConnectorButton"
+    >
+      <FormattedMessage
+        id="xpack.contextEngine.sourcePicker.connectors.createButton"
+        defaultMessage="Create a connector"
+      />
+    </EuiButtonEmpty>
+  );
+
+  if (isLoading) {
+    return <EuiSkeletonText lines={3} data-test-subj="contextConnectorsLoading" />;
+  }
+
+  if (connectors.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="plugs"
+        titleSize="xs"
+        data-test-subj="contextConnectorsEmpty"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.emptyTitle"
+              defaultMessage="No connectors yet"
+            />
+          </h3>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
+              defaultMessage="Create a connector in this space to use it as a source."
+            />
+          </p>
+        }
+        actions={createConnectorButton}
+      />
+    );
+  }
+
+  return (
+    <div data-test-subj="contextConnectorsTab">
+      <EuiSelectable
+        aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.listAriaLabel', {
+          defaultMessage: 'Select connectors to use as sources',
+        })}
+        searchable
+        options={options}
+        onChange={handleChange}
+        height={240}
+        listProps={{ bordered: true, isVirtualized: false, onFocusBadge: false }}
+        data-test-subj="contextConnectorsSelectable"
+      >
+        {(list, search) => (
+          <>
+            {search}
+            <EuiSpacer size="s" />
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+      <EuiHorizontalRule margin="m" />
+      {createConnectorButton}
+    </div>
+  );
+};

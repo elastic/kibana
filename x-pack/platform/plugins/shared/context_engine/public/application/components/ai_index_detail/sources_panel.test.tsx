@@ -12,6 +12,14 @@ import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { SourcesPanel } from './sources_panel';
 
+jest.mock('../../hooks/use_data_connectors', () => ({
+  useDataConnectors: () => ({
+    connectors: [{ id: 'connector-gdrive', name: 'Google Drive' }],
+    connectorNameById: new Map([['connector-gdrive', 'Google Drive']]),
+    isLoading: false,
+  }),
+}));
+
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
@@ -52,6 +60,19 @@ describe('SourcesPanel', () => {
 
     expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(sources.length);
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+  });
+
+  it('resolves the connector name for connector sources', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        sources={[{ type: 'connector', value: 'connector-gdrive' }]}
+        canEdit
+        onEditSources={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('Google Drive');
   });
 
   it('disables the edit button when editing is not allowed', () => {
