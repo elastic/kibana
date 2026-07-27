@@ -20,11 +20,12 @@ jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
 }));
 
 const mockGetServiceMapUrl = jest.fn(
-  () => '/app/apm#/service-map?rangeFrom=now-15m&rangeTo=now'
+  (_core: unknown, _params?: unknown) => '/app/apm#/service-map?rangeFrom=now-15m&rangeTo=now'
 );
 
 jest.mock('../../../../embeddable/service_map/get_service_map_url', () => ({
-  getServiceMapUrl: (...args: unknown[]) => mockGetServiceMapUrl(...args),
+  getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
+    mockGetServiceMapUrl(...args),
 }));
 
 const defaultProps: ContextualServiceMapSectionProps = {
