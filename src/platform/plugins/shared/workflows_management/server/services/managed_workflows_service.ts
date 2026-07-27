@@ -47,6 +47,8 @@ interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   logger: Logger;
+  /** When true, abort before primary ES writes (plugin stop mid-install). */
+  isStopping?: () => boolean;
   audit?: Pick<
     WorkflowManagementAuditLog,
     'logWorkflowCreated' | 'logWorkflowUpdated' | 'logWorkflowDeleted'
@@ -66,6 +68,14 @@ export class ManagedWorkflowsService {
 
   constructor(private readonly deps: ManagedWorkflowsServiceDeps) {
     this.logger = deps.logger;
+  }
+
+  private shouldAbortManagedWrite(operation: string): boolean {
+    if (!this.deps.isStopping?.()) {
+      return false;
+    }
+    this.logger.warn(`Managed workflows: skipping ${operation} (stopping)`);
+    return true;
   }
 
   public isPluginReady(pluginId: string): boolean {
@@ -184,6 +194,11 @@ export class ManagedWorkflowsService {
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = this.getRequiredSpaceId(options);
 
+    // Abort before trackInstall so ready() reconcile does not treat a skipped write as installed.
+    if (this.shouldAbortManagedWrite(`install '${id}'`)) {
+      return;
+    }
+
     this.trackInstall(registeredPluginId, id, workflowDocumentId, spaceId);
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
@@ -201,6 +216,10 @@ export class ManagedWorkflowsService {
     });
 
     if (!existing) {
+      if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
+        this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+        return;
+      }
       const document = await this.prepareManagedWorkflowDocument({
         definition,
         workflowDocumentId,
@@ -211,6 +230,10 @@ export class ManagedWorkflowsService {
         now,
       });
       const documentWithVersion = applyWorkflowVersion(document, undefined);
+      if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
+        this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+        return;
+      }
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
         workflowDocumentId,
         spaceId,
@@ -267,6 +290,10 @@ export class ManagedWorkflowsService {
       createdAt: existing.created_at,
     });
     const documentWithVersion = applyWorkflowVersion(document, existing);
+    if (this.shouldAbortManagedWrite(`install update '${id}'`)) {
+      this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+      return;
+    }
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
       workflowDocumentId,
       spaceId,
@@ -586,6 +613,10 @@ export class ManagedWorkflowsService {
         );
       }
     }
+  }
+
+  private untrackInstall(pluginId: string, workflowDocumentId: string, spaceId: string): void {
+    this.installedDocKeysByPlugin.get(pluginId)?.delete(`${workflowDocumentId}:${spaceId}`);
   }
 
   private applyManagedEnabledState(

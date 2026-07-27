@@ -427,6 +427,89 @@ describe('ManagedWorkflowsService', () => {
   });
 
   describe('installManagedWorkflow', () => {
+    it('aborts before trackInstall when stopping so ready() still treats the workflow as uninstalled', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      let stopping = true;
+      const crudService = createCrudServiceMock();
+      const logger = loggerMock.create();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+        isStopping: () => stopping,
+      });
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.getWorkflowDocumentWithVersion).not.toHaveBeenCalled();
+      expect(crudService.createWorkflowDocument).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install '${WORKFLOW_ID}' (stopping)`)
+      );
+
+      stopping = false;
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: WORKFLOW_ID,
+          source: createWorkflowSource({
+            originManagedWorkflowId: WORKFLOW_ID,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith([WORKFLOW_ID], SPACE_ID, {
+        force: true,
+      });
+    });
+
+    it('untracks when stopping after trackInstall and before create so ready() can reconcile', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      let stopping = false;
+      const crudService = createCrudServiceMock();
+      const logger = loggerMock.create();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+        isStopping: () => stopping,
+      });
+
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+      const prepareImpl = crudService.prepareWorkflowDocumentForStorage.getMockImplementation()!;
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+        const result = await prepareImpl(params);
+        stopping = true;
+        return result;
+      });
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.createWorkflowDocument).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install create '${WORKFLOW_ID}' (stopping)`)
+      );
+
+      stopping = false;
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: WORKFLOW_ID,
+          source: createWorkflowSource({
+            originManagedWorkflowId: WORKFLOW_ID,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith([WORKFLOW_ID], SPACE_ID, {
+        force: true,
+      });
+    });
+
     it('creates a new managed workflow document', async () => {
       const definition = createDefinition();
       mockManagedWorkflowDefinitions = [definition];
