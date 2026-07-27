@@ -29,54 +29,23 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 ## How to invoke
 
-**Mode:** Single for new areas (full investigation chains). Parallel when `knowledge/` is populated — investigation limited to one level (`phases/2-explore.md`).
+**Mode:** Single for new areas. Parallel when `knowledge/` is populated — see `phases/2-explore.md`.
 
-**The entire invocation block below is optional.** If `Area` or `Flows` is missing, the agent runs a short guided intake.
+Example (replace area, flows, and role with your targets):
 
 ```
-Read and follow x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
-Area: <feature area>
+Read and follow x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/SKILL.md
+Area: Entity Analytics
 Flows:
-  - <flow name>
-    entry: <path or description>
-    expected: <correct outcome>
-    timeout: <minutes>
-    isolate: false    # optional — parallel mode only; default true (own space per flow)
-Setup: <connector name>, role: <role>
-Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
-Session-timeout: 90    # optional, total session cap in minutes (default 90)
-Session-dir: .exploratory-session/entity-analytics-20260714-093022  # optional — resume a prior session
-Environment: profile <name>  # optional — or just: Environment: <name> if the profile file exists
-Session-config: <path>       # optional — read all inputs from a YAML file instead of this block
+  - Happy path — view entity risk scores
+    entry: Security → Entity Analytics
+    expected: Risk scores table loads with data
+Setup: role: t2_analyst
 ```
 
-Claude Code users who set up the symlink from Prerequisites (`ln -s "$(pwd)/x-pack/…/exploratory-tester" ~/.claude/skills/exploratory-tester`) can use the short form `exploratory-tester/SKILL.md` instead. Cursor and other IDEs use the full path above.
+All optional fields (Environment, Specs, Session-timeout, Session-dir, Session-config, isolate): `templates/session.example.yaml`.
+Guided intake runs automatically if `Area` or `Flows` is missing.
 
-Guided intake: if `Area`/`Flows` missing, the agent asks interactively with defaults (`phases/0-setup.md`). Environment profiles: `Environment: profile <name>` loads a saved profile; the agent offers to save a new profile after validating a user-provided environment (`phases/0-setup.md`). Session-config: `Session-config: <path>` reads all inputs from YAML; copy `templates/session.example.yaml` as a template.
-
-Each session writes its output to an isolated subfolder of `.exploratory-session/` named `<area-slug>-<YYYYMMDD-HHMMSS>`, so multiple agents can run sessions in parallel without interfering. To resume a prior session, pass its folder path as `Session-dir:`.
-
-## Common Mistakes
-
-Pre-session errors that make findings low-value before exploration even starts:
-
-- **No `expected:` on flows** — findings become vague and unactionable; the agent has no oracle to cite
-- **Running as `admin`** — permission bugs are invisible to admins; use `t2_analyst` or `platform_engineer`
-- **No `Specs:` when testing a PR** — without specs the agent falls back to UX heuristics and misses acceptance criteria
-- **Forgetting `Session-timeout:`** — long or many-flow sessions hit the 90 min default cap unexpectedly; set ≈ flows × 12 min
-- **Using this for API-only, load, or accessibility testing** — scope is functional UI testing only; browser reproduction is required for every finding
-
-## Red Flags
-
-| Thought | Reality |
-|---|---|
-| "This area looks fine — I didn't find anything" | Did you attempt every checklist step? Did step 3 use the noise index? |
-| "All my test data is well-formed ECS" | Real customer data has non-ECS types. Use the noise index for data-view flows. |
-| "Let me check the source code / test file selectors" | **Hard stop.** The implementation may be wrong. Navigate from what's visible in the browser. |
-| "I don't know how this feature works" | Check specs → official docs → UI → test files for user flows. |
-| "This error is expected" | Document it. User decides — then add to `knowledge/<area-slug>.md`. |
-| "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
-| "I didn't find anything — I should flag this observation just in case" | If you completed the checklist and nothing confirmed, report it as clean. That is signal, not failure. |
 ## Phases
 
 Execute in order — read each file before starting it:

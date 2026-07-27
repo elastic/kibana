@@ -15,6 +15,7 @@ import type {
   ActionPolicyResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 export interface FindActionPoliciesResponse {
@@ -148,10 +149,10 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async fetchDataFields(matcher?: string) {
+  public async fetchRuleEventFields(matcher?: string) {
     const trimmed = matcher?.trim();
     return this.http.get<string[]>(
-      `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+      ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
       trimmed ? { query: { matcher: trimmed } } : {}
     );
   }

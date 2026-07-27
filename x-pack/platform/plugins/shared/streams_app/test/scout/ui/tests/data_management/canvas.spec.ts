@@ -144,14 +144,14 @@ test.describe(
       await streams.tidyUpCanvasFromPane();
       await expect(streams.canvasUndo).toBeEnabled();
 
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click();
+      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
       await page.keyboard.press('Control+z');
       await expect(streams.canvasUndo).toBeDisabled();
     });
 
     test('undoes a keyboard-driven node reposition', async ({ page, pageObjects: { streams } }) => {
       // Selecting + focusing a node lets the arrow keys reposition it.
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click();
+      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
       await page.keyboard.press('ArrowRight');
 
       // The keyboard move records a history step even though no pointer drag ran,
@@ -166,6 +166,26 @@ test.describe(
     }) => {
       await expect(streams.getCanvasProcessingGlyph(PROCESSING_STREAM)).toBeVisible();
       await expect(streams.getCanvasProcessingGlyph(PLAIN_STREAM)).toHaveCount(0);
+    });
+
+    test('shows a flyout for classic streams when a destination node is clicked', async ({
+      page,
+    }) => {
+      await page.testSubj.click('streamsCanvasDestinationNode');
+
+      const loadingEffect = page.testSubj.locator('streamsCanvasFlyout-loading');
+      const flyout = page.testSubj.locator('streamsCanvasFlyout');
+
+      await expect(flyout).toBeVisible();
+      await expect(page.testSubj.locator('streamsCanvasFlyoutTitle')).toBeVisible();
+
+      await loadingEffect.waitFor({ state: 'hidden' });
+
+      await expect(flyout.getByTestId('classicStreamBadge')).toBeVisible();
+      await expect(flyout.getByTestId('streamsCanvasFlyoutTab-overview')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
     });
   }
 );

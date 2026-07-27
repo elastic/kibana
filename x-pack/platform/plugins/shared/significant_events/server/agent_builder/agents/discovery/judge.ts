@@ -11,7 +11,7 @@ import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-bu
 import instructions from './instructions/judge.md.text';
 import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 
-export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'platform.streams.sig-events.discovery-judge';
+export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'significant_events.discovery-judge';
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID = 'platform.sig_events.discovery-judge-type';
 
 export const judgeAgentType = {

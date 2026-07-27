@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/279391
+issues:
+- https://github.com/elastic/kibana/issues/279388
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Search and data
+title: Fix Fleet integration policy YAML errors when values contain double quotes
+description: Fixes policy YAML corruption when an `escape_string` field value includes
+  a `"` character, which could produce invalid agent configuration.

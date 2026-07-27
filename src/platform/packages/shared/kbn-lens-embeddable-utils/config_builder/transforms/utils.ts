@@ -21,7 +21,7 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Sha256 } from '@kbn/crypto-browser';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
@@ -337,7 +337,7 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
     case 'esql':
       return {
         index: getIndexPatternFromESQLQuery(dataSource.query),
-        timeFieldName: getTimeFieldFromESQLQuery(dataSource.query),
+        timeFieldName: parseTimeFieldFromESQLQuery(dataSource.query),
         esqlQuery: dataSource.query,
       };
     case AS_CODE_DATA_VIEW_REFERENCE_TYPE:
