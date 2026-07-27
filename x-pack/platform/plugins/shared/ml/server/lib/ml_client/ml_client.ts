@@ -172,27 +172,40 @@ export function getMlClient(
   }
 
   /**
-   * Check to see if the supplied deployment IDs are also being used as model IDs.
-   * If they are, then check to see if the user has access to the model in the current space.
-   * This is needed to avoid a situation where a user supplies a deployment ID that is also being used as a model ID,
-   * and the user does not have access to the model in the current space.
+   * Validates that the supplied deployment IDs belong to the model ID in the request.
+   * Loads trained model stats for the model and checks each deployment ID against
+   * the deployments reported for that model. Wildcards are not allowed.
    */
-  async function deploymentIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
+  async function deploymentIdsCheck(p: MlClientParams) {
     const deploymentIds = filterAll(getDeploymentIdsFromRequest(p));
     if (deploymentIds.length === 0) {
       return;
     }
 
-    const allModels = await mlSavedObjectService.getAllTrainedModelObjectsForAllSpaces(
-      deploymentIds
-    );
-    const existingModelIds = new Set(allModels.map((m) => m.attributes.model_id));
-    // Keep only deployment IDs that are also used as model IDs in any space
-    const knownDeploymentIds = deploymentIds.filter((id) => existingModelIds.has(id));
+    const [modelId] = filterAll(getModelIdsFromRequest(p as MlGetTrainedModelParams));
+    if (modelId === undefined) {
+      return;
+    }
 
-    if (knownDeploymentIds.length) {
-      // Verify the user has access to those models in the current space
-      await checkModelIds(knownDeploymentIds, allowWildcards);
+    const hasWildcard = (id: string) => id.includes('*') || id.includes('?');
+    if (hasWildcard(modelId) || deploymentIds.some(hasWildcard)) {
+      throw new MLModelNotFound('Model and deployment ids must not contain wildcard characters');
+    }
+
+    const { trained_model_stats: modelStats } = await mlClient.getTrainedModelsStats({
+      model_id: modelId,
+    });
+
+    const validDeploymentIds = new Set(
+      modelStats
+        .map((stats) => stats.deployment_stats?.deployment_id)
+        .filter((id): id is string => id !== undefined)
+    );
+
+    for (const id of deploymentIds) {
+      if (validDeploymentIds.has(id) === false) {
+        throw new MLModelNotFound(`No known deployment with id '${id}'`);
+      }
     }
   }
 
