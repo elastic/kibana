@@ -854,14 +854,7 @@ export class WorkflowsExecutionEnginePlugin
         throw new Error('Request-local capabilities and abort signals require sync execution');
       }
 
-      if (options.executionMode === 'sync') {
-        if (!this.config.syncExecution.enabled) {
-          throw new Error(
-            'Synchronous workflow execution is disabled. ' +
-              'Set xpack.workflowsExecutionEngine.syncExecution.enabled: true alongside ' +
-              'xpack.inference.anonymization.workflow_driven: true to enable it.'
-          );
-        }
+      if (options.executionMode === 'sync' && this.config.syncExecution.enabled) {
         if (!request) {
           throw new Error('Synchronous workflows cannot be executed without the user context');
         }
