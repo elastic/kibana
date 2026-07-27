@@ -28,6 +28,7 @@ import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
 import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
+import { useSteppedFlyoutStyles } from './use_stepped_flyout_styles';
 
 const backLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.back', {
   defaultMessage: 'Back',
@@ -54,6 +55,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   onBack,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
 
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
@@ -67,12 +69,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
     {
       title: parametersLabel,
       status: 'complete' as const,
-      children: (
-        <>
-          <EuiSpacer size="s" />
-          <JsonCodeBlock data={step.params} />
-        </>
-      ),
+      children: <JsonCodeBlock data={step.params} />,
     },
     ...(showExecutionSection
       ? [
@@ -80,38 +77,32 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
             title: executionLabel,
             status: (isSubAgentRunning ? 'loading' : 'complete') as 'loading' | 'complete',
             children: !subAgentExecutionId ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiLoadingSpinner size="s" />
-              </>
+              <EuiLoadingSpinner size="s" />
             ) : (
-              <>
-                <EuiSpacer size="s" />
-                <ul
-                  css={css`
-                    list-style-type: disc;
-                    padding-inline-start: ${euiTheme.size.l};
-                    margin: 0;
-                  `}
-                >
-                  <li>
-                    <EuiButtonEmpty
-                      iconType="sortRight"
-                      iconSide="right"
-                      flush="left"
-                      size="s"
-                      css={css`
-                        color: ${euiTheme.colors.textDisabled};
-                      `}
-                      onClick={openSubFlyout}
-                    >
-                      <EuiText size="m" color={`${euiTheme.colors.textDisabled}`}>
-                        {subAgentExecutionLabel} {subAgentExecutionId}
-                      </EuiText>
-                    </EuiButtonEmpty>
-                  </li>
-                </ul>
-              </>
+              <ul
+                css={css`
+                  list-style-type: disc;
+                  padding-inline-start: ${euiTheme.size.l};
+                  margin: 0;
+                `}
+              >
+                <li>
+                  <EuiButtonEmpty
+                    iconType="sortRight"
+                    iconSide="right"
+                    flush="left"
+                    size="s"
+                    css={css`
+                      color: ${euiTheme.colors.textDisabled};
+                    `}
+                    onClick={openSubFlyout}
+                  >
+                    <EuiText size="m" color={`${euiTheme.colors.textDisabled}`}>
+                      {subAgentExecutionLabel} {subAgentExecutionId}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                </li>
+              </ul>
             ),
           },
         ]
@@ -121,17 +112,12 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
           {
             title: resultLabel,
             status: (hasErrorResult ? 'danger' : 'complete') as 'danger' | 'complete',
-            children: (
-              <>
-                <EuiSpacer size="s" />
-                {step.results.map((result, idx) => (
-                  <Fragment key={`flyout-result-${idx}`}>
-                    <ToolResult result={result} />
-                    {idx < step.results.length - 1 && <EuiSpacer size="s" />}
-                  </Fragment>
-                ))}
-              </>
-            ),
+            children: step.results.map((result, idx) => (
+              <Fragment key={`flyout-result-${idx}`}>
+                <ToolResult result={result} />
+                {idx < step.results.length - 1 && <EuiSpacer size="s" />}
+              </Fragment>
+            )),
           },
         ]
       : []),
@@ -146,15 +132,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       outsideClickCloses={onBack ? true : undefined}
     >
       {onBack && (
-        <EuiFlyoutHeader
-          hasBorder
-          css={css`
-            && {
-              padding-block: 4px;
-              padding-left: 8px;
-            }
-          `}
-        >
+        <EuiFlyoutHeader hasBorder css={backHeaderCss}>
           <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
             <EuiText size="xs" component="span">
               {backLabel}
@@ -170,7 +148,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} />
+        <EuiSteps headingElement="h3" titleSize="xxs" steps={steps} css={stepsCss} />
       </EuiFlyoutBody>
       {isSubFlyoutOpen && subAgentExecutionId && (
         <SubAgentExecutionFlyout

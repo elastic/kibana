@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
@@ -29,6 +28,7 @@ import { JsonCodeBlock } from '../json_code_block';
 import { FlyoutStackContext } from './flyout_stack_context';
 import { ToolResponseFlyout } from './tool_response_flyout';
 import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
+import { useSteppedFlyoutStyles } from './use_stepped_flyout_styles';
 
 const backLabel = i18n.translate('xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.back', {
   defaultMessage: 'Back',
@@ -67,6 +67,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
     error,
   } = useFollowExecution(executionId);
   const { euiTheme } = useEuiTheme();
+  const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
   const hasError = Boolean(error);
@@ -77,12 +78,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
           {
             title: parametersLabel,
             status: 'complete' as const,
-            children: (
-              <>
-                <EuiSpacer size="s" />
-                <JsonCodeBlock data={params} />
-              </>
-            ),
+            children: <JsonCodeBlock data={params} />,
           },
         ]
       : []),
@@ -92,12 +88,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         | 'danger'
         | 'loading'
         | 'complete',
-      children: (
-        <>
-          <EuiSpacer size="s" />
-          <RoundEvents steps={executionSteps} />
-        </>
-      ),
+      children: <RoundEvents steps={executionSteps} />,
     },
     ...(!isRunning || displayMessage
       ? [
@@ -109,7 +100,6 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
               | 'complete',
             children: (
               <>
-                <EuiSpacer size="s" />
                 {hasError ? (
                   <EuiCallOut
                     announceOnMount
@@ -146,15 +136,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         outsideClickCloses={onBack ? true : undefined}
       >
         {onBack && (
-          <EuiFlyoutHeader
-            hasBorder
-            css={css`
-              && {
-                padding-block: ${euiTheme.size.xs};
-                padding-left: ${euiTheme.size.s};
-              }
-            `}
-          >
+          <EuiFlyoutHeader hasBorder css={backHeaderCss}>
             <EuiButtonEmpty iconType="undo" onClick={onBack} flush="left" size="s" color="text">
               <EuiText size="xs" component="span">
                 {backLabel}
@@ -174,7 +156,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSteps headingElement="h3" titleSize="xxs" steps={euiSteps} />
+          <EuiSteps headingElement="h3" titleSize="xxs" steps={euiSteps} css={stepsCss} />
         </EuiFlyoutBody>
       </EuiFlyout>
       {nestedStep && (
