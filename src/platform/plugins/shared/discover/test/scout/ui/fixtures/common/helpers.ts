@@ -47,7 +47,7 @@ export const waitForStoredQueryMode = async (
         return false;
       }
       try {
-        return JSON.parse(storedValue)?.mode === mode;
+        return JSON.parse(storedValue)?.currentMode === mode;
       } catch {
         return false;
       }
@@ -78,9 +78,9 @@ const getStoredQueryMode = async (page: ScoutPage): Promise<QueryMode | null> =>
     if (storedValue == null) {
       return null;
     }
-    // The app persists `{ mode, isEsqlDefault }` JSON-encoded.
+    // The app persists `{ currentMode, defaultMode }` JSON-encoded.
     try {
-      const parsedMode = JSON.parse(storedValue)?.mode;
+      const parsedMode = JSON.parse(storedValue)?.currentMode;
       return parsedMode === 'classic' || parsedMode === 'esql' ? parsedMode : null;
     } catch {
       return null;

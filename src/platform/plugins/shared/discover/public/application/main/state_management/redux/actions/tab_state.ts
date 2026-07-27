@@ -430,8 +430,8 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
     );
 
     services.storage.set(DISCOVER_QUERY_MODE_KEY, {
-      mode: 'classic',
-      isEsqlDefault: services.discoverFeatureFlags.getIsEsqlDefault(),
+      currentMode: 'classic',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
     });
   };
 
@@ -479,8 +479,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
 
     services.storage.set(DISCOVER_QUERY_MODE_KEY, {
-      mode: 'esql',
-      isEsqlDefault: services.discoverFeatureFlags.getIsEsqlDefault(),
+      currentMode: 'esql',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
     });
   };
 

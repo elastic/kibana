@@ -694,8 +694,8 @@ describe('tab_state actions', () => {
       expect(tab.defaultProfileState.resetId).not.toEqual('');
 
       expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
-        mode: 'classic',
-        isEsqlDefault: false,
+        currentMode: 'classic',
+        defaultMode: 'classic',
       });
     });
   });
@@ -795,8 +795,8 @@ describe('tab_state actions', () => {
       expect(tab.defaultProfileState.resetId).not.toEqual('');
 
       expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
-        mode: 'esql',
-        isEsqlDefault: false,
+        currentMode: 'esql',
+        defaultMode: 'classic',
       });
     });
   });

@@ -1295,16 +1295,16 @@ export class DiscoverPageObject extends FtrService {
     const storedValue = await this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
     if (storedValue == null) return null;
     try {
-      return JSON.parse(storedValue)?.mode ?? null;
+      return JSON.parse(storedValue)?.currentMode ?? null;
     } catch {
       return null;
     }
   }
 
-  public setQueryMode(mode: string, isEsqlDefault = false) {
+  public setQueryMode(currentMode: string, defaultMode: string = 'classic') {
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,
-      JSON.stringify({ mode, isEsqlDefault })
+      JSON.stringify({ currentMode, defaultMode })
     );
   }
 

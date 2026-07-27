@@ -496,7 +496,7 @@ describe('getInitialAppState', () => {
             const services = createDiscoverServicesMock();
             services.storage.get = jest
               .fn()
-              .mockReturnValue({ mode: 'esql', isEsqlDefault: false });
+              .mockReturnValue({ currentMode: 'esql', defaultMode: 'classic' });
             services.uiSettings.get = jest.fn().mockReturnValue(true);
 
             // When
@@ -520,7 +520,7 @@ describe('getInitialAppState', () => {
           });
         });
 
-        describe('when the persisted query mode was recorded against a stale isEsqlDefault value', () => {
+        describe('when the persisted query mode was recorded against a stale default mode', () => {
           it('should ignore a legacy (pre-object) persisted value and use the current esql default', () => {
             const services = createDiscoverServicesMock();
             services.storage.get = jest.fn().mockReturnValue('classic');
@@ -545,11 +545,11 @@ describe('getInitialAppState', () => {
             );
           });
 
-          it('should ignore a persisted value recorded under a different isEsqlDefault value and use the current default', () => {
+          it('should ignore a persisted value recorded under a different default mode and use the current default', () => {
             const services = createDiscoverServicesMock();
             services.storage.get = jest
               .fn()
-              .mockReturnValue({ mode: 'classic', isEsqlDefault: false });
+              .mockReturnValue({ currentMode: 'classic', defaultMode: 'classic' });
             services.uiSettings.get = jest.fn().mockReturnValue(true);
             services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
 
@@ -571,11 +571,11 @@ describe('getInitialAppState', () => {
             );
           });
 
-          it('should honor a persisted value recorded under the current isEsqlDefault value', () => {
+          it('should honor a persisted value recorded under the current default mode', () => {
             const services = createDiscoverServicesMock();
             services.storage.get = jest
               .fn()
-              .mockReturnValue({ mode: 'classic', isEsqlDefault: true });
+              .mockReturnValue({ currentMode: 'classic', defaultMode: 'esql' });
             services.uiSettings.get = jest.fn().mockReturnValue(true);
             services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
             services.data.query.queryString.getDefaultQuery = jest
@@ -727,10 +727,13 @@ describe('getInitialAppState', () => {
 
         describe.each([
           {
-            queryMode: { mode: 'esql', isEsqlDefault: false },
+            queryMode: { currentMode: 'esql', defaultMode: 'classic' },
             description: 'esql but esql is disabled',
           },
-          { queryMode: { mode: 'classic', isEsqlDefault: false }, description: 'classic' },
+          {
+            queryMode: { currentMode: 'classic', defaultMode: 'classic' },
+            description: 'classic',
+          },
           { queryMode: undefined, description: 'unset' },
         ])('when the query mode is $description', ({ queryMode }) => {
           it('should return the default query', () => {

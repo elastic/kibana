@@ -33,13 +33,14 @@ export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 export type QueryMode = 'classic' | 'esql';
 
 /**
- * The value persisted at `DISCOVER_QUERY_MODE_KEY`. Snapshots the `isEsqlDefault`
- * feature flag value in effect when it was written, so a change to the flag can be
- * detected and the persisted mode discarded in favor of the new default.
+ * The value persisted at `DISCOVER_QUERY_MODE_KEY`. Snapshots the resolved default
+ * mode in effect when it was written, so a change to that default (e.g. from the
+ * `isEsqlDefault` feature flag) can be detected and the persisted mode discarded in
+ * favor of the new default.
  */
 export interface PersistedQueryMode {
-  mode: QueryMode;
-  isEsqlDefault: boolean;
+  currentMode: QueryMode;
+  defaultMode: QueryMode;
 }
 
 /**
@@ -49,8 +50,8 @@ export const isPersistedQueryMode = (value: unknown): value is PersistedQueryMod
   const castedValue = value as PersistedQueryMode;
   return (
     isObject(castedValue) &&
-    (castedValue.mode === 'classic' || castedValue.mode === 'esql') &&
-    typeof castedValue.isEsqlDefault === 'boolean'
+    (castedValue.currentMode === 'classic' || castedValue.currentMode === 'esql') &&
+    (castedValue.defaultMode === 'classic' || castedValue.defaultMode === 'esql')
   );
 };
 
