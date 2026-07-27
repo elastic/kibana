@@ -611,7 +611,11 @@ describe('bulkEditRules', () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [
         existingRule,
-        { ...existingRule, id: '2', attributes: { ...existingRule.attributes, name: 'my other rule' } },
+        {
+          ...existingRule,
+          id: '2',
+          attributes: { ...existingRule.attributes, name: 'my other rule' },
+        },
       ],
     });
 
@@ -627,24 +631,30 @@ describe('bulkEditRules', () => {
     });
 
     expect(auditLogger.log).toHaveBeenCalledTimes(2);
-    expect(auditLogger.log).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      event: expect.objectContaining({
-        action: 'rule_bulk_edit',
-        outcome: 'success',
-      }),
-      kibana: expect.objectContaining({
-        saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
-      }),
-    }));
-    expect(auditLogger.log).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      event: expect.objectContaining({
-        action: 'rule_bulk_edit',
-        outcome: 'success',
-      }),
-      kibana: expect.objectContaining({
-        saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '2', name: 'my other rule' },
-      }),
-    }));
+    expect(auditLogger.log).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
+        }),
+      })
+    );
+    expect(auditLogger.log).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '2', name: 'my other rule' },
+        }),
+      })
+    );
   });
 
   test('should log audit event with BULK_EDIT_PARAMS action for read-auth operations', async () => {
@@ -659,15 +669,17 @@ describe('bulkEditRules', () => {
     });
 
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith(expect.objectContaining({
-      event: expect.objectContaining({
-        action: 'rule_bulk_edit_params',
-        outcome: 'success',
-      }),
-      kibana: expect.objectContaining({
-        saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
-      }),
-    }));
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit_params',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
+        }),
+      })
+    );
   });
 
   test('should not log audit event for skipped rules', async () => {
