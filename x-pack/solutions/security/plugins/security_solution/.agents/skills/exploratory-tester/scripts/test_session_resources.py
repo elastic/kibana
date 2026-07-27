@@ -61,6 +61,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_resources import (  # noqa: E402
     acquire_ccs_deployment_lease,
+    assert_ccs_deployment_lease_allows_session,
     build_auth_args,
     ccs_cleanup_blocked,
     ccs_deployment_lease_path,
@@ -72,6 +73,7 @@ from session_resources import (  # noqa: E402
     reconcile_pending_resource,
     register_resource,
     release_ccs_deployment_lease,
+    refresh_ccs_deployment_lease,
     run_curl,
 )
 
@@ -1478,6 +1480,17 @@ print("500")
                 encoding="utf-8",
             )
 
+            # Expired foreign leases still fence capture/restore; only acquire
+            # may take over for crash recovery.
+            with self.assertRaises(ValueError):
+                assert_ccs_deployment_lease_allows_session(
+                    {
+                        "session_id": "other001",
+                        "environment": {"es_url": "https://shared.es.test"},
+                    },
+                    env=environment,
+                )
+
             takeover = {
                 "session_id": "fresh001",
                 "environment": {"es_url": "https://shared.es.test"},
@@ -1500,6 +1513,220 @@ print("500")
                     require_owner=False,
                 )
             )
+
+    def test_expired_foreign_lease_blocks_capture(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://shared.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "unchanged",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            environment = os.environ.copy()
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+            environment["EXPLORATORY_TESTER_CCS_LEASE_TTL_SECONDS"] = "30"
+            lease_path = ccs_deployment_lease_path(
+                {
+                    "session_id": "stale0001",
+                    "environment": {"es_url": "https://shared.es.test"},
+                },
+                env=environment,
+            )
+            lease_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "stale0001",
+                        "acquired_at": time.time() - 120,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+print(json.dumps([]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertIn("lease", result.stderr.lower())
+            self.assertIn("stale0001", result.stderr)
+
+    def test_restore_persists_state_when_lease_no_longer_owned(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config = {
+                "session_id": "abc12345",
+                "environment": {
+                    "url": "https://source.kibana.test",
+                    "es_url": "https://source.es.test",
+                    "ccs": {"remote_cluster_alias": "remote"},
+                },
+                "credentials": {"api_key": "source-key"},
+                "ccs_state": "modified",
+                "ccs_restore": {
+                    "remote_cluster_alias": "remote",
+                    "endpoint": "/api/remote_clusters/remote",
+                    "payload": {
+                        "skipUnavailable": False,
+                        "mode": "proxy",
+                        "seeds": None,
+                        "nodeConnections": None,
+                        "proxyAddress": "remote.example.test:9400",
+                        "proxySocketConnections": 3,
+                        "serverName": None,
+                    },
+                    "provenance": {
+                        "is_configured_by_node": False,
+                        "has_deprecated_proxy_setting": False,
+                        "configuration_layer": "persistent",
+                        "settings": PERSISTENT_CCS_SETTINGS,
+                    },
+                },
+            }
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            environment = os.environ.copy()
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+            acquire_ccs_deployment_lease(config, env=environment)
+
+            steal_marker = root / "steal-lease"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                f"""#!/usr/bin/env python3
+import json
+import os
+import sys
+import time
+
+# After the first mutating PUT, steal the lease so release is no longer owned.
+if "PUT" in sys.argv and not os.path.exists({str(steal_marker)!r}):
+    open({str(steal_marker)!r}, "w").close()
+    lease = {str(ccs_deployment_lease_path(config, env=environment))!r}
+    with open(lease, "w", encoding="utf-8") as handle:
+        json.dump({{"session_id": "thief001", "acquired_at": time.time()}}, handle)
+        handle.write("\\n")
+if "PUT" in sys.argv:
+    print(json.dumps({{"acknowledged": True}}))
+elif "_cluster/settings" in " ".join(sys.argv):
+    print(json.dumps({{
+        "persistent": {{
+            "cluster": {{
+                "remote": {{
+                    "remote": {{
+                        "mode": "proxy",
+                        "proxy_address": "remote.example.test:9400",
+                    }}
+                }}
+            }}
+        }},
+        "transient": {{}},
+    }}))
+elif "_remote/info" in " ".join(sys.argv):
+    print(json.dumps({{"remote": {{"connected": True}}}}))
+else:
+    print(json.dumps([{{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": "remote.example.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": False,
+        "isConfiguredByNode": False,
+    }}]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--timeout-seconds",
+                    "5",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            persisted = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(persisted["ccs_state"], "restored")
+            self.assertTrue(persisted["ccs_restored"])
+            self.assertEqual(
+                read_ccs_deployment_lease(config, env=environment)["session_id"],
+                "thief001",
+            )
+
+    def test_owner_lease_heartbeat_refreshes_acquired_at(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            environment = os.environ.copy()
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+            config = {
+                "session_id": "abc12345",
+                "environment": {"es_url": "https://source.es.test"},
+            }
+            acquire_ccs_deployment_lease(config, env=environment)
+            first = read_ccs_deployment_lease(config, env=environment)
+            self.assertIsNotNone(first)
+            time.sleep(0.05)
+            refresh_ccs_deployment_lease(config, env=environment)
+            second = read_ccs_deployment_lease(config, env=environment)
+            self.assertIsNotNone(second)
+            self.assertGreater(second["acquired_at"], first["acquired_at"])
 
     def test_ensure_base_space_times_out_hung_curl(self):
         with tempfile.TemporaryDirectory() as raw_dir:

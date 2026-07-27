@@ -470,16 +470,34 @@ def assert_ccs_deployment_lease_allows_session(
     *,
     env: Mapping[str, str] | None = None,
 ) -> None:
+    """Refuse foreign leases even when expired.
+
+    TTL expiry enables acquire-time takeover for crash recovery; it must not
+    silently allow capture/restore against another session's exclusive window.
+    """
     session_id = require_session_id(config)
     existing = read_ccs_deployment_lease(config, env=env)
     if existing is None:
         return
     owner = existing["session_id"]
-    if owner == session_id:
-        return
-    if ccs_deployment_lease_is_expired(existing, env=env):
-        return
-    raise ValueError(f"CCS deployment lease is held by session {owner!r}")
+    if owner != session_id:
+        raise ValueError(f"CCS deployment lease is held by session {owner!r}")
+
+
+def refresh_ccs_deployment_lease(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> None:
+    """Heartbeat: refresh acquired_at for the owning session only."""
+    session_id = require_session_id(config)
+    existing = read_ccs_deployment_lease(config, env=env)
+    if existing is None:
+        raise ValueError("CCS deployment lease is missing")
+    owner = existing["session_id"]
+    if owner != session_id:
+        raise ValueError(f"CCS deployment lease is held by session {owner!r}")
+    _write_ccs_deployment_lease(config, session_id=session_id, env=env)
 
 
 def release_ccs_deployment_lease(

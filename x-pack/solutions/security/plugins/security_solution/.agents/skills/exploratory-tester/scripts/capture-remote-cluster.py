@@ -13,6 +13,8 @@ from session_resources import (
     build_auth_args,
     ccs_operation_lock,
     edit_session_config,
+    read_ccs_deployment_lease,
+    refresh_ccs_deployment_lease,
     run_curl,
     resolve_resource_base_url,
     validate_resource_endpoint,
@@ -242,6 +244,8 @@ def main() -> int:
                     )
                     return 1
                 assert_ccs_deployment_lease_allows_session(config)
+                if read_ccs_deployment_lease(config) is not None:
+                    refresh_ccs_deployment_lease(config)
                 auth_args = build_auth_args(config)
                 source_url = resolve_resource_base_url(config, "url")
                 es_url = resolve_resource_base_url(config, "es_url")

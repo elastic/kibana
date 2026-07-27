@@ -154,6 +154,9 @@ def main() -> int:
                 for header in request_headers:
                     header_args.extend(["-H", header])
 
+                # Acquire (or refresh) the lease; expired foreign leases may be
+                # taken over here for crash recovery, but capture/restore still
+                # refuse foreign leases even when expired.
                 acquire_ccs_deployment_lease(config)
                 config["ccs_state"] = "mutation_pending"
                 config["ccs_restored"] = False

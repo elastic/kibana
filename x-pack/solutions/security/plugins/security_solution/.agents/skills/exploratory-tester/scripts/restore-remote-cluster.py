@@ -15,6 +15,8 @@ from session_resources import (
     build_auth_args,
     ccs_operation_lock,
     edit_session_config,
+    read_ccs_deployment_lease,
+    refresh_ccs_deployment_lease,
     release_ccs_deployment_lease,
     resolve_resource_base_url,
     run_curl,
@@ -402,6 +404,8 @@ def main() -> int:
         with ccs_operation_lock(config_path):
             with edit_session_config(config_path, persist=False) as config:
                 assert_ccs_deployment_lease_allows_session(config)
+                if read_ccs_deployment_lease(config) is not None:
+                    refresh_ccs_deployment_lease(config)
                 restore_snapshot = copy.deepcopy(config.get("ccs_restore"))
                 endpoint, alias, payload, provenance, settings = _validate_snapshot(
                     restore_snapshot
@@ -432,6 +436,11 @@ def main() -> int:
                 verified = False
 
             if not verified:
+                # Re-check ownership immediately before mutating shared CCS.
+                with edit_session_config(config_path, persist=False) as config:
+                    assert_ccs_deployment_lease_allows_session(config)
+                    if read_ccs_deployment_lease(config) is not None:
+                        refresh_ccs_deployment_lease(config)
                 restored, restore_error = _restore_raw_settings(
                     auth_args=auth_args,
                     es_url=es_url,
@@ -486,11 +495,14 @@ def main() -> int:
                         file=sys.stderr,
                     )
                     return 1
-                assert_ccs_deployment_lease_allows_session(config)
+                # Persist restored state even if the lease was stolen mid-flight;
+                # never fail the command after a successful remote restore solely
+                # because lease release is no longer owned.
                 config["ccs_state"] = "restored"
                 config["ccs_restored"] = True
-                if not args.keep_lease:
-                    release_ccs_deployment_lease(config)
+            if not args.keep_lease:
+                with edit_session_config(config_path, persist=False) as config:
+                    release_ccs_deployment_lease(config, require_owner=False)
     except TimeoutError as exc:
         print(str(exc), file=sys.stderr)
         return 1
