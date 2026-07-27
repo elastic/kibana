@@ -5,33 +5,15 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { getRule } from '../../../rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 jest.mock('../../../../lib/rule_gaps/find_gaps_by_id');
 jest.mock('../../../backfill/methods/schedule');
@@ -40,8 +22,10 @@ jest.mock('../../../rule/methods/get/get_rule');
 describe('fillGapById', () => {
   let rulesClient: RulesClient;
   let eventLogClient: ReturnType<typeof eventLogClientMock.create>;
-  const auditLogger = auditLoggerMock.create();
-  const authorization = alertingAuthorizationMock.create();
+  const { rulesClientParams, authorization, auditLogger } = getRulesClientMockParams({
+    kibanaVersion: 'v8.0.0',
+    eventLogger: eventLoggerMock.create(),
+  });
   const mockedGetRule = getRule as jest.MockedFunction<typeof getRule>;
 
   const mockRule = {
@@ -83,39 +67,7 @@ describe('fillGapById', () => {
     eventLogClient = eventLogClientMock.create();
     mockedGetRule.mockResolvedValue(mockRule);
 
-    const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-      request: httpServerMock.createKibanaRequest(),
-      taskManager: taskManagerMock.createStart(),
-      ruleTypeRegistry: ruleTypeRegistryMock.create(),
-      unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-      authorization: authorization as unknown as AlertingAuthorization,
-      actionsAuthorization: actionsAuthorizationMock.create() as unknown as ActionsAuthorization,
-      spaceId: 'default',
-      namespace: 'default',
-      getUserName: jest.fn(),
-      createAPIKey: jest.fn(),
-      cloneAPIKey: jest.fn(),
-      logger: loggingSystemMock.create().get(),
-      internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
-      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-      getActionsClient: jest.fn(),
-      getEventLogClient: jest.fn().mockResolvedValue(eventLogClient),
-      kibanaVersion: 'v8.0.0',
-      auditLogger,
-      maxScheduledPerMinute: 10000,
-      minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: jest.fn(),
-      getAuthenticationAPIKey: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
-      alertsService: null,
-      backfillClient: backfillClientMock.create(),
-      isSystemAction: jest.fn(),
-      connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      eventLogger: eventLoggerMock.create(),
-      featureFlags: coreFeatureFlagsMock.createStart(),
-      isServerless: false,
-    };
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 
     rulesClient = new RulesClient(rulesClientParams);
   });
