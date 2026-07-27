@@ -22,9 +22,13 @@ to answer questions about evaluation results that already exist.
 
 ## Core Concepts
 
-An **experiment** evaluates a **target** (one Agent Builder \`agent_id\`)
-against one or more **datasets**, scoring each example with one or more **evaluators**, using
-one or more model **connectors**. Two or more connectors trigger a cross-model comparison.
+An **experiment** evaluates a **target** against one or more **datasets**, scoring each example
+with one or more **evaluators**, using one or more model **connectors**. Two or more connectors
+trigger a cross-model comparison.
+
+The target is either:
+- \`target: 'inference'\` — invoke the model connector(s) directly, with no agent in the loop.
+- \`target: 'agent'\` — run an Agent Builder agent via converse. Requires an \`agent_id\`.
 
 Experiments run as **workflows**. You never hand-write the workflow YAML — the preview/save/run
 tools generate valid YAML deterministically from the configuration.
@@ -34,7 +38,9 @@ tools generate valid YAML deterministically from the configuration.
 Every experiment requires the inputs below. **Never** fill any of them with a guess or a default,
 and never silently auto-pick the first (or only) candidate a discovery tool returns:
 
-- **Target** — the Agent Builder \`agent_id\` to evaluate.
+- **Target** — \`target: 'inference'\` (direct model invocation) or \`target: 'agent'\` plus the
+  \`agent_id\` to evaluate. Never infer this from context: if the user has not said which one they
+  want, ask, and offer both.
 - **Model(s) under evaluation** — one or more \`connector_ids\` (two or more = cross-model).
 - **Dataset(s)** — one or more \`dataset_ids\`.
 - **Evaluator(s)** — one or more, plus a judge \`connector_id\` for every \`needsJudgeConnector: true\` evaluator.
@@ -49,7 +55,7 @@ preview/save/run once every input above has been confirmed by the user.
 
 1. **Discover** the building blocks (only fetch what you still need):
    - \`${evalsTools.listDatasets}\` - datasets and their ids.
-   - \`${evalsTools.listTargets}\` - agents to pick the \`agent_id\`.
+   - \`${evalsTools.listTargets}\` - agents to pick the \`agent_id\`. Only needed for \`target: 'agent'\`.
    - \`${evalsTools.listConnectors}\` - model connectors and their ids. Use this to map a model name
      the user mentioned (e.g. "Claude Opus 4.5") to a \`connector_id\`, for both the model under
      evaluation and any llm evaluator judge.
@@ -68,7 +74,8 @@ preview/save/run once every input above has been confirmed by the user.
 
 ## Composition Rules
 
-- Provide the \`agent_id\` of the Agent Builder agent to evaluate.
+- Always set \`target\`. Provide an \`agent_id\` when \`target\` is \`agent\`, and omit \`agent_id\`
+  entirely when \`target\` is \`inference\`.
 - \`connector_ids\`, \`dataset_ids\`, and \`evaluators\` each need at least one entry.
 - Resolve every connector id (models under evaluation and judge connectors) from
   \`${evalsTools.listConnectors}\`. Never guess connector ids or try to read them from system

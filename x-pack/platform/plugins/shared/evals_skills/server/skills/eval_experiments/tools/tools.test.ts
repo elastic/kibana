@@ -78,6 +78,7 @@ const grantingDeps = () => ({
 });
 
 const validConfig = {
+  target: 'agent' as const,
   connector_ids: ['c1'],
   dataset_ids: ['d1'],
   evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
@@ -96,6 +97,20 @@ describe('previewEvalExperimentTool', () => {
     expect(result.data.workflow_yaml).toContain('steps:');
     expect(result.data.run_plan.mode).toBe('single');
     expect(result.data.run_plan.execution_count).toBe(1);
+  });
+
+  it('generates a direct-inference experiment with no agent in the workflow', async () => {
+    const { deps } = createDeps();
+    const result = firstResult(
+      await previewEvalExperimentTool(deps).handler(
+        { ...validConfig, target: 'inference', agent_id: undefined },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data.workflow_yaml).toContain('steps:');
+    expect(result.data.workflow_yaml).not.toContain('agent_id');
   });
 
   it('returns an error result for an invalid configuration', async () => {
@@ -409,6 +424,22 @@ describe('discovery tools', () => {
     expect(result.type).toBe(ToolResultType.error);
   });
 
+  it('refuses to list model connectors when the caller lacks read_evals', async () => {
+    const listModelConnectors = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        evals: { listModelConnectors },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listConnectorsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(listModelConnectors).not.toHaveBeenCalled();
+  });
+
   it('lists agent targets from the agent builder registry', async () => {
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
@@ -426,5 +457,21 @@ describe('discovery tools', () => {
     const result = firstResult(await listEvalTargetsTool(deps).handler({}, createContext()));
 
     expect(result.data.agents[0].id).toBe('a1');
+  });
+
+  it('refuses to list agent targets when the caller lacks read_evals', async () => {
+    const getRegistry = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        agentBuilder: { agents: { getRegistry } },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvalTargetsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(getRegistry).not.toHaveBeenCalled();
   });
 });

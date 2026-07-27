@@ -10,10 +10,12 @@ import {
   EvalExperimentConfigError,
   buildResultsLink,
   buildWorkflowLink,
+  evalExperimentConfigSchema,
   toGenerateParams,
 } from './common';
 
 const baseConfig = {
+  target: 'agent' as const,
   connector_ids: ['c1'],
   dataset_ids: ['d1'],
   evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
@@ -40,9 +42,63 @@ describe('toGenerateParams', () => {
     });
   });
 
-  it('rejects a config without an agent_id', () => {
+  it('omits agentId for a direct-inference target', () => {
+    const params = toGenerateParams({ ...baseConfig, target: 'inference' });
+
+    expect(params.agentId).toBeUndefined();
+    expect(params.connectorIds).toEqual(['c1']);
+  });
+
+  it('ignores a stray agent_id when the target is inference', () => {
+    const params = toGenerateParams({
+      ...baseConfig,
+      target: 'inference',
+      agent_id: 'agent-1',
+    });
+
+    expect(params.agentId).toBeUndefined();
+  });
+
+  it('rejects an agent target without an agent_id', () => {
     expect(() => toGenerateParams({ ...baseConfig })).toThrow(EvalExperimentConfigError);
     expect(() => toGenerateParams({ ...baseConfig })).toThrow(/Provide an agent_id/);
+  });
+});
+
+describe('evalExperimentConfigSchema', () => {
+  it('requires an explicit target', () => {
+    const result = evalExperimentConfigSchema.safeParse({
+      connector_ids: ['c1'],
+      dataset_ids: ['d1'],
+      evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts an inference target with no agent_id', () => {
+    const result = evalExperimentConfigSchema.safeParse({
+      ...baseConfig,
+      target: 'inference',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an agent target with no agent_id', () => {
+    const result = evalExperimentConfigSchema.safeParse(baseConfig);
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an inference target that also passes an agent_id', () => {
+    const result = evalExperimentConfigSchema.safeParse({
+      ...baseConfig,
+      target: 'inference',
+      agent_id: 'agent-1',
+    });
+
+    expect(result.success).toBe(false);
   });
 });
 

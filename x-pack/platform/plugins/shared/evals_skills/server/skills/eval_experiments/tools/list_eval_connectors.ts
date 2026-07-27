@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { evalsTools, otherResult, toErrorResult } from './common';
+import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
+import { hasReadEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({});
@@ -25,9 +26,15 @@ export const listConnectorsTool = (
   description:
     'List available model connectors (id, name, type). Use this to resolve a model name the user mentioned to its connector id, for both the model under evaluation (connector_ids) and any llm evaluator judge (connector_id). Never guess connector ids or query system indices.',
   schema,
-  handler: async (_input, { request }) => {
+  handler: async (_input, { request, spaceId }) => {
     try {
-      const { evals } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
+      if (!(await hasReadEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the read_evals privilege required to list model connectors in this space.'
+        );
+      }
+
       if (!evals.listModelConnectors) {
         return toErrorResult(
           new Error('the evals connector listing is unavailable'),

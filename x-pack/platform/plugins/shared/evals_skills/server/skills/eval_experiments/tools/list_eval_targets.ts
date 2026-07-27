@@ -9,7 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
-import { evalsTools, otherResult, toErrorResult } from './common';
+import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
+import { hasReadEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({
@@ -46,9 +47,15 @@ export const listEvalTargetsTool = (
   description:
     'List the Agent Builder agents that can be evaluated. Returns agent_id values (with names and descriptions) to use as the experiment target.',
   schema,
-  handler: async ({ search, limit = 100 }, { request }) => {
+  handler: async ({ search, limit = 100 }, { request, spaceId }) => {
     try {
-      const { agentBuilder } = await deps.getStartDependencies();
+      const { agentBuilder, security } = await deps.getStartDependencies();
+      if (!(await hasReadEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the read_evals privilege required to list evaluation targets in this space.'
+        );
+      }
+
       const registry = await agentBuilder.agents.getRegistry({ request });
       const agents = await registry.list();
 
