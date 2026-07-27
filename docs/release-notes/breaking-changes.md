@@ -96,6 +96,17 @@ $$$kibana-267517$$$
 View [#267517]({{kib-pull}}267517).
 ::::
 
+$$$kibana-280959$$$
+::::{dropdown} Managed integrations can no longer be created, updated, upgraded, or copied through the package policy and agent policy APIs
+**Details**<br> Creating, updating, upgrading, or copying managed integrations (formerly agentless) through the {{fleet}} package policy (`/api/fleet/package_policies`) and agent policy (`/api/fleet/agent_policies`) APIs is no longer supported. These operations are served exclusively by the Managed integrations API (`/api/fleet/managed_integrations`). This affects Elastic Cloud Hosted deployments and Elastic Cloud Serverless projects where managed integrations are enabled. Self-managed deployments are not affected.
+
+**Impact**<br> Requests that create, update, upgrade, or copy managed integrations through the package policy or agent policy APIs now fail with a `400` error. Existing managed integrations are not affected: they keep running and are upgraded and reconciled automatically, with no action required. Only clients that call the package policy or agent policy APIs directly for these write operations need to change.
+
+**Action**<br> Use the Managed integrations API (`/api/fleet/managed_integrations`) to create, update, upgrade, or copy managed integrations, and update any automation that relied on the package policy or agent policy APIs for these operations.
+
+View [#280959]({{kib-pull}}280959).
+::::
+
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
 
 $$$kibana-255122-9.4.0$$$
