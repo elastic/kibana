@@ -98,3 +98,6 @@ export function TagsComboBox({
     </EuiFlexGroup>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default TagsComboBox;

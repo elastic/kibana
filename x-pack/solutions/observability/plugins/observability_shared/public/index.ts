@@ -37,7 +37,7 @@ export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_
 export { TagsList } from './components/tags_list/tags_list_lazy';
 export type { TagsListProps } from './components/tags_list/tags_list';
 
-export { TagsComboBox } from './components/tags_combo_box/tags_combo_box';
+export { TagsComboBox } from './components/tags_combo_box/tags_combo_box_lazy';
 export type { TagsComboBoxProps } from './components/tags_combo_box/tags_combo_box';
 export {
   createTagsPasteHandler,

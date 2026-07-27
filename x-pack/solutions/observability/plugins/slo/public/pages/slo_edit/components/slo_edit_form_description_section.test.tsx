@@ -51,7 +51,7 @@ const renderSection = (defaultTags: string[] = []) => {
 describe('<SloEditFormDescriptionSection /> tags field', () => {
   it('splits a pasted newline-separated clipboard value into multiple tags', async () => {
     const getTags = renderSection([]);
-    const input = screen.getByTestId('comboBoxSearchInput');
+    const input = await screen.findByTestId('comboBoxSearchInput');
 
     fireEvent.paste(input, { clipboardData: { getData: () => 'tag1\ntag2\ntag3' } });
 
@@ -62,7 +62,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
 
   it('splits a pasted comma-separated clipboard value into multiple tags', async () => {
     const getTags = renderSection([]);
-    const input = screen.getByTestId('comboBoxSearchInput');
+    const input = await screen.findByTestId('comboBoxSearchInput');
 
     fireEvent.paste(input, { clipboardData: { getData: () => 'tag1, tag2 , tag3' } });
 
@@ -73,7 +73,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
 
   it('de-duplicates case-insensitively and ignores empty values on paste', async () => {
     const getTags = renderSection(['tag1']);
-    const input = screen.getByTestId('comboBoxSearchInput');
+    const input = await screen.findByTestId('comboBoxSearchInput');
 
     fireEvent.paste(input, { clipboardData: { getData: () => 'TAG1\n\ntag2\ntag2' } });
 
@@ -84,7 +84,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
 
   it('splits a typed comma list created via onCreateOption', async () => {
     const getTags = renderSection([]);
-    const input = screen.getByTestId('comboBoxSearchInput');
+    const input = await screen.findByTestId('comboBoxSearchInput');
 
     fireEvent.change(input, { target: { value: 'a, b, c' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
@@ -94,15 +94,15 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
     });
   });
 
-  it('disables the copy button when there are no tags', () => {
+  it('disables the copy button when there are no tags', async () => {
     renderSection([]);
 
-    expect(screen.getByTestId('sloEditTagsCopyButton')).toBeDisabled();
+    expect(await screen.findByTestId('sloEditTagsCopyButton')).toBeDisabled();
   });
 
-  it('enables the copy button when tags exist', () => {
+  it('enables the copy button when tags exist', async () => {
     renderSection(['tag1', 'tag2']);
 
-    expect(screen.getByTestId('sloEditTagsCopyButton')).toBeEnabled();
+    expect(await screen.findByTestId('sloEditTagsCopyButton')).toBeEnabled();
   });
 });
