@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildMatchMetricBase } from './can_compile_match_metric';
+import { canCompileMatchMetric } from './can_compile_match_metric';
 import {
   METRIC_SERIES_BUCKET_FIELD,
   METRIC_SERIES_CLOSED_BUCKETS,
@@ -21,9 +21,12 @@ import {
  * `time_field`. The in-query `DATE_TRUNC(NOW())` drops the open current minute.
  */
 export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: string): string {
-  // Parse once: assert filter-only eligibility and peel trailing SORT/LIMIT/KEEP
-  // via AST source-slicing (never a text regex).
-  const base = buildMatchMetricBase(esqlQuery);
+  const base = esqlQuery.trim();
+  if (!canCompileMatchMetric(base)) {
+    throw new Error(
+      'MATCH query cannot be installed as a metric-series rule: expected a filter-only FROM … | WHERE … query (no STATS) that parses cleanly. Refusing to install a per-document copy rule.'
+    );
+  }
 
   // Keep `bucket` as a datetime (no TO_LONG here). Alerting persists the ES|QL
   // date value; readers project with TO_DATETIME(TO_LONG(FIELD_EXTRACT(...))).
@@ -38,6 +41,9 @@ export function compileMatchCountBreachQuery(esqlQuery: string, timestampField: 
   // With EVERY=5m and LOOKBACK=7m that leaves 6 fully covered closed minutes,
   // one of which intentionally overlaps the previous run (see
   // metric_series_contract.ts). SORT DESC + LIMIT is then only a safety cap.
+  //
+  // Join with `\n| ` so a KI ending in a `//` line comment cannot swallow the
+  // pipe that starts the first appended command.
   return [
     base,
     `STATS ${METRIC_SERIES_VALUE_FIELD} = COUNT(*) BY ${METRIC_SERIES_BUCKET_FIELD} = BUCKET(${timestampField}, 1 minute)`,

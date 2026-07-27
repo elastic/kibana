@@ -64,6 +64,6 @@ describe('METRIC_SERIES_RUNTIME_MAPPINGS', () => {
       bucketSource.indexOf("doc.containsKey('data.bucket')")
     );
     expect(bucketSource).toContain('Long.parseLong');
-    expect(bucketSource).toContain('ZonedDateTime.parse');
+    expect(bucketSource).not.toContain('ZonedDateTime.parse');
   });
 });

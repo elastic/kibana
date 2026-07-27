@@ -15,13 +15,19 @@ describe('canCompileMatchMetric', () => {
     expect(canCompileMatchMetric('FROM logs-* | WHERE level == "error"')).toBe(true);
   });
 
-  it('accepts FROM-only and trailing SORT/LIMIT', () => {
+  it('accepts FROM-only queries', () => {
     expect(canCompileMatchMetric('FROM logs-*')).toBe(true);
+  });
+
+  it('rejects trailing SORT / LIMIT / KEEP', () => {
     expect(
       canCompileMatchMetric(
         'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10'
       )
-    ).toBe(true);
+    ).toBe(false);
+    expect(canCompileMatchMetric('FROM logs-* | WHERE level == "error" | KEEP message')).toBe(
+      false
+    );
   });
 
   it('rejects STATS queries', () => {
@@ -58,15 +64,9 @@ describe('canCompileMatchMetric', () => {
     ).toBe(true);
   });
 
-  it('accepts comments around the peeled tail', () => {
-    expect(
-      canCompileMatchMetric(
-        'FROM logs-* | WHERE level == "error" | /* note */ SORT @timestamp DESC'
-      )
-    ).toBe(true);
-    expect(
-      canCompileMatchMetric('FROM logs-* | WHERE level == "error"\n// note\n| SORT @timestamp DESC')
-    ).toBe(true);
+  it('accepts comments inside a filter-only query', () => {
+    expect(canCompileMatchMetric('FROM logs-* | WHERE level == "error" /* note */')).toBe(true);
+    expect(canCompileMatchMetric('FROM logs-* | WHERE level == "error" // note')).toBe(true);
   });
 });
 
@@ -93,17 +93,6 @@ describe('compileMatchCountBreachQuery', () => {
     expect(compiled).not.toContain('SORT bucket ASC');
   });
 
-  it('strips trailing SORT/LIMIT while keeping the author WHERE', () => {
-    const compiled = compileMatchCountBreachQuery(
-      'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10',
-      '@timestamp'
-    );
-    const base = compiled.split('\n| ')[0];
-    expect(base).toContain('WHERE level == "error"');
-    expect(base).not.toMatch(/\bSORT\b/);
-    expect(base).not.toMatch(/\bLIMIT\b/);
-  });
-
   it('fails closed for STATS and non-filter MATCH shapes', () => {
     expect(() =>
       compileMatchCountBreachQuery(
@@ -118,6 +107,13 @@ describe('compileMatchCountBreachQuery', () => {
         '@timestamp'
       )
     ).toThrow(/filter-only/);
+
+    expect(() =>
+      compileMatchCountBreachQuery(
+        'FROM logs-* | WHERE level == "error" | SORT @timestamp DESC | LIMIT 10',
+        '@timestamp'
+      )
+    ).toThrow(/filter-only/);
   });
 
   it('fails closed for queries with parser errors', () => {
@@ -126,28 +122,25 @@ describe('compileMatchCountBreachQuery', () => {
     ).toThrow(/filter-only/);
   });
 
-  it.each([
-    ['block comment', 'FROM logs-* | WHERE level == "error" | /* note */ SORT @timestamp DESC'],
-    ['line comment', 'FROM logs-* | WHERE level == "error"\n// note\n| SORT @timestamp DESC'],
-    ['trailing line comment', 'FROM logs-* | WHERE level == "error" // note\n| SORT @timestamp'],
-  ])('emits parseable ES|QL when a %s precedes the peeled tail', (_label, query) => {
-    const compiled = compileMatchCountBreachQuery(query, '@timestamp');
+  it('emits parseable ES|QL when the KI ends in a line comment', () => {
+    const compiled = compileMatchCountBreachQuery(
+      'FROM logs-* | WHERE level == "error" // note',
+      '@timestamp'
+    );
 
-    expect(compiled.split('\n| ')[0]).toBe('FROM logs-* | WHERE level == "error"');
+    expect(compiled.split('\n| ')[0]).toBe('FROM logs-* | WHERE level == "error" // note');
     expect(Parser.parse(compiled).errors).toHaveLength(0);
   });
 
   it('preserves a pipe inside a WHERE literal and emits valid ES|QL', () => {
     const compiled = compileMatchCountBreachQuery(
-      'FROM logs-* | WHERE message == "queue full | LIMIT exceeded" | SORT @timestamp DESC | LIMIT 10',
+      'FROM logs-* | WHERE message == "queue full | LIMIT exceeded"',
       '@timestamp'
     );
 
-    // The author WHERE (literal intact) survives; trailing SORT/LIMIT are peeled.
     expect(compiled.split('\n| ')[0]).toBe(
       'FROM logs-* | WHERE message == "queue full | LIMIT exceeded"'
     );
-    // The compiled breach query must itself parse cleanly (no corrupted literal).
     expect(Parser.parse(compiled).errors).toHaveLength(0);
   });
 });

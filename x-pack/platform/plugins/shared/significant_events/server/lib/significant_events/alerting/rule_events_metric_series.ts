@@ -29,13 +29,11 @@ export const RULE_EVENTS_INDEX = '.rule-events';
  * | EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
  * ```
  *
- * Invariant: this projection assumes Alerting v2 persists the ES|QL date column
- * as epoch millis, which the Arrow streaming write path guarantees. `TO_LONG`
- * cannot parse an ISO-8601 string — if `bucket` were ever persisted as ISO text,
- * this EVAL would yield NULL and the reader's `bucket IS NOT NULL` guard would
- * silently empty the occurrences chart. The painless runtime mapping used by
- * change-point additionally tolerates ISO (`ZonedDateTime.parse`), so keep both
- * read paths in sync if that persistence format ever changes.
+ * Invariant: both this projection and {@link METRIC_SERIES_RUNTIME_MAPPINGS}
+ * assume Alerting v2 persists the ES|QL date column as epoch millis, which the
+ * Arrow streaming write path guarantees. `TO_LONG` / `Long.parseLong` cannot
+ * parse an ISO-8601 string — if `bucket` were ever persisted as ISO text, the
+ * reader's `bucket IS NOT NULL` guard would silently empty the series.
  */
 export function projectMetricSeriesColumns(query: ComposerQuery): ComposerQuery {
   const dataCol = esql.col('data');
@@ -59,26 +57,11 @@ export const METRIC_SERIES_VALUE_RUNTIME_FIELD = 'metric_series.value';
  * prefers `_source` / FIELD_EXTRACT (see series_grouping_values_query). Runtime
  * mappings used by change_point must follow the same `_source`-first rule or the
  * date_histogram sees no values and change_point returns `indeterminable`.
+ *
+ * Numeric parse only (epoch millis for `bucket`): same contract as the ES|QL
+ * `TO_LONG` path above.
  */
-function flattenedLeafScript(leaf: string, emitDate: boolean): string {
-  const emitBlock = emitDate
-    ? `
-          try {
-            emit(Long.parseLong(text));
-          } catch (NumberFormatException e1) {
-            try {
-              emit((long) Double.parseDouble(text));
-            } catch (NumberFormatException e2) {
-              emit(ZonedDateTime.parse(text).toInstant().toEpochMilli());
-            }
-          }`
-    : `
-          try {
-            emit(Long.parseLong(text));
-          } catch (NumberFormatException e) {
-            emit((long) Double.parseDouble(text));
-          }`;
-
+function flattenedLeafScript(leaf: string): string {
   return `
         String text = null;
         if (params._source != null && params._source.containsKey('data') && params._source.data != null) {
@@ -91,7 +74,11 @@ function flattenedLeafScript(leaf: string, emitDate: boolean): string {
           }
         }
         if (text != null && !text.isEmpty()) {
-          ${emitBlock}
+          try {
+            emit(Long.parseLong(text));
+          } catch (NumberFormatException e) {
+            emit((long) Double.parseDouble(text));
+          }
         }
       `;
 }
@@ -100,13 +87,13 @@ export const METRIC_SERIES_RUNTIME_MAPPINGS: MappingRuntimeFields = {
   [METRIC_SERIES_BUCKET_RUNTIME_FIELD]: {
     type: 'date',
     script: {
-      source: flattenedLeafScript(METRIC_SERIES_BUCKET_FIELD, true),
+      source: flattenedLeafScript(METRIC_SERIES_BUCKET_FIELD),
     },
   },
   [METRIC_SERIES_VALUE_RUNTIME_FIELD]: {
     type: 'long',
     script: {
-      source: flattenedLeafScript(METRIC_SERIES_VALUE_FIELD, false),
+      source: flattenedLeafScript(METRIC_SERIES_VALUE_FIELD),
     },
   },
 };

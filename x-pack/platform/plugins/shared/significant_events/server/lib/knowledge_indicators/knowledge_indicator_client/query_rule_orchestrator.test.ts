@@ -244,7 +244,7 @@ describe('QueryRuleOrchestrator', () => {
           title: 'Error query',
           description: 'desc',
           type: 'match',
-          esql: { query: 'FROM logs-* | LIMIT 1' },
+          esql: { query: 'FROM logs-*' },
           features: [{ id: 'feat-1' }],
         },
         ...overrides,
