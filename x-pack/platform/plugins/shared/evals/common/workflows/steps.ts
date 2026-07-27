@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
  * Shared definitions for the evals workflow steps. Held in `common`
  * so the server handlers and the public editor metadata stay locked together.
  *
- * Step ids use the `evals.` namespace with a camelCase action. `evals.` is a fresh plugin
- * prefix, intentionally not one of the engine's reserved category prefixes (`ai`, `data`,
- * `kibana`, `elasticsearch`, ...); the registry enforces global id uniqueness at setup.
- * All input/output keys we own are snake_case per the workflows conventions.
+ * Step ids live under the `ai.evals.` namespace (grouped beneath the shared `ai.` category
+ * prefix alongside steps like `ai.prompt`), and are `tech_preview` while the framework is
+ * feature-flagged. The registry enforces global id uniqueness at setup. All input/output
+ * keys we own are snake_case per the workflows conventions.
  */
 
 // ---------------------------------------------------------------------------
@@ -97,7 +97,7 @@ const description = (id: string, defaultMessage: string) =>
 // Layer 1 — atomic primitives
 // ---------------------------------------------------------------------------
 
-export const ResolveDatasetStepId = 'evals.resolveDataset' as const;
+export const ResolveDatasetStepId = 'ai.evals.resolveDataset' as const;
 
 export const resolveDatasetInputSchema = z.object({
   dataset_ids: z.array(z.string()).min(1),
@@ -113,6 +113,7 @@ export const resolveDatasetCommonDefinition: CommonStepDefinition<
 > = {
   id: ResolveDatasetStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('resolveDataset', 'Resolve evaluation dataset'),
   description: description(
     'resolveDataset',
@@ -122,7 +123,7 @@ export const resolveDatasetCommonDefinition: CommonStepDefinition<
   outputSchema: resolveDatasetOutputSchema,
 };
 
-export const ExecuteTaskStepId = 'evals.executeTask' as const;
+export const ExecuteTaskStepId = 'ai.evals.executeTask' as const;
 
 export const executeTaskInputSchema = z.object({
   ...taskTargetShape,
@@ -140,6 +141,7 @@ export const executeTaskCommonDefinition: CommonStepDefinition<
 > = {
   id: ExecuteTaskStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('executeTask', 'Execute evaluation task'),
   description: description(
     'executeTask',
@@ -149,7 +151,7 @@ export const executeTaskCommonDefinition: CommonStepDefinition<
   outputSchema: executeTaskOutputSchema,
 };
 
-export const EvaluateTraceStepId = 'evals.evaluateTrace' as const;
+export const EvaluateTraceStepId = 'ai.evals.evaluateTrace' as const;
 
 export const evaluateTraceInputSchema = z.object({
   trace_id: z.string(),
@@ -168,6 +170,7 @@ export const evaluateTraceCommonDefinition: CommonStepDefinition<
 > = {
   id: EvaluateTraceStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('evaluateTrace', 'Evaluate trace'),
   description: description(
     'evaluateTrace',
@@ -177,7 +180,7 @@ export const evaluateTraceCommonDefinition: CommonStepDefinition<
   outputSchema: evaluateTraceOutputSchema,
 };
 
-export const IngestScoresStepId = 'evals.ingestScores' as const;
+export const IngestScoresStepId = 'ai.evals.ingestScores' as const;
 
 export const ingestScoresInputSchema = z.object({
   experiment_id: z.string(),
@@ -214,6 +217,7 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
 > = {
   id: IngestScoresStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('ingestScores', 'Ingest evaluation scores'),
   description: description(
     'ingestScores',
@@ -227,7 +231,7 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
 // Layer 2 — composite convenience
 // ---------------------------------------------------------------------------
 
-export const EvaluateExampleStepId = 'evals.evaluateExample' as const;
+export const EvaluateExampleStepId = 'ai.evals.evaluateExample' as const;
 
 export const evaluateExampleInputSchema = z.object({
   ...taskTargetShape,
@@ -257,6 +261,7 @@ export const evaluateExampleCommonDefinition: CommonStepDefinition<
 > = {
   id: EvaluateExampleStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('evaluateExample', 'Evaluate example'),
   description: description(
     'evaluateExample',
@@ -266,7 +271,7 @@ export const evaluateExampleCommonDefinition: CommonStepDefinition<
   outputSchema: evaluateExampleOutputSchema,
 };
 
-export const EvaluateDatasetStepId = 'evals.evaluateDataset' as const;
+export const EvaluateDatasetStepId = 'ai.evals.evaluateDataset' as const;
 
 export const evaluateDatasetInputSchema = z.object({
   ...taskTargetShape,
@@ -298,6 +303,7 @@ export const evaluateDatasetCommonDefinition: CommonStepDefinition<
 > = {
   id: EvaluateDatasetStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('evaluateDataset', 'Evaluate dataset'),
   description: description(
     'evaluateDataset',
@@ -311,7 +317,7 @@ export const evaluateDatasetCommonDefinition: CommonStepDefinition<
 // Layer 3 — lifecycle
 // ---------------------------------------------------------------------------
 
-export const StartExperimentStepId = 'evals.startExperiment' as const;
+export const StartExperimentStepId = 'ai.evals.startExperiment' as const;
 export const startExperimentInputSchema = z.object({
   task_model: modelSchema,
   suite_id: z.string().optional(),
@@ -330,6 +336,7 @@ export const startExperimentCommonDefinition: CommonStepDefinition<
 > = {
   id: StartExperimentStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('startExperiment', 'Start experiment'),
   description: description(
     'startExperiment',
@@ -339,7 +346,7 @@ export const startExperimentCommonDefinition: CommonStepDefinition<
   outputSchema: startExperimentOutputSchema,
 };
 
-export const CompareExperimentsStepId = 'evals.compareExperiments' as const;
+export const CompareExperimentsStepId = 'ai.evals.compareExperiments' as const;
 
 export const compareExperimentsInputSchema = z.object({
   experiment_ids: z.array(z.string()).min(2),
@@ -355,6 +362,7 @@ export const compareExperimentsCommonDefinition: CommonStepDefinition<
 > = {
   id: CompareExperimentsStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('compareExperiments', 'Compare experiments'),
   description: description(
     'compareExperiments',

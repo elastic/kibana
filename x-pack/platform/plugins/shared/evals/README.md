@@ -127,12 +127,12 @@ triggers:
   - type: manual
 steps:
   - name: start
-    type: evals.startExperiment
+    type: ai.evals.startExperiment
     with:
       task_model:
         id: my-model-connector-id
   - name: evaluate
-    type: evals.evaluateDataset
+    type: ai.evals.evaluateDataset
     with:
       experiment_id: '{{ steps.start.output.experiment_id }}'
       execution_id: '{{ steps.start.output.execution_id }}'
@@ -146,18 +146,18 @@ steps:
       concurrency: 5
 ```
 
-The full set of `evals.*` steps:
+The full set of `ai.evals.*` steps:
 
 | Step | Purpose |
 | --- | --- |
-| `evals.startExperiment` | Create the experiment/execution ids that group a run's scores. |
-| `evals.resolveDataset` | Load datasets and their examples. |
-| `evals.executeTask` | Run the thing being evaluated against one example. |
-| `evals.evaluateTrace` | Grade one trace with one or more evaluators. |
-| `evals.ingestScores` | Persist evaluator scores for one example. |
-| `evals.evaluateExample` | Execute, evaluate, and ingest scores for a single example. |
-| `evals.evaluateDataset` | Resolve datasets and evaluate every example (the main step). |
-| `evals.compareExperiments` | Statistically compare two or more experiments. |
+| `ai.evals.startExperiment` | Create the experiment/execution ids that group a run's scores. |
+| `ai.evals.resolveDataset` | Load datasets and their examples. |
+| `ai.evals.executeTask` | Run the thing being evaluated against one example. |
+| `ai.evals.evaluateTrace` | Grade one trace with one or more evaluators. |
+| `ai.evals.ingestScores` | Persist evaluator scores for one example. |
+| `ai.evals.evaluateExample` | Execute, evaluate, and ingest scores for a single example. |
+| `ai.evals.evaluateDataset` | Resolve datasets and evaluate every example (the main step). |
+| `ai.evals.compareExperiments` | Statistically compare two or more experiments. |
 
 The Workflows YAML editor autocompletes and validates these steps and their inputs as you author.
 

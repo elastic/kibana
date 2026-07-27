@@ -29,7 +29,7 @@ import type { RunExperimentRequest } from '../common/experiments/run_experiment'
  *   single, self-contained workflow definition that re-generates fresh ids on
  *   every (possibly scheduled) run, so repeated runs form comparable, distinct
  *   experiments. Cross-model saved workflows run sequentially and, when `compare`
- *   is requested, end with a `evals.compareExperiments` step.
+ *   is requested, end with a `ai.evals.compareExperiments` step.
  *
  * The engine does not execute `parallel` today, so cross-model parallelism is
  * achieved via execution fan-out in "Run now"; the saved-workflow form stays
@@ -347,7 +347,7 @@ export interface GeneratedSavedWorkflow {
  * mints a fresh `experiment_id` (and `execution_id`) on every run so scheduled
  * re-runs produce distinct, comparable experiments. Cross-model saved workflows
  * run each model sequentially and, when `compare` is requested, finish with
- * `evals.compareExperiments` over the per-model experiment ids.
+ * `ai.evals.compareExperiments` over the per-model experiment ids.
  */
 export const generateSavedWorkflowYaml = (
   params: GenerateExperimentParams

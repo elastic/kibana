@@ -118,7 +118,7 @@ export interface PreviewExperimentResponse {
   yaml: string;
 }
 
-/** Compact progress counters extracted from the `evals.evaluateDataset` step state. */
+/** Compact progress counters extracted from the `ai.evals.evaluateDataset` step state. */
 export interface ExperimentStepProgress {
   total?: number;
   completed?: number;

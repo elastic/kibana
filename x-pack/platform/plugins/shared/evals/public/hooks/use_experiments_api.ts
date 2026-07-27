@@ -27,6 +27,7 @@ import type {
   GetExperimentTemplatesResponse,
   ExperimentExecutionStatus,
 } from '../../common/experiments/run_experiment';
+import { EvaluateDatasetStepId } from '../../common/workflows/steps';
 
 export interface ModelConnector {
   id: string;
@@ -228,7 +229,7 @@ export const isTerminalExecutionStatus = (status: string): boolean =>
   TERMINAL_EXECUTION_STATUSES.has(status);
 
 const WORKFLOW_EXECUTION_POLL_MS = 2000;
-const DATASET_STEP_TYPE = 'evals.evaluateDataset';
+const DATASET_STEP_TYPE = EvaluateDatasetStepId;
 
 export interface WorkflowExecutionView {
   id: string;

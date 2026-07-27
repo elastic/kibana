@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ExperimentExecutionStepStatus } from '../../../common/experiments/run_experiment';
+import { EvaluateDatasetStepId } from '../../../common/workflows/steps';
 import { useCancelWorkflowExecution } from '../../hooks/use_experiments_api';
 import type { WorkflowExecutionView } from '../../hooks/use_experiments_api';
 import {
@@ -35,7 +36,7 @@ import {
 } from './translations';
 
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
-const EVALUATE_DATASET_STEP_TYPE = 'evals.evaluateDataset';
+const EVALUATE_DATASET_STEP_TYPE = EvaluateDatasetStepId;
 
 const isTerminal = (status: string) => TERMINAL_STATUSES.has(status);
 

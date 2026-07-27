@@ -44,11 +44,11 @@ import type { DatasetEvaluationConfig, StepRuntime } from './lib';
 const DEFAULT_CONCURRENCY = 5;
 const DEFAULT_REPETITIONS = 1;
 
-/** Number of examples drained per `poll()` invocation of `evals.evaluateDataset`. */
+/** Number of examples drained per `poll()` invocation of `ai.evals.evaluateDataset`. */
 const POLL_BATCH_SIZE = 25;
 
 /**
- * Poll ceilings for `evals.evaluateDataset`. The engine defaults (~1 min) are far
+ * Poll ceilings for `ai.evals.evaluateDataset`. The engine defaults (~1 min) are far
  * too low for real evaluation runs, so we raise them substantially; the generated
  * workflow additionally sets a high `settings.timeout`.
  */
@@ -68,7 +68,7 @@ const resolvedModelSchema = z.object({
   provider: z.string().optional(),
 });
 
-/** Progress persisted between `evals.evaluateDataset` poll cycles. */
+/** Progress persisted between `ai.evals.evaluateDataset` poll cycles. */
 const evaluateDatasetStateSchema = z.object({
   work: z.array(
     z.object({
@@ -158,7 +158,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
 
       if (errors.length > 0) {
         context.logger.warn(
-          `evals.evaluateTrace: ${
+          `ai.evals.evaluateTrace: ${
             errors.length
           } evaluator(s) failed for trace "${trace_id}": ${errors.join('; ')}`
         );
@@ -242,7 +242,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
 
       if (result.errors.length > 0) {
         context.logger.warn(
-          `evals.evaluateExample: ${result.errors.length} error(s) while evaluating example "${
+          `ai.evals.evaluateExample: ${result.errors.length} error(s) while evaluating example "${
             input.example.id
           }": ${result.errors.join('; ')}`
         );
@@ -334,7 +334,9 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const runtime = makeRuntime(context);
       const { input, state } = context;
       if (!state) {
-        return { error: new Error('evals.evaluateDataset poll invoked without persisted state') };
+        return {
+          error: new Error('ai.evals.evaluateDataset poll invoked without persisted state'),
+        };
       }
       if (runtime.abortSignal.aborted) {
         return { error: new Error('Dataset evaluation was cancelled') };
@@ -389,7 +391,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     },
     onCancel: (context) => {
       context.logger.info(
-        'evals.evaluateDataset cancelled; in-flight evaluations aborted via signal'
+        'ai.evals.evaluateDataset cancelled; in-flight evaluations aborted via signal'
       );
     },
   });

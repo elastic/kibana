@@ -114,7 +114,7 @@ export const evalExperimentConfigSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Only for saved cross-model workflows: append an evals.compareExperiments step after the per-model runs.'
+      'Only for saved cross-model workflows: append an ai.evals.compareExperiments step after the per-model runs.'
     ),
 });
 

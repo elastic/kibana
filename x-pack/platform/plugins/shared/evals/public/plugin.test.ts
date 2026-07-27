@@ -76,7 +76,7 @@ describe('EvalsPublicPlugin', () => {
     expect(true).toBe(true);
   });
 
-  it('registers the evals.* Workflows editor steps when the feature flag is enabled', () => {
+  it('registers the ai.evals.* Workflows editor steps when the feature flag is enabled', () => {
     const plugin = createPlugin(true);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
@@ -85,7 +85,7 @@ describe('EvalsPublicPlugin', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
   });
 
-  it('does not register the evals.* Workflows editor steps when the feature flag is disabled', () => {
+  it('does not register the ai.evals.* Workflows editor steps when the feature flag is disabled', () => {
     const plugin = createPlugin(false);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
