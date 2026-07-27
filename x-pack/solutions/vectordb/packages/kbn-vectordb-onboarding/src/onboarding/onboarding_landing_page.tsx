@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,19 +20,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { markOnboardingSeen } from '../first_load';
+import { hasExitedOnboarding, markOnboardingSeen } from '../first_load';
 import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from './components/onboarding_paths';
 import { useKibana } from '../services';
-import { ONBOARDING_PATH } from '../routes';
 
 export const OnboardingLandingPage = () => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
   const { services } = useKibana();
-  const vectorSearchDocsUrl = services.docLinks.links.enterpriseSearch.vectorSearch;
+  const vectorDatabaseDocsUrl = services.docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
+
+  const [hasExited] = useState(() => hasExitedOnboarding());
 
   useEffect(() => {
     markOnboardingSeen();
@@ -49,7 +50,7 @@ export const OnboardingLandingPage = () => {
             <EuiTitle size="l">
               <h1>
                 {i18n.translate('vectordbOnboarding.pathSelection.title', {
-                  defaultMessage: 'Set up your Elasticsearch Vector Database',
+                  defaultMessage: 'Get started with your Elasticsearch Vector Database',
                 })}
               </h1>
             </EuiTitle>
@@ -72,13 +73,13 @@ export const OnboardingLandingPage = () => {
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiFlexItem>
-            <OnboardingPaths origin={ONBOARDING_PATH} />
+            <OnboardingPaths />
           </EuiFlexItem>
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLink
-                href={vectorSearchDocsUrl}
+                href={vectorDatabaseDocsUrl}
                 target="_blank"
                 external
                 data-test-subj="vectordbPathSelectionDocumentation"
@@ -89,21 +90,23 @@ export const OnboardingLandingPage = () => {
                 })}
               </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="text"
-                iconType="sortRight"
-                iconSide="right"
-                flush="right"
-                onClick={() => history.push('/')}
-                data-test-subj="vectordbPathSelectionSkip"
-                data-telemetry-id="vectordbOnboarding-pathSelection-skip"
-              >
-                {i18n.translate('vectordbOnboarding.pathSelection.skip', {
-                  defaultMessage: 'Skip the setup guide',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {!hasExited && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="text"
+                  iconType="sortRight"
+                  iconSide="right"
+                  flush="right"
+                  onClick={() => history.push('/')}
+                  data-test-subj="vectordbPathSelectionSkip"
+                  data-telemetry-id="vectordbOnboarding-pathSelection-skip"
+                >
+                  {i18n.translate('vectordbOnboarding.pathSelection.skip', {
+                    defaultMessage: 'Skip the setup guide',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>

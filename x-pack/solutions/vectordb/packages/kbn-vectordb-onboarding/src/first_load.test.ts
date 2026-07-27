@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { hasSeenOnboarding, markOnboardingSeen } from './first_load';
-import { ONBOARDING_SEEN_STORAGE_KEY } from './storage_keys';
+import {
+  hasExitedOnboarding,
+  hasSeenOnboarding,
+  markOnboardingExited,
+  markOnboardingSeen,
+} from './first_load';
+import { ONBOARDING_EXITED_STORAGE_KEY, ONBOARDING_SEEN_STORAGE_KEY } from './storage_keys';
 
 beforeEach(() => {
   localStorage.clear();
@@ -46,5 +51,42 @@ describe('markOnboardingSeen', () => {
       throw new Error('storage unavailable');
     });
     expect(() => markOnboardingSeen()).not.toThrow();
+  });
+});
+
+describe('hasExitedOnboarding', () => {
+  it('returns false when the key is absent', () => {
+    expect(hasExitedOnboarding()).toBe(false);
+  });
+
+  it('returns true after markOnboardingExited sets the key', () => {
+    markOnboardingExited();
+    expect(hasExitedOnboarding()).toBe(true);
+  });
+
+  it('is independent of the seen flag', () => {
+    markOnboardingSeen();
+    expect(hasExitedOnboarding()).toBe(false);
+  });
+
+  it('returns true when localStorage throws', () => {
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
+      throw new Error('storage unavailable');
+    });
+    expect(hasExitedOnboarding()).toBe(true);
+  });
+});
+
+describe('markOnboardingExited', () => {
+  it('writes "true" under the expected key', () => {
+    markOnboardingExited();
+    expect(localStorage.getItem(ONBOARDING_EXITED_STORAGE_KEY)).toBe('true');
+  });
+
+  it('does not throw when localStorage throws', () => {
+    jest.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+      throw new Error('storage unavailable');
+    });
+    expect(() => markOnboardingExited()).not.toThrow();
   });
 });
