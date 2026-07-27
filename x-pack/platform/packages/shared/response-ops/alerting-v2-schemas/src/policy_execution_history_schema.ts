@@ -6,15 +6,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ID_MAX_LENGTH } from './constants';
-
-export const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
-export const POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;
+import { arrayOrSingleSchema } from './common';
+import {
+  ID_MAX_LENGTH,
+  EXECUTION_HISTORY_MAX_PER_PAGE,
+  EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+  EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+  EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
+  EXECUTION_HISTORY_SEARCH_MAX_LENGTH,
+} from './constants';
 
 export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
 
-export const policyExecutionOutcomeFilterSchema = z.enum(['dispatched', 'throttled', 'all']);
+export const policyExecutionOutcomeFilterSchema = arrayOrSingleSchema(
+  policyExecutionOutcomeSchema,
+  policyExecutionOutcomeSchema.options.length
+);
 export type PolicyExecutionOutcomeFilter = z.infer<typeof policyExecutionOutcomeFilterSchema>;
 
 const sharedFilterFields = {
@@ -22,7 +30,7 @@ const sharedFilterFields = {
     .string()
     .trim()
     .min(1)
-    .max(POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH)
+    .max(EXECUTION_HISTORY_SEARCH_MAX_LENGTH)
     .optional()
     .describe(
       'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
@@ -30,57 +38,72 @@ const sharedFilterFields = {
   ruleIds: z
     .preprocess(
       (v) => (v === undefined || Array.isArray(v) ? v : [v]),
-      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
+      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
     )
     .optional()
     .describe(
-      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided. Max 50 ids.'
+      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.'
     ),
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted defaults to "all" (both dispatched and throttled). Pass "dispatched" or "throttled" to narrow.'
+      'Outcome filter. When omitted matches all outcomes. Pass "dispatched" and/or "throttled" to narrow.'
     ),
 };
 
-export const listPolicyExecutionHistoryQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
-  perPage: z.coerce
-    .number()
-    .min(1)
-    .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
-    .optional()
-    .describe('Number of events per page. Defaults to 100.'),
-  episodeIds: z
-    .preprocess(
-      (v) => (v === undefined || Array.isArray(v) ? v : [v]),
-      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
-    )
-    .optional()
-    .describe(
-      'Episode filter. Narrows events to those referencing at least one of the provided episode ids. Max 50 ids.'
-    ),
-  start_date: z
-    .string()
-    .trim()
-    .max(64)
-    .optional()
-    .describe(
-      'Inclusive ISO timestamp lower bound applied to @timestamp; overrides the default 24-hour window. Independent of episodeIds \u2014 e.g. set it to an episode\u2019s start time to scope results to that episode\u2019s lifetime.'
-    ),
-  ...sharedFilterFields,
-});
-export type ListPolicyExecutionHistoryParams = z.infer<
-  typeof listPolicyExecutionHistoryQuerySchema
->;
+export const listPolicyExecutionHistoryQuerySchema = z
+  .object({
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(EXECUTION_HISTORY_MAX_RESULT_WINDOW)
+      .default(1)
+      .describe('Page number (1-indexed).'),
+    perPage: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(EXECUTION_HISTORY_MAX_PER_PAGE)
+      .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
+      .describe('Number of events per page.'),
+    start_date: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episodeIds — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
+      ),
+    episodeIds: z
+      .preprocess(
+        (v) => (v === undefined || Array.isArray(v) ? v : [v]),
+        z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
+      )
+      .optional()
+      .describe(
+        'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'
+      ),
+    ...sharedFilterFields,
+  })
+  .refine(({ page, perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+    message: `page * perPage cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+    path: ['page'],
+  });
 
-export const countPolicyExecutionEventsQuerySchema = z.object({
-  since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
-  ...sharedFilterFields,
-});
-export type CountPolicyExecutionEventsParams = z.infer<
-  typeof countPolicyExecutionEventsQuerySchema
->;
+/**
+ * Request-side params for the list endpoint. All fields are optional: `page`
+ * and `perPage` carry schema defaults, and the filters are opt-in. Kept as an
+ * explicit interface (rather than `z.infer`) so callers building query strings
+ * are not forced to supply the defaulted pagination fields.
+ */
+export interface ListPolicyExecutionHistoryParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  ruleIds?: string[];
+  outcome?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
+  start_date?: string;
+}
 
 const namedRefSchema = z.object({
   id: z.string(),
@@ -95,7 +118,7 @@ const MAX_WORKFLOWS_PER_ITEM = 100;
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
 
 export const policyExecutionHistoryItemSchema = z.object({
-  '@timestamp': z.string(),
+  dispatched_at: z.string(),
   policy: namedRefSchema,
   outcome: policyExecutionOutcomeSchema,
   episode_count: z.number(),
@@ -135,11 +158,4 @@ export const listPolicyExecutionHistoryResponseSchema = z.object({
 });
 export type ListPolicyExecutionHistoryResponse = z.infer<
   typeof listPolicyExecutionHistoryResponseSchema
->;
-
-export const countPolicyExecutionEventsResponseSchema = z.object({
-  count: z.number(),
-});
-export type CountPolicyExecutionEventsResponse = z.infer<
-  typeof countPolicyExecutionEventsResponseSchema
 >;

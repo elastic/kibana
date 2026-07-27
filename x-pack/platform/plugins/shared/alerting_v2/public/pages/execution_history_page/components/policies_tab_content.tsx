@@ -12,7 +12,11 @@ import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import { useCountNewExecutionHistoryEvents } from '../../../hooks/use_count_new_execution_history_events';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
-import { ExecutionHistorySearchBar, type RuleOption } from './execution_history_search_bar';
+import {
+  ExecutionHistorySearchBar,
+  type PolicyOutcomeFilter,
+  type RuleOption,
+} from './execution_history_search_bar';
 import { FilteredEmptyState, PoliciesEmptyState } from './empty_state';
 import { ExecutionHistoryErrorState } from './error_state';
 import { NewEventsBanner } from './new_events_banner';
@@ -20,7 +24,10 @@ import { TruncatedCallout } from './truncated_callout';
 import { PoliciesExecutionHistoryTable } from './policies_execution_history_table';
 
 const DEFAULT_PER_PAGE = 10;
-const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
+const DEFAULT_OUTCOME: PolicyOutcomeFilter = 'all';
+
+const toOutcomeParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
+  filter === 'all' ? undefined : [filter];
 
 interface Props {
   onPolicyClick: (policyId: string) => void;
@@ -33,30 +40,31 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
   const [ruleFilters, setRuleFilters] = useState<RuleOption[]>([]);
-  const [outcome, setOutcome] = useState<PolicyExecutionOutcomeFilter>(DEFAULT_OUTCOME);
+  const [outcome, setOutcome] = useState<PolicyOutcomeFilter>(DEFAULT_OUTCOME);
   const [lastSeenAt, setLastSeenAt] = useState(() => new Date().toISOString());
   const [isLoadingNewEvents, setIsLoadingNewEvents] = useState(false);
 
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
   const ruleIdsParam = ruleFilters.length > 0 ? ruleFilters.map((r) => r.id) : undefined;
+  const outcomeParam = toOutcomeParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
     search: searchParam,
     ruleIds: ruleIdsParam,
-    outcome,
+    outcome: outcomeParam,
   });
 
   const { data: newCountData } = useCountNewExecutionHistoryEvents({
     since: lastSeenAt,
     search: searchParam,
     ruleIds: ruleIdsParam,
-    outcome,
+    outcome: outcomeParam,
     enabled: !isError,
   });
-  const newEventsCount = newCountData?.count ?? 0;
+  const newEventsCount = newCountData?.totalEvents ?? 0;
 
   // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
   useEffect(() => {
@@ -77,7 +85,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     setPage(0);
   }, []);
 
-  const onOutcomeChange = useCallback((value: PolicyExecutionOutcomeFilter) => {
+  const onOutcomeChange = useCallback((value: PolicyOutcomeFilter) => {
     setOutcome(value);
     setPage(0);
   }, []);

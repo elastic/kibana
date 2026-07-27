@@ -69,3 +69,23 @@ export const ACTION_POLICY_MAX_DESTINATIONS = 10;
  * and `PUT /{id}`.
  */
 export const VERSION_MAX_LENGTH = 256;
+
+/** Maximum number of execution-history events returned per page (rule + action policy streams). */
+export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
+
+/** Default number of execution-history events returned per page when `perPage` is omitted. */
+export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of events that can be paged through.
+ */
+export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
+
+/**
+ * Maximum number of rule ids accepted by the execution-history rule-id
+ * filter.
+ */
+export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
+
+/** Maximum length for the execution-history free-text search string. */
+export const EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;

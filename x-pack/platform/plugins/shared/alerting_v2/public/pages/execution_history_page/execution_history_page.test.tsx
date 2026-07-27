@@ -120,7 +120,7 @@ jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => (
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
 ): PolicyExecutionHistoryItem => ({
-  '@timestamp': '2026-05-05T10:00:00.000Z',
+  dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   totalRuleCount: 1,
@@ -199,7 +199,7 @@ const switchToPoliciesTab = async () => {
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 0 } });
+    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 0 } });
     mockRuleExecutionFetchResult();
   });
 
@@ -283,7 +283,7 @@ describe('ExecutionHistoryPage', () => {
     it('formats the timestamp using the user dateFormat setting', async () => {
       mockFetchResult({
         data: {
-          items: [buildItem({ '@timestamp': '2026-05-05T10:00:00.000Z' })],
+          items: [buildItem({ dispatched_at: '2026-05-05T10:00:00.000Z' })],
           page: 1,
           perPage: 50,
           totalEvents: 1,
@@ -430,7 +430,8 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 10,
         search: undefined,
-        outcome: 'all',
+        ruleIds: undefined,
+        outcome: undefined,
       });
     });
 
@@ -458,7 +459,8 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           perPage: 10,
           search: undefined,
-          outcome: 'dispatched',
+          ruleIds: undefined,
+          outcome: ['dispatched'],
         });
       });
     });
@@ -476,7 +478,8 @@ describe('ExecutionHistoryPage', () => {
             page: 1,
             perPage: 10,
             search: 'cpu',
-            outcome: 'all',
+            ruleIds: undefined,
+            outcome: undefined,
           });
         },
         { timeout: 2000 }
@@ -501,7 +504,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('shows the new-events banner when count > 0', async () => {
       mockFetchResult();
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 3 } });
+      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 3 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -511,7 +514,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('hides the new-events banner when count is 0', async () => {
       mockFetchResult();
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 0 } });
+      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 0 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -520,7 +523,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('hides the banner when in error state even if count > 0', async () => {
       mockFetchResult({ isError: true });
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 5 } });
+      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 5 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -529,7 +532,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('clicking "Load new events" resets to page 1 and refetches', async () => {
       mockFetchResult();
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 2 } });
+      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 2 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -540,7 +543,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('keeps the banner visible with a loading button while the fetch is in flight', async () => {
       mockFetchResult({ isFetching: true });
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { count: 2 } });
+      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 2 } });
       renderPage();
       await switchToPoliciesTab();
 

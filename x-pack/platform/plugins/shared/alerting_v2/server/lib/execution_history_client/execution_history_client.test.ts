@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { GetRuleExecutionsQuery } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsQuery } from '@kbn/alerting-v2-schemas';
 import type { EventLogService } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
 import { ExecutionHistoryClient } from './execution_history_client';
 
-const baseQuery = (overrides: Partial<GetRuleExecutionsQuery> = {}): GetRuleExecutionsQuery => ({
+const baseQuery = (overrides: Partial<ListRuleExecutionsQuery> = {}): ListRuleExecutionsQuery => ({
   sort: 'startedAt',
   sortOrder: 'desc',
   page: 1,
@@ -36,18 +36,18 @@ const createMocks = (spaceId = 'default'): Mocks => {
 };
 
 describe('ExecutionHistoryClient', () => {
-  describe('getRuleExecutions', () => {
+  describe('listRuleExecutions', () => {
     it('passes the request space id to the underlying event log service', async () => {
       const { client, findRuleExecutions } = createMocks('space-A');
-      await client.getRuleExecutions(baseQuery());
+      await client.listRuleExecutions(baseQuery());
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'space-A' })
       );
     });
 
-    it('renames the schema ruleId (singular, REST convention) to ruleIds for the service call', async () => {
+    it('forwards the ruleIds filter to the service call', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.getRuleExecutions(baseQuery({ ruleId: ['rule-x'] }));
+      await client.listRuleExecutions(baseQuery({ ruleIds: ['rule-x'] }));
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: ['rule-x'] })
       );
@@ -55,7 +55,7 @@ describe('ExecutionHistoryClient', () => {
 
     it('supports filtering on multiple rule ids', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.getRuleExecutions(baseQuery({ ruleId: ['rule-x', 'rule-y', 'rule-z'] }));
+      await client.listRuleExecutions(baseQuery({ ruleIds: ['rule-x', 'rule-y', 'rule-z'] }));
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: ['rule-x', 'rule-y', 'rule-z'] })
       );
@@ -63,7 +63,7 @@ describe('ExecutionHistoryClient', () => {
 
     it('omits ruleIds when no rule filter is provided', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.getRuleExecutions(baseQuery());
+      await client.listRuleExecutions(baseQuery());
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: undefined })
       );
@@ -71,7 +71,7 @@ describe('ExecutionHistoryClient', () => {
 
     it('renames the schema outcome (singular, REST convention) to outcomes for the service call', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.getRuleExecutions(baseQuery({ outcome: ['success', 'failure'] }));
+      await client.listRuleExecutions(baseQuery({ outcome: ['success', 'failure'] }));
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ outcomes: ['success', 'failure'] })
       );
@@ -79,7 +79,7 @@ describe('ExecutionHistoryClient', () => {
 
     it('passes through sort, sortOrder, from, to, paging unchanged', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.getRuleExecutions(
+      await client.listRuleExecutions(
         baseQuery({
           sort: 'duration',
           sortOrder: 'asc',
@@ -109,7 +109,7 @@ describe('ExecutionHistoryClient', () => {
         page: 5,
         perPage: 25,
       });
-      const result = await client.getRuleExecutions(baseQuery({ page: 5, perPage: 25 }));
+      const result = await client.listRuleExecutions(baseQuery({ page: 5, perPage: 25 }));
       expect(result).toEqual({ total: 137, page: 5, perPage: 25, items: [] });
     });
   });

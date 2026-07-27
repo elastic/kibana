@@ -59,7 +59,7 @@ jest.mock(
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
 ): PolicyExecutionHistoryItem => ({
-  '@timestamp': '2026-05-05T10:00:00.000Z',
+  dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   totalRuleCount: 1,

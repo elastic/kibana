@@ -9,9 +9,9 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import {
   errorResponseSchema,
-  getRuleExecutionsQuerySchema,
-  getRuleExecutionsResponseSchema,
-  type GetRuleExecutionsQuery,
+  listRuleExecutionsQuerySchema,
+  listRuleExecutionsResponseSchema,
+  type ListRuleExecutionsQuery,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ExecutionHistoryClientToken } from '../../lib/execution_history_client';
@@ -21,10 +21,10 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { getRuleExecutionsOasExamples } from './get_rule_executions_oas_example';
+import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_example';
 
 @injectable()
-export class GetRuleExecutionsRoute extends BaseAlertingRoute {
+export class ListRuleExecutionsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
   static path = ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH;
   static security: RouteSecurity = {
@@ -35,15 +35,15 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
-    oasOperationObject: getRuleExecutionsOasExamples,
+    oasOperationObject: listRuleExecutionsOasExamples,
   } as const;
   static schemas = {
     request: {
-      query: getRuleExecutionsQuerySchema,
+      query: listRuleExecutionsQuerySchema,
     },
     response: {
       200: {
-        body: () => getRuleExecutionsResponseSchema,
+        body: () => listRuleExecutionsResponseSchema,
         description: 'Returns a paginated list of rule execution events.',
       },
       400: {
@@ -53,12 +53,12 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'get rule executions';
+  protected readonly routeName = 'list rule executions';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, GetRuleExecutionsQuery, unknown>,
+    private readonly request: KibanaRequest<unknown, ListRuleExecutionsQuery, unknown>,
     @inject(ExecutionHistoryClientToken)
     private readonly executionHistoryClient: ExecutionHistoryClientContract
   ) {
@@ -66,7 +66,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const result = await this.executionHistoryClient.getRuleExecutions(this.request.query);
+    const result = await this.executionHistoryClient.listRuleExecutions(this.request.query);
     return this.ctx.response.ok({ body: result });
   }
 }

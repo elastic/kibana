@@ -9,12 +9,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { createRouteDependencies } from '../test_utils';
-import { ListExecutionHistoryRoute } from './list_execution_history_route';
+import { ListActionPolicyExecutionsRoute } from './list_action_policy_executions_route';
 
 const createMocks = () => {
   const deps = createRouteDependencies();
   const executionHistoryClient: jest.Mocked<
-    Pick<ActionPolicyExecutionHistoryClient, 'listExecutionHistory' | 'countNewEventsSince'>
+    Pick<ActionPolicyExecutionHistoryClient, 'listExecutionHistory'>
   > = {
     listExecutionHistory: jest.fn().mockResolvedValue({
       items: [],
@@ -23,23 +23,22 @@ const createMocks = () => {
       totalEvents: 0,
       searchMatches: null,
     }),
-    countNewEventsSince: jest.fn(),
   };
   return { deps, executionHistoryClient };
 };
 
 const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks>) =>
-  new ListExecutionHistoryRoute(
+  new ListActionPolicyExecutionsRoute(
     mocks.deps.ctx,
     request as any,
     mocks.executionHistoryClient as unknown as ActionPolicyExecutionHistoryClient
   );
 
-describe('ListExecutionHistoryRoute', () => {
+describe('ListActionPolicyExecutionsRoute', () => {
   it('forwards page, perPage, search and outcome from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { page: 2, perPage: 25, search: 'foo', outcome: 'throttled' },
+      query: { page: 2, perPage: 25, search: 'foo', outcome: ['throttled'] },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
@@ -50,7 +49,7 @@ describe('ListExecutionHistoryRoute', () => {
       page: 2,
       perPage: 25,
       search: 'foo',
-      outcome: 'throttled',
+      outcome: ['throttled'],
     });
   });
 
@@ -82,7 +81,7 @@ describe('ListExecutionHistoryRoute', () => {
     );
   });
 
-  it('passes undefined params when query is empty (defaults applied by client)', async () => {
+  it('passes undefined params when query is empty (defaults applied by schema)', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();
     const route = buildRoute(request as unknown as KibanaRequest, mocks);

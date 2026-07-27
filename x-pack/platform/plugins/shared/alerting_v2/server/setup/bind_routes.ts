@@ -48,9 +48,8 @@ import { UnsnoozeActionPolicyRoute } from '../routes/action_policies/unsnooze_ac
 import { UpdateActionPolicyRoute } from '../routes/action_policies/update_action_policy_route';
 import { UpdateActionPolicyApiKeyRoute } from '../routes/action_policies/update_action_policy_api_key_route';
 import { DeleteActionPolicyRoute } from '../routes/action_policies/delete_action_policy_route';
-import { ListExecutionHistoryRoute } from '../routes/action_policies/list_execution_history_route';
-import { CountNewExecutionHistoryEventsRoute } from '../routes/action_policies/count_new_execution_history_events_route';
-import { GetRuleExecutionsRoute } from '../routes/execution_history/get_rule_executions_route';
+import { ListActionPolicyExecutionsRoute } from '../routes/execution_history/list_action_policy_executions_route';
+import { ListRuleExecutionsRoute } from '../routes/execution_history/list_rule_executions_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
 import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_route';
@@ -108,9 +107,8 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkSnoozeActionPoliciesRoute);
   bind(Route).toConstantValue(BulkUnsnoozeActionPoliciesRoute);
   bind(Route).toConstantValue(BulkUpdateApiKeyActionPoliciesRoute);
-  bind(Route).toConstantValue(ListExecutionHistoryRoute);
-  bind(Route).toConstantValue(CountNewExecutionHistoryEventsRoute);
-  bind(Route).toConstantValue(GetRuleExecutionsRoute);
+  bind(Route).toConstantValue(ListActionPolicyExecutionsRoute);
+  bind(Route).toConstantValue(ListRuleExecutionsRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 

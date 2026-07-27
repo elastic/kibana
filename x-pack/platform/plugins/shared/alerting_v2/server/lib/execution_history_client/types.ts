@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetRuleExecutionsQuery, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsQuery, ListRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 
 export interface ExecutionHistoryClientContract {
-  getRuleExecutions(query: GetRuleExecutionsQuery): Promise<GetRuleExecutionsResponse>;
+  listRuleExecutions(query: ListRuleExecutionsQuery): Promise<ListRuleExecutionsResponse>;
 }

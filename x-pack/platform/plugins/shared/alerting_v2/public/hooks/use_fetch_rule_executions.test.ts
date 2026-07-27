@@ -27,20 +27,20 @@ const createWrapper = () => {
 };
 
 describe('useFetchRuleExecutions', () => {
-  const mockGetRuleExecutions = jest.fn();
+  const mockListRuleExecutions = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ExecutionHistoryApi) {
-        return { getRuleExecutions: mockGetRuleExecutions } as any;
+        return { listRuleExecutions: mockListRuleExecutions } as any;
       }
       return undefined as any;
     });
   });
 
-  it('calls getRuleExecutions with the provided params', async () => {
-    mockGetRuleExecutions.mockResolvedValue({
+  it('calls listRuleExecutions with the provided params', async () => {
+    mockListRuleExecutions.mockResolvedValue({
       items: [],
       total: 0,
       page: 2,
@@ -52,7 +52,7 @@ describe('useFetchRuleExecutions', () => {
     });
 
     await waitFor(() => {
-      expect(mockGetRuleExecutions).toHaveBeenCalledWith({
+      expect(mockListRuleExecutions).toHaveBeenCalledWith({
         page: 2,
         perPage: 50,
         outcome: ['failure'],
@@ -67,7 +67,7 @@ describe('useFetchRuleExecutions', () => {
       page: 1,
       perPage: 10,
     };
-    mockGetRuleExecutions.mockResolvedValue(fakeResponse);
+    mockListRuleExecutions.mockResolvedValue(fakeResponse);
 
     const { result } = renderHook(() => useFetchRuleExecutions({ page: 1, perPage: 10 }), {
       wrapper: createWrapper(),
@@ -79,7 +79,7 @@ describe('useFetchRuleExecutions', () => {
 
   it('exposes isError and the error when the API rejects', async () => {
     const error = new Error('boom');
-    mockGetRuleExecutions.mockRejectedValue(error);
+    mockListRuleExecutions.mockRejectedValue(error);
 
     const { result } = renderHook(() => useFetchRuleExecutions({ page: 1, perPage: 10 }), {
       wrapper: createWrapper(),

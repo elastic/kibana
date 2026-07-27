@@ -10,14 +10,16 @@ import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } fro
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useService } from '@kbn/core-di-browser';
-import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../hooks/use_fetch_rules';
 import { UserCapabilities } from '../../../services/user_capabilities';
 
 const SEARCH_DEBOUNCE_MS = 300;
 const RULE_FILTER_MAX_RESULTS = 20;
 
-const OUTCOME_OPTIONS: Array<{ value: PolicyExecutionOutcomeFilter; text: string }> = [
+export type PolicyOutcomeFilter = 'all' | PolicyExecutionOutcome;
+
+const OUTCOME_OPTIONS: Array<{ value: PolicyOutcomeFilter; text: string }> = [
   {
     value: 'all',
     text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.all', {
@@ -45,8 +47,8 @@ export interface RuleOption {
 
 interface ExecutionHistorySearchBarProps {
   onSearchChange: (search: string) => void;
-  outcome: PolicyExecutionOutcomeFilter;
-  onOutcomeChange: (outcome: PolicyExecutionOutcomeFilter) => void;
+  outcome: PolicyOutcomeFilter;
+  onOutcomeChange: (outcome: PolicyOutcomeFilter) => void;
   ruleFilters: RuleOption[];
   onRuleFiltersChange: (rules: RuleOption[]) => void;
 }
@@ -150,7 +152,7 @@ export const ExecutionHistorySearchBar = ({
           data-test-subj="executionHistoryOutcomeFilter"
           options={OUTCOME_OPTIONS}
           value={outcome}
-          onChange={(e) => onOutcomeChange(e.target.value as PolicyExecutionOutcomeFilter)}
+          onChange={(e) => onOutcomeChange(e.target.value as PolicyOutcomeFilter)}
           prepend={i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcomeLabel', {
             defaultMessage: 'Outcome',
           })}

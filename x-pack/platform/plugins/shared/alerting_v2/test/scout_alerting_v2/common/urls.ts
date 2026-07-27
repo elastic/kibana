@@ -7,26 +7,24 @@
 
 import type { z } from '@kbn/zod/v4';
 import type {
-  CountPolicyExecutionEventsParams,
   ListPolicyExecutionHistoryParams,
-  getRuleExecutionsQuerySchema,
+  listRuleExecutionsQuerySchema,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_API_PATH,
   ACTION_POLICY_API_PATH,
   RULE_API_PATH,
   EXECUTION_HISTORY_API_PATH,
-  EXECUTION_HISTORY_COUNT_API_PATH,
   RULE_EXECUTIONS_API_PATH,
 } from './constants';
 
 /**
- * Pre-parse input shape for {@link getRuleExecutionsUrl}. Kept local because
+ * Pre-parse input shape for {@link listRuleExecutionsUrl}. Kept local because
  * it only matters for tests that build query strings: fields with a Zod
  * `.default(...)` are optional here, and array-like fields accept either a
  * single value or an array (the schema normalizes them at parse time).
  */
-type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
+type ListRuleExecutionsQueryInput = z.input<typeof listRuleExecutionsQuerySchema>;
 
 /**
  * URL for a single rule resource: `${RULE_API_PATH}/${encodedId}`.
@@ -120,21 +118,17 @@ export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryPar
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, String(v)));
+    } else {
       params.set(key, String(value));
     }
   }
   return `${EXECUTION_HISTORY_API_PATH}?${params.toString()}`;
 };
 
-export const getCountNewExecutionHistoryEventsUrl = (
-  query: CountPolicyExecutionEventsParams
-): string => {
-  const params = new URLSearchParams({ since: query.since });
-  return `${EXECUTION_HISTORY_COUNT_API_PATH}?${params.toString()}`;
-};
-
-export const getRuleExecutionsUrl = (query?: GetRuleExecutionsQueryInput): string => {
+export const listRuleExecutionsUrl = (query?: ListRuleExecutionsQueryInput): string => {
   if (!query) return RULE_EXECUTIONS_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {

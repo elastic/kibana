@@ -8,7 +8,6 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
-  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
 } from '../constants';
 import { ExecutionHistoryApi } from './execution_history_api';
@@ -32,18 +31,27 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards page, perPage, search and outcome as query params', async () => {
+  it('forwards page, perPage, search, outcome and start_date as query params', async () => {
     const { api, http } = buildApi();
 
     await api.listExecutionHistory({
       page: 3,
       perPage: 25,
       search: 'foo',
-      outcome: 'throttled',
+      outcome: ['throttled'],
+      start_date: '2026-01-01T00:00:00.000Z',
     });
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: 3, perPage: 25, search: 'foo', outcome: 'throttled' },
+      query: {
+        page: 3,
+        perPage: 25,
+        search: 'foo',
+        ruleIds: undefined,
+        outcome: ['throttled'],
+        episodeIds: undefined,
+        start_date: '2026-01-01T00:00:00.000Z',
+      },
     });
   });
 
@@ -53,14 +61,35 @@ describe('ExecutionHistoryApi', () => {
     await api.listExecutionHistory();
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: undefined, perPage: undefined, search: undefined, outcome: undefined },
+      query: {
+        page: undefined,
+        perPage: undefined,
+        search: undefined,
+        ruleIds: undefined,
+        outcome: undefined,
+        episodeIds: undefined,
+        start_date: undefined,
+      },
     });
+  });
+
+  it('supports a count-only read via perPage=0 and start_date', async () => {
+    const { api, http } = buildApi();
+
+    await api.listExecutionHistory({ start_date: '2026-01-01T00:00:00.000Z', perPage: 0 });
+
+    expect(http.get).toHaveBeenCalledWith(
+      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
+      expect.objectContaining({
+        query: expect.objectContaining({ perPage: 0, start_date: '2026-01-01T00:00:00.000Z' }),
+      })
+    );
   });
 
   it('returns the response from http.get', async () => {
     const { api, http } = buildApi();
     const fakeResponse = {
-      items: [{ '@timestamp': '2026-05-05T10:00:00Z' }],
+      items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
       page: 2,
       perPage: 25,
       totalEvents: 137,
@@ -77,19 +106,10 @@ describe('ExecutionHistoryApi', () => {
     await expect(api.listExecutionHistory()).rejects.toThrow('boom');
   });
 
-  it('forwards search and outcome to countNewSince', async () => {
-    const { api, http } = buildApi();
-    await api.countNewSince('2026-01-01T00:00:00.000Z', { search: 'foo', outcome: 'throttled' });
-    expect(http.get).toHaveBeenCalledWith(
-      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
-      { query: { since: '2026-01-01T00:00:00.000Z', search: 'foo', outcome: 'throttled' } }
-    );
-  });
-
   it('GETs the rule execution history endpoint', async () => {
     const { api, http } = buildApi();
 
-    await api.getRuleExecutions({ page: 1, perPage: 10 });
+    await api.listRuleExecutions({ page: 1, perPage: 10 });
 
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
@@ -97,11 +117,11 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards all query params to getRuleExecutions', async () => {
+  it('forwards all query params to listRuleExecutions', async () => {
     const { api, http } = buildApi();
 
     const params = {
-      ruleId: ['r1', 'r2'],
+      ruleIds: ['r1', 'r2'],
       outcome: ['failure' as const],
       from: '2026-01-01T00:00:00Z',
       to: '2026-01-02T00:00:00Z',
@@ -111,7 +131,7 @@ describe('ExecutionHistoryApi', () => {
       perPage: 50,
     };
 
-    await api.getRuleExecutions(params);
+    await api.listRuleExecutions(params);
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
       query: params,

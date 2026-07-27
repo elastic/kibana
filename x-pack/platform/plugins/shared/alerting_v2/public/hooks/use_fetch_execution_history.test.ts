@@ -50,7 +50,8 @@ describe('useFetchExecutionHistory', () => {
     });
 
     renderHook(
-      () => useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: 'throttled' }),
+      () =>
+        useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: ['throttled'] }),
       {
         wrapper: createWrapper(),
       }
@@ -61,14 +62,14 @@ describe('useFetchExecutionHistory', () => {
         page: 2,
         perPage: 25,
         search: 'foo',
-        outcome: 'throttled',
+        outcome: ['throttled'],
       });
     });
   });
 
   it('returns data from the API on success', async () => {
     const fakeResponse = {
-      items: [{ '@timestamp': '2026-05-05T10:00:00Z' }],
+      items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
       page: 1,
       perPage: 50,
       totalEvents: 1,
