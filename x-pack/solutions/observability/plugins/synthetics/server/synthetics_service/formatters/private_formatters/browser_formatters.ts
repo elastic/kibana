@@ -10,9 +10,9 @@ import type { Formatter } from './common_formatters';
 import { commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
-  objectToJsonFormatter,
   stringToJsonFormatter,
   omitDefaultFormatter,
+  omitFieldFormatter,
 } from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
@@ -45,7 +45,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
+  // __ui is UI-only metadata that Heartbeat ignores; drop it from the policy.
+  [ConfigKey.METADATA]: omitFieldFormatter,
   // Private browser monitors encode SOURCE_INLINE in formatSyntheticsPolicy and set
   // source.inline.encoding=base64. Keep this null so the generic string formatter
   // does not JSON-stringify the script before that private-location encoding step.

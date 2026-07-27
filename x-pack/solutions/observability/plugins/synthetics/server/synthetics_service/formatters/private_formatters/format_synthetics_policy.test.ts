@@ -361,8 +361,7 @@ describe('formatSyntheticsPolicy', () => {
               vars: {
                 __ui: {
                   type: 'yaml',
-                  value:
-                    '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":false}',
+                  value: null,
                 },
                 config_id: {
                   type: 'text',
@@ -530,7 +529,7 @@ describe('formatSyntheticsPolicy', () => {
               vars: {
                 __ui: {
                   type: 'yaml',
-                  value: `{"is_tls_enabled":${isTLSEnabled}}`,
+                  value: null,
                 },
                 'check.request.body': {
                   type: 'yaml',
@@ -1017,6 +1016,9 @@ describe('formatSyntheticsPolicy', () => {
     expect(vars?.max_redirects.value).toBeNull();
     expect(vars?.['response.include_body'].value).toBeNull();
     expect(vars?.timeout.value).toBeNull();
+
+    // __ui is UI-only metadata that Heartbeat ignores; it is dropped from the policy.
+    expect(vars?.__ui.value).toBeNull();
 
     // response.include_headers (bool default true) is intentionally still sent.
     expect(vars?.['response.include_headers'].value).toBe(true);

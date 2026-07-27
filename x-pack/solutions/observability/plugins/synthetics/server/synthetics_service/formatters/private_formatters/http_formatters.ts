@@ -21,6 +21,7 @@ import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   omitDefaultFormatter,
+  omitFieldFormatter,
 } from './formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
@@ -35,7 +36,8 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.RESPONSE_BODY_INDEX]: omitDefaultFormatter(ResponseBodyIndexPolicy.ON_ERROR),
   [ConfigKey.MODE]: omitDefaultFormatter(Mode.ANY),
   [ConfigKey.RESPONSE_HEADERS_INDEX]: null,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
+  // __ui is UI-only metadata that Heartbeat ignores; drop it from the policy.
+  [ConfigKey.METADATA]: omitFieldFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.USERNAME]: stringToJsonFormatter,
   [ConfigKey.PASSWORD]: stringToJsonFormatter,

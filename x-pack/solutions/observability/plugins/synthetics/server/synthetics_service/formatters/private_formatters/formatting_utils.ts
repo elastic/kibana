@@ -31,6 +31,14 @@ export const omitDefaultFormatter =
     return formatter ? formatter(fields, key) : (value as string) ?? null;
   };
 
+/**
+ * Always omits a field from the agent policy. Used for UI-only metadata
+ * (`__ui`) that Heartbeat ignores, so it never needs to reach the agent
+ * (see elastic/kibana#241818). An empty value already resolved to `null`
+ * before, so dropping it unconditionally is a safe extension.
+ */
+export const omitFieldFormatter: FormatterFn = () => null;
+
 export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string[]) ?? [];
   return value.length ? JSON.stringify(value) : null;

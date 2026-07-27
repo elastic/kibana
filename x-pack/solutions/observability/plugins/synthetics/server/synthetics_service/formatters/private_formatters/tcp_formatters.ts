@@ -7,7 +7,7 @@
 
 import type { TCPFields } from '../../../../common/runtime_types';
 import { ConfigKey, Mode } from '../../../../common/runtime_types';
-import { objectToJsonFormatter, omitDefaultFormatter } from './formatting_utils';
+import { omitDefaultFormatter, omitFieldFormatter } from './formatting_utils';
 import { tlsFormatters } from './tls_formatters';
 import { stringToJsonFormatter } from './formatting_utils';
 import type { Formatter } from './common_formatters';
@@ -18,7 +18,8 @@ export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 export const tcpFormatters: TCPFormatMap = {
   ...commonFormatters,
   ...tlsFormatters,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
+  // __ui is UI-only metadata that Heartbeat ignores; drop it from the policy.
+  [ConfigKey.METADATA]: omitFieldFormatter,
   [ConfigKey.HOSTS]: stringToJsonFormatter,
   // proxy_use_local_resolver (default false) is dropped by the template's
   // {{#if}} guard, so no formatter is needed here.
