@@ -128,20 +128,32 @@ export const POST_CHECKOUT_SCRIPT_SOURCE = `#!/usr/bin/env bash
 # \`yarn kbn bootstrap\` is safe. Set KBN_WORKTREE_SEED_FOREGROUND=1 to run inline
 # (e.g. for debugging), or KBN_SKIP_WORKTREE_SEED=1 to disable entirely.
 
+PREV_HEAD="\${1:-}"
+BRANCH_FLAG="\${3:-}"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-SEED_SCRIPT="\${REPO_ROOT}/scripts/seed_worktree_caches.sh"
 
-if [ -n "\${REPO_ROOT}" ] && [ -f "\${SEED_SCRIPT}" ]; then
+# Seed only on the first checkout of a brand-new worktree/clone: git passes an
+# all-zeros previous HEAD (and a branch checkout, flag 1). Ordinary branch
+# switches and rebases fall through silently - no message, no background work.
+seed_worktree() {
+  case "\${PREV_HEAD}" in "" | *[!0]*) return 0 ;; esac
+  [ "\${BRANCH_FLAG}" = "1" ] || return 0
+
+  local seed_script="\${REPO_ROOT}/scripts/seed_worktree_caches.sh"
+  [ -n "\${REPO_ROOT}" ] && [ -f "\${seed_script}" ] || return 0
+
   if [ "\${KBN_WORKTREE_SEED_FOREGROUND:-}" = "1" ]; then
-    bash "\${SEED_SCRIPT}" "$@" || true
+    bash "\${seed_script}" "$@" || true
   else
-    SEED_LOG="$(git rev-parse --git-path worktree-seed.log 2>/dev/null || true)"
-    [ -n "\${SEED_LOG}" ] || SEED_LOG="\${TMPDIR:-/tmp}/kbn-worktree-seed.log"
-    nohup bash "\${SEED_SCRIPT}" "$@" >"\${SEED_LOG}" 2>&1 </dev/null &
-    echo "[seed-worktree] cloning build caches in the background -> \${SEED_LOG}"
+    local seed_log
+    seed_log="$(git rev-parse --git-path worktree-seed.log 2>/dev/null || true)"
+    [ -n "\${seed_log}" ] || seed_log="\${TMPDIR:-/tmp}/kbn-worktree-seed.log"
+    nohup bash "\${seed_script}" "$@" >"\${seed_log}" 2>&1 </dev/null &
+    echo "[seed-worktree] cloning build caches in the background -> \${seed_log}"
     echo "[seed-worktree] let it finish, then run: yarn kbn bootstrap"
   fi
-fi
+}
+seed_worktree "$@"
 
 # Allow a developer-local post-checkout hook to run too.
 POST_CHECKOUT_LOCAL="\${REPO_ROOT}/.git/hooks/post-checkout.local"
