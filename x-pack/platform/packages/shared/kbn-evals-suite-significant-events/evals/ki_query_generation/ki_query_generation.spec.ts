@@ -11,6 +11,7 @@ import {
   createMemoryDiscoveryTools,
   MemoryServiceImpl,
 } from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
@@ -28,6 +29,7 @@ import {
   SIGEVENTS_WIRED_ROOTS,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
+import { createEvalSignificantEventSearchTool } from '../../src/tools/significant_event_search_tool';
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
 import { createScenarioCriteriaLlmEvaluator } from '../../src/evaluators/scenario_criteria/evaluators';
 import {
@@ -64,7 +66,21 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, log }) => {
+  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    // The significant_event_search tool is only registered when significant
+    // events availability is on (defaults to false); enable it before any run.
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        },
+      },
+    });
+    log.info('Enabled significant events availability feature flag');
+
     const snapshots = await buildAvailableSnapshotsBySource(
       activeDatasets,
       (dataset) => dataset.kiQueryGeneration,
@@ -222,10 +238,26 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               ])
             );
 
-            // Exercise the same memory grounding tools that production query
-            // generation wires in, so the eval covers the memory code path.
+            // Exercise the same grounding tools that production query generation
+            // wires in, so the eval covers the memory + prior-SigEvents code paths.
             const memoryTools = createMemoryDiscoveryTools({
               memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+            });
+
+            const executeAgentBuilderTool = async (
+              toolId: string,
+              toolParams: Record<string, unknown>
+            ) =>
+              (await fetch('/api/agent_builder/tools/_execute', {
+                method: 'POST',
+                version: '2023-10-31',
+                body: JSON.stringify({ tool_id: toolId, tool_params: toolParams }),
+              })) as { results?: AgentBuilderToolResult[] };
+
+            const eventSearchTool = createEvalSignificantEventSearchTool({
+              executeTool: executeAgentBuilderTool,
+              streamName: MANAGED_STREAM_NAME,
+              logger,
             });
 
             const groundingModes = resolveGroundingModes();
@@ -325,7 +357,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
-                const promptSnippet = [groundingTools?.promptSnippet, memoryTools.promptSnippet]
+                const promptSnippet = [
+                  groundingTools?.promptSnippet,
+                  memoryTools.promptSnippet,
+                  eventSearchTool.promptSnippet,
+                ]
                   .filter(Boolean)
                   .join('\n');
 
@@ -337,9 +373,14 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   signal: new AbortController().signal,
                   systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
                   getFeatures: async () => kis,
-                  additionalTools: { ...memoryTools.tools, ...groundingTools?.additionalTools },
+                  additionalTools: {
+                    ...memoryTools.tools,
+                    ...eventSearchTool.tools,
+                    ...groundingTools?.additionalTools,
+                  },
                   additionalToolCallbacks: {
                     ...memoryTools.callbacks,
+                    ...eventSearchTool.callbacks,
                     ...groundingTools?.additionalToolCallbacks,
                   },
                   maxSteps: groundingTools ? 12 : 8,

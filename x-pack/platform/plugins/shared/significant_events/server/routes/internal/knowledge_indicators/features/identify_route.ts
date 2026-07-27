@@ -148,6 +148,11 @@ const identifyInferredFeaturesRoute = createServerRoute({
         },
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        // Expose prior Significant Events (read-only search) to feature
+        // extraction when Agent Builder tools are available.
+        ...(server.agentBuilder?.tools
+          ? { agentBuilderTools: server.agentBuilder.tools, request }
+          : {}),
       });
       return { ...result, connectorId };
     } catch (error) {

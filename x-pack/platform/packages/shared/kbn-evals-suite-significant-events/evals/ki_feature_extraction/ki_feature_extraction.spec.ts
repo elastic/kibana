@@ -11,9 +11,14 @@ import {
   createMemoryDiscoveryTools,
   MemoryServiceImpl,
 } from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import {
+  createEvalSignificantEventSearchTool,
+  type AgentBuilderToolResult,
+} from '../../src/tools/significant_event_search_tool';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
@@ -43,7 +48,21 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, log }) => {
+  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    // The significant_event_search tool is only registered when significant
+    // events availability is on (defaults to false); enable it before any run.
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        },
+      },
+    });
+    log.info('Enabled significant events availability feature flag');
+
     const snapshots = await buildAvailableSnapshotsBySource(
       activeDatasets,
       (dataset) => dataset.kiFeatureExtraction,
@@ -110,6 +129,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           logger,
           traceEsClient,
           log,
+          fetch,
         }) => {
           const heavyDataByScenario = new Map(
             collectedExamples.map(({ scenario, sampleDocuments }) => [
@@ -118,10 +138,26 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             ])
           );
 
-          // Exercise the same memory grounding tools that production feature
-          // extraction now wires in, so the eval covers the memory code path.
+          // Exercise the same grounding tools that production feature extraction
+          // now wires in, so the eval covers the memory + prior-SigEvents paths.
           const memoryTools = createMemoryDiscoveryTools({
             memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+          });
+
+          const executeAgentBuilderTool = async (
+            toolId: string,
+            toolParams: Record<string, unknown>
+          ) =>
+            (await fetch('/api/agent_builder/tools/_execute', {
+              method: 'POST',
+              version: '2023-10-31',
+              body: JSON.stringify({ tool_id: toolId, tool_params: toolParams }),
+            })) as { results?: AgentBuilderToolResult[] };
+
+          const eventSearchTool = createEvalSignificantEventSearchTool({
+            executeTool: executeAgentBuilderTool,
+            streamName: MANAGED_STREAM_NAME,
+            logger,
           });
 
           await executorClient.runExperiment(
@@ -152,12 +188,15 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 const { features } = await identifyFeatures({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: heavy.sampleDocuments,
-                  systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}`,
+                  systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}\n${eventSearchTool.promptSnippet}`,
                   inferenceClient,
                   logger,
                   signal: new AbortController().signal,
-                  additionalTools: memoryTools.tools,
-                  additionalToolCallbacks: memoryTools.callbacks,
+                  additionalTools: { ...memoryTools.tools, ...eventSearchTool.tools },
+                  additionalToolCallbacks: {
+                    ...memoryTools.callbacks,
+                    ...eventSearchTool.callbacks,
+                  },
                 });
 
                 return {
