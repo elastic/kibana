@@ -71,6 +71,8 @@ const parseAuthoringResponse = (
   }
 
   const record = parsed as Record<string, unknown>;
+  const { summary: rawSummary, ...specWithoutSummary } = record;
+  const summary = typeof rawSummary === 'string' ? rawSummary.trim() : '';
   const nestedSpec = record.spec;
   const isEnvelope =
     nestedSpec !== null &&
@@ -79,7 +81,6 @@ const parseAuthoringResponse = (
     !hasRenderableView(record);
 
   if (isEnvelope) {
-    const summary = typeof record.summary === 'string' ? record.summary.trim() : '';
     const title = typeof record.title === 'string' ? record.title.trim() || undefined : undefined;
     return {
       spec: nestedSpec as Record<string, unknown>,
@@ -94,7 +95,7 @@ const parseAuthoringResponse = (
     );
   }
 
-  return { spec: record };
+  return { spec: specWithoutSummary, ...(summary ? { summary } : {}) };
 };
 
 const VegaStateAnnotation = Annotation.Root({
