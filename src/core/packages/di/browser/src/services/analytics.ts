@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { createToken } from '@kbn/core-di';
 import type { ServiceToken } from '@kbn/core-di';
 
 /**
  * The event-based telemetry reporting API.
- * @see {@link AnalyticsServiceStart}
+ * @see {@link AnalyticsServiceSetup}
  * @public
  */
-export type IAnalytics = AnalyticsServiceStart;
+export type IAnalytics = Pick<AnalyticsServiceSetup, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 /**
  * The event-based telemetry reporting service.

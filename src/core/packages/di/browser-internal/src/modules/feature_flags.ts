@@ -11,5 +11,8 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { CoreStart, FeatureFlags } from '@kbn/core-di-browser';
 
 export function loadFeatureFlags({ bind }: ContainerModuleLoadOptions): void {
+  // TODO: IFeatureFlags omits appendContext in the type but at runtime it's still on
+  // the object. I think it's safe but wanted to raise the question (same applies to
+  // other adapters)
   bind(FeatureFlags).toService(CoreStart('featureFlags'));
 }
