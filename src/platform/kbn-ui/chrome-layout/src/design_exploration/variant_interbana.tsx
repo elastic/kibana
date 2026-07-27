@@ -80,11 +80,14 @@ const interbanaGridTemplateColumns = (navWidth: number) =>
 export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationVariantScope(INTERBANA_VARIANT_ID);
   const { colors } = euiTheme.euiTheme;
+  const isDarkMode = euiTheme.colorMode === 'DARK';
 
   // Still a single shared hairline for anywhere a border remains, but it's
   // used far more sparingly than in Linbana — mainly on individual cards and
   // controls, not as internal row dividers within a shared container.
   const INTERBANA_HAIRLINE = `1px solid ${bespokeVar('borderSubdued')}`;
+  const INTERBANA_HAIRLINE_INSET_SHADOW = `0 0 0 1px ${bespokeVar('borderSubdued')} inset`;
+  const INTERBANA_ACCENT_INSET_SHADOW = `0 0 0 1px ${INTERBANA_ACCENT} inset`;
   const INTERBANA_SURFACE_HOVER_FILL = `color-mix(in srgb, ${colors.textParagraph} 4%, transparent)`;
 
   return css`
@@ -610,6 +613,15 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusPanelCompact')} !important;
     }
 
+    ${scope} .embPanel__hoverActions,
+    ${scope} .embPanel__hoverActions > * {
+      border-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} .embPanel__hoverActionsAnchor {
+      border-radius: ${knobVar('radiusControl')} !important;
+    }
+
     ${scope} .echChartBackground,
     ${scope} .echMetric,
     ${scope} .euiDataGridRow,
@@ -624,6 +636,16 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
     }
+
+    ${isDarkMode
+      ? `
+    ${scope} .kbnFilterButtonGroup .euiButtonGroupButton-isIconOnly,
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroupButton-isIconOnly,
+    ${scope} [class*='css-'][class*='-euiButtonGroupButton-iconOnly'] {
+      background-color: ${knobVar('surface')} !important;
+    }
+    `
+      : ''}
 
     ${scope} .dshLayout--editing .embPanel__header:hover {
       background-color: ${INTERBANA_SURFACE_HOVER_FILL} !important;
@@ -756,13 +778,299 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope}
     .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])) {
-      border: ${INTERBANA_HAIRLINE} !important;
+      border: none !important;
       border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: ${INTERBANA_HAIRLINE_INSET_SHADOW} !important;
     }
 
     ${scope}
     .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
-      border: 1px solid ${INTERBANA_ACCENT} !important;
+      border: none !important;
+      box-shadow: ${INTERBANA_ACCENT_INSET_SHADOW} !important;
+    }
+
+    /* Filter bar +/- and menu buttons: match query bar hairline + control radius. */
+    ${scope} .kbnFilterButtonGroup {
+      border-radius: ${knobVar('radiusControl')} !important;
+      overflow: hidden;
+      background-color: ${knobVar('surface')} !important;
+      width: fit-content;
+    }
+
+    ${scope} .kbnFilterButtonGroup::after {
+      border: none !important;
+      box-shadow: ${INTERBANA_HAIRLINE_INSET_SHADOW} !important;
+    }
+
+    ${scope} .kbnFilterButtonGroup > *:not(:last-of-type) {
+      border-right: none !important;
+    }
+
+    ${scope} .kbnFilterButtonGroup.kbnFilterButtonGroup--attached {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+    }
+
+    ${scope} .kbnFilterButtonGroup > .euiFlexItem {
+      display: flex;
+      flex: 0 0 auto !important;
+      flex-direction: column;
+      align-items: stretch;
+      height: 100%;
+      width: auto;
+      aspect-ratio: 1;
+      align-self: stretch;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    /* Add-filter nests three EuiFlexItems before the button — column flex passes height down. */
+    ${scope} .kbnFilterButtonGroup > .euiFlexItem .euiFlexItem {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      align-items: stretch;
+      align-self: stretch;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    ${scope} .kbnFilterButtonGroup .euiPopover,
+    ${scope} .kbnFilterButtonGroup .euiToolTipAnchor {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    ${scope} .kbnFilterButtonGroup .euiButtonIcon,
+    ${scope} .kbnFilterButtonGroup .euiButtonEmpty,
+    ${scope} .kbnFilterButtonGroup [class*='-euiButtonDisplay'] {
+      flex: 1 1 auto;
+      width: 100%;
+      min-width: 0 !important;
+      height: auto !important;
+      min-height: 100%;
+      border-radius: 0 !important;
+    }
+
+    ${scope} .kbnFilterButtonGroup > *:first-of-type .euiButtonIcon,
+    ${scope} .kbnFilterButtonGroup > *:first-of-type .euiButtonEmpty,
+    ${scope} .kbnFilterButtonGroup > *:first-of-type [class*='-euiButtonDisplay'] {
+      border-start-start-radius: ${knobVar('radiusControl')} !important;
+      border-end-start-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} .kbnFilterButtonGroup > *:last-of-type .euiButtonIcon,
+    ${scope} .kbnFilterButtonGroup > *:last-of-type .euiButtonEmpty,
+    ${scope} .kbnFilterButtonGroup > *:last-of-type [class*='-euiButtonDisplay'] {
+      border-start-end-radius: ${knobVar('radiusControl')} !important;
+      border-end-end-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} .kbnFilterButtonGroup.kbnFilterButtonGroup--attached > *:last-of-type .euiButtonIcon,
+    ${scope} .kbnFilterButtonGroup.kbnFilterButtonGroup--attached > *:last-of-type .euiButtonEmpty,
+    ${scope} .kbnFilterButtonGroup.kbnFilterButtonGroup--attached > *:last-of-type [class*='-euiButtonDisplay'] {
+      border-start-end-radius: 0 !important;
+      border-end-end-radius: 0 !important;
+    }
+
+    /* Date range time window buttons — same visual language, separate EuiButtonGroup DOM. */
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] {
+      border-radius: ${knobVar('radiusControl')} !important;
+      overflow: hidden;
+      background-color: ${knobVar('surface')} !important;
+      position: relative;
+      width: fit-content;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons']::after {
+      content: '' !important;
+      position: absolute;
+      inset: 0;
+      border: none !important;
+      box-shadow: ${INTERBANA_HAIRLINE_INSET_SHADOW} !important;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__buttons {
+      border-radius: inherit !important;
+      align-items: stretch;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__buttons > *:not(:last-child) {
+      border-right: ${INTERBANA_HAIRLINE} !important;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroupButton::before {
+      display: none !important;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroupButton {
+      border: none !important;
+      margin-inline-start: 0 !important;
+      background-color: ${knobVar('surface')} !important;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__tooltipWrapper {
+      display: flex;
+      flex: 0 0 auto !important;
+      flex-direction: column;
+      align-items: stretch;
+      height: 100%;
+      width: auto;
+      aspect-ratio: 1;
+      align-self: stretch;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroupButton,
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] [class*='-euiButtonDisplay'] {
+      flex: 1 1 auto;
+      width: 100%;
+      min-width: 0 !important;
+      height: auto !important;
+      min-height: 100%;
+      border-radius: 0 !important;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__buttons > *:first-child .euiButtonGroupButton,
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__buttons > *:first-child [class*='-euiButtonDisplay'] {
+      border-start-start-radius: ${knobVar('radiusControl')} !important;
+      border-end-start-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__buttons > *:last-child .euiButtonGroupButton,
+    ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__buttons > *:last-child [class*='-euiButtonDisplay'] {
+      border-start-end-radius: ${knobVar('radiusControl')} !important;
+      border-end-end-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    /* Discover data table toolbar — control groups + standalone grid controls. */
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] {
+      padding-block-end: 12px !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup {
+      border-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup::after {
+      content: '' !important;
+      position: absolute;
+      inset: 0;
+      border: none !important;
+      box-shadow: ${INTERBANA_HAIRLINE_INSET_SHADOW} !important;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton > div {
+      z-index: auto !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup:has([data-test-subj='inTableSearchInput']) {
+      overflow: visible !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlButton + .unifiedDataTableToolbarControlButton {
+      border-inline-start: none !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton:not(:has([data-test-subj='inTableSearchInput'])) {
+      display: flex;
+      flex: 0 0 auto !important;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton:not(:has([data-test-subj='inTableSearchInput'])) > div {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton:has([data-test-subj='inTableSearchInput']) {
+      aspect-ratio: unset !important;
+      flex: 1 1 auto !important;
+      width: auto !important;
+      overflow: visible !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .euiToolTipAnchor,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .euiPopover {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .euiButtonIcon,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .euiDataGridToolbarControl,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup [class*='-euiButtonDisplay'] {
+      flex: 1 1 auto;
+      width: 100%;
+      min-width: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background-color: ${knobVar('surface')} !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton:not(:has([data-test-subj='inTableSearchInput'])) .euiDataGridToolbarControl,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton:not(:has([data-test-subj='inTableSearchInput'])) .euiButtonIcon {
+      block-size: 32px !important;
+      inline-size: 32px !important;
+      min-block-size: 32px !important;
+      min-inline-size: 32px !important;
+      height: 32px !important;
+      width: 32px !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup > *:first-child .euiButtonIcon,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup > *:first-child .euiDataGridToolbarControl,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup > *:first-child [class*='-euiButtonDisplay'] {
+      border-start-start-radius: ${knobVar('radiusControl')} !important;
+      border-end-start-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup > *:last-child .euiButtonIcon,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup > *:last-child .euiDataGridToolbarControl,
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup > *:last-child [class*='-euiButtonDisplay'] {
+      border-start-end-radius: ${knobVar('radiusControl')} !important;
+      border-end-end-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
+      border: none !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      box-shadow: ${INTERBANA_HAIRLINE_INSET_SHADOW} !important;
+      background-color: ${knobVar('surface')} !important;
+    }
+
+    ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
+      border-radius: 0 !important;
+      box-shadow: none !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
@@ -991,6 +1299,18 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       top: 0 !important;
       transition: top ${INTERBANA_APP_HEADER_TRANSITION_MS}ms ease
         ${INTERBANA_APP_HEADER_TRANSITION_MS}ms !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+      border-block-end: none !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      [data-test-subj='appHeader'] {
+      border-block-end: none !important;
+      border-bottom: none !important;
+      margin-bottom: 0 !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
