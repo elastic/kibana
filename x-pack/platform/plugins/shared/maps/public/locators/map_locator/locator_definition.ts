@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { MapsAppLocatorDependencies, MapsAppLocatorParams } from './types';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 
 export const MAPS_APP_LOCATOR = 'MAPS_APP_LOCATOR' as const;
 

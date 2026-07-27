@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { MapsAppTileMapLocatorParams, MapsAppTileMapLocatorDependencies } from './types';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 
 export const MAPS_APP_TILE_MAP_LOCATOR = 'MAPS_APP_TILE_MAP_LOCATOR' as const;
 
