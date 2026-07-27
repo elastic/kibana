@@ -16,7 +16,6 @@ import {
   promptResponseEntrySchema,
   registerChatRoutes,
 } from './chat';
-import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 
 describe('promptResponseEntrySchema', () => {
   it('accepts the confirmation variant', () => {
@@ -211,11 +210,6 @@ describe('callbackConversePayloadSchema', () => {
         execution_idempotency_key: 'x'.repeat(257),
       })
     ).toThrow(/execution_idempotency_key/);
-  });
-
-  it('identifies callback request payloads', () => {
-    expect(isChatCallbackRequestBodyPayload(basePayload)).toBe(true);
-    expect(isChatCallbackRequestBodyPayload({ agent_id: 'agent-1', input: 'Hello' })).toBe(false);
   });
 });
 
