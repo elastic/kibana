@@ -15,4 +15,9 @@ export default createServerlessTestConfig<typeof services>({
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic APM API Integration Tests',
   },
+  mochaOpts: {
+    // synthtrace before hooks bulk-index >100k events, which takes longer than
+    // the default 2 min hookTimeout when running against real MKI projects
+    hookTimeout: 360_000,
+  },
 });

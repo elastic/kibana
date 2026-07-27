@@ -23,6 +23,7 @@ interface CreateTestConfigOptions<T> {
   suiteTags?: { include?: string[]; exclude?: string[] };
   tier?: 'oblt_logs_essentials';
   indexRefreshInterval?: string | false;
+  mochaOpts?: { timeout?: number; hookTimeout?: number };
 }
 
 // These args replicate the MKI setup from the elasticsearch controller:
@@ -143,6 +144,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
       },
       indexRefreshInterval: options.indexRefreshInterval,
+      mochaOpts: {
+        ...svlSharedConfig.get('mochaOpts'),
+        ...options.mochaOpts,
+      },
     };
   };
 }
