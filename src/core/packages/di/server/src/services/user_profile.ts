@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { UserProfileGetCurrentParams } from '@kbn/core-user-profile-server';
 import type {
   UserProfileData,
@@ -34,14 +35,12 @@ export type IUserProfileIdAccessor = () => Promise<string | null>;
  * The accessor retrieving the user profile in the current HTTP request context.
  * @public
  */
-export const UserProfileAccessor = Symbol(
-  'UserProfileAccessor'
-) as ServiceIdentifier<IUserProfileAccessor>;
+export const UserProfileAccessor: ServiceToken<IUserProfileAccessor> =
+  createToken('UserProfileAccessor');
 
 /**
  * The accessor retrieving the user profile identifier in the current HTTP request context.
  * @public
  */
-export const UserProfileIdAccessor = Symbol(
-  'UserProfileIdAccessor'
-) as ServiceIdentifier<IUserProfileIdAccessor>;
+export const UserProfileIdAccessor: ServiceToken<IUserProfileIdAccessor> =
+  createToken('UserProfileIdAccessor');

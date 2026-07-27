@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
 
 /**
@@ -22,4 +23,4 @@ export type IUserActivity = UserActivityServiceSetup;
  * @see {@link IUserActivity}
  * @public
  */
-export const UserActivity = Symbol('UserActivity') as ServiceIdentifier<IUserActivity>;
+export const UserActivity: ServiceToken<IUserActivity> = createToken('UserActivity');

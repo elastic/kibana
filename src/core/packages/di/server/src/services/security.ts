@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { APIKeysType, AuditLogger as IAuditLogger } from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
@@ -16,18 +17,18 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
  * @see {@link IAuditLogger}
  * @public
  */
-export const AuditLogger = Symbol('AuditLogger') as ServiceIdentifier<IAuditLogger>;
+export const AuditLogger: ServiceToken<IAuditLogger> = createToken('AuditLogger');
 
 /**
  * The user authenticated for the current HTTP request or `null` if the request is not authenticated.
  * @see {@link AuthenticatedUser}
  * @public
  */
-export const CurrentUser = Symbol('CurrentUser') as ServiceIdentifier<AuthenticatedUser | null>;
+export const CurrentUser: ServiceToken<AuthenticatedUser | null> = createToken('CurrentUser');
 
 /**
  * The service for managing API keys.
  * @see {@link APIKeysType}
  * @public
  */
-export const ApiKeys = Symbol('ApiKeys') as ServiceIdentifier<APIKeysType>;
+export const ApiKeys: ServiceToken<APIKeysType> = createToken('ApiKeys');

@@ -19,6 +19,7 @@
     "@kbn/core-analytics-server",
     "@kbn/core-capabilities-common",
     "@kbn/core-capabilities-server",
+    "@kbn/core-di",
     "@kbn/core-doc-links-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-execution-context-server",

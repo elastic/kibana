@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Factory, ServiceIdentifier } from 'inversify';
+import type { Factory } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type {
   AsScopedOptions,
   ElasticsearchClient as IElasticsearchClient,
@@ -25,31 +27,29 @@ export type IScopedClusterClientFactory = Factory<IScopedClusterClient, [AsScope
  * The Elasticsearch client authenticated as the user of the current HTTP request.
  * @public
  */
-export const ElasticsearchClient = Symbol(
-  'ElasticsearchClient'
-) as ServiceIdentifier<IElasticsearchClient>;
+export const ElasticsearchClient: ServiceToken<IElasticsearchClient> =
+  createToken('ElasticsearchClient');
 
 /**
  * The Elasticsearch client authenticated as the internal Kibana user.
  * @public
  */
-export const InternalElasticsearchClient = Symbol(
+export const InternalElasticsearchClient: ServiceToken<IElasticsearchClient> = createToken(
   'InternalElasticsearchClient'
-) as ServiceIdentifier<IElasticsearchClient>;
+);
 
 /**
  * The Elasticsearch cluster client scoped to the current HTTP request.
  * @see {@link IScopedClusterClient}
  * @public
  */
-export const ScopedClusterClient = Symbol(
-  'ScopedClusterClient'
-) as ServiceIdentifier<IScopedClusterClient>;
+export const ScopedClusterClient: ServiceToken<IScopedClusterClient> =
+  createToken('ScopedClusterClient');
 
 /**
  * The cluster client factory that constructs a scoped client instance in the current HTTP request context.
  * @public
  */
-export const ScopedClusterClientFactory = Symbol(
+export const ScopedClusterClientFactory: ServiceToken<IScopedClusterClientFactory> = createToken(
   'ScopedClusterClientFactory'
-) as ServiceIdentifier<IScopedClusterClientFactory>;
+);

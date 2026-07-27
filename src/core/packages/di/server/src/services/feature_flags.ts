@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 
 /**
@@ -23,4 +24,4 @@ export type IFeatureFlags = Omit<FeatureFlagsStart, 'appendContext'>;
  * @see {@link IFeatureFlags}
  * @public
  */
-export const FeatureFlags = Symbol('FeatureFlags') as ServiceIdentifier<IFeatureFlags>;
+export const FeatureFlags: ServiceToken<IFeatureFlags> = createToken('FeatureFlags');

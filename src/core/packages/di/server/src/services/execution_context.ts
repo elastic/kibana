@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
 
 /**
@@ -22,4 +23,4 @@ export type IExecutionContext = ExecutionContextSetup;
  * @see {@link IExecutionContext}
  * @public
  */
-export const ExecutionContext = Symbol('ExecutionContext') as ServiceIdentifier<IExecutionContext>;
+export const ExecutionContext: ServiceToken<IExecutionContext> = createToken('ExecutionContext');

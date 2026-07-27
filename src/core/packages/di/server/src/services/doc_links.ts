@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 
 /**
  * The documentation links.
@@ -22,4 +23,4 @@ export type IDocLinks = DocLinksServiceSetup;
  * @see {@link IDocLinks}
  * @public
  */
-export const DocLinks = Symbol('DocLinks') as ServiceIdentifier<IDocLinks>;
+export const DocLinks: ServiceToken<IDocLinks> = createToken('DocLinks');

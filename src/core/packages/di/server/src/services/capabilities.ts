@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type {
   CapabilitiesProvider as ICapabilitiesProvider,
   ResolveCapabilitiesOptions,
 } from '@kbn/core-capabilities-server';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 
 /**
  * Service identifier to register a capabilities provider.
@@ -25,9 +26,8 @@ import type {
  * ```
  * @public
  */
-export const CapabilitiesProvider = Symbol(
-  'CapabilitiesProvider'
-) as ServiceIdentifier<ICapabilitiesProvider>;
+export const CapabilitiesProvider: ServiceToken<ICapabilitiesProvider> =
+  createToken('CapabilitiesProvider');
 
 /**
  * Resolves the {@link Capabilities} for the current HTTP request.
@@ -40,6 +40,5 @@ export type ICapabilitiesAccessor = (options: ResolveCapabilitiesOptions) => Pro
  * @see {@link ICapabilitiesAccessor}
  * @public
  */
-export const CapabilitiesAccessor = Symbol(
-  'CapabilitiesAccessor'
-) as ServiceIdentifier<ICapabilitiesAccessor>;
+export const CapabilitiesAccessor: ServiceToken<ICapabilitiesAccessor> =
+  createToken('CapabilitiesAccessor');

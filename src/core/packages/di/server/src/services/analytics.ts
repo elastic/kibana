@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 
 /**
  * The event-based telemetry reporting API.
@@ -22,4 +23,4 @@ export type IAnalytics = Pick<AnalyticsServiceSetup, 'optIn' | 'reportEvent' | '
  * @see {@link IAnalytics}
  * @public
  */
-export const Analytics = Symbol('Analytics') as ServiceIdentifier<IAnalytics>;
+export const Analytics: ServiceToken<IAnalytics> = createToken('Analytics');

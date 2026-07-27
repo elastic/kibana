@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { PricingServiceStart } from '@kbn/core-pricing-server';
 
 /**
@@ -23,4 +24,4 @@ export type IPricing = Pick<PricingServiceStart, 'isFeatureAvailable'>;
  * @see {@link IPricing}
  * @public
  */
-export const Pricing = Symbol('Pricing') as ServiceIdentifier<IPricing>;
+export const Pricing: ServiceToken<IPricing> = createToken('Pricing');
