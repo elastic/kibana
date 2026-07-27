@@ -26,7 +26,16 @@ curl -s -X POST -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: applicati
   "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
   -d '{ "type": "query", "name": "positive-control-<SLUG>", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["logs-testing.<SLUG>-default"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
 ```
-Record the returned rule `id`.
+Record the returned rule `id` and register it immediately as an owned
+`detection_rule` resource:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind detection_rule \
+  --id "$RULE_ID" \
+  --endpoint "/s/$SPACE_ID/api/detection_engine/rules?id=$RULE_ID" \
+  --owned
+```
 
 ### 3. Force immediate execution
 ```bash
@@ -42,14 +51,18 @@ curl -s -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json"
 ```
 A real alert has `kibana.alert.status`, `kibana.alert.rule.rule_type_id: "siem.queryRule"`, and a populated `kibana.alert.rule.uuid`. If those fields are present, the local pipeline genuinely produced an alert — so if the feature under test still shows nothing, the gap is the feature, not the data. **For CCS:** index the step-1 document on the **REMOTE** cluster and point the rule's `index` at the CCS pattern `<remote_cluster_alias>:logs-testing.<SLUG>-default` to prove the remote data path specifically.
 
-### 5. Clean up at end of session
+### 5. Register source resource and clean up at end of session
 ```bash
-curl -s -X DELETE -H "Authorization: ApiKey <API_KEY>" -H "kbn-xsrf: true" \
-  "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules?id=<RULE_ID>"
-curl -s -X DELETE -H "Authorization: ApiKey <API_KEY>" \
-  "<ES_URL>/logs-testing.<SLUG>-default"
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+  --session-dir "$SESSION_DIR" \
+  --kind es_index \
+  --id "logs-testing.<SLUG>-default" \
+  --endpoint "/logs-testing.<SLUG>-default" \
+  --base-url es_url \
+  --owned
 ```
-Note the cleanup in the finding so the environment is known to be left clean.
+The central session cleanup deletes both owned resources. Do not manually
+delete a reused index or rule; register it with `--reused` instead.
 
 ## Notes
 

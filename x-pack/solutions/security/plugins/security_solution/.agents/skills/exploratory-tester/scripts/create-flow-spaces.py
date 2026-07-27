@@ -1,100 +1,159 @@
 #!/usr/bin/env python3
-"""
-Creates per-flow Kibana spaces for parallel-mode isolation.
-
-For each flow in config.json where isolate=true (the default), creates a
-dedicated Kibana space "exploratory-testing-flow-<N>" and updates the flow's
-space_id in config.json. Flows with isolate=false share the base space.
-
-Usage:
-    python3 scripts/create-flow-spaces.py --session-dir .exploratory-session/entity-analytics-20260714-093022
-
-Reads:  <session-dir>/config.json
-Writes: <session-dir>/config.json  (updates flow.space_id for each flow,
-                                    adds created_flow_spaces list)
-
-Exit 0: all spaces created (or already existed).
-Exit 1: unrecoverable error — check output for details.
-
-Run this during Phase 1c, while still authenticated as admin.
-"""
+"""Create session-owned per-flow Kibana spaces for parallel-mode isolation."""
 
 import argparse
 import json
 import subprocess
 import sys
+from pathlib import Path
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--session-dir', required=True,
-                    help='Path to the session directory (contains config.json)')
-args = parser.parse_args()
+from session_resources import (
+    build_auth_args,
+    ensure_session_manifest,
+    namespaced_flow_space_id,
+    register_resource,
+)
 
-CONFIG_PATH = f'{args.session_dir}/config.json'
 
-with open(CONFIG_PATH) as f:
-    cfg = json.load(f)
+def _write_config(config_path: Path, config: dict[str, object]) -> None:
+    temporary_path = config_path.with_suffix(".json.tmp")
+    with temporary_path.open("w", encoding="utf-8") as config_file:
+        json.dump(config, config_file, indent=2)
+        config_file.write("\n")
+    temporary_path.replace(config_path)
 
-if cfg.get('mode') != 'parallel':
-    print('Not parallel mode — no per-flow spaces needed.')
-    sys.exit(0)
 
-url      = cfg['environment']['url']
-base_sid = cfg['environment'].get('space_id', 'exploratory-testing')
-creds    = cfg.get('credentials', {})
-api_key  = creds.get('api_key')
-username = creds.get('username', 'elastic')
-password = creds.get('password', 'changeme')
-
-# Build auth args for curl: API key takes precedence over basic auth
-if api_key:
-    auth_args = ['-H', f'Authorization: ApiKey {api_key}']
-else:
-    auth_args = ['-u', f'{username}:{password}']
-
-created = []
-errors  = []
-
-for i, flow in enumerate(cfg['flows'], 1):
-    if not flow.get('isolate', True):
-        flow['space_id'] = base_sid
-        print(f'Flow {i} ({flow["name"]!r}): isolate=false → sharing {base_sid!r}')
-        continue
-
-    sid  = f'exploratory-testing-flow-{i}'
-    body = json.dumps({'id': sid, 'name': f'Exploratory Testing — Flow {i}', 'color': '#DD0A73'})
-
-    result = subprocess.run(
-        ['curl', '-s', '-w', '\n%{http_code}']
-        + auth_args +
-        ['-X', 'POST', f'{url}/api/spaces/space',
-         '-H', 'kbn-xsrf: true',
-         '-H', 'Content-Type: application/json',
-         '-d', body],
-        capture_output=True, text=True
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--session-dir",
+        required=True,
+        help="Path to the session directory (contains config.json)",
     )
+    args = parser.parse_args()
 
-    lines    = result.stdout.strip().rsplit('\n', 1)
-    http_code = lines[-1] if len(lines) > 1 else '000'
+    config_path = Path(args.session_dir) / "config.json"
+    with config_path.open(encoding="utf-8") as config_file:
+        config = json.load(config_file)
 
-    if http_code in ('200', '409'):          # 409 = already exists, reuse
-        flow['space_id'] = sid
-        created.append(sid)
-        status = 'created' if http_code == '200' else 'already exists'
-        print(f'Flow {i} ({flow["name"]!r}): space {sid!r} {status}')
-    else:
-        # Fall back to base space rather than blocking the session
-        flow['space_id'] = base_sid
-        errors.append({'flow': i, 'space': sid, 'http_code': http_code, 'body': lines[0]})
-        print(f'Flow {i} ({flow["name"]!r}): space creation failed (HTTP {http_code}) '
-              f'— falling back to shared space {base_sid!r}', file=sys.stderr)
+    if config.get("mode") != "parallel":
+        print("Not parallel mode — no per-flow spaces needed.")
+        return 0
 
-cfg['created_flow_spaces'] = created
+    session_id = ensure_session_manifest(config)
+    _write_config(config_path, config)
+    url = config["environment"]["url"]
+    base_space_id = config["environment"].get("space_id", "exploratory-testing")
 
-with open(CONFIG_PATH, 'w') as f:
-    json.dump(cfg, f, indent=2)
+    try:
+        auth_args = build_auth_args(config)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
-print(f'\n{len(created)} per-flow space(s) ready. {len(errors)} fallback(s).')
-if errors:
-    print('Fallback details:', json.dumps(errors, indent=2), file=sys.stderr)
+    errors: list[dict[str, object]] = []
 
-sys.exit(0)
+    for flow_number, flow in enumerate(config["flows"], 1):
+        if not flow.get("isolate", True):
+            flow["space_id"] = base_space_id
+            print(
+                f"Flow {flow_number} ({flow['name']!r}): "
+                f"isolate=false → sharing {base_space_id!r}"
+            )
+            _write_config(config_path, config)
+            continue
+
+        space_id = namespaced_flow_space_id(session_id, flow_number)
+        body = json.dumps(
+            {
+                "id": space_id,
+                "name": f"Exploratory Testing — Flow {flow_number}",
+                "color": "#DD0A73",
+            }
+        )
+
+        result = subprocess.run(
+            [
+                "curl",
+                "-s",
+                "-w",
+                "\n%{http_code}",
+                *auth_args,
+                "-X",
+                "POST",
+                f"{url}/api/spaces/space",
+                "-H",
+                "kbn-xsrf: true",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                body,
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        lines = result.stdout.strip().rsplit("\n", 1)
+        http_code = lines[-1] if len(lines) > 1 else "000"
+        endpoint = f"/api/spaces/space/{space_id}"
+
+        if http_code == "200":
+            flow["space_id"] = space_id
+            register_resource(
+                config,
+                kind="kibana_space",
+                resource_id=space_id,
+                owned=True,
+                endpoint=endpoint,
+            )
+            print(
+                f"Flow {flow_number} ({flow['name']!r}): "
+                f"space {space_id!r} created"
+            )
+        elif http_code == "409":
+            flow["space_id"] = space_id
+            register_resource(
+                config,
+                kind="kibana_space",
+                resource_id=space_id,
+                owned=False,
+                endpoint=endpoint,
+            )
+            print(
+                f"Flow {flow_number} ({flow['name']!r}): "
+                f"space {space_id!r} already exists — reusing"
+            )
+        else:
+            flow["space_id"] = base_space_id
+            errors.append(
+                {
+                    "flow": flow_number,
+                    "space": space_id,
+                    "http_code": http_code,
+                    "body": lines[0] if lines else "",
+                }
+            )
+            print(
+                f"Flow {flow_number} ({flow['name']!r}): "
+                f"space creation failed (HTTP {http_code}) — "
+                f"falling back to shared space {base_space_id!r}",
+                file=sys.stderr,
+            )
+
+        _write_config(config_path, config)
+
+    created_count = len(config["created_flow_spaces"])
+    reused_count = len(config["reused_flow_spaces"])
+    print(
+        f"\n{created_count} per-flow space(s) created, "
+        f"{reused_count} reused. {len(errors)} fallback(s)."
+    )
+    if errors:
+        print(f"Fallback details: {json.dumps(errors, indent=2)}", file=sys.stderr)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

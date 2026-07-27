@@ -47,6 +47,8 @@ TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 # Try preferred index name first; fall back to non-logs prefix on serverless
 # where logs-* matches a data stream template and cannot be used as a plain index.
+INDEX_READY=false
+INDEX_OWNED=false
 for INDEX in "logs-exploratory.noise-000001" "exploratory-noise-000001"; do
   ALIAS="${INDEX%-000001}"   # strip trailing -000001
 
@@ -71,12 +73,16 @@ for INDEX in "logs-exploratory.noise-000001" "exploratory-noise-000001"; do
 
   if [[ "$RESPONSE" == "200" ]]; then
     echo "Index created."
+    INDEX_READY=true
+    INDEX_OWNED=true
     break
   elif [[ "$RESPONSE" == "400" ]]; then
     # Could be "already exists" (fine) or data stream conflict (retry with fallback name)
     BODY=$(curl -s -H "$AUTH_HEADER" -X GET "$ES_URL/$INDEX" 2>/dev/null || true)
     if echo "$BODY" | grep -q '"mappings"'; then
       echo "Index already exists — reusing."
+      INDEX_READY=true
+      INDEX_OWNED=false
       break
     else
       echo "Index name $INDEX conflicts with a data stream template — trying fallback name ..."
@@ -87,6 +93,11 @@ for INDEX in "logs-exploratory.noise-000001" "exploratory-noise-000001"; do
     exit 1
   fi
 done
+
+if [[ "$INDEX_READY" != true ]]; then
+  echo "Unable to create or identify a reusable noise index." >&2
+  exit 1
+fi
 
 echo "Indexing noise documents into $INDEX ..."
 BULK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -110,3 +121,4 @@ fi
 
 echo "Noise index ready: $ALIAS"
 echo "NOISE_INDEX_ALIAS=$ALIAS"
+echo "NOISE_INDEX_OWNED=$INDEX_OWNED"

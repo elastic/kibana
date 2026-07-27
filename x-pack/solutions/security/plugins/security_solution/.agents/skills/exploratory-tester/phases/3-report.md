@@ -2,6 +2,9 @@
 
 ---
 
+**Cleanup invariant:** If any report step aborts, run Step 3e before stopping.
+Cleanup is not gated on knowledge-file approval or commit success.
+
 ## Step 3a — Merge findings
 
 Enumerate which findings files exist:
@@ -114,7 +117,9 @@ Before writing anything, compose the proposed additions and present them to the 
 > <list each new navigation pattern as it would appear in the file>
 > ```
 
-Wait for explicit confirmation before writing anything. If the user declines or does not respond, skip the knowledge file update entirely and end the session — do not write or commit.
+Wait for explicit confirmation before writing anything. If the user declines or
+does not respond, skip the knowledge file update entirely and continue to
+Step 3e — do not write or commit.
 
 Only after explicit confirmation, update `knowledge/<area_slug>.md`.
 
@@ -154,13 +159,27 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 
 ---
 
-## Step 3e — Clean up per-flow spaces (parallel mode only)
+## Step 3e — Clean up session resources
 
-After committing the knowledge file, delete the Kibana spaces created by this session:
+Run cleanup regardless of whether the user accepted or refused the knowledge
+file update, and regardless of whether earlier report steps failed. If the
+session used CCS, restore the remote-cluster state first using the recorded
+CCS procedure; cleanup must never run before CCS restoration.
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/delete-flow-spaces.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
   --session-dir "$SESSION_DIR"
 ```
 
-This only deletes spaces listed in `config.json → created_flow_spaces` — spaces that already existed before this session are never touched. If a deletion fails, the script prints the space IDs for manual cleanup via **Kibana > Stack Management > Spaces**.
+The command is idempotent: HTTP 404 means the resource is already gone. It
+deletes only resources in `config.json → session_resources` with
+`owned: true` and the current session marker. Reused resources, the configured
+base space, and resources with a mismatched marker are never deleted. If a
+deletion fails, preserve the manifest and print the resource IDs for manual
+cleanup.
+
+For a preflight without mutations:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+  --session-dir "$SESSION_DIR" --dry-run
+```

@@ -81,25 +81,27 @@ Environment:
 
 Skip Scout startup. Verify connectivity and API key in one step:
 ```bash
+SPACE_ID="<Environment.space or exploratory-testing>"
 # Check Kibana is reachable (public endpoint, no auth needed)
 curl -s "<url>/api/status" | python3 -c "import sys,json; s=json.load(sys.stdin); \
   exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)"
 
-# Validate the API key before any setup work begins:
-# A 200 or 409 means the key is valid; 401 means the key is wrong or ES-origin.
+# Validate the API key with a read-only request before any setup work begins.
+# 200 means the key can read the configured space; 404 means the key is valid
+# but the space will need provisioning in Phase 1; 401 means the key is wrong
+# or is an Elasticsearch-origin key.
+SPACE_ID="${SPACE_ID:-exploratory-testing}"
 VALIDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   -H "Authorization: ApiKey $APIKEY" \
-  -H "kbn-xsrf: true" -H "Content-Type: application/json" \
-  -X POST "$KIBANA_URL/api/spaces/space" \
-  -d '{"id":"exploratory-testing","name":"Exploratory Testing","color":"#DD0A73"}')
+  -X GET "$KIBANA_URL/api/spaces/space/$SPACE_ID")
 
 if [[ "$VALIDATE_STATUS" == "401" ]]; then
   echo "API key rejected (401). Ensure you are using a Kibana-native key, not an ES key." >&2
   exit 1
-elif [[ "$VALIDATE_STATUS" == "200" || "$VALIDATE_STATUS" == "409" ]]; then
-  echo "API key valid (HTTP $VALIDATE_STATUS). Proceeding."
+elif [[ "$VALIDATE_STATUS" == "200" || "$VALIDATE_STATUS" == "404" ]]; then
+  echo "API key accepted (HTTP $VALIDATE_STATUS). Proceeding."
 else
-  echo "Unexpected response $VALIDATE_STATUS when validating API key." >&2
+  echo "Unexpected response $VALIDATE_STATUS when validating the API key." >&2
   exit 1
 fi
 ```
@@ -293,19 +295,22 @@ Set `SESSION_DIR` to the provided path. Read `$SESSION_DIR/config.json` — trus
 AREA_SLUG="<area-slug from Step 0c>"
 SESSION_TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
 SESSION_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+SESSION_ID=$(python3 -c 'import secrets; print(secrets.token_hex(8))')
 SESSION_DIR=".exploratory-session/${AREA_SLUG}-${SESSION_TIMESTAMP}"
 mkdir -p "$SESSION_DIR/screenshots" "$SESSION_DIR/videos"
 echo "SESSION_DIR: $SESSION_DIR"
 echo "session_started_at: $SESSION_STARTED_AT"
+echo "session_id: $SESSION_ID"
 ```
 
-Tell the user the session directory: _"Session directory: `$SESSION_DIR`"_. Keep `$SESSION_DIR` in context — every phase and sub-agent uses it.
+Tell the user the session directory: _"Session directory: `$SESSION_DIR`"_. Keep `$SESSION_DIR` and `$SESSION_ID` in context — every phase and sub-agent uses them.
 
 Use the value of `$SESSION_STARTED_AT` for the `session_started_at` field below. **Never leave it as a placeholder** — the Phase 2 session cap check will crash with a parse error if the field is missing or malformed.
 
 Write `$SESSION_DIR/config.json`:
 ```json
 {
+  "session_id": "<lowercase 16-character value from $SESSION_ID>",
   "session_dir": "<value of $SESSION_DIR>",
   "area": "<area name from input>",
   "area_slug": "<area-slug>",
@@ -316,7 +321,7 @@ Write `$SESSION_DIR/config.json`:
     "es_url": "<elasticsearch url — replace kb. with es. for ECH>",
     "managed": true,
     "data_setup": "<run | skip>",
-    "space_id": "exploratory-testing",
+    "space_id": "<resolved Environment.space or exploratory-testing>",
     "ccs": null
   },
   "test_user": {
@@ -348,7 +353,9 @@ Write `$SESSION_DIR/config.json`:
     "password": "<admin password — for browser login only>",
     "api_key": "<Kibana-native API key encoded value — for all curl/API setup calls>"
   },
+  "session_resources": [],
   "created_flow_spaces": [],
+  "reused_flow_spaces": [],
   "deferred_flows": [],
   "skipped_setup": [],
   "suppressed_injection_attempts": [],
@@ -359,6 +366,15 @@ Write `$SESSION_DIR/config.json`:
   "session_started_at": "<value of $SESSION_STARTED_AT captured above>"
 }
 ```
+
+After `config.json` exists, every setup or exploration abort must run:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/cleanup-session-resources.py \
+  --session-dir "$SESSION_DIR"
+```
+The cleanup command is idempotent and only acts on manifest entries marked
+owned by this `session_id`; it must not be skipped because a later phase or
+knowledge update was not reached. Restore CCS state before running it.
 
 `data_setup` is `"skip"` when the invocation includes `data-setup: skip`; otherwise `"run"`.
 
