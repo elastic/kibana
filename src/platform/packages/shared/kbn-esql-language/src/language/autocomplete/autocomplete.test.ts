@@ -556,9 +556,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison
-    testSuggestions(
-      'FROM index1 | WHERE keywordField i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE keywordField i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -567,13 +567,13 @@ describe('autocomplete', () => {
         },
         ['keyword'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
 
     // WHERE function <suggest>
-    testSuggestions(
-      'FROM index1 | WHERE ABS(integerField) i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE ABS(integerField) i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'any',
         {
@@ -582,8 +582,8 @@ describe('autocomplete', () => {
         },
         ['integer'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
@@ -994,9 +994,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison (keyword fields get only string operators)
-    testSuggestions(
-      'FROM a | WHERE keywordField /',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM a | WHERE keywordField /', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -1004,8 +1004,8 @@ describe('autocomplete', () => {
           skipAssign: true,
         },
         ['keyword']
-      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
-    );
+      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s))),
+    ]);
 
     describe('field lists', () => {
       describe('METADATA <field>', () => {

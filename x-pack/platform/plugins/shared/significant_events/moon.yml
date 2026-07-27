@@ -58,7 +58,6 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/storage-adapter'
   - '@kbn/search-inference-endpoints'
-  - '@kbn/task-manager-plugin'
   - '@kbn/core-analytics-server'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
@@ -79,6 +78,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/datemath'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - prod

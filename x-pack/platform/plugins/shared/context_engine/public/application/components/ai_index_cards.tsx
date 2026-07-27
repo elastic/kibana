@@ -12,16 +12,16 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSkeletonRectangle,
   EuiText,
+  EuiTextBlockTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React from 'react';
-import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
+import type { AiIndexHttpItem, AiIndexType } from '../../../common/http_api/ai_indices';
 import { useListAiIndices } from '../hooks/use_list_ai_indices';
 import { useNavigation } from '../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../paths';
@@ -29,57 +29,101 @@ import { CreateAiIndexButton } from './create_ai_index_button';
 
 const SKELETON_CARD_COUNT = 3;
 
+const TYPE_LABEL: Record<AiIndexType, string> = {
+  index: i18n.translate('xpack.contextEngine.landing.card.type.index', {
+    defaultMessage: 'Index',
+  }),
+  data_stream: i18n.translate('xpack.contextEngine.landing.card.type.dataStream', {
+    defaultMessage: 'Data stream',
+  }),
+};
+
 const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string }) => {
   const { euiTheme } = useEuiTheme();
-
-  const sourcesLabel = i18n.translate('xpack.contextEngine.landing.card.sourcesCount', {
-    defaultMessage: '{count, plural, one {# source} other {# sources}}',
-    values: { count: aiIndex.sources.length },
-  });
-
-  const automationsLabel = i18n.translate('xpack.contextEngine.landing.card.automationsCount', {
-    defaultMessage: '{count, plural, one {# automation} other {# automations}}',
-    values: { count: aiIndex.automations.length },
-  });
 
   return (
     <EuiCard
       data-test-subj="contextAiIndexCard"
       textAlign="left"
       titleSize="xs"
+      titleElement="h4"
       paddingSize="l"
-      title={aiIndex.name}
+      title={<EuiTextBlockTruncate lines={1}>{aiIndex.id}</EuiTextBlockTruncate>}
       href={href}
+      css={css`
+        block-size: 100%;
+      `}
       footer={
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiText size="xs" color="subdued" data-test-subj="contextAiIndexCardUpdated">
-            <FormattedMessage
-              id="xpack.contextEngine.landing.card.updated"
-              defaultMessage="Updated {time}"
-              values={{ time: <FormattedRelative value={aiIndex.date_modified} /> }}
-            />
-          </EuiText>
-        </>
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="contextAiIndexCardUpdated"
+          css={css`
+            text-align: end;
+          `}
+        >
+          <FormattedMessage
+            id="xpack.contextEngine.landing.card.updated"
+            defaultMessage="Updated {time}"
+            values={{ time: <FormattedRelative value={aiIndex.date_modified} /> }}
+          />
+        </EuiText>
       }
     >
-      <EuiFlexGroup
-        gutterSize="s"
-        wrap
-        responsive={false}
-        css={css`
-          margin-block-start: ${euiTheme.size.s};
-        `}
-      >
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType="documents" data-test-subj="contextAiIndexCardSources">
-            {sourcesLabel}
-          </EuiBadge>
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj="contextAiIndexCardDescription"
+            css={css`
+              min-block-size: calc(${euiTheme.font.lineHeightMultiplier} * 2em);
+            `}
+          >
+            <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
+          </EuiText>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType="gear" data-test-subj="contextAiIndexCardAutomations">
-            {automationsLabel}
-          </EuiBadge>
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                data-test-subj="contextAiIndexCardType"
+                css={css`
+                  align-self: flex-start;
+                `}
+              >
+                {TYPE_LABEL[aiIndex.dest.type]}
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                iconType="documents"
+                data-test-subj="contextAiIndexCardSources"
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.landing.card.sourcesCount"
+                  defaultMessage="{count, plural, one {# source} other {# sources}}"
+                  values={{ count: aiIndex.sources.length }}
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                iconType="gear"
+                data-test-subj="contextAiIndexCardAutomations"
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.landing.card.automationsCount"
+                  defaultMessage="{count, plural, one {# automation} other {# automations}}"
+                  values={{ count: aiIndex.automations.length }}
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCard>
@@ -114,9 +158,10 @@ export const AiIndexCards = () => {
         data-test-subj="contextAiIndexCardsError"
         title={
           <h2>
-            {i18n.translate('xpack.contextEngine.landing.errorTitle', {
-              defaultMessage: 'Unable to load AI Indexes',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.errorTitle"
+              defaultMessage="Unable to load AI Indexes"
+            />
           </h2>
         }
         body={<p>{error.message}</p>}
@@ -131,17 +176,18 @@ export const AiIndexCards = () => {
         data-test-subj="contextAiIndexCardsEmpty"
         title={
           <h2>
-            {i18n.translate('xpack.contextEngine.landing.emptyTitle', {
-              defaultMessage: 'No AI Indexes yet',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.emptyTitle"
+              defaultMessage="No AI Indexes yet"
+            />
           </h2>
         }
         body={
           <p>
-            {i18n.translate('xpack.contextEngine.landing.emptyBody', {
-              defaultMessage:
-                'Create an AI Index to organize and retrieve contextual knowledge for your agents.',
-            })}
+            <FormattedMessage
+              id="xpack.contextEngine.landing.emptyBody"
+              defaultMessage="Create an AI Index to organize and retrieve contextual knowledge for your agents."
+            />
           </p>
         }
         actions={<CreateAiIndexButton />}
