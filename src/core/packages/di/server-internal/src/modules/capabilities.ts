@@ -19,7 +19,7 @@ import {
 } from '@kbn/core-di-server';
 import { OnSetup } from '@kbn/core-di';
 
-export function loadCapabilites({ bind, onActivation }: ContainerModuleLoadOptions): void {
+export function loadCapabilities({ bind, onActivation }: ContainerModuleLoadOptions): void {
   onActivation(CapabilitiesProvider, ({ get }, provider) => {
     get(CoreSetup('capabilities')).registerProvider(provider);
 

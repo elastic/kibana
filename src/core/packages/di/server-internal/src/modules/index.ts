@@ -9,7 +9,7 @@
 
 import { ContainerModule } from 'inversify';
 import { loadAnalytics } from './analytics';
-import { loadCapabilites } from './capabilities';
+import { loadCapabilities } from './capabilities';
 import { loadDocLinks } from './doc_links';
 import { loadElasticsearch } from './elasticsearch';
 import { loadExecutionContext } from './execution_context';
@@ -24,7 +24,7 @@ import { loadUserProfile } from './user_profile';
 
 export const core = new ContainerModule((options) => {
   loadAnalytics(options);
-  loadCapabilites(options);
+  loadCapabilities(options);
   loadDocLinks(options);
   loadElasticsearch(options);
   loadExecutionContext(options);

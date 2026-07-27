@@ -20,7 +20,7 @@ import {
 } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loadCapabilites } from './capabilities';
+import { loadCapabilities } from './capabilities';
 
 describe('loadCapabilities', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
@@ -40,7 +40,7 @@ describe('loadCapabilities', () => {
     capabilitiesStart = capabilitiesServiceMock.createStartContract();
     request = httpServerMock.createKibanaRequest();
     container = injection.getContainer();
-    container.load(new ContainerModule(loadCapabilites));
+    container.load(new ContainerModule(loadCapabilities));
     container.bind(CoreSetup('capabilities')).toConstantValue(capabilitiesSetup);
     container.bind(CoreStart('capabilities')).toConstantValue(capabilitiesStart);
     container.bind(Request).toConstantValue(request);
