@@ -8,6 +8,7 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
+import type { UserProfileData, UserProfileLabels } from '@kbn/core-user-profile-common';
 import { cacheInScope } from '@kbn/core-di-internal';
 import {
   CoreStart,
@@ -21,8 +22,10 @@ export function loadUserProfile({ bind }: ContainerModuleLoadOptions): void {
   bind(UserProfileAccessor)
     .toResolvedValue(
       (userProfile, request): IUserProfileAccessor =>
-        (options) =>
-          userProfile.getCurrent({ ...options, request }),
+        <D extends UserProfileData, L extends UserProfileLabels>(
+          options?: Parameters<IUserProfileAccessor>[0]
+        ) =>
+          userProfile.getCurrent<D, L>({ ...options, request }),
       [CoreStart('userProfile'), Request]
     )
     .inRequestScope()
