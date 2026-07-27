@@ -9,6 +9,9 @@ import { ApiKeyType } from '../task_runner/types';
 import type { RawAlertInstance } from '../../common';
 import type { AlertingConfig } from '../config';
 
+export { getRulesClientMockParams } from './rules_client_mock';
+export type { RulesClientMock } from './rules_client_mock';
+
 interface Resolvable<T> {
   resolve: (arg: T) => void;
 }
