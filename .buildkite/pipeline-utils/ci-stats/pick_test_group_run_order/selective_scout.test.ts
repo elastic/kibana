@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isScoutTestsOnlyDiff } from './selective_scout';
+import { isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout';
 
 describe('isScoutTestsOnlyDiff', () => {
   it('returns false for an empty diff (no signal)', () => {
@@ -118,6 +118,34 @@ describe('isScoutTestsOnlyDiff', () => {
     expect(
       isScoutTestsOnlyDiff([
         'src/platform/plugins/shared/discover/test/scout_setup/playwright.config.ts',
+      ])
+    ).toBe(false);
+  });
+});
+
+describe('isScoutPathOnlyDiff', () => {
+  it('returns true for fixtures / page objects, unlike isScoutTestsOnlyDiff', () => {
+    expect(
+      isScoutPathOnlyDiff([
+        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
+      ])
+    ).toBe(true);
+  });
+
+  it('returns true when a fixtures change is mixed with in-scope specs', () => {
+    expect(
+      isScoutPathOnlyDiff([
+        'src/platform/plugins/shared/discover/test/scout/ui/tests/foo.spec.ts',
+        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
+      ])
+    ).toBe(true);
+  });
+
+  it('returns false when any non-Scout, non-noise file is present', () => {
+    expect(
+      isScoutPathOnlyDiff([
+        'src/platform/plugins/shared/discover/test/scout/ui/tests/foo.spec.ts',
+        'src/platform/plugins/shared/discover/public/application/main.tsx',
       ])
     ).toBe(false);
   });

@@ -16,7 +16,6 @@ import {
   DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
   INDEX_ALIAS_CONFIG,
   VALID_ALERT_INDICES,
-  VALID_SYSTEM_INDICES,
 } from './constants';
 
 export function toSnapshotName(index: string): string {
@@ -31,7 +30,6 @@ export const parseRepeatableFlag = (value: unknown): string[] => {
 
 export interface CommonSnapshotFlags {
   snapshotName: string;
-  systemIndices: string[];
   alertIndices: string[];
   logsIndex: string;
 }
@@ -41,10 +39,6 @@ export const parseCommonSnapshotFlags = (flags: Record<string, unknown>): Common
   if (!snapshotName) {
     throw new Error('Required: --snapshot-name <name>');
   }
-
-  // System indices are not configurable — there is a single fixed set, so always
-  // capture/restore all of them. The KI data stream is handled separately.
-  const systemIndices = [...VALID_SYSTEM_INDICES];
 
   const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
   const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : [...VALID_ALERT_INDICES];
@@ -61,7 +55,7 @@ export const parseCommonSnapshotFlags = (flags: Record<string, unknown>): Common
 
   const logsIndex = String(flags['logs-index'] || DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
 
-  return { snapshotName, systemIndices, alertIndices, logsIndex };
+  return { snapshotName, alertIndices, logsIndex };
 };
 
 const DURATION_RE = /^(\d+)(s|m|h|d)$/;
@@ -137,18 +131,16 @@ export async function resolvePatterns(
 export const ensureKnownAliases = async ({
   esClient,
   log,
-  systemIndices,
   alertIndices,
 }: {
   esClient: Client;
   log: ToolingLog;
-  systemIndices: string[];
   alertIndices: string[];
 }): Promise<void> => {
   let created = 0;
   let skipped = 0;
 
-  for (const indexPattern of [...systemIndices, ...alertIndices]) {
+  for (const indexPattern of alertIndices) {
     const config = INDEX_ALIAS_CONFIG[indexPattern as keyof typeof INDEX_ALIAS_CONFIG];
     if (!config?.alias) {
       log.warning(`No alias config for "${indexPattern}" — skipping`);
@@ -288,21 +280,21 @@ async function promptConfirm(question: string): Promise<boolean> {
 export async function ensureCleanEnvironment({
   esClient,
   log,
-  systemIndices,
+  dataStreamIndices,
   alertIndices,
   logsIndex,
   clean,
 }: {
   esClient: Client;
   log: ToolingLog;
-  systemIndices: string[];
+  dataStreamIndices: string[];
   alertIndices: string[];
   logsIndex: string;
   clean: boolean;
 }): Promise<void> {
   const [matchedByPattern, aliasNameCollisions] = await Promise.all([
-    resolveExisting(esClient, [logsIndex, ...systemIndices, ...alertIndices]),
-    findCollidingAliasNameIndices(esClient, [...systemIndices, ...alertIndices]),
+    resolveExisting(esClient, [logsIndex, ...dataStreamIndices, ...alertIndices]),
+    findCollidingAliasNameIndices(esClient, alertIndices),
   ]);
 
   const seen = new Set<string>();

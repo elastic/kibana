@@ -30,7 +30,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/esql",
     "@kbn/es-query",
-    "@kbn/try-in-console",
     "@kbn/share-plugin",
     "@kbn/console-plugin"
   ]
