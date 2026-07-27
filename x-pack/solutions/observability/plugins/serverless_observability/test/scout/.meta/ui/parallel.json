@@ -1,5 +1,5 @@
 {
-  "sha1": "9ccba485ce37e9d01c690532a849375f21a46b37",
+  "sha1": "469d470d4d8277dfb537e9b8b7224687a72831d1",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -34,8 +34,8 @@
       }
     },
     {
-      "id": "08c621ad2871856-84fd07f729aa1c1",
-      "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate and update breadcrumbs",
+      "id": "08c621ad2871856-bb61deb08996fef",
+      "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 145,
+        "line": 149,
         "column": 9
       }
     },
@@ -57,7 +57,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 209,
+        "line": 213,
         "column": 9
       }
     },
@@ -71,7 +71,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 218,
+        "line": 222,
         "column": 9
       }
     },
