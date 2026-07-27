@@ -1,18 +1,14 @@
 # Security Solution — Critical workflows
 
-Domain-specific map used by the [`test-plan-generator`](../SKILL.md) skill to inform scenario prioritisation. Owned jointly by the Security Solution team (domain authority) and the `@elastic/security-engineering-productivity` team (format authority) — see [`critical-workflows.md`](critical-workflows.md) for the file-lookup convention.
+Domain-specific map of workflows the Security Solution team considers critical. Consumed by the [`test-plan-generator`](../SKILL.md) skill to inform scenario prioritisation.
+
+**Owners.** Content (P0/P1 rows, "why critical" rationale) is owned by `@elastic/security-solution`. File format and how the skill reads it are owned by `@elastic/security-engineering-productivity`. CODEOWNERS requires both teams to approve any change.
+
+**How the skill uses this file, priority rules, and no-map fallback:** see [`critical-workflows.md`](critical-workflows.md).
 
 **Last updated:** 2026-07-27
 
 > **Seed — extend.** This file starts with a conservative list of universally-agreed P0 workflows. Add rows as the team validates the pattern on real test plans. Prefer accuracy over volume: a short, trusted list is more useful than a long, aspirational one.
-
-## Unlisted workflows
-
-If a workflow is not listed in the tables below, it is treated as **P2 by default**. The abstract impact rules in [`optional-scenarios.md`](optional-scenarios.md#priority-levels) can raise it to P1 or P0 when they apply (data loss, security risk, blocks core functionality). Never downgrade a workflow the team listed here based on abstract rules alone; see the deviation guidance in [`critical-workflows.md`](critical-workflows.md#using-the-map).
-
-## How the skill uses this file
-
-For every scenario it generates, the skill cross-references the scenario's feature area against the rows below. A scenario touching a P0-listed workflow defaults to P0 (unless the scenario itself is clearly narrow — e.g. a UI copy nit inside a P0 area). See [`critical-workflows.md`](critical-workflows.md) for the full lookup and fallback rules.
 
 ## P0 workflows (critical impact)
 
