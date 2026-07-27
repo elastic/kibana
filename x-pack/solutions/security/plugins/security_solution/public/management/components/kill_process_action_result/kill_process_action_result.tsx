@@ -77,11 +77,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.entity_id) {
         if (processResultData.length > 0) {
-          processResultData.push(
-            <EuiTextColor key={`${agentId}-entityId-sep`} color="subdued">
-              {' | '}
-            </EuiTextColor>
-          );
+          processResultData.push(<DataSeparator key={`${agentId}-entityId-sep`} />);
         }
 
         processResultData.push(
@@ -97,7 +93,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.process_name) {
         if (processResultData.length > 0) {
-          processResultData.push(<EuiTextColor color="subdued">{' | '}</EuiTextColor>);
+          processResultData.push(<DataSeparator key={`${agentId}-processName-sep`} />);
         }
 
         processResultData.push(
@@ -113,7 +109,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
 
       if (hostOutput?.command) {
         if (processResultData.length > 0) {
-          processResultData.push(<EuiTextColor color="subdued">{' | '}</EuiTextColor>);
+          processResultData.push(<DataSeparator key={`${agentId}-command-sep`} />);
         }
 
         processResultData.push(
@@ -168,3 +164,8 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
   }
 );
 KillSuspendProcessActionResult.displayName = 'KillSuspendProcessActionResult';
+
+export const DataSeparator = memo(() => {
+  return <EuiTextColor color="subdued">{' | '}</EuiTextColor>;
+});
+DataSeparator.displayName = 'DataSeparator';
