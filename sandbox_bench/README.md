@@ -100,6 +100,41 @@ Run each level on the *same* spec across providers or the comparison is meaningl
 cannot allocate the L4+ spec, record it as unsupported rather than benchmarking a swap-thrashing
 sandbox.
 
+### Reference timings (single iterations, 4 vCPU / 16 GB container)
+
+Measured with this harness on one sandbox-grade container (`local` adapter, shallow clone from a
+local mirror, test-binary downloads skipped — treat as order-of-magnitude anchors, not results):
+
+| Phase | Cold caches | Warm yarn + page cache |
+|---|---|---|
+| clone (shallow, 1.8 GB worktree) | ~25–65 s at local disk speed; +3–4 min typical over cloud egress | same |
+| toolchain (nvm + Node + yarn) | ~12 s | ~1.5 s |
+| `yarn kbn bootstrap` | ~15–17 min | **~5.5 min** |
+| resulting `node_modules` | 3.3 GB | — |
+
+The cold/warm bootstrap gap is the headline: cache persistence (provider cache volumes, pre-baked
+images) buys roughly 3× on L2. A fast developer laptop (10+ cores, NVMe, warm caches) lands under
+5 minutes — sandbox-grade hardware does not, even warm.
+
+### Sandbox image checklist (failure modes found the hard way)
+
+Every one of these produced a real L2 failure during harness bring-up; a provider image must
+handle all of them before timings mean anything:
+
+- **A non-root user.** Kibana tooling refuses root without `--allow-root`; Elasticsearch refuses
+  root with no override. The harness auto-drops to an unprivileged user, but images that only
+  offer root shells pay for user setup on every run.
+- **nvm is incompatible with `set -e`** (exits 3 when sourced/used under errexit) — relevant to
+  any provisioning script, not just this harness.
+- **Egress to build-time hosts**: `github.com`, `registry.npmjs.org`, `nodejs.org`,
+  `cdn.playwright.dev` (the `playwright install` CLI ignores `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` —
+  that var only guards npm postinstall), Chrome-for-Testing endpoints (chromedriver), and
+  `download.cypress.io`. Restricted-egress sandboxes need `CHROMEDRIVER_SKIP_DOWNLOAD=true`,
+  `CYPRESS_INSTALL_BINARY=0`, `GECKODRIVER_SKIP_DOWNLOAD=true`, and a pre-seeded
+  `PLAYWRIGHT_BROWSERS_PATH` (world-readable, or owned by the task user).
+- **CA bundles and proxy env must survive the root→user switch**: corporate/proxied sandboxes
+  that keep the CA bundle under `/root` break every TLS download for the unprivileged user.
+
 ## Harness architecture
 
 ```
