@@ -136,7 +136,6 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       flyoutProps: {
         'data-test-subj': 'export_json_flyout',
         focusedPanelId: embeddable.uuid,
-        triggerId: `presentationPanelContextMenu-${embeddable.uuid}`,
       },
     });
   }
