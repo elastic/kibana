@@ -1,5 +1,5 @@
 {
-  "sha1": "de7ab4476d8bf945885f4c5274847308a3999a91",
+  "sha1": "ef2ea992f1498fc058438ca5a5baf20ec80892c3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -538,6 +538,20 @@
       }
     },
     {
+      "id": "5e1819ccd21625a-984590e296dee6c",
+      "title": "Agent Builder — conversations access-control API auto-create cannot overwrite or take over another user conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 743,
+        "column": 12
+      }
+    },
+    {
       "id": "5e1819ccd21625a-38ea603d84caa81",
       "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
       "expectedStatus": "passed",
@@ -547,7 +561,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 743,
+        "line": 793,
         "column": 12
       }
     },
