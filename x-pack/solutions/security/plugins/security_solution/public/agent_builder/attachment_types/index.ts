@@ -218,19 +218,31 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
+  experimentalFeatures,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
     './entity_analytics_dashboard_attachment'
   ).then(({ registerEntityAnalyticsDashboardAttachment: register }) => {
-    register({ attachments, application, agentBuilder, chrome, searchSession });
+    register({
+      attachments,
+      application,
+      agentBuilder,
+      chrome,
+      experimentalFeatures,
+      searchSession,
+      uiSettings,
+    });
   });
 };
 
