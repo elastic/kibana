@@ -2,16 +2,15 @@
 """Reconcile a pending resource by probing its remote endpoint."""
 
 import argparse
-import subprocess
 import sys
 from pathlib import Path
 
 from session_resources import (
     build_auth_args,
     edit_session_config,
-    http_status,
     reconcile_pending_resource,
     resolve_resource_base_url,
+    run_curl,
     validate_resource_endpoint,
 )
 
@@ -43,10 +42,12 @@ def main() -> int:
         endpoint = validate_resource_endpoint(args.endpoint)
         config_path = Path(args.session_dir) / "config.json"
 
-        with edit_session_config(config_path) as config:
+        with edit_session_config(config_path, persist=False) as config:
             auth_args = build_auth_args(config, base_url_key=args.base_url)
             base_url = resolve_resource_base_url(config, args.base_url)
-            result = subprocess.run(
+
+        try:
+            status, _ = run_curl(
                 [
                     "curl",
                     "-s",
@@ -58,12 +59,17 @@ def main() -> int:
                     "-X",
                     args.probe_method,
                     f"{base_url}{endpoint}",
-                ],
-                capture_output=True,
-                text=True,
-                check=False,
+                ]
             )
-            status = http_status(result.stdout)
+        except TimeoutError as exc:
+            print(
+                f"Could not reconcile pending {args.kind} {args.resource_id!r} "
+                f"(probe timed out: {exc}); reservation remains pending.",
+                file=sys.stderr,
+            )
+            return 1
+
+        with edit_session_config(config_path) as config:
             transition = reconcile_pending_resource(
                 config,
                 kind=args.kind,

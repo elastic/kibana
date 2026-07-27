@@ -4,17 +4,18 @@
 import argparse
 import copy
 import json
-import subprocess
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 from session_resources import (
+    DEFAULT_CURL_MAX_TIME_SECONDS,
     build_auth_args,
+    ccs_operation_lock,
     edit_session_config,
-    http_status,
     resolve_resource_base_url,
-    session_operation_lock,
+    run_curl,
     validate_resource_endpoint,
 )
 
@@ -36,21 +37,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
     parser.add_argument("--poll-interval-seconds", type=float, default=2.0)
     return parser.parse_args()
-
-
-def _response_body(stdout: str) -> str:
-    lines = stdout.strip().splitlines()
-    return "\n".join(lines[:-1]) if len(lines) > 1 else ""
-
-
-def _run_curl(curl_args: list[str]) -> tuple[str, str]:
-    result = subprocess.run(
-        curl_args,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return http_status(result.stdout), _response_body(result.stdout)
 
 
 def _find_cluster(payload: object, alias: str) -> dict[str, object] | None:
@@ -184,10 +170,25 @@ def _parse_json_body(body: str, description: str) -> object:
         raise ValueError(f"invalid {description}: {exc}") from exc
 
 
+def _run_curl(
+    curl_args: list[str],
+    *,
+    request_budget: Callable[[], float],
+) -> tuple[str, str]:
+    max_time_seconds = request_budget()
+    if max_time_seconds <= 0:
+        raise TimeoutError("CCS restore timed out before the next request")
+    try:
+        return run_curl(curl_args, max_time_seconds=max_time_seconds)
+    except TimeoutError as exc:
+        raise TimeoutError("CCS restore timed out waiting for curl") from exc
+
+
 def _read_raw_settings(
     *,
     auth_args: list[str],
     es_url: str,
+    request_budget: Callable[[], float],
 ) -> tuple[bool, str, dict[str, object] | None]:
     status, body = _run_curl(
         [
@@ -199,7 +200,8 @@ def _read_raw_settings(
             "-X",
             "GET",
             f"{es_url}/_cluster/settings?include_defaults=false",
-        ]
+        ],
+        request_budget=request_budget,
     )
     if status != "200":
         return False, f"raw CCS settings check returned HTTP {status}", None
@@ -223,6 +225,7 @@ def _restore_raw_settings(
     es_url: str,
     alias: str,
     settings: dict[str, object],
+    request_budget: Callable[[], float],
 ) -> tuple[bool, str]:
     clear_status, _ = _run_curl(
         [
@@ -241,7 +244,8 @@ def _restore_raw_settings(
                 _settings_update(alias=alias, settings=settings, clear=True),
                 separators=(",", ":"),
             ),
-        ]
+        ],
+        request_budget=request_budget,
     )
     if clear_status != "200":
         return False, f"CCS settings clear failed (HTTP {clear_status})"
@@ -263,7 +267,8 @@ def _restore_raw_settings(
             "Content-Type: application/json",
             "-d",
             json.dumps(update, separators=(",", ":")),
-        ]
+        ],
+        request_budget=request_budget,
     )
     if update_status != "200":
         return False, f"CCS settings restore failed (HTTP {update_status})"
@@ -298,6 +303,7 @@ def _verify_restored_cluster(
     payload: dict[str, object],
     provenance: dict[str, object],
     settings: dict[str, object],
+    request_budget: Callable[[], float],
 ) -> tuple[bool, str]:
     collection_endpoint = validate_resource_endpoint("/api/remote_clusters")
     config_status, config_body = _run_curl(
@@ -310,7 +316,8 @@ def _verify_restored_cluster(
             "-X",
             "GET",
             f"{source_url}{collection_endpoint}",
-        ]
+        ],
+        request_budget=request_budget,
     )
     if config_status != "200":
         return False, f"remote-cluster configuration check returned HTTP {config_status}"
@@ -328,6 +335,7 @@ def _verify_restored_cluster(
     settings_ok, settings_error, actual_settings = _read_raw_settings(
         auth_args=auth_args,
         es_url=es_url,
+        request_budget=request_budget,
     )
     if not settings_ok or actual_settings is None:
         return False, settings_error
@@ -351,7 +359,8 @@ def _verify_restored_cluster(
             "-X",
             "GET",
             f"{es_url}/_remote/info",
-        ]
+        ],
+        request_budget=request_budget,
     )
     if info_status != "200":
         return False, f"CCS connectivity check returned HTTP {info_status}"
@@ -371,9 +380,16 @@ def main() -> int:
         print("Timeout and poll interval must not be negative.", file=sys.stderr)
         return 1
     config_path = Path(args.session_dir) / "config.json"
+    deadline = time.monotonic() + args.timeout_seconds
+
+    def request_budget() -> float:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return 0.0
+        return min(DEFAULT_CURL_MAX_TIME_SECONDS, remaining)
 
     try:
-        with session_operation_lock(config_path, "ccs-restore"):
+        with ccs_operation_lock(config_path):
             with edit_session_config(config_path, persist=False) as config:
                 restore_snapshot = copy.deepcopy(config.get("ccs_restore"))
                 endpoint, alias, payload, provenance, settings = _validate_snapshot(
@@ -399,6 +415,7 @@ def main() -> int:
                     payload=payload,
                     provenance=provenance,
                     settings=settings,
+                    request_budget=request_budget,
                 )
             else:
                 verified = False
@@ -409,12 +426,12 @@ def main() -> int:
                     es_url=es_url,
                     alias=alias,
                     settings=settings,
+                    request_budget=request_budget,
                 )
                 if not restored:
                     print(restore_error, file=sys.stderr)
                     return 1
 
-            deadline = time.monotonic() + args.timeout_seconds
             last_error = "verification did not run"
             while True:
                 verified, error = _verify_restored_cluster(
@@ -425,6 +442,7 @@ def main() -> int:
                     payload=payload,
                     provenance=provenance,
                     settings=settings,
+                    request_budget=request_budget,
                 )
                 if verified:
                     break
@@ -459,6 +477,9 @@ def main() -> int:
                     return 1
                 config["ccs_state"] = "restored"
                 config["ccs_restored"] = True
+    except TimeoutError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(str(exc), file=sys.stderr)
         return 1

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -15,10 +14,10 @@ from session_resources import (
     ccs_cleanup_blocked,
     cleanup_candidates,
     edit_session_config,
-    http_status,
     pending_resources,
     require_session_id,
     resolve_resource_base_url,
+    run_curl,
     validate_resource_endpoint,
 )
 
@@ -81,11 +80,6 @@ def _resource_url(config: dict[str, Any], resource: dict[str, Any]) -> str:
 def _cleanup_order(resource: dict[str, Any]) -> tuple[int, str]:
     kind = resource.get("kind")
     return (0 if kind in CCS_RESOURCE_KINDS else 1, str(resource.get("id", "")))
-
-
-def _response_body(stdout: str) -> str:
-    lines = stdout.strip().splitlines()
-    return "\n".join(lines[:-1]) if len(lines) > 1 else ""
 
 
 def _delete_by_query_error(
@@ -203,13 +197,13 @@ def cleanup_session(
             curl_args.extend(["-H", "Content-Type: application/json", "-d", body])
         if base_url_key == "url":
             curl_args.extend(["-H", "kbn-xsrf: true"])
-        result = subprocess.run(
-            curl_args,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        status = http_status(result.stdout)
+        try:
+            status, response_body = run_curl(curl_args)
+        except TimeoutError as exc:
+            errors.append(
+                f"Resource {resource_id!r}: cleanup timed out ({exc})"
+            )
+            continue
         if status in SUCCESSFUL_CLEANUP_STATUSES:
             if method == "POST" and "_delete_by_query" in str(
                 resource.get("endpoint", "")
@@ -217,7 +211,7 @@ def cleanup_session(
                 delete_by_query_error = _delete_by_query_error(
                     resource_id=resource_id,
                     status=status,
-                    response_body=_response_body(result.stdout),
+                    response_body=response_body,
                 )
                 if delete_by_query_error is not None:
                     errors.append(delete_by_query_error)

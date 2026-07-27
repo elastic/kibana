@@ -80,6 +80,10 @@ treat a broken shared deployment as urgent.
 ## Notes
 
 - Only the SOURCE deployment holds the remote-cluster definition; run every command here against the SOURCE URLs, never the REMOTE cluster's.
+- Capture, break, and restore take a deployment-scoped lock derived from
+  `environment.es_url` (override directory with
+  `EXPLORATORY_TESTER_CCS_LOCK_DIR`) so concurrent exploratory sessions against
+  the same SOURCE cluster cannot mutate CCS at the same time.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
 - If the session cap fires or the browser dies mid-scenario, run step 6 first
   from the persisted `SESSION_DIR`, then handle the timeout/loss. Restoration

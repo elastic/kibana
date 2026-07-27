@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import fcntl
 import json
 import os
 import subprocess
@@ -61,11 +62,13 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from session_resources import (  # noqa: E402
     build_auth_args,
     ccs_cleanup_blocked,
+    ccs_deployment_lock_path,
     cleanup_candidates,
     ensure_session_manifest,
     namespaced_flow_space_id,
     reconcile_pending_resource,
     register_resource,
+    run_curl,
 )
 
 
@@ -563,6 +566,464 @@ print("200")
                 "lock-test-index",
                 {resource["id"] for resource in config["session_resources"]},
             )
+
+    def test_run_curl_enforces_max_time_on_hung_requests(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import time
+time.sleep(5)
+print("{}")
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            started = time.monotonic()
+            with self.assertRaises(TimeoutError):
+                run_curl(
+                    ["curl", "-s", "-w", "\n%{http_code}", "https://example.test"],
+                    connect_timeout_seconds=1,
+                    max_time_seconds=0.5,
+                    env=environment,
+                )
+            self.assertLess(time.monotonic() - started, 3)
+
+    def test_restore_times_out_when_curl_hangs(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "modified",
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": {
+                                "skipUnavailable": False,
+                                "mode": "proxy",
+                                "seeds": None,
+                                "nodeConnections": None,
+                                "proxyAddress": "remote.example.test:9400",
+                                "proxySocketConnections": 3,
+                                "serverName": None,
+                            },
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": False,
+                                "configuration_layer": "persistent",
+                                "settings": PERSISTENT_CCS_SETTINGS,
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import time
+time.sleep(10)
+print("{}")
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(root / "locks")
+            started = time.monotonic()
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--timeout-seconds",
+                    "1",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+                timeout=8,
+            )
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertLess(time.monotonic() - started, 6)
+            self.assertIn("timed out", (result.stderr or result.stdout).lower())
+
+    def test_capture_rejects_inconsistent_api_and_settings_reads(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "unchanged",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            counter = root / "curl-count"
+            counter.write_text("0", encoding="utf-8")
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+count_path = os.environ["CURL_COUNT"]
+count = int(open(count_path, encoding="utf-8").read() or "0") + 1
+open(count_path, "w", encoding="utf-8").write(str(count))
+if "_cluster/settings" in " ".join(sys.argv):
+    proxy = "first.remote.test:9400" if count <= 2 else "second.remote.test:9400"
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": proxy,
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+else:
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "isConnected": True,
+        "skipUnavailable": False,
+        "proxyAddress": "first.remote.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "seeds": None,
+        "nodeConnections": None,
+        "isConfiguredByNode": False,
+        "hasDeprecatedProxySetting": False,
+    }]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["CURL_COUNT"] = str(counter)
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(root / "locks")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertIn("changed during capture", result.stderr.lower())
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "unchanged")
+            self.assertNotIn("ccs_restore", config)
+
+    def test_reconcile_does_not_hold_config_lock_during_http(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {"api_key": "test-key"},
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "pending-index",
+                                "endpoint": "/pending-index",
+                                "base_url": "es_url",
+                                "owned": False,
+                                "state": "pending",
+                                "marker": "exploratory-tester:abc12345",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            started_marker = root / "curl-started"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import time
+
+if not os.path.exists(os.environ["STARTED_MARKER"]):
+    open(os.environ["STARTED_MARKER"], "w").close()
+    time.sleep(2)
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["STARTED_MARKER"] = str(started_marker)
+
+            reconcile_process = subprocess.Popen(
+                [
+                    sys.executable,
+                    str(RECONCILE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "pending-index",
+                    "--endpoint",
+                    "/pending-index",
+                    "--base-url",
+                    "es_url",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env=environment,
+            )
+            deadline = time.monotonic() + 2
+            while not started_marker.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(started_marker.exists())
+
+            register_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(REGISTER_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "lock-test-index",
+                    "--endpoint",
+                    "/lock-test-index",
+                    "--base-url",
+                    "es_url",
+                    "--owned",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+                timeout=1.5,
+            )
+            reconcile_stdout, reconcile_stderr = reconcile_process.communicate(
+                timeout=5
+            )
+
+            self.assertEqual(register_result.returncode, 0, register_result.stderr)
+            self.assertEqual(
+                reconcile_process.returncode,
+                0,
+                reconcile_stderr or reconcile_stdout,
+            )
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            resource_ids = {resource["id"] for resource in config["session_resources"]}
+            self.assertIn("lock-test-index", resource_ids)
+            pending = next(
+                resource
+                for resource in config["session_resources"]
+                if resource["id"] == "pending-index"
+            )
+            self.assertEqual(pending["state"], "owned")
+
+    def test_ccs_deployment_lock_is_shared_across_sessions(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            lock_dir = root / "locks"
+            lock_dir.mkdir()
+            environment = os.environ.copy()
+            environment["EXPLORATORY_TESTER_CCS_LOCK_DIR"] = str(lock_dir)
+
+            config_a = {
+                "environment": {"es_url": "https://shared.es.test/"},
+            }
+            config_b = {
+                "environment": {"es_url": "https://shared.es.test"},
+            }
+            path_a = ccs_deployment_lock_path(config_a, env=environment)
+            path_b = ccs_deployment_lock_path(config_b, env=environment)
+            self.assertEqual(path_a, path_b)
+
+            with path_a.open("a+", encoding="utf-8") as held:
+                fcntl.flock(held.fileno(), fcntl.LOCK_EX)
+                with path_b.open("a+", encoding="utf-8") as rival:
+                    with self.assertRaises(BlockingIOError):
+                        fcntl.flock(
+                            rival.fileno(),
+                            fcntl.LOCK_EX | fcntl.LOCK_NB,
+                        )
+
+            session_a = root / "session-a"
+            session_b = root / "session-b"
+            for session_dir in (session_a, session_b):
+                session_dir.mkdir()
+                (session_dir / "config.json").write_text(
+                    json.dumps(
+                        {
+                            "session_id": session_dir.name.replace("-", "")[:8]
+                            + "abcd",
+                            "environment": {
+                                "url": "https://source.kibana.test",
+                                "es_url": "https://shared.es.test",
+                                "ccs": {"remote_cluster_alias": "remote"},
+                            },
+                            "credentials": {"api_key": "source-key"},
+                            "ccs_state": "unchanged",
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+            started_marker = root / "curl-started"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import time
+
+if not os.path.exists(os.environ["STARTED_MARKER"]):
+    open(os.environ["STARTED_MARKER"], "w").close()
+    time.sleep(2)
+if "_cluster/settings" in " ".join(__import__("sys").argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy_address": "remote.example.test:9400",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+else:
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": "remote.example.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": False,
+        "isConfiguredByNode": False,
+    }]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["STARTED_MARKER"] = str(started_marker)
+
+            first = subprocess.Popen(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_a),
+                    "--alias",
+                    "remote",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env=environment,
+            )
+            deadline = time.monotonic() + 2
+            while not started_marker.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(started_marker.exists())
+
+            with self.assertRaises(subprocess.TimeoutExpired):
+                subprocess.run(
+                    [
+                        sys.executable,
+                        str(CAPTURE_CCS_SCRIPT),
+                        "--session-dir",
+                        str(session_b),
+                        "--alias",
+                        "remote",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    env=environment,
+                    timeout=1.0,
+                )
+            first_stdout, first_stderr = first.communicate(timeout=5)
+            self.assertEqual(first.returncode, 0, first_stderr or first_stdout)
+            # Retry after first release succeeds.
+            retry = subprocess.run(
+                [
+                    sys.executable,
+                    str(CAPTURE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_b),
+                    "--alias",
+                    "remote",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+                timeout=5,
+            )
+            self.assertEqual(retry.returncode, 0, retry.stderr)
 
     def test_reconcile_resource_cli_adopts_a_pending_remote_resource(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -1116,7 +1577,7 @@ print("200")
                     "--session-dir",
                     str(session_dir),
                     "--timeout-seconds",
-                    "1",
+                    "10",
                     "--poll-interval-seconds",
                     "0",
                 ],
@@ -1152,7 +1613,7 @@ print("200")
                 env=environment,
                 timeout=1.5,
             )
-            restore_stdout, restore_stderr = restore_process.communicate(timeout=5)
+            restore_stdout, restore_stderr = restore_process.communicate(timeout=8)
 
             self.assertEqual(register_result.returncode, 0, register_result.stderr)
             self.assertEqual(restore_process.returncode, 0, restore_stderr or restore_stdout)
@@ -1623,6 +2084,8 @@ print("200")
         self.assertIn('"mutation_pending"', setup)
         self.assertIn("ccs_state", report)
         self.assertIn("break-remote-cluster.py", break_remote)
+        self.assertIn("deployment-scoped lock", break_remote)
+        self.assertIn("EXPLORATORY_TESTER_CCS_LOCK_DIR", break_remote)
         self.assertIn('ccs_state="mutation_pending"', break_remote)
         self.assertIn("capture-remote-cluster.py", break_remote)
         self.assertIn("restore-remote-cluster.py", break_remote)

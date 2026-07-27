@@ -5,16 +5,15 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
 from session_resources import (
     build_auth_args,
+    ccs_operation_lock,
     edit_session_config,
-    http_status,
     resolve_resource_base_url,
-    session_operation_lock,
+    run_curl,
     validate_resource_endpoint,
 )
 
@@ -104,7 +103,7 @@ def main() -> int:
     config_path = Path(args.session_dir) / "config.json"
 
     try:
-        with session_operation_lock(config_path, "ccs-restore"):
+        with ccs_operation_lock(config_path):
             with edit_session_config(config_path) as config:
                 restore = config.get("ccs_restore")
                 if not isinstance(restore, dict):
@@ -157,27 +156,30 @@ def main() -> int:
                 config["ccs_state"] = "mutation_pending"
                 config["ccs_restored"] = False
 
-            result = subprocess.run(
-                [
-                    "curl",
-                    "-s",
-                    "-w",
-                    "\n%{http_code}",
-                    *auth_args,
-                    "-X",
-                    "PUT",
-                    request_url,
-                    *header_args,
-                    "-H",
-                    "Content-Type: application/json",
-                    "-d",
-                    json.dumps(broken_body, separators=(",", ":")),
-                ],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            status = http_status(result.stdout)
+            try:
+                status, _ = run_curl(
+                    [
+                        "curl",
+                        "-s",
+                        "-w",
+                        "\n%{http_code}",
+                        *auth_args,
+                        "-X",
+                        "PUT",
+                        request_url,
+                        *header_args,
+                        "-H",
+                        "Content-Type: application/json",
+                        "-d",
+                        json.dumps(broken_body, separators=(",", ":")),
+                    ]
+                )
+            except TimeoutError as exc:
+                print(
+                    f"CCS break timed out ({exc}); mutation remains pending.",
+                    file=sys.stderr,
+                )
+                return 1
             if status != "200":
                 print(
                     f"CCS break failed (HTTP {status}); mutation remains pending.",

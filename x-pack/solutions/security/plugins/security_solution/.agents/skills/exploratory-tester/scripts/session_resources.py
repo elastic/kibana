@@ -5,14 +5,20 @@ from __future__ import annotations
 
 # The exploratory-tester runtime is Unix-only; fcntl gives process-safe locks.
 import fcntl
+import hashlib
 import json
 import os
 import re
 import secrets
+import subprocess
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Mapping
+
+DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS = 10.0
+DEFAULT_CURL_MAX_TIME_SECONDS = 30.0
+CCS_LOCK_DIR_ENV = "EXPLORATORY_TESTER_CCS_LOCK_DIR"
 
 
 SESSION_ID_PATTERN = re.compile(r"^[a-z0-9]{8,32}$")
@@ -217,6 +223,102 @@ def resolve_resource_base_url(
 def http_status(stdout: str) -> str:
     lines = stdout.strip().splitlines()
     return lines[-1].strip() if lines else "000"
+
+
+def _response_body(stdout: str) -> str:
+    lines = stdout.strip().splitlines()
+    return "\n".join(lines[:-1]) if len(lines) > 1 else ""
+
+
+def run_curl(
+    curl_args: list[str],
+    *,
+    connect_timeout_seconds: float = DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS,
+    max_time_seconds: float = DEFAULT_CURL_MAX_TIME_SECONDS,
+    env: Mapping[str, str] | None = None,
+) -> tuple[str, str]:
+    if connect_timeout_seconds <= 0 or max_time_seconds <= 0:
+        raise ValueError("curl timeouts must be positive")
+    if not curl_args:
+        raise ValueError("curl args must not be empty")
+
+    timeout_flags = [
+        "--connect-timeout",
+        f"{connect_timeout_seconds:g}",
+        "--max-time",
+        f"{max_time_seconds:g}",
+    ]
+    if curl_args[0] == "curl":
+        args = ["curl", *timeout_flags, *curl_args[1:]]
+    else:
+        args = ["curl", *timeout_flags, *curl_args]
+
+    subprocess_timeout = max_time_seconds + 1.0
+    try:
+        result = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=subprocess_timeout,
+            env=None if env is None else dict(env),
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(
+            f"curl exceeded max_time_seconds={max_time_seconds:g}"
+        ) from exc
+    return http_status(result.stdout), _response_body(result.stdout)
+
+
+def _normalize_deployment_url(url: str) -> str:
+    return url.strip().rstrip("/")
+
+
+def ccs_deployment_lock_path(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> Path:
+    environment = env if env is not None else os.environ
+    lock_dir_value = environment.get(CCS_LOCK_DIR_ENV)
+    lock_dir = (
+        Path(lock_dir_value) if lock_dir_value else Path(tempfile.gettempdir())
+    )
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    es_url = resolve_resource_base_url(config, "es_url")
+    digest = hashlib.sha256(_normalize_deployment_url(es_url).encode()).hexdigest()[
+        :32
+    ]
+    return lock_dir / f"exploratory-tester-ccs-{digest}.lock"
+
+
+@contextmanager
+def ccs_deployment_lock(
+    config: dict[str, Any],
+    *,
+    env: Mapping[str, str] | None = None,
+) -> Iterator[None]:
+    lock_path = ccs_deployment_lock_path(config, env=env)
+    with lock_path.open("a+", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+@contextmanager
+def ccs_operation_lock(config_path: Path) -> Iterator[None]:
+    """Serialize CCS mutations across sessions for the same deployment."""
+    with edit_session_config(config_path, persist=False) as config:
+        deployment_config = {
+            "environment": {
+                "es_url": resolve_resource_base_url(config, "es_url"),
+            }
+        }
+    with ccs_deployment_lock(deployment_config):
+        with session_operation_lock(config_path, "ccs-restore"):
+            yield
 
 
 def resource_state(resource: dict[str, Any]) -> str:
