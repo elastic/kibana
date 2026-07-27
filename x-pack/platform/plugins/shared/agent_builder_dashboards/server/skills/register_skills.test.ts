@@ -43,4 +43,31 @@ describe('registerSkills', () => {
       'provide a new `chartType` when the request changes the chart family'
     );
   });
+
+  it('inlines the layout guidance for reworking an existing dashboard', () => {
+    expect(dashboardManagementSkill.content).toContain('Vertical gaps close by themselves');
+    expect(dashboardManagementSkill.content).toContain(
+      'Keep every panel at the size its chart type'
+    );
+    expect(dashboardManagementSkill.content).toContain('never `w` and `h`');
+    expect(dashboardManagementSkill.content).toContain('Inserting above an existing section');
+  });
+
+  describe('panel editing reference', () => {
+    const reference = (dashboardManagementSkill.referencedContent ?? []).find(
+      ({ name }) => name === 'panel-editing'
+    );
+
+    it('defers the panel editing details to a referenced file', () => {
+      expect(reference?.content).toContain('Panels that can be edited in place');
+      expect(reference?.content).toContain('Wait for confirmation before removing or replacing');
+    });
+
+    it('tells the skill body to read the file before every edit', () => {
+      expect(dashboardManagementSkill.content).toContain(
+        `${reference?.relativePath}/${reference?.name}.md`
+      );
+      expect(dashboardManagementSkill.content).toContain('before any `edit_panels` call');
+    });
+  });
 });

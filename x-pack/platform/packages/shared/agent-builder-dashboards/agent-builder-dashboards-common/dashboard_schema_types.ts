@@ -17,10 +17,18 @@ import { z } from '@kbn/zod/v4';
  * Dashboard grid is 48 columns wide; height is in same units.
  */
 export const panelGridSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-  w: z.number().int().min(1).max(48),
-  h: z.number().int().min(1),
+  x: z
+    .number()
+    .describe(
+      'Leftmost column, 0-based, in a 48-column grid. `x + w` must not exceed 48. Inside a section, coordinates are section-relative.'
+    ),
+  y: z
+    .number()
+    .describe(
+      'Top row, 0-based, growing downwards from the top-left origin. Inside a section, each section starts again at 0.'
+    ),
+  w: z.number().int().min(1).max(48).describe('Width in columns, out of 48.'),
+  h: z.number().int().min(1).describe('Height in rows. Roughly 20-24 rows fit on a 16:9 screen.'),
 });
 
 // ============================================================================
@@ -45,7 +53,13 @@ export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
 // ============================================================================
 
 export const sectionGridSchema = z.object({
-  y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
+  y: z
+    .number()
+    .int()
+    .min(0)
+    .describe(
+      'Section position in outer dashboard grid coordinates. A section occupies exactly one outer row regardless of how tall its panels are, so the next widget below it goes at `y + 1`.'
+    ),
 });
 
 const dashboardSectionSchema = z.object({

@@ -15,7 +15,12 @@ import { createPanelInputMaterializer } from './panel_creation';
 export const addPanelsOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_panels'),
-    panels: z.array(addPanelsItemSchema).min(1),
+    panels: z
+      .array(addPanelsItemSchema)
+      .min(1)
+      .describe(
+        'Panels to append. One operation may mix panel kinds and target different sectionId values, so batch related panels here instead of repeating the operation.'
+      ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
     const materializePanelInput = createPanelInputMaterializer({

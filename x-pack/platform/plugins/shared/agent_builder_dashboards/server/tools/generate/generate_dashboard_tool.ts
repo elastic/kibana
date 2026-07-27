@@ -39,7 +39,12 @@ const generateDashboardSchema = z.object({
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
-  operations: z.array(dashboardOperationSchema).min(1),
+  operations: z
+    .array(dashboardOperationSchema)
+    .min(1)
+    .describe(
+      'Ordered operations applied to the dashboard. Each one sees the state left by the previous one, so ordering matters (create a section before targeting it by id). Batch every change for one request into a single call. A panel that fails to resolve does not fail the call — it is reported in the result `failures` while the rest are applied.'
+    ),
 });
 
 /**
@@ -105,18 +110,9 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Generate or update a dashboard from ordered operations.
+    description: `Generate or update a dashboard from ordered operations: metadata, panels, layouts, sections, and controls.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
-
-Use operations[] to:
-1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
-4. update panel layouts without changing content
-5. add / remove sections, including inline section panels during add_section
-6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
+Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
