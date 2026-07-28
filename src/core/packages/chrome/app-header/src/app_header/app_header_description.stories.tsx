@@ -7,29 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
 import type { AppHeaderDescription as AppHeaderDescriptionConfig } from '../types';
-import { AppHeaderDescription } from './app_header_description';
-import { AppHeaderShell } from './app_header_shell';
+import { AppHeaderView } from './app_header';
 
 interface AppHeaderDescriptionStoryProps {
   title: string;
   description: AppHeaderDescriptionConfig;
 }
 
-const HeaderWithDescription = ({ title, description }: AppHeaderDescriptionStoryProps) => (
-  <AppHeaderShell
-    title={
-      <EuiTitle size="s">
-        <h1>{title}</h1>
-      </EuiTitle>
-    }
-    secondaryContent={<AppHeaderDescription description={description} />}
-    sticky={false}
-  />
-);
+const HeaderWithDescription = ({ title, description }: AppHeaderDescriptionStoryProps) => {
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
+
+  return (
+    <ChromeServiceProvider value={{ chrome }}>
+      <AppHeaderView title={title} description={description} sticky={false} />
+    </ChromeServiceProvider>
+  );
+};
 
 const meta: Meta<AppHeaderDescriptionStoryProps> = {
   title: 'Chrome/App Header Description',
