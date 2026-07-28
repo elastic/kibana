@@ -5,52 +5,30 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
-interface ToggleRuleEnabledVariables {
-  id: string;
-  enabled: boolean;
-  name: string;
-}
-
 export const useToggleRuleEnabled = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  const showErrorToast = useCallback(
-    () =>
-      toasts.addDanger(
-        i18n.translate('xpack.alertingV2.hooks.useToggleRuleEnabled.errorMessage', {
-          defaultMessage: 'Failed to update rule status',
-        })
-      ),
-    [toasts]
-  );
-
   return useMutation({
-    mutationFn: ({ id, enabled }: ToggleRuleEnabledVariables) =>
-      enabled ? rulesApi.bulkEnableRules({ ids: [id] }) : rulesApi.bulkDisableRules({ ids: [id] }),
+    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
+      enabled ? rulesApi.enableRule(id) : rulesApi.disableRule(id),
     onSuccess: async (data, variables) => {
-      if (data.errors.length > 0) {
-        showErrorToast();
-        return;
-      }
-
       toasts.addSuccess(
         variables.enabled
           ? i18n.translate('xpack.alertingV2.hooks.useToggleRuleEnabled.enabledMessage', {
               defaultMessage: 'Rule "{ruleName}" enabled',
-              values: { ruleName: variables.name },
+              values: { ruleName: data.metadata.name },
             })
           : i18n.translate('xpack.alertingV2.hooks.useToggleRuleEnabled.disabledMessage', {
               defaultMessage: 'Rule "{ruleName}" disabled',
-              values: { ruleName: variables.name },
+              values: { ruleName: data.metadata.name },
             })
       );
 
@@ -60,7 +38,11 @@ export const useToggleRuleEnabled = () => {
       ]);
     },
     onError: () => {
-      showErrorToast();
+      toasts.addDanger(
+        i18n.translate('xpack.alertingV2.hooks.useToggleRuleEnabled.errorMessage', {
+          defaultMessage: 'Failed to update rule status',
+        })
+      );
     },
   });
 };

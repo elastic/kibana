@@ -147,6 +147,8 @@ export const FLYOUT_ORIGIN = {
   // Top-level entry points outside any open flyout.
   // Alerts table row.
   ALERTS_TABLE: 'alerts_table',
+  // Discover document table row.
+  DISCOVER_TABLE: 'discover_table',
   // Attacks table row.
   ATTACKS_TABLE: 'attacks_table',
   // Attacks KPI widget.
