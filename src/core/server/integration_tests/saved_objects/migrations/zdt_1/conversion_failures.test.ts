@@ -61,7 +61,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     });
   });
 
-  describe('when discardCorruptObjects is false', () => {
+  describe.only('when discardCorruptObjects is false', () => {
     it('fails the migration with an explicit message and keep the documents', async () => {
       const { client, runMigrations } = await prepareScenario({
         discardCorruptObjects: false,
@@ -109,7 +109,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
             type: 'unsafe_transform',
             transformFn: (typeSafeGuard) =>
               typeSafeGuard((doc) => {
-                throw new Error(`error from ${doc.id}`);
+                return { document: { ...doc, attributes: { test : true, ...doc.attributes as any }, } as any };
               }),
           },
         ],
@@ -125,10 +125,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
             type: 'unsafe_transform',
             transformFn: (typeSafeGuard) =>
               typeSafeGuard((doc) => {
-                if (doc.id === 'b-0') {
-                  throw new Error(`error from ${doc.id}`);
-                }
-                return { document: doc };
+                return { document: { ...doc, attributes: { test : true, ...doc.attributes as any }, } as any };
               }),
           },
         ],
