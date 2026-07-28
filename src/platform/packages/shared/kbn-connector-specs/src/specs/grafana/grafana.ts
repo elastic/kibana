@@ -436,6 +436,7 @@ export const Grafana: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.grafana.test.description', {
       defaultMessage: 'Verifies the Grafana connection by listing configured alert rules',
     }),
