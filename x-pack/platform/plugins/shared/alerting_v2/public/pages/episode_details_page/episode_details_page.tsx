@@ -123,10 +123,11 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
+  const eventRuleName = episode?.['rule.name'] as string | undefined;
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
-      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+      : eventRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

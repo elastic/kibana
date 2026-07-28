@@ -46,6 +46,23 @@ export class FetchRulesStep implements DispatcherStep {
       });
     }
 
+    // For rule IDs not found as saved objects (external alerts), build synthetic
+    // Rule entries from the episode's event data so downstream steps (matchers,
+    // maintenance windows, groups) don't skip them.
+    const episodesByRuleId = Map.groupBy(dispatchable, (ep) => ep.rule_id);
+    for (const ruleId of uniqueRuleIds) {
+      if (!rules.has(ruleId)) {
+        const representative = episodesByRuleId.get(ruleId)?.[0];
+        rules.set(ruleId, {
+          id: ruleId,
+          spaceId: 'default',
+          name: representative?.rule_name ?? ruleId,
+          tags: [],
+          isExternal: true,
+        });
+      }
+    }
+
     return { type: 'continue', data: { rules } };
   }
 }

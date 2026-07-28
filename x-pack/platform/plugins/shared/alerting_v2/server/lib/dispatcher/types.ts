@@ -23,6 +23,7 @@ export interface ActionPolicyDestination {
 export interface AlertEpisode {
   last_event_timestamp: string;
   rule_id: RuleId;
+  rule_name?: string;
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
@@ -58,6 +59,8 @@ export interface Rule {
   spaceId: string;
   name: string;
   tags: string[];
+  /** True when the rule has no backing Kibana saved object (external alert source). */
+  isExternal?: boolean;
 }
 
 export interface ActionPolicy {
