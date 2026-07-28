@@ -121,6 +121,7 @@ export const backfillScheduleIds = async ({
                   unset(draft, 'id');
                   removePackFromPolicy(draft, packSO.attributes.name, spaceId);
                   set(draft, `${packPath}.pack_id`, packSO.id);
+                  set(draft, `${packPath}.pack_name`, packSO.attributes.name);
                   set(
                     draft,
                     `${packPath}.queries`,

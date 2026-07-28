@@ -96,6 +96,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     this.annotationSub = annotationUpdatesService.update$().subscribe((v) => {
       this.setState({
         annotationState: v,
+        applyAnnotationToSeries: v?._id === undefined ? true : v?.detector_index !== undefined,
       });
     });
   }

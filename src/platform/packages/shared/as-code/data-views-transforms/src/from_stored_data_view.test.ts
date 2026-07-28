@@ -22,6 +22,27 @@ describe('fromStoredDataView', () => {
     });
   });
 
+  it('maps inline allowHidden to allow_hidden_indices and round-trips', () => {
+    const stored = {
+      title: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    };
+    const api = fromStoredDataView(stored);
+    expect(api).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+    expect(toStoredDataView(api)).toEqual(stored);
+  });
+
+  it('omits allow_hidden_indices when allowHidden is undefined', () => {
+    const api = fromStoredDataView({ title: 'logs-*' });
+    expect(api).not.toHaveProperty('allow_hidden_indices');
+  });
+
   it('maps inline spec with indexed field formats and attrs to field_settings', () => {
     expect(
       fromStoredDataView({

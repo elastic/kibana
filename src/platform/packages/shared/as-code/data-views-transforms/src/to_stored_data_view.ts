@@ -35,6 +35,9 @@ export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpe
   return {
     title: dataView.index_pattern,
     ...(dataView.time_field !== undefined && { timeFieldName: dataView.time_field }),
+    ...(dataView.allow_hidden_indices !== undefined && {
+      allowHidden: dataView.allow_hidden_indices,
+    }),
     ...(runtimeFieldMap && Object.keys(runtimeFieldMap).length > 0 && { runtimeFieldMap }),
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),

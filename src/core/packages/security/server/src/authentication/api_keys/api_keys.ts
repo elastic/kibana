@@ -137,6 +137,7 @@ export interface CreateCrossClusterAPIKeyParams {
     }>;
     replication?: Array<{
       names: string[];
+      allow_restricted_indices?: boolean;
     }>;
   };
 }
@@ -246,6 +247,7 @@ export interface UpdateCrossClusterAPIKeyParams {
     }>;
     replication?: Array<{
       names: string[];
+      allow_restricted_indices?: boolean;
     }>;
   };
 }
