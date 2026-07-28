@@ -108,8 +108,11 @@ export class DiscoverPlugin
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: async (params) => {
-          const { appLocatorGetLocation } = await getLocators();
-          return appLocatorGetLocation({ useHash }, params);
+          const [{ appLocatorGetLocation }, profileStateRegistry] = await Promise.all([
+            getLocators(),
+            getProfileStateRegistry(),
+          ]);
+          return appLocatorGetLocation({ useHash, profileStateRegistry }, params);
         },
       });
 
@@ -353,11 +356,7 @@ export class DiscoverPlugin
   }) {
     const [
       { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
-      {
-        createProfileProviderSharedServices,
-        registerProfileProviders,
-        registerProfileStateDefinitions,
-      },
+      { createProfileProviderSharedServices, registerProfileProviders },
     ] = await Promise.all([
       this.createProfileServices(),
       import('./context_awareness/profile_providers'),
@@ -374,8 +373,6 @@ export class DiscoverPlugin
         setHeaderActionMenu,
       }),
     ]);
-
-    registerProfileStateDefinitions(services.profileStateRegistry);
 
     registerProfileProviders({
       rootProfileService,
@@ -404,9 +401,10 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices }, historyService] = await Promise.all([
+    const [{ buildServices }, historyService, profileStateRegistry] = await Promise.all([
       getSharedServices(),
       getHistoryService(),
+      getProfileStateRegistry(),
     ]);
     return buildServices({
       core,
@@ -419,6 +417,7 @@ export class DiscoverPlugin
       scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
+      profileStateRegistry,
       ebtManager,
       setHeaderActionMenu,
     });
@@ -515,4 +514,9 @@ const getHistoryService = once(async () => {
 const getEmptyEbtManager = once(async () => {
   const { DiscoverEBTManager } = await getSharedServices();
   return new DiscoverEBTManager(); // It is not initialized outside of Discover
+});
+
+const getProfileStateRegistry = once(async () => {
+  const { createProfileStateRegistry } = await getSharedServices();
+  return createProfileStateRegistry();
 });
