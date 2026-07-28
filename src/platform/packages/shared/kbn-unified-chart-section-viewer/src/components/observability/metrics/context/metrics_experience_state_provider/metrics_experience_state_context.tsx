@@ -23,6 +23,9 @@ import {
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
   gridSettings: MetricsGridSettings;
+  // Sourced from the host's Url-persisted profile state (no longer restorable
+  // state), so it is declared explicitly here rather than inherited.
+  metricsSort: MetricsSort;
   recentlyExploredMetrics: readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
   onPageChange: (value: number) => void;
@@ -43,6 +46,8 @@ export function MetricsExperienceStateProvider({
   profileId,
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
+  metricsSort = DEFAULT_METRICS_SORT,
+  onMetricsSortChange,
   getRecentlyExploredMetrics,
   onMetricExplored,
   discoverFetch$,
@@ -51,6 +56,8 @@ export function MetricsExperienceStateProvider({
   profileId: string;
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  metricsSort?: MetricsSort;
+  onMetricsSortChange?: (sort: MetricsSort) => void;
   getRecentlyExploredMetrics?: () => readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
   discoverFetch$?: UnifiedMetricsGridProps['fetch$'];
@@ -60,7 +67,6 @@ export function MetricsExperienceStateProvider({
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
-  const [metricsSort, setMetricsSort] = useRestorableState('metricsSort', DEFAULT_METRICS_SORT);
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
     getRecentlyExploredMetrics,
@@ -96,18 +102,19 @@ export function MetricsExperienceStateProvider({
     [setSearchTerm, setCurrentPage]
   );
 
-  const onMetricsSortChange = useCallback(
+  const handleMetricsSortChange = useCallback(
     (nextSort: MetricsSort) => {
-      setMetricsSort((prevSort) => {
-        const [prevSortBy, prevDirection] = prevSort;
-        const [nextSortBy, nextDirection] = nextSort;
-        if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
-          setCurrentPage(0);
-        }
-        return nextSort;
-      });
+      // Preserve the page-reset-on-sort-change behavior from #277184: sort now
+      // lives in the host's profile state, so we compare against the current
+      // prop-sourced sort and forward the change to the host.
+      const [prevSortBy, prevDirection] = metricsSort;
+      const [nextSortBy, nextDirection] = nextSort;
+      if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
+        setCurrentPage(0);
+      }
+      onMetricsSortChange?.(nextSort);
     },
-    [setMetricsSort, setCurrentPage]
+    [metricsSort, onMetricsSortChange, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
@@ -151,7 +158,7 @@ export function MetricsExperienceStateProvider({
         onPageChange,
         onDimensionsChange,
         onSearchTermChange,
-        onMetricsSortChange,
+        onMetricsSortChange: handleMetricsSortChange,
         onToggleFullscreen,
         onFlyoutStateChange,
         onFlyoutSelectedTabChange,

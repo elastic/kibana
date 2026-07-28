@@ -13,7 +13,12 @@ import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
 } from './metrics_experience_state_context';
-import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../../../common/constants';
+import {
+  DEFAULT_METRICS_SORT,
+  METRICS_SORT_BY,
+  METRICS_SORT_DIRECTION,
+} from '../../../../../common/constants';
+import type { MetricsSort } from '../../../../../types';
 
 jest.mock('../../../../../restorable_state', () => {
   const { useState, useCallback } = jest.requireActual('react');
@@ -237,12 +242,26 @@ describe('MetricsExperienceStateProvider', () => {
     });
   });
 
-  describe('onMetricsSortChange', () => {
-    it('updates metricsSort', () => {
+  describe('metricsSort', () => {
+    const createSortWrapper =
+      (props: { metricsSort?: MetricsSort; onMetricsSortChange?: (sort: MetricsSort) => void }) =>
+      ({ children }: { children: React.ReactNode }) =>
+        (
+          <MetricsExperienceStateProvider profileId="test-profile" {...props}>
+            {children}
+          </MetricsExperienceStateProvider>
+        );
+
+    it('defaults to DEFAULT_METRICS_SORT when the prop is omitted', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
 
-      act(() => {
-        result.current.onMetricsSortChange([METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc]);
+      expect(result.current.metricsSort).toEqual(DEFAULT_METRICS_SORT);
+    });
+
+    it('uses the metricsSort prop sourced from the host profile state', () => {
+      const metricsSort: MetricsSort = [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc];
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: createSortWrapper({ metricsSort }),
       });
 
       expect(result.current.metricsSort).toEqual([
@@ -251,8 +270,25 @@ describe('MetricsExperienceStateProvider', () => {
       ]);
     });
 
-    it('resets currentPage to 0 when the sort changes', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+    it('forwards sort changes to the host onMetricsSortChange prop', () => {
+      const onMetricsSortChange = jest.fn();
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: createSortWrapper({ metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange }),
+      });
+
+      const nextSort: MetricsSort = [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc];
+      act(() => {
+        result.current.onMetricsSortChange(nextSort);
+      });
+
+      expect(onMetricsSortChange).toHaveBeenCalledWith(nextSort);
+    });
+
+    it('resets currentPage to 0 when the sort changes (parity with #277184)', () => {
+      const onMetricsSortChange = jest.fn();
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: createSortWrapper({ metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange }),
+      });
 
       act(() => {
         result.current.onPageChange(2);
@@ -269,14 +305,17 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('does not reset currentPage when the sort is unchanged', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const onMetricsSortChange = jest.fn();
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: createSortWrapper({ metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange }),
+      });
 
       act(() => {
         result.current.onPageChange(3);
       });
       expect(result.current.currentPage).toBe(3);
 
-      // Re-apply the same (default) sort
+      // Re-apply the same (default) sort — page must be preserved.
       act(() => {
         result.current.onMetricsSortChange([
           METRICS_SORT_BY.alphabetically,
@@ -284,6 +323,8 @@ describe('MetricsExperienceStateProvider', () => {
         ]);
       });
       expect(result.current.currentPage).toBe(3);
+      // The change is still forwarded to the host regardless of the page reset.
+      expect(onMetricsSortChange).toHaveBeenCalled();
     });
   });
 });
