@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo, useState, useRef, useCallback } from 'react';
 import type { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiProgress } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';
@@ -260,6 +261,9 @@ export const ContainerNameWidget = ({
         />
       )}
       <EuiBasicTable
+        tableCaption={i18n.translate('xpack.kubernetesSecurity.containerNameWidget.tableCaption', {
+          defaultMessage: 'Container names',
+        })}
         aria-label={CONTAINER_NAME_SESSION_ARIA_LABEL}
         items={containerNameArray}
         columns={columns}

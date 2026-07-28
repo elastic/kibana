@@ -6,12 +6,14 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/constants';
 import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
+  STREAMS_RULE_STREAM_TAG_PREFIX,
+  streamNameFromTag,
   toStreamTag,
   type IRulesManagementClient,
   type SignificantEventsRuleDefinition,
@@ -54,7 +56,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async bulkDeleteRules(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.statusCode !== 404);
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND);
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
@@ -77,6 +79,20 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       page++;
     }
     return ids;
+  }
+
+  async findStreamNamesWithOwnedRules(): Promise<string[]> {
+    // Filters rules, not tags: matched rules return all their tags, so drop non-ownership ones below.
+    const escapedPrefix = STREAMS_RULE_STREAM_TAG_PREFIX.replace(/[\\:]/g, '\\$&');
+    const tags = await this.rulesClient.getTags({ filter: `metadata.tags: ${escapedPrefix}*` });
+    const streamNames = new Set<string>();
+    for (const tag of tags) {
+      const streamName = streamNameFromTag(tag);
+      if (streamName) {
+        streamNames.add(streamName);
+      }
+    }
+    return [...streamNames];
   }
 
   /**

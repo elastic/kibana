@@ -533,6 +533,10 @@ export const ActionTypeForm = ({
           <>
             {!hideNotifyWhen && <EuiSpacer size="s" />}
             <EuiSuperSelect
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenAriaLabel',
+                { defaultMessage: 'Run when' }
+              )}
               prepend={
                 <EuiFormPrepend
                   inputId={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}

@@ -169,6 +169,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
 
     return {
       key: bucket.key,
+      severity_score: meta?.severityScore ?? 0,
       doc_count: bucket.signal_count?.value ?? bucket.doc_count,
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
       stream: { buckets: [{ key: streamName }] },

@@ -51,6 +51,13 @@ export const SECTION_DATASETS = i18n.translate('xpack.evals.experimentDetail.sec
   defaultMessage: 'Datasets',
 });
 
+export const SECTION_RUN_PROGRESS = i18n.translate(
+  'xpack.evals.experimentDetail.section.runProgress',
+  {
+    defaultMessage: 'Run progress',
+  }
+);
+
 export const DELETED_DATASET_SUFFIX = i18n.translate(
   'xpack.evals.experimentDetail.deletedDatasetSuffix',
   {
@@ -149,6 +156,50 @@ export const EXPERIMENT_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.evals.experimentDetail.experimentLoadErrorTitle',
   {
     defaultMessage: 'Unable to load experiment',
+  }
+);
+
+export const EXPERIMENT_PREPARING_TITLE = i18n.translate(
+  'xpack.evals.experimentDetail.experimentPreparingTitle',
+  {
+    defaultMessage: 'Preparing experiment…',
+  }
+);
+
+export const EXPERIMENT_PREPARING_BODY = i18n.translate(
+  'xpack.evals.experimentDetail.experimentPreparingBody',
+  {
+    defaultMessage:
+      'The run is launching. This page will update automatically once the experiment starts producing results.',
+  }
+);
+
+export const EXPERIMENT_LOADING_RESULTS_TITLE = i18n.translate(
+  'xpack.evals.experimentDetail.experimentLoadingResultsTitle',
+  {
+    defaultMessage: 'Loading results…',
+  }
+);
+
+export const EXPERIMENT_LOADING_RESULTS_BODY = i18n.translate(
+  'xpack.evals.experimentDetail.experimentLoadingResultsBody',
+  {
+    defaultMessage: 'Scores have been ingested. Fetching the experiment report…',
+  }
+);
+
+export const EXPERIMENT_NO_RESULTS_TITLE = i18n.translate(
+  'xpack.evals.experimentDetail.experimentNoResultsTitle',
+  {
+    defaultMessage: 'Run finished — no results',
+  }
+);
+
+export const EXPERIMENT_NO_RESULTS_BODY = i18n.translate(
+  'xpack.evals.experimentDetail.experimentNoResultsBody',
+  {
+    defaultMessage:
+      'The run completed without ingesting any scores, so there is nothing to display. Check the run progress above for step errors, and confirm the selected dataset has examples and that your evaluators (plus any judge connector) are configured correctly.',
   }
 );
 

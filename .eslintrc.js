@@ -3148,7 +3148,6 @@ module.exports = {
  */
 module.exports.overrides.push({
   files: [
-    'examples/response_stream/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
@@ -3159,7 +3158,6 @@ module.exports.overrides.push({
     'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
     'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',

@@ -42,9 +42,6 @@ spec:
               - package.json
               - tsconfig.base.json
               - versions.json
-              # The pre-command hook (pulled in via .buildkite) runs kbn-evals' dependency-free
-              # validate_config.js when KBN_EVALS=1, so it must be present in the sparse tree.
-              - x-pack/platform/packages/shared/kbn-evals/scripts/vault
             cleanup_sparse_state: true
       provider_settings:
         build_branches: false

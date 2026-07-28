@@ -18,8 +18,14 @@ import {
   handleExecutionDelay,
 } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
+import {
+  createMockWorkflowExecutionCursor,
+  type MockWorkflowExecutionCursorOptions,
+} from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
+const makeParams = (
+  cursorOptions: MockWorkflowExecutionCursorOptions = {}
+): jest.Mocked<WorkflowExecutionLoopParams> =>
   ({
     workflowRuntime: {
       getWorkflowExecution: jest.fn().mockReturnValue({
@@ -29,6 +35,7 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
       }),
       getCurrentNode: jest.fn().mockReturnValue(undefined),
     },
+    workflowExecutionCursor: createMockWorkflowExecutionCursor(cursorOptions),
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),
@@ -201,14 +208,8 @@ describe('handleExecutionDelay', () => {
         jest.useFakeTimers();
         try {
           jest.setSystemTime(new Date(nowIso));
-          const params = makeParams();
-          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
-            workflowLevelTimeout
-          );
-          (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
-            id: 'exec-parent',
-            startedAt: '2025-06-01T12:00:00.000Z',
-            scopeStack: [
+          const params = makeParams({
+            currentStackFrames: [
               {
                 stepId: 'timedParent',
                 nestedScopes: [
@@ -220,6 +221,9 @@ describe('handleExecutionDelay', () => {
               },
             ],
           });
+          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
+            workflowLevelTimeout
+          );
           (params.workflowExecutionGraph.getNode as jest.Mock).mockImplementation(
             (nodeId: string) => {
               if (nodeId === 'enterTimeoutZone_timedParent') {
@@ -396,7 +400,7 @@ describe('handleExecutionDelay', () => {
   });
 
   describe('short wait — abort during in-process sleep (real timers)', () => {
-    it('on step abort during sleep sets RUNNING and returns (cancel / interrupt path)', async () => {
+    it('on step abort during sleep leaves workflow WAITING and returns (cancel / interrupt path)', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 3000).toISOString();
       const ac = new AbortController();
@@ -415,6 +419,9 @@ describe('handleExecutionDelay', () => {
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.WAITING,
+      });
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith({
         status: ExecutionStatus.RUNNING,
       });
     });

@@ -1490,10 +1490,14 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               interval: {
+                value: '24h',
                 type: 'text',
-                value: '30s',
               },
               batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              max_executions: {
                 value: 1000,
                 type: 'integer',
               },
@@ -1532,8 +1536,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               interval: {
+                value: '24h',
                 type: 'text',
-                value: '30s',
               },
               batch_size: {
                 value: 1000,
@@ -1574,10 +1578,14 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               interval: {
+                value: '24h',
                 type: 'text',
-                value: '30s',
               },
               batch_size: {
+                value: 1000,
+                type: 'integer',
+              },
+              max_executions: {
                 value: 1000,
                 type: 'integer',
               },
@@ -1616,12 +1624,12 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
+                value: '24h',
                 type: 'text',
-                value: '48h',
               },
               interval: {
+                value: '1m',
                 type: 'text',
-                value: '30s',
               },
               batch_size: {
                 value: 1000,
@@ -1684,8 +1692,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                type: 'text',
                 value: '48h',
+                type: 'text',
               },
               interval: {
                 value: '30s',
@@ -1712,8 +1720,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                type: 'text',
                 value: '48h',
+                type: 'text',
               },
               interval: {
                 value: '30s',
@@ -1740,8 +1748,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                type: 'text',
                 value: '48h',
+                type: 'text',
               },
               interval: {
                 value: '30s',
@@ -1768,8 +1776,8 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                type: 'text',
                 value: '48h',
+                type: 'text',
               },
               interval: {
                 value: '30s',
@@ -1796,12 +1804,24 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
             },
             vars: {
               initial_interval: {
-                type: 'text',
                 value: '48h',
+                type: 'text',
               },
               interval: {
                 value: '30s',
                 type: 'text',
+              },
+              enable_star_rule_enrichment: {
+                value: false,
+                type: 'bool',
+              },
+              max_executions: {
+                value: 1000,
+                type: 'integer',
+              },
+              page_size: {
+                value: 100,
+                type: 'integer',
               },
               tags: {
                 value: ['forwarded', 'sentinel_one-threat'],

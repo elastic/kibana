@@ -62,6 +62,7 @@ describe('ApiEndpoints', () => {
     });
     mockUseApiKeys.mockReturnValue({
       encodedApiKeys: {},
+      keyCreatedBeforeByEndpointId: {},
       createApiKey: jest.fn(),
     });
     mockUseKibana.mockReturnValue({
