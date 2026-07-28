@@ -55,7 +55,6 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
-      security: setupDeps.security,
     });
 
     return {
