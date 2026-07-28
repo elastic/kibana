@@ -66,7 +66,7 @@ pageLoadAssetSize:
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 6117
+  evals: 8650
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -143,6 +143,7 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 48128
   painlessLab: 6299
+  pnd: 7674
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860

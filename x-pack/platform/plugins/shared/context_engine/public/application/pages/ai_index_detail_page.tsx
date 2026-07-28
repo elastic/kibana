@@ -99,7 +99,7 @@ export const AiIndexDetailPage = () => {
           onEditSources={() => setIsEditingSources(true)}
         />
         <EuiSpacer size="l" />
-        <AutomationsPanel />
+        <AutomationsPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

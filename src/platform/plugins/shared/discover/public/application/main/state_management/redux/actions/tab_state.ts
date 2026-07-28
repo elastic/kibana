@@ -9,6 +9,7 @@
 
 import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
   type AggregateQuery,
@@ -41,13 +42,13 @@ import {
   ProfileStateType,
   type ProfileStateDefinition,
   type ProfileStateDefaultsHandling,
-  type ProfileStateMutationOptions,
-} from '../../../../../context_awareness';
+} from '../../../../../../common/context_awareness';
+import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
   selectCurrentProfileUrlState,
-  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileStateDefinition,
   selectTabRuntimeState,
 } from '../runtime_state';
 import type {
@@ -221,7 +222,7 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
     }
   };
 
-type ProfileStatePayload<TState extends object> = TabActionPayload<{
+type ProfileStatePayload<TState extends SerializableRecord> = TabActionPayload<{
   profileStateDefinition: ProfileStateDefinition<TState>;
   profileState: TState;
   historyMethod?: ProfileStateMutationOptions['historyMethod'];
@@ -238,7 +239,7 @@ const URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Url]);
 /**
  * Updates tab profile state for provided definition, and optionally pushes to URL history
  */
-export const setProfileState = <TState extends object>(
+export const setProfileState = <TState extends SerializableRecord>(
   payload: ProfileStatePayload<TState>
 ): InternalStateThunkAction =>
   function setProfileStateThunkFn(
@@ -276,7 +277,7 @@ export const setProfileState = <TState extends object>(
       stateTypes,
       defaultsHandling,
     }: {
-      profileState: object | undefined;
+      profileState: SerializableRecord | undefined;
       stateTypes: Set<ProfileStateType>;
       defaultsHandling?: ProfileStateDefaultsHandling;
     }) => {
@@ -288,11 +289,11 @@ export const setProfileState = <TState extends object>(
       });
     };
 
-    const dispatchProfileState = (profileState: object | undefined) => {
+    const dispatchProfileState = (profileState: SerializableRecord | undefined) => {
       dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
     };
 
-    const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
+    const profileUrlStateDefinition = selectCurrentProfileStateDefinition(
       runtimeStateManager,
       tabId
     );

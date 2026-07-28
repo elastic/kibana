@@ -25,15 +25,18 @@ import {
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
-import type { ProfileStateDefinition } from '../../../../../context_awareness';
-import { ProfileStateType } from '../../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../../../../common/context_awareness';
 
-interface SecondaryProfileState {
+interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;
 }
 
