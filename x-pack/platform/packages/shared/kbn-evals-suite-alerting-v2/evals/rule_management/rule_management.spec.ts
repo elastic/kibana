@@ -27,13 +27,13 @@ evaluate.describe(
   'Alerting V2 rule-management skill - routing',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('observability use case routes to rule-management', async ({ evaluateDataset }) => {
+    evaluate('skill routing', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'alerting-v2: rule-management observability routing',
+          name: 'alerting-v2: skill routing',
           description:
-            'An Observability / ops alerting request (metrics threshold) should load the ' +
-            'rule-management skill and must not load Security detection-rule-edit.',
+            'Verifies that Observability / ops alerting requests route to the rule-management ' +
+            'skill and Security / SIEM detection requests route to detection-rule-edit.',
           examples: [
             {
               input: {
@@ -50,19 +50,6 @@ evaluate.describe(
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
               },
             },
-          ],
-        },
-      });
-    });
-
-    evaluate('security use case routes to detection-rule-edit', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'alerting-v2: rule-management security routing',
-          description:
-            'A Security / SIEM detection request should load detection-rule-edit and must not ' +
-            'load the Alerting V2 rule-management skill.',
-          examples: [
             {
               input: {
                 turns: [
@@ -86,20 +73,20 @@ evaluate.describe(
 );
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - Create with AI Agent entry point',
+  'Alerting V2 rule-management skill - composition',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate(
-      'UI entry prompt loads the skill, asks what to monitor, then composes',
-      async ({ evaluateDataset, hostMetricsIndex }) => {
+      'rule composition',
+      async ({ evaluateDataset, hostMetricsIndex, adminConsoleIndex }) => {
         await evaluateDataset({
           dataset: {
-            name: 'alerting-v2: create-with-agent UI entry point',
+            name: 'alerting-v2: rule composition',
             description:
-              'Exercises the exact initial message the rules list page sends when the user clicks ' +
-              '"Create with AI Agent". The prompt explicitly names the rule-management skill and ' +
-              'alerting v2: the agent should load the skill, ask what the user wants to monitor ' +
-              '(guided setup), and after the user answers, compose the rule via manage_rule.',
+              'Exercises rule composition via the Alerting V2 rule-management skill across ' +
+              'multiple scenarios: the "Create with AI Agent" UI entry point, a fully-specified ' +
+              'single-turn request, and a vague natural-language request that requires index ' +
+              'discovery. All target data-forge-seeded indices so ES|QL validation is real.',
             examples: [
               {
                 input: {
@@ -141,31 +128,6 @@ evaluate.describe(
                   },
                 },
               },
-            ],
-          },
-        });
-      }
-    );
-  }
-);
-
-evaluate.describe(
-  'Alerting V2 rule-management skill - composition',
-  { tag: tags.serverless.observability.complete },
-  () => {
-    evaluate(
-      'fully-specified request composes a CPU alert rule',
-      async ({ evaluateDataset, hostMetricsIndex }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'alerting-v2: rule-management fully-specified compose',
-            description:
-              'A single-turn request that already supplies every detail needed to build a rule ' +
-              '(index pattern, metric field, threshold, grouping, and duration) should route to the ' +
-              'Alerting V2 rule-management skill and compose the rule via manage_rule in this turn — ' +
-              'no further clarification is required. The target index is seeded via data-forge so the ' +
-              "skill's set_query ES|QL validation resolves against a real, mapped source.",
-            examples: [
               {
                 input: {
                   turns: [
@@ -195,8 +157,6 @@ evaluate.describe(
                     expect(attachment!.grouping?.fields).toEqual(
                       expect.arrayContaining(['host.name'])
                     );
-                    // "stays above for 5 minutes" → pending timeframe / lookback, not a
-                    // WHERE on @timestamp. Accept either representation.
                     expect(
                       attachment!.state_transition?.pending_timeframe ??
                         attachment!.schedule?.lookback
@@ -207,24 +167,6 @@ evaluate.describe(
                   },
                 },
               },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'vague admin-console request discovers index then composes',
-      async ({ evaluateDataset, adminConsoleIndex }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'alerting-v2: rule-management vague admin-console compose',
-            description:
-              'A natural-language Observability request that names a dataset colloquially ' +
-              '("admin console") and gives a threshold/window, but not the concrete index pattern ' +
-              'or field names. The agent should discover the admin-console index, inspect mappings, ' +
-              'and compose via manage_rule. The target index is seeded via data-forge.',
-            examples: [
               {
                 input: {
                   turns: [
@@ -241,8 +183,6 @@ evaluate.describe(
                   ],
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                  // Index is only named colloquially, so the agent must discover it and
-                  // inspect mappings before composing.
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],
                   expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],

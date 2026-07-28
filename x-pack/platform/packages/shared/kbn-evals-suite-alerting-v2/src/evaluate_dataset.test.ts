@@ -8,8 +8,8 @@
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
-import type { TaskOutput } from '@kbn/evals';
-import type { ConverseResult, RuleManagementChatClient } from './chat_client';
+import type { AgentBuilderClient, AgentBuilderClientResponse, TaskOutput } from '@kbn/evals';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { buildPromptResponses, collectScoredCriteria, createTask } from './evaluate_dataset';
 
 const askUserQuestion = (id: string, questionCount = 1): PromptRequest =>
@@ -29,11 +29,12 @@ const confirmation = (id: string): PromptRequest =>
 const authorization = (id: string): PromptRequest =>
   ({ type: AgentPromptType.authorization, id } as PromptRequest);
 
-const converseResult = (overrides: Partial<ConverseResult> = {}): ConverseResult => ({
+const converseResult = (
+  overrides: Partial<AgentBuilderClientResponse> = {}
+): AgentBuilderClientResponse => ({
   conversationId: 'conv-1',
-  response: { message: 'agent reply' },
+  message: 'agent reply',
   steps: [],
-  errors: [],
   prompts: [],
   ...overrides,
 });
@@ -53,15 +54,15 @@ const conversationResult = (overrides: Partial<Conversation> = {}): Conversation
   } as Conversation);
 
 /**
- * Chat client stub that returns a scripted response per `converse` call and records the
+ * Client stub that returns a scripted response per `converse` call and records the
  * params it was called with, so we can assert how the task loop threads turns and prompts.
  */
-const makeChatClient = ({
+const makeClient = ({
   responses,
   conversation = conversationResult(),
   getConversation = jest.fn(async () => conversation),
 }: {
-  responses: ConverseResult[];
+  responses: AgentBuilderClientResponse[];
   conversation?: Conversation;
   getConversation?: jest.Mock;
 }) => {
@@ -72,17 +73,17 @@ const makeChatClient = ({
     return responses[index++] ?? converseResult();
   });
   return {
-    client: { converse, getConversation } as unknown as RuleManagementChatClient,
+    client: { converse, getConversation } as unknown as AgentBuilderClient,
     calls,
     getConversation,
   };
 };
 
 const runTask = async (
-  client: RuleManagementChatClient,
+  client: AgentBuilderClient,
   input: { turns: string[] }
 ): Promise<TaskOutput> => {
-  const task = createTask(client);
+  const task = createTask(client, agentBuilderDefaultAgentId);
   return task({ input, metadata: null } as Parameters<typeof task>[0]);
 };
 
@@ -160,18 +161,18 @@ describe('buildPromptResponses', () => {
 
 describe('createTask', () => {
   it('sends a single-turn example as an input message with no prompt responses', async () => {
-    const { client, calls } = makeChatClient({ responses: [converseResult()] });
+    const { client, calls } = makeClient({ responses: [converseResult()] });
 
     await runTask(client, { turns: ['hello'] });
 
     expect(calls).toHaveLength(1);
-    expect(calls[0].messages).toEqual([{ message: 'hello' }]);
+    expect(calls[0].input).toBe('hello');
     expect(calls[0].promptResponses).toBeUndefined();
   });
 
   it('answers a pending opener prompt with the next turn text instead of a new message', async () => {
     const pendingPrompt = askUserQuestion('ask-1');
-    const { client, calls } = makeChatClient({
+    const { client, calls } = makeClient({
       responses: [
         converseResult({ prompts: [pendingPrompt] }), // turn 0 -> agent asks
         converseResult({ prompts: [] }), // turn 1 answer -> resolved
@@ -184,7 +185,7 @@ describe('createTask', () => {
 
     expect(calls).toHaveLength(2);
     // Turn 0: plain message, no prompt answers.
-    expect(calls[0].messages).toEqual([{ message: 'I want to set up alerting' }]);
+    expect(calls[0].input).toBe('I want to set up alerting');
     expect(calls[0].promptResponses).toBeUndefined();
     // Turn 1: delivered as the answer to the pending prompt, not as a fresh input message.
     expect(calls[1].promptResponses).toEqual({
@@ -195,7 +196,7 @@ describe('createTask', () => {
   it('captures prompts from every turn so the judge and low-score logs can see them', async () => {
     const firstPrompt = askUserQuestion('ask-1');
     const laterPrompt = askUserQuestion('ask-2');
-    const { client } = makeChatClient({
+    const { client } = makeClient({
       responses: [
         converseResult({ prompts: [firstPrompt] }),
         converseResult({ prompts: [laterPrompt] }),
@@ -210,7 +211,7 @@ describe('createTask', () => {
   });
 
   it('threads the conversationId returned from the first turn into subsequent turns', async () => {
-    const { client, calls } = makeChatClient({
+    const { client, calls } = makeClient({
       responses: [
         converseResult({ conversationId: 'conv-xyz', prompts: [] }),
         converseResult({ conversationId: 'conv-xyz', prompts: [] }),
@@ -226,7 +227,7 @@ describe('createTask', () => {
 
   it('aggregates steps and loads rounds/messages from GET conversation', async () => {
     const rounds = [round('t0', 'm0'), round('t1', 'm1')];
-    const { client, getConversation } = makeChatClient({
+    const { client, getConversation } = makeClient({
       responses: [
         converseResult({ steps: [{ a: 1 }], prompts: [] }),
         converseResult({ steps: [{ b: 2 }], prompts: [] }),
@@ -267,7 +268,7 @@ describe('createTask', () => {
         ],
       },
     ];
-    const { client, getConversation } = makeChatClient({
+    const { client, getConversation } = makeClient({
       responses: [converseResult({ conversationId: 'conv-xyz' })],
       conversation: conversationResult({
         id: 'conv-xyz',
@@ -295,7 +296,7 @@ describe('createTask', () => {
     const getConversation = jest.fn(async () => {
       throw new Error('conversation gone');
     });
-    const { client } = makeChatClient({
+    const { client } = makeClient({
       responses: [converseResult({ conversationId: 'conv-xyz' })],
       getConversation,
     });
@@ -307,7 +308,7 @@ describe('createTask', () => {
   });
 
   it('throws when converse returns no conversationId', async () => {
-    const { client, getConversation } = makeChatClient({
+    const { client, getConversation } = makeClient({
       responses: [converseResult({ conversationId: undefined })],
     });
 

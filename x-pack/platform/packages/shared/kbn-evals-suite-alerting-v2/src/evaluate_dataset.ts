@@ -7,6 +7,7 @@
 
 import {
   selectEvaluators,
+  type AgentBuilderClient,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -14,7 +15,7 @@ import {
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import {
   isAskUserQuestionPrompt,
@@ -23,7 +24,6 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { RuleManagementChatClient } from './chat_client';
 import { createExpectedSkillEvaluator } from './evaluators/expected_skill';
 import {
   createExpectedAnyOfToolIdsEvaluator,
@@ -102,12 +102,12 @@ export const buildPromptResponses = (
  * prompts from the previous turn so multi-turn flows can continue.
  */
 export const runConversationTurns = async (
-  chatClient: RuleManagementChatClient,
+  client: AgentBuilderClient,
+  agentId: string,
   turns: string[]
 ): Promise<ConversationTurnResult> => {
   let conversationId: string | undefined;
   const steps: unknown[] = [];
-  const errors: unknown[] = [];
   let traceId: string | undefined;
   const prompts: PromptRequest[] = [];
   // Prompts the agent is awaiting a response to, carried over between turns so the next
@@ -115,37 +115,40 @@ export const runConversationTurns = async (
   let pendingPrompts: PromptRequest[] = [];
 
   for (const turnText of turns) {
-    const response = await chatClient.converse({
-      messages: [{ message: turnText }],
+    const promptResponses =
+      pendingPrompts.length > 0 ? buildPromptResponses(pendingPrompts, turnText) : undefined;
+
+    const response = await client.converse({
+      agentId,
+      input: turnText,
       conversationId,
-      promptResponses:
-        pendingPrompts.length > 0 ? buildPromptResponses(pendingPrompts, turnText) : undefined,
+      promptResponses,
     });
     conversationId = response.conversationId ?? conversationId;
-    if (response.steps) steps.push(...response.steps);
-    errors.push(...response.errors);
+    steps.push(...response.steps);
     traceId = response.traceId ?? traceId;
-    prompts.push(...response.prompts);
-    pendingPrompts = response.prompts;
+    const turnPrompts = response.prompts as PromptRequest[];
+    prompts.push(...turnPrompts);
+    pendingPrompts = turnPrompts;
   }
 
-  return { conversationId, steps, errors, traceId, prompts };
+  return { conversationId, steps, traceId, prompts };
 };
 
 /**
  * Loads authoritative rounds + attachments from GET conversation.
- * Retries live in the chat client; after they are exhausted this throws — the
+ * Retries live in the client; after they are exhausted this throws — the
  * conversation is the core of the eval task, so we do not degrade silently.
  */
 export const loadConversationState = async (
-  chatClient: RuleManagementChatClient,
+  client: AgentBuilderClient,
   conversationId: string | undefined
 ): Promise<{ rounds: ConversationRound[]; attachments: VersionedAttachment[] }> => {
   if (!conversationId) {
     throw new Error('No conversationId after converse; cannot load conversation state');
   }
 
-  const conversation = await chatClient.getConversation(conversationId);
+  const conversation = await client.getConversation<Conversation>(conversationId);
   return {
     rounds: conversation.rounds ?? [],
     attachments: conversation.attachments ?? [],
@@ -153,12 +156,13 @@ export const loadConversationState = async (
 };
 
 export const createTask = (
-  chatClient: RuleManagementChatClient
+  client: AgentBuilderClient,
+  agentId: string
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
   return async ({ input }) => {
-    const turnResult = await runConversationTurns(chatClient, input.turns);
+    const turnResult = await runConversationTurns(client, agentId, input.turns);
     const { rounds, attachments } = await loadConversationState(
-      chatClient,
+      client,
       turnResult.conversationId
     );
 
@@ -172,13 +176,15 @@ export const createTask = (
 };
 
 export const createEvaluateDataset = ({
-  chatClient,
+  agentBuilderClient,
+  agentId,
   evaluators,
   executorClient,
   log,
   testTitle,
 }: {
-  chatClient: RuleManagementChatClient;
+  agentBuilderClient: AgentBuilderClient;
+  agentId: string;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   log: ToolingLog;
@@ -201,7 +207,7 @@ export const createEvaluateDataset = ({
     await executorClient.runExperiment(
       {
         datasets: [dataset],
-        task: createTask(chatClient),
+        task: createTask(agentBuilderClient, agentId),
       },
       selectedEvaluators
     );

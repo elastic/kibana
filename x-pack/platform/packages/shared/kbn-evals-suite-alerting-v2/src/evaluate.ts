@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
 import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
-import { RuleManagementChatClient } from './chat_client';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createEvaluateDataset } from './evaluate_dataset';
 import type { EvaluateDataset } from './types';
 import {
@@ -20,46 +20,33 @@ import {
 
 const base = withPhoenixExecutor(evalsBase);
 
-export const evaluate = base.extend<
-  {
-    evaluateDataset: EvaluateDataset;
-    /**
-     * Seeds all data-forge eval data (see `full_stack_data.ts`) before the test
-     * and cleans it up afterwards. Only tests that (transitively) destructure
-     * this fixture pay the seeding cost, so routing-only specs stay fast.
-     * Shared by {@link hostMetricsIndex} and {@link adminConsoleIndex} so the
-     * data is seeded at most once per test.
-     */
-    fullStackData: void;
-    /**
-     * Resolves to the seeded host-metrics index pattern
-     */
-    hostMetricsIndex: string;
-    /**
-     * Resolves to the seeded admin-console index pattern
-     */
-    adminConsoleIndex: string;
-    /** Creates a test `.email` connector */
-    emailConnectorId: string;
-  },
-  {
-    chatClient: RuleManagementChatClient;
-  }
->({
-  chatClient: [
-    async ({ fetch, kbnClient, log, connector }, use) => {
-      const chatClient = new RuleManagementChatClient(fetch, kbnClient, log, connector.id);
-      await use(chatClient);
-    },
-    {
-      scope: 'worker',
-    },
-  ],
+export const evaluate = base.extend<{
+  evaluateDataset: EvaluateDataset;
+  /**
+   * Seeds all data-forge eval data (see `full_stack_data.ts`) before the test
+   * and cleans it up afterwards. Only tests that (transitively) destructure
+   * this fixture pay the seeding cost, so routing-only specs stay fast.
+   * Shared by {@link hostMetricsIndex} and {@link adminConsoleIndex} so the
+   * data is seeded at most once per test.
+   */
+  fullStackData: void;
+  /**
+   * Resolves to the seeded host-metrics index pattern
+   */
+  hostMetricsIndex: string;
+  /**
+   * Resolves to the seeded admin-console index pattern
+   */
+  adminConsoleIndex: string;
+  /** Creates a test `.email` connector */
+  emailConnectorId: string;
+}>({
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, log }, use, testInfo) => {
+    ({ agentBuilderClient, evaluators, executorClient, log }, use, testInfo) => {
       use(
         createEvaluateDataset({
-          chatClient,
+          agentBuilderClient,
+          agentId: agentBuilderDefaultAgentId,
           evaluators,
           executorClient,
           log,

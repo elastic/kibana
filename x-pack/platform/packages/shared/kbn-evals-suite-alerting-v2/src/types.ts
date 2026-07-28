@@ -43,7 +43,6 @@ export type EvaluateDataset = (params: {
 export interface ConversationTurnResult {
   conversationId?: string;
   steps: unknown[];
-  errors: unknown[];
   traceId?: string;
   prompts: PromptRequest[];
 }
