@@ -117,8 +117,57 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     const res = await step.handler(context);
 
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent.mock.calls[0][0].params.accessControl).toBeUndefined();
     expect(res).toHaveProperty('output.conversation_id');
     expect(res.output?.conversation_id).toBe('c-1');
+  });
+
+  it('passes public access control when public-conversation is true', async () => {
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-public', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+        },
+        config: {
+          'create-conversation': true,
+          'public-conversation': true,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          accessControl: { access_mode: 'public' },
+          storeConversation: true,
+          autoCreateConversationWithId: true,
+        }),
+      })
+    );
+    expect(res.output?.conversation_id).toBe('c-public');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {

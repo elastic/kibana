@@ -113,6 +113,19 @@ export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descr
   defaultMessage: 'Description',
 });
 
+export const REQUIRED_COLUMN = i18n.translate('xpack.cases.fieldLibrary.requiredColumn', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_ON_CLOSE_BADGE = i18n.translate(
+  'xpack.cases.fieldLibrary.requiredOnCloseBadge',
+  { defaultMessage: 'Required on close' }
+);
+
 export const OWNER_COLUMN = i18n.translate('xpack.cases.fieldLibrary.ownerColumn', {
   defaultMessage: 'Owner',
 });

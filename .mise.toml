@@ -8,11 +8,7 @@ yarn = "1.22.21"
 description = "Install and link Kibana dependencies"
 run = "yarn kbn bootstrap"
 
-[tasks."river:warm"]
-description = "Warm Kibana and Elasticsearch caches for a River image"
+[tasks."river:prebuild"]
+description = "Prebuild River sandbox image"
 depends = ["bootstrap"]
 run = "bash .river/warm.sh"
-
-[tasks.river-prebuild]
-description = "Prepare Kibana for a River sandbox image"
-depends = ["river:warm"]
