@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { securityTool } from '../../tools/constants';
@@ -13,6 +14,66 @@ import { securityTool } from '../../tools/constants';
 export const DEEP_WATCH_FORENSICS_SKILL_ID = 'deep-watch-forensics';
 
 export const DEEP_WATCH_PACKAGE_EVIDENCE_TOOL_ID = securityTool('deep_watch.package_evidence');
+
+/**
+ * Durable outcome index for produce_draft_forensic_report (PR #35 pyramid §3:
+ * "L4 requires a durable outcome to score"). Temporary: a custom `.kibana-*`
+ * index until the platform Investigation (Agent Builder templated
+ * conversation) object model is ready — see durable_outcome.spec.ts.
+ */
+export const DEEP_WATCH_FORENSICS_REPORTS_INDEX = '.kibana-deep-watch-forensics-reports';
+
+let reportsIndexEnsuredPromise: Promise<void> | undefined;
+
+async function ensureReportsIndex(esClient: ElasticsearchClient): Promise<void> {
+  if (!reportsIndexEnsuredPromise) {
+    reportsIndexEnsuredPromise = (async () => {
+      try {
+        const exists = await esClient.indices.exists({
+          index: DEEP_WATCH_FORENSICS_REPORTS_INDEX,
+        });
+        if (!exists) {
+          await esClient.indices.create({
+            index: DEEP_WATCH_FORENSICS_REPORTS_INDEX,
+            mappings: {
+              dynamic: false,
+              properties: {
+                '@timestamp': { type: 'date' },
+                report_status: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+                scope: {
+                  properties: {
+                    hosts: { type: 'keyword' },
+                    time_window_hours: { type: 'integer' },
+                    mitre_techniques: { type: 'keyword' },
+                  },
+                },
+                timeline_event_count: { type: 'integer' },
+                validated_iocs: { type: 'object', enabled: false },
+                persistence_findings: { type: 'text' },
+                remediation_recommendations: { type: 'text' },
+                unresolved_questions: { type: 'text' },
+                confidence_assessment: {
+                  properties: {
+                    overall: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          });
+        }
+      } catch (e) {
+        // A concurrent call may have created the index between our `exists`
+        // check and `create` — that race is harmless (resource_already_exists);
+        // any other error should surface via the caller's own try/catch around
+        // the subsequent index() write.
+        if (!(e as { message?: string }).message?.includes('resource_already_exists')) {
+          throw e;
+        }
+      }
+    })();
+  }
+  return reportsIndexEnsuredPromise;
+}
 
 interface IocInput {
   type: string;
@@ -490,43 +551,66 @@ If approved: defer to **endpoint-response-actions** for execution. Do not execut
           }
         }
 
+        const report = {
+          report_status: 'DRAFT — Pending Specialist Review (FR-082)',
+          scope: {
+            hosts,
+            time_window_hours: timeWindowHours,
+            mitre_techniques: mitreTechniques ?? [],
+          },
+          timeline,
+          timeline_event_count: timeline.length,
+          validated_iocs: validatedIocs,
+          persistence_findings:
+            'Query registry run keys, scheduled tasks, and startup items via platform.core.generate_esql + platform.core.execute_esql to populate this section.',
+          remediation_recommendations: [
+            'All recommendations below are PROPOSAL-ONLY — require human specialist approval before execution (FR-007).',
+            'Isolate affected hosts to prevent lateral movement — defer to endpoint-response-actions.',
+            'Run malware scan on affected hosts — defer to endpoint-response-actions.',
+            'Collect and preserve evidence (memory, disk) before remediation wipes volatile artifacts.',
+          ],
+          unresolved_questions: unresolvedQuestions,
+          confidence_assessment: {
+            overall:
+              timeline.length > 50 ? 'medium' : timeline.length > 10 ? 'low' : 'insufficient',
+            rationale:
+              timeline.length > 50
+                ? 'Sufficient telemetry events for moderate-confidence reconstruction. Entry vector and pre-window activity remain uncertain.'
+                : timeline.length > 10
+                ? 'Limited telemetry — reconstruction is directional, not definitive. Supplement with additional data sources.'
+                : 'Insufficient telemetry for credible reconstruction. Report is a skeleton — do not treat findings as confirmed.',
+            note: 'Confidence is independent of severity (FR-141). A high-severity finding may have low confidence.',
+          },
+          guidance:
+            'Present this draft to the specialist for review. Label all findings as DRAFT. After specialist approval, recommend containment via endpoint-response-actions. Do NOT execute actions autonomously.',
+        };
+
+        // Persist the draft so it has a durable outcome beyond this ephemeral
+        // tool response (PR #35 pyramid §3 — L4 scoring requires a durable
+        // record; see durable_outcome.spec.ts and DEEP_WATCH_FORENSICS_REPORTS_INDEX).
+        try {
+          await ensureReportsIndex(context.esClient.asInternalUser);
+          await context.esClient.asInternalUser.index({
+            index: DEEP_WATCH_FORENSICS_REPORTS_INDEX,
+            document: {
+              '@timestamp': new Date().toISOString(),
+              ...report,
+            },
+            refresh: 'wait_for',
+          });
+        } catch (e) {
+          context.logger?.warn(
+            `deep_watch_forensics: failed to persist draft report to ${DEEP_WATCH_FORENSICS_REPORTS_INDEX}: ${
+              (e as Error).message
+            }`
+          );
+        }
+
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: {
-                report_status: 'DRAFT — Pending Specialist Review (FR-082)',
-                scope: {
-                  hosts,
-                  time_window_hours: timeWindowHours,
-                  mitre_techniques: mitreTechniques ?? [],
-                },
-                timeline,
-                timeline_event_count: timeline.length,
-                validated_iocs: validatedIocs,
-                persistence_findings:
-                  'Query registry run keys, scheduled tasks, and startup items via platform.core.generate_esql + platform.core.execute_esql to populate this section.',
-                remediation_recommendations: [
-                  'All recommendations below are PROPOSAL-ONLY — require human specialist approval before execution (FR-007).',
-                  'Isolate affected hosts to prevent lateral movement — defer to endpoint-response-actions.',
-                  'Run malware scan on affected hosts — defer to endpoint-response-actions.',
-                  'Collect and preserve evidence (memory, disk) before remediation wipes volatile artifacts.',
-                ],
-                unresolved_questions: unresolvedQuestions,
-                confidence_assessment: {
-                  overall:
-                    timeline.length > 50 ? 'medium' : timeline.length > 10 ? 'low' : 'insufficient',
-                  rationale:
-                    timeline.length > 50
-                      ? 'Sufficient telemetry events for moderate-confidence reconstruction. Entry vector and pre-window activity remain uncertain.'
-                      : timeline.length > 10
-                      ? 'Limited telemetry — reconstruction is directional, not definitive. Supplement with additional data sources.'
-                      : 'Insufficient telemetry for credible reconstruction. Report is a skeleton — do not treat findings as confirmed.',
-                  note: 'Confidence is independent of severity (FR-141). A high-severity finding may have low confidence.',
-                },
-                guidance:
-                  'Present this draft to the specialist for review. Label all findings as DRAFT. After specialist approval, recommend containment via endpoint-response-actions. Do NOT execute actions autonomously.',
-              },
+              data: report,
             },
           ],
         };
