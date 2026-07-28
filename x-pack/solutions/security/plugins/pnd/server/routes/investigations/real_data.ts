@@ -108,6 +108,111 @@ export const realInvestigations: ListInvestigationsResponse['investigations'] = 
       },
     ],
   },
+  {
+    id: 'inv-floor-chain-100',
+    template_id: 'investigation' as const,
+    template_version: TEMPLATE_VERSION_CURRENT,
+    title:
+      'FIN-WS-07 — Full escalation chain: Cobalt Strike beacon (Floor → Dark → Deep → Detection)',
+    createdAt: '2026-07-24T03:00:00Z',
+    updatedAt: '2026-07-24T03:42:00Z',
+    watch_id: 'system-security-watch-floor',
+    watch_execution_id: EXEC_ID,
+    watch_tier: 'floor' as const,
+    severity: 'critical',
+    assignee: null,
+    status: 'escalated',
+    pendingProposalCount: 1,
+    recommendedAction: 'escalate' as const,
+    affectedSurface: 'FIN-WS-07 (10.42.1.19) — Finance Workstation',
+    summary:
+      "Floor detected an anomalous process spawn and handed off to Dark Watch, whose threat-intel correlation matched a Cobalt Strike IoC. Deep Watch's forensic sweep confirmed lateral-movement staging, and Detection Watch drafted a rule-creation proposal to close the gap the existing ruleset missed. One investigation, one continuous escalation thread across all four tiers.",
+    priorityScore: 97,
+    recordId: 'CASE-9200',
+    primaryActionLabel: 'Review decision',
+    // This investigation exists specifically to demonstrate the full
+    // Floor -> Dark -> Deep -> Detection escalation chain as a single
+    // continuous thread in the Investigation Detail Timeline diagram (see
+    // investigation_flow_diagram.tsx). Every other seeded investigation is
+    // single-tier or short-circuits (e.g. Floor -> Officer directly, per
+    // watch_floor_orchestrator.yaml's confidence-gated escalate_to_dark
+    // step); this one exercises all four `actor` tiers in one events[].
+    events: [
+      {
+        id: 'evt-chain-01',
+        timestamp: '2026-07-24T03:00:00Z',
+        type: 'triage',
+        summary: 'Anomalous child process: winword.exe spawned powershell.exe -enc (FIN-WS-07)',
+        actor: 'system-security-watch-floor',
+      },
+      {
+        id: 'evt-chain-02',
+        timestamp: '2026-07-24T03:04:00Z',
+        type: 'escalation',
+        summary:
+          'Confidence 0.81 ≥ threshold — escalated to Dark Watch for threat-intel correlation',
+        actor: 'system-security-watch-floor',
+      },
+      {
+        id: 'evt-chain-03',
+        timestamp: '2026-07-24T03:09:00Z',
+        type: 'classification',
+        summary: 'IoC hash match: decoded payload matches Cobalt Strike stager (T1059.001)',
+        actor: 'system-security-watch-dark',
+      },
+      {
+        id: 'evt-chain-04',
+        timestamp: '2026-07-24T03:12:00Z',
+        type: 'evidence',
+        summary: 'C2 beacon to 91.219.237.14:443 every 45s, jitter 20% (T1071.001)',
+        actor: 'system-security-watch-dark',
+      },
+      {
+        id: 'evt-chain-05',
+        timestamp: '2026-07-24T03:16:00Z',
+        type: 'escalation',
+        summary: 'Confidence 0.89 ≥ threshold — escalated to Deep Watch for forensic verification',
+        actor: 'system-security-watch-dark',
+      },
+      {
+        id: 'evt-chain-06',
+        timestamp: '2026-07-24T03:21:00Z',
+        type: 'evidence',
+        summary: 'Memory forensics: reflective DLL injection into explorer.exe confirmed',
+        actor: 'system-security-watch-deep',
+      },
+      {
+        id: 'evt-chain-07',
+        timestamp: '2026-07-24T03:27:00Z',
+        type: 'evidence',
+        summary: 'Lateral movement staging: SMB admin-share enumeration toward FIN-DC-01',
+        actor: 'system-security-watch-deep',
+      },
+      {
+        id: 'evt-chain-08',
+        timestamp: '2026-07-24T03:31:00Z',
+        type: 'escalation',
+        summary:
+          'Forensics confirmed active intrusion — routed to Detection Watch for rule-gap analysis',
+        actor: 'system-security-watch-deep',
+      },
+      {
+        id: 'evt-chain-09',
+        timestamp: '2026-07-24T03:36:00Z',
+        type: 'proposal_created',
+        summary:
+          'Existing ruleset has no coverage for winword.exe → powershell.exe -enc — drafted new detection rule',
+        actor: 'system-security-watch-detection',
+      },
+      {
+        id: 'evt-chain-esc',
+        timestamp: '2026-07-24T03:42:00Z',
+        type: 'escalation',
+        summary: 'Escalated — requires analyst decision',
+        actor: 'system-security-watch-detection',
+      },
+    ],
+  },
 ];
 
 export function getRealInvestigationById(id: string) {
@@ -187,6 +292,50 @@ export const realProposals: Record<string, ListInvestigationProposalsResponse['p
       summary: 'Contain: isolate endpoint-lab-vm',
       recommendation:
         'Credential dumping tool detected accessing LSASS memory. Recommend immediate network isolation of endpoint-lab-vm to prevent credential-based propagation while Deep Watch performs forensic verification.',
+    },
+  ],
+  'inv-floor-chain-100': [
+    {
+      id: 'prop-chain-100',
+      template_id: 'proposal' as const,
+      template_version: TEMPLATE_VERSION_CURRENT,
+      parentConversationId: 'inv-floor-chain-100',
+      type: 'create',
+      confidence: 0.91,
+      reasoning:
+        "Deep Watch's forensic confirmation (reflective DLL injection, SMB lateral-movement staging toward FIN-DC-01) traces back to a decoded PowerShell stager the existing ruleset does not cover. Detection Watch drafted a new rule matching the winword.exe -> powershell.exe -enc parent/child pattern with base64-decode entropy scoring, closing the gap this chain exposed.",
+      evidenceRefs: [
+        {
+          id: 'ev-chain-0',
+          type: 'process_event',
+          label: 'winword.exe spawned powershell.exe -enc (FIN-WS-07)',
+        },
+        {
+          id: 'ev-chain-1',
+          type: 'alert',
+          label: 'IoC match: Cobalt Strike stager hash',
+        },
+        {
+          id: 'ev-chain-2',
+          type: 'network',
+          label: 'C2 beacon to 91.219.237.14:443',
+        },
+        {
+          id: 'ev-chain-3',
+          type: 'process_event',
+          label: 'Reflective DLL injection into explorer.exe',
+        },
+      ],
+      status: 'pending' as const,
+      assignee: null,
+      sla: '2026-07-24T05:00:00Z',
+      events: [],
+      sourceWatchId: 'system-security-watch-detection',
+      approvalRequired: true,
+      summary:
+        'Create: new detection rule for winword.exe -> powershell.exe -enc parent/child pattern',
+      recommendation:
+        'Create a detection rule matching Office-application-spawns-encoded-PowerShell with base64 decode-entropy scoring, closing the gap this Cobalt Strike chain exposed.',
     },
   ],
 };

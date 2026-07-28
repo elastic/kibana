@@ -107,6 +107,10 @@ const leafEvaluators = [
   'outputTokens',
   'latency',
 ];
+// Suppress unused-var lint: this list is documentation of the leaf evaluator
+// names used in scorecards above; the actual evaluator selection happens
+// via `selectEvaluators(evaluators)` at runtime.
+void leafEvaluators;
 
 // ── Spec ─────────────────────────────────────────────────────────────────────
 
@@ -115,10 +119,10 @@ const examples = buildExamples();
 base.describe('Deep Watch Forensics — L2 Leaf Quality', { tag: tags.stateful.classic }, () => {
   examples.forEach((example) => {
     base(
-      example.id,
+      example.id ?? `forensic-${example.metadata?.case_id ?? 'unknown'}`,
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        const selected = selectEvaluators(evaluators, leafEvaluators);
+        const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
 
         log.info(`[L2] Running ${example.id}: ${example.input.question.slice(0, 100)}...`);
 
@@ -128,16 +132,18 @@ base.describe('Deep Watch Forensics — L2 Leaf Quality', { tag: tags.stateful.c
           input: example.input.question,
         });
 
-        const steps = getToolCallSteps(response.steps);
-        const toolCalls = steps.filter((s) => s.type === 'tool_call');
-        const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
+        const toolCallSteps = getToolCallSteps(response);
+        const toolIds = new Set(toolCallSteps.map((s) => s.tool_id).filter(Boolean));
 
         // ── Step 2: routing gates ───────────────────────────────────────────────
-        const skillInvoked = [...toolIds].some((id) => id.includes(DEEP_WATCH_FORENSICS_SKILL_ID));
+        const skillInvoked = [...toolIds].some((id) =>
+          (id as string).includes(DEEP_WATCH_FORENSICS_SKILL_ID)
+        );
         const packageEvidenceCalled = toolIds.has(DEEP_WATCH_TOOL_IDS.package_evidence);
         const produceDraftCalled = toolIds.has(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);
         const esqlToolsCalled = [...toolIds].some(
-          (id) => id.includes('generate_esql') || id.includes('execute_esql')
+          (id) =>
+            (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
         );
 
         log.info(
@@ -176,7 +182,7 @@ base.describe('Deep Watch Forensics — L2 Leaf Quality', { tag: tags.stateful.c
         let timelineEvents = 0;
         let validatedIocs: Array<{ status: string }> = [];
 
-        const draftSteps = toolCalls.filter(
+        const draftSteps = toolCallSteps.filter(
           (s) => s.tool_id === DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report
         );
 

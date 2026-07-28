@@ -89,11 +89,12 @@ evaluate.describe('Deep Watch Forensics — L0 Routing Smoke', { tag: tags.state
         input,
       });
 
-      const steps = getToolCallSteps(result.steps);
-      const toolCalls = steps.filter((s) => s.type === 'tool_call');
-      const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
+      const toolCallSteps = getToolCallSteps(result);
+      const toolIds = new Set(toolCallSteps.map((s) => s.tool_id).filter(Boolean));
 
-      const skillInvoked = [...toolIds].some((id) => id.includes(DEEP_WATCH_FORENSICS_SKILL_ID));
+      const skillInvoked = [...toolIds].some((id) =>
+        (id as string).includes(DEEP_WATCH_FORENSICS_SKILL_ID)
+      );
       const correctToolCalled = expectToolCalled ? toolIds.has(expectToolCalled) : true;
 
       log.info(
@@ -103,15 +104,15 @@ evaluate.describe('Deep Watch Forensics — L0 Routing Smoke', { tag: tags.state
       );
 
       if (expectSkillInvoked) {
-        expect(skillInvoked).toBe(true, `Expected skill invocation failed — ${reason}`);
+        expect(skillInvoked).to.eql(true, `Expected skill invocation failed — ${reason}`);
         if (expectToolCalled) {
-          expect(correctToolCalled).toBe(
+          expect(correctToolCalled).to.eql(
             true,
             `Expected ${expectToolCalled} but got [${Array.from(toolIds).join(', ')}]`
           );
         }
       } else {
-        expect(skillInvoked).toBe(false, `Skill should NOT have been invoked — ${reason}`);
+        expect(skillInvoked).to.eql(false, `Skill should NOT have been invoked — ${reason}`);
       }
     });
   });

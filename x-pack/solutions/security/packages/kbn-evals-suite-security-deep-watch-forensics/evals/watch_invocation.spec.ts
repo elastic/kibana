@@ -17,6 +17,7 @@
  * This spec covers the routing boundary only (YAML → conversation → skill).
  */
 
+import expect from '@kbn/expect';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import {
   DEEP_WATCH_FORENSICS_SKILL_ID,
@@ -62,9 +63,8 @@ evaluate.describe('Deep Watch Forensics — Watch Invocation', { tag: tags.state
         input: message,
       });
 
-      const steps = getToolCallSteps(result.steps);
-      const toolCalls = steps.filter((s) => s.type === 'tool_call');
-      const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
+      const toolCallSteps = getToolCallSteps(result);
+      const toolIds = new Set(toolCallSteps.map((s) => s.tool_id).filter(Boolean));
 
       const skillInvoked = [...toolIds].some((id) =>
         String(id).includes(DEEP_WATCH_FORENSICS_SKILL_ID)
@@ -75,11 +75,11 @@ evaluate.describe('Deep Watch Forensics — Watch Invocation', { tag: tags.state
         `Watch invocation → skillInvoked=${skillInvoked}, packageEvidence=${packageEvidenceCalled}`
       );
 
-      expect(skillInvoked).toBe(
+      expect(skillInvoked).to.eql(
         true,
         'Hydrated watch message should route to deep-watch-forensics skill'
       );
-      expect(packageEvidenceCalled).toBe(
+      expect(packageEvidenceCalled).to.eql(
         true,
         'deep-watch-forensics should call package_evidence tool'
       );

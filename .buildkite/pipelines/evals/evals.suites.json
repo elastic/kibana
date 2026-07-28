@@ -281,6 +281,34 @@
       ]
     },
     {
+      "id": "security-watch-escalation-chain",
+      "name": "Security Watch Escalation Chain (Floor → Dark → Deep → Detection)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/playwright.config.ts",
+      "tags": [
+        "security",
+        "watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-watch-escalation-chain"
+      ]
+    },
+    {
+      "id": "security-deep-watch-forensics",
+      "name": "Security Deep Watch Forensics",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics/playwright.config.ts",
+      "tags": [
+        "security",
+        "deep-watch",
+        "pnd"
+      ],
+      "ciLabels": [
+        "evals:security-deep-watch-forensics"
+      ]
+    },
+    {
       "id": "agent-builder-dashboards",
       "name": "Agent Builder Dashboards",
       "slackChannel": "#kibana-presentation-reminders",
