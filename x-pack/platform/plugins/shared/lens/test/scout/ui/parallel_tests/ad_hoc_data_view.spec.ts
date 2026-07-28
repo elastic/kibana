@@ -12,7 +12,6 @@ import {
   createAdHocDataViewFromLens,
   createRuntimeFieldFromEditor,
   enableElasticChartDebug,
-  switchDataPanelIndexPattern,
   testData,
 } from '../fixtures';
 
@@ -142,10 +141,10 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
 
       await spaceTest.step('switch to another data view and back', async () => {
         await page.testSubj.locator('lnsIndexPatternFieldSearch').fill('');
-        await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.LOGSTASH);
+        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
         await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
 
-        await switchDataPanelIndexPattern(page, testData.AD_HOC_DATA_VIEW_NAME);
+        await lens.switchDataPanelIndexPattern(testData.AD_HOC_DATA_VIEW_NAME);
         // Scope to Available fields — the same test subject also appears under Selected.
         await expect(
           page.testSubj

@@ -37,20 +37,6 @@ export async function createAdHocDataViewFromLens(page: ScoutPage, name: string)
 }
 
 /**
- * Switches the active data view in the Lens data panel (left-side field list).
- * Equivalent to FTR `lens.switchDataPanelIndexPattern(title)`.
- */
-export async function switchDataPanelIndexPattern(page: ScoutPage, title: string): Promise<void> {
-  await page.testSubj.click('lns-dataView-switch-link');
-  const switcher = page.testSubj.locator('indexPattern-switcher');
-  await switcher.waitFor({ state: 'visible' });
-  await page.testSubj.fill('indexPattern-switcher--input', title);
-  await switcher.locator(`[data-test-subj="dataView-${title}"]`).click();
-  // justified: field list reload after DV switch can be slow under parallel CI load
-  await page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden', timeout: 30_000 });
-}
-
-/**
  * Adds a new data layer to the current XY chart.
  * Equivalent to FTR `lens.createLayer('data')` for XY visualizations that show the layer-type picker.
  */

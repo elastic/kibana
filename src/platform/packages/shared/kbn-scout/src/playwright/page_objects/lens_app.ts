@@ -954,17 +954,26 @@ export class LensApp {
    * Changes the data view in the Lens data panel.
    * Waits for a saved `dataView-{title}` row and fails if it is missing
    * (does not fall back to "Explore matching indices").
+   *
+   * Uses `typeWithDelay` (not `fill`): EuiSelectable filters on keystrokes, and a bulk
+   * `fill` can race so the matching row never appears under CI load.
    */
   async switchDataPanelIndexPattern(dataViewTitle: string) {
     const switchLink = this.page.testSubj.locator('lns-dataView-switch-link');
+    if ((await switchLink.innerText()).trim() === dataViewTitle) {
+      return;
+    }
+
     await switchLink.click();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
-    const matching = switcher.locator(`[data-test-subj="dataView-${dataViewTitle}"]`);
+    // getByTestId escapes special chars (e.g. trailing `*` in index patterns)
+    const matching = switcher.getByTestId(`dataView-${dataViewTitle}`);
     await matching.waitFor({ state: 'visible' });
     await matching.click();
     await switcher.waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden' });
   }
 
   private getFieldListPanelFieldLocator(field: string) {

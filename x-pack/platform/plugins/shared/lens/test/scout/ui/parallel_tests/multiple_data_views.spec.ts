@@ -8,12 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  addDataLayer,
-  enableElasticChartDebug,
-  switchDataPanelIndexPattern,
-  testData,
-} from '../fixtures';
+import { addDataLayer, enableElasticChartDebug, testData } from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
@@ -64,12 +59,12 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
         await lens.openFullEditor();
 
         // Logstash layer — switch data panel to long-window, click bytes
-        await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH);
+        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH);
         await page.testSubj.click('fieldToggle-bytes');
 
         // Flights layer — switch data panel first so the new layer inherits flights,
         // then add a line layer and toggle DistanceKilometers (matches FTR order).
-        await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.FLIGHTS);
+        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.FLIGHTS);
         await addDataLayer(page, 'line');
         await lens.activateLayerTab(1);
         await page.testSubj.locator('fieldToggle-DistanceKilometers').waitFor({ state: 'visible' });
