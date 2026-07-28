@@ -505,6 +505,25 @@ export const CasesFindResponseRt = rt.intersection([
   CasesStatusResponseRt,
 ]);
 
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseRt` so the public `_find` contract
+ * (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseRt = rt.intersection([
+  CasesFindResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The average resolve time in seconds of the cases matching the search, ignoring the
+       * status filter (like the status counts). Null when no matching case has been closed.
+       */
+      mttr: rt.union([rt.number, rt.null]),
+    })
+  ),
+]);
+
 export const CasesSimilarResponseRt = rt.strict({
   cases: rt.array(SimilarCaseRt),
   page: rt.number,
@@ -683,6 +702,7 @@ export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequest
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
+export type CasesSearchResponse = rt.TypeOf<typeof CasesSearchResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;
