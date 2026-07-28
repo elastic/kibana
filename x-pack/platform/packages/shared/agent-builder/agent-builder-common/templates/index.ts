@@ -13,6 +13,23 @@ export type ConversationTemplateFieldType =
   | 'boolean'
   | 'date';
 
+export interface ConversationTemplateFieldValidation {
+  /** Field must have a non-empty value when the template is applied. */
+  required?: boolean;
+  /** Regex the value must match, with an optional custom error message. */
+  pattern?: { regex: string; message?: string };
+  /** Minimum string length — applies to `keyword` and `text` fields. */
+  min_length?: number;
+  /** Maximum string length — applies to `keyword` and `text` fields. */
+  max_length?: number;
+  /** Minimum numeric value — applies to `integer` and `float` fields. */
+  min?: number;
+  /** Maximum numeric value — applies to `integer` and `float` fields. */
+  max?: number;
+  /** Exhaustive list of accepted values. */
+  allowed_values?: string[];
+}
+
 export interface ConversationTemplateField {
   /** ES field name */
   name: string;
@@ -20,6 +37,8 @@ export interface ConversationTemplateField {
   type: ConversationTemplateFieldType;
   /** Default value applied to the conversation when the template is used */
   value?: string;
+  /** Optional validation rules checked whenever the template is applied. */
+  validation?: ConversationTemplateFieldValidation;
 }
 
 export interface ConversationTemplateDefinition {
