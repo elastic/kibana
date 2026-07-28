@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/streams-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import {
   createSearchKnowledgeIndicatorsTool,
@@ -36,6 +37,39 @@ describe('ki_search tool', () => {
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID);
     expect(tool.id).toBe('platform.sig_events.ki_search');
+  });
+
+  it('accepts typed filters and pagination', () => {
+    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createSearchKnowledgeIndicatorsTool({
+      getScopedClients,
+      server,
+      logger,
+    });
+    if (!('schema' in tool)) {
+      throw new Error('Expected a schema-backed tool registration');
+    }
+
+    expect(
+      tool.schema.safeParse({
+        kind: ['query'],
+        stream_names: ['logs.test'],
+        query_types: ['match'],
+        query_ids: ['query-1'],
+        rule_ids: ['rule-1'],
+        rule_backed: true,
+        page: 2,
+        per_page: 50,
+      }).success
+    ).toBe(true);
+    expect(tool.schema.safeParse({ per_page: 101 }).success).toBe(false);
+    expect(tool.schema.safeParse({ feature_types: ['unsupported'] }).success).toBe(false);
+
+    const defaults = tool.schema.safeParse({});
+    expect(defaults.success).toBe(true);
+    if (defaults.success) {
+      expect(defaults.data.per_page).toBe(DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE);
+    }
   });
 
   it('availability returns available when access check succeeds', async () => {
