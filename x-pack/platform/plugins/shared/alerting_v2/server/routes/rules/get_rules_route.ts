@@ -20,7 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { listRulesOasExamples } from './list_rules_oas_example';
 
 @injectable()
@@ -47,7 +47,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

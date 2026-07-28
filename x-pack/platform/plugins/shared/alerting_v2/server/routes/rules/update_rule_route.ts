@@ -21,7 +21,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_VERSION_CONFLICT_DESCRIPTION,
@@ -53,7 +53,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
