@@ -83,7 +83,7 @@ describe('Transform: <TransformManagementSection />', () => {
     mockUseAppDependencies.mockReset();
     mockUseAppDependencies.mockReturnValue({
       dataViewEditor: undefined,
-      cps: { cpsManager: {} },
+      cps: { cpsManager: {}, isTierEligible: true },
       storage: mockStorage,
     });
   });
