@@ -18,7 +18,7 @@ const callbackRetryOptions = {
   randomize: false,
 } as const;
 
-export type MakeRequest = (
+export type CallbackTransport = (
   payload: ChatCallbackResponse,
   signal: AbortSignal
 ) => Promise<{ status: number }>;
@@ -44,7 +44,7 @@ export class CallbackDeliveryService {
     this.actions.getActionsConfigurationUtilities().ensureUriAllowed(callbackUrl);
   }
 
-  createMakeRequest(callbackUrl: string): MakeRequest {
+  createTransport(callbackUrl: string): CallbackTransport {
     const relayClient = this.actions.getRelayClient();
 
     if (relayClient?.isRelayOrigin(callbackUrl)) {
@@ -65,11 +65,11 @@ export class CallbackDeliveryService {
 
   async makeCallbackRequest({
     payload,
-    makeRequest,
+    transport,
     retry,
   }: {
     payload: ChatCallbackResponse;
-    makeRequest: MakeRequest;
+    transport: CallbackTransport;
     retry: boolean;
   }): Promise<void> {
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
@@ -82,7 +82,7 @@ export class CallbackDeliveryService {
         let response: { status: number };
 
         try {
-          response = await makeRequest(payload, abortController.signal);
+          response = await transport(payload, abortController.signal);
         } catch (error) {
           throw error instanceof Error ? error : new Error(String(error));
         } finally {

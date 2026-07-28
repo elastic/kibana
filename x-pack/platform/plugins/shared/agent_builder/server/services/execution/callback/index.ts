@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { CallbackDeliveryService, type MakeRequest } from './callback_delivery_service';
+export { CallbackDeliveryService } from './callback_delivery_service';
 export { deliverCallbackEvents } from './deliver_callback_events';

@@ -43,7 +43,7 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const makeRequest = callbackDeliveryService.createMakeRequest(callbackUrl);
+  const transport = callbackDeliveryService.createTransport(callbackUrl);
 
   return new Promise<void>((resolve) => {
     events$
@@ -56,7 +56,7 @@ export const deliverCallbackEvents = ({
               event,
               ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
             },
-            makeRequest,
+            transport,
             retry: isTerminal,
           });
 
@@ -77,7 +77,7 @@ export const deliverCallbackEvents = ({
               error: serializeExecutionError(error),
               idempotency_key: execution.executionId,
             },
-            makeRequest,
+            transport,
             retry: true,
           });
 
