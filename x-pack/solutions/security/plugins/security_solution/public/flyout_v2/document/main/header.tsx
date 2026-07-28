@@ -32,8 +32,8 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
-import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
-import { FLYOUT_V2_ALERT_PAGINATION_TEST_ID } from './components/test_ids';
+import { useFlyoutPagination } from '../pagination/use_flyout_pagination';
+import { FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID } from './components/test_ids';
 
 const SHARE_ALERT_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
@@ -45,7 +45,7 @@ const SHARE_ALERT_LABEL = i18n.translate(
 const PAGINATION_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.header.paginationAriaLabel',
   {
-    defaultMessage: 'Navigate between alerts',
+    defaultMessage: 'Navigate between documents',
   }
 );
 
@@ -79,12 +79,11 @@ export interface HeaderProps {
    * `true` while pagination is fetching the next document and the previously
    * rendered hit is kept around only to preserve non-mutating header context.
    */
-  isLoading?: boolean;
+  isPaginationLoading?: boolean;
   /**
-   * Per-source-instance UUID passed in from the V2 paginated wrapper
-   * (`PaginatedDocumentFlyout` / `PaginatedTimelineDocumentFlyout`). When
-   * present the header renders in-flyout `EuiPagination` chevrons keyed to
-   * the caller's slice. Absent for non-paginated flyout opens.
+   * Per-source-instance UUID passed in from a paginated document source.
+   * When present the header renders in-flyout `EuiPagination` chevrons keyed
+   * to the caller's slice. Absent for non-paginated flyout opens.
    */
   paginationInstanceId?: string;
 }
@@ -100,7 +99,7 @@ export const Header: FC<HeaderProps> = memo(
     renderCellActions = noopCellActionRenderer,
     onAlertUpdated,
     onShowNotes,
-    isLoading = false,
+    isPaginationLoading = false,
     paginationInstanceId,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -117,15 +116,15 @@ export const Header: FC<HeaderProps> = memo(
       timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
     });
 
-    const { flyoutAlertIndex, totalAlertCount, openAlertFlyout } =
+    const { flyoutDocumentIndex, totalDocumentCount, openDocumentFlyout } =
       useFlyoutPagination(paginationInstanceId);
     // Show pagination only when the flyout was opened from a paginated source
     // (paginationInstanceId set) and there is more than one document to walk.
     const showPagination =
       paginationInstanceId != null &&
-      totalAlertCount > 1 &&
-      flyoutAlertIndex != null &&
-      flyoutAlertIndex >= 0;
+      totalDocumentCount > 1 &&
+      flyoutDocumentIndex != null &&
+      flyoutDocumentIndex >= 0;
 
     // When pagination is rendered on the right side of the row it would sit
     // underneath the absolutely-positioned EuiFlyout close button (top: 8px,
@@ -161,11 +160,11 @@ export const Header: FC<HeaderProps> = memo(
             <EuiFlexItem grow={false}>
               <EuiPagination
                 aria-label={PAGINATION_ARIA_LABEL}
-                pageCount={totalAlertCount}
-                activePage={flyoutAlertIndex}
-                onPageClick={openAlertFlyout}
+                pageCount={totalDocumentCount}
+                activePage={flyoutDocumentIndex}
+                onPageClick={openDocumentFlyout}
                 compressed
-                data-test-subj={FLYOUT_V2_ALERT_PAGINATION_TEST_ID}
+                data-test-subj={FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID}
               />
             </EuiFlexItem>
           )}
@@ -175,7 +174,7 @@ export const Header: FC<HeaderProps> = memo(
           <EuiSpacer size="xs" />
         </Timestamp>
         <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
-        {isAlert && !isLoading && (
+        {isAlert && !isPaginationLoading && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup

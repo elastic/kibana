@@ -13,9 +13,8 @@ export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPr
  * cross-page alert. */
 export const FLYOUT_V2_LOADING_SPINNER_TEST_ID = `${PREFIX}V2LoadingSpinner` as const;
 
-/* In-flyout EuiPagination that walks the entire alerts result set without
- * moving the underlying alerts table. */
-export const FLYOUT_V2_ALERT_PAGINATION_TEST_ID = `${PREFIX}V2AlertPagination` as const;
+/* In-flyout EuiPagination that walks the source's document result set. */
+export const FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID = `${PREFIX}V2DocumentPagination` as const;
 
 /* Header */
 

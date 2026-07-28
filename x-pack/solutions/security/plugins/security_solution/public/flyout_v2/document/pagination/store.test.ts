@@ -17,9 +17,9 @@ describe('flyoutPaginationStore', () => {
   });
 
   it('setSlice creates a new slice', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 1, totalAlertCount: 10 });
-    expect(flyoutPaginationStore.getSlice(ID_A).flyoutAlertIndex).toBe(1);
-    expect(flyoutPaginationStore.getSlice(ID_A).totalAlertCount).toBe(10);
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1, totalDocumentCount: 10 });
+    expect(flyoutPaginationStore.getSlice(ID_A).flyoutDocumentIndex).toBe(1);
+    expect(flyoutPaginationStore.getSlice(ID_A).totalDocumentCount).toBe(10);
   });
 
   it('getSlice returns absentSlice for null, undefined, and unknown ids', () => {
@@ -29,14 +29,14 @@ describe('flyoutPaginationStore', () => {
   });
 
   it('getSlice returns the correct slice for a known id', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 7, pageSize: 25 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 7, pageSize: 25 });
     const slice = flyoutPaginationStore.getSlice(ID_A);
-    expect(slice.flyoutAlertIndex).toBe(7);
+    expect(slice.flyoutDocumentIndex).toBe(7);
     expect(slice.pageSize).toBe(25);
   });
 
   it('removeSlice removes the slice so getSlice returns absentSlice', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 2 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 2 });
     flyoutPaginationStore.removeSlice(ID_A);
     expect(flyoutPaginationStore.getSlice(ID_A)).toBe(absentSlice);
   });
@@ -46,23 +46,23 @@ describe('flyoutPaginationStore', () => {
   });
 
   it('mutating slice A does not change the object reference for slice B', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 1 });
-    flyoutPaginationStore.setSlice(ID_B, { flyoutAlertIndex: 2 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
+    flyoutPaginationStore.setSlice(ID_B, { flyoutDocumentIndex: 2 });
     const snapshotB = flyoutPaginationStore.getSlice(ID_B);
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 99 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 99 });
     expect(flyoutPaginationStore.getSlice(ID_B)).toBe(snapshotB);
   });
 
   it('removeSlice for A does not change the object reference for slice B', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 1 });
-    flyoutPaginationStore.setSlice(ID_B, { flyoutAlertIndex: 2 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
+    flyoutPaginationStore.setSlice(ID_B, { flyoutDocumentIndex: 2 });
     const snapshotB = flyoutPaginationStore.getSlice(ID_B);
     flyoutPaginationStore.removeSlice(ID_A);
     expect(flyoutPaginationStore.getSlice(ID_B)).toBe(snapshotB);
   });
 
   it('__resetFlyoutPaginationStoreForTests clears all slices', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 1 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
     __resetFlyoutPaginationStoreForTests();
     expect(flyoutPaginationStore.getSlice(ID_A)).toBe(absentSlice);
   });
@@ -71,10 +71,10 @@ describe('flyoutPaginationStore', () => {
     const spy = jest.fn();
     const unsub = flyoutPaginationStore.subscribe(spy);
 
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 1 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
     expect(spy).toHaveBeenCalledTimes(1);
 
-    flyoutPaginationStore.setSlice(ID_A, { flyoutAlertIndex: 1 });
+    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
     expect(spy).toHaveBeenCalledTimes(1);
 
     flyoutPaginationStore.removeSlice(ID_A);

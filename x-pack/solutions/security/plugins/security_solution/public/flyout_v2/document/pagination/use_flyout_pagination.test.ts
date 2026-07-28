@@ -6,12 +6,15 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import type { Alert } from '@kbn/alerting-types';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutPagination } from './use_flyout_pagination';
 import { __resetFlyoutPaginationStoreForTests, flyoutPaginationStore } from './store';
 import { absentSlice } from './types';
 
-const sampleAlert = { _id: 'alert-1', _index: 'index-1' } as unknown as Alert;
+const sampleDocument = {
+  id: 'index-1::alert-1',
+  raw: { _id: 'alert-1', _index: 'index-1' },
+} as unknown as DataTableRecord;
 
 const INSTANCE_A = 'instance-a';
 const INSTANCE_B = 'instance-b';
@@ -25,23 +28,22 @@ describe('useFlyoutPagination', () => {
     it('returns the absent slice so consumers render no pagination', () => {
       const { result } = renderHook(() => useFlyoutPagination(null));
 
-      expect(result.current.flyoutAlertIndex).toBeNull();
+      expect(result.current.flyoutDocumentIndex).toBeNull();
       expect(result.current.pageSize).toBe(0);
-      expect(result.current.totalAlertCount).toBe(0);
-      expect(result.current.isFlyoutAlertLoading).toBe(false);
-      expect(result.current.flyoutAlert).toBeNull();
-      expect(result.current.flyoutDocumentRef).toBeNull();
+      expect(result.current.totalDocumentCount).toBe(0);
+      expect(result.current.isFlyoutDocumentLoading).toBe(false);
+      expect(result.current.flyoutDocument).toBeNull();
     });
 
-    it('does not throw when openAlertFlyout is called with a null instanceId', () => {
+    it('does not throw when openDocumentFlyout is called with a null instanceId', () => {
       const { result } = renderHook(() => useFlyoutPagination(null));
-      expect(() => result.current.openAlertFlyout(3)).not.toThrow();
+      expect(() => result.current.openDocumentFlyout(3)).not.toThrow();
     });
 
     it('returns the absent slice for an unknown instanceId', () => {
       const { result } = renderHook(() => useFlyoutPagination('no-such-id'));
-      expect(result.current.flyoutAlertIndex).toBeNull();
-      expect(result.current.totalAlertCount).toBe(0);
+      expect(result.current.flyoutDocumentIndex).toBeNull();
+      expect(result.current.totalDocumentCount).toBe(0);
     });
   });
 
@@ -49,57 +51,60 @@ describe('useFlyoutPagination', () => {
     it('reflects updates written to the store', () => {
       const { result } = renderHook(() => useFlyoutPagination(INSTANCE_A));
 
-      expect(result.current.flyoutAlertIndex).toBeNull();
+      expect(result.current.flyoutDocumentIndex).toBeNull();
 
       act(() => {
         flyoutPaginationStore.setSlice(INSTANCE_A, {
-          flyoutAlertIndex: 42,
-          totalAlertCount: 500,
+          flyoutDocumentIndex: 42,
+          totalDocumentCount: 500,
           pageSize: 50,
-          flyoutAlert: sampleAlert,
+          flyoutDocument: sampleDocument,
         });
       });
 
-      expect(result.current.flyoutAlertIndex).toBe(42);
-      expect(result.current.totalAlertCount).toBe(500);
+      expect(result.current.flyoutDocumentIndex).toBe(42);
+      expect(result.current.totalDocumentCount).toBe(500);
       expect(result.current.pageSize).toBe(50);
-      expect(result.current.flyoutAlert).toBe(sampleAlert);
+      expect(result.current.flyoutDocument).toBe(sampleDocument);
     });
 
-    it('forwards openAlertFlyout to the registered openAlertFlyoutImpl', () => {
+    it('forwards openDocumentFlyout to the registered openDocumentFlyoutImpl', () => {
       const impl = jest.fn();
 
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_A, { openAlertFlyoutImpl: impl });
+        flyoutPaginationStore.setSlice(INSTANCE_A, { openDocumentFlyoutImpl: impl });
       });
 
       const { result } = renderHook(() => useFlyoutPagination(INSTANCE_A));
 
-      result.current.openAlertFlyout(7);
+      result.current.openDocumentFlyout(7);
 
       expect(impl).toHaveBeenCalledTimes(1);
       expect(impl).toHaveBeenCalledWith(7);
     });
 
-    it('treats openAlertFlyout as a no-op if no impl is registered', () => {
+    it('treats openDocumentFlyout as a no-op if no impl is registered', () => {
       const { result } = renderHook(() => useFlyoutPagination(INSTANCE_A));
-      expect(() => result.current.openAlertFlyout(0)).not.toThrow();
+      expect(() => result.current.openDocumentFlyout(0)).not.toThrow();
     });
 
     it('returns to absent slice after the slice is removed', () => {
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_A, { flyoutAlertIndex: 10, totalAlertCount: 100 });
+        flyoutPaginationStore.setSlice(INSTANCE_A, {
+          flyoutDocumentIndex: 10,
+          totalDocumentCount: 100,
+        });
       });
 
       const { result } = renderHook(() => useFlyoutPagination(INSTANCE_A));
-      expect(result.current.flyoutAlertIndex).toBe(10);
+      expect(result.current.flyoutDocumentIndex).toBe(10);
 
       act(() => {
         flyoutPaginationStore.removeSlice(INSTANCE_A);
       });
 
-      expect(result.current.flyoutAlertIndex).toBeNull();
-      expect(result.current.totalAlertCount).toBe(0);
+      expect(result.current.flyoutDocumentIndex).toBeNull();
+      expect(result.current.totalDocumentCount).toBe(0);
     });
   });
 
@@ -109,25 +114,31 @@ describe('useFlyoutPagination', () => {
       const { result: resultB } = renderHook(() => useFlyoutPagination(INSTANCE_B));
 
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_A, { flyoutAlertIndex: 5, totalAlertCount: 50 });
+        flyoutPaginationStore.setSlice(INSTANCE_A, {
+          flyoutDocumentIndex: 5,
+          totalDocumentCount: 50,
+        });
         flyoutPaginationStore.setSlice(INSTANCE_B, {
-          flyoutAlertIndex: 99,
-          totalAlertCount: 200,
+          flyoutDocumentIndex: 99,
+          totalDocumentCount: 200,
         });
       });
 
-      expect(resultA.current.flyoutAlertIndex).toBe(5);
-      expect(resultA.current.totalAlertCount).toBe(50);
-      expect(resultB.current.flyoutAlertIndex).toBe(99);
-      expect(resultB.current.totalAlertCount).toBe(200);
+      expect(resultA.current.flyoutDocumentIndex).toBe(5);
+      expect(resultA.current.totalDocumentCount).toBe(50);
+      expect(resultB.current.flyoutDocumentIndex).toBe(99);
+      expect(resultB.current.totalDocumentCount).toBe(200);
     });
 
     it("removing instance A's slice does not affect instance B", () => {
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_A, { flyoutAlertIndex: 3, totalAlertCount: 30 });
+        flyoutPaginationStore.setSlice(INSTANCE_A, {
+          flyoutDocumentIndex: 3,
+          totalDocumentCount: 30,
+        });
         flyoutPaginationStore.setSlice(INSTANCE_B, {
-          flyoutAlertIndex: 77,
-          totalAlertCount: 770,
+          flyoutDocumentIndex: 77,
+          totalDocumentCount: 770,
         });
       });
 
@@ -139,17 +150,20 @@ describe('useFlyoutPagination', () => {
       });
 
       expect(resultA.current).toMatchObject(absentSlice);
-      expect(resultB.current.flyoutAlertIndex).toBe(77);
-      expect(resultB.current.totalAlertCount).toBe(770);
+      expect(resultB.current.flyoutDocumentIndex).toBe(77);
+      expect(resultB.current.totalDocumentCount).toBe(770);
     });
 
     it("removing instance B's slice does not affect instance A", () => {
       act(() => {
         flyoutPaginationStore.setSlice(INSTANCE_A, {
-          flyoutAlertIndex: 10,
-          totalAlertCount: 100,
+          flyoutDocumentIndex: 10,
+          totalDocumentCount: 100,
         });
-        flyoutPaginationStore.setSlice(INSTANCE_B, { flyoutAlertIndex: 20, totalAlertCount: 200 });
+        flyoutPaginationStore.setSlice(INSTANCE_B, {
+          flyoutDocumentIndex: 20,
+          totalDocumentCount: 200,
+        });
       });
 
       const { result: resultA } = renderHook(() => useFlyoutPagination(INSTANCE_A));
@@ -159,8 +173,8 @@ describe('useFlyoutPagination', () => {
         flyoutPaginationStore.removeSlice(INSTANCE_B);
       });
 
-      expect(resultA.current.flyoutAlertIndex).toBe(10);
-      expect(resultA.current.totalAlertCount).toBe(100);
+      expect(resultA.current.flyoutDocumentIndex).toBe(10);
+      expect(resultA.current.totalDocumentCount).toBe(100);
       expect(resultB.current).toMatchObject(absentSlice);
     });
   });
@@ -172,15 +186,15 @@ describe('useFlyoutPagination', () => {
 
       act(() => {
         flyoutPaginationStore.setSlice(INSTANCE_A, {
-          flyoutAlertIndex: 42,
-          flyoutAlert: sampleAlert,
+          flyoutDocumentIndex: 42,
+          flyoutDocument: sampleDocument,
         });
       });
 
-      expect(hookA.current.flyoutAlertIndex).toBe(42);
-      expect(hookA.current.flyoutAlert).toBe(sampleAlert);
-      expect(hookB.current.flyoutAlertIndex).toBe(42);
-      expect(hookB.current.flyoutAlert).toBe(sampleAlert);
+      expect(hookA.current.flyoutDocumentIndex).toBe(42);
+      expect(hookA.current.flyoutDocument).toBe(sampleDocument);
+      expect(hookB.current.flyoutDocumentIndex).toBe(42);
+      expect(hookB.current.flyoutDocument).toBe(sampleDocument);
     });
   });
 });

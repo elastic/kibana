@@ -13,7 +13,7 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import {
   mockBrowserFieldsWithId,
@@ -27,11 +27,14 @@ import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { useOpenFlyout } from '../../../../../flyout_v2/shared/hooks/use_open_flyout';
+import { flyoutPaginationStore } from '../../../../../flyout_v2/document/pagination/store';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
 jest.mock('../../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../../flyout_v2/shared/hooks/use_open_flyout');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({
@@ -47,12 +50,7 @@ const onFetchMoreRecordsMock = jest.fn();
 const openFlyoutMock = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
 const mockUiSettingsGet = jest.fn().mockReturnValue(false);
-const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
-  <div>{'MockDocumentFlyoutWrapper'}</div>
-));
-const mockPaginatedTimelineDocumentFlyout = jest.fn((_props?: unknown) => (
-  <div>{'MockPaginatedTimelineDocumentFlyout'}</div>
-));
+const mockDocumentFlyout = jest.fn((_props?: unknown) => <div>{'MockDocumentFlyout'}</div>);
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
@@ -60,11 +58,8 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
-  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
-}));
-jest.mock('../../../../../flyout_v2/document/paginated_timeline_document_flyout', () => ({
-  PaginatedTimelineDocumentFlyout: (props: unknown) => mockPaginatedTimelineDocumentFlyout(props),
+jest.mock('../../../../../flyout_v2/document/main', () => ({
+  DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../../common/lib/kibana');
@@ -169,6 +164,9 @@ describe('unified data table', () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest
+      .mocked(useOpenFlyout)
+      .mockReturnValue(mockOpenSystemFlyout.mockReturnValue({ close: jest.fn() }));
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -232,7 +230,37 @@ describe('unified data table', () => {
       );
 
       expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
-      expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
+      expect(mockDocumentFlyout).not.toHaveBeenCalled();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'updates the expanded row icon when the document flyout paginates',
+    async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      const expandButtons = screen.getAllByTestId('docTableExpandToggleColumn');
+      fireEvent.click(expandButtons[0]);
+
+      await waitFor(() => {
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
+      });
+
+      const flyoutBody = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
+      const { paginationInstanceId } = flyoutBody.props;
+
+      act(() => {
+        flyoutPaginationStore.getSlice(paginationInstanceId).openDocumentFlyoutImpl?.(1);
+      });
+
+      await waitFor(() => {
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'expand');
+        expect(expandButtons[1].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
+      });
     },
     SPECIAL_TEST_TIMEOUT
   );
@@ -248,11 +276,11 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalled();
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
       });
 
-      const { renderCellActions } = jest.mocked(flyoutApi.openDocumentFlyoutFromIndex).mock
-        .calls[0][0];
+      const flyoutBody = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
+      const { renderCellActions } = flyoutBody.props;
 
       // Even when a cell passes an empty scopeId, the bound timeline scope must win so Filter
       // In/Out target the timeline's own filter manager instead of the page behind it.
@@ -294,7 +322,7 @@ describe('unified data table', () => {
 
       // attack rows no longer go through the inline system flyout or the document flyout api
       expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
-      expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
+      expect(mockDocumentFlyout).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );
