@@ -20,6 +20,7 @@
     "xpack.banners": "platform/plugins/private/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
+    "xpack.clientApps": "solutions/observability/plugins/client_apps",
     "xpack.cloud": "platform/plugins/shared/cloud",
     "xpack.cloudConnect": "platform/plugins/shared/cloud_connect",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",

@@ -35,6 +35,7 @@ import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
 import type { LensAttributes } from '../types';
 import type { LensApiAllOperations, LensApiConfig, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
+import { toApiFieldSettings, fromApiFieldSettings } from './columns/field_settings';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn, APIAdHocDataView, APIDataView } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
@@ -150,14 +151,12 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
     title: dataView.index,
-    name: dataView.index,
+    name: dataView.name ?? dataView.index,
     timeFieldName: dataView.timeFieldName,
     sourceFilters: [],
-    fieldFormats: {},
-    runtimeFieldMap: {},
-    fieldAttrs: {},
+    ...fromApiFieldSettings(dataView.fieldSettings),
     allowNoIndex: false,
-    allowHidden: false,
+    ...(dataView.allowHidden !== undefined ? { allowHidden: dataView.allowHidden } : {}),
     ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
@@ -222,10 +221,16 @@ export function buildDataSourceStateNoESQL(
   if (adhocReference && adHocDataViews?.[adhocReference.id]) {
     const dataViewSpec = adHocDataViews[adhocReference.id];
     if (isDataViewSpec(dataViewSpec) && dataViewSpec.title) {
+      const fieldSettings = toApiFieldSettings(dataViewSpec);
       return {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: dataViewSpec.title,
+        ...(dataViewSpec.name ? { name: dataViewSpec.name } : {}),
         time_field: dataViewSpec.timeFieldName,
+        ...(dataViewSpec.allowHidden !== undefined
+          ? { allow_hidden_indices: dataViewSpec.allowHidden }
+          : {}),
+        ...(fieldSettings ? { field_settings: fieldSettings } : {}),
       };
     }
   }
@@ -294,6 +299,11 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
       return {
         index: dataSource.index_pattern,
         timeFieldName: dataSource.time_field ?? timeFieldName,
+        ...(dataSource.name ? { name: dataSource.name } : {}),
+        ...(dataSource.allow_hidden_indices !== undefined
+          ? { allowHidden: dataSource.allow_hidden_indices }
+          : {}),
+        ...(dataSource.field_settings ? { fieldSettings: dataSource.field_settings } : {}),
       };
     case 'esql':
       return {

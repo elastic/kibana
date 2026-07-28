@@ -11,6 +11,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getDataSourceIndex,
+  getAdHocDataViewSpec,
   addLayerColumn,
   getDefaultReferences,
   operationFromColumn,
@@ -19,6 +20,7 @@ import {
   generateLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
+  buildDataSourceStateNoESQL,
 } from './utils';
 import type {
   GenericIndexPatternColumn,
@@ -82,6 +84,52 @@ describe('getDatasetIndex', () => {
         "timeFieldName": undefined,
       }
     `);
+  });
+
+  test('threads allow_hidden_indices into allowHidden when set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+    expect(result).toEqual({
+      index: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+  });
+
+  test('omits allowHidden when allow_hidden_indices is not set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    });
+    expect(result).not.toHaveProperty('allowHidden');
+  });
+
+  test('threads name into the adhoc dataview index when set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    });
+    expect(result).toEqual({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'My logs',
+    });
+  });
+
+  test('omits name when not set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    });
+    expect(result).not.toHaveProperty('name');
   });
 });
 
@@ -430,6 +478,170 @@ describe('buildDataSourceState', () => {
         "type": "data_view_spec",
       }
     `);
+  });
+});
+
+describe('buildDataSourceStateNoESQL', () => {
+  const formBasedLayer = {
+    indexPatternId: 'my-adhoc-dataview-id',
+    columns: {},
+    columnOrder: [],
+  } as FormBasedLayer;
+
+  test('emits allow_hidden_indices for an adhoc dataview with allowHidden', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'my-hidden-*',
+          timeFieldName: '@timestamp',
+          allowHidden: true,
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+  });
+
+  test('omits allow_hidden_indices for an adhoc dataview without allowHidden', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).not.toHaveProperty('allow_hidden_indices');
+  });
+
+  test('emits name for an adhoc dataview with a name', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          name: 'My logs',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      name: 'My logs',
+      time_field: '@timestamp',
+    });
+  });
+
+  test('omits name for an adhoc dataview without a name', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).not.toHaveProperty('name');
+  });
+});
+
+describe('getAdHocDataViewSpec', () => {
+  test('preserves allowHidden when true', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+    expect(spec).toHaveProperty('allowHidden', true);
+  });
+
+  test('omits allowHidden when not provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).not.toHaveProperty('allowHidden');
+  });
+
+  test('preserves name when provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      name: 'My logs',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).toHaveProperty('name', 'My logs');
+  });
+
+  test('defaults name to the index when not provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).toHaveProperty('name', 'logs-*');
+  });
+
+  test('derives name from the index for ES|QL adhoc dataviews (no name field on the esql source)', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'kibana_sample_data_logs',
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM kibana_sample_data_logs',
+      timeFieldName: undefined,
+    });
+    expect(spec).toHaveProperty('name', 'kibana_sample_data_logs');
+    expect(spec).toHaveProperty('title', 'kibana_sample_data_logs');
   });
 });
 

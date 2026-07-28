@@ -45,9 +45,6 @@ describe('toStoredDataView', () => {
       fieldFormats: {
         rt: { id: 'string', params: undefined },
       },
-      fieldAttrs: {
-        rt: {},
-      },
       runtimeFieldMap: {
         rt: {
           type: 'keyword',
@@ -55,6 +52,46 @@ describe('toStoredDataView', () => {
         },
       },
     });
+  });
+
+  it('maps inline allow_hidden_indices to allowHidden', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+  });
+
+  it('preserves name on an inline (adhoc) data view spec', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'My logs',
+    });
+  });
+
+  it('omits name on an inline data view spec when not provided', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).not.toHaveProperty('name');
   });
 
   it('converts index-pattern data_source without runtime fields', () => {
@@ -116,9 +153,6 @@ describe('toStoredDataView', () => {
       },
       fieldFormats: {
         rt: { id: 'string', params: undefined },
-      },
-      fieldAttrs: {
-        rt: {},
       },
     });
   });

@@ -138,7 +138,7 @@ describe('AlertActionsClient', () => {
 
     it('should handle null profile uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
-      userProfileService.getCurrent.mockResolvedValueOnce(null);
+      userProfileService.getCurrentProfileId.mockResolvedValueOnce(null);
 
       await client.createAction({
         groupHash: 'test-group-hash',
