@@ -167,8 +167,9 @@ const getAgentDocument = async ({
 };
 
 /**
- * Creates a system agent if it doesn't exist. Concurrent creations are
- * expected (parallel requests or multiple Kibana nodes) and treated as success.
+ * Ensures a system agent exists, treating a concurrent create as success. Guarantees
+ * existence, not searchability: the document may not be visible to searches yet when
+ * this resolves.
  */
 const ensureSystemAgent = async ({
   storage,
@@ -479,8 +480,8 @@ class AgentClientImpl implements AgentClient {
   }
 
   /**
-   * A concurrently created agent may not be searchable right away
-   * (searches are refresh-dependent), so the read is retried until it becomes visible.
+   * A concurrently created agent may not be searchable right away,
+   * so the read is retried until it becomes visible.
    */
   async ensureDefaultAgent(
     profile: AgentCreateRequest
