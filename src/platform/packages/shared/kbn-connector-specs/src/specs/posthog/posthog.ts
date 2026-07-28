@@ -368,6 +368,7 @@ export const PostHog: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.posthog.test.description', {
       defaultMessage:
         'Verifies connectivity by listing error-tracking issues for the configured project.',
