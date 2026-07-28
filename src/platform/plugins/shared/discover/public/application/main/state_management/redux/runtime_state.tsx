@@ -17,11 +17,10 @@ import type { DiscoverDataStateContainer } from '../discover_data_state_containe
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import {
   ProfileStateType,
-  type ContextAwarenessToolkit,
   type ProfileStateMap,
   type ProfileStateRegistry,
-  type ScopedProfilesManager,
-} from '../../../../context_awareness';
+} from '../../../../../common/context_awareness';
+import type { ContextAwarenessToolkit, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
@@ -136,7 +135,7 @@ export const selectDataSourceProfileId = (
     .getContexts().dataSourceContext.profileId;
 };
 
-export const selectCurrentProfileUrlStateDefinition = (
+export const selectCurrentProfileStateDefinition = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
 ) => {
@@ -156,20 +155,71 @@ export const selectCurrentProfileUrlState = ({
   profileStateMap: ProfileStateMap;
   profileStateRegistry: ProfileStateRegistry;
 }): ProfileStateMap | undefined => {
-  const profileStateDefinition = selectCurrentProfileUrlStateDefinition(runtimeStateManager, tabId);
+  return selectCurrentProfileState({
+    runtimeStateManager,
+    tabId,
+    profileStateMap,
+    profileStateRegistry,
+    stateTypes: [ProfileStateType.Url],
+    alwaysIncludeDefaults: false,
+  });
+};
+
+export const selectCurrentProfileLocatorState = ({
+  runtimeStateManager,
+  tabId,
+  profileStateMap,
+  profileStateRegistry,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
+  profileStateMap: ProfileStateMap;
+  profileStateRegistry: ProfileStateRegistry;
+}): ProfileStateMap | undefined => {
+  return selectCurrentProfileState({
+    runtimeStateManager,
+    tabId,
+    profileStateMap,
+    profileStateRegistry,
+    stateTypes: [ProfileStateType.Url, ProfileStateType.Persistent],
+    alwaysIncludeDefaults: true,
+  });
+};
+
+const selectCurrentProfileState = ({
+  runtimeStateManager,
+  tabId,
+  profileStateMap,
+  profileStateRegistry,
+  stateTypes,
+  alwaysIncludeDefaults,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
+  profileStateMap: ProfileStateMap;
+  profileStateRegistry: ProfileStateRegistry;
+  stateTypes: ProfileStateType[];
+  alwaysIncludeDefaults: boolean;
+}): ProfileStateMap | undefined => {
+  const profileStateDefinition = selectCurrentProfileStateDefinition(runtimeStateManager, tabId);
 
   if (!profileStateDefinition) {
     return undefined;
   }
 
-  const filteredUrlState = profileStateRegistry.filterFieldsByType({
-    profileState: profileStateMap[profileStateDefinition.key],
+  const filteredState = profileStateRegistry.filterFieldsByType({
+    profileState: alwaysIncludeDefaults
+      ? {
+          ...profileStateDefinition.defaultState,
+          ...profileStateMap[profileStateDefinition.key],
+        }
+      : profileStateMap[profileStateDefinition.key],
     stateKey: profileStateDefinition.key,
-    stateTypes: [ProfileStateType.Url],
+    stateTypes,
     defaultsHandling: 'expand',
   });
 
-  return filteredUrlState ? { [profileStateDefinition.key]: filteredUrlState } : undefined;
+  return filteredState ? { [profileStateDefinition.key]: filteredState } : undefined;
 };
 
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (

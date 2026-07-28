@@ -114,6 +114,11 @@ export class MetricsExperiencePage {
     await (direction === 'asc' ? this.sortDirectionAsc : this.sortDirectionDesc).click();
   }
 
+  public async selectSortBy(sortBy: 'alphabetically' | 'recency'): Promise<void> {
+    await this.sortSelectorButton.click();
+    await this.page.testSubj.locator(`metricsExperienceSortOption-${sortBy}`).click();
+  }
+
   public async toggleFullscreen(): Promise<void> {
     // Entering fullscreen triggers `handleEuiFullScreenChanges` which calls
     // `chrome.setIsVisible(false)` asynchronously. Wait for the chrome header
@@ -165,5 +170,12 @@ export class MetricsExperiencePage {
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
     await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).inspect);
+  }
+
+  /**
+   * Returns the title element of the card at `index`
+   */
+  public getCardTitle(index: number): Locator {
+    return this.getCardByIndex(index).locator('[data-test-subj="embeddablePanelTitle"]');
   }
 }
