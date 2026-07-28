@@ -78,12 +78,27 @@ export const DeleteEnrollmentAPIKeyResponseSchema = schema.object(
   { meta: { id: 'delete_enrollment_api_key_response' } }
 );
 
+// ES duration format: a positive integer followed by a time unit (d, h, m, s, ms, micros, nanos)
+const ES_DURATION_REGEX = /^\d+(d|h|m|s|ms|micros|nanos)$/;
+
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object(
     {
       name: schema.maybe(schema.string()),
       policy_id: schema.string(),
-      expiration: schema.maybe(schema.string()),
+      expiration: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              'The expiration time for the enrollment token, expressed as an Elasticsearch duration (e.g. 7d, 24h). By default, enrollment tokens never expire.',
+          },
+          validate: (value) => {
+            if (!ES_DURATION_REGEX.test(value)) {
+              return 'expiration must be a valid Elasticsearch duration (e.g. 7d, 24h, 30m)';
+            }
+          },
+        })
+      ),
     },
     { meta: { id: 'new_enrollment_api_key' } }
   ),

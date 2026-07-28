@@ -413,6 +413,7 @@ export async function generateEnrollmentAPIKey(
   const key = await esClient.security
     .createApiKey({
       name,
+      ...(data.expiration ? { expiration: data.expiration } : {}),
       metadata: {
         managed_by: 'fleet',
         managed: true,
@@ -448,6 +449,9 @@ export async function generateEnrollmentAPIKey(
 
   const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
 
+  // key.expiration is epoch-ms returned by the Security API; convert to ISO for the date-typed field
+  const expireAt = key.expiration ? new Date(key.expiration).toISOString() : undefined;
+
   const body = {
     active: true,
     api_key_id: key.id,
@@ -457,6 +461,7 @@ export async function generateEnrollmentAPIKey(
     namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
     hidden: agentPolicy?.supports_agentless || agentPolicy?.is_managed,
+    ...(expireAt ? { expire_at: expireAt } : {}),
   };
 
   const res = await esClient.create({
@@ -474,6 +479,7 @@ export async function generateEnrollmentAPIKey(
     active: body.active,
     policy_id: body.policy_id,
     created_at: body.created_at,
+    ...(expireAt ? { expire_at: expireAt } : {}),
   };
 
   return enrollmentAPIKey;
@@ -575,5 +581,6 @@ function esDocToEnrollmentApiKey(doc: {
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
     hidden: doc._source.hidden || false,
+    ...(doc._source.expire_at ? { expire_at: doc._source.expire_at } : {}),
   };
 }
