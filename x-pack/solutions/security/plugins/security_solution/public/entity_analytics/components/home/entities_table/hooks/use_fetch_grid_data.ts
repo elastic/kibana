@@ -116,10 +116,10 @@ export function useFetchGridData(options: UseEntitiesOptions) {
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
       getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.page.length < options.pageSize) {
+        if (lastPage.page.length < MAX_ENTITIES_TO_LOAD) {
           return undefined;
         }
-        return allPages.length * options.pageSize;
+        return allPages.length * MAX_ENTITIES_TO_LOAD;
       },
     }
   );
