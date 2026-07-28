@@ -112,6 +112,9 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: tags.stateful.cla
       await spaceTest.step('enables a progress bar via the max dimension', async () => {
         await lens.openDimensionEditor(`${MAX_PANEL} > lns-empty-dimension`);
         await lens.waitForVisualization('mtrVis');
+        // The progress bar lands in a render pass after the one `waitForVisualization` settles
+        // on, so wait for it directly (auto-retries) rather than racing a one-shot data snapshot.
+        await expect(lens.getMetricProgressBarLocator()).not.toHaveCount(0);
 
         const [datum] = await lens.getMetricVisualizationData();
         expect(datum.showingBar).toBe(true);

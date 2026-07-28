@@ -53,6 +53,7 @@ export class LensApp {
   private readonly metricTilesLocator;
   private readonly secondaryMetricBadge;
   private readonly secondaryMetricLabel;
+  private readonly metricProgressBar;
   private readonly layerTabsLocator;
 
   constructor(private readonly page: ScoutPage) {
@@ -92,6 +93,7 @@ export class LensApp {
     );
     this.secondaryMetricBadge = this.page.locator('.echBadge__content');
     this.secondaryMetricLabel = this.page.locator('.echSecondaryMetric__label');
+    this.metricProgressBar = this.page.locator('.echSingleMetricProgress');
     // Tab `data-test-subj` values use layer ids (not numeric indices); this only ever
     // resolves to elements when there are 2+ layers (EUI hides the tab strip for one).
     this.layerTabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
@@ -711,10 +713,20 @@ export class LensApp {
     await tiles[index].click();
   }
 
+  /**
+   * Returns the progress-bar locator rendered on metric tiles once a "max" dimension is set.
+   * Elastic Charts adds this element in a render pass after the one `waitForVisualization`
+   * settles on, so callers that need to assert it appears should poll this locator's `count()`
+   * before snapshotting tile state via `getMetricVisualizationData`.
+   */
+  getMetricProgressBarLocator() {
+    return this.metricProgressBar;
+  }
+
   /** Reads the current state of every metric tile inside `[data-test-subj="mtrVis"]`. */
   async getMetricVisualizationData() {
     const tiles = await this.getMetricTiles();
-    const showingBar = (await this.page.locator('.echSingleMetricProgress').count()) > 0;
+    const showingBar = (await this.metricProgressBar.count()) > 0;
 
     const data = [];
     for (const tile of tiles) {

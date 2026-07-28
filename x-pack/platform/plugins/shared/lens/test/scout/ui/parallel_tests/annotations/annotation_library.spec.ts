@@ -41,43 +41,49 @@ spaceTest.describe('Lens annotation library', { tag: tags.stateful.classic }, ()
   spaceTest(
     'saves an annotation group to the library, syncs edits across dashboard panels, and propagates deletion',
     async ({ page, pageObjects: { visualize, lens, dashboard, saveModal } }) => {
-      await spaceTest.step('saves a new annotation layer to the library under a new tag', async () => {
-        await visualize.goto();
-        await visualize.openNewVisualizationWizard();
-        await visualize.clickVisType('lens');
-        await lens.dragFieldToWorkspace('@timestamp');
-        await lens.waitForVisualization('xyVisChart');
+      await spaceTest.step(
+        'saves a new annotation layer to the library under a new tag',
+        async () => {
+          await visualize.goto();
+          await visualize.openNewVisualizationWizard();
+          await visualize.clickVisType('lens');
+          await lens.dragFieldToWorkspace('@timestamp');
+          await lens.waitForVisualization('xyVisChart');
 
-        await lens.createLayer('annotations');
-        await lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+          await lens.createLayer('annotations');
+          await lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
 
-        await expect(saveModal.modal).toBeVisible();
-        await saveModal.fillTitle(ANNOTATION_GROUP_TITLE);
-        await saveModal.fillDescription('my description');
-        await saveModal.createAndSelectTag({ name: 'my-new-tag', color: '#FFCC33' });
-        await saveModal.confirm();
+          await expect(saveModal.modal).toBeVisible();
+          await saveModal.fillTitle(ANNOTATION_GROUP_TITLE);
+          await saveModal.fillDescription('my description');
+          await saveModal.createAndSelectTag({ name: 'my-new-tag', color: '#FFCC33' });
+          await saveModal.confirm();
 
-        // Confirms this specifically saved a library-linked annotation group (as opposed to
-        // a plain save), which the rest of this test depends on.
-        await expect(page.getByText('View or manage in the annotation library.')).toBeVisible();
+          // Confirms this specifically saved a library-linked annotation group (as opposed to
+          // a plain save), which the rest of this test depends on.
+          await expect(page.getByText('View or manage in the annotation library.')).toBeVisible();
 
-        await lens.save(FIRST_VIS_TITLE, { addToDashboard: 'none' });
-      });
+          await lens.save(FIRST_VIS_TITLE, { addToDashboard: 'none' });
+        }
+      );
 
-      await spaceTest.step('adds the saved annotation group from the library to a new chart', async () => {
-        await visualize.goto();
-        await visualize.openNewVisualizationWizard();
-        await visualize.clickVisType('lens');
-        await lens.dragFieldToWorkspace('@timestamp');
-        await lens.waitForVisualization('xyVisChart');
+      await spaceTest.step(
+        'adds the saved annotation group from the library to a new chart',
+        async () => {
+          await visualize.goto();
+          await visualize.openNewVisualizationWizard();
+          await visualize.clickVisType('lens');
+          await lens.dragFieldToWorkspace('@timestamp');
+          await lens.waitForVisualization('xyVisChart');
 
-        await lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
-        // Adding a layer from the library is async (fetches the saved annotation group before
-        // the new tab renders), so poll rather than reading the layer count synchronously.
-        await expect.poll(() => lens.getLayerCount()).toBe(2);
+          await lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
+          // Adding a layer from the library is async (fetches the saved annotation group before
+          // the new tab renders), so poll rather than reading the layer count synchronously.
+          await expect.poll(() => lens.getLayerCount()).toBe(2);
 
-        await lens.save(SECOND_VIS_TITLE, { addToDashboard: 'none' });
-      });
+          await lens.save(SECOND_VIS_TITLE, { addToDashboard: 'none' });
+        }
+      );
 
       await spaceTest.step(
         'syncs annotation-group edits across cloned dashboard panels via inline edit',
