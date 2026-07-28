@@ -80,7 +80,12 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     const searchCall = esClient.search.mock.calls[0][0] as any;
     expect(searchCall.query.bool.must_not).toEqual([
       { exists: { field: 'parent_span_id' } },
-      { exists: { field: 'attributes.evaluator.name' } },
+      {
+        bool: {
+          filter: [{ exists: { field: 'attributes.evaluator.name' } }],
+          must_not: [{ prefix: { name: 'judge · ' } }],
+        },
+      },
     ]);
     expect(searchCall.query.bool.filter).toEqual(
       expect.arrayContaining([
