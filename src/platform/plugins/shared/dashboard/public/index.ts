@@ -31,7 +31,7 @@ export type { RedirectToProps } from './dashboard_app/types';
 export type { FindDashboardsByIdResponse } from './dashboard_client';
 
 export { DASHBOARD_APP_ID } from '../common/page_bundle_constants';
-export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
+export { cleanEmptyKeys } from '../common/clean_empty_keys';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
