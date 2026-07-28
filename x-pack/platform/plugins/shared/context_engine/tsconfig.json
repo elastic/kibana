@@ -33,7 +33,6 @@
     "@kbn/share-plugin",
     "@kbn/console-plugin",
     "@kbn/workflows-ui",
-    "@kbn/workflows",
     "@kbn/deeplinks-workflows"
   ]
 }
