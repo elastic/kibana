@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 
@@ -35,7 +35,6 @@ export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: 
 
 export interface CreateDataClientDeps {
   source: ExecutionStorageSource;
-  coreSetup: CoreSetup;
   logger: Logger;
 }
 
@@ -88,8 +87,8 @@ export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 
 /** Pair of workflow/step data access instances plus lifecycle hooks from `createDataClientBundle`. */
 export interface DataClientBundle {
-  initSetup: () => Promise<void>;
-  initStart: () => Promise<void>;
+  initSetup: (coreSetup: CoreSetup) => Promise<void>;
+  initStart: (coreStart: CoreStart) => Promise<void>;
   createWorkflowDataClient: () => WorkflowExecutionsDataClient;
   createStepDataClient: () => StepExecutionsDataClient;
 }

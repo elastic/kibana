@@ -8,6 +8,7 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { createOrUpdateIndex } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import {
@@ -25,44 +26,47 @@ import type {
 import { DeferredDataClient } from '../deferred_data_client';
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
+  private initPromise!: Promise<ElasticsearchClient>;
+  private started: boolean = false;
+
   constructor(private readonly deps: CreateDataClientDeps) {}
 
-  async initSetup(): Promise<void> {
-    const esClient = await this.deps.coreSetup
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-    const logger = this.deps.logger;
-    try {
-      await Promise.all([
-        createOrUpdateIndex({
-          esClient,
-          indexName: WORKFLOWS_EXECUTIONS_INDEX,
-          mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-          logger,
-        }),
-        createOrUpdateIndex({
-          esClient,
-          indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-          logger,
-        }),
-      ]);
-    } catch (error) {
-      this.deps.logger.error('Failed to create or update index', { error });
-      throw error;
-    }
-  }
+  async initSetup(_coreSetup: CoreSetup): Promise<void> {}
 
-  initStart(): Promise<void> {
-    return Promise.resolve();
+  async initStart(coreStart: CoreStart): Promise<void> {
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const { logger } = this.deps;
+    this.initPromise = Promise.all([
+      createOrUpdateIndex({
+        esClient,
+        indexName: WORKFLOWS_EXECUTIONS_INDEX,
+        mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+        logger,
+      }),
+      createOrUpdateIndex({
+        esClient,
+        indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+        logger,
+      }),
+    ])
+      .then(() => coreStart.elasticsearch.client.asInternalUser)
+      .catch((error) => {
+        logger.error('Failed to create or update index', { error });
+        throw error;
+      });
+    this.started = true;
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    return new DeferredDataClient<EsWorkflowExecution>(() =>
-      this.deps.coreSetup.getStartServices().then(
-        ([coreStart]) =>
+    if (!this.started) {
+      throw new Error('initStart must be called before creating data clients');
+    }
+    return new DeferredDataClient(() =>
+      this.initPromise.then(
+        (esClient) =>
           new PlainIndexDataClient<EsWorkflowExecution>({
-            esClient: coreStart.elasticsearch.client.asInternalUser,
+            esClient,
             logger: this.deps.logger,
             indexName: WORKFLOWS_EXECUTIONS_INDEX,
             mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -72,11 +76,15 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    return new DeferredDataClient<EsWorkflowStepExecution>(() =>
-      this.deps.coreSetup.getStartServices().then(
-        ([coreStart]) =>
+    if (!this.started) {
+      throw new Error('initStart must be called before creating data clients');
+    }
+
+    return new DeferredDataClient(() =>
+      this.initPromise.then(
+        (esClient) =>
           new PlainIndexDataClient<EsWorkflowStepExecution>({
-            esClient: coreStart.elasticsearch.client.asInternalUser,
+            esClient,
             logger: this.deps.logger,
             indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
             mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,

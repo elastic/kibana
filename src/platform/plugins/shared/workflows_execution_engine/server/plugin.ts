@@ -182,10 +182,9 @@ export class WorkflowsExecutionEnginePlugin
 
     this.dataClientBundle = createDataClientBundle({
       source: 'system_index',
-      coreSetup: core,
       logger: this.logger,
     });
-    void this.dataClientBundle.initSetup();
+    void this.dataClientBundle.initSetup(core);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -698,7 +697,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
-    void this.dataClientBundle.initStart();
+    void this.dataClientBundle.initStart(coreStart);
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
