@@ -39,7 +39,7 @@ export const TIMELINE_TAB_TITLE = i18n.translate(
 export const ACTION_POLICY_HISTORY_TAB_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.mainTabActionPolicyHistory',
   {
-    defaultMessage: 'Action policy history',
+    defaultMessage: 'Policy history',
   }
 );
 
