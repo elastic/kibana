@@ -168,7 +168,9 @@ export class LogsExtractionClient {
           namespace: this.namespace,
         });
         if (healed) {
-          this.logger.info(`Recreated missing entity store assets; retrying extraction for ${type}`);
+          this.logger.info(
+            `Recreated missing entity store assets; retrying extraction for ${type}`
+          );
           try {
             return await this.runExtraction(type, opts);
           } catch (retryError) {

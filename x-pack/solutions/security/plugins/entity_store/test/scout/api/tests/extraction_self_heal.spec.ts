@@ -16,10 +16,7 @@ import {
   LATEST_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import {
-  assertEntitiesEqual,
-  expectedHostEntities,
-} from '../fixtures/entity_extraction_expected';
+import { assertEntitiesEqual, expectedHostEntities } from '../fixtures/entity_extraction_expected';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 // Verifies the extraction task heals itself: if the shared latest index is deleted out from
