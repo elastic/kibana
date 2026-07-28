@@ -11,7 +11,7 @@ import { absentSlice, type FlyoutPaginationValue, type ScopedPaginationSlice } f
 
 const absentValue: FlyoutPaginationValue = {
   ...absentSlice,
-  openAlertFlyout: () => {},
+  openDocumentFlyout: () => {},
 };
 
 /**
@@ -38,16 +38,16 @@ export const useFlyoutPagination = (
   // Reads the impl at call-time so swapping the impl (e.g. when the
   // source re-registers it after a page change) is always picked up
   // without the caller needing to re-render.
-  const openAlertFlyout = useCallback(
-    (alertIndex: number): void => {
+  const openDocumentFlyout = useCallback(
+    (documentIndex: number): void => {
       if (!instanceId) return;
-      flyoutPaginationStore.getSlice(instanceId).openAlertFlyoutImpl?.(alertIndex);
+      flyoutPaginationStore.getSlice(instanceId).openDocumentFlyoutImpl?.(documentIndex);
     },
     [instanceId]
   );
 
   return useMemo<FlyoutPaginationValue>(() => {
     if (slice === absentSlice && !instanceId) return absentValue;
-    return { ...slice, openAlertFlyout };
-  }, [instanceId, slice, openAlertFlyout]);
+    return { ...slice, openDocumentFlyout };
+  }, [instanceId, slice, openDocumentFlyout]);
 };
