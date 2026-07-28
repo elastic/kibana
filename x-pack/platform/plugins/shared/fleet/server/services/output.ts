@@ -846,14 +846,11 @@ class OutputService {
         });
       }
 
-      if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+      if (output.type === outputType.Kafka) {
         if (!output.password && output.secrets?.password) {
-          data.password = output.secrets?.password as string;
+          (data as OutputSoKafkaAttributes).password = output.secrets.password as string;
         }
-      } else if (
-        output.type === outputType.RemoteElasticsearch &&
-        data.type === outputType.RemoteElasticsearch
-      ) {
+      } else if (output.type === outputType.RemoteElasticsearch) {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets.service_token as string;
         }
@@ -1227,11 +1224,11 @@ class OutputService {
           !updateData.compression ||
           (updateData.compression === kafkaCompressionType.Gzip && !updateData.compression_level)
         ) {
-          updateData.compression_level = 4;
+          kafkaUpdateData.compression_level = 4;
         }
         if (updateData.compression && updateData.compression !== kafkaCompressionType.Gzip) {
           // Clear compression level if compression is not gzip
-          updateData.compression_level = null;
+          kafkaUpdateData.compression_level = null;
         }
 
         if (!updateData.client_id) {
@@ -1267,9 +1264,9 @@ class OutputService {
         if (!updateData.broker_timeout) {
           updateData.broker_timeout = 10;
         }
-        if (updateData.required_acks === null || updateData.required_acks === undefined) {
+        if (kafkaUpdateData.required_acks === null || kafkaUpdateData.required_acks === undefined) {
           // required_acks can be 0
-          updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
+          kafkaUpdateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
         // Clear fields that are only valid for specific auth_type values
         if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.None) {

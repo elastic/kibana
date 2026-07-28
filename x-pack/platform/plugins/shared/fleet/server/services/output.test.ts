@@ -2251,8 +2251,14 @@ describe('Output Service', () => {
         ssl: null,
       });
 
+<<<<<<< HEAD
       expect(soClient.update).toHaveBeenCalled();
       expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+=======
+      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+>>>>>>> 3593222d986a (Add OTLP handling in CRUD operations)
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
