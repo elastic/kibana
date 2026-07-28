@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -25,7 +26,6 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
-import { AddAutomationControls } from './add_automation_controls';
 import { AutomationRow } from './automation_row';
 
 interface AutomationsPanelProps {
@@ -47,7 +47,6 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
     isBusy,
     startEditing,
     stopEditing,
-    addAutomation,
     removeAutomation,
     save,
     createAndAttach,
@@ -137,13 +136,33 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
       ) : (
         <>
           {isEditing && (
-            <AddAutomationControls
-              attachedWorkflowIds={workflowIds}
-              isCreating={isCreating}
-              isCreateDisabled={isBusy || !canAddMore}
-              onAdd={addAutomation}
-              onCreate={handleCreate}
-            />
+            <>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={handleCreate}
+                    isLoading={isCreating}
+                    isDisabled={isBusy || !canAddMore}
+                    data-test-subj="contextCreateAutomationButton"
+                  >
+                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
+                      defaultMessage: 'Create a new automation',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createHint', {
+                      defaultMessage: 'Opens the workflow editor in a new page.',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="m" />
+            </>
           )}
           {automations.length === 0 && !isEditing ? (
             <EuiEmptyPrompt
@@ -160,7 +179,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               body={
                 <p>
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
-                    defaultMessage: 'Add an existing workflow.',
+                    defaultMessage: 'Create an automation to get started.',
                   })}
                 </p>
               }

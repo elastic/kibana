@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { AddAutomationControls } from './add_automation_controls';
 export { AutomationRow } from './automation_row';
 export { AutomationsPanel } from './automations_panel';
 export { DescriptionPanel } from './description_panel';

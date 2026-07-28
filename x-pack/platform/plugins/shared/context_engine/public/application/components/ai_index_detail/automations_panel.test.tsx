@@ -9,7 +9,7 @@ import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
@@ -32,15 +32,6 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: jest.fn(),
     createWorkflow: jest.fn(),
   }),
-  WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
-    <button
-      type="button"
-      data-test-subj="mockWorkflowSelector"
-      onClick={() => onWorkflowChange('wf-new')}
-    >
-      pick workflow
-    </button>
-  ),
 }));
 
 const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
@@ -57,7 +48,6 @@ const editorResult = (
   isBusy: false,
   startEditing: jest.fn(),
   stopEditing: jest.fn(),
-  addAutomation: jest.fn(),
   removeAutomation: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
   createAndAttach: jest.fn().mockResolvedValue(undefined),
@@ -102,6 +92,7 @@ const renderPanel = (props: Partial<PanelProps> = {}) => {
   const view = render(wrap());
   return {
     onSaved,
+    services,
     rerender: (overrides: Partial<PanelProps> = {}) => view.rerender(wrap(overrides)),
   };
 };
@@ -145,13 +136,40 @@ describe('AutomationsPanel', () => {
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
 
-  it('shows the add controls instead of the empty prompt when editing with no automations', () => {
+  it('shows the create control instead of the empty prompt when editing with no automations', () => {
     mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true }));
 
     renderPanel();
 
     expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
+  });
+
+  it('opens the created workflow in the Workflows app', async () => {
+    const createAndAttach = jest.fn().mockResolvedValue('wf-created');
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true, createAndAttach }));
+
+    const { services } = renderPanel();
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+        path: '/wf-created',
+      });
+    });
+  });
+
+  it('stays on the page when the automation could not be created', async () => {
+    const createAndAttach = jest.fn().mockResolvedValue(undefined);
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true, createAndAttach }));
+
+    const { services } = renderPanel();
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(createAndAttach).toHaveBeenCalledTimes(1);
+    });
+    expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
   it('renders one row per automation', () => {

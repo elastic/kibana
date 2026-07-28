@@ -19,7 +19,6 @@ type AutomationsEditorState =
 type AutomationsEditorAction =
   | { type: 'editStarted'; automations: AiIndexAutomation[] }
   | { type: 'editStopped' }
-  | { type: 'automationAdded'; workflowId: string }
   | { type: 'automationRemoved'; value: string };
 
 const IDLE: AutomationsEditorState = { status: 'idle' };
@@ -33,18 +32,6 @@ const reducer = (
       return { status: 'editing', draft: action.automations };
     case 'editStopped':
       return IDLE;
-    case 'automationAdded': {
-      if (state.status !== 'editing') {
-        return state;
-      }
-      const isAttached = state.draft.some((automation) => automation.value === action.workflowId);
-      return isAttached
-        ? state
-        : {
-            status: 'editing',
-            draft: [...state.draft, { type: 'workflow', value: action.workflowId }],
-          };
-    }
     case 'automationRemoved': {
       if (state.status !== 'editing') {
         return state;
@@ -74,7 +61,6 @@ export interface UseAutomationsEditorResult {
   isBusy: boolean;
   startEditing: () => void;
   stopEditing: () => void;
-  addAutomation: (workflowId: string) => void;
   removeAutomation: (value: string) => void;
   save: () => Promise<void>;
   /** Resolves with the new workflow id once it is attached and persisted. */
@@ -108,12 +94,6 @@ export const useAutomationsEditor = ({
   );
 
   const stopEditing = useCallback(() => dispatch({ type: 'editStopped' }), []);
-
-  const addAutomation = useCallback((workflowId: string) => {
-    if (workflowId) {
-      dispatch({ type: 'automationAdded', workflowId });
-    }
-  }, []);
 
   const removeAutomation = useCallback(
     (value: string) => dispatch({ type: 'automationRemoved', value }),
@@ -164,7 +144,6 @@ export const useAutomationsEditor = ({
     isBusy: isSaving || isCreating,
     startEditing,
     stopEditing,
-    addAutomation,
     removeAutomation,
     save,
     createAndAttach,

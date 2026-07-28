@@ -28,6 +28,8 @@ export const useWorkflowSummaries = (workflowIds: string[]) => {
     queryKey: ['context_engine', 'workflow_summaries', ids],
     queryFn: () => api.mgetWorkflows({ ids }),
     enabled: ids.length > 0,
+    // Editing the automations changes the query key, which would otherwise drop the resolved summaries.
+    keepPreviousData: true,
   });
 
   const summaries = useMemo(() => {

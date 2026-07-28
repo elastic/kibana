@@ -95,37 +95,9 @@ describe('useAutomationsEditor', () => {
     expect(result.current.automations).toEqual([{ type: 'workflow', value: 'wf-saved' }]);
   });
 
-  it('appends an added workflow to the draft', () => {
+  it('ignores remove while idle', () => {
     const { result } = renderEditor();
 
-    act(() => result.current.startEditing());
-    act(() => result.current.addAutomation('wf-new'));
-
-    expect(result.current.workflowIds).toEqual(['wf-saved', 'wf-new']);
-  });
-
-  it('ignores a workflow that is already attached', () => {
-    const { result } = renderEditor();
-
-    act(() => result.current.startEditing());
-    act(() => result.current.addAutomation('wf-saved'));
-
-    expect(result.current.workflowIds).toEqual(['wf-saved']);
-  });
-
-  it('ignores an empty workflow id', () => {
-    const { result } = renderEditor();
-
-    act(() => result.current.startEditing());
-    act(() => result.current.addAutomation(''));
-
-    expect(result.current.workflowIds).toEqual(['wf-saved']);
-  });
-
-  it('ignores add and remove while idle', () => {
-    const { result } = renderEditor();
-
-    act(() => result.current.addAutomation('wf-new'));
     act(() => result.current.removeAutomation('wf-saved'));
 
     expect(result.current.isEditing).toBe(false);
@@ -157,7 +129,7 @@ describe('useAutomationsEditor', () => {
     const { result } = renderEditor();
 
     act(() => result.current.startEditing());
-    act(() => result.current.addAutomation('wf-new'));
+    act(() => result.current.removeAutomation('wf-saved'));
     act(() => result.current.stopEditing());
     act(() => result.current.startEditing());
 
@@ -168,15 +140,12 @@ describe('useAutomationsEditor', () => {
     const { result, onSaved } = renderEditor();
 
     act(() => result.current.startEditing());
-    act(() => result.current.addAutomation('wf-new'));
+    act(() => result.current.removeAutomation('wf-saved'));
     await act(async () => {
       await result.current.save();
     });
 
-    expect(mockSaveAutomations).toHaveBeenCalledWith(aiIndex, [
-      { type: 'workflow', value: 'wf-saved' },
-      { type: 'workflow', value: 'wf-new' },
-    ]);
+    expect(mockSaveAutomations).toHaveBeenCalledWith(aiIndex, []);
     expect(result.current.isEditing).toBe(false);
     expect(onSaved).toHaveBeenCalledTimes(1);
   });
@@ -186,13 +155,13 @@ describe('useAutomationsEditor', () => {
     const { result, onSaved } = renderEditor();
 
     act(() => result.current.startEditing());
-    act(() => result.current.addAutomation('wf-new'));
+    act(() => result.current.removeAutomation('wf-saved'));
     await act(async () => {
       await result.current.save();
     });
 
     expect(result.current.isEditing).toBe(true);
-    expect(result.current.workflowIds).toEqual(['wf-saved', 'wf-new']);
+    expect(result.current.workflowIds).toEqual([]);
     expect(onSaved).not.toHaveBeenCalled();
   });
 
