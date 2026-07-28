@@ -43,6 +43,12 @@ const createEvent = (text: string): ChatEvent =>
     data: { text_chunk: text, message_id: 'message-1' },
   } as ChatEvent);
 
+const createRoundCompleteEvent = (): ChatEvent =>
+  ({
+    type: ChatEventType.roundComplete,
+    data: { round: { id: 'round-1' } },
+  } as unknown as ChatEvent);
+
 const failurePayload: ChatCallbackFailureResponse = {
   execution_id: 'execution-1',
   error: {
@@ -190,6 +196,7 @@ describe('makeCallbackRequest', () => {
     await createCallbackDeliveryService().makeCallbackRequest({
       payload: failurePayload,
       makeRequest,
+      retry: true,
     });
 
     expect(makeRequest).toHaveBeenCalledTimes(1);
@@ -208,6 +215,7 @@ describe('makeCallbackRequest', () => {
     const delivery = createCallbackDeliveryService().makeCallbackRequest({
       payload: failurePayload,
       makeRequest,
+      retry: true,
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow('The operation was aborted');
 
@@ -217,7 +225,7 @@ describe('makeCallbackRequest', () => {
     expect(makeRequest).toHaveBeenCalledTimes(3);
   });
 
-  it('retries network errors and 5xx responses', async () => {
+  it('retries network errors and 5xx responses when retry is true', async () => {
     jest.useFakeTimers();
     const makeRequest = jest
       .fn()
@@ -228,6 +236,7 @@ describe('makeCallbackRequest', () => {
     const delivery = createCallbackDeliveryService().makeCallbackRequest({
       payload: failurePayload,
       makeRequest,
+      retry: true,
     });
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
 
@@ -237,6 +246,20 @@ describe('makeCallbackRequest', () => {
     expect(makeRequest).toHaveBeenCalledTimes(3);
   });
 
+  it('does not retry when retry is false', async () => {
+    const makeRequest = jest.fn().mockResolvedValue({ status: 503 });
+
+    await expect(
+      createCallbackDeliveryService().makeCallbackRequest({
+        payload: failurePayload,
+        makeRequest,
+        retry: false,
+      })
+    ).rejects.toThrow('Callback delivery failed with status 503');
+
+    expect(makeRequest).toHaveBeenCalledTimes(1);
+  });
+
   it('does not retry 4xx responses', async () => {
     const makeRequest = jest.fn().mockResolvedValue({ status: 400 });
 
@@ -244,6 +267,7 @@ describe('makeCallbackRequest', () => {
       createCallbackDeliveryService().makeCallbackRequest({
         payload: failurePayload,
         makeRequest,
+        retry: true,
       })
     ).rejects.toThrow('Callback delivery failed with status 400');
 
@@ -257,6 +281,7 @@ describe('makeCallbackRequest', () => {
     const delivery = createCallbackDeliveryService().makeCallbackRequest({
       payload: failurePayload,
       makeRequest,
+      retry: true,
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow(
       'Callback delivery failed with status 503'
@@ -359,8 +384,37 @@ describe('deliverStream', () => {
             event,
           },
           makeRequest,
+          retry: false,
         },
       ])
+    );
+  });
+
+  it('retries only round_complete events; other events are delivered at-most-once', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const progressEvent = createEvent('progress');
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverStream({
+      execution: createConversationExecution(),
+      events$: of(progressEvent, roundCompleteEvent),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        payload: { execution_id: 'execution-1', event: progressEvent },
+        retry: false,
+      })
+    );
+    expect(service.makeCallbackRequest).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        payload: { execution_id: 'execution-1', event: roundCompleteEvent },
+        retry: true,
+      })
     );
   });
 
@@ -429,6 +483,7 @@ describe('deliverStream', () => {
         },
       },
       makeRequest,
+      retry: false,
     });
   });
 
@@ -452,6 +507,7 @@ describe('deliverStream', () => {
         },
       },
       makeRequest,
+      retry: false,
     });
   });
 

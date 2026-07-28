@@ -8,7 +8,11 @@
 import { EMPTY, from, concatMap, catchError, type Observable } from 'rxjs';
 import pRetry, { AbortError } from 'p-retry';
 import type { Logger } from '@kbn/logging';
-import { AgentExecutionMode, type ChatEvent } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  isRoundCompleteEvent,
+  type ChatEvent,
+} from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { ChatCallbackResponse } from '../../../common/http_api/chat_callback';
@@ -76,44 +80,49 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * Posts the payload through `makeRequest` with the Actions response timeout, retrying
-   * network errors and 5xx responses.
+   * Posts the payload through `makeRequest` with the Actions response timeout. When `retry`
+   * is true, retries network errors and 5xx responses; otherwise the request is attempted once.
    */
   async makeCallbackRequest({
     payload,
     makeRequest,
+    retry,
   }: {
     payload: ChatCallbackResponse;
     makeRequest: MakeRequest;
+    retry: boolean;
   }): Promise<void> {
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
 
-    await pRetry(async () => {
-      const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), timeout);
+    await pRetry(
+      async () => {
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
-      let response: { status: number };
+        let response: { status: number };
 
-      try {
-        response = await makeRequest(payload, abortController.signal);
-      } catch (error) {
-        throw error instanceof Error ? error : new Error(String(error));
-      } finally {
-        clearTimeout(timeoutId);
-      }
+        try {
+          response = await makeRequest(payload, abortController.signal);
+        } catch (error) {
+          throw error instanceof Error ? error : new Error(String(error));
+        } finally {
+          clearTimeout(timeoutId);
+        }
 
-      if (response.status >= 200 && response.status < 300) {
-        return;
-      }
+        if (response.status >= 200 && response.status < 300) {
+          return;
+        }
 
-      const error = new Error(`Callback delivery failed with status ${response.status}`);
+        const error = new Error(`Callback delivery failed with status ${response.status}`);
 
-      if (response.status >= 500) {
-        throw error;
-      }
+        if (response.status >= 500) {
+          throw error;
+        }
 
-      throw new AbortError(error);
-    }, callbackRetryOptions);
+        throw new AbortError(error);
+      },
+      retry ? callbackRetryOptions : { retries: 0 }
+    );
   }
 }
 
@@ -121,7 +130,10 @@ export class CallbackDeliveryService {
  * Consumes the event stream and delivers one callback request per event through the
  * callback delivery service, sequentially and in order, as the events are emitted.
  * Delivery is best-effort: per-event failures are logged and the stream continues.
- * When the stream errors, a synthetic failure payload is delivered instead.
+ * When the stream errors, a failure payload is delivered instead.
+ *
+ * Only `round_complete` events are retried (at-least-once); progress events and the
+ * failure payload are delivered at-most-once.
  *
  * Resolves once all deliveries have drained; never rejects. No-op (without subscribing)
  * when the execution has no callback configured — callback delivery is only supported
@@ -166,6 +178,7 @@ export const deliverStream = ({
               event,
             },
             makeRequest,
+            retry: isRoundCompleteEvent(event),
           });
 
           return from(delivery).pipe(
@@ -185,6 +198,7 @@ export const deliverStream = ({
               error: serializeExecutionError(error),
             },
             makeRequest,
+            retry: false,
           });
 
           return from(failureDelivery).pipe(
