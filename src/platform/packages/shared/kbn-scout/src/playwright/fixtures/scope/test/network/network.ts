@@ -9,14 +9,28 @@
 
 import type { ScoutPage } from '../scout_page';
 
+export interface RequestMatcher {
+  endpoint: string;
+  method: string;
+}
+
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  async countMatchingRequests(endpoint: string, action: () => Promise<void>): Promise<number> {
+  async countMatchingRequests(
+    matcher: string | RequestMatcher,
+    action: () => Promise<void>
+  ): Promise<number> {
     let count = 0;
-    const listener = (request: { url: () => string }) => {
-      if (request.url().includes(endpoint)) {
-        count++;
+    const listener = (request: { url: () => string; method: () => string }) => {
+      if (typeof matcher === 'string') {
+        if (request.url().includes(matcher)) {
+          count++;
+        }
+      } else {
+        if (request.url().includes(matcher.endpoint) && request.method() === matcher.method) {
+          count++;
+        }
       }
     };
 
