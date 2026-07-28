@@ -8,12 +8,7 @@
 import { EMPTY, from, concatMap, catchError, type Observable } from 'rxjs';
 import pRetry, { AbortError } from 'p-retry';
 import type { Logger } from '@kbn/logging';
-import {
-  AgentExecutionMode,
-  ExecutionStatus,
-  isRequestAbortedError,
-  type ChatEvent,
-} from '@kbn/agent-builder-common';
+import { AgentExecutionMode, type ChatEvent } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { ChatCallbackResponse } from '../../../common/http_api/chat_callback';
@@ -184,14 +179,9 @@ export const deliverStream = ({
           );
         }),
         catchError((error) => {
-          const status = isRequestAbortedError(error)
-            ? ExecutionStatus.aborted
-            : ExecutionStatus.failed;
-
           const failureDelivery = callbackDeliveryService.makeCallbackRequest({
             payload: {
               execution_id: execution.executionId,
-              status,
               error: serializeExecutionError(error),
             },
             makeRequest,

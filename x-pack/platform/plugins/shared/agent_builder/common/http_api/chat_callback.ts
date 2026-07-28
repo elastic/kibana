@@ -10,7 +10,6 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationOriginType,
-  ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload } from './chat';
@@ -28,7 +27,6 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
 
 export interface ChatCallbackAcceptedResponse {
   execution_id: string;
-  status: ExecutionStatus.scheduled;
 }
 
 export interface ChatCallbackEventResponse {
@@ -38,8 +36,7 @@ export interface ChatCallbackEventResponse {
 
 export interface ChatCallbackFailureResponse {
   execution_id: string;
-  status: ExecutionStatus.failed | ExecutionStatus.aborted;
-  error?: SerializedExecutionError;
+  error: SerializedExecutionError;
 }
 
 export type ChatCallbackResponse = ChatCallbackEventResponse | ChatCallbackFailureResponse;

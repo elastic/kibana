@@ -11,7 +11,6 @@ import {
   AgentBuilderErrorCode,
   AgentExecutionMode,
   ChatEventType,
-  ExecutionStatus,
   createRequestAbortedError,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
@@ -46,7 +45,6 @@ const createEvent = (text: string): ChatEvent =>
 
 const failurePayload: ChatCallbackFailureResponse = {
   execution_id: 'execution-1',
-  status: ExecutionStatus.failed,
   error: {
     code: AgentBuilderErrorCode.internalError,
     message: 'boom',
@@ -408,7 +406,7 @@ describe('deliverStream', () => {
     );
   });
 
-  it('delivers a synthetic failure payload when the stream errors', async () => {
+  it('delivers a failure payload with a failure error code when the stream errors', async () => {
     const { service, makeRequest } = createCallbackDeliveryServiceMock();
 
     await deliverStream({
@@ -425,7 +423,6 @@ describe('deliverStream', () => {
     expect(service.makeCallbackRequest).toHaveBeenLastCalledWith({
       payload: {
         execution_id: 'execution-1',
-        status: ExecutionStatus.failed,
         error: {
           code: AgentBuilderErrorCode.internalError,
           message: 'agent boom',
@@ -435,7 +432,7 @@ describe('deliverStream', () => {
     });
   });
 
-  it('marks the synthetic failure payload as aborted for request-aborted errors', async () => {
+  it('delivers a failure payload with the requestAborted error code for aborts', async () => {
     const { service, makeRequest } = createCallbackDeliveryServiceMock();
 
     await deliverStream({
@@ -448,7 +445,6 @@ describe('deliverStream', () => {
     expect(service.makeCallbackRequest).toHaveBeenCalledWith({
       payload: {
         execution_id: 'execution-1',
-        status: ExecutionStatus.aborted,
         error: {
           code: AgentBuilderErrorCode.requestAborted,
           message: 'request aborted',

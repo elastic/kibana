@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType, ExecutionStatus } from '@kbn/agent-builder-common';
+import { ConversationOriginType } from '@kbn/agent-builder-common';
 import { of } from 'rxjs';
 import { internalApiPath } from '../../common/constants';
 import {
@@ -324,7 +324,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
+      payload: { execution_id: 'execution-1' },
     });
     expect(validateCallbackUrl).toHaveBeenCalledWith('https://relay.example.com/events?token=abc');
     expect(executeAgent).toHaveBeenCalledWith(
@@ -415,7 +415,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
+      payload: { execution_id: 'execution-1' },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -519,7 +519,6 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: {
         execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
-        status: ExecutionStatus.scheduled,
       },
     });
     expect(executeAgent).toHaveBeenCalledWith(

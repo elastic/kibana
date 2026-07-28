@@ -12,7 +12,6 @@ import {
   AgentBuilderErrorCode,
   ConversationAccessControlMode,
   ConversationOriginType,
-  ExecutionStatus,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
@@ -190,7 +189,6 @@ apiTest.describe(
       const accepted = response.body as ChatCallbackAcceptedResponse;
       expect(typeof accepted.execution_id).toBe('string');
       expect(accepted.execution_id.length).toBeGreaterThan(0);
-      expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
       const callbackRequests = await collectCompletedRoundRequests();
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -254,7 +252,6 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const accepted = response.body as ChatCallbackAcceptedResponse;
-        expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
         const callbackRequests = await collectCompletedRoundRequests();
 
@@ -336,14 +333,12 @@ apiTest.describe(
       expect(response).toHaveStatusCode(202);
 
       const accepted = response.body as ChatCallbackAcceptedResponse;
-      expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
       const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
-      expect(callbackPayload.status).toBe(ExecutionStatus.failed);
-      expect(callbackPayload.error?.code).toBe(AgentBuilderErrorCode.agentExecutionError);
-      expect(typeof callbackPayload.error?.message).toBe('string');
-      expect(callbackPayload.error?.message.length).toBeGreaterThan(0);
+      expect(callbackPayload.error.code).toBe(AgentBuilderErrorCode.agentExecutionError);
+      expect(typeof callbackPayload.error.message).toBe('string');
+      expect(callbackPayload.error.message.length).toBeGreaterThan(0);
     });
 
     apiTest('delivers aborted response to callback URL', async ({ apiClient }) => {
@@ -372,7 +367,6 @@ apiTest.describe(
       expect(response).toHaveStatusCode(202);
 
       const accepted = response.body as ChatCallbackAcceptedResponse;
-      expect(accepted.status).toBe(ExecutionStatus.scheduled);
 
       // Wait until the agent has issued the (hanging) final answer request so the execution is
       // running and can be aborted while in flight.
@@ -390,10 +384,9 @@ apiTest.describe(
 
       const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
-      expect(callbackPayload.status).toBe(ExecutionStatus.aborted);
-      expect(callbackPayload.error?.code).toBe(AgentBuilderErrorCode.requestAborted);
-      expect(typeof callbackPayload.error?.message).toBe('string');
-      expect(callbackPayload.error?.message.length).toBeGreaterThan(0);
+      expect(callbackPayload.error.code).toBe(AgentBuilderErrorCode.requestAborted);
+      expect(typeof callbackPayload.error.message).toBe('string');
+      expect(callbackPayload.error.message.length).toBeGreaterThan(0);
     });
 
     apiTest(
@@ -433,7 +426,6 @@ apiTest.describe(
           const firstAccepted = first.body as ChatCallbackAcceptedResponse;
           executionId = firstAccepted.execution_id;
           expect(executionId).toMatch(/^[a-f0-9]{64}$/);
-          expect(firstAccepted.status).toBe(ExecutionStatus.scheduled);
 
           const firstRequests = await collectCompletedRoundRequests();
 
