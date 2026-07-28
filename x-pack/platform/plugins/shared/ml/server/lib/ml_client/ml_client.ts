@@ -12,6 +12,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { LANG_IDENT_MODEL_ID } from '@kbn/ml-trained-models-utils';
+import { isNLPModelItem } from '@kbn/ml-common-types/trained_models';
 import type { MlLicense } from '../../../common/license/ml_license';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -183,7 +185,7 @@ export function getMlClient(
     }
 
     const [modelId] = filterAll(getModelIdsFromRequest(p as MlGetTrainedModelParams));
-    if (modelId === undefined) {
+    if (modelId === undefined || modelId === LANG_IDENT_MODEL_ID) {
       return;
     }
 
@@ -192,19 +194,39 @@ export function getMlClient(
       throw new MLModelNotFound('Model and deployment ids must not contain wildcard characters');
     }
 
-    const { trained_model_stats: modelStats } = await mlClient.getTrainedModelsStats({
-      model_id: modelId,
-    });
+    const [{ trained_model_stats: modelStats }, { trained_model_configs: models }] =
+      await Promise.all([
+        mlClient.getTrainedModelsStats({
+          model_id: modelId,
+        }),
+        mlClient.getTrainedModels({
+          model_id: modelId,
+        }),
+      ]);
 
-    const validDeploymentIds = new Set(
-      modelStats
-        .map((stats) => stats.deployment_stats?.deployment_id)
-        .filter((id): id is string => id !== undefined)
-    );
+    const [model] = models;
 
-    for (const id of deploymentIds) {
-      if (validDeploymentIds.has(id) === false) {
-        throw new MLModelNotFound(`No known deployment with id '${id}'`);
+    if (isNLPModelItem(model)) {
+      // if the model is pytorch, we need to check that the deployment ids are valid
+      const validDeploymentIds = new Set(
+        modelStats
+          .map((stats) => stats.deployment_stats?.deployment_id)
+          .filter((id): id is string => id !== undefined)
+      );
+
+      for (const id of deploymentIds) {
+        if (validDeploymentIds.has(id) === false) {
+          throw new MLModelNotFound(`No known deployment with id '${id}'`);
+        }
+      }
+    } else {
+      // Non-pytorch models should not have deployments
+      for (const stats of modelStats) {
+        if (stats.deployment_stats !== undefined) {
+          throw new MLModelNotFound(
+            `Unexpected deployment stats for non-pytorch model '${modelId}'`
+          );
+        }
       }
     }
   }
