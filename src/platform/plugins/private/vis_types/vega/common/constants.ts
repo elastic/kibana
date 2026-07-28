@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-
 /** Frozen as part of the Dashboard REST API (`panels[].type`). */
 export const VEGA_EMBEDDABLE_TYPE = 'vega';
 
-export const VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
+/** Event name emitted by Vega specs when a filter should be applied to the host application. */
+export const VEGA_EVENT_APPLY_FILTER = 'applyFilter';
 
 /** Browser feature flag gating the Dashboard "Add Vega panel" creation action. Off by default. */
 export const VEGA_DASHBOARD_EMBEDDABLE_FLAG = 'vega.dashboardEmbeddable';

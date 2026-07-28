@@ -21,6 +21,7 @@ import { BehaviorSubject, combineLatest, map, merge, skip, switchMap } from 'rxj
 import type { Query } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { parse } from 'hjson';
+import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasExecutionContext,
   apiIsPresentationContainer,
@@ -45,7 +46,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS, VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../../common/constants';
 import type { VegaByValueState } from './types';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { toVegaEmbeddableExpressionAst } from '../to_ast';
@@ -180,7 +181,7 @@ export const vegaEmbeddableFactory = (
       usesEsql$,
       projectRoutingOverrides$,
       dataViews$,
-      supportedTriggers: () => VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS,
+      supportedTriggers: () => [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU],
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
       onEdit: async ({ isNewPanel = false } = {}) => {
@@ -255,8 +256,8 @@ export const vegaEmbeddableFactory = (
         },
         onRender$: () => rendered$.next(true),
         onEvent: async (event) => {
-          if (event.name === 'applyFilter' && !areTriggersDisabled(api)) {
-            await deps.uiActions.executeTriggerActions(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS[0], {
+          if (event.name === VEGA_EVENT_APPLY_FILTER && !areTriggersDisabled(api)) {
+            await deps.uiActions.executeTriggerActions(ON_APPLY_FILTER, {
               embeddable: api,
               ...event.data,
             });

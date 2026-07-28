@@ -14,7 +14,8 @@ import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drill
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../../common/constants';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
@@ -146,11 +147,11 @@ describe('vegaEmbeddableFactory', () => {
 
     await waitFor(() => expect(latestRendererParams).toBeDefined());
     await latestRendererParams?.onEvent?.({
-      name: 'applyFilter',
+      name: VEGA_EVENT_APPLY_FILTER,
       data: { filters: [{ meta: {}, query: { match_all: {} } }] },
     });
-    expect(api.supportedTriggers()).toEqual(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS);
-    expect(executeTriggerActions).toHaveBeenCalledWith(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS[0], {
+    expect(api.supportedTriggers()).toEqual([ON_APPLY_FILTER, ON_OPEN_PANEL_MENU]);
+    expect(executeTriggerActions).toHaveBeenCalledWith(ON_APPLY_FILTER, {
       embeddable: api,
       filters: [{ meta: {}, query: { match_all: {} } }],
     });

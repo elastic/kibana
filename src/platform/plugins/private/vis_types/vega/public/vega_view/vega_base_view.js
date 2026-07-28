@@ -19,6 +19,7 @@ import { TooltipHandler } from './vega_tooltip';
 import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { normalizeDate, normalizeString, normalizeObject } from './utils';
+import { VEGA_EVENT_APPLY_FILTER } from '../../common/constants';
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -388,7 +389,7 @@ export class VegaBaseView {
     const indexId = await this.findIndex(normalizedIndex);
     const filter = buildQueryFilter(normalizedQuery, indexId, normalizedAlias);
 
-    this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
+    this._fireEvent({ name: VEGA_EVENT_APPLY_FILTER, data: { filters: [filter] } });
   }
 
   /**
@@ -428,7 +429,7 @@ export class VegaBaseView {
     const { from, to, mode } = VegaBaseView._parseTimeRange(normalizedStart, normalizedEnd);
 
     this._fireEvent({
-      name: 'applyFilter',
+      name: VEGA_EVENT_APPLY_FILTER,
       data: {
         timeFieldName: '*',
         filters: [
