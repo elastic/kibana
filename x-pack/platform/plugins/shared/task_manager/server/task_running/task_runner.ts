@@ -77,6 +77,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
+const MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE = 4096; // 4 KB
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -191,6 +192,7 @@ export class TaskManagerRunner implements TaskRunner {
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private taskRunEventCustomFields?: Record<string, unknown>;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -472,6 +474,7 @@ export class TaskManagerRunner implements TaskRunner {
             signal: abortController.signal,
             enrichRequest,
             executionUuid: this.uuid,
+            setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -1139,6 +1142,23 @@ export class TaskManagerRunner implements TaskRunner {
     return stop;
   }
 
+  private setCustomTaskRunEventFields = (fields: Record<string, unknown>): void => {
+    try {
+      const serializedSize = JSON.stringify(fields).length;
+      if (serializedSize > MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE) {
+        this.logger.warn(
+          `Dropping custom task run event fields for task ${this.taskType} because the serialized size (${serializedSize} bytes) exceeds the ${MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE} byte limit.`
+        );
+      } else {
+        this.taskRunEventCustomFields = fields;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Dropping custom task run event fields for task ${this.taskType} because they could not be serialized to JSON.`
+      );
+    }
+  };
+
   private logTaskRunStartEvent(task: ConcreteTaskInstance, startedAt: Date): void {
     const scheduleDelayNs = task.scheduledAt
       ? millisToNanos(startedAt.getTime() - task.scheduledAt.getTime())
@@ -1192,6 +1212,7 @@ export class TaskManagerRunner implements TaskRunner {
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
           execution: { uuid: this.uuid },
+          ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },
       message,
@@ -1214,6 +1235,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           execution: { uuid: this.uuid },
+          ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },
       message: `Task ${this.taskType} "${this.id}" has been cancelled.`,
