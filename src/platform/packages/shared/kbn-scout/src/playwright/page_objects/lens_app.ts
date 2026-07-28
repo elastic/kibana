@@ -502,7 +502,32 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
+    // Prefer the field's own stable test-subj over the generic combo box's
+    // label-text match: Lens's field icon adds hidden accessibility text (e.g.
+    // "IP address") to every option, and the field search itself matches any
+    // field name containing the typed substring — so filtering for `ip` also
+    // renders (and can ambiguously match) an unrelated `clientip` option.
+    const fieldCombo = this.page.testSubj.locator('indexPattern-dimension-field');
+    await fieldCombo.getByTestId('comboBoxInput').click();
+    const searchInput = fieldCombo.getByTestId('comboBoxSearchInput');
+    await searchInput.fill(field);
+    // A field is either compatible or incompatible with the current operation,
+    // never both, so at most one of these two test-subjs renders for `field`.
+    const option = this.page
+      .getByTestId(`lns-fieldOption-${field}`)
+      .or(this.page.getByTestId(`lns-fieldOptionIncompatible-${field}`));
+    try {
+      await option.waitFor({ state: 'visible', timeout: 2000 });
+      await option.click();
+    } catch {
+      // Some special pseudo-fields (e.g. the "Records" document count) are
+      // addressed by a display label rather than their real field id, so they
+      // never render the test-subj above — fall back to label matching.
+      await searchInput.blur();
+      await this.page.components
+        .comboBox('indexPattern-dimension-field')
+        .setSelectedOptions([field]);
+    }
   }
 
   /** Clears the dimension field combo box (removes the currently selected field). */
