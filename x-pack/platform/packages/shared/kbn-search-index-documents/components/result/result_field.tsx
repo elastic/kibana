@@ -120,9 +120,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isSemanticVector = fieldType === 'semantic_text' && embeddings && embeddings.length > 0;
-  const shouldTruncate = isSemanticVector
-    ? false
-    : !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
+  const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
   const resolvedIconType = iconType || (fieldType ? iconMap[fieldType] : defaultToken);
 
   const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
@@ -130,7 +128,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
     values: { fieldType },
   });
 
-  if (isSemanticVector) {
+  if (isSemanticVector && isExpanded) {
     return (
       <EuiTableRow css={Styles.resultFieldSemanticVector(euiTheme)}>
         <EuiTableRowCell colSpan={2} className="resultFieldRowCell" truncateText={false}>
@@ -173,7 +171,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         <ResultFieldValue
           fieldValue={fieldValue}
           fieldType={fieldType}
-          embeddings={embeddings}
+          embeddings={isExpanded ? embeddings : undefined}
           isExpanded={isExpanded}
         />
       </EuiTableRowCell>

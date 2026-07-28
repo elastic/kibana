@@ -27,7 +27,24 @@ const iconTypeOf = (container: HTMLElement): string | null =>
   container.querySelector('[data-euiicon-type]')?.getAttribute('data-euiicon-type') ?? null;
 
 describe('ResultField', () => {
-  it('shows the text and embeddings type lines in the Field cell for a semantic_text field with vectors', () => {
+  it('shows the text and embeddings type lines in the Field cell for a semantic_text field with vectors when expanded', () => {
+    const { container } = renderField({
+      fieldName: 'body',
+      fieldType: 'semantic_text',
+      fieldValue: '"the original text"',
+      embeddings: JSON.stringify([0.1, 0.2]),
+      dimensions: 2,
+      isExpanded: true,
+    });
+    const icons = Array.from(container.querySelectorAll('[data-euiicon-type]'))
+      .map((el) => el.getAttribute('data-euiicon-type'))
+      .filter((i) => i?.startsWith('token'));
+    expect(icons).toEqual(['tokenSemanticText', 'tokenVectorDense']);
+    expect(screen.getByText('body')).toBeInTheDocument();
+    expect(screen.getByText('embeddings')).toBeInTheDocument();
+  });
+
+  it('renders a compact single row for a semantic_text field with vectors when collapsed', () => {
     const { container } = renderField({
       fieldName: 'body',
       fieldType: 'semantic_text',
@@ -38,9 +55,9 @@ describe('ResultField', () => {
     const icons = Array.from(container.querySelectorAll('[data-euiicon-type]'))
       .map((el) => el.getAttribute('data-euiicon-type'))
       .filter((i) => i?.startsWith('token'));
-    expect(icons).toEqual(['tokenString', 'tokenVectorDense']);
+    expect(icons).toEqual(['tokenSemanticText']);
     expect(screen.getByText('body')).toBeInTheDocument();
-    expect(screen.getByText('embeddings')).toBeInTheDocument();
+    expect(screen.queryByText('embeddings')).not.toBeInTheDocument();
   });
 
   it('uses the semantic_text icon and shows the field name for a semantic_text field without vectors', () => {
