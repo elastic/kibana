@@ -12,7 +12,7 @@ import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-p
 import type { ToastsStart } from '@kbn/core/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from '../redux';
-import { diag } from '../../../../utils/diag_trace';
+import { diag, diagGuard } from '../../../../utils/diag_trace';
 
 interface DataViewData {
   /**
@@ -62,9 +62,11 @@ export async function loadDataView({
       // to avoid conflicts, then create and return the data view
       if (locationDataViewSpec.id) {
         diag('loadDataView:clearInstanceCache', { id: locationDataViewSpec.id });
+        diagGuard(`loadDataView:clearInstanceCache:${locationDataViewSpec.id}`, 50);
         dataViews.clearInstanceCache(locationDataViewSpec.id);
       }
       diag('loadDataView:create', { id: locationDataViewSpec.id });
+      diagGuard(`loadDataView:create:${locationDataViewSpec.id}`, 50);
       const createdAdHocDataView = await dataViews.create(locationDataViewSpec);
       diag('loadDataView:createDone', { id: createdAdHocDataView.id });
       return {
@@ -244,6 +246,7 @@ export const loadAndResolveDataView = async ({
   // to avoid unnecessary requests on startup.
   if (!dataView.isPersisted() && !dataView.fields.length) {
     diag('loadAndResolveDataView:refreshFields', { id: dataView.id });
+    diagGuard('loadAndResolveDataView:refreshFields', 50);
     await dataViews.refreshFields(dataView);
     diag('loadAndResolveDataView:refreshFieldsDone', { id: dataView.id });
   }

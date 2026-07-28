@@ -48,7 +48,7 @@ import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { diag } from '../../../../../utils/diag_trace';
+import { diag, diagGuard } from '../../../../../utils/diag_trace';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -352,6 +352,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
     { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) {
     diag('initTabs:start', { discoverSessionId, shouldClearAllTabs });
+    diagGuard('initTabs:start', 100);
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
     const getUserId = async () => {

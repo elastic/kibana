@@ -24,3 +24,24 @@ export const diag = (marker: string, payload?: unknown) => {
     addLog(`DIAG ${marker} #${count} seq=${globalSeq} t=${now}ms`, payload);
   }
 };
+
+const guardState: Record<string, { count: number; last: number }> = {};
+
+export const diagGuard = (label: string, limit: number, windowMs = 2000) => {
+  const now = typeof performance !== 'undefined' ? performance.now() : 0;
+  const prev = guardState[label];
+
+  if (!prev || now - prev.last > windowMs) {
+    guardState[label] = { count: 1, last: now };
+    return;
+  }
+
+  prev.count += 1;
+  prev.last = now;
+
+  if (prev.count >= limit) {
+    throw new Error(
+      `[Discover] DIAG-GUARD tripped: ${label} reached ${prev.count} calls within ${windowMs}ms`
+    );
+  }
+};

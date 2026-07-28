@@ -47,7 +47,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
-import { diag } from '../../utils/diag_trace';
+import { diag, diagGuard } from '../../utils/diag_trace';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -106,6 +106,7 @@ export const DiscoverMainRoute = ({
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
+  diagGuard('render:DiscoverMainRouteContent', 1000);
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
   const { core, dataViews, chrome, data } = services;
