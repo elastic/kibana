@@ -193,6 +193,9 @@ apiTest.describe(
       const callbackRequests = await collectCompletedRoundRequests();
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
+      // Events stream incrementally: progress events are delivered before the terminal ones.
+      expect(callbackRequests.length).toBeGreaterThan(1);
+
       for (const callbackRequest of callbackRequests) {
         expect(callbackRequest.method).toBe('POST');
         expect(callbackRequest.url).toBe('/callback?token=success');
