@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
   ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
@@ -35,11 +36,12 @@ export default function ({ getService }: FtrProviderContext) {
       _version: string;
     };
 
-    interface YaraSignatureApiCallInterface<BodyReturnType = unknown> {
+    interface YaraSignatureApiCallInterface<BodyReturnType = object> {
       method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
       info: string;
       path: string;
-      getBody: () => BodyReturnType;
+      getBody?: () => BodyReturnType;
+      getFile?: () => [string, Buffer, string];
     }
 
     before(async () => {
@@ -127,7 +129,6 @@ export default function ({ getService }: FtrProviderContext) {
         get path() {
           return `${EXCEPTION_LIST_ITEM_URL}?item_id=${seededArtifact.item_id}&namespace_type=${seededArtifact.namespace_type}`;
         },
-        getBody: () => undefined,
       },
       {
         method: 'get',
@@ -135,7 +136,6 @@ export default function ({ getService }: FtrProviderContext) {
         get path() {
           return `${EXCEPTION_LIST_ITEM_URL}?item_id=${seededArtifact.item_id}&namespace_type=${seededArtifact.namespace_type}`;
         },
-        getBody: () => undefined,
       },
       {
         method: 'get',
@@ -143,7 +143,6 @@ export default function ({ getService }: FtrProviderContext) {
         get path() {
           return `${EXCEPTION_LIST_URL}/summary?list_id=${seededArtifact.list_id}&namespace_type=${seededArtifact.namespace_type}`;
         },
-        getBody: () => undefined,
       },
       {
         method: 'get',
@@ -151,7 +150,6 @@ export default function ({ getService }: FtrProviderContext) {
         get path() {
           return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${seededArtifact.list_id}&namespace_type=${seededArtifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
         },
-        getBody: () => undefined,
       },
       {
         method: 'post',
@@ -159,19 +157,39 @@ export default function ({ getService }: FtrProviderContext) {
         get path() {
           return `${EXCEPTION_LIST_URL}/_export?list_id=${seededArtifact.list_id}&namespace_type=${seededArtifact.namespace_type}&id=${seededArtifact.id}&include_expired_exceptions=true`;
         },
-        getBody: () => undefined,
+      },
+      {
+        method: 'post',
+        info: 'import',
+        get path() {
+          return `${EXCEPTION_LIST_URL}/_import`;
+        },
+        getFile: () => [
+          'file',
+          exceptionsGenerator.generateImportBuffer(
+            seededArtifact.list_id as (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number]
+          ),
+          'import_data.ndjson',
+        ],
       },
     ];
 
     for (const apiCall of apiCalls) {
       it(`should return 403 on [${apiCall.method}] - [${apiCall.info}]`, async () => {
-        await adminSupertest[apiCall.method](apiCall.path)
-          .set('kbn-xsrf', 'true')
-          .send(apiCall.getBody() as object)
-          .expect(403, {
-            status_code: 403,
-            message: 'EndpointArtifactError: Endpoint authorization failure',
-          });
+        const request = adminSupertest[apiCall.method](apiCall.path).set('kbn-xsrf', 'true');
+
+        if (apiCall.getFile) {
+          request.attach(...apiCall.getFile());
+        }
+
+        if (apiCall.getBody) {
+          request.send(apiCall.getBody());
+        }
+
+        await request.expect(403, {
+          status_code: 403,
+          message: 'EndpointArtifactError: Endpoint authorization failure',
+        });
       });
     }
   });
