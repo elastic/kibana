@@ -20,7 +20,7 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { actionPolicyTagsOasExamples } from './action_policy_tags_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class ActionPolicyTagsRoute extends BaseAlertingRoute {
@@ -47,7 +47,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

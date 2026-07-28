@@ -20,7 +20,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { listActionPolicyExecutionHistoryOasExamples } from './list_execution_history_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
@@ -48,7 +48,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

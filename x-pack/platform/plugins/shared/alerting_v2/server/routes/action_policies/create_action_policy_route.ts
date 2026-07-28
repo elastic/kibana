@@ -20,7 +20,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { createActionPolicyOasExamples } from './create_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
@@ -51,7 +51,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

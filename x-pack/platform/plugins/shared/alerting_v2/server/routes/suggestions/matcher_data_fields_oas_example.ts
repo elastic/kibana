@@ -8,7 +8,7 @@
 import type { MatcherDataFieldsResponse } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 export const MATCHER_DATA_FIELDS_RESPONSE: MatcherDataFieldsResponse = [
   'host.name',
@@ -17,7 +17,7 @@ export const MATCHER_DATA_FIELDS_RESPONSE: MatcherDataFieldsResponse = [
 ];
 
 const INVALID_MATCHER_DATA_FIELDS_QUERY_RESPONSE = invalidResponseExample({
-  summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   message: 'matcher: Too small: expected string to have >=1 characters',
   details: {
     errors: {

@@ -11,7 +11,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { INVALID_REQUEST_BODY_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { ACTION_POLICY_RESPONSE } from './action_policy_oas_shared_examples';
 
 export const MATCH_ACTION_POLICIES_FOR_RULE_REQUEST: MatchActionPoliciesForRuleBody = {
@@ -41,7 +41,7 @@ export const matchActionPoliciesForRuleOasExamples = (): AlertingOasOperationObj
         value: MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
       },
       400: invalidResponseExample({
-        summary: INVALID_REQUEST_BODY_DESCRIPTION,
+        summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
         message: 'rule: Invalid input: expected object, received undefined',
         details: {
           errors: {

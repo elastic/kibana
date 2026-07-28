@@ -24,10 +24,7 @@ import {
   ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
-import {
-  INVALID_QUERY_PARAMETERS_DESCRIPTION,
-  INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
-} from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { invalidResponseExample } from '../oas_utils';
 import type { OasExampleEntry } from '../oas_types';
 
@@ -89,7 +86,7 @@ export const invalidActionPolicyDataResponse = (
   context: ActionPolicyValidationContext
 ): OasExampleEntry =>
   invalidResponseExample({
-    summary: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+    summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
     code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
     message: getInvalidActionPolicyDataMessage(
       context,
@@ -108,7 +105,7 @@ export const invalidActionPolicyDataResponse = (
 
 /** Static 400 body shared by read routes that reject invalid query parameters. */
 export const INVALID_QUERY_PARAMETERS_RESPONSE: OasExampleEntry = invalidResponseExample({
-  summary: INVALID_QUERY_PARAMETERS_DESCRIPTION,
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   message: 'page: Too small: expected number to be >=1',
   details: {
     errors: {
@@ -166,7 +163,7 @@ export const BULK_RESPONSE: BulkResponse = {
 
 /** Static 400 body for bulk-by-ids routes that reject an invalid request body. */
 export const INVALID_BULK_BY_IDS_RESPONSE: OasExampleEntry = invalidResponseExample({
-  summary: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
   message: 'ids: Invalid input: expected array, received undefined',
   details: {
     errors: {

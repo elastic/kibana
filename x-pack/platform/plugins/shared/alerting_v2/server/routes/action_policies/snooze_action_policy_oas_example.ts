@@ -8,7 +8,7 @@
 import type { SnoozeActionPolicyBody } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
@@ -31,7 +31,7 @@ export const snoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
         snoozedUntil: SNOOZE_ACTION_POLICY_REQUEST.snoozedUntil,
       }),
       400: invalidResponseExample({
-        summary: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+        summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
         message: 'snoozedUntil: Invalid input: expected string, received undefined',
         details: {
           errors: {

@@ -26,7 +26,7 @@ import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
-import { INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION } from '../route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 const updateActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -59,7 +59,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
