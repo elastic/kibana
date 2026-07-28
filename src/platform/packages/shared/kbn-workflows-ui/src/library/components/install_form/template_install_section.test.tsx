@@ -84,13 +84,15 @@ describe('TemplateInstallSection', () => {
     });
   };
 
+  const PREVIEW_YAML = 'name: Demo Template\nsteps:\n  - name: demo_step\n    type: demo.run\n';
+
   const renderSection = (template: TemplateBody = TEMPLATE) =>
     render(
       <QueryClientProvider client={queryClient}>
         <TemplateInstallSection
           template={template}
           onPreviewValuesChange={onPreviewValuesChange}
-          secondaryAction={<button type="button" data-test-subj="secondaryAction" />}
+          previewYaml={PREVIEW_YAML}
         />
       </QueryClientProvider>
     );
@@ -104,14 +106,29 @@ describe('TemplateInstallSection', () => {
     setCapabilities(true);
   });
 
-  it('should render the form fields and the secondary action', () => {
+  it('should render the form fields and the Remix with AI action', () => {
     renderSection();
 
     expect(screen.getByTestId('workflowLibraryInstallForm')).toBeInTheDocument();
     expect(
       screen.getByTestId('workflowLibraryInstallForm-field-demo-connector')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('secondaryAction')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLibraryTemplateRemixButton')).toBeInTheDocument();
+  });
+
+  it('should open the editor with the previewed YAML as history state on Remix with AI', () => {
+    renderSection();
+    const remixButton = screen.getByTestId('workflowLibraryTemplateRemixButton');
+
+    // Not gated on validation: remix is the escape hatch for finishing the
+    // configuration in the editor, so it works with required fields missing.
+    expect(remixButton).toBeEnabled();
+    fireEvent.click(remixButton);
+
+    expect(navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/create',
+      state: { initialYaml: PREVIEW_YAML },
+    });
   });
 
   it('should disable Install while required fields are missing and explain it in a tooltip', async () => {
@@ -187,6 +204,6 @@ describe('TemplateInstallSection', () => {
     renderSection();
 
     expect(screen.queryByTestId('workflowLibraryTemplateInstallActions')).toBeNull();
-    expect(screen.queryByTestId('secondaryAction')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateRemixButton')).toBeNull();
   });
 });

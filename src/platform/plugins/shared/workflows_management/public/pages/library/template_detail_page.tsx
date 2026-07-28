@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -23,7 +23,6 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
-import { FROM_TEMPLATE_QUERY_PARAM } from '../../shared/utils/template_prefill';
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
@@ -32,10 +31,6 @@ const libraryBreadcrumbLabel = i18n.translate(
 
 const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
   defaultMessage: 'Back to library',
-});
-
-const openInEditorLabel = i18n.translate('workflowsManagement.libraryTemplatePage.openInEditor', {
-  defaultMessage: 'Open in editor',
 });
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
@@ -79,21 +74,9 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
-  const [loadedTemplate, setLoadedTemplate] = useState<TemplateBody | undefined>();
   const handleTemplateLoaded = useCallback((template: TemplateBody) => {
     setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
-    setLoadedTemplate(template);
   }, []);
-
-  const handleOpenInEditor = useCallback(() => {
-    if (!loadedTemplate) return;
-    // The create page loads the template by its stable slug, so the link
-    // survives refreshes and can be shared.
-    const templateSlug = encodeURIComponent(loadedTemplate.metadata.slug);
-    void application.navigateToApp(PLUGIN_ID, {
-      path: `/create?${FROM_TEMPLATE_QUERY_PARAM}=${templateSlug}`,
-    });
-  }, [application, loadedTemplate]);
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {
     if (templateBreadcrumb?.slug === slug) {
@@ -149,17 +132,6 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
           onLoaded={handleTemplateLoaded}
           showGraphPreview={showGraphPreview}
           backButton={backButton}
-          secondaryAction={
-            loadedTemplate ? (
-              <EuiButton
-                fullWidth
-                onClick={handleOpenInEditor}
-                data-test-subj="workflowLibraryTemplateDetailOpenInEditorButton"
-              >
-                {openInEditorLabel}
-              </EuiButton>
-            ) : null
-          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

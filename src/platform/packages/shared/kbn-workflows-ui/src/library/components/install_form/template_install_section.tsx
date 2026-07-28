@@ -27,6 +27,7 @@ import { validateInstallFormValues } from '@kbn/workflows-library';
 import type { InstallFormField, TemplateBody } from '@kbn/workflows-library';
 import { InstallForm } from './install_form';
 import { useWorkflowsCapabilities } from '../../../hooks/use_workflows_capabilities';
+import type { WorkflowsCreateRouteState } from '../../../navigation';
 import { useInstallTemplate } from '../../hooks/use_install_template';
 
 export interface TemplateInstallSectionProps {
@@ -36,8 +37,12 @@ export interface TemplateInstallSectionProps {
    * blur for text inputs) so the host view can refresh the YAML preview.
    */
   onPreviewValuesChange?: (values: Record<string, unknown>) => void;
-  /** Rendered below the Install button (e.g. an "Open in editor" link). */
-  secondaryAction?: React.ReactNode;
+  /**
+   * The rendered template YAML currently shown in the preview (committed form
+   * values applied). "Remix with AI" hands exactly this string to the workflow
+   * editor, so what the user sees is what they remix.
+   */
+  previewYaml: string;
 }
 
 const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =>
@@ -50,13 +55,15 @@ const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =
 /**
  * The installation part of the template detail view: the `install.form`
  * fields, the Install button (enabled once every required field is filled),
- * and the install call itself. Works out of the box in any host plugin — the
- * HTTP client comes from `useKibana().services.http`, connector services from
- * `WorkflowsUiServicesProvider`. On success it shows a toast and navigates to
- * the created workflow's editor page.
+ * the install call itself, and the "Remix with AI" action that opens the
+ * rendered template in the workflow editor (via `WorkflowsCreateRouteState`
+ * history state — no template knowledge in the editor). Works out of the box
+ * in any host plugin — the HTTP client comes from `useKibana().services.http`,
+ * connector services from `WorkflowsUiServicesProvider`. On success it shows
+ * a toast and navigates to the created workflow's editor page.
  */
 export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
-  function TemplateInstallSection({ template, onPreviewValuesChange, secondaryAction }) {
+  function TemplateInstallSection({ template, onPreviewValuesChange, previewYaml }) {
     const { euiTheme } = useEuiTheme();
     const { application, notifications } = useKibana<{
       application: ApplicationStart;
@@ -145,6 +152,18 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       setServerErrors({});
       installTemplate(values);
     }, [installTemplate, values]);
+
+    // Opens the workflow editor seeded with the previewed YAML, via the
+    // create page's history-state contract (`WorkflowsCreateRouteState`).
+    // Deliberately not gated on form validation: it is the escape hatch for
+    // finishing the configuration in the editor — unset fields carry their
+    // defaults or `<name>` placeholders.
+    const handleRemix = useCallback(() => {
+      void application.navigateToApp(WORKFLOWS_APP_ID, {
+        path: '/create',
+        state: { initialYaml: previewYaml } satisfies WorkflowsCreateRouteState,
+      });
+    }, [application, previewYaml]);
 
     if (!canCreateWorkflow) {
       // Without the create privilege the install (and any secondary create
@@ -237,7 +256,18 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
                 installButton
               )}
             </EuiFlexItem>
-            {secondaryAction ? <EuiFlexItem grow={false}>{secondaryAction}</EuiFlexItem> : null}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fullWidth
+                iconType="productAgent"
+                onClick={handleRemix}
+                data-test-subj="workflowLibraryTemplateRemixButton"
+              >
+                {i18n.translate('workflows.library.install.remixButton', {
+                  defaultMessage: 'Remix with AI',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </>

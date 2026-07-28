@@ -57,15 +57,6 @@ export interface TemplateDetailProps {
    * full two-column layout (letting the preview panel reach the top of the page).
    */
   backButton?: React.ReactNode;
-  /**
-   * Rendered below the built-in Install button at the bottom of the left
-   * column (e.g. an "Open in editor" button that opens `/workflows/create`
-   * prefilled from this template). Kept as a slot so the host app owns
-   * navigation while this component owns placement. Not rendered when the
-   * user lacks the create-workflow privilege (the Install button is hidden
-   * for the same reason).
-   */
-  secondaryAction?: React.ReactNode;
   /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
   showGraphPreview?: boolean;
 }
@@ -95,7 +86,6 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   slug,
   onLoaded,
   backButton,
-  secondaryAction,
   showGraphPreview = false,
 }) {
   const { data, isLoading, isError } = useTemplate(slug);
@@ -474,7 +464,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                 key={metadata.slug}
                 template={data}
                 onPreviewValuesChange={setPreviewValues}
-                secondaryAction={secondaryAction}
+                previewYaml={previewYaml}
               />
             </EuiFlexGroup>
           </EuiFlexItem>

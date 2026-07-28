@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
@@ -27,21 +27,14 @@ jest.mock('@kbn/workflows-ui', () => ({
     slug,
     onLoaded,
     showGraphPreview,
-    secondaryAction,
   }: {
     slug: string;
     onLoaded: (template: TemplateBody) => void;
     showGraphPreview: boolean;
-    secondaryAction?: React.ReactNode;
   }) => {
     mockOnLoaded = onLoaded;
     mockShowGraphPreview = showGraphPreview;
-    return (
-      <div data-test-subj="mockTemplateDetail">
-        {slug}
-        {secondaryAction}
-      </div>
-    );
+    return <div data-test-subj="mockTemplateDetail">{slug}</div>;
   },
 }));
 
@@ -97,32 +90,6 @@ describe('LibraryTemplateDetailPage', () => {
       expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
         expect.objectContaining({ text: 'Template Library' }),
       ]);
-    });
-  });
-
-  it('supplies an "Open in editor" secondary action that opens the prefilled create page', () => {
-    const services = buildEnabledServices();
-
-    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
-      wrapper: getTestProvider({ services }),
-    });
-
-    // The action only renders once the template has loaded (it links by slug).
-    expect(
-      screen.queryByTestId('workflowLibraryTemplateDetailOpenInEditorButton')
-    ).not.toBeInTheDocument();
-
-    act(() => {
-      mockOnLoaded?.({
-        metadata: { slug: 'first-template', name: 'First template' },
-      } as TemplateBody);
-    });
-
-    const button = screen.getByTestId('workflowLibraryTemplateDetailOpenInEditorButton');
-    fireEvent.click(button);
-
-    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/create?fromTemplate=first-template',
     });
   });
 

@@ -91,15 +91,15 @@ jest.mock('./template_yaml_preview', () => ({
 }));
 
 // The install section has its own test (it needs kibana services and a query
-// client); the stub exposes the preview-values callback and the secondary
-// action so their wiring through TemplateDetail can be asserted.
+// client); the stub exposes the preview-values callback and echoes the
+// `previewYaml` prop so their wiring through TemplateDetail can be asserted.
 jest.mock('./install_form', () => ({
   TemplateInstallSection: ({
     onPreviewValuesChange,
-    secondaryAction,
+    previewYaml,
   }: {
     onPreviewValuesChange?: (values: Record<string, unknown>) => void;
-    secondaryAction?: React.ReactNode;
+    previewYaml: string;
   }) => (
     <div data-test-subj="mockInstallSection">
       <button
@@ -107,7 +107,7 @@ jest.mock('./install_form', () => ({
         data-test-subj="mockInstallSectionCommit"
         onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
       />
-      {secondaryAction}
+      <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
     </div>
   ),
 }));
@@ -219,18 +219,16 @@ describe('TemplateDetail', () => {
     expect(preview.textContent).not.toContain('maxAge: 7');
   });
 
-  it('should pass the secondary action into the install section', () => {
-    render(
-      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
-        <TemplateDetail
-          slug="my-template"
-          secondaryAction={<button type="button" data-test-subj="hostSecondaryAction" />}
-        />
-      </WorkflowsUiServicesProvider>
-    );
+  it('should pass the preview YAML into the install section (so Remix hands over what the preview shows)', () => {
+    renderDetail();
 
-    const installSection = screen.getByTestId('mockInstallSection');
-    expect(within(installSection).getByTestId('hostSecondaryAction')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('mockInstallSectionCommit'));
+
+    const sectionYaml = screen.getByTestId('mockInstallSectionPreviewYaml');
+    expect(sectionYaml.textContent).toContain('maxAge: 42');
+    expect(sectionYaml.textContent).toBe(
+      screen.getByTestId('workflowLibraryTemplateDetail-preview').textContent
+    );
   });
 
   it('should show the selected step YAML in a read-only graph flyover', () => {
