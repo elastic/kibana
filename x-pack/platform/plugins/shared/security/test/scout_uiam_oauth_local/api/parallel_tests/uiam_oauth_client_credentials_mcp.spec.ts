@@ -222,11 +222,9 @@ apiTest.describe(
           // The transport gets a 401, calls redirectToAuthorization() (our SAML flow,
           // which captures the code), then throws UnauthorizedError — that's expected.
           const transport1 = new StreamableHTTPClientTransport(mcpUrl, transportOpts);
+          const client = new Client({ name: 'scout-mcp', version: '1.0.0' });
 
-          await expect(
-            new Client({ name: 'scout-mcp-phase1', version: '1.0.0' }).connect(transport1)
-          ).rejects.toThrow(UnauthorizedError);
-
+          await expect(client.connect(transport1)).rejects.toThrow(UnauthorizedError);
           expect(provider.capturedCode).toBeDefined();
 
           // Phase 2: exchange the auth code for tokens.
@@ -234,14 +232,15 @@ apiTest.describe(
           expect(provider.tokens()).toBeDefined();
 
           // Phase 3: reconnect with stored tokens and verify tool access.
-          const transport3 = new StreamableHTTPClientTransport(mcpUrl, transportOpts);
-          const client3 = new Client({ name: 'scout-mcp-phase3', version: '1.0.0' });
+          // transport1 cannot be reused (its AbortController is not reset after close),
+          // but the client can connect to a fresh transport.
+          const transport2 = new StreamableHTTPClientTransport(mcpUrl, transportOpts);
           try {
-            await client3.connect(transport3);
-            const { tools } = await client3.listTools();
+            await client.connect(transport2);
+            const { tools } = await client.listTools();
             expect(tools.length).toBeGreaterThan(0);
           } finally {
-            await client3.close();
+            await client.close();
           }
         } finally {
           await apiClient.post(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`, {
