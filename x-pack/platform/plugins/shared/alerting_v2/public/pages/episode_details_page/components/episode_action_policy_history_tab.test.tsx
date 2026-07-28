@@ -17,8 +17,6 @@ const EPISODE_ID = 'episode-42';
 const mockUseFetchExecutionHistory = jest.fn();
 const mockRefetch = jest.fn();
 
-let mockCanReadRules = true;
-
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
@@ -27,15 +25,8 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'settings') {
       return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
     }
-    if (token === 'http') {
-      return {};
-    }
     if (typeof token === 'function') {
-      return {
-        canRead: () => mockCanReadRules,
-        canWrite: () => mockCanReadRules,
-        can: () => mockCanReadRules,
-      };
+      return { canRead: () => true, canWrite: () => true, can: () => true };
     }
     return {};
   },
@@ -101,17 +92,16 @@ const mockFetchResult = (
   });
 };
 
-const renderTab = () =>
+const renderTab = (episodeStart?: string) =>
   render(
     <I18nProvider>
-      <EpisodeActionPolicyHistoryTab episodeId={EPISODE_ID} />
+      <EpisodeActionPolicyHistoryTab episodeId={EPISODE_ID} episodeStart={episodeStart} />
     </I18nProvider>
   );
 
 describe('EpisodeActionPolicyHistoryTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCanReadRules = true;
   });
 
   it('fetches execution history scoped to the current episode', () => {
@@ -122,6 +112,18 @@ describe('EpisodeActionPolicyHistoryTab', () => {
       page: 1,
       perPage: 10,
       episodeIds: [EPISODE_ID],
+    });
+  });
+
+  it('bounds the query by the episode start when provided', () => {
+    mockFetchResult();
+    renderTab('2026-01-01T00:00:00.000Z');
+
+    expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
+      page: 1,
+      perPage: 10,
+      episodeIds: [EPISODE_ID],
+      startDate: '2026-01-01T00:00:00.000Z',
     });
   });
 

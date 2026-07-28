@@ -472,7 +472,10 @@ export function EpisodeDetailsPage() {
                   services={{ data, spaces, userProfile: services.userProfile }}
                 />
               ) : actualMainPanel === 'action_policy_history' ? (
-                <EpisodeActionPolicyHistoryTab episodeId={episodeId} />
+                <EpisodeActionPolicyHistoryTab
+                  episodeId={episodeId}
+                  episodeStart={episode?.first_timestamp}
+                />
               ) : actualMainPanel === 'metadata' ? (
                 <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
               ) : (

@@ -28,9 +28,13 @@ const DEFAULT_PER_PAGE = 10;
 
 interface Props {
   episodeId: string;
+  /**
+   * Episode start. Used as the lower bound for the execution-history query.
+   */
+  episodeStart?: string;
 }
 
-export const EpisodeActionPolicyHistoryTab = ({ episodeId }: Props) => {
+export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props) => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
@@ -39,6 +43,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId }: Props) => {
     page: page + 1,
     perPage,
     episodeIds: [episodeId],
+    startDate: episodeStart,
   });
 
   const onTableChange = useCallback(

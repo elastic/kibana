@@ -14,13 +14,13 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import { RulesCell } from './rules_cell';
+import * as i18n from '../translations';
 
 const MAX_VISIBLE_RULES = 3;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -48,15 +48,11 @@ const buildColumns = ({
 }): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
   {
     field: '@timestamp',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.timestamp', {
-      defaultMessage: 'Timestamp',
-    }),
+    name: i18n.COLUMN_TIMESTAMP,
     render: (value: string) => formatTimestamp(value),
   },
   {
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
-      defaultMessage: 'Policy',
-    }),
+    name: i18n.COLUMN_POLICY,
     render: (item: PolicyExecutionHistoryItem) => {
       const label = item.policy.name ?? item.policy.id;
       return canReadActionPolicies ? (
@@ -68,9 +64,7 @@ const buildColumns = ({
   },
   {
     field: 'outcome',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.outcome', {
-      defaultMessage: 'Outcome',
-    }),
+    name: i18n.COLUMN_OUTCOME,
     render: (outcome: PolicyExecutionHistoryItem['outcome']) => (
       <EuiBadge color="hollow" iconType={outcome === 'dispatched' ? 'check' : 'clock'}>
         {outcome}
@@ -80,9 +74,7 @@ const buildColumns = ({
   ...(showRulesColumn
     ? [
         {
-          name: i18n.translate('xpack.alertingV2.executionHistory.columns.rules', {
-            defaultMessage: 'Rules',
-          }),
+          name: i18n.COLUMN_RULES,
           render: (item: PolicyExecutionHistoryItem) => (
             <RulesCell
               rules={item.rules}
@@ -100,23 +92,17 @@ const buildColumns = ({
     ? [
         {
           field: 'episode_count',
-          name: i18n.translate('xpack.alertingV2.executionHistory.columns.episodes', {
-            defaultMessage: 'Episodes',
-          }),
+          name: i18n.COLUMN_EPISODES,
         },
         {
           field: 'action_group_count',
-          name: i18n.translate('xpack.alertingV2.executionHistory.columns.actionGroups', {
-            defaultMessage: 'Action groups',
-          }),
+          name: i18n.COLUMN_ACTION_GROUPS,
         },
       ]
     : []),
   {
     field: 'workflows',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.workflows', {
-      defaultMessage: 'Workflows',
-    }),
+    name: i18n.COLUMN_WORKFLOWS,
     render: (workflows: PolicyExecutionHistoryItem['workflows']) => {
       if (workflows.length === 0) return null;
       return (
