@@ -1,6 +1,6 @@
 # ES|QL Read Query Templates — Records, Timeline, Influencers, RCA
 
-Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `.ml-*` system indices. Keep `?param` placeholders in the query and bind values in `params` (keys without `?`, e.g. `{ "job_id_pattern": "*", "min_score": 25 }`).
+Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `.ml-*` system indices. Keep `?param` placeholders in the query and bind values in `params` (keys without `?`, e.g. `{ "job_id_pattern": "*", "min_score": 25 }`). Never call with an empty argument object — `query` is always required. Omit the `params` field entirely when the query has no placeholders.
 
 Section titles (e.g. `ad_query_anomaly_records`) are labels for the query examples only — they are not tool arguments.
 

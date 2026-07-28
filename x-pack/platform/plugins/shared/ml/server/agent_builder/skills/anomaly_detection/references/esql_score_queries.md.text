@@ -1,6 +1,6 @@
 # ES|QL Score Query Templates — Model Plot, Forecasts, Score Reassessment, Snapshots
 
-Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter. Bind `?param` values via `params`.
+Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter. Bind `?param` values via `params`. Never call with an empty argument object — `query` is required; omit the `params` field when unused.
 
 **Time fields:** `.ml-anomalies-*` uses `timestamp`, not `@timestamp`.
 

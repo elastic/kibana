@@ -38,13 +38,13 @@ const schema = z.object({
     .string()
     .min(1)
     .describe(
-      'The ES|QL query to execute against ML system indices (.ml-anomalies-*, .ml-config, .ml-notifications-*, .ml-annotations-*). Copy query text from the anomaly-detection skill referenced content.'
+      'The ES|QL query to execute against ML system indices. Copy a template verbatim from one of the referenced content files: esql-read-queries (records/timeline/influencers/RCA), esql-metadata-queries (job config/memory/datafeed/annotations), or esql-score-queries (model plots/forecasts/score reassessment). Do not construct a query from memory — always read the file first.'
     ),
   params: z
     .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
     .optional()
     .describe(
-      '(Optional) Bound values for ?param placeholders (keys without ?), e.g. { "job_id_pattern": "*", "min_score": 25 }.'
+      '(Optional) Bound values for ?param placeholders (keys without ?), e.g. { "job_id_pattern": "*", "min_score": 25 }. Omit this field entirely when the query has no placeholders — do not pass an empty object.'
     ),
   limit: z
     .number()
@@ -138,21 +138,33 @@ export const createQueryAnomaliesTool = (
   id: QUERY_ANOMALIES_TOOL_ID,
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
-  description: `Execute an ES|QL query against ML anomaly-detection system indices and return tabular results.
+  description: `## Before calling this tool — required
 
-## Usage
+Read one of the referenced ES|QL content files and copy a complete query into \`query\`:
+- \`esql-read-queries\` — anomaly records, timeline, influencers, RCA queries
+- \`esql-metadata-queries\` — job config, annotations, memory health, datafeed gaps
+- \`esql-score-queries\` — model plots, forecasts, score reassessment
 
-Pass the full ES|QL string in \`query\`. Optionally pass bound \`params\` for ?placeholders.
+**Never call this tool without \`query\`.** Do not pass \`{}\`, an empty string, or a section label like \`"ad_get_jobs"\` — always paste the full ES|QL block from the file.
 
-Example:
+---
+
+Execute an ES|QL query against ML anomaly-detection system indices (.ml-anomalies-*, .ml-config, .ml-notifications-*, .ml-annotations-*) and return tabular results.
+
+Pass the full ES|QL string in \`query\`. Only include \`params\` when the query contains \`?placeholders\` — omit the \`params\` field entirely when unused.
+
+Example (no placeholders — omit params):
 {
-  "query": "FROM .ml-config | WHERE job_type == \\"anomaly_detector\\" | STATS job_count = COUNT(*), job_ids = VALUES(job_id)",
-  "params": {}
+  "query": "FROM .ml-config | WHERE job_type == \\"anomaly_detector\\" | STATS job_count = COUNT(*), job_ids = VALUES(job_id)"
+}
+
+Example (with placeholders — bind every ?name):
+{
+  "query": "FROM .ml-anomalies-* | WHERE result_type == \\"record\\" AND job_id LIKE ?job_id_pattern AND record_score >= ?min_score | SORT record_score DESC | LIMIT 50",
+  "params": { "job_id_pattern": "*", "min_score": 50 }
 }
 
 Allowed indices (internal user): \`.ml-anomalies-*\`, \`.ml-config\`, \`.ml-notifications-*\`, \`.ml-annotations-*\`.
-Copy query examples from the anomaly-detection skill referenced content (\`esql-read-queries\`, \`esql-metadata-queries\`, \`esql-score-queries\`).
-
 For source-data indices use \`platform.core.execute_esql\` instead.`,
   experimental: true,
   schema,

@@ -133,6 +133,18 @@ describe('queryAnomaliesTool', () => {
     expect(queryAnomaliesTool.description).toBeTruthy();
   });
 
+  it('does not teach calling with an empty params object or missing query', () => {
+    // Models copy description examples; an empty params object causes {} / missing-query calls.
+    expect(queryAnomaliesTool.description).not.toMatch(/"params"\s*:\s*\{\s*\}/);
+    // Must front-load the "read before call" requirement and forbid empty calls.
+    expect(queryAnomaliesTool.description).toMatch(/never call this tool without `query`/i);
+    expect(queryAnomaliesTool.description).toMatch(/omit the `params` field entirely/i);
+    // Must list the referenced ES|QL files explicitly so agents know where to look.
+    expect(queryAnomaliesTool.description).toMatch(/esql-read-queries/i);
+    expect(queryAnomaliesTool.description).toMatch(/esql-metadata-queries/i);
+    expect(queryAnomaliesTool.description).toMatch(/esql-score-queries/i);
+  });
+
   describe('handler', () => {
     it('executes ES|QL as the internal user for allowed .ml indices', async () => {
       const esClient = createEsClientMock();

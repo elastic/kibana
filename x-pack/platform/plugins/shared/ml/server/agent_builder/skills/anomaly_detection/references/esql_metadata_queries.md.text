@@ -1,6 +1,6 @@
 # ES|QL Metadata Query Templates — Jobs, Config, Annotations, Memory, Gaps
 
-Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `.ml-*` system indices. Bind `?param` values via `params`.
+Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `.ml-*` system indices. Bind `?param` values via `params`. Never call with an empty argument object — `query` is required; omit the `params` field when unused.
 
 For **`ad_ts_ingest_latency_estimate`** (source data indices) use `platform.core.execute_esql` instead.
 

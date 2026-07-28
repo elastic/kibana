@@ -12,9 +12,17 @@ Single skill covering all anomaly detection work. Use the **Mode Selector** belo
 
 ### Calling `ml.query_anomalies`
 
-Pass the ES|QL text in `query` (copy from referenced content). Optional `params` for `?placeholders`.
+**Step 1 — read the right referenced ES|QL file:**
+- `esql-read-queries` — anomaly records, timeline, influencers, RCA queries
+- `esql-metadata-queries` — job config, annotations, memory health, datafeed gaps
+- `esql-score-queries` — model plots, forecasts, score reassessment
+
+**Step 2 — copy the full ES|QL block into `query`.** Never call with `{}`, an empty string, or a section label like `"ad_get_jobs"` as the value. `query` is always required.
+
+Only include `params` when the query has `?placeholders`; omit the `params` field entirely otherwise.
 
 ```text
+# No placeholders — omit params
 ml.query_anomalies
   query: |
     FROM .ml-config
@@ -28,6 +36,19 @@ ml.query_anomalies
             partition_fields = VALUES(`analysis_config.detectors.partition_field_name`),
             influencers = VALUES(`analysis_config.influencers`),
             bucket_spans = VALUES(`analysis_config.bucket_span`)
+
+# With placeholders — bind every ?name in params
+ml.query_anomalies
+  query: |
+    FROM .ml-anomalies-*
+    | WHERE result_type == "record"
+      AND job_id LIKE ?job_id_pattern
+      AND record_score >= ?min_score
+    | SORT record_score DESC
+    | LIMIT 50
+  params:
+    job_id_pattern: "*"
+    min_score: 50
 ```
 
 ## Mode Selector
@@ -77,16 +98,16 @@ Read scores this way:
 
 ### Tool chain
 
-| Phase                 | Tool                         | ES|QL to pass in `query` (from referenced content)                        |
+| Phase                 | Tool                         | `query` value: read file → copy section                                   |
 | --------------------- | ---------------------------- | ------------------------------------------------------------------------- |
 | Discovery             | `ml.ad_get_job_info`         | `operation=get_available_metadata`                                        |
-| Job detail            | `ml.query_anomalies`         | copy `ad_get_jobs` / `ad_discover_related_jobs`                           |
-| Timeline / scope      | `ml.query_anomalies`         | copy `ad_query_anomaly_timeline`                                          |
-| Cross-job / entities  | `ml.query_anomalies`         | copy `ad_rca_cross_job_entity_match` / `ad_rca_multi_job_entities` / `ad_rca_entity_profile` |
-| Records / influencers | `ml.query_anomalies`         | copy `ad_query_anomaly_records` / `ad_query_influencers`                  |
-| RCA depth             | `ml.query_anomalies`         | copy `ad_rca_detector_fingerprint` / `ad_rca_correlation` / `ad_rca_blast_radius` / `ad_rca_score_reassessment` |
-| Categories            | `ml.query_anomalies`         | copy `ad_get_categories`                                                  |
-| Source evidence       | `platform.core.execute_esql` | copy `ad_rca_source_evidence` / `ad_search_log_category_examples`         |
+| Job detail            | `ml.query_anomalies`         | `esql-metadata-queries` → `ad_get_jobs` / `ad_discover_related_jobs`     |
+| Timeline / scope      | `ml.query_anomalies`         | `esql-read-queries` → `ad_query_anomaly_timeline`                        |
+| Cross-job / entities  | `ml.query_anomalies`         | `esql-read-queries` → `ad_rca_cross_job_entity_match` / `ad_rca_multi_job_entities` / `ad_rca_entity_profile` |
+| Records / influencers | `ml.query_anomalies`         | `esql-read-queries` → `ad_query_anomaly_records` / `ad_query_influencers` |
+| RCA depth             | `ml.query_anomalies`         | `esql-read-queries` → `ad_rca_detector_fingerprint` / `ad_rca_correlation` / `ad_rca_blast_radius` / `ad_rca_score_reassessment` |
+| Categories            | `ml.query_anomalies`         | `esql-metadata-queries` → `ad_get_categories`                            |
+| Source evidence       | `platform.core.execute_esql` | `esql-read-queries` → `ad_rca_source_evidence` / `ad_search_log_category_examples` |
 | Job config            | `ml.ad_get_job_info`         | `operation=get_datafeed_config`                                           |
 
 ### Protocol
@@ -142,16 +163,16 @@ These live under `anomaly_score_explanation.*` in ES|QL. **Do not** `KEEP anomal
 
 ### Tool chain
 
-| Purpose                | Tool                         | ES|QL template / operation                             |
-| ---------------------- | ---------------------------- | ------------------------------------------------------ |
-| Records + explanation  | `ml.query_anomalies` | `ad_query_anomaly_records` (exact `job_id_pattern`)    |
-| Renormalization drift  | `ml.query_anomalies` | `ad_rca_score_reassessment`                            |
-| Model bounds (visual)  | `ml.query_anomalies` | `ad_get_model_plot`                                    |
-| Forecast overlap       | `ml.query_anomalies` | `ad_get_forecast_results`                              |
-| Influencer attribution | `ml.query_anomalies` | `ad_query_influencers`                                 |
-| Config & detector      | `ml.ad_get_job_info`            | `operation=get_jobs` — `bucket_span`, function, `use_null` |
-| Model snapshots        | `ml.ad_get_job_info`            | `operation=get_model_snapshots`                        |
-| Categorization         | `ml.query_anomalies` | `ad_get_categories`                                    |
+| Purpose                | Tool                         | `query` value: read file → copy section                             |
+| ---------------------- | ---------------------------- | ------------------------------------------------------------------- |
+| Records + explanation  | `ml.query_anomalies` | `esql-read-queries` → `ad_query_anomaly_records` (exact `job_id_pattern`) |
+| Renormalization drift  | `ml.query_anomalies` | `esql-read-queries` → `ad_rca_score_reassessment`                   |
+| Model bounds (visual)  | `ml.query_anomalies` | `esql-score-queries` → `ad_get_model_plot`                          |
+| Forecast overlap       | `ml.query_anomalies` | `esql-score-queries` → `ad_get_forecast_results`                    |
+| Influencer attribution | `ml.query_anomalies` | `esql-read-queries` → `ad_query_influencers`                        |
+| Config & detector      | `ml.ad_get_job_info`            | `operation=get_jobs` — `bucket_span`, function, `use_null`          |
+| Model snapshots        | `ml.ad_get_job_info`            | `operation=get_model_snapshots`                                     |
+| Categorization         | `ml.query_anomalies` | `esql-metadata-queries` → `ad_get_categories`                       |
 
 ### Decision tree — score troubleshooting
 

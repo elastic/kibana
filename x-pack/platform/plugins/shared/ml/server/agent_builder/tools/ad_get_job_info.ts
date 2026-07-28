@@ -166,7 +166,8 @@ export const createAdGetJobInfoTool = (
         }
 
         case 'get_available_metadata': {
-          const response = await esClient.asInternalUser.esql.query({
+          /** Internal user has no privileges on .ml-config, so we use current user */
+          const response = await esClient.asCurrentUser.esql.query({
             query: `FROM .ml-config
 | WHERE job_type == "anomaly_detector"
 | STATS job_count = COUNT(*),
