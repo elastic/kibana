@@ -1049,22 +1049,19 @@ const scenario: Scenario<ApmOtelFields> = async () => {
         );
 
       return [
-        withClient(
-          apmEsClient,
-          [
-            chatSpans,
-            toolSpans,
-            embedSpans,
-            minimalSpans,
-            longSpans,
-            agentSpans,
-            ragSpans,
-            realworldSpans,
-            maxlenSpans,
-            overlimitSpans,
-            regularSpans,
-          ].flatMap((s) => s)
-        ),
+        withClient(apmEsClient, [
+          chatSpans,
+          toolSpans,
+          embedSpans,
+          minimalSpans,
+          longSpans,
+          agentSpans,
+          ragSpans,
+          realworldSpans,
+          maxlenSpans,
+          overlimitSpans,
+          regularSpans,
+        ]),
       ];
     },
     setupPipeline: ({ apmEsClient }) => {

@@ -164,6 +164,20 @@ describe('getGenAiFields', () => {
     expect(fields.response.id).toBe('resp-abc123');
   });
 
+  it('preserves all elements of multi-valued finish_reasons', () => {
+    const fields = getGenAiFields({
+      'attributes.gen_ai.response.finish_reasons': ['stop', 'length', 'tool_calls'],
+    });
+    expect(fields.response.finish_reasons).toEqual(['stop', 'length', 'tool_calls']);
+  });
+
+  it('wraps a single finish_reason value in an array', () => {
+    const fields = getGenAiFields({
+      'attributes.gen_ai.response.finish_reasons': 'stop',
+    });
+    expect(fields.response.finish_reasons).toEqual(['stop']);
+  });
+
   it('parses input and output messages', () => {
     const fields = getGenAiFields(metadata);
     expect(fields.inputMessages).toHaveLength(1);

@@ -72,26 +72,33 @@ export function hasGenAiData(metadata: Record<string, unknown>): boolean {
  *   2. gen_ai.*             — bare OTel (no attributes. prefix)
  *   3. labels.gen_ai_*      — APM Server ingest (dots → underscores)
  */
-function first<T>(metadata: Record<string, unknown>, key: string): T | undefined {
-  const read = (k: string) => {
-    const val = metadata[k];
-    if (val === undefined) return undefined;
-    return (Array.isArray(val) ? val[0] : val) as T | undefined;
-  };
-
-  const direct = read(key);
+function rawValue(metadata: Record<string, unknown>, key: string): unknown {
+  const direct = metadata[key];
   if (direct !== undefined) return direct;
 
   if (key.startsWith('attributes.')) {
     const bare = key.slice('attributes.'.length); // gen_ai.request.model
-    const fromBare = read(bare);
+    const fromBare = metadata[bare];
     if (fromBare !== undefined) return fromBare;
 
     const labelsKey = 'labels.' + bare.replace(/\./g, '_'); // labels.gen_ai_request_model
-    return read(labelsKey);
+    return metadata[labelsKey];
   }
 
   return undefined;
+}
+
+function first<T>(metadata: Record<string, unknown>, key: string): T | undefined {
+  const val = rawValue(metadata, key);
+  if (val === undefined) return undefined;
+  return (Array.isArray(val) ? val[0] : val) as T | undefined;
+}
+
+/** Like `first`, but preserves every element of a multi-valued field. */
+function allValues<T>(metadata: Record<string, unknown>, key: string): T[] | undefined {
+  const val = rawValue(metadata, key);
+  if (val === undefined) return undefined;
+  return (Array.isArray(val) ? val : [val]) as T[];
 }
 
 export function parseGenAiMessages(raw: string[] | undefined): GenAiMessage[] {
@@ -167,7 +174,8 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
     },
     response: {
       id: f(ATTRIBUTE_GEN_AI_RESPONSE_ID) as string | undefined,
-      finish_reasons: f(ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS) as string[] | undefined,
+      // Multi-valued: one finish reason per choice — keep every element.
+      finish_reasons: allValues<string>(metadata, ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS),
     },
     inputMessages: parseGenAiMessages(
       metadata[ATTRIBUTE_GEN_AI_INPUT_MESSAGES] as string[] | undefined
