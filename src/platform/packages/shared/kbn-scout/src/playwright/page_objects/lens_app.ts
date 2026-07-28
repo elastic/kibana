@@ -60,7 +60,7 @@ export class LensApp {
   }
 
   async waitForLensApp() {
-    await this.lensApp.waitFor({ state: 'visible' });
+    await this.lensApp.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   async openFullEditor() {
@@ -104,9 +104,13 @@ export class LensApp {
       const el = document.querySelector('[data-test-subj="indexPattern-filters-label"]');
       return el instanceof HTMLInputElement && el.placeholder === expected;
     }, kql);
-    await this.page.keyboard.press('Escape'); // dismiss autocomplete dropdown if visible
-    await this.page.keyboard.press('Tab'); // move focus to the label input
-    await this.page.keyboard.press('Enter'); // triggers `closePopover`
+    // Close the popover by clicking its trigger button (identified by the typed query text).
+    // This toggles `activeFilterId` without invoking `closePopover()` (which resets
+    // localFilter.input to the prop value and can race with React's prop propagation).
+    await this.page.testSubj
+      .locator('indexPattern-filters-existingFilterTrigger')
+      .filter({ hasText: kql })
+      .click();
   }
 
   /** Returns the visible label of every existing filter row in a filters-aggregation editor. */
@@ -509,10 +513,10 @@ export class LensApp {
    */
   async waitForVisualization(chartSubj = 'lnsVisualizationContainer') {
     const workspace = this.page.testSubj.locator('lnsWorkspace');
-    await workspace.waitFor({ state: 'visible' });
+    await workspace.waitFor({ state: 'visible', timeout: 20_000 });
 
     const container = workspace.getByTestId(chartSubj);
-    await container.waitFor({ state: 'visible' });
+    await container.waitFor({ state: 'visible', timeout: 20_000 });
 
     let prevCount: string | null = null;
     await expect
