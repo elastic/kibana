@@ -21,21 +21,23 @@ const setConversationMetadataSchema = z.object({
     ),
 });
 
-const toolDescription = `Update conversation metadata key/value pairs.
+const toolDescription = `Update conversation metadata fields defined by the active template.
 
-Use this tool when you have gathered or inferred structured context about the conversation that was requested by a conversation template (e.g. affected component, environment, severity). The keys and expected values are described in the ## CONVERSATION CONTEXT section of your system prompt.
+The \`## CONVERSATION CONTEXT\` section of your system prompt lists all fields for this conversation (their names, types, descriptions, and current values). Use this tool to write back a field value once you have gathered or inferred it from the conversation.
 
 ## When to use it
 
-- After the user provides a value that fills a template field listed in ## CONVERSATION CONTEXT.
-- When you can confidently infer a metadata value from available information.
+- As soon as the user provides or confirms a value for a field shown as _not yet set_ in ## CONVERSATION CONTEXT.
+- When you can confidently infer a field value from the conversation without asking.
+- When a previously set value needs correction based on new information.
 
 ## Rules
 
-- Only set keys that are defined in the ## CONVERSATION CONTEXT section.
-- Do not hallucinate values — only set keys when you have reliable information.
-- Updates are merged: you may call this tool multiple times; earlier values are not removed unless you overwrite them.
-- Do not call this tool on every round — only when new values are known.`;
+- Only set keys that appear in the ## CONVERSATION CONTEXT field list.
+- Do not hallucinate or assume values — only write a field when you have reliable information.
+- Updates merge into existing metadata: earlier values for other keys are preserved.
+- You can update multiple keys in a single call.
+- Do not call this tool on every round — only when new field values are known.`;
 
 export const createSetConversationMetadataTool = ({
   updateConversationMetadata,

@@ -17,6 +17,7 @@ import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
+import { getTemplate } from '../../../conversation/templates/registry';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -55,12 +56,35 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
-const getConversationContextSection = (metadata: Record<string, string> | undefined): string => {
-  if (!metadata || Object.keys(metadata).length === 0) return '';
-  const lines = Object.entries(metadata)
-    .map(([k, v]) => `- **${k}**: ${v}`)
+const getConversationContextSection = (
+  templateId: string | undefined,
+  metadata: Record<string, string> | undefined
+): string => {
+  const template = templateId ? getTemplate(templateId) : undefined;
+  if (!template) return '';
+
+  const fields = template.definition.fields ?? [];
+  if (fields.length === 0) return '';
+
+  const fieldLines = fields
+    .map((f) => {
+      const current = metadata?.[f.name];
+      const valueStr = current !== undefined ? `**${current}**` : '_not yet set_';
+      const descStr = f.description ? ` — ${f.description}` : '';
+      return `- \`${f.name}\` (${f.type})${descStr}: ${valueStr}`;
+    })
     .join('\n');
-  return `## CONVERSATION CONTEXT\n\nThe following key/value pairs were set for this conversation and describe the current context. Use them to guide your responses.\n\n${lines}\n`;
+
+  const templateDesc = template.description ? `\n\n${template.description}` : '';
+
+  return `## CONVERSATION CONTEXT
+
+This conversation uses the **${template.name}** template.${templateDesc}
+
+The table below lists the structured fields for this conversation. Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the \`set_conversation_metadata\` tool.
+
+${fieldLines}
+`;
 };
 
 const getAgentSystemMessage = async ({
@@ -72,6 +96,7 @@ const getAgentSystemMessage = async ({
   capabilities,
   renderers,
   conversationMetadata,
+  conversationTemplateId,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
 
@@ -133,7 +158,7 @@ ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
 ${experimentalFeatures.skills ? getSkillsInstructions({ skills }) : ''}
 
-${getConversationContextSection(conversationMetadata)}
+${getConversationContextSection(conversationTemplateId, conversationMetadata)}
 ## INSTRUCTIONS
 
 ${customInstructions}

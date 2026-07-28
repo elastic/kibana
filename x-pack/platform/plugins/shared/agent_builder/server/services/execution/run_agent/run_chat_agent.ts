@@ -285,6 +285,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
     renderers: renderers?.getRegisteredRenderers() ?? [],
     conversationMetadata: conversation?.metadata,
+    conversationTemplateId: conversation?.template_id,
   });
 
   const agentGraph = createAgentGraph({

@@ -35,6 +35,8 @@ export interface ConversationTemplateField {
   name: string;
   /** ES mapping type for this field */
   type: ConversationTemplateFieldType;
+  /** Human-readable description shown to the LLM so it knows what to capture. */
+  description?: string;
   /** Default value applied to the conversation when the template is used */
   value?: string;
   /** Optional validation rules checked whenever the template is applied. */
