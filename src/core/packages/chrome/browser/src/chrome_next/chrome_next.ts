@@ -218,13 +218,18 @@ export type AppHeaderTitle = string | AppHeaderEditableTitle;
  */
 export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
 
-/** @public */
-export interface AppHeaderDescription {
-  /** Plain-text page description. */
-  text: string;
-  /** Optional URL rendered with a fixed "Learn more" label. */
-  learnMoreUrl?: string;
-}
+/**
+ * Plain-text page description. Use the object form to add a URL rendered with a fixed
+ * "Learn more" label.
+ *
+ * @public
+ */
+export type AppHeaderDescription =
+  | string
+  | {
+      text: string;
+      learnMoreUrl: string;
+    };
 
 interface AppHeaderConfigBase {
   title?: AppHeaderTitle;

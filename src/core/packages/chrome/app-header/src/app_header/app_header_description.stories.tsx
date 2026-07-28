@@ -50,9 +50,7 @@ type Story = StoryObj<AppHeaderDescriptionStoryProps>;
 export const Description: Story = {
   args: {
     title: 'Data federation',
-    description: {
-      text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
-    },
+    description: 'Query and analyze data stored across multiple Elasticsearch clusters.',
   },
 };
 

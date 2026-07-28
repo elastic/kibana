@@ -21,6 +21,8 @@ export const AppHeaderDescription = React.memo<{
   description: AppHeaderDescriptionConfig;
 }>(({ description }) => {
   const { euiTheme } = useEuiTheme();
+  const text = typeof description === 'string' ? description : description.text;
+  const learnMoreUrl = typeof description === 'string' ? undefined : description.learnMoreUrl;
 
   return (
     <EuiText
@@ -32,11 +34,11 @@ export const AppHeaderDescription = React.memo<{
       size="xs"
     >
       <p>
-        {description.text}
-        {description.learnMoreUrl && (
+        {text}
+        {learnMoreUrl && (
           <>
             {' '}
-            <EuiLink external href={description.learnMoreUrl} target="_blank">
+            <EuiLink external href={learnMoreUrl} target="_blank">
               {learnMoreLinkText}
             </EuiLink>
           </>

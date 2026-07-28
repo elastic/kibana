@@ -65,7 +65,16 @@ saves, Escape cancels, and returning a string from `onSave` keeps edit mode open
 ## Description and metadata
 
 Use `description` only when short explanatory text materially helps users understand the page. It
-accepts plain text and an optional URL rendered with the fixed label "Learn more":
+accepts a string:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description="Query and analyze data stored across multiple Elasticsearch clusters."
+/>
+```
+
+To add a URL rendered with the fixed label "Learn more", use the object form:
 
 ```tsx
 <AppHeader
