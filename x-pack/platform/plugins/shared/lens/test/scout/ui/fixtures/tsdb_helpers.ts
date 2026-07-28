@@ -81,7 +81,7 @@ export interface TsdbScenario {
     initialIndex: string,
     indexes: TsdbScenarioIndex[],
     timeRange: TsdbScenarioTimeRange
-  ) => Promise<{ dataViewTitle: string; expectedDocumentCountBeforeUpgrade: number }>;
+  ) => Promise<{ expectedDocumentCountBeforeUpgrade: number }>;
 }
 
 interface LensUiTestFixtures extends ScoutTestFixtures {
@@ -435,7 +435,6 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
           'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
         });
         return {
-          dataViewTitle: scenario.dataViewTitle,
           expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
         };
       } catch (error) {
