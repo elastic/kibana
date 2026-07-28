@@ -33,6 +33,9 @@ export const ALERTING_V2_EPISODES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/$
 export const ALERTING_V2_EXECUTION_HISTORY_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const MANAGEMENT_APP_ID = 'management';
+
+/** Stable Content List `id` / query-key scope for the rules list page. */
+export const RULES_CONTENT_LIST_ID = 'alerting-v2-rules';
 export {
   ALERTING_V2_RULE_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,

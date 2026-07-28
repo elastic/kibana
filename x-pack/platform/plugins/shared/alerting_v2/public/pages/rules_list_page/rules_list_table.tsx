@@ -5,94 +5,205 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-  type Criteria,
-  type EuiBasicTableColumn,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { getRootEsqlQuery, type RuleKind } from '@kbn/alerting-v2-schemas';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ContentList, ContentListProvider } from '@kbn/content-list';
+import type { FieldDefinition } from '@kbn/content-list-provider';
+import { useContentListItems } from '@kbn/content-list-provider';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
+import { RuleSummaryFlyout } from '../../components/rule/flyouts';
+import { paths } from '../../constants';
+import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
+import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
+import { useDeleteRule } from '../../hooks/use_delete_rule';
+import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import type { RuleApiResponse } from '../../services/rules_api';
-import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
-import { RuleActionsMenu } from './rule_actions_menu';
-import { RulesBulkActions } from './rules_bulk_actions';
+import { UserCapabilities } from '../../services/user_capabilities';
+import { RULES_CONTENT_LIST_ID } from '../../constants';
+import { useRulesDataSource } from './rules_data_source';
+import type { RuleContentListItem } from './rules_data_source';
+import {
+  MODE_FILTER_OPTIONS,
+  RulesListTableContent,
+  STATUS_FILTER_OPTIONS,
+} from './rules_list_table_content';
+import { ENABLED_FILTER_ID, KIND_FILTER_ID, TAG_FILTER_ID } from './rules_query_params';
+import { useRulesSelectionMode } from './use_rules_selection_mode';
 
-const labelsContainerStyle = css`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  overflow: hidden;
-`;
+const enabledFieldDefinition: FieldDefinition = {
+  fieldName: ENABLED_FILTER_ID,
+  resolveIdToDisplay: (id) => STATUS_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
+  resolveDisplayToId: (displayValue) =>
+    STATUS_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
+  resolveFuzzyDisplayToIds: (partial) => {
+    const lower = partial.toLowerCase();
+    return STATUS_FILTER_OPTIONS.filter((o) => o.label.toLowerCase().includes(lower)).map(
+      (o) => o.key
+    );
+  },
+};
 
-const labelBadgeStyle = css`
-  min-width: 0;
-  flex-shrink: 1;
-`;
+const kindFieldDefinition: FieldDefinition = {
+  fieldName: KIND_FILTER_ID,
+  resolveIdToDisplay: (id) => MODE_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
+  resolveDisplayToId: (displayValue) =>
+    MODE_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
+  resolveFuzzyDisplayToIds: (partial) => {
+    const lower = partial.toLowerCase();
+    return MODE_FILTER_OPTIONS.filter((o) => o.label.toLowerCase().includes(lower)).map(
+      (o) => o.key
+    );
+  },
+};
 
-const overflowTooltipStyle = css`
-  flex-shrink: 0;
-  line-height: 0;
-`;
+const tagFieldDefinition: FieldDefinition = {
+  fieldName: TAG_FILTER_ID,
+  resolveIdToDisplay: (id) => id,
+  resolveDisplayToId: (displayValue) => displayValue,
+};
 
-const descriptionTextStyle = css`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-`;
-
-export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
+const FEATURES_FIELDS: FieldDefinition[] = [
+  enabledFieldDefinition,
+  kindFieldDefinition,
+  tagFieldDefinition,
+];
 
 export interface RulesListTableProps {
-  items: RuleApiResponse[];
-  totalItemCount: number;
-  page: number;
-  perPage: number;
-  search: string;
-  hasActiveFilters: boolean;
-  sortField?: RulesListTableSortField;
-  sortDirection?: 'asc' | 'desc';
-  isLoading: boolean;
+  /**
+   * Rendered inside the provider but outside {@link ContentList}, so it can
+   * read Content List phase (e.g. AppHeader create-menu gating).
+   */
+  header?: ReactNode;
+  /** Custom empty state rendered by Content List when there are no rules. */
+  emptyState?: ReactNode;
+  onEditInFlyout: (rule: RuleApiResponse) => void;
+  onCloneInFlyout: (rule: RuleApiResponse) => void;
+}
 
-  /** When false, write affordances (selection, bulk actions, quick edit, actions menu) are hidden and the enabled toggle is read-only. */
+/**
+ * Content List provider shell for the rules list — data source, sort/filter/
+ * selection features, bulk mutations, and summary/delete modals.
+ */
+export const RulesListTable = ({
+  header,
+  emptyState,
+  onEditInFlyout,
+  onCloneInFlyout,
+}: RulesListTableProps) => {
+  const refetchRef = useRef<() => void>(() => {});
+  const onRefetchReady = useCallback((refetchFn: () => void) => {
+    refetchRef.current = refetchFn;
+  }, []);
+
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const { basePath } = useService(CoreStart('http'));
+
+  const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
+  const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+
+  const deleteRuleMutation = useDeleteRule();
+  const bulkDeleteMutation = useBulkDeleteRules();
+  const bulkEnableMutation = useBulkEnableRules();
+  const bulkDisableMutation = useBulkDisableRules();
+  const toggleEnabledMutation = useToggleRuleEnabled();
+
+  const dataSource = useRulesDataSource();
+  const itemConfig = useMemo(() => ({}), []);
+
+  const navigateToDetails = useCallback(
+    (rule: RuleApiResponse) => navigateToUrl(basePath.prepend(paths.ruleDetails(rule.id))),
+    [navigateToUrl, basePath]
+  );
+
+  return (
+    <ContentListProvider
+      id={RULES_CONTENT_LIST_ID}
+      labels={{
+        entity: i18n.translate('xpack.alertingV2.rulesList.entity', {
+          defaultMessage: 'rule',
+        }),
+        entityPlural: i18n.translate('xpack.alertingV2.rulesList.entityPlural', {
+          defaultMessage: 'rules',
+        }),
+      }}
+      dataSource={dataSource}
+      item={itemConfig}
+      features={{
+        sorting: {
+          initialSort: { field: 'name', direction: 'asc' },
+          fields: [
+            {
+              field: 'name',
+              name: i18n.translate('xpack.alertingV2.rulesList.sort.name', {
+                defaultMessage: 'Name',
+              }),
+            },
+            {
+              field: 'kind',
+              name: i18n.translate('xpack.alertingV2.rulesList.sort.kind', {
+                defaultMessage: 'Mode',
+              }),
+            },
+            {
+              field: 'enabled',
+              name: i18n.translate('xpack.alertingV2.rulesList.sort.enabled', {
+                defaultMessage: 'Enabled',
+              }),
+            },
+          ],
+        },
+        pagination: { initialPageSize: 20 },
+        search: true,
+        selection: canWrite,
+        fields: FEATURES_FIELDS,
+      }}
+    >
+      {header}
+      <ContentList emptyState={emptyState} data-test-subj="rulesList">
+        <RulesListInner
+          canWrite={canWrite}
+          togglingRuleId={
+            toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
+          }
+          isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
+          onRefetchReady={onRefetchReady}
+          onNavigateToDetails={navigateToDetails}
+          onExpand={(rule) => setExpandedRuleId(rule.id)}
+          onQuickEdit={onEditInFlyout}
+          onEdit={onEditInFlyout}
+          onClone={onCloneInFlyout}
+          onDelete={setRuleToDelete}
+          onToggleEnabled={(rule) =>
+            toggleEnabledMutation.mutate(
+              { id: rule.id, enabled: !rule.enabled },
+              { onSuccess: () => refetchRef.current() }
+            )
+          }
+          bulkEnableMutation={bulkEnableMutation}
+          bulkDisableMutation={bulkDisableMutation}
+          bulkDeleteMutation={bulkDeleteMutation}
+          showBulkDeleteConfirm={showBulkDeleteConfirm}
+          setShowBulkDeleteConfirm={setShowBulkDeleteConfirm}
+          expandedRuleId={expandedRuleId}
+          setExpandedRuleId={setExpandedRuleId}
+          ruleToDelete={ruleToDelete}
+          setRuleToDelete={setRuleToDelete}
+          deleteRuleMutation={deleteRuleMutation}
+          refetchRef={refetchRef}
+        />
+      </ContentList>
+    </ContentListProvider>
+  );
+};
+
+interface RulesListInnerProps {
   canWrite: boolean;
-
-  /** Bulk selection state */
-  selectedCount: number;
-  isAllSelected: boolean;
-  isPageSelected: boolean;
-  isRowSelected: (id: string) => boolean;
-  onSelectRow: (id: string) => void;
-  onSelectPage: () => void;
-  onSelectAll: () => void;
-  onClearSelection: () => void;
-
-  /** Bulk action callbacks */
-  onBulkEnable: () => void;
-  onBulkDisable: () => void;
-  onBulkDelete: () => void;
-
-  /** Row action callbacks */
+  togglingRuleId?: string;
+  isBulkTogglingEnabled?: boolean;
+  onRefetchReady: (refetch: () => void) => void;
   onNavigateToDetails: (rule: RuleApiResponse) => void;
   onExpand: (rule: RuleApiResponse) => void;
   onQuickEdit: (rule: RuleApiResponse) => void;
@@ -100,37 +211,24 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
-  /** Id of the rule whose enabled state is currently being toggled, if any. */
-  togglingRuleId?: string;
-  /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
-  isBulkTogglingEnabled?: boolean;
-
-  /** Pagination callback */
-  onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
+  bulkEnableMutation: ReturnType<typeof useBulkEnableRules>;
+  bulkDisableMutation: ReturnType<typeof useBulkDisableRules>;
+  bulkDeleteMutation: ReturnType<typeof useBulkDeleteRules>;
+  showBulkDeleteConfirm: boolean;
+  setShowBulkDeleteConfirm: (show: boolean) => void;
+  expandedRuleId: string | null;
+  setExpandedRuleId: (id: string | null) => void;
+  ruleToDelete: RuleApiResponse | null;
+  setRuleToDelete: (rule: RuleApiResponse | null) => void;
+  deleteRuleMutation: ReturnType<typeof useDeleteRule>;
+  refetchRef: React.MutableRefObject<() => void>;
 }
 
-export const RulesListTable: React.FC<RulesListTableProps> = ({
-  items,
-  totalItemCount,
-  page,
-  perPage,
-  search,
-  hasActiveFilters,
-  sortField,
-  sortDirection,
-  isLoading,
+const RulesListInner = ({
   canWrite,
-  selectedCount,
-  isAllSelected,
-  isPageSelected,
-  isRowSelected,
-  onSelectRow,
-  onSelectPage,
-  onSelectAll,
-  onClearSelection,
-  onBulkEnable,
-  onBulkDisable,
-  onBulkDelete,
+  togglingRuleId,
+  isBulkTogglingEnabled,
+  onRefetchReady,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -138,369 +236,140 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
-  togglingRuleId,
-  isBulkTogglingEnabled,
-  onTableChange,
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const hideMobileSortMenuOnWideScreensStyle = useMemo(
-    () => css`
-      @media (min-width: ${euiTheme.breakpoint.m}px) {
-        .euiTableSortMobile {
-          display: none;
-        }
-      }
-    `,
-    [euiTheme.breakpoint.m]
-  );
-
-  const pagination = {
-    pageIndex: page - 1,
-    pageSize: perPage,
+  bulkEnableMutation,
+  bulkDisableMutation,
+  bulkDeleteMutation,
+  showBulkDeleteConfirm,
+  setShowBulkDeleteConfirm,
+  expandedRuleId,
+  setExpandedRuleId,
+  ruleToDelete,
+  setRuleToDelete,
+  deleteRuleMutation,
+  refetchRef,
+}: RulesListInnerProps) => {
+  const { items } = useContentListItems();
+  const {
+    selectedCount,
     totalItemCount,
-    pageSizeOptions: [10, 20, 50],
+    isAllSelected,
+    selectAllMatching,
+    clearSelection,
+    getBulkParams,
+  } = useRulesSelectionMode();
+
+  const expandedRule = useMemo(() => {
+    if (!expandedRuleId) {
+      return null;
+    }
+    const match = items.find((item) => item.id === expandedRuleId) as
+      | RuleContentListItem
+      | undefined;
+    return match?.rule ?? null;
+  }, [expandedRuleId, items]);
+
+  const handleBulkEnable = () => {
+    bulkEnableMutation.mutate(getBulkParams(), {
+      onSuccess: () => {
+        clearSelection();
+        refetchRef.current();
+      },
+    });
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => [
-      ...(canWrite
-        ? ([
-            {
-              field: 'id',
-              name: (
-                <EuiCheckbox
-                  id="selectAllPage"
-                  checked={isPageSelected}
-                  onChange={onSelectPage}
-                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectAllPage', {
-                    defaultMessage: 'Select all rules on this page',
-                  })}
-                  data-test-subj="selectAllRulesOnPage"
-                />
-              ),
-              width: '32px',
-              render: (id: string) => (
-                <EuiCheckbox
-                  id={`select-rule-${id}`}
-                  checked={isRowSelected(id)}
-                  onChange={() => onSelectRow(id)}
-                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
-                    defaultMessage: 'Select rule',
-                  })}
-                  data-test-subj={`checkboxSelectRow-${id}`}
-                />
-              ),
-            },
-          ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-        : []),
-      {
-        name: '',
-        width: '32px',
-        render: (rule: RuleApiResponse) => (
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-              defaultMessage: 'Open rule summary',
-            })}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="expand"
-              color="text"
-              onClick={() => onExpand(rule)}
-              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-                defaultMessage: 'Open rule summary',
-              })}
-              data-test-subj={`expandRule-${rule.id}`}
-            />
-          </EuiToolTip>
-        ),
+  const handleBulkDisable = () => {
+    bulkDisableMutation.mutate(getBulkParams(), {
+      onSuccess: () => {
+        clearSelection();
+        refetchRef.current();
       },
-      {
-        field: 'metadata',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
-        ),
-        truncateText: true,
-        sortable: true,
-        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
-          <div>
-            <EuiLink
-              onClick={() => onNavigateToDetails(rule)}
-              data-test-subj={`ruleNameLink-${rule.id}`}
-            >
-              {metadata?.name ?? rule.id}
-            </EuiLink>
-            {metadata?.description && (
-              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
-                {metadata.description}
-              </EuiText>
-            )}
-          </div>
-        ),
-      },
-      {
-        field: 'query',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
-        ),
-        width: '18%',
-        truncateText: true,
-        render: (query: RuleApiResponse['query']) => {
-          const source = query
-            ? getIndexPatternFromESQLQuery(getRootEsqlQuery(query)) || undefined
-            : undefined;
-          return source ? (
-            <EuiBadge color="hollow">{source}</EuiBadge>
-          ) : (
-            <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-          );
-        },
-      },
-      {
-        field: 'metadata',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
-        ),
-        width: '20%',
-        render: (_metadata: RuleApiResponse['metadata']) => {
-          const tags = _metadata?.tags;
-          if (!tags || tags.length === 0) {
-            return (
-              <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-            );
-          }
-          const overflowCount = tags.length - 1;
-          return (
-            <EuiBadgeGroup
-              gutterSize="xs"
-              css={labelsContainerStyle}
-              data-test-subj="tagsContainer"
-            >
-              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-                {tags[0]}
-              </EuiBadge>
-              {overflowCount > 0 && (
-                <span css={overflowTooltipStyle}>
-                  <EuiToolTip content={tags.slice(1).join(', ')}>
-                    <EuiBadge
-                      tabIndex={0}
-                      color="hollow"
-                      data-test-subj="overflowTagsBadge"
-                      iconType="tag"
-                      title=""
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
-                        defaultMessage: '+{count}',
-                        values: { count: overflowCount },
-                      })}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </span>
-              )}
-            </EuiBadgeGroup>
-          );
-        },
-      },
-      {
-        field: 'kind',
-        name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
-        ),
-        width: '10%',
-        sortable: true,
-        render: (kind: RuleKind) => <RuleKindBadge kind={kind} />,
-      },
-      {
-        field: 'enabled',
-        name: (
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.column.enabled"
-            defaultMessage="Enabled"
-          />
-        ),
-        width: '8%',
-        sortable: true,
-        render: (enabled: boolean, rule: RuleApiResponse) => {
-          if (!canWrite) {
-            return (
-              <EuiBadge
-                color={enabled ? 'success' : 'default'}
-                data-test-subj={`ruleEnabledBadge-${rule.id}`}
-              >
-                {enabled ? (
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.column.enabled.enabledBadge"
-                    defaultMessage="Enabled"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.column.enabled.disabledBadge"
-                    defaultMessage="Disabled"
-                  />
-                )}
-              </EuiBadge>
-            );
-          }
+    });
+  };
 
-          return togglingRuleId === rule.id ? (
-            <EuiLoadingSpinner data-test-subj={`ruleEnabledSpinner-${rule.id}`} size="m" />
-          ) : (
-            <EuiSwitch
-              compressed
-              showLabel={false}
-              label={i18n.translate('xpack.alertingV2.rulesList.column.enabled.switchLabel', {
-                defaultMessage: 'Enabled: {ruleName}',
-                values: { ruleName: rule.metadata?.name ?? rule.id },
-              })}
-              checked={enabled}
-              disabled={Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
-              onChange={() => onToggleEnabled(rule)}
-              data-test-subj={`ruleEnabledSwitch-${rule.id}`}
-            />
-          );
-        },
+  const onBulkDeleteConfirm = () => {
+    bulkDeleteMutation.mutate(getBulkParams(), {
+      onSuccess: () => {
+        clearSelection();
+        setShowBulkDeleteConfirm(false);
+        refetchRef.current();
       },
-      ...(canWrite
-        ? ([
-            {
-              name: (
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.column.actions"
-                  defaultMessage="Actions"
-                />
-              ),
-              width: '8%',
-              align: 'right',
-              render: (rule: RuleApiResponse) => (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="flexEnd"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                        defaultMessage: 'Quick edit rule',
-                      })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        color="text"
-                        onClick={() => onQuickEdit(rule)}
-                        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Quick edit rule',
-                        })}
-                        data-test-subj={`quickEditRule-${rule.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <RuleActionsMenu
-                      rule={rule}
-                      onEdit={onEdit}
-                      onClone={onClone}
-                      onDelete={onDelete}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            },
-          ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-        : []),
-    ],
-    [
-      canWrite,
-      isPageSelected,
-      isRowSelected,
-      onSelectPage,
-      onSelectRow,
-      onNavigateToDetails,
-      onExpand,
-      onQuickEdit,
-      onEdit,
-      onClone,
-      onDelete,
-      onToggleEnabled,
-      togglingRuleId,
-      isBulkTogglingEnabled,
-    ]
-  );
-
-  const noItemsMessage =
-    search || hasActiveFilters
-      ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-          defaultMessage: 'No rules match your search or filters.',
-        })
-      : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-          defaultMessage: 'No rules found.',
-        });
+      onError: () => {
+        setShowBulkDeleteConfirm(false);
+      },
+    });
+  };
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" data-test-subj="rulesListShowingLabel">
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.showingLabel"
-              defaultMessage="Showing {rangeBold} of {totalBold}"
-              values={{
-                rangeBold: (
-                  <strong>
-                    {Math.min((page - 1) * perPage + 1, totalItemCount)}-
-                    {Math.min(page * perPage, totalItemCount)}
-                  </strong>
-                ),
-                totalBold: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.showingLabelTotal"
-                      defaultMessage="{total} {total, plural, one {Rule} other {Rules}}"
-                      values={{ total: totalItemCount }}
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        {canWrite ? (
-          <RulesBulkActions
-            selectedCount={selectedCount}
-            totalItemCount={totalItemCount}
-            isAllSelected={isAllSelected}
-            onSelectAll={onSelectAll}
-            onClearSelection={onClearSelection}
-            onBulkEnable={onBulkEnable}
-            onBulkDisable={onBulkDisable}
-            onBulkDelete={onBulkDelete}
-          />
-        ) : null}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
-      <EuiBasicTable
-        css={hideMobileSortMenuOnWideScreensStyle}
-        items={items}
-        itemId="id"
-        columns={columns}
-        loading={isLoading}
-        pagination={pagination}
-        sorting={
-          sortField && sortDirection
-            ? { sort: { field: sortField, direction: sortDirection } }
-            : undefined
-        }
-        noItemsMessage={noItemsMessage}
-        onChange={onTableChange}
-        responsiveBreakpoint={false}
-        tableCaption={i18n.translate('xpack.alertingV2.rulesList.tableCaption', {
-          defaultMessage: 'Rules',
-        })}
-        data-test-subj="rulesListTable"
+      <RulesListTableContent
+        canWrite={canWrite}
+        togglingRuleId={togglingRuleId}
+        isBulkTogglingEnabled={isBulkTogglingEnabled}
+        selectedCount={selectedCount}
+        totalItemCount={totalItemCount}
+        isAllSelected={isAllSelected}
+        onSelectAll={selectAllMatching}
+        onClearSelection={clearSelection}
+        onRefetchReady={onRefetchReady}
+        onNavigateToDetails={onNavigateToDetails}
+        onExpand={onExpand}
+        onQuickEdit={onQuickEdit}
+        onEdit={onEdit}
+        onClone={onClone}
+        onDelete={onDelete}
+        onToggleEnabled={onToggleEnabled}
+        onBulkEnable={handleBulkEnable}
+        onBulkDisable={handleBulkDisable}
+        onBulkDelete={() => setShowBulkDeleteConfirm(true)}
       />
+      {expandedRule ? (
+        <RuleSummaryFlyout
+          rule={expandedRule}
+          canWrite={canWrite}
+          onClose={() => setExpandedRuleId(null)}
+          onQuickEdit={(r) => {
+            setExpandedRuleId(null);
+            onQuickEdit(r);
+          }}
+          onEdit={(r) => {
+            setExpandedRuleId(null);
+            onEdit(r);
+          }}
+          onClone={(r) => {
+            setExpandedRuleId(null);
+            onClone(r);
+          }}
+          onDelete={(r) => onDelete(r)}
+          onToggleEnabled={onToggleEnabled}
+        />
+      ) : null}
+      {ruleToDelete ? (
+        <DeleteConfirmationModal
+          ruleName={ruleToDelete.metadata?.name ?? ruleToDelete.id}
+          onCancel={() => setRuleToDelete(null)}
+          onConfirm={() => {
+            deleteRuleMutation.mutate(
+              { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+              {
+                onSettled: () => {
+                  setRuleToDelete(null);
+                  setExpandedRuleId(null);
+                  refetchRef.current();
+                },
+              }
+            );
+          }}
+          isLoading={deleteRuleMutation.isLoading}
+        />
+      ) : null}
+      {showBulkDeleteConfirm ? (
+        <DeleteConfirmationModal
+          ruleCount={selectedCount}
+          onCancel={() => setShowBulkDeleteConfirm(false)}
+          onConfirm={onBulkDeleteConfirm}
+          isLoading={bulkDeleteMutation.isLoading}
+        />
+      ) : null}
     </>
   );
 };
