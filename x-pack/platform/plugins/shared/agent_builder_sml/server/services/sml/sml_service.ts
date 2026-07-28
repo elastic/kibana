@@ -516,16 +516,11 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  * false) on multi-value fields — an ES|QL semantic that would silently drop
  * multi-tag documents.
  *
- * Authorization is enforced in-query via the `authz` param (pre-aggregation):
- * a doc is authorized iff its required composite privileges (`space|action`
- * tokens) are a subset of what the caller holds. `MV_CONTAINS(?authorized,
- * permissions...name)` expresses exactly that (the authorized set is bound as
- * a single multivalue param) — and because a null/empty permission field is
- * treated as the empty set, public KIs (no required perms) pass automatically.
- * Space scoping is implicit in the tokens: each token encodes both the space
- * and the action, so a separate `WHERE MV_CONTAINS(spaces, ?)` clause is
- * unnecessary. This replaces the former overfetch + JS post-filter, so the
- * outer LIMIT is just `size`.
+ * Authorization is enforced via a `terms_set` Query DSL filter pushed into
+ * the ES|QL `_query` API's `filter` parameter (not a WHERE clause). The
+ * caller passes `buildAuthzFilter(authz)` to the `esql.query` call. Space
+ * scoping is implicit in the composite tokens: each token encodes both
+ * the space and the action.
  *
  * `references.uri` is extracted via EVAL before KEEP so the result column is
  * a flat keyword array that can be reconstructed into Array<{uri}> client-side.
@@ -754,9 +749,9 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * Before the search, `resolveAuthorizedUniverse` enumerates the corpus's
  * Kibana-privilege universe (`_terms_enum`) and resolves, in a single
  * `_has_privileges` call, which Kibana actions the caller is authorized for.
- * The resulting set is pushed into the ES|QL query as an MV_CONTAINS subset
- * filter, so the index returns only authorized docs — no overfetch, no
- * JS post-filter. The outer LIMIT is exactly `size`.
+ * The resulting set is pushed as a `terms_set` Query DSL filter via the
+ * ES|QL `_query` API `filter` param, so the index returns only authorized
+ * docs — no overfetch, no JS post-filter. The outer LIMIT is exactly `size`.
  *
  * When the security plugin is absent (dev / test), enumeration is skipped and
  * all docs in the space are returned (open-access parity with the prior
@@ -767,12 +762,10 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * `retriever.rrf fields` two-retriever structure. Empty string or `*`: plain
  * sorted scan, no relevance signal.
  *
- * Filter composition: authz (MV_CONTAINS subset of composite `space|action`
- * tokens) + constraints (runtime-imposed per-type id-allowlist) + agent filters
- * — each component is a separate WHERE clause (ANDed across dimensions); within
- * types and tags, matching is OR (any listed value matches). Space scoping is
- * implicit: composite tokens encode both the space and the action, so no
- * separate space WHERE clause is needed.
+ * Filter composition: authz (`terms_set` via ES|QL `filter` param) +
+ * constraints (runtime-imposed per-type id-allowlist) + agent filters
+ * — authz is a Query DSL filter; constraints and tags are WHERE clauses
+ * (ANDed across dimensions); within types and tags, matching is OR.
  */
 const searchSml = async ({
   query,
@@ -879,8 +872,7 @@ const searchSml = async ({
     return result;
   });
 
-  // Authorization is already enforced in-query (MV_CONTAINS subset filters), so
-  // every returned row is authorized and the ES|QL LIMIT bounds it to `size`.
+  // Authorization is enforced via the terms_set filter; LIMIT bounds to `size`.
   logger.debug(`SML search: returned=${response.values.length}, size=${size}`);
   const includePermissions = fields !== undefined && fields.includes('permissions');
   return {
