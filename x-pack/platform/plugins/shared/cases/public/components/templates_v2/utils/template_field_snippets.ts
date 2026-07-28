@@ -25,12 +25,14 @@ const NAME = '${1:field_name}';
 const LABEL = '${2:Label}';
 
 /**
- * One snippet per field control plus a `$ref` library reference. Each body mirrors the minimal,
- * valid shape from the field catalog (correct `control`, `type`, and the required `metadata` for
- * that control), so choosing a field type from autocomplete scaffolds a correct entry without the
- * author needing to recall the exact keys from the documentation.
+ * One snippet per inline field control. Each body mirrors the minimal, valid shape from the field
+ * catalog (correct `control`, `type`, and the required `metadata` for that control), so choosing a
+ * field type from autocomplete scaffolds a correct entry without the author needing to recall the
+ * exact keys from the documentation. Shared by the template editor (as `fields` array entries) and
+ * the field library editor (as the document root) — `$ref` is template-only, see
+ * FIELD_DEFAULT_SNIPPETS.
  */
-export const FIELD_DEFAULT_SNIPPETS: DefaultSnippet[] = [
+export const INLINE_FIELD_DEFAULT_SNIPPETS: DefaultSnippet[] = [
   {
     label: FIELD_TYPE_TITLES[FieldType.INPUT_TEXT],
     description: i18n.FIELD_SNIPPET_DESC_INPUT_TEXT,
@@ -131,6 +133,14 @@ export const FIELD_DEFAULT_SNIPPETS: DefaultSnippet[] = [
       metadata: { content: '${2:### Instructions}' },
     },
   },
+];
+
+/**
+ * Snippets for a template's `fields` array entries: every inline control plus a `$ref` library
+ * reference (references only make sense inside a template, never in the library itself).
+ */
+export const FIELD_DEFAULT_SNIPPETS: DefaultSnippet[] = [
+  ...INLINE_FIELD_DEFAULT_SNIPPETS,
   {
     label: i18n.FIELD_SNIPPET_LABEL_REF,
     description: i18n.FIELD_SNIPPET_DESC_REF,

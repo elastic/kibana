@@ -77,12 +77,12 @@ engine:
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -101,7 +101,7 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 sandbox:
   agent: awf
 
@@ -189,7 +189,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review). Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating. It is a no-op when the PR is already out of draft.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -214,20 +214,34 @@ safe-outputs:
               }
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-              if (!pr.draft) {
-                core.info(`PR #${prNumber} is already out of draft; nothing to do.`);
+              if (pr.draft) {
+                try {
+                  // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
+                  await github.graphql(
+                    'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                    { id: pr.node_id }
+                  );
+                  core.info(`Marked PR #${prNumber} ready for review.`);
+                } catch (err) {
+                  // Non-fatal: a failure to mark ready must not fail the verification run.
+                  core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                }
+              } else {
+                core.info(`PR #${prNumber} is already out of draft.`);
+              }
+              if (pr.state !== 'open' || pr.merged) {
+                core.info(`PR #${prNumber} is not open; skipping auto-merge.`);
                 return;
               }
               try {
-                // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
                 await github.graphql(
-                  'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                  'mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: SQUASH }) { pullRequest { autoMergeRequest { enabledAt } } } }',
                   { id: pr.node_id }
                 );
-                core.info(`Marked PR #${prNumber} ready for review.`);
+                core.info(`Enabled auto-merge (squash) for PR #${prNumber}.`);
               } catch (err) {
-                // Non-fatal: a failure to mark ready must not fail the verification run.
-                core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                // Non-fatal: auto-merge may be rejected (e.g. all requirements already met, or a transient draft-state race); a human can still merge.
+                core.warning(`Could not enable auto-merge for PR #${prNumber}: ${err.status || ''} ${err.message}`);
               }
 
 strict: false

@@ -179,6 +179,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Workflows
   'workflow-authoring',
 
+  // Evals
+  'eval-experiment-authoring',
+
   // Security Solution
   'entity-analytics-leads',
   'find-security-ml-jobs',

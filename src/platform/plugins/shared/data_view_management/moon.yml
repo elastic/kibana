@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/discover-utils'
   - '@kbn/scout'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
