@@ -155,7 +155,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
         }
         secondaryContent={
           description ? (
-            <AppHeaderDescription description={description} offset={!backTargets.length} />
+            <AppHeaderDescription description={description} hasBack={backTargets.length > 0} />
           ) : metadata?.length ? (
             <AppHeaderMetadata metadata={metadata} />
           ) : undefined
