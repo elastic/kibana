@@ -84,29 +84,4 @@ describe('useChromeAppHeaderRegistration', () => {
       metadata: [{ type: 'text', label: 'Updated by: analyst' }],
     });
   });
-
-  it('does not re-register an equivalent description object', () => {
-    const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
-    chrome.getChromeStyle.mockReturnValue('project');
-    chrome.next.appHeader.set.mockReturnValue(jest.fn());
-
-    const description = {
-      text: 'Query data across clusters.',
-      learnMoreUrl: 'https://example.com',
-    };
-    const { rerender } = render(
-      <ChromeServiceProvider value={{ chrome }}>
-        <ChromeAppHeaderRegistration description={description} />
-      </ChromeServiceProvider>
-    );
-
-    rerender(
-      <ChromeServiceProvider value={{ chrome }}>
-        <ChromeAppHeaderRegistration description={{ ...description }} />
-      </ChromeServiceProvider>
-    );
-
-    expect(chrome.next.appHeader.set).toHaveBeenCalledTimes(1);
-  });
 });

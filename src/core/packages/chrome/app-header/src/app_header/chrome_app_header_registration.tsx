@@ -38,38 +38,20 @@ export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
 
 export const ChromeAppHeaderRegistration = React.memo<AppHeaderConfig>((props) => {
   const { title, back, tabs, badges, menu, favorite, description, metadata, spacing } = props;
-  const descriptionText = typeof description === 'string' ? description : description?.text;
-  const descriptionLearnMoreUrl =
-    typeof description === 'string' ? undefined : description?.learnMoreUrl;
 
-  const config = useMemo<AppHeaderConfig>(() => {
-    let stableDescription: AppHeaderConfig['description'] = descriptionText;
-    if (descriptionText !== undefined && descriptionLearnMoreUrl) {
-      stableDescription = { text: descriptionText, learnMoreUrl: descriptionLearnMoreUrl };
-    }
-
-    return {
+  const config = useMemo<AppHeaderConfig>(
+    () => ({
       title,
       back,
       tabs,
       badges,
       menu,
       favorite,
-      ...(stableDescription ? { description: stableDescription } : { metadata }),
+      ...(description ? { description } : { metadata }),
       spacing,
-    };
-  }, [
-    title,
-    back,
-    tabs,
-    badges,
-    menu,
-    favorite,
-    descriptionText,
-    descriptionLearnMoreUrl,
-    metadata,
-    spacing,
-  ]);
+    }),
+    [title, back, tabs, badges, menu, favorite, description, metadata, spacing]
+  );
 
   useChromeAppHeaderRegistration(config);
 
