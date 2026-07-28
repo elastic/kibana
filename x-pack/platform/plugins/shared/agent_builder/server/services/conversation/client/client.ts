@@ -34,6 +34,7 @@ import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import type { ConversationTemplateField } from '@kbn/agent-builder-common';
 import { getTemplate } from '../templates/registry';
+import { validateTemplateFields } from '../templates/validation';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -194,16 +195,23 @@ class ConversationClientImpl implements ConversationClient {
     const { template_id: templateId, ...conversationWithoutTemplateId } = conversation;
 
     let resolvedMetadata = conversationWithoutTemplateId.metadata;
+    let resolvedTemplateId: string | undefined;
     if (templateId) {
       const template = getTemplate(templateId);
       if (template) {
+        validateTemplateFields(template);
         const templateMetadata = buildMetadataFromFields(template.definition.fields);
         resolvedMetadata = { ...templateMetadata, ...(resolvedMetadata ?? {}) };
+        resolvedTemplateId = templateId;
       }
     }
 
     const attributes = createRequestToEs({
-      conversation: { ...conversationWithoutTemplateId, metadata: resolvedMetadata },
+      conversation: {
+        ...conversationWithoutTemplateId,
+        metadata: resolvedMetadata,
+        ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
+      },
       currentUser: this.user,
       creationDate: now,
       space: this.space,
@@ -278,10 +286,11 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError(`Template not found: ${templateId}`);
     }
 
+    validateTemplateFields(template);
     const templateMetadata = buildMetadataFromFields(template.definition.fields);
     const metadata: Record<string, string> = { ...templateMetadata, ...(existing.metadata ?? {}) };
 
-    return this.update({ id: conversationId, metadata }, { access: 'owner' });
+    return this.update({ id: conversationId, metadata, template_id: templateId }, { access: 'owner' });
   }
 
   private async _get(conversationId: string): Promise<Document | undefined> {

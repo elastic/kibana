@@ -33,7 +33,15 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'workspace_id' | 'metadata'
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'status'
+      | 'read'
+      | 'workspace_id'
+      | 'metadata'
+      | 'template_id'
     >
   >;
 

@@ -450,6 +450,8 @@ export interface Conversation {
   origin?: ConversationOrigin;
   /** Arbitrary key/value pairs seeded from a template or set by callers. */
   metadata?: Record<string, string>;
+  /** ID of the template that was last applied to this conversation. */
+  template_id?: string;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
