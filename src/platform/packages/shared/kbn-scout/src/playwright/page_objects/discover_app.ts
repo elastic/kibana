@@ -1116,4 +1116,102 @@ export class DiscoverApp {
       return false;
     }
   }
+
+  /**
+   * Whether the ES|QL grouped ("cascade") layout is currently rendered,
+   * as opposed to the classic/flat data grid.
+   */
+  async isShowingCascadeLayout(): Promise<boolean> {
+    return Promise.all([
+      this.page.testSubj
+        .locator('data-cascade')
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => true)
+        .catch(() => false),
+      this.page.testSubj
+        .locator('discoverEnableCascadeLayoutSwitch')
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => true)
+        .catch(() => false),
+    ]).then(([hasCascade, hasSwitch]) => hasCascade && hasSwitch);
+  }
+
+  private getCascadeScrollContainer(): Locator {
+    return this.page.testSubj.locator('dataCascadeScrollContainer');
+  }
+
+  /**
+   * Returns the ids of the top-level ("root") cascade rows currently
+   * scrolled into view within the cascade scroll container.
+   */
+  async getCascadeLayoutVisibleRowIds(): Promise<string[]> {
+    return this.getCascadeScrollContainer().evaluate((container) => {
+      const containerRect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll('[data-row-type="root"]');
+      const visibleIds: string[] = [];
+      for (const row of rows) {
+        const rowRect = row.getBoundingClientRect();
+        if (rowRect.top >= containerRect.bottom) break;
+        if (rowRect.bottom > containerRect.top) {
+          visibleIds.push(row.id || '');
+        }
+      }
+      return visibleIds;
+    });
+  }
+
+  /**
+   * Whether the given cascade row id is currently expanded.
+   */
+  async isCascadeLayoutRowExpanded(rowId: string): Promise<boolean> {
+    return (await this.page.locator(`[id="${rowId}"]`).getAttribute('aria-expanded')) === 'true';
+  }
+
+  /**
+   * Toggles (expands/collapses) the cascade row with the given id and waits
+   * for the `aria-expanded` state to flip before returning. Waits for the doc
+   * table to finish rendering after an expand, since that triggers a fetch.
+   */
+  async toggleCascadeLayoutRow(rowId: string): Promise<void> {
+    const row = this.page.locator(`[id="${rowId}"]`);
+    const wasExpanded = (await row.getAttribute('aria-expanded')) === 'true';
+
+    // Scoped to `row`: while scrolled, the sticky pinned group header renders a
+    // `createPortal` duplicate of this same button elsewhere in the DOM (outside
+    // `row`), so an unscoped page-wide testSubj locator can match two elements.
+    await row.locator(`[data-test-subj="toggle-row-${rowId}-button"]`).click();
+    await row
+      .and(this.page.locator(`[aria-expanded="${!wasExpanded}"]`))
+      .waitFor({ state: 'attached' });
+
+    if (!wasExpanded) {
+      await this.dataGrid.waitForDocTableRendered();
+    }
+  }
+
+  /**
+   * Waits for the cascade layout's virtualizer to finish
+   * measuring/correcting itself (e.g. restoring a scroll anchor after a tab
+   * switch). The scroll container is hidden behind a loading spinner via
+   * `visibility: hidden` until the virtualizer reports itself stable.
+   */
+  async waitForCascadeLayoutStable(): Promise<void> {
+    await this.getCascadeScrollContainer().waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Current `scrollTop` of the cascade layout's scroll container.
+   */
+  async getCascadeLayoutScrollTop(): Promise<number> {
+    return this.getCascadeScrollContainer().evaluate((container) => container.scrollTop);
+  }
+
+  /**
+   * Scrolls the cascade layout's scroll container by `delta` pixels.
+   */
+  async scrollCascadeLayoutBy(delta: number): Promise<void> {
+    await this.getCascadeScrollContainer().evaluate((container, scrollDelta) => {
+      container.scrollTop += scrollDelta;
+    }, delta);
+  }
 }
