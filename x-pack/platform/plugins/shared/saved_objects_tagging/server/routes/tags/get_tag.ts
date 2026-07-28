@@ -21,7 +21,7 @@ export const registerGetTagRoute = (router: TagsPluginRouter) => {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 256 }),
         }),
       },
     },
