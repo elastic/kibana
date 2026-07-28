@@ -119,6 +119,12 @@ export class RulesApi {
     });
   }
 
+  public async bulkUpdateRuleApiKey(params: BulkByIdsParams) {
+    return this.http.post<BulkResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_update_api_key`, {
+      body: JSON.stringify(params),
+    });
+  }
+
   public async deleteRulesByQuery(
     params: BulkByQueryParams & { force: true }
   ): Promise<BulkResponse>;
