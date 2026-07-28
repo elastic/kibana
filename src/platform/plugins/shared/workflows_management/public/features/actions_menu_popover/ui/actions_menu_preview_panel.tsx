@@ -660,9 +660,8 @@ const panelStyles = {
     flexDirection: 'column',
     alignItems: 'stretch',
   }),
-  // Figma: Frame 8 steps list — r=8, connected rows with no gap.
+  // Figma: Frame 8 steps list — connected rows, no outer card border.
   // Sizes to content; scroll appears on stepListScroll when it overflows.
-  // overflow:hidden keeps row backgrounds clipped to the card radius.
   stepList: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: '0 0 auto',
@@ -671,7 +670,7 @@ const panelStyles = {
       // Full width minus the flush-scrollbar gutter
       width: 'calc(100% - 16px)',
       borderRadius: euiTheme.border.radius.medium,
-      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      border: 'none',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       overflow: 'hidden',
     }),
@@ -895,15 +894,10 @@ const previewStepRowStyles = {
       gap: '11px',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       border: 'none',
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      // Square corners — the parent stepList clips to the card radius.
       borderRadius: 0,
       cursor: 'pointer',
       textAlign: 'left',
       margin: 0,
-      '&:last-child': {
-        borderBottom: 'none',
-      },
       '&:hover': {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       },
@@ -916,8 +910,7 @@ const previewStepRowStyles = {
         pointerEvents: 'auto',
       },
     }),
-  // Keep radius on the same rule as fill/border so corners render cleanly
-  // (avoid overflow:hidden + separate border, which aliases oddly).
+  // Keep radius on the same rule as fill so corners render cleanly
   iconContainer: css({
     width: '40px',
     height: '40px',
@@ -931,12 +924,12 @@ const previewStepRowStyles = {
   iconContainerPlatform: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis2,
-      border: `1px solid ${euiTheme.colors.borderStrongPrimary}`,
+      border: 'none',
     }),
   iconContainerTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis4,
-      border: `1px solid ${euiTheme.colors.borderStrongAccent}`,
+      border: 'none',
     }),
   iconContainerAppLogo: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -946,12 +939,12 @@ const previewStepRowStyles = {
   iconContainerFlowControl: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis0,
-      border: `1px solid ${euiTheme.colors.borderStrongAccentSecondary}`,
+      border: 'none',
     }),
   iconContainerDataTransformation: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis8,
-      border: `1px solid ${euiTheme.colors.borderStrongWarning}`,
+      border: 'none',
     }),
   info: css({
     display: 'flex',

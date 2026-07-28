@@ -1080,7 +1080,7 @@ export function ActionsMenu({
         ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 64 }),
       }}
       renderOption={renderActionOption}
-      css={styles.selectable}
+      css={[styles.selectable, currentPath.length > 0 && styles.selectableInCategory]}
       singleSelection
     >
       {(list, search) => (
@@ -1378,6 +1378,12 @@ const componentStyles = {
           pointerEvents: 'auto',
         },
     }),
+  // Nested category browse: no row dividers (matches borderless category tiles)
+  selectableInCategory: css({
+    '& .euiSelectableListItem': {
+      borderBottom: 'none',
+    },
+  }),
   actionOptionWrapper: css({
     width: '100%',
     padding: `12px 16px`,
@@ -1407,17 +1413,17 @@ const componentStyles = {
     borderRadius: '8px',
     boxSizing: 'border-box',
   }),
-  // Platform (AI, Data transformation, Cases) — Vis2 fill + strong primary border
+  // Platform (AI, Data transformation, Cases) — Vis2 fill, no border
   iconOuterPlatform: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis2,
-      border: `1px solid ${euiTheme.colors.borderStrongPrimary}`,
+      border: 'none',
     }),
-  // Triggers — Vis4 fill + strong accent border
+  // Triggers — Vis4 fill, no border
   iconOuterTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis4,
-      border: `1px solid ${euiTheme.colors.borderStrongAccent}`,
+      border: 'none',
     }),
   // App logos (ES, Kibana) + External — plain white + prominent border
   iconOuterAppLogo: ({ euiTheme }: UseEuiTheme) =>
@@ -1431,17 +1437,17 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
     }),
-  // Data transformation — Vis8 fill + strong warning border
+  // Data transformation — Vis8 fill, no border
   iconOuterDataTransformation: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis8,
-      border: `1px solid ${euiTheme.colors.borderStrongWarning}`,
+      border: 'none',
     }),
-  // Flow control — Vis0 fill + strong accent-secondary border
+  // Flow control — Vis0 fill, no border
   iconOuterFlowControl: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.vis.euiColorVis0,
-      border: `1px solid ${euiTheme.colors.borderStrongAccentSecondary}`,
+      border: 'none',
     }),
   groupIconInner: css({
     display: 'flex',
