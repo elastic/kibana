@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
-import { useConversationContext } from '../../context/conversation/conversation_context';
-import { useApplyTemplate } from '../../hooks/use_apply_template';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useApplyTemplate } from '../../../hooks/use_apply_template';
 import { useConversation } from '../../../hooks/use_conversation';
 
 export const TemplateSelector: React.FC = () => {
