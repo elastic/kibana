@@ -150,11 +150,19 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   if (filterState.status?.length) {
     addStatusFilter(query, filterState.status);
   }
-  if (filterState.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
+  const ruleIds = filterState.ruleIds?.filter(Boolean) ?? [];
+  if (ruleIds.length === 1) {
+    query.where`rule.id == ${ruleIds[0]}`;
+  } else if (ruleIds.length > 1) {
+    const inList = ruleIds.map((id) => escapeStringValue(id)).join(', ');
+    query.pipe(`WHERE \`rule.id\` IN (${inList})`);
   }
-  if (filterState.groupHash) {
-    query.where`group_hash == ${filterState.groupHash}`;
+  const groupHashes = filterState.groupHashes?.filter(Boolean) ?? [];
+  if (groupHashes.length === 1) {
+    query.where`group_hash == ${groupHashes[0]}`;
+  } else if (groupHashes.length > 1) {
+    const inList = groupHashes.map((hash) => escapeStringValue(hash)).join(', ');
+    query.pipe(`WHERE group_hash IN (${inList})`);
   }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);

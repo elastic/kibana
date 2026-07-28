@@ -91,7 +91,7 @@ export const EpisodesFilterBar = ({
 
   const onRuleChange = useCallback(
     (ruleId: string | undefined) => {
-      onFilterChange((prev) => ({ ...prev, ruleId }));
+      onFilterChange((prev) => ({ ...prev, ruleIds: ruleId ? [ruleId] : undefined }));
     },
     [onFilterChange]
   );
@@ -149,7 +149,7 @@ export const EpisodesFilterBar = ({
               />
 
               <AlertEpisodesRuleFilter
-                selectedRuleId={filterState.ruleId}
+                selectedRuleId={filterState.ruleIds?.[0]}
                 onRuleChange={onRuleChange}
                 ruleOptions={ruleOptions}
                 data-test-subj="episodesFilterBar-rule"

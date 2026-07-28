@@ -44,11 +44,11 @@ export {
 export interface AlertEpisodesListLinkOptions {
   /** Pre-applied filters carried via the rison-encoded `_a` query param. */
   filters?: {
-    ruleId?: string;
-    groupHash?: string;
+    ruleIds?: string[];
+    groupHashes?: string[];
     status?: string;
     /**
-     * Display-only companion to `groupHash`. When the source surface (e.g.
+     * Display-only companion to `groupHashes`. When the source surface (e.g.
      * the rule details heatmap) has already resolved grouping field values,
      * passing them through avoids a second lookup at the destination.
      */
@@ -77,7 +77,7 @@ export const paths = {
    * filters and time range via `_a.episodesList.*`.
    *
    * Shape MUST match what `readEpisodesListAppStateFromUrlStorage` reads:
-   * flat fields inside `_a.episodesList` (`ruleId`, `groupHash`,
+   * flat fields inside `_a.episodesList` (`ruleIds`, `groupHashes`,
    * `groupingValues`, `timeFrom`, `timeTo`). Time is NOT put in `_g` —
    * the episodes list reads time from `_a.episodesList.{timeFrom,timeTo}`
    * so that no Kibana global-time sync fires on mount and pushes a spurious
@@ -89,8 +89,8 @@ export const paths = {
     const { filters, timeRange } = opts;
     const episodesList = Object.fromEntries(
       Object.entries({
-        ruleId: filters?.ruleId,
-        groupHash: filters?.groupHash,
+        ruleIds: filters?.ruleIds?.length ? filters.ruleIds : undefined,
+        groupHashes: filters?.groupHashes?.length ? filters.groupHashes : undefined,
         status: filters?.status,
         groupingValues:
           filters?.groupingValues && Object.keys(filters.groupingValues).length > 0

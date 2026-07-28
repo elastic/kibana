@@ -449,7 +449,7 @@ describe('episode count + reset filters toolbar', () => {
     await waitFor(() => expect(capturedFilterBarOnFilterChange).toBeDefined());
 
     await act(async () => {
-      capturedFilterBarOnFilterChange!({ ...DEFAULT_EPISODES_LIST_FILTER, ruleId: 'rule-1' });
+      capturedFilterBarOnFilterChange!({ ...DEFAULT_EPISODES_LIST_FILTER, ruleIds: ['rule-1'] });
     });
 
     const button = await screen.findByTestId('episodesFilterBar-resetFilters');

@@ -39,7 +39,7 @@ describe('episodes_list_url_state', () => {
     it('reads filter + time fields as expected from _a.episodesList', async () => {
       const storage = await createKbnTestUrlStorage({
         status: ['active', 'pending'],
-        ruleId: 'r1',
+        ruleIds: ['r1'],
         queryString: '  host  ',
         tags: ['a', 'b'],
         severity: ['high', '__no_severity__'],
@@ -51,7 +51,7 @@ describe('episodes_list_url_state', () => {
       expect(readEpisodesListAppStateFromUrlStorage(storage)).toEqual({
         filterState: {
           status: ['active', 'pending'],
-          ruleId: 'r1',
+          ruleIds: ['r1'],
           queryString: 'host',
           tags: ['a', 'b'],
           severity: ['high', '__no_severity__'],
@@ -90,6 +90,15 @@ describe('episodes_list_url_state', () => {
       ]);
     });
 
+    it('maps a legacy single-string ruleId to ruleIds array', async () => {
+      const storage = await createKbnTestUrlStorage({
+        ruleId: 'legacy-rule',
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.ruleIds).toEqual([
+        'legacy-rule',
+      ]);
+    });
+
     it('defaults status to active when _a is missing', async () => {
       const storage = await createKbnTestUrlStorage();
       expect(readEpisodesListAppStateFromUrlStorage(storage)).toEqual({
@@ -97,15 +106,24 @@ describe('episodes_list_url_state', () => {
       });
     });
 
-    it('reads groupHash and groupingValues from the URL blob', async () => {
+    it('reads groupHashes and groupingValues from the URL blob', async () => {
       const storage = await createKbnTestUrlStorage({
-        groupHash: 'abc123',
+        groupHashes: ['abc123'],
         groupingValues: { 'host.name': 'web-01', region: null },
       });
       expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toMatchObject({
-        groupHash: 'abc123',
+        groupHashes: ['abc123'],
         groupingValues: { 'host.name': 'web-01', region: null },
       });
+    });
+
+    it('maps a legacy single-string groupHash to groupHashes array', async () => {
+      const storage = await createKbnTestUrlStorage({
+        groupHash: 'legacy-hash',
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.groupHashes).toEqual([
+        'legacy-hash',
+      ]);
     });
 
     it('ignores groupingValues when it is not a plain object', async () => {
@@ -195,14 +213,14 @@ describe('episodes_list_url_state', () => {
       ]);
     });
 
-    it('round-trips groupHash and groupingValues', async () => {
+    it('round-trips groupHashes and groupingValues', async () => {
       const storage = await createKbnTestUrlStorage();
 
       await writeEpisodesListAppStateToUrlStorage(
         storage,
         {
           status: ['active'],
-          groupHash: 'xyz',
+          groupHashes: ['xyz'],
           groupingValues: { 'host.name': 'web-01', region: null },
         },
         DEFAULT_EPISODES_LIST_TIME_RANGE
@@ -210,7 +228,7 @@ describe('episodes_list_url_state', () => {
 
       expect(storage.get('_a')).toEqual({
         [EPISODES_LIST_APP_STATE_KEY]: {
-          groupHash: 'xyz',
+          groupHashes: ['xyz'],
           groupingValues: { 'host.name': 'web-01', region: null },
         },
       });

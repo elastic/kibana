@@ -37,8 +37,10 @@ export const ALERT_EPISODE_FIELDS = [
 
 export interface EpisodesFilterState {
   status?: string[] | null;
-  ruleId?: string | null;
-  groupHash?: string | null;
+  /** Filter by one or more rule IDs (OR). */
+  ruleIds?: string[] | null;
+  /** Filter by one or more group hashes (OR). */
+  groupHashes?: string[] | null;
   groupingValues?: Record<string, string | null> | null;
   queryString?: string | null;
   tags?: string[] | null;
@@ -163,12 +165,23 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
   if (filterState.status?.length) {
     addStatusFilter(query, filterState.status);
   }
-  if (filterState.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
+
+  const ruleIds = filterState.ruleIds?.filter(Boolean) ?? [];
+  if (ruleIds.length === 1) {
+    query.where`rule.id == ${ruleIds[0]}`;
+  } else if (ruleIds.length > 1) {
+    const inList = ruleIds.map((id) => escapeStringValue(id)).join(', ');
+    query.pipe(`WHERE \`rule.id\` IN (${inList})`);
   }
-  if (filterState.groupHash) {
-    query.where`group_hash == ${filterState.groupHash}`;
+
+  const groupHashes = filterState.groupHashes?.filter(Boolean) ?? [];
+  if (groupHashes.length === 1) {
+    query.where`group_hash == ${groupHashes[0]}`;
+  } else if (groupHashes.length > 1) {
+    const inList = groupHashes.map((hash) => escapeStringValue(hash)).join(', ');
+    query.pipe(`WHERE group_hash IN (${inList})`);
   }
+
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
   }
@@ -186,6 +199,8 @@ const ALLOWLISTED_SORT_FIELDS = new Set([
   'episode.status',
   'rule.id',
   'duration',
+  'first_timestamp',
+  'last_timestamp',
 ]);
 
 const SEVERITY_SORT_FIELD = '_severity_sort';

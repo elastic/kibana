@@ -164,33 +164,55 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('`episode.status` IN');
   });
 
-  it('should apply ruleId filter', () => {
+  it('should apply ruleIds filter', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { ruleId: 'rule-123' }
+      { ruleIds: ['rule-123'] }
     );
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
   });
 
-  it('should apply groupHash filter', () => {
+  it('should apply multiple ruleIds with IN', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { groupHash: 'abc123' }
+      { ruleIds: ['rule-1', 'rule-2'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE `rule.id` IN ("rule-1", "rule-2")');
+  });
+
+  it('should apply groupHashes filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHashes: ['abc123'] }
     );
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE group_hash == "abc123"');
   });
 
-  it('should not apply groupHash filter when null', () => {
+  it('should apply multiple groupHashes with IN', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { groupHash: null }
+      { groupHashes: ['abc123', 'def456'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash IN ("abc123", "def456")');
+  });
+
+  it('should not apply groupHashes filter when null', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHashes: null }
     );
     const queryString = query.print('basic');
 
@@ -202,7 +224,7 @@ describe('buildEpisodesQuery', () => {
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       {
-        groupHash: 'abc123',
+        groupHashes: ['abc123'],
         groupingValues: { 'host.name': 'web-01', 'service.name': 'checkout' },
       }
     );
@@ -232,7 +254,7 @@ describe('buildEpisodesQuery', () => {
       {
         queryString: 'alert.name: "test"',
         status: ['active'],
-        ruleId: 'rule-123',
+        ruleIds: ['rule-123'],
       }
     );
     const queryString = query.print('basic');
@@ -339,8 +361,8 @@ describe('buildEpisodesQuery', () => {
       {
         queryString: null,
         status: null,
-        ruleId: undefined,
-        groupHash: null,
+        ruleIds: undefined,
+        groupHashes: null,
         tags: null,
         severity: null,
       }
@@ -405,7 +427,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { assigneeUid: 'user-123', status: ['active'], ruleId: 'rule-456' }
+      { assigneeUid: 'user-123', status: ['active'], ruleIds: ['rule-456'] }
     );
     const queryString = query.print('basic');
 
@@ -502,8 +524,8 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('applies ruleId filter when provided', () => {
-    const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
+  it('applies ruleIds filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { ruleIds: ['rule-xyz'] });
     expect(output).toContain('WHERE rule.id == "rule-xyz"');
   });
 });
@@ -536,8 +558,8 @@ describe('buildEpisodesHistogramQuery', () => {
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('includes the ruleId filter when filterState.ruleId is provided', () => {
-    const output = buildEpisodesHistogramQuery('default', { ruleId: 'rule-abc' }).print('basic');
+  it('includes the ruleIds filter when filterState.ruleIds is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { ruleIds: ['rule-abc'] }).print('basic');
     expect(output).toContain('rule-abc');
   });
 

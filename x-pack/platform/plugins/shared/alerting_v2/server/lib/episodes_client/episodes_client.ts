@@ -6,6 +6,7 @@
  */
 
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ComposerQuery } from '@elastic/esql';
 import { inject, injectable } from 'inversify';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import {
@@ -22,10 +23,10 @@ import {
   buildRelatedSameRuleQuery,
   buildRelatedOtherGroupsQuery,
   buildRelatedSameGroupQuery,
-  ALERT_EVENTS_DATA_STREAM,
-  ALERT_ACTIONS_DATA_STREAM,
+  buildEpisodesQuery,
+  buildEpisodesKpisQuery,
+  type EpisodesFilterState,
 } from '@kbn/alerting-v2-common-queries';
-import type { AlertEventType } from '../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -34,6 +35,7 @@ import type {
   EpisodeData,
   FindEpisodesParams,
   FindEpisodesResult,
+  FindEpisodesFilters,
   EpisodeKpis,
   GetKpisParams,
   EpisodeEventRow,
@@ -62,6 +64,13 @@ const buildTimestampFilter = (timeRange: { gte: string; lte?: string }) => ({
       ...(timeRange.lte ? { lte: timeRange.lte } : {}),
     },
   },
+});
+
+const toFilterState = (filters: FindEpisodesFilters = {}): EpisodesFilterState => ({
+  status: filters.status,
+  ruleIds: filters.rule_ids,
+  groupHashes: filters.group_hashes,
+  severity: filters.severity,
 });
 
 interface RawEpisodeRow {
@@ -117,69 +126,13 @@ export class EpisodesClient implements EpisodesClientContract {
       sortOrder = 'desc',
     } = params;
 
-    const alertEventType: AlertEventType = 'alert';
+    const query = buildEpisodesQuery(
+      this.spaceId,
+      { sortField: sortBy, sortDirection: sortOrder },
+      toFilterState(filters)
+    ).limit((page - 1) * perPage + perPage);
 
-    const whereClauses: string[] = [];
-    const queryParams: unknown[] = [];
-
-    if (filters.status?.length) {
-      const placeholders = filters.status.map(() => '?').join(', ');
-      whereClauses.push(`episode.status IN (${placeholders})`);
-      queryParams.push(...filters.status);
-    }
-    if (filters.rule_ids?.length) {
-      const placeholders = filters.rule_ids.map(() => '?').join(', ');
-      whereClauses.push(`rule.id IN (${placeholders})`);
-      queryParams.push(...filters.rule_ids);
-    }
-    if (filters.severity?.length) {
-      const placeholders = filters.severity.map(() => '?').join(', ');
-      whereClauses.push(`severity IN (${placeholders})`);
-      queryParams.push(...filters.severity);
-    }
-    if (filters.group_hashes?.length) {
-      const placeholders = filters.group_hashes.map(() => '?').join(', ');
-      whereClauses.push(`group_hash IN (${placeholders})`);
-      queryParams.push(...filters.group_hashes);
-    }
-
-    const postAggWhere = whereClauses.length > 0 ? `AND ${whereClauses.join(' AND ')}` : '';
-
-    const queryString = `FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _source
-    | WHERE (type == "alert" OR action_type IN ("snooze", "unsnooze", "ack", "unack", "assign")) AND space_id == ?
-    | INLINE STATS
-        last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-        snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze"
-      BY group_hash
-    | EVAL episode_id = COALESCE(episode.id, episode_id)
-    | INLINE STATS
-        last_ack_action    = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-        last_assignee_uid  = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
-      BY episode_id
-    | WHERE type == ?
-    | EVAL extracted_data = JSON_EXTRACT(_source, "data")
-    | DROP _source
-    | INLINE STATS
-        first_timestamp = MIN(@timestamp),
-        last_timestamp  = MAX(@timestamp),
-        triggered_at    = MIN(@timestamp) WHERE episode.status == "active",
-        episode_data    = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}",
-        severity        = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL
-      BY episode.id
-    | EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
-    | WHERE @timestamp == last_timestamp ${postAggWhere}
-    | KEEP episode.id, episode.status, rule.id, group_hash, first_timestamp, last_timestamp,
-           duration, triggered_at, severity, episode_data, last_ack_action, last_assignee_uid,
-           last_snooze_action, snooze_expiry, space_id
-    | SORT ${sortBy} ${sortOrder.toUpperCase()}
-    | LIMIT ${(page - 1) * perPage + perPage}`;
-
-    const response = await this.queryService.executeQuery({
-      query: queryString,
-      params: [this.spaceId, alertEventType, ...queryParams],
-      filter: buildTimestampFilter(timeRange),
-    });
-
+    const response = await this.executeComposerQuery(query, buildTimestampFilter(timeRange));
     const allRows = this.toRows<RawEpisodeRow>(response);
     const offset = (page - 1) * perPage;
     const pageRows = allRows.slice(offset, offset + perPage);
@@ -191,14 +144,10 @@ export class EpisodesClient implements EpisodesClientContract {
   }
 
   public async get(episodeId: string): Promise<EpisodeData | undefined> {
-    const query = buildEpisodeQuery(this.spaceId, episodeId);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-      filter: buildTimestampFilter(defaultTimeRange()),
-    });
+    const response = await this.executeComposerQuery(
+      buildEpisodeQuery(this.spaceId, episodeId),
+      buildTimestampFilter(defaultTimeRange())
+    );
 
     const rows = this.toRows<RawEpisodeRow>(response);
     return rows.length > 0 ? toEpisodeData(rows[0]) : undefined;
@@ -206,88 +155,33 @@ export class EpisodesClient implements EpisodesClientContract {
 
   public async getKpis(params: GetKpisParams): Promise<EpisodeKpis> {
     const { currentUserUid, filters = {}, timeRange } = params;
-    const alertEventType: AlertEventType = 'alert';
 
-    const whereClauses: string[] = [];
-    const queryParams: unknown[] = [];
-
-    if (filters.status?.length) {
-      const placeholders = filters.status.map(() => '?').join(', ');
-      whereClauses.push(`episode.status IN (${placeholders})`);
-      queryParams.push(...filters.status);
-    }
-    if (filters.rule_ids?.length) {
-      const placeholders = filters.rule_ids.map(() => '?').join(', ');
-      whereClauses.push(`rule.id IN (${placeholders})`);
-      queryParams.push(...filters.rule_ids);
-    }
-
-    const postAggWhere = whereClauses.length > 0 ? `AND ${whereClauses.join(' AND ')}` : '';
-
-    const assignedToMeEval = currentUserUid
-      ? `EVAL _assigned_to_me = CASE(last_assignee_uid == ?, 1, 0)`
-      : `EVAL _assigned_to_me = 0`;
-    const assignedParams = currentUserUid ? [currentUserUid] : [];
-
-    const queryString = `FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _source
-    | WHERE (type == "alert" OR action_type IN ("snooze", "unsnooze", "ack", "unack", "assign")) AND space_id == ?
-    | INLINE STATS
-        last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-        snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze"
-      BY group_hash
-    | EVAL episode_id = COALESCE(episode.id, episode_id)
-    | INLINE STATS
-        last_ack_action    = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-        last_assignee_uid  = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
-      BY episode_id
-    | WHERE type == ?
-    | EVAL extracted_data = JSON_EXTRACT(_source, "data")
-    | DROP _source
-    | INLINE STATS
-        first_timestamp = MIN(@timestamp),
-        last_timestamp  = MAX(@timestamp),
-        triggered_at    = MIN(@timestamp) WHERE episode.status == "active",
-        episode_data    = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}",
-        severity        = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL
-      BY episode.id
-    | EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
-    | WHERE @timestamp == last_timestamp ${postAggWhere}
-    | EVAL _active_rule_id = CASE(episode.status == "active", rule.id, null)
-    | ${assignedToMeEval}
-    | EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)
-    | EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)
-    | EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)
-    | STATS
-      alerts_count   = COUNT(*),
-      firing_rules   = COUNT_DISTINCT(_active_rule_id),
-      assigned_to_me = SUM(_assigned_to_me),
-      unassigned     = SUM(_is_unassigned),
-      acknowledged   = SUM(_is_acked),
-      snoozed        = SUM(_is_snoozed)`;
-
-    const response = await this.queryService.executeQuery({
-      query: queryString,
-      params: [this.spaceId, alertEventType, ...queryParams, ...assignedParams],
-      filter: buildTimestampFilter(timeRange),
-    });
+    const response = await this.executeComposerQuery(
+      buildEpisodesKpisQuery(this.spaceId, currentUserUid, toFilterState(filters)),
+      buildTimestampFilter(timeRange)
+    );
 
     const rows = this.toRows<EpisodeKpis>(response);
-    return rows[0] ?? { alerts_count: 0, firing_rules: 0, assigned_to_me: 0, unassigned: 0, acknowledged: 0, snoozed: 0 };
+    return (
+      rows[0] ?? {
+        alerts_count: 0,
+        firing_rules: 0,
+        assigned_to_me: 0,
+        unassigned: 0,
+        acknowledged: 0,
+        snoozed: 0,
+      }
+    );
   }
 
   public async getEvents(
     episodeId: string,
     timeRange: { gte: string; lte?: string }
   ): Promise<EpisodeEventRow[]> {
-    const query = buildEpisodeEventsQuery(this.spaceId, episodeId);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-      filter: buildTimestampFilter(timeRange),
-    });
-
+    const response = await this.executeComposerQuery(
+      buildEpisodeEventsQuery(this.spaceId, episodeId),
+      buildTimestampFilter(timeRange)
+    );
     return this.toRows<EpisodeEventRow>(response);
   }
 
@@ -295,15 +189,10 @@ export class EpisodesClient implements EpisodesClientContract {
     episodeId: string,
     timeRange: { gte: string; lte?: string }
   ): Promise<EpisodeEventDataRow | undefined> {
-    const query = buildEpisodeEventDataQuery(this.spaceId, episodeId);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-      filter: buildTimestampFilter(timeRange),
-    });
-
+    const response = await this.executeComposerQuery(
+      buildEpisodeEventDataQuery(this.spaceId, episodeId),
+      buildTimestampFilter(timeRange)
+    );
     const rows = this.toRows<EpisodeEventDataRow>(response);
     return rows[0];
   }
@@ -311,45 +200,30 @@ export class EpisodesClient implements EpisodesClientContract {
   public async getActions(episodeIds: string[]): Promise<EpisodeActionState[]> {
     if (episodeIds.length === 0) return [];
 
-    const query = buildEpisodeActionsQuery(this.spaceId, episodeIds);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-    });
-
+    const response = await this.executeComposerQuery(
+      buildEpisodeActionsQuery(this.spaceId, episodeIds)
+    );
     return this.toRows<EpisodeActionState>(response);
   }
 
   public async getActionsHistory(params: GetActionsHistoryParams): Promise<EpisodeActionHistoryEntry[]> {
     const { episodeId, groupHash, before, limit } = params;
 
-    const query = buildEpisodeActionsHistoryQuery(this.spaceId, episodeId, groupHash, {
-      before,
-      limit,
-    });
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-    });
-
+    const response = await this.executeComposerQuery(
+      buildEpisodeActionsHistoryQuery(this.spaceId, episodeId, groupHash, {
+        before,
+        limit,
+      })
+    );
     return this.toRows<EpisodeActionHistoryEntry>(response);
   }
 
   public async getGroupActions(groupHashes: string[]): Promise<GroupActionState[]> {
     if (groupHashes.length === 0) return [];
 
-    const query = buildGroupActionsQuery(this.spaceId, groupHashes);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-    });
-
+    const response = await this.executeComposerQuery(
+      buildGroupActionsQuery(this.spaceId, groupHashes)
+    );
     return this.toRows<GroupActionState>(response);
   }
 
@@ -365,28 +239,17 @@ export class EpisodesClient implements EpisodesClientContract {
       query = buildRelatedSameRuleQuery(this.spaceId, ruleId, excludeEpisodeId, limit);
     }
 
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-      filter: buildTimestampFilter(timeRange),
-    });
-
+    const response = await this.executeComposerQuery(query, buildTimestampFilter(timeRange));
     return this.toRows<RelatedEpisode>(response);
   }
 
   public async getTrend(params: GetTrendParams): Promise<EpisodeTrendRow[]> {
     const { episodeId, metricLabels, timeRange } = params;
 
-    const query = buildEpisodeTrendQuery(this.spaceId, episodeId, metricLabels);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-      filter: buildTimestampFilter(timeRange),
-    });
+    const response = await this.executeComposerQuery(
+      buildEpisodeTrendQuery(this.spaceId, episodeId, metricLabels),
+      buildTimestampFilter(timeRange)
+    );
 
     const rawRows = this.toRows<Record<string, unknown>>(response);
     return rawRows.map((row) => ({
@@ -406,38 +269,38 @@ export class EpisodesClient implements EpisodesClientContract {
     episodeId: string,
     limit: number = 10
   ): Promise<EpisodeFlappingStatus[]> {
-    const query = buildEpisodeFlappingQuery(this.spaceId, episodeId, limit);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
-
-    const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-    });
-
+    const response = await this.executeComposerQuery(
+      buildEpisodeFlappingQuery(this.spaceId, episodeId, limit)
+    );
     return this.toRows<EpisodeFlappingStatus>(response);
   }
 
   public async getTagOptions(timeRange: { gte: string; lte?: string }): Promise<string[]> {
-    const query = buildEpisodeTagOptionsQuery(this.spaceId);
-    const request = query.toRequest();
-    const { filter: _composerFilter, ...esqlRequest } = request;
+    const response = await this.executeComposerQuery(
+      buildEpisodeTagOptionsQuery(this.spaceId),
+      buildTimestampFilter(timeRange)
+    );
+    return this.toRows<{ tags: string }>(response).map((r) => r.tags);
+  }
 
+  public async getTagSuggestions(): Promise<string[]> {
     const response = await this.queryService.executeQuery({
-      query: (esqlRequest as unknown as EsqlQueryRequest).query,
-      filter: buildTimestampFilter(timeRange),
+      query: buildTagSuggestionsQuery(this.spaceId),
     });
 
     return this.toRows<{ tags: string }>(response).map((r) => r.tags);
   }
 
-  public async getTagSuggestions(): Promise<string[]> {
-    const queryString = buildTagSuggestionsQuery(this.spaceId);
-
-    const response = await this.queryService.executeQuery({
-      query: queryString,
+  private async executeComposerQuery(
+    query: ComposerQuery,
+    filter?: ReturnType<typeof buildTimestampFilter>
+  ) {
+    const request = query.toRequest();
+    const { filter: _composerFilter, ...esqlRequest } = request;
+    return this.queryService.executeQuery({
+      query: (esqlRequest as unknown as EsqlQueryRequest).query,
+      ...(filter ? { filter } : {}),
     });
-
-    return this.toRows<{ tags: string }>(response).map((r) => r.tags);
   }
 
   private toRows<T>(response: { columns: Array<{ name: string }>; values: unknown[][] }): T[] {

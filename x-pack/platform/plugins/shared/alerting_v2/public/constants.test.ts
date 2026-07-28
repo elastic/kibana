@@ -26,27 +26,27 @@ describe('paths.alertEpisodesListHref', () => {
     );
   });
 
-  it('encodes ruleId into _a.episodesList', () => {
-    const url = paths.alertEpisodesListHref({ filters: { ruleId: 'rule-1' } });
-    expect(decodeAppState(url)).toMatchObject({ ruleId: 'rule-1' });
+  it('encodes ruleIds into _a.episodesList', () => {
+    const url = paths.alertEpisodesListHref({ filters: { ruleIds: ['rule-1'] } });
+    expect(decodeAppState(url)).toMatchObject({ ruleIds: ['rule-1'] });
   });
 
-  it('encodes groupHash and groupingValues into _a.episodesList', () => {
+  it('encodes groupHashes and groupingValues into _a.episodesList', () => {
     const url = paths.alertEpisodesListHref({
       filters: {
-        groupHash: 'abc123',
+        groupHashes: ['abc123'],
         groupingValues: { 'host.name': 'web-01', region: null },
       },
     });
     expect(decodeAppState(url)).toMatchObject({
-      groupHash: 'abc123',
+      groupHashes: ['abc123'],
       groupingValues: { 'host.name': 'web-01', region: null },
     });
   });
 
   it('encodes timeRange as timeFrom/timeTo inside _a.episodesList, not in _g', () => {
     const url = paths.alertEpisodesListHref({
-      filters: { ruleId: 'r1' },
+      filters: { ruleIds: ['r1'] },
       timeRange: { from: 'now-7d', to: 'now' },
     });
     expect(decodeAppState(url)).toMatchObject({ timeFrom: 'now-7d', timeTo: 'now' });
@@ -55,7 +55,7 @@ describe('paths.alertEpisodesListHref', () => {
 
   it('omits empty groupingValues objects', () => {
     const url = paths.alertEpisodesListHref({
-      filters: { ruleId: 'r1', groupingValues: {} },
+      filters: { ruleIds: ['r1'], groupingValues: {} },
     });
     const state = decodeAppState(url) as Record<string, unknown>;
     expect(state).not.toHaveProperty('groupingValues');
@@ -64,16 +64,16 @@ describe('paths.alertEpisodesListHref', () => {
   it('encodes all fields together', () => {
     const url = paths.alertEpisodesListHref({
       filters: {
-        ruleId: 'r1',
-        groupHash: 'gh1',
+        ruleIds: ['r1'],
+        groupHashes: ['gh1'],
         status: 'active',
         groupingValues: { env: 'prod' },
       },
       timeRange: { from: '2024-01-01T00:00:00.000Z', to: '2024-01-07T00:00:00.000Z' },
     });
     expect(decodeAppState(url)).toEqual({
-      ruleId: 'r1',
-      groupHash: 'gh1',
+      ruleIds: ['r1'],
+      groupHashes: ['gh1'],
       status: 'active',
       groupingValues: { env: 'prod' },
       timeFrom: '2024-01-01T00:00:00.000Z',

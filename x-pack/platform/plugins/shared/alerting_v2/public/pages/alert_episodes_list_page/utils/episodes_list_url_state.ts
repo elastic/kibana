@@ -51,11 +51,17 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
     // Back-compat with bookmarks/deep-links created before status became multi-select.
     result.status = [o.status];
   }
-  if (isNonEmptyString(o.ruleId)) {
-    result.ruleId = o.ruleId;
+  if (isStringArray(o.ruleIds)) {
+    result.ruleIds = [...o.ruleIds];
+  } else if (isNonEmptyString(o.ruleId)) {
+    // Back-compat with bookmarks/deep-links created before ruleId became ruleIds.
+    result.ruleIds = [o.ruleId];
   }
-  if (isNonEmptyString(o.groupHash)) {
-    result.groupHash = o.groupHash;
+  if (isStringArray(o.groupHashes)) {
+    result.groupHashes = [...o.groupHashes];
+  } else if (isNonEmptyString(o.groupHash)) {
+    // Back-compat with bookmarks/deep-links created before groupHash became groupHashes.
+    result.groupHashes = [o.groupHash];
   }
   if (isGroupingValues(o.groupingValues)) {
     result.groupingValues = o.groupingValues;
@@ -104,11 +110,11 @@ function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown>
   } else if (!isSameStatusSet(st, DEFAULT_EPISODES_LIST_FILTER.status ?? [])) {
     result.status = [...st];
   }
-  if (isNonEmptyString(state.ruleId)) {
-    result.ruleId = state.ruleId;
+  if (isStringArray(state.ruleIds)) {
+    result.ruleIds = [...state.ruleIds];
   }
-  if (isNonEmptyString(state.groupHash)) {
-    result.groupHash = state.groupHash;
+  if (isStringArray(state.groupHashes)) {
+    result.groupHashes = [...state.groupHashes];
   }
   if (isGroupingValues(state.groupingValues)) {
     result.groupingValues = { ...state.groupingValues };

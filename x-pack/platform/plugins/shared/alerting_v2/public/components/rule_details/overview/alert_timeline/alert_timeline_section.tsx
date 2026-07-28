@@ -105,7 +105,7 @@ export const AlertTimelineSection: React.FC = () => {
     () =>
       http.basePath.prepend(
         paths.alertEpisodesListHref({
-          filters: { ruleId: rule.id, status: 'all' },
+          filters: { ruleIds: [rule.id], status: 'all' },
           timeRange: {
             from: new Date(windowStartMs).toISOString(),
             to: new Date(windowEndMs).toISOString(),
