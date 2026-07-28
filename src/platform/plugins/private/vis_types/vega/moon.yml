@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/visualizations-common'
   - '@kbn/es-types'
   - '@kbn/esql-utils'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -61,6 +62,7 @@ fileGroups:
   src:
     - server/**/*
     - public/**/*
+    - test/scout/**/*
     - '*.ts'
     - public/test_utils/vega_map_test.json
     - public/test_utils/vegalite_graph.json
