@@ -82,3 +82,39 @@ export const PROPOSAL_NOT_FOUND = i18n.translate('xpack.pnd.investigation.propos
 export const RETRY = i18n.translate('xpack.pnd.investigation.retry', {
   defaultMessage: 'Retry',
 });
+
+export const FLOW_STAGE_DETECTED = i18n.translate('xpack.pnd.investigation.flow.stage.detected', {
+  defaultMessage: 'Detected',
+});
+
+export const FLOW_STAGE_INVESTIGATED = i18n.translate(
+  'xpack.pnd.investigation.flow.stage.investigated',
+  {
+    defaultMessage: 'Investigated',
+  }
+);
+
+export const FLOW_STAGE_PROPOSED = i18n.translate('xpack.pnd.investigation.flow.stage.proposed', {
+  defaultMessage: 'Proposed',
+});
+
+export const FLOW_STAGE_DECIDED = i18n.translate('xpack.pnd.investigation.flow.stage.decided', {
+  defaultMessage: 'Decided',
+});
+
+export const FLOW_EMPTY = i18n.translate('xpack.pnd.investigation.flow.empty', {
+  defaultMessage: 'No timeline events recorded for this investigation yet.',
+});
+
+export const FLOW_SOURCE_INVESTIGATION = i18n.translate(
+  'xpack.pnd.investigation.flow.source.investigation',
+  {
+    defaultMessage: 'Investigation',
+  }
+);
+
+export const flowSourceProposal = (proposalType: string): string =>
+  i18n.translate('xpack.pnd.investigation.flow.source.proposal', {
+    defaultMessage: 'Proposal · {proposalType}',
+    values: { proposalType },
+  });

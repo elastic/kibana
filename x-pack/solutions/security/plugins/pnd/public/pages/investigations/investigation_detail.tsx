@@ -20,7 +20,7 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Proposal, ProposalStatus } from '@kbn/pnd-common';
@@ -33,6 +33,7 @@ import {
   useGenerateProposal,
 } from '../../hooks/use_investigations_api';
 import type { GenerateProposalProvenance } from '../../hooks/use_investigations_api';
+import { InvestigationFlowDiagram } from './components/investigation_flow_diagram';
 import * as i18n from './translations';
 
 const ProposalRow: React.FC<{
@@ -182,6 +183,7 @@ const ProposalRow: React.FC<{
 export const InvestigationDetailPage: React.FC = () => {
   const { services } = useKibana();
   const { id, proposalId } = useParams<{ id: string; proposalId?: string }>();
+  const history = useHistory();
   const { data, isLoading, error, refetch } = useInvestigation(id);
   const proposalsQuery = useInvestigationProposals(id);
   const [localStatuses, setLocalStatuses] = useState<Record<string, ProposalStatus>>({});
@@ -385,18 +387,14 @@ export const InvestigationDetailPage: React.FC = () => {
       id: 'timeline',
       name: i18n.TAB_TIMELINE,
       content: (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="s">
-            <ul>
-              {(investigation.events ?? []).map((event) => (
-                <li key={event.id}>
-                  {event.timestamp}: {event.summary}
-                </li>
-              ))}
-            </ul>
-          </EuiText>
-        </>
+        <InvestigationFlowDiagram
+          investigation={investigation}
+          proposals={proposals}
+          onSelectProposal={(nextProposalId) => {
+            setSelectedTabId('proposals');
+            history.push(`/investigations/${id}/proposals/${nextProposalId}`);
+          }}
+        />
       ),
     },
   ];

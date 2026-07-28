@@ -7150,11 +7150,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-security-deep-watch-forensics@link:x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-security-esql-generation-regression@link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression":
   version "0.0.0"
   uid ""
 
 "@kbn/evals-suite-security-threat-intel-hunt@link:x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-security-watch-escalation-chain@link:x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain":
   version "0.0.0"
   uid ""
 

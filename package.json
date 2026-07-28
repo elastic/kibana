@@ -1817,6 +1817,7 @@
     "@kbn/evals-suite-security-deep-watch-forensics": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics",
     "@kbn/evals-suite-security-esql-generation-regression": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression",
     "@kbn/evals-suite-security-threat-intel-hunt": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt",
+    "@kbn/evals-suite-security-watch-escalation-chain": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain",
     "@kbn/evals-suite-siem-readiness": "link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness",
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
     "@kbn/evals-suite-smoke-tests": "link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests",
