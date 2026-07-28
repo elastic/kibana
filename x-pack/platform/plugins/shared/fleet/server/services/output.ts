@@ -40,6 +40,7 @@ import type {
   OutputSoOtlpAttributes,
   SecretReference,
   BeatsSoBaseAttributes,
+  BeatsOutputSOAttributes,
 } from '../types';
 import type {
   KafkaOutput,
@@ -125,29 +126,30 @@ export function outputIdToUuid(id: string) {
   return uuidv5(id, uuidv5.DNS);
 }
 
+const isBeatsSOOutput = (attrs: OutputSOAttributes): attrs is BeatsOutputSOAttributes =>
+  isBeatsOutput(attrs);
+
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
 
-  if (so.attributes.type === outputType.Otlp) {
-    const { output_id: outputId, ...attributes } = so.attributes;
-    return { id: outputId ?? so.id, ...attributes };
+  if (isBeatsSOOutput(so.attributes)) {
+    const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+    let parsedSsl;
+    try {
+      parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
+    } catch (e) {
+      logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
+    }
+    return {
+      id: outputId ?? so.id,
+      ...attributes,
+      ...(parsedSsl ? { ssl: parsedSsl } : {}),
+      ...(proxyId ? { proxy_id: proxyId } : {}),
+    };
   }
 
-  // After the OTLP check, TypeScript narrows so.attributes to BeatsOutputSOAttributes
-  const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
-
-  let parsedSsl;
-  try {
-    parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
-  } catch (e) {
-    logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
-  }
-  return {
-    id: outputId ?? so.id,
-    ...attributes,
-    ...(parsedSsl ? { ssl: parsedSsl } : {}),
-    ...(proxyId ? { proxy_id: proxyId } : {}),
-  };
+  const { output_id: outputId, ...attributes } = so.attributes;
+  return { id: outputId ?? so.id, ...attributes };
 }
 
 async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean) {

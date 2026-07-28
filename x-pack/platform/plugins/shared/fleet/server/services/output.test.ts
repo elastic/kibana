@@ -13,6 +13,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 
 import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
+import type { NewElasticsearchOutput } from '../../common/types';
 import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
@@ -3330,20 +3331,22 @@ describe('Output Service', () => {
   describe('outputSavedObjectToOutput', () => {
     it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
       const so = mockOutputSO('output-test', {
+        type: 'elasticsearch',
         ssl: '{ "certificate": "cert", "key": "key" }',
       });
 
-      const output = outputSavedObjectToOutput(so);
+      const output = outputSavedObjectToOutput(so) as NewElasticsearchOutput;
 
       expect(output.ssl).toEqual({ certificate: 'cert', key: 'key' });
     });
 
     it('should return output object with no SSL field when SSL is an invalid JSON string', () => {
       const so = mockOutputSO('output-test', {
+        type: 'elasticsearch',
         ssl: 'invalid-json',
       });
 
-      const output = outputSavedObjectToOutput(so);
+      const output = outputSavedObjectToOutput(so) as NewElasticsearchOutput;
 
       expect(output.ssl).toEqual(undefined);
       expect(mockedLogger.warn).toHaveBeenCalledWith(
@@ -3353,10 +3356,11 @@ describe('Output Service', () => {
 
     it('should return output object with no SSL field when SSL is not a string', () => {
       const so = mockOutputSO('output-test', {
+        type: 'elasticsearch',
         ssl: { certificate: 'cert', key: 'key' },
       });
 
-      const output = outputSavedObjectToOutput(so);
+      const output = outputSavedObjectToOutput(so) as NewElasticsearchOutput;
 
       expect(output.ssl).toEqual(undefined);
     });
