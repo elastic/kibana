@@ -10,7 +10,7 @@ import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
+import { EPISODES_LIST_PAGE_SIZE } from '../constants';
 
 export interface FetchRulesByIdsParams {
   http: HttpStart;
@@ -30,7 +30,7 @@ export const fetchRulesByIds = async ({
   http,
   ids,
 }: FetchRulesByIdsParams): Promise<RuleResponse[]> => {
-  const idsToFetch = take(ids, ALERT_EPISODES_LIST_PAGE_SIZE);
+  const idsToFetch = take(ids, EPISODES_LIST_PAGE_SIZE);
   if (idsToFetch.length === 0) {
     return [];
   }
@@ -38,7 +38,7 @@ export const fetchRulesByIds = async ({
   const response = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
     query: {
       filter: buildRuleIdsFilter(idsToFetch),
-      perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+      perPage: EPISODES_LIST_PAGE_SIZE,
       page: 1,
     },
   });

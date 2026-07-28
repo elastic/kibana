@@ -22,7 +22,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
-import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
+import { RELATED_EPISODES_LIMIT } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
@@ -75,7 +75,7 @@ export function RelatedEpisodesGroupSubsection({
     useFetchSameGroupEpisodesQuery({
       ruleId,
       excludeEpisodeId: currentEpisodeId,
-      pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
+      pageSize: RELATED_EPISODES_LIMIT,
       groupHash,
       services: { expressions, spaces },
       toastDanger,

@@ -7,7 +7,7 @@
 
 import { buildTagSuggestionsQuery } from '@kbn/alerting-v2-common-queries';
 
-export const ALERT_ACTION_TAG_SUGGESTIONS_LIMIT = 20;
+export { TAG_SUGGESTIONS_LIMIT } from '@kbn/alerting-v2-common-queries';
 
 export const buildAlertActionTagSuggestionsQuery = (spaceId: string): string =>
   buildTagSuggestionsQuery(spaceId);

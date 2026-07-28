@@ -15,14 +15,15 @@ export {
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
 } from '@kbn/alerting-v2-constants';
-export { HISTOGRAM_EPISODE_LIMIT } from '@kbn/alerting-v2-common-queries';
+export {
+  HISTOGRAM_EPISODE_LIMIT,
+  EPISODES_LIST_PAGE_SIZE,
+  RELATED_EPISODES_LIMIT,
+} from '@kbn/alerting-v2-common-queries';
 
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
-export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
-/** Max episodes returned per list page (ESQL LIMIT) and max unique rules resolved in one batch. */
-export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
 export const QUERY_STALE_TIME = 30_000;
 /**
  * Fields produced by buildEpisodesHistogramQuery that are valid as breakdown dimensions.
