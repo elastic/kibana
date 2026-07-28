@@ -169,6 +169,9 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     options.addArguments('disk-cache-dir', '/dev/null');
   }
 
+  const v8ProfLogPath = resolve(process.cwd(), 'target', 'kibana-v8prof-%p.log');
+  options.addArguments(`js-flags=--prof --no-logfile-per-isolate --logfile=${v8ProfLogPath}`);
+
   const prefs = new logging.Preferences();
   prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
   options.setUserPreferences(chromiumUserPrefs);

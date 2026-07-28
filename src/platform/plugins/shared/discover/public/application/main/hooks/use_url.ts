@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import type { History } from 'history';
 import useLatest from 'react-use/lib/useLatest';
-import { diag, diagGuard } from '../../../utils/diag_trace';
+import { diag } from '../../../utils/diag_trace';
 
 export function useUrl({
   history,
@@ -38,7 +38,6 @@ export function useUrl({
       });
       if (pathname === '/' && !search && !hash && !savedSearchId) {
         diag('useUrl:onNewUrl', { pathname });
-        diagGuard('useUrl:onNewUrl', 100);
         onNewUrl.current();
       }
     });

@@ -47,7 +47,7 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
-import { diag, diagGuard } from '../../../../utils/diag_trace';
+import { diag } from '../../../../utils/diag_trace';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -66,7 +66,6 @@ export const SingleTabView = ({
   runtimeStateManager,
   searchSessionManager,
 }: SingleTabViewProps) => {
-  diagGuard('render:SingleTabView', 1000);
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
 

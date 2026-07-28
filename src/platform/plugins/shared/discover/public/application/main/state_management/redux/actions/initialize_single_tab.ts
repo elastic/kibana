@@ -37,7 +37,7 @@ import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
-import { diag, diagGuard } from '../../../../../utils/diag_trace';
+import { diag } from '../../../../../utils/diag_trace';
 
 export interface InitializeSingleTabsParams {
   customizationService: ConnectedCustomizationService;
@@ -71,7 +71,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       hasDataViewSpec: Boolean(dataViewSpec),
       specId: dataViewSpec?.id,
     });
-    diagGuard('singleTab:start', 100);
     const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
       selectTabRuntimeState(runtimeStateManager, tabId);
 
