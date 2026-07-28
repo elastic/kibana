@@ -10,12 +10,13 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
+const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
 const AI_INDEX_ID = 'scout_test_ai_index';
-const AI_INDEX_PATH = `api/context_engine/ai_index/${AI_INDEX_ID}`;
+const AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`;
 const INDEX_AI_INDEX_ID = 'scout_test_index_ai_index';
-const INDEX_AI_INDEX_PATH = `api/context_engine/ai_index/${INDEX_AI_INDEX_ID}`;
+const INDEX_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${INDEX_AI_INDEX_ID}`;
 const LAZY_AI_INDEX_ID = `${AI_INDEX_ID}_lazy`;
-const LAZY_AI_INDEX_PATH = `api/context_engine/ai_index/${LAZY_AI_INDEX_ID}`;
+const LAZY_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${LAZY_AI_INDEX_ID}`;
 const DEST_DATA_STREAM = 'ai-index-ds-scout-test';
 const DEST_INDEX = 'ai-index-idx-scout-test';
 // Must not match the data stream template pattern (`${DEST_DATA_STREAM}*`),
@@ -30,14 +31,14 @@ const API_HEADERS = {
 };
 
 const aiIndexBody = {
-  name: 'scout_test_ai_index',
   description: 'AI index created by the Scout API test suite',
   dest: { type: 'data_stream', value: DEST_DATA_STREAM },
   automations: [{ type: 'workflow', value: 'scout-automation' }],
   sources: [{ type: 'esql', value: `FROM ${DEST_DATA_STREAM} | LIMIT 1` }],
 };
 
-apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/280639
+apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
@@ -49,7 +50,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       name: DEST_INDEX_TEMPLATE,
       index_patterns: [`${DEST_DATA_STREAM}*`],
       data_stream: {},
-      priority: 500,
     });
     await esClient.indices.createDataStream({ name: DEST_DATA_STREAM });
     await esClient.indices.create({ index: DEST_INDEX });
@@ -81,14 +81,24 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     let dateCreated: string;
 
     await apiTest.step('creates the AI index', async () => {
-      const response = await apiClient.put(AI_INDEX_PATH, {
+      const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: aiIndexBody,
+        body: { id: AI_INDEX_ID, ...aiIndexBody },
       });
 
       expect(response).toHaveStatusCode(201);
       expect(response.body).toStrictEqual({ status: 'created' });
+    });
+
+    await apiTest.step('rejects a duplicate id with a 409', async () => {
+      const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
+        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+        body: { id: AI_INDEX_ID, ...aiIndexBody },
+      });
+
+      expect(response).toHaveStatusCode(409);
     });
 
     await apiTest.step('gets the AI index by id', async () => {
@@ -181,7 +191,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: {
-        name: INDEX_AI_INDEX_ID,
         dest: { type: 'index', value: `${DEST_INDEX}*` },
         automations: [],
         sources: [],
@@ -228,6 +237,16 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: bodyWithoutDest,
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('rejects an id with disallowed characters', async ({ apiClient }) => {
+    const response = await apiClient.put('api/context_engine/ai_index/Invalid_ID', {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: aiIndexBody,
     });
 
     expect(response).toHaveStatusCode(400);

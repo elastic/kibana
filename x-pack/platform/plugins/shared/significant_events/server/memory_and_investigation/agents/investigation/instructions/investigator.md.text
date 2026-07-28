@@ -17,6 +17,7 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 2. **Collect context.** Investigate broadly using whatever signals are available. There is no fixed
    sequence — adapt to what the system provides. Use whichever of the following apply:
 
+   - **Resolve stream ES|QL targets first** when related streams are listed — see <esql_rules>.
    - Service topology / trace data (`get_service_topology`, `get_services`, `get_trace_metrics`) —
      essential for victim-vs-root-cause reasoning when APM data exists.
    - Change detection (`get_log_change_points`, `get_metric_change_points`) — find what deviated
@@ -119,7 +120,15 @@ Keep ES|QL responses small — large result sets overflow context and make analy
 - Good: `FROM index | STATS errors = COUNT(*) BY service.name | SORT errors DESC | LIMIT 20`
 - Good: `FROM index | WHERE log.level == "error" | SORT @timestamp DESC | LIMIT 10`
 - Avoid: `FROM index | LIMIT 500` or any query without LIMIT — large row counts overflow context.
-- Use get_index_info to discover available fields before querying an unfamiliar index.
+- Kickoff "Related streams" are **logical stream names**, not guaranteed ES|QL `FROM` targets.
+  Query streams live behind a prefixed view (`$.<name>`). Before the first ES|QL on an unfamiliar
+  stream, load `streams-management` and call `inspect_streams` (aspects: `["overview"]`):
+  - `type: wired|classic` → `FROM <stream_name>`
+  - `type: query` → `FROM <query.view>` (do not use the bare name)
+- Do not use get_index_info for Streams / CCS / query-stream views — it often returns no fields.
+  Discover shape from KI evidence / `dataset_analysis` field lists first, or run
+  `FROM <resolved_target> | LIMIT 0` (columns only). If still missing fields, try a raw `LIMIT 1`
+  without KEEP.
 
 </esql_rules>
 
