@@ -7,18 +7,21 @@
 
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ABSOLUTE_MAX_FILE_SIZE_BYTES } from '@kbn/file-upload-common';
 
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 import type { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
-const bodySchema = schema.object({
-  file: schema.string({ maxLength: 1000000 }),
+// The UI accepts files up to the `fileUpload:maxFileSize` setting, which is capped
+// at ABSOLUTE_MAX_FILE_SIZE_BYTES, so the route must accept the same upper bound.
+export const parseCsvBodySchema = schema.object({
+  file: schema.string({ maxLength: ABSOLUTE_MAX_FILE_SIZE_BYTES }),
   copyAction: schema.string({ maxLength: 64 }) as Type<FieldCopyAction>,
 });
 
-type ReqBody = TypeOf<typeof bodySchema>;
+type ReqBody = TypeOf<typeof parseCsvBodySchema>;
 
 export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
   router.post<void, void, ReqBody>(
@@ -31,7 +34,7 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
         },
       },
       validate: {
-        body: bodySchema,
+        body: parseCsvBodySchema,
       },
     },
     async (contxt, req, res) => {
