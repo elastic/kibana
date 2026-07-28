@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/event-router-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Prototype: accepts events from external systems over HTTP and fans them out in-process to filtered listeners, which enqueue their own durable work. The router owns no poller and no queue.",
+  "plugin": {
+    "id": "eventRouter",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "eventRouter"
+    ],
+    "optionalPlugins": [
+      "taskManager"
+    ]
+  }
+}
