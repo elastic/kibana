@@ -690,6 +690,7 @@ describe('ai indices routes', () => {
       it('logs outcome:success after successful retrieval', async () => {
         aiIndexService.get.mockResolvedValue({
           id: 'customer_support',
+          managed: false,
           dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
           automations: [],
           sources: [],
