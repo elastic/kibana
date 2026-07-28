@@ -136,6 +136,14 @@ export const STATS_PROMOTE_DISABLED_TOOLTIP = i18n.translate(
   { defaultMessage: 'STATS queries cannot be promoted to rules yet' }
 );
 
+export const NOT_FILTER_ONLY_PROMOTE_DISABLED = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.notFilterOnlyPromoteDisabled',
+  {
+    defaultMessage:
+      'Only filter-only queries can be promoted. Rewrite the query as FROM … | WHERE … without other commands.',
+  }
+);
+
 export const DELETE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.deleteQueryErrorToastTitle',
   { defaultMessage: 'Failed to delete query' }
