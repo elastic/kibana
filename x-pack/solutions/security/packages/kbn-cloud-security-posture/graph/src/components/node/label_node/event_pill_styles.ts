@@ -47,21 +47,15 @@ export const getEventPillColors = (
 ): EventPillColors => {
   if (tone === 'alert') {
     return {
-      backgroundColor: isActive
-        ? euiTheme.colors.backgroundLightDanger
-        : euiTheme.colors.backgroundBaseDanger,
-      borderColor: isActive ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBaseDanger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      borderColor: isActive ? euiTheme.colors.primary : euiTheme.colors.borderBaseProminent,
       textColor: euiTheme.colors.textParagraph,
     };
   }
 
   return {
-    backgroundColor: isActive
-      ? euiTheme.colors.backgroundBasePrimary
-      : euiTheme.colors.backgroundBasePlain,
-    borderColor: isActive
-      ? euiTheme.colors.borderBasePrimary
-      : euiTheme.colors.borderBaseProminent,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderColor: isActive ? euiTheme.colors.primary : euiTheme.colors.borderBaseProminent,
     textColor: euiTheme.colors.textParagraph,
   };
 };

@@ -265,7 +265,7 @@ export const Minimap = ({
   `;
 
   return (
-    <Panel position="bottom-left" css={panelCss} data-test-subj={GRAPH_MINIMAP_ID}>
+    <Panel position="bottom-right" css={panelCss} data-test-subj={GRAPH_MINIMAP_ID}>
       {isExpanded ? (
         <div css={expandedPanelCss}>
           <GraphControlTooltip content={CollapseLabel} position="top">

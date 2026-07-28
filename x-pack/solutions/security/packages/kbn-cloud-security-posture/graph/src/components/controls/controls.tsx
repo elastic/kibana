@@ -103,8 +103,8 @@ const CONTROL_BUTTON_SIZE = 32;
 const CONTROL_BUTTON_RADIUS = 4;
 const ZOOM_BUTTON_GAP = 4;
 const SECTION_GAP = 8;
-/** Distance from the right edge of the graph canvas to the controls panel. */
-export const CONTROL_PANEL_MARGIN_RIGHT = 16;
+/** Distance from the canvas edge to the controls panel. */
+export const CONTROL_PANEL_MARGIN = 16;
 /** EUI medium drop shadow for the controls panel. */
 const CONTROL_PANEL_SHADOW = 'm' as const;
 
@@ -127,7 +127,7 @@ const ControlButton = ({
   disabled,
   controlButtonCss,
 }: ControlButtonProps) => (
-  <GraphControlTooltip content={tooltipContent} position="left" disableScreenReaderOutput>
+  <GraphControlTooltip content={tooltipContent} position="right" disableScreenReaderOutput>
     <EuiButtonIcon
       iconType={iconType}
       aria-label={ariaLabel}

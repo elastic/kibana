@@ -18,7 +18,6 @@ import type { NodeViewModel } from '../types';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
   GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
-  GRAPH_BOTTOM_BAR_SEARCH_ID,
 } from '../test_ids';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
@@ -85,21 +84,19 @@ beforeEach(() => {
 });
 
 describe('BottomBar', () => {
-  it('renders keyboard shortcuts, search, and display controls', () => {
+  it('renders keyboard shortcuts and display controls', () => {
     renderBottomBar();
 
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('cloudSecurityGraphGraphInvestigationSearch')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID)).toBeInTheDocument();
   });
 
   it('shows shortcut hints in control button aria labels', () => {
     renderBottomBar();
 
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toHaveAttribute(
-      'aria-label',
-      'Search   S'
-    );
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID)).toHaveAttribute(
       'aria-label',
       'Display   D'

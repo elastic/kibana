@@ -70,8 +70,8 @@ const pillHitTargetCss = css`
 const EventPill = styled.div<{
   backgroundColor: string;
   borderColor: string;
+  defaultShadow?: string;
   hoverShadow?: string;
-  dragShadow?: string;
 }>`
   display: inline-flex;
   align-items: center;
@@ -84,20 +84,16 @@ const EventPill = styled.div<{
   border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ backgroundColor }) => backgroundColor};
   max-width: 100%;
-  box-shadow: none;
+  ${({ defaultShadow }) => defaultShadow ?? ''}
   transition: box-shadow 0.2s ease, border-width 0.2s ease;
 
-  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+  .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
     ${({ hoverShadow }) => hoverShadow ?? ''}
   }
 
-  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
-    border-width: 2px;
-  }
-
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
     border-width: 2px;
-    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
@@ -117,8 +113,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   } = props.data as LabelNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
-  const hoverShadow = useEuiShadow('xs');
-  const dragShadow = useEuiShadow('xs');
+  const defaultShadow = useEuiShadow('xs');
+  const hoverShadow = useEuiShadow('s');
   const zoom = useViewportZoom();
   const isMultipleNodesSelected = useMultipleNodesSelected();
   const showExpandButton = interactive && !isMultipleNodesSelected;
@@ -184,8 +180,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
           data-test-subj={TEST_SUBJ_SHAPE}
           backgroundColor={pillColors.backgroundColor}
           borderColor={pillColors.borderColor}
+          defaultShadow={defaultShadow}
           hoverShadow={hoverShadow}
-          dragShadow={dragShadow}
         >
           {renderLabelText()}
           <LabelNodeBadges

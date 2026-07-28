@@ -41,7 +41,7 @@ describe('Minimap', () => {
     expect(minimap.querySelector('svg')?.childNodes).toHaveLength(2); // only <title> and <path> for mask
   });
 
-  it('should be at the bottom-left corner with subdued viewport over a plain frame', async () => {
+  it('should be at the bottom-right corner with subdued viewport over a plain frame', async () => {
     render(
       <ReactFlow>
         <Minimap />
@@ -49,7 +49,7 @@ describe('Minimap', () => {
     );
 
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
-    expect(minimap).toHaveClass('bottom left');
+    expect(minimap).toHaveClass('bottom right');
     const flowMinimap = minimap.querySelector('.react-flow__minimap');
     expect(flowMinimap).toHaveStyle({
       '--xy-minimap-background-color-props': '#F6F9FC',

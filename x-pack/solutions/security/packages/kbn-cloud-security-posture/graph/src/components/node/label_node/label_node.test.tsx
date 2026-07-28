@@ -303,6 +303,7 @@ describe('LabelNode', () => {
         borderBasePlain: '#cad3e2',
         borderBaseProminent: '#98a2b3',
         borderBasePrimary: '#0b64dd',
+        primary: '#0b64dd',
         textParagraph: '#1d2a3e',
       },
     } as EuiThemeComputed;
@@ -311,14 +312,14 @@ describe('LabelNode', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
       const colors = getEventPillColors(getEventPillTone(analysis), false, mockEuiTheme);
       expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBaseDanger);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseDanger);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseProminent);
     });
 
     it('returns active alert colors when selected', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
       const colors = getEventPillColors(getEventPillTone(analysis), true, mockEuiTheme);
-      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundLightDanger);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderStrongDanger);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBaseDanger);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.primary);
     });
 
     it('returns event colors for event-only nodes', () => {
@@ -331,8 +332,8 @@ describe('LabelNode', () => {
     it('returns active event colors when selected', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
       const colors = getEventPillColors(getEventPillTone(analysis), true, mockEuiTheme);
-      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePrimary);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBasePrimary);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePlain);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.primary);
     });
   });
 });

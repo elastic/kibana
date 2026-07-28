@@ -38,7 +38,7 @@ import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
-import { Controls, CONTROL_PANEL_MARGIN_RIGHT } from '../controls/controls';
+import { Controls, CONTROL_PANEL_MARGIN } from '../controls/controls';
 import { GraphInteractionToolContext } from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
 import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
@@ -520,7 +520,7 @@ export const Graph = memo<GraphProps>(
         height: 100%;
         display: flex;
         flex-direction: column;
-        background-color: ${euiTheme.colors.backgroundBasePlain};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
 
         .react-flow {
           flex: 1;
@@ -606,8 +606,8 @@ export const Graph = memo<GraphProps>(
                   <ZoomNodeInternalsSync />
                   {interactive && (
                     <Panel
-                      position="bottom-right"
-                      style={{ marginRight: CONTROL_PANEL_MARGIN_RIGHT, overflow: 'visible' }}
+                      position="bottom-left"
+                      style={{ marginLeft: CONTROL_PANEL_MARGIN, overflow: 'visible' }}
                     >
                       <Controls
                         fitViewOptions={fitViewOptions}
@@ -618,7 +618,7 @@ export const Graph = memo<GraphProps>(
                     </Panel>
                   )}
                   {children}
-                  <Background id={backgroundId} />
+                  <Background id={backgroundId} bgColor={euiTheme.colors.backgroundBaseSubdued} />
                   {interactive && showMinimap && (
                     <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
                   )}
