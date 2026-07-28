@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useServiceFlyoutContext } from '../service_flyout_context';
@@ -149,6 +150,7 @@ export function ServiceFlyoutOverview() {
           <LatencyAggregationTypeSelect
             latencyAggregationType={latencyAggregationType}
             onChange={setLatencyAggregationType}
+            ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
           />
         ),
       }),

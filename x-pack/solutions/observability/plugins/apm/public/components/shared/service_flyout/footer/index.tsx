@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
@@ -149,6 +149,10 @@ export function ServiceFlyoutFooter() {
                 iconSide="right"
                 disabled={actionGroups.length === 0}
                 data-test-subj="serviceFlyoutActionsButton"
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+                  element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+                })}
               >
                 {i18n.translate('xpack.apm.serviceFlyout.actionsButtonLabel', {
                   defaultMessage: 'Actions',

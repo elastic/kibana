@@ -8,7 +8,10 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.avg, text: 'Average' },
@@ -19,13 +22,18 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
 export function LatencyAggregationTypeSelect({
   latencyAggregationType,
   onChange,
+  ebt,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   onChange: (value: LatencyAggregationType) => void;
+  ebt?: Omit<EbtClickAttrs, 'action'>;
 }) {
   return (
     <EuiSelect
       data-test-subj="apmLatencyChartSelect"
+      {...(ebt
+        ? getEbtProps({ action: APM_EBT_ACTIONS.SET_LATENCY_AGGREGATION_TYPE, ...ebt })
+        : {})}
       compressed
       aria-label={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.selector', {
         defaultMessage: 'Metric selector',

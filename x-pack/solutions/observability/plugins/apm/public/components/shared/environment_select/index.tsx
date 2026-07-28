@@ -10,6 +10,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { CSSObject } from '@emotion/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
+import { APM_EBT_ACTIONS } from '../../app/ebt_constants';
 import {
   getEnvironmentLabel,
   ENVIRONMENT_NOT_DEFINED,
@@ -64,6 +67,7 @@ export function EnvironmentSelect({
   compressed,
   hideLabel,
   cssOverride,
+  ebt,
 }: {
   environment: Environment;
   availableEnvironments: Environment[];
@@ -76,6 +80,7 @@ export function EnvironmentSelect({
   compressed?: boolean;
   hideLabel?: boolean;
   cssOverride?: CSSObject;
+  ebt?: Omit<EbtClickAttrs, 'action'>;
 }) {
   const { isSmall } = useBreakpoints();
   const fullWidth = fullWidthProp ?? isSmall;
@@ -160,6 +165,7 @@ export function EnvironmentSelect({
         )}
         compressed={compressed}
         data-test-subj="environmentFilter"
+        {...(ebt ? getEbtProps({ action: APM_EBT_ACTIONS.SET_ENVIRONMENT, ...ebt }) : {})}
         fullWidth={fullWidth}
         async
         isClearable={false}

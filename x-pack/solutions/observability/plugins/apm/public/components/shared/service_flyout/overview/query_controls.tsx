@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
@@ -28,6 +29,8 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
+import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 
 export function ServiceFlyoutQueryControls() {
   const {
@@ -138,6 +141,10 @@ export function ServiceFlyoutQueryControls() {
                     }
                   )}
                   data-test-subj="serviceFlyoutTransactionTypeSelect"
+                  {...getEbtProps({
+                    action: APM_EBT_ACTIONS.SET_TRANSACTION_TYPE,
+                    element: SERVICE_FLYOUT_EBT_ELEMENTS.QUERY_CONTROLS,
+                  })}
                   disabled={isTransactionTypeDisabled}
                   options={
                     isTransactionTypeDisabled
@@ -168,6 +175,7 @@ export function ServiceFlyoutQueryControls() {
                 rangeFrom={rangeFrom ?? ''}
                 rangeTo={rangeTo ?? ''}
                 onChange={(nextEnvironment) => setEnvironment(nextEnvironment as Environment)}
+                ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.QUERY_CONTROLS }}
               />
             </EuiFlexItem>
           </EuiFlexGrid>
