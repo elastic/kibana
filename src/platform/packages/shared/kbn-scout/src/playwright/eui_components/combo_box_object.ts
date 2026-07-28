@@ -57,17 +57,8 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
    * accessible name keeps the full label — so `getByRole('option', { name })`
    * resolves reliably where a text/title match would not. Being a poll, it also
    * waits out async / server-side filtering (it only passes once the real match
-   * renders, never a stale pre-filter suggestion). An exact-name match is
-   * preferred over the default substring match (e.g. picking a plain "ip"
-   * option over a co-rendered option whose name merely contains "ip", such as
-   * "clientip"); only when no option's name is an exact match does a keyboard
-   * fallback (`ArrowDown` + `Enter`) handle genuine duplicate labels.
-   *
-   * Note this can't disambiguate options whose *own* accessible name embeds
-   * another string as a real substring with no separator (e.g. a type-icon's
-   * label concatenated straight onto the field name) — callers with a
-   * consumer-specific unique identifier (like a per-option `data-test-subj`)
-   * should prefer selecting by that instead.
+   * renders, never a stale pre-filter suggestion). A single match is clicked; a
+   * keyboard fallback (`ArrowDown` + `Enter`) handles duplicate labels.
    *
    * For free-text `onCreateOption` combos use {@link setCustomSelectedOptions}.
    */
@@ -79,17 +70,13 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
       await this.inputWrapper.click();
       await this.searchField.fill(label);
 
-      const options = this.optionsList().getByRole('option', { name: label });
-      await expect.poll(() => options.count(), { timeout }).toBeGreaterThan(0);
-
-      const exactOption = this.optionsList().getByRole('option', { name: label, exact: true });
-      if ((await exactOption.count()) === 1) {
-        await exactOption.click();
-      } else if ((await options.count()) === 1) {
-        await options.click();
+      const option = this.optionsList().getByRole('option', { name: label });
+      await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
+      if ((await option.count()) === 1) {
+        await option.click();
       } else {
-        // Multiple substring matches with no single exact match — keyboard-select
-        // the highlighted match; avoids the nth-methods banned in kbn-scout.
+        // Duplicate label / multiple substring matches — keyboard-select the
+        // highlighted match; avoids the nth-methods banned in kbn-scout.
         await this.searchField.press('ArrowDown');
         await this.searchField.press('Enter');
       }
