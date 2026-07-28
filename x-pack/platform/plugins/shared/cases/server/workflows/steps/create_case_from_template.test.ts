@@ -441,9 +441,9 @@ describe('createCaseFromTemplateStepDefinition', () => {
       };
 
       const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
-        buildTemplateSO(templateDefinition, { templateVersion: 4 })
-      );
+      const getTemplate = jest
+        .fn()
+        .mockResolvedValue(buildTemplateSO(templateDefinition, { templateVersion: 4 }));
       const getCasesClient = jest.fn().mockResolvedValue({
         templates: { getTemplate },
         configure: { get: jest.fn() },
@@ -469,7 +469,9 @@ describe('createCaseFromTemplateStepDefinition', () => {
         total: 0,
       });
       templatesService.getTemplate.mockResolvedValue(
-        buildTemplateSO(templateDefinition, { templateVersion: 4 }) as unknown as SavedObject<Template>
+        buildTemplateSO(templateDefinition, {
+          templateVersion: 4,
+        }) as unknown as SavedObject<Template>
       );
       const resolved = await resolveTemplateForCreate({
         templateId: 'triage_template',
