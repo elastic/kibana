@@ -8,7 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { addDataLayer, enableElasticChartDebug, testData } from '../fixtures';
+import { addDataLayer, enableElasticChartDebug, openEmptyLensEditor, testData } from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
@@ -17,17 +17,30 @@ function getNonEmptyLineSeriesCount(state: DebugState): number {
 }
 
 spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH_INDEX_PATTERN
-    );
-    await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVE_PATHS.KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN
-    );
+  // Prefer API-created DVs over the kbn archive: the archive uses saved-object id
+  // `long-window-logstash-*`, and the unencoded `*` in data-view URLs 404s under CI load.
+  let longWindowDataViewId: string | undefined;
+
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+    const { data: longWindowDv } = await apiServices.dataViews.create({
+      title: testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH,
+      // Name matches title so switcher rows resolve as `dataView-long-window-logstash-*`.
+      name: testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH,
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    longWindowDataViewId = longWindowDv.id;
+
+    await apiServices.dataViews.create({
+      title: testData.DATA_VIEW_ID.FLIGHTS,
+      name: testData.DATA_VIEW_ID.FLIGHTS,
+      timeFieldName: 'timestamp',
+      spaceId: scoutSpace.id,
+    });
 
     await scoutSpace.uiSettings.set({
       'courier:ignoreFilterIfFieldNotInIndex': true,
-      defaultIndex: testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH,
+      defaultIndex: longWindowDataViewId ?? testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': JSON.stringify(testData.MULTIPLE_DATA_VIEWS_TIME_RANGE),
     });
@@ -56,10 +69,14 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
       const { visualize, lens, filterBar } = pageObjects;
 
       await spaceTest.step('build multi-layer chart with logstash and flights layers', async () => {
-        await lens.openFullEditor();
+        await openEmptyLensEditor(pageObjects);
 
-        // Logstash layer — switch data panel to long-window, click bytes
-        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH);
+        // defaultIndex already points at the long-window DV; wait for it to resolve instead of
+        // opening the switcher (search + `*` titles races under parallel CI load).
+        await expect(page.testSubj.locator('lns-dataView-switch-link')).toHaveText(
+          testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH
+        );
+        await page.testSubj.locator('fieldToggle-bytes').waitFor({ state: 'visible' });
         await page.testSubj.click('fieldToggle-bytes');
 
         // Flights layer — switch data panel first so the new layer inherits flights,

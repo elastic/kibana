@@ -955,20 +955,21 @@ export class LensApp {
    * Waits for a saved `dataView-{title}` row and fails if it is missing
    * (does not fall back to "Explore matching indices").
    *
-   * Uses `typeWithDelay` (not `fill`): EuiSelectable filters on keystrokes, and a bulk
-   * `fill` can race so the matching row never appears under CI load.
+   * Does not type into the switcher search box: EuiSelectable filtering races with
+   * async option load under CI. Scopes to the :visible switcher because the layer
+   * panel also mounts `indexPattern-switcher` (hidden) while the popover is open.
    */
   async switchDataPanelIndexPattern(dataViewTitle: string) {
     const switchLink = this.page.testSubj.locator('lns-dataView-switch-link');
+    await switchLink.waitFor({ state: 'visible' });
     if ((await switchLink.innerText()).trim() === dataViewTitle) {
       return;
     }
 
     await switchLink.click();
-    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    // Layer config also uses `indexPattern-switcher`; only the open popover is visible.
+    const switcher = this.page.locator('[data-test-subj="indexPattern-switcher"]:visible');
     await switcher.waitFor({ state: 'visible' });
-    await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
-    // getByTestId escapes special chars (e.g. trailing `*` in index patterns)
     const matching = switcher.getByTestId(`dataView-${dataViewTitle}`);
     await matching.waitFor({ state: 'visible' });
     await matching.click();
