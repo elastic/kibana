@@ -31,7 +31,9 @@ export class MetricsSettingsPage {
     this.missingMetricIndicesCallout = this.page.getByTestId(
       'infraIndicesPanelSettingsWarningCallout'
     );
-    this.remoteClusterDangerCallout = this.page.getByTestId('infraIndicesPanelSettingsDangerCallout');
+    this.remoteClusterDangerCallout = this.page.getByTestId(
+      'infraIndicesPanelSettingsDangerCallout'
+    );
     this.usedByRulesWarningCallout = this.page.getByTestId(
       'infraIndicesPanelSettingsWarningCalloutUsedByRules'
     );
