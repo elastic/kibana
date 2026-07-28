@@ -22,11 +22,14 @@ import {
   selectTabRuntimeState,
   type DiscoverAppState,
 } from '../redux';
-import type { ProfileStateDefinition } from '../../../../context_awareness';
-import { ProfileStateType } from '../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../../../common/context_awareness';
 import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-interface SecondaryProfileState {
+interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;
   secondaryPersistentValue: string;
 }

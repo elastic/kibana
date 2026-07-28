@@ -2356,10 +2356,10 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-test-helpers@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.1.0.tgz#738c02c7efd00b36d179e057f0f81c1a602555c4"
-  integrity sha512-Mkaav4vjOHULNWk0M+MqheaVyOzvFHYsiKHa+djKtQK9czpP92eY4399ZtYvU5ruyuROfMmj9TmDVJn6iFc0oQ==
+"@elastic/eui-test-helpers@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.2.0.tgz#60fb34fa36ba169a1ae639284f36b3be43d3c82a"
+  integrity sha512-1k27oE2Wkogh6yeXmUa0kp3D6bjm+8Cv4v8MniBMyLBHwKGK41YQebKAkfmGq4V2xHV5Jv+lAkuTYZf9Iyr0ww==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
@@ -7079,6 +7079,14 @@
   uid ""
 
 "@kbn/evals-plugin@link:x-pack/platform/plugins/shared/evals":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-runner@link:x-pack/platform/packages/shared/kbn-evals-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-skills-plugin@link:x-pack/platform/plugins/shared/evals_skills":
   version "0.0.0"
   uid ""
 
