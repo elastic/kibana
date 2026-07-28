@@ -428,6 +428,22 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       })
     );
 
+    dispatch(
+      updateAttributes({
+        tabId,
+        attributes: {
+          visContext: undefined,
+          controlGroupState: undefined,
+        },
+      })
+    );
+    dispatch(
+      internalStateSlice.actions.setEsqlVariables({
+        tabId,
+        esqlVariables: [],
+      })
+    );
+
     dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
 

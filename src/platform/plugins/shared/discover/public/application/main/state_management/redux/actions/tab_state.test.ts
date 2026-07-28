@@ -23,6 +23,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
@@ -631,6 +632,27 @@ describe('tab_state actions', () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
+      const esqlVariables = [
+        { key: 'status', type: 'values', value: 'active' } as ESQLControlVariable,
+      ];
+
+      // Set ES|QL-specific attributes and a shared attribute before the transition
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            visContext: {},
+            controlGroupState: mockControlState,
+            timeRestore: true,
+          },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setEsqlVariables({
+          tabId,
+          esqlVariables,
+        })
+      );
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
       const prevDefaultProfileState = tab.defaultProfileState;
@@ -641,6 +663,12 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
       });
+      expect(tab.attributes).toStrictEqual({
+        visContext: {},
+        controlGroupState: mockControlState,
+        timeRestore: true,
+      });
+      expect(tab.esqlVariables).toBe(esqlVariables);
 
       expect(prevDefaultProfileState.fieldsToReset).toBe('none');
       expect(typeof prevDefaultProfileState.resetId).toBe('string');
@@ -677,6 +705,12 @@ describe('tab_state actions', () => {
         type: DataSourceType.DataView,
         dataViewId: dataView.id,
       });
+      expect(tab.attributes).toStrictEqual({
+        visContext: undefined,
+        controlGroupState: undefined,
+        timeRestore: true,
+      });
+      expect(tab.esqlVariables).toStrictEqual([]);
 
       expect(tab.defaultProfileState.fieldsToReset).toBe('all');
       expect(typeof tab.defaultProfileState.resetId).toBe('string');
