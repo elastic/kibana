@@ -18,11 +18,13 @@ import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_obj
 import { UnifiedFieldList } from '@kbn/unified-field-list/test/scout/ui/fixtures/page_objects';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { spaceTest as spaceBaseTest } from './common';
+import { LookupIndexEditor } from './common/page_objects';
 
 export type DiscoverPageObjects = PageObjects & {
   inspector: Inspector;
   unifiedFieldList: UnifiedFieldList;
   docViewer: DocViewer;
+  lookupIndexEditor: LookupIndexEditor;
 };
 
 export interface DiscoverTestFixtures {
@@ -37,6 +39,7 @@ const extendWithDiscoverPageObjects = (
   inspector: createLazyPageObject(Inspector, page),
   unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
   docViewer: createLazyPageObject(DocViewer, page),
+  lookupIndexEditor: createLazyPageObject(LookupIndexEditor, page, pageObjects.dataGrid),
 });
 
 export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, ScoutParallelWorkerFixtures>({

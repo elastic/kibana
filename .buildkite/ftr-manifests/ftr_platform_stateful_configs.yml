@@ -82,7 +82,6 @@ enabled:
   - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/embeddable_2/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
-  - src/platform/test/functional/apps/discover/esql_3/config.ts
   - src/platform/test/functional/apps/discover/esql_4/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group3/config.ts
