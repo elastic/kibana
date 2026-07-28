@@ -7,22 +7,51 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiTextColor } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { KillProcessActionOutputContent } from '../../../../../common/endpoint/types';
 
+const KILLED_LABEL = i18n.translate(
+  'xpack.securitySolution.management.killProcessActionResult.killedLabel',
+  {
+    defaultMessage: 'Killed',
+  }
+);
+const SUSPENDED_LABEL = i18n.translate(
+  'xpack.securitySolution.management.killProcessActionResult.suspendedLabel',
+  {
+    defaultMessage: 'Suspended',
+  }
+);
+const NOT_KILLED_LABEL = i18n.translate(
+  'xpack.securitySolution.management.killProcessActionResult.notKilledLabel',
+  {
+    defaultMessage: 'Not killed',
+  }
+);
+const NOT_SUSPENDED_LABEL = i18n.translate(
+  'xpack.securitySolution.management.killProcessActionResult.notSuspendedLabel',
+  {
+    defaultMessage: 'Not suspended',
+  }
+);
+
 export interface ProcessResultProps {
+  command: 'kill-process' | 'suspend-process';
   processResult: Required<KillProcessActionOutputContent>['descendants'][number] &
     Pick<KillProcessActionOutputContent, 'process_name'>;
   'data-test-subj'?: string;
 }
 
 export const ProcessResult = memo<ProcessResultProps>(
-  ({ processResult, 'data-test-subj': dataTestSubj }) => {
+  ({ command, processResult, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const processData: React.ReactNode = useMemo(() => {
       const processResultData: React.ReactNode[] = [];
+      const successMsg = command === 'kill-process' ? KILLED_LABEL : SUSPENDED_LABEL;
+      const failedMsg = command === 'kill-process' ? NOT_KILLED_LABEL : NOT_SUSPENDED_LABEL;
 
       if (processResult?.pid) {
         processResultData.push(
@@ -84,12 +113,34 @@ export const ProcessResult = memo<ProcessResultProps>(
         );
       }
 
+      if (processResultData.length > 0) {
+        processResultData.push(<DataSeparator key="failureMsg-sep" />);
+      }
+
+      if (processResult.was_killed === false || processResult.error) {
+        processResultData.push(
+          <EuiTextColor color="danger" key="failureMsg">
+            {failedMsg}
+            {processResult.error && ` - ${processResult.error}`}
+          </EuiTextColor>
+        );
+      } else {
+        processResultData.push(
+          <EuiTextColor key="successMsg" color="success">
+            {successMsg}
+          </EuiTextColor>
+        );
+      }
+
       return processResultData;
     }, [
+      command,
       processResult?.command,
       processResult?.entity_id,
+      processResult.error,
       processResult?.pid,
       processResult?.process_name,
+      processResult.was_killed,
     ]);
 
     return <div data-test-subj={getTestId()}>{processData}</div>;

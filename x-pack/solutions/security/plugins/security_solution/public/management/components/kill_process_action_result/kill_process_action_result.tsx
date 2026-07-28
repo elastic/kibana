@@ -58,33 +58,10 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
       );
     }, [action, agentId]);
 
-    const processResult: React.ReactNode = useMemo(() => {
-      if (!isCompleted) {
-        return null;
-      }
-
-      if (!action.outputs?.[agentId]?.content) {
-        return (
-          <EuiText size="s">
-            {i18n.translate(
-              'xpack.securitySolution.management.killProcessActionResult.noProcessResult',
-              { defaultMessage: 'No process result is available' }
-            )}
-          </EuiText>
-        );
-      }
-
-      return <ProcessResult processResult={action.outputs?.[agentId]?.content} />;
-    }, [action.outputs, agentId, isCompleted]);
-
     if (command !== 'kill-process' && command !== 'suspend-process') {
       window.console.warn(
         `KillProcessActionResult: Action provided not a kill-process or suspend-process command`
       );
-      return <></>;
-    }
-
-    if (!isCompleted) {
       return <></>;
     }
 
@@ -103,7 +80,17 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                   id="xpack.securitySolution.management.killProcessActionResult.processInfo"
                   defaultMessage="Action result:"
                 />
-                <div>{processResult}</div>
+
+                {hostActionOutput ? (
+                  <ProcessResult command={command} processResult={hostActionOutput} />
+                ) : (
+                  <div>
+                    {i18n.translate(
+                      'xpack.securitySolution.management.killProcessActionResult.noProcessResult',
+                      { defaultMessage: 'No process result is available' }
+                    )}
+                  </div>
+                )}
 
                 {hostActionOutput && hostActionOutput.descendants && (
                   <div>
@@ -118,6 +105,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                     {hostActionOutput.descendants.map((descendantResult) => {
                       return (
                         <ProcessResult
+                          command={command}
                           processResult={descendantResult}
                           key={`pid-${descendantResult.pid}`}
                         />
