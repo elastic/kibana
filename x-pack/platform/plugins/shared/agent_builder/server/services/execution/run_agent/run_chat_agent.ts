@@ -203,7 +203,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const updateConversationMetadata =
     conversationId && conversation?.template_id
       ? async (updates: Record<string, string>) => {
-          await context.esClient.asCurrentUser.update({
+          // Use asInternalUser — conversation docs live in a system (dot-prefixed) index
+          // that is not accessible to regular user credentials, matching the pattern
+          // used by ConversationService.getScopedClient.
+          await context.esClient.asInternalUser.update({
             index: conversationIndexName,
             id: conversationId,
             doc: { metadata: { ...currentMetadata, ...updates } },
