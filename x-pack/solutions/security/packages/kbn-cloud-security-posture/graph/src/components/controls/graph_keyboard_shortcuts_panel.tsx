@@ -23,9 +23,7 @@ import {
   DISPLAY_SHORTCUT,
   FIT_TO_SCREEN_SHORTCUT,
   FULL_SCREEN_SHORTCUT,
-  PAN_TOOL_SHORTCUT,
   SEARCH_TOOL_SHORTCUT,
-  SELECT_TOOL_SHORTCUT,
   ZOOM_IN_SHORTCUT,
   ZOOM_OUT_SHORTCUT,
 } from './graph_keyboard_shortcuts';
@@ -37,18 +35,6 @@ const panelTitle = i18n.translate(
 );
 
 const shortcuts = [
-  {
-    label: i18n.translate('securitySolutionPackages.csp.graph.controls.keyboardShortcuts.select', {
-      defaultMessage: 'Select tool',
-    }),
-    keys: [SELECT_TOOL_SHORTCUT],
-  },
-  {
-    label: i18n.translate('securitySolutionPackages.csp.graph.controls.keyboardShortcuts.pan', {
-      defaultMessage: 'Pan tool',
-    }),
-    keys: [PAN_TOOL_SHORTCUT],
-  },
   {
     label: i18n.translate('securitySolutionPackages.csp.graph.controls.keyboardShortcuts.search', {
       defaultMessage: 'Open search',

@@ -14,6 +14,11 @@ export const GlobalGraphStyles = () => {
   return (
     <Global
       styles={css`
+        .react-flow {
+          /* Keep the dotted Background (z-index: -1) above ancestor fills. */
+          isolation: isolate;
+        }
+
         .react-flow__node:focus:focus-visible {
           outline: none !important;
         }
@@ -22,20 +27,12 @@ export const GlobalGraphStyles = () => {
           vector-effect: non-scaling-stroke;
         }
 
-        .react-flow.graph-tool-pan .react-flow__pane {
+        .react-flow__pane {
           cursor: grab;
         }
 
-        .react-flow.graph-tool-pan .react-flow__pane:active {
+        .react-flow__pane:active {
           cursor: grabbing;
-        }
-
-        .react-flow.graph-tool-select .react-flow__pane {
-          cursor: default;
-        }
-
-        .react-flow__nodesselection {
-          display: none;
         }
 
         .react-flow.graph-highlight-origins-only .react-flow__node:not(.graph-origin-node) {

@@ -103,10 +103,12 @@ const CONTROL_BUTTON_SIZE = 32;
 const CONTROL_BUTTON_RADIUS = 4;
 const ZOOM_BUTTON_GAP = 4;
 const SECTION_GAP = 8;
-/** Distance from the right edge of the graph canvas to the controls panel. */
-export const CONTROL_PANEL_MARGIN_RIGHT = 16;
+/** Distance from the left edge of the graph canvas to the controls panel. */
+export const CONTROL_PANEL_MARGIN_LEFT = 16;
 /** EUI medium drop shadow for the controls panel. */
 const CONTROL_PANEL_SHADOW = 'm' as const;
+/** Relative zoom factor per button click — smaller than xyflow's default 1.2 for smoother steps. */
+const ZOOM_STEP_FACTOR = 1.12;
 
 interface ControlButtonProps {
   iconType: React.ComponentProps<typeof EuiButtonIcon>['iconType'];
@@ -127,7 +129,7 @@ const ControlButton = ({
   disabled,
   controlButtonCss,
 }: ControlButtonProps) => (
-  <GraphControlTooltip content={tooltipContent} position="left" disableScreenReaderOutput>
+  <GraphControlTooltip content={tooltipContent} position="right" disableScreenReaderOutput>
     <EuiButtonIcon
       iconType={iconType}
       aria-label={ariaLabel}
@@ -157,7 +159,7 @@ export const Controls = ({
 }: ControlsProps) => {
   const { euiTheme } = useEuiTheme();
   const groupShadow = useEuiShadow(CONTROL_PANEL_SHADOW);
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { getZoom, zoomTo, fitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
   // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
@@ -169,14 +171,14 @@ export const Controls = ({
   );
 
   const onZoomInHandler = useCallback(() => {
-    zoomIn({ duration: fitViewOptions?.duration });
+    zoomTo(getZoom() * ZOOM_STEP_FACTOR, { duration: fitViewOptions?.duration });
     onZoomIn?.();
-  }, [fitViewOptions?.duration, zoomIn, onZoomIn]);
+  }, [fitViewOptions?.duration, getZoom, zoomTo, onZoomIn]);
 
   const onZoomOutHandler = useCallback(() => {
-    zoomOut({ duration: fitViewOptions?.duration });
+    zoomTo(getZoom() / ZOOM_STEP_FACTOR, { duration: fitViewOptions?.duration });
     onZoomOut?.();
-  }, [fitViewOptions?.duration, zoomOut, onZoomOut]);
+  }, [fitViewOptions?.duration, getZoom, zoomTo, onZoomOut]);
 
   const onFitViewHandler = useCallback(() => {
     fitView(fitViewOptions);

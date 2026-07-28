@@ -9,11 +9,20 @@ import { GRID_SIZE } from '../constants';
 
 export const LAYOUT_GRID_SIZE_OFFSET = GRID_SIZE * 2;
 
-/** Dagre minimum separation between ranks (horizontal gaps in LR layout). */
-export const GRAPH_LAYOUT_RANK_SEP = LAYOUT_GRID_SIZE_OFFSET * 10;
+/**
+ * Horizontal gap between ranks (entity ↔ label ↔ entity).
+ * Kept compact so columns sit close without touching — see design example `exemplo.pdf`.
+ */
+export const GRAPH_LAYOUT_RANK_SEP = LAYOUT_GRID_SIZE_OFFSET * 8;
 
-/** Dagre minimum separation between nodes in the same rank (vertical gaps in LR layout). */
-export const GRAPH_LAYOUT_NODE_SEP = LAYOUT_GRID_SIZE_OFFSET * 14;
+/**
+ * Vertical gap between nodes in the same rank.
+ * Roughly one compact card of breathing room between siblings.
+ */
+export const GRAPH_LAYOUT_NODE_SEP = LAYOUT_GRID_SIZE_OFFSET * 8;
 
-/** Minimum gap enforced between node bounding boxes after post-layout overlap resolution. */
-export const GRAPH_LAYOUT_MIN_NODE_GAP = LAYOUT_GRID_SIZE_OFFSET;
+/**
+ * Minimum gap enforced between node bounding boxes after post-layout overlap resolution.
+ * Small safety margin so alignment passes do not leave nodes touching.
+ */
+export const GRAPH_LAYOUT_MIN_NODE_GAP = LAYOUT_GRID_SIZE_OFFSET * 2;

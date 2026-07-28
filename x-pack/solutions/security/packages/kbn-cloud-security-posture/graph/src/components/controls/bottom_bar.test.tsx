@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ReactFlow } from '@xyflow/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -19,9 +18,7 @@ import type { NodeViewModel } from '../types';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
   GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
-  GRAPH_BOTTOM_BAR_PAN_TOOL_ID,
   GRAPH_BOTTOM_BAR_SEARCH_ID,
-  GRAPH_BOTTOM_BAR_SELECT_TOOL_ID,
 } from '../test_ids';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
@@ -73,6 +70,7 @@ const renderBottomBar = (
               registerApplyFiltersToggle,
               registerSearchPanelToggle,
               registerFocusSearchInput,
+              openInGraphSearch: jest.fn(),
             }}
           >
             <BottomBar
@@ -92,40 +90,17 @@ beforeEach(() => {
 });
 
 describe('BottomBar', () => {
-  it('renders keyboard shortcuts, tools, search, and display controls', () => {
+  it('renders keyboard shortcuts, search, and display controls', () => {
     renderBottomBar();
 
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID)).toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
-  });
-
-  it('switches to pan tool when pan button is clicked', async () => {
-    const setInteractionTool = jest.fn();
-    renderBottomBar('select', setInteractionTool);
-
-    await userEvent.click(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID));
-
-    expect(setInteractionTool).toHaveBeenCalledWith('pan');
   });
 
   it('shows shortcut hints in tool button aria labels', () => {
     renderBottomBar();
 
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toHaveAttribute(
-      'aria-label',
-      'Select   V'
-    );
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID)).toHaveAttribute(
-      'aria-label',
-      'Pan   Space'
-    );
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toHaveAttribute(
       'aria-label',
       'Search   S'

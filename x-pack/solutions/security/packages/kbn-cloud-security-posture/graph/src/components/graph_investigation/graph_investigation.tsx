@@ -223,6 +223,13 @@ export interface GraphInvestigationProps {
    * Whether to show toggle search action button. Defaults value is false.
    */
   showToggleSearch?: boolean;
+
+  /**
+   * Search controls layout for prototyping.
+   * - `split` (Option A): top KQL toggle + bottom in-graph search
+   * - `unified` (Option B): top search dropdown with both actions; bottom search hidden
+   */
+  searchControlsVariant?: 'split' | 'unified';
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -243,6 +250,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
+    searchControlsVariant = 'split',
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
@@ -363,13 +371,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       ipPopover.actions.closePopover();
       countryFlagsPopover.actions.closePopover();
       eventPopover.actions.closePopover();
-    }, [
-      nodeExpandPopover,
-      labelExpandPopover,
-      ipPopover,
-      countryFlagsPopover,
-      eventPopover,
-    ]);
+    }, [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]);
 
     const isPopoverOpen = [
       nodeExpandPopover,
@@ -556,14 +558,25 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         : undefined;
 
     return (
-      <>
+      <div
+        css={css`
+          height: 100%;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        `}
+      >
         <EuiFlexGroup
           data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
           onPointerDownCapture={handlePointerDownCapture}
           css={css`
+            flex: 1 1 auto;
+            min-height: 0;
             height: 100%;
+            overflow: hidden;
 
             .react-flow__panel.top.right {
               margin-right: 8px;
@@ -578,6 +591,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             }
 
             .react-flow__panel.bottom.right {
+              overflow: visible;
+            }
+
+            .react-flow__panel.bottom.left {
               overflow: visible;
             }
           `}
@@ -621,6 +638,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             css={css`
               border-top: ${useBorder()};
               position: relative;
+              min-height: 0;
+              overflow: hidden;
             `}
           >
             {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
@@ -641,6 +660,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                 <Actions
                   showInvestigateInTimeline={false}
                   showToggleSearch={showToggleSearch}
+                  searchControlsVariant={searchControlsVariant}
+                  nodes={nodes}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
                   searchFilterCounter={searchFilterCounter}
                   searchToggled={searchToggled}
@@ -654,6 +675,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   filtersState={graphFilters}
                   onFiltersChange={setGraphFilters}
                   nodes={nodes}
+                  showInGraphSearch={searchControlsVariant !== 'unified'}
                 />
               </Panel>
             </Graph>
@@ -664,7 +686,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         <ipPopover.PopoverComponent />
         <countryFlagsPopover.PopoverComponent />
         <eventPopover.PopoverComponent />
-      </>
+      </div>
     );
   }
 );
