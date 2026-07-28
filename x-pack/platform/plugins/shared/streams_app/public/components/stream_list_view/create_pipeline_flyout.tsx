@@ -85,12 +85,12 @@ function CreatePipelineHeader({
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h2 id={titleId}>
+          <h4 id={titleId}>
             {pipelineName ??
               i18n.translate('xpack.streams.createPipelineFlyout.untitled', {
                 defaultMessage: 'Untitled',
               })}
-          </h2>
+          </h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -1326,8 +1326,8 @@ export function DestinationFlyout({
       >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id={titleId}>{destinationName}</h2>
+            <EuiTitle size="xs">
+              <h4 id={titleId}>{destinationName}</h4>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -69,12 +69,12 @@ export function DestinationConfigurationFlyout({
       data-test-subj="destinationConfigurationFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>
+        <EuiTitle size="xs">
+          <h4 id={titleId}>
             {i18n.translate('xpack.streams.destinationConfigurationFlyout.title', {
               defaultMessage: 'Configure destination',
             })}
-          </h2>
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">

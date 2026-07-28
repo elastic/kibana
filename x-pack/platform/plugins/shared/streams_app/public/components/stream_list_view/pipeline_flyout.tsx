@@ -311,12 +311,12 @@ export function PipelineFlyout({
   return (
     <EuiFlyout size="m" onClose={onClose} aria-labelledby={titleId} data-test-subj="pipelineFlyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>
+        <EuiTitle size="xs">
+          <h4 id={titleId}>
             {i18n.translate('xpack.streams.pipelineFlyout.title', {
               defaultMessage: 'Apply Pipeline',
             })}
-          </h2>
+          </h4>
         </EuiTitle>
       </EuiFlyoutHeader>
 

@@ -226,12 +226,12 @@ output.elasticsearch:
         aria-labelledby="streamsSettingsFlyoutTitle"
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id="streamsSettingsFlyoutTitle">
+          <EuiTitle size="xs">
+            <h4 id="streamsSettingsFlyoutTitle">
               {i18n.translate('xpack.streams.streamsListView.settingsFlyoutTitle', {
                 defaultMessage: 'Streams Settings',
               })}
-            </h2>
+            </h4>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

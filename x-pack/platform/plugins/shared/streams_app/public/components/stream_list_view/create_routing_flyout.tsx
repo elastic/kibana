@@ -2155,8 +2155,8 @@ export function CreateRoutingFlyout({
       data-test-subj="createRoutingFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id={titleId}>
+        <EuiTitle size="xs">
+          <h4 id={titleId}>
             {isRoutingListFlow
               ? i18n.translate('xpack.streams.createRoutingFlyout.routeYourDataTitle', {
                   defaultMessage: 'Route your data',
@@ -2173,7 +2173,7 @@ export function CreateRoutingFlyout({
               : i18n.translate('xpack.streams.createRoutingFlyout.title', {
                   defaultMessage: 'Create routing conditions',
                 })}
-          </h2>
+          </h4>
         </EuiTitle>
         {isRoutingListFlow || initialStep === 'applied' ? (
           <>

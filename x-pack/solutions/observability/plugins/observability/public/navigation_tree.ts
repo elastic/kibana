@@ -78,7 +78,6 @@ function createNavTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
-      ...getWorkflowsNavPanel(coreStart),
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
@@ -271,118 +270,7 @@ function createNavTree({
               link: 'observabilityAIAssistant' as const,
             },
           ]
-        : [
-            {
-              link: 'agent_builder' as const,
-              icon: 'productAgent',
-            },
-          ]),
-      {
-        id: 'machine_learning-landing',
-        title: i18n.translate('xpack.observability.obltNav.machineLearning', {
-          defaultMessage: 'Machine Learning',
-        }),
-        renderAs: 'panelOpener',
-        icon: 'productML',
-        children: [
-          {
-            title: '',
-            children: [
-              {
-                link: 'ml:overview',
-              },
-              {
-                link: 'ml:dataVisualizer',
-              },
-              {
-                link: 'ml:dataDrift',
-                sideNavStatus: 'hidden',
-              },
-              {
-                link: 'ml:dataDriftPage',
-                sideNavStatus: 'hidden',
-              },
-              {
-                link: 'ml:fileUpload',
-                sideNavStatus: 'hidden',
-              },
-              {
-                link: 'ml:indexDataVisualizer',
-                sideNavStatus: 'hidden',
-              },
-            ],
-          },
-          {
-            id: 'category-anomaly_detection',
-            title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
-              defaultMessage: 'Anomaly detection',
-            }),
-            breadcrumbStatus: 'hidden',
-            children: [
-              {
-                link: 'management:anomaly_detection',
-                title: i18n.translate(
-                  'xpack.observability.obltNav.ml.anomaly_detection.manage_jobs',
-                  {
-                    defaultMessage: 'Manage jobs',
-                  }
-                ),
-              },
-              {
-                link: 'ml:anomalyExplorer',
-              },
-              {
-                link: 'ml:singleMetricViewer',
-              },
-            ],
-          },
-          {
-            id: 'category-data_frame analytics',
-            title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
-              defaultMessage: 'Data frame analytics',
-            }),
-            breadcrumbStatus: 'hidden',
-            children: [
-              {
-                link: 'ml:resultExplorer',
-              },
-              {
-                link: 'ml:analyticsMap',
-              },
-            ],
-          },
-          {
-            id: 'category-aiops_labs',
-            title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-              defaultMessage: 'AIOps Labs',
-            }),
-            breadcrumbStatus: 'hidden',
-            children: [
-              {
-                link: 'ml:logRateAnalysis',
-              },
-              {
-                link: 'ml:logRateAnalysisPage',
-                sideNavStatus: 'hidden',
-              },
-              {
-                link: 'ml:logPatternAnalysis',
-              },
-              {
-                link: 'ml:logPatternAnalysisPage',
-                sideNavStatus: 'hidden',
-              },
-              {
-                link: 'ml:changePointDetections',
-              },
-              {
-                link: 'ml:changePointDetectionsPage',
-                sideNavStatus: 'hidden',
-              },
-            ],
-          },
-        ],
-      },
+        : []),
       {
         id: 'otherTools',
         title: i18n.translate('xpack.observability.obltNav.otherTools', {
@@ -391,6 +279,127 @@ function createNavTree({
         renderAs: 'panelOpener',
         icon: 'wrench',
         children: [
+          {
+            id: 'otherTools-primary',
+            title: '',
+            children: [
+              ...getWorkflowsNavPanel(coreStart),
+              ...(showAiAssistant
+                ? []
+                : [
+                    {
+                      link: 'agent_builder' as const,
+                      icon: 'productAgent',
+                    },
+                  ]),
+              {
+                id: 'machine_learning-landing',
+                title: i18n.translate('xpack.observability.obltNav.machineLearning', {
+                  defaultMessage: 'Machine Learning',
+                }),
+                renderAs: 'panelOpener',
+                icon: 'productML',
+                children: [
+                  {
+                    title: '',
+                    children: [
+                      {
+                        link: 'ml:overview',
+                      },
+                      {
+                        link: 'ml:dataVisualizer',
+                      },
+                      {
+                        link: 'ml:dataDrift',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        link: 'ml:dataDriftPage',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        link: 'ml:fileUpload',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        link: 'ml:indexDataVisualizer',
+                        sideNavStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
+                    id: 'category-anomaly_detection',
+                    title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
+                      defaultMessage: 'Anomaly detection',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      {
+                        link: 'management:anomaly_detection',
+                        title: i18n.translate(
+                          'xpack.observability.obltNav.ml.anomaly_detection.manage_jobs',
+                          {
+                            defaultMessage: 'Manage jobs',
+                          }
+                        ),
+                      },
+                      {
+                        link: 'ml:anomalyExplorer',
+                      },
+                      {
+                        link: 'ml:singleMetricViewer',
+                      },
+                    ],
+                  },
+                  {
+                    id: 'category-data_frame analytics',
+                    title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
+                      defaultMessage: 'Data frame analytics',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      {
+                        link: 'ml:resultExplorer',
+                      },
+                      {
+                        link: 'ml:analyticsMap',
+                      },
+                    ],
+                  },
+                  {
+                    id: 'category-aiops_labs',
+                    title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
+                      defaultMessage: 'AIOps Labs',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      {
+                        link: 'ml:logRateAnalysis',
+                      },
+                      {
+                        link: 'ml:logRateAnalysisPage',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        link: 'ml:logPatternAnalysis',
+                      },
+                      {
+                        link: 'ml:logPatternAnalysisPage',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        link: 'ml:changePointDetections',
+                      },
+                      {
+                        link: 'ml:changePointDetectionsPage',
+                        sideNavStatus: 'hidden',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
           {
             link: 'logs:anomalies',
             title: i18n.translate('xpack.observability.obltNav.otherTools.logsAnomalies', {

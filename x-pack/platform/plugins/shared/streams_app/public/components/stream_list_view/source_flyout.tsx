@@ -379,52 +379,60 @@ function ConfiguredSourceBody({
           defaultMessage: 'API key',
         })}
       </EuiFormLabel>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {apiKeys.length > 0 ? (
         <EuiPanel
           hasShadow={false}
           hasBorder
-          paddingSize="s"
+          paddingSize="none"
           data-test-subj="sourceFlyoutApiKeyList"
+          className={css`
+            padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+            border-radius: ${euiTheme.border.radius.small};
+          `}
         >
-          {apiKeys.map((key, index) => (
-            <React.Fragment key={key.id}>
-              {index > 0 ? <EuiHorizontalRule margin="xs" /> : null}
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+            {apiKeys.map((key, index) => (
+              <React.Fragment key={key.id}>
+                {index > 0 ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="key" />
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="key" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s" color="subdued">
+                        {key.label}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        color="danger"
+                        flush="right"
+                        onClick={() => deleteKey(key.id)}
+                        data-test-subj="sourceFlyoutDeleteKeyButton"
+                      >
+                        {i18n.translate('xpack.streams.sourceFlyout.deleteKey', {
+                          defaultMessage: 'Delete',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s" color="subdued">
-                    {key.label}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    color="danger"
-                    flush="right"
-                    onClick={() => deleteKey(key.id)}
-                    data-test-subj="sourceFlyoutDeleteKeyButton"
-                  >
-                    {i18n.translate('xpack.streams.sourceFlyout.deleteKey', {
-                      defaultMessage: 'Delete',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </React.Fragment>
-          ))}
+              </React.Fragment>
+            ))}
+          </EuiFlexGroup>
         </EuiPanel>
       ) : null}
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiButton
         size="s"
-        className={css`
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-          color: ${euiTheme.colors.textPrimary};
-          border: none;
-        `}
+        color="primary"
         onClick={generateKey}
         data-test-subj="sourceFlyoutGenerateKeyButton"
       >
@@ -440,7 +448,7 @@ function ConfiguredSourceBody({
           defaultMessage: 'Danger area',
         })}
       </EuiFormLabel>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <EuiButton
         color="danger"
         size="s"
@@ -491,22 +499,22 @@ export function SourceFlyout({
     <EuiFlyout
       size="s"
       type="push"
-      pushMinBreakpoint={800}
+      pushMinBreakpoint="m"
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="sourceFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>
+        <EuiTitle size="xs">
+          <h4 id={titleId}>
             {isConfiguring
               ? i18n.translate('xpack.streams.sourceFlyout.configureTitle', {
                   defaultMessage: 'Configure new source',
                 })
               : sourceName}
-          </h2>
+          </h4>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           {isConfiguring
             ? i18n.translate('xpack.streams.sourceFlyout.configuringDescription', {
