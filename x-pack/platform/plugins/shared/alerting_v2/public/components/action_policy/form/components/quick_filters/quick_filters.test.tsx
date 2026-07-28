@@ -312,11 +312,13 @@ describe('TagsFilter', () => {
     );
   });
 
-  it('restricts fetched tags to kind:alert', () => {
+  it('restricts fetched tags to kind: alert (typed, not raw KQL)', () => {
     renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
 
-    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
-      expect.objectContaining({ filter: 'kind:alert' })
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ kind: 'alert' }));
+    // must NOT use raw KQL filter anymore
+    expect(mockUseFetchRuleTags).not.toHaveBeenCalledWith(
+      expect.objectContaining({ filter: expect.anything() })
     );
   });
 
@@ -399,5 +401,36 @@ describe('TagsFilter', () => {
     await clickOption(user, 'quickFilterTagsList', 'production');
 
     expect(onChange).toHaveBeenCalledWith('rule.id : "x"');
+  });
+
+  it('shows cap guidance when API returns exactly 20 tags', async () => {
+    const twentyTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
+    mockUseFetchRuleTags.mockReturnValue({ data: twentyTags, isLoading: false });
+
+    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    await user.click(screen.getByTestId('quickFilterTags'));
+
+    expect(screen.getByTestId('quickFilterTagsCapGuidance')).toBeInTheDocument();
+  });
+
+  it('does not show cap guidance when API returns fewer than 20 tags', async () => {
+    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+    await user.click(screen.getByTestId('quickFilterTags'));
+
+    expect(screen.queryByTestId('quickFilterTagsCapGuidance')).not.toBeInTheDocument();
+  });
+
+  it('preserves out-of-result selected tags during subsequent selection changes', async () => {
+    // 'orphan' is selected but won't come back from the API
+    const onChange = jest.fn();
+    renderWithI18n(<TagsFilter matcher='rule.tags : "orphan"' onChange={onChange} />);
+
+    await user.click(screen.getByTestId('quickFilterTags'));
+    // select a tag that IS in the API results
+    await clickOption(user, 'quickFilterTagsList', 'production');
+
+    // Both the orphaned tag and the newly selected one must be in the result
+    expect(onChange).toHaveBeenCalledWith(expect.stringContaining('orphan'));
+    expect(onChange).toHaveBeenCalledWith(expect.stringContaining('production'));
   });
 });

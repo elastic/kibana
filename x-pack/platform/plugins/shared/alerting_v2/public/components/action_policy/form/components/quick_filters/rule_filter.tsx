@@ -28,7 +28,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
 import { mergeRuleIdsIntoMatcher, parseRuleIdsFromMatcher } from '../../matcher_quick_filter_utils';
 import {
-  ALERT_KIND_FILTER,
+  ALERT_KIND_RULE_LIST_FILTER,
   POPOVER_PANEL_STYLE,
   SELECTABLE_LIST_PROPS,
   type QuickFiltersProps,
@@ -59,7 +59,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     perPage: 50,
     search: debouncedSearch || undefined,
     enabled: isOpen,
-    filter: ALERT_KIND_FILTER,
+    filter: ALERT_KIND_RULE_LIST_FILTER,
   });
   const items = data?.items;
 
