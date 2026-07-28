@@ -171,16 +171,34 @@ function DetectionCard({
             flex: 1 1 ${TEXT_CONTENT_MIN_WIDTH};
           `}
         >
-          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            css={css`
+              row-gap: ${euiTheme.size.s};
+            `}
+          >
             <EuiFlexItem grow={false}>
-              <EuiText size="s" textAlign="left">
-                <strong>{detection.rule_name}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" textAlign="left">
-                {formatTimestamp(detection['@timestamp'])}
-              </EuiText>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+                css={css`
+                  row-gap: 2px;
+                `}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" textAlign="left">
+                    <strong>{detection.rule_name}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" textAlign="left">
+                    {formatTimestamp(detection['@timestamp'])}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
