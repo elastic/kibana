@@ -15876,8 +15876,6 @@
     "xpack.cases.customFields": "カスタムフィールド",
     "xpack.cases.customFields.addCustomField": "フィールドの追加",
     "xpack.cases.customFields.defaultValue": "デフォルト値",
-    "xpack.cases.customFields.deleteField": "フィールド\"{fieldName}\"を削除しますか？",
-    "xpack.cases.customFields.deleteFieldDescription": "このフィールドはすべてのケースから削除され、データは失われます。",
     "xpack.cases.customFields.description": "ケースコラボレーションをカスタマイズするには、任意のフィールドと必須フィールドを追加します。",
     "xpack.cases.customFields.fieldLabel": "フィールドラベル",
     "xpack.cases.customFields.fieldLabelHelpText": "最大50文字",
