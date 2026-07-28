@@ -96,7 +96,8 @@ const MAP_SYNC_DEBOUNCE = 256;
  *
  * @returns A promise that resolves after the sync window elapses and redux state changes have been flushed to Maplibre instance.
  */
-export const waitForMapSync = () => new Promise((resolve) => setTimeout(resolve, MAP_SYNC_DEBOUNCE * 1.5));
+export const waitForMapSync = () =>
+  new Promise((resolve) => setTimeout(resolve, MAP_SYNC_DEBOUNCE * 1.5));
 
 export class MbMap extends Component<Props, State> {
   private _isMounted: boolean = false;
