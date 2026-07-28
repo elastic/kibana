@@ -168,15 +168,16 @@ restore-and-cleanup wrapper:
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
 ```
-When `config.json → ccs_state` is `"captured"`, `"mutation_pending"`,
-`"modified"`, or otherwise unsafe, the wrapper invokes
-`restore-remote-cluster.py`. That command first verifies an untouched captured
-snapshot, otherwise restores the durable persistent/transient settings from
+When `config.json → ccs_state` is `"mutation_pending"`, `"modified"`, or
+otherwise unsafe, the wrapper invokes `restore-remote-cluster.py`, which
+restores the durable persistent/transient settings from
 `config.json → ccs_restore`, compares the configuration and provenance, polls
 `GET /_remote/info` until connected, and marks the state restored only after
 verification. If it fails, the wrapper does not invoke
 `cleanup-session-resources.py`; tell the user to restore the shared cluster
-using the persisted raw settings snapshot.
+using the persisted raw settings snapshot. `"captured"` is pre-mutation —
+nothing has been changed on the remote yet — so the wrapper skips restoration
+and proceeds straight to cleanup.
 
 After CCS is safe, the wrapped cleanup command is idempotent: HTTP 404 means
 the resource is already gone. It

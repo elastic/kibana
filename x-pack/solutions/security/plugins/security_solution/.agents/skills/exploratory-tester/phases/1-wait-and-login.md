@@ -3,9 +3,10 @@
 ---
 
 If any setup step aborts after `config.json` exists, always run the
-restore-aware cleanup wrapper. It verifies a captured snapshot and restores
-CCS when `ccs_state` is `"captured"`, `"mutation_pending"`, or `"modified"`;
-when there is no snapshot, it proceeds with ordinary cleanup:
+restore-aware cleanup wrapper. It restores CCS when `ccs_state` is
+`"mutation_pending"` or `"modified"` — i.e. when a break was attempted or
+applied. `"captured"` is pre-mutation (nothing was changed on the remote
+yet), so it proceeds straight to ordinary cleanup without restoring anything:
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
@@ -49,8 +50,10 @@ TEST_USERNAME="${TEST_USERNAME:-exploratory-tester-$SESSION_ID}"
 TEST_PASSWORD="${TEST_PASSWORD:-Exploratory123!}"
 SPACE_ID=$(session_config_value environment.space_id)
 SPACE_ID="${SPACE_ID:-exploratory-testing}"
+RESOLVED_ROLE=$(session_config_value setup.resolved_role)
 : "${KIBANA_URL:?config.json is missing environment.url}"
 : "${ES_URL:?config.json is missing environment.es_url}"
+: "${RESOLVED_ROLE:?config.json is missing setup.resolved_role}"
 
 if [[ "$ENV_TYPE" == "user-provided" || "$ENV_TYPE" == "serverless" ]]; then
   : "${API_KEY:?user-provided and serverless setup requires credentials.api_key}"
@@ -294,7 +297,7 @@ case "$USER_EXISTING_STATUS" in
       curl -s "${CURL_TIMEOUT_ARGS[@]}" "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
         -X POST "$KIBANA_URL/internal/security/users/$TEST_USERNAME" \
         -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
-        -d "{\"username\":\"$TEST_USERNAME\",\"password\":\"$TEST_PASSWORD\",\"roles\":[\"<resolved_role>\"],\"full_name\":\"Exploratory Tester\"}"
+        -d "{\"username\":\"$TEST_USERNAME\",\"password\":\"$TEST_PASSWORD\",\"roles\":[\"$RESOLVED_ROLE\"],\"full_name\":\"Exploratory Tester\"}"
     )
     USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
     if [[ "$USER_HTTP_STATUS" == "404" ]]; then
@@ -302,7 +305,7 @@ case "$USER_EXISTING_STATUS" in
         curl -s "${CURL_TIMEOUT_ARGS[@]}" "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
           -X PUT "$ES_URL/_security/user/$TEST_USERNAME" \
           -H 'Content-Type: application/json' \
-          -d "{\"password\":\"$TEST_PASSWORD\",\"roles\":[\"<resolved_role>\"],\"full_name\":\"Exploratory Tester\"}"
+          -d "{\"password\":\"$TEST_PASSWORD\",\"roles\":[\"$RESOLVED_ROLE\"],\"full_name\":\"Exploratory Tester\"}"
       )
       USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
     fi

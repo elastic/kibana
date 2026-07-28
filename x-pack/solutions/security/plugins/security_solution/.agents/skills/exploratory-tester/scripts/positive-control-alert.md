@@ -25,6 +25,8 @@ SOURCE_INDEX="logs-testing.<SLUG>-<SESSION_ID>-default"
 RULE_NAME="positive-control-<SLUG>-<SESSION_ID>"
 RULE_ID="positive-control-<SLUG>-<SESSION_ID>"
 RULE_SAVED_OBJECT_ID=""
+KIBANA_URL="<KIBANA_URL>"
+SPACE_ID="<SPACE_ID>"
 SOURCE_ES_URL="<ES_URL>"
 SOURCE_API_KEY="<SOURCE_API_KEY>"
 DATA_API_KEY="$SOURCE_API_KEY"
@@ -179,7 +181,7 @@ RULE_RESPONSE=$(
     -H "Content-Type: application/json" \
     -H "kbn-xsrf: true" \
     -H "elastic-api-version: 2023-10-31" \
-    "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules" \
+    "$KIBANA_URL/s/$SPACE_ID/api/detection_engine/rules" \
     -d '{ "rule_id": "'"$RULE_ID"'", "type": "query", "name": "'"$RULE_NAME"'", "description": "exploratory-tester positive control", "risk_score": 21, "severity": "low", "index": ["'"$RULE_INDEX"'"], "query": "event.action: \"positive-control\"", "language": "kuery", "from": "now-1h", "interval": "5m", "enabled": true }'
 )
 RULE_HTTP_STATUS="${RULE_RESPONSE##*$'\n'}"
@@ -232,7 +234,7 @@ if [[ "$RULE_HTTP_STATUS" == "409" ]]; then
     curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' -X GET \
       -H "Authorization: ApiKey $SOURCE_API_KEY" \
       -H "elastic-api-version: 2023-10-31" \
-      "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules?rule_id=$RULE_ID"
+      "$KIBANA_URL/s/$SPACE_ID/api/detection_engine/rules?rule_id=$RULE_ID"
   )
   RULE_LOOKUP_STATUS="${RULE_LOOKUP_RESPONSE##*$'\n'}"
   RULE_LOOKUP_BODY="${RULE_LOOKUP_RESPONSE%$'\n'*}"
@@ -284,7 +286,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 RUN_SOON_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' -X POST \
   -H "Authorization: ApiKey $SOURCE_API_KEY" \
   -H "kbn-xsrf: true" -H "x-elastic-internal-origin: kibana" \
-  "<KIBANA_URL>/s/<SPACE_ID>/internal/alerting/rule/<RULE_SAVED_OBJECT_ID>/_run_soon")
+  "$KIBANA_URL/s/$SPACE_ID/internal/alerting/rule/$RULE_SAVED_OBJECT_ID/_run_soon")
 RUN_SOON_STATUS="${RUN_SOON_RESPONSE##*$'\n'}"
 if [[ "$RUN_SOON_STATUS" != "200" && "$RUN_SOON_STATUS" != "202" && "$RUN_SOON_STATUS" != "204" ]]; then
   echo "Unable to run positive-control rule (HTTP $RUN_SOON_STATUS)." >&2

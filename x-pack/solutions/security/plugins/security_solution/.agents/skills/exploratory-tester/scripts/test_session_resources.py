@@ -3066,6 +3066,168 @@ print("200")
             self.assertNotIn("isConnected", curl_log)
             self.assertNotIn("securityModel", curl_log)
 
+    def test_restore_retries_a_transient_reapply_failure_instead_of_giving_up(self):
+        # _restore_raw_settings clears the alias, then reapplies the saved
+        # settings. If the reapply request fails after the clear succeeded,
+        # the cluster is left cleared, not restored. Bailing out after a
+        # single attempt would leave it that way for the whole
+        # --timeout-seconds window (or forever, if the caller does not
+        # retry). The command must retry the whole clear-then-reapply
+        # attempt instead of surfacing the first transient failure.
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            payload = {
+                "skipUnavailable": False,
+                "mode": "proxy",
+                "seeds": None,
+                "nodeConnections": None,
+                "proxyAddress": "old.remote.test:9400",
+                "proxySocketConnections": 3,
+                "serverName": None,
+            }
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "url": "https://source.kibana.test",
+                            "es_url": "https://source.es.test",
+                            "ccs": {"remote_cluster_alias": "remote"},
+                        },
+                        "credentials": {"api_key": "source-key"},
+                        "ccs_state": "modified",
+                        "ccs_restored": False,
+                        "ccs_restore": {
+                            "remote_cluster_alias": "remote",
+                            "endpoint": "/api/remote_clusters/remote",
+                            "payload": payload,
+                            "provenance": {
+                                "is_configured_by_node": False,
+                                "has_deprecated_proxy_setting": True,
+                                "configuration_layer": "persistent",
+                                "settings": {
+                                    "persistent": {
+                                        "cluster": {
+                                            "remote": {
+                                                "remote": {
+                                                    "mode": "proxy",
+                                                    "proxy": "old.remote.test:9400",
+                                                    "skip_unavailable": "false",
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "transient": {},
+                                },
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            reapply_count_path = root / "reapply-count"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+argv = sys.argv[1:]
+with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
+    log.write(" ".join(argv) + "\\n")
+
+if "PUT" in argv:
+    body = argv[argv.index("-d") + 1]
+    remote = json.loads(body)["persistent"]["cluster"]["remote"]["remote"]
+    if remote is None:
+        # Clear request: always succeeds.
+        print(json.dumps({"acknowledged": True}))
+        print("200")
+    else:
+        # Reapply request: fails the first time, then succeeds.
+        counter_path = os.environ["REAPPLY_COUNT"]
+        count = int(open(counter_path).read()) if os.path.exists(counter_path) else 0
+        with open(counter_path, "w", encoding="utf-8") as counter:
+            counter.write(str(count + 1))
+        if count == 0:
+            print(json.dumps({"error": "simulated transient failure"}))
+            print("500")
+        else:
+            print(json.dumps({"acknowledged": True}))
+            print("200")
+elif "_cluster/settings" in " ".join(argv):
+    print(json.dumps({
+        "persistent": {
+            "cluster": {
+                "remote": {
+                    "remote": {
+                        "mode": "proxy",
+                        "proxy": "old.remote.test:9400",
+                        "skip_unavailable": "false",
+                    }
+                }
+            }
+        },
+        "transient": {},
+    }))
+    print("200")
+elif any("api/remote_clusters" in value for value in argv):
+    print(json.dumps([{
+        "name": "remote",
+        "mode": "proxy",
+        "skipUnavailable": False,
+        "seeds": None,
+        "nodeConnections": None,
+        "proxyAddress": "old.remote.test:9400",
+        "proxySocketConnections": 3,
+        "serverName": None,
+        "hasDeprecatedProxySetting": True,
+        "isConfiguredByNode": False,
+    }]))
+    print("200")
+elif any("_remote/info" in value for value in argv):
+    print(json.dumps({"remote": {"connected": True}}))
+    print("200")
+else:
+    print(json.dumps({}))
+    print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+            environment["REAPPLY_COUNT"] = str(reapply_count_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RESTORE_CCS_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--timeout-seconds",
+                    "5",
+                    "--poll-interval-seconds",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["ccs_state"], "restored")
+            self.assertTrue(config["ccs_restored"])
+            self.assertEqual(int(reapply_count_path.read_text()), 2)
+
     def test_restore_node_configured_cluster_removes_temporary_override(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
@@ -3372,11 +3534,26 @@ print("200")
         self.assertIn('--endpoint "/_security/user/$TEST_USERNAME"', login)
         self.assertIn("USER_PROVISIONING_SKIPPED", login)
 
+        # The created test user must be granted the role config.json actually
+        # resolved in Step 0c, not the literal placeholder text — a literal
+        # role name does not exist in Elasticsearch, so the user would end up
+        # with no privileges from that assignment.
+        self.assertIn(
+            "RESOLVED_ROLE=$(session_config_value setup.resolved_role)",
+            login,
+        )
+        self.assertIn(
+            'RESOLVED_ROLE:?config.json is missing setup.resolved_role',
+            login,
+        )
+
         # User management must never run against a cluster this session does
         # not own, and skipping it by design must not abort the session.
         user_section = login[
             login.index("**Create test user**") : login.index("`environment.es_url`")
         ]
+        self.assertNotIn("<resolved_role>", user_section)
+        self.assertIn('roles\\":[\\"$RESOLVED_ROLE\\"]', user_section)
         self.assertIn(
             'if [[ "$ENV_TYPE" != "user-provided" && "$ENV_TYPE" != "serverless" ]]',
             user_section,
@@ -4962,6 +5139,164 @@ print("204")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("source-index", log_path.read_text(encoding="utf-8"))
 
+    def test_cleanup_auto_reconciles_a_pending_resource_left_by_a_crash(self):
+        # A resource stays pending forever if a script crashes after
+        # creating it but before promoting it to owned — cleanup previously
+        # only reported it as blocking, with no path to ever resolving it.
+        # Cleanup must probe it, discover it exists, promote it to owned,
+        # and then delete it in the same run instead of leaking it.
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://kibana.example.test",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "crashed-index",
+                                "state": "pending",
+                                "owned": False,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": "/crashed-index",
+                                "base_url": "es_url",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+argv = sys.argv[1:]
+with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
+    log.write(" ".join(argv) + "\\n")
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("Auto-reconciled", result.stdout)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            resource = next(
+                resource
+                for resource in config["session_resources"]
+                if resource["id"] == "crashed-index"
+            )
+            self.assertEqual(resource["cleanup_status"], "deleted")
+            curl_log = log_path.read_text(encoding="utf-8")
+            self.assertIn("-X GET", curl_log)
+            self.assertIn("-X DELETE", curl_log)
+
+    def test_cleanup_does_not_probe_pending_resources_cleaned_up_via_post(self):
+        # es_alerts (and anything else cleaned up with a POST body, e.g.
+        # _delete_by_query) has no safe idempotent GET/HEAD probe target, so
+        # auto-reconciliation must leave it pending rather than guessing.
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "url": "https://kibana.example.test",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {
+                            "username": "elastic",
+                            "password": "changeme",
+                        },
+                        "session_resources": [
+                            {
+                                "kind": "es_alerts",
+                                "id": "positive-control-alerts-rule",
+                                "state": "pending",
+                                "owned": False,
+                                "marker": "exploratory-tester:abc12345",
+                                "endpoint": "/.alerts-security.alerts-default/_delete_by_query",
+                                "base_url": "es_url",
+                                "method": "POST",
+                                "body": '{"query":{"match_all":{}}}',
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            log_path = root / "curl.log"
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
+    log.write(" ".join(sys.argv[1:]) + "\\n")
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLEANUP_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("pending", result.stderr.lower())
+            self.assertFalse(log_path.exists())
+
     def test_cleanup_reports_pending_resources_instead_of_succeeding(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             session_dir = Path(raw_dir)
@@ -5011,6 +5346,10 @@ print("204")
             self.assertIn("pending", result.stderr.lower())
 
     def test_cleanup_still_deletes_owned_resources_when_pending_remains(self):
+        # The pending resource's probe returns an ambiguous status (neither
+        # present nor absent), so auto-reconciliation cannot resolve it and
+        # it must remain pending — but that must not block deleting the
+        # unrelated owned resource.
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
             session_dir = root / "session"
@@ -5062,9 +5401,10 @@ print("204")
 import os
 import sys
 
-with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
-    log.write(" ".join(sys.argv[1:]))
-print("204")
+argv = sys.argv[1:]
+with open(os.environ["FAKE_CURL_LOG"], "a", encoding="utf-8") as log:
+    log.write(" ".join(argv) + "\\n")
+print("500" if "GET" in argv else "204")
 """,
                 encoding="utf-8",
             )

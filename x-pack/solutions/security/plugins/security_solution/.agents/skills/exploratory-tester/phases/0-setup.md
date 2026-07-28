@@ -335,7 +335,7 @@ Write `$SESSION_DIR/config.json`:
     "type": "<stateful-classic | stateful-ess | serverless | user-provided>",
     "url": "<resolved url>",
     "es_url": "<elasticsearch url — replace kb. with es. for ECH>",
-    "managed": true,
+    "managed": "<true if Step 0a took the Agent-managed branch, false if it took the User-provided branch>",
     "data_setup": "<run | skip>",
     "space_id": "<resolved Environment.space or exploratory-testing>",
     "ccs": null
@@ -389,6 +389,14 @@ Write `$SESSION_DIR/config.json`:
 Set `credentials.api_key` to the value of `ENVIRONMENT_API_KEY` when one is
 available; leave it as the empty string for agent-managed basic-auth fallback.
 Never leave a descriptive placeholder in this field.
+
+Set `environment.managed` to `true` only when Step 0a took the Agent-managed
+branch (a Scout server this session started); set it to `false` whenever
+Step 0a took the User-provided branch (`Environment.url` was present), even
+if `environment.type` is `stateful-ess` or `serverless`. Step 1a keys off this
+field to decide whether to poll the local Scout server for readiness — a
+stray `true` on a user-provided environment makes it poll a Kibana that was
+never started until it times out.
 
 After `config.json` exists, every setup or exploration abort must run:
 ```bash
@@ -479,8 +487,11 @@ sets it to `"captured"`; `break-remote-cluster.py` changes it to
 `"mutation_pending"` before the request and to `"modified"` only after the
 request succeeds. `restore-remote-cluster.py` sets it to `"restored"` only
 after the original raw settings layers, configuration, provenance, and
-connection have been verified. Cleanup fails closed for captured, pending, and
-modified states.
+connection have been verified. `"captured"` is pre-mutation — nothing has
+been changed on the remote yet — so it does not block cleanup. Cleanup fails
+closed for `"mutation_pending"` and `"modified"` (and for `"unchanged"` if a
+snapshot was somehow captured without a state transition), since those mean
+the remote may still differ from its original settings.
 
 ---
 

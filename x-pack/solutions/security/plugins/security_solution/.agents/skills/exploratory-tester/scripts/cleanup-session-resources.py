@@ -15,6 +15,7 @@ from session_resources import (
     cleanup_candidates,
     edit_session_config,
     pending_resources,
+    reconcile_pending_resource,
     require_session_id,
     resolve_resource_base_url,
     run_curl,
@@ -104,6 +105,68 @@ def _delete_by_query_error(
     return None
 
 
+def _auto_reconcile_pending(config: dict[str, Any]) -> list[str]:
+    """Best-effort probe of resources still pending from a crashed prior run.
+
+    A resource stays pending only if a script died between creating it and
+    promoting it to owned/removed. Cleanup runs later, potentially in a
+    different process invocation, so it is the last chance to resolve those
+    reservations instead of leaking them forever. Resources cleaned up via a
+    POST action (e.g. es_alerts' _delete_by_query) have no safe idempotent
+    GET probe target and are left pending here, same as before.
+    """
+    notes: list[str] = []
+    for resource in pending_resources(config):
+        if resource.get("method", "DELETE") != "DELETE":
+            continue
+        kind = resource.get("kind")
+        resource_id = resource.get("id")
+        endpoint = resource.get("endpoint")
+        base_url_key = resource.get("base_url", "url")
+        if not isinstance(kind, str) or not isinstance(resource_id, str):
+            continue
+        try:
+            endpoint = validate_resource_endpoint(endpoint)
+            if not isinstance(base_url_key, str):
+                continue
+            auth_args = build_auth_args(config, base_url_key=base_url_key)
+            base_url = resolve_resource_base_url(config, base_url_key)
+        except (ValueError, TypeError):
+            continue
+        try:
+            status, _ = run_curl(
+                [
+                    "curl",
+                    "-s",
+                    "-o",
+                    "/dev/null",
+                    "-w",
+                    "\n%{http_code}",
+                    *auth_args,
+                    "-X",
+                    "GET",
+                    f"{base_url.rstrip('/')}{endpoint}",
+                ]
+            )
+        except TimeoutError:
+            continue
+        transition = reconcile_pending_resource(
+            config,
+            kind=kind,
+            resource_id=resource_id,
+            endpoint=endpoint,
+            base_url=base_url_key,
+            http_code=status,
+        )
+        if transition == "owned":
+            notes.append(f"Auto-reconciled pending {kind} {resource_id!r} as owned.")
+        elif transition == "removed":
+            notes.append(
+                f"Auto-reconciled pending {kind} {resource_id!r}: it no longer exists."
+            )
+    return notes
+
+
 def cleanup_session(
     config: dict[str, Any],
     dry_run: bool,
@@ -116,6 +179,7 @@ def cleanup_session(
             "and ccs_state is restored in config.json."
         ]
 
+    reconcile_notes = _auto_reconcile_pending(config)
     pending = pending_resources(config)
     pending_message: str | None = None
     if pending:
@@ -133,11 +197,11 @@ def cleanup_session(
         ),
         key=_cleanup_order,
     )
-    messages = [pending_message] if pending_message else []
+    messages = reconcile_notes + ([pending_message] if pending_message else [])
     if not resources:
         if pending_message:
             return (0 if dry_run else 1), messages
-        return 0, ["No owned session resources to clean up."]
+        return 0, messages + ["No owned session resources to clean up."]
 
     errors: list[str] = []
     for resource in resources:

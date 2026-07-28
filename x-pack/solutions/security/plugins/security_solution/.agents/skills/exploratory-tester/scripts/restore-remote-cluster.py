@@ -437,25 +437,42 @@ def main() -> int:
             else:
                 verified = False
 
-            if not verified:
-                # Re-check ownership immediately before mutating shared CCS.
-                with edit_session_config(config_path, persist=False) as config:
-                    assert_ccs_deployment_lease_allows_session(config)
-                    if read_ccs_deployment_lease(config) is not None:
-                        refresh_ccs_deployment_lease(config)
-                restored, restore_error = _restore_raw_settings(
-                    auth_args=auth_args,
-                    es_url=es_url,
-                    alias=alias,
-                    settings=settings,
-                    request_budget=request_budget,
-                )
-                if not restored:
-                    print(restore_error, file=sys.stderr)
-                    return 1
-
+            # A restore attempt is a clear followed by a reapply, so a
+            # transient failure between the two requests can leave the
+            # cluster cleared instead of restored. Retrying the whole
+            # attempt (rather than failing after one shot) closes that
+            # window: the clear-then-reapply payload is the same on every
+            # attempt, so retrying converges to the fully-restored state
+            # instead of leaving it half-applied.
+            restore_needed = not verified
             last_error = "verification did not run"
             while True:
+                if restore_needed:
+                    # Re-check ownership immediately before each attempt to
+                    # mutate shared CCS.
+                    with edit_session_config(config_path, persist=False) as config:
+                        assert_ccs_deployment_lease_allows_session(config)
+                        if read_ccs_deployment_lease(config) is not None:
+                            refresh_ccs_deployment_lease(config)
+                    restored, restore_error = _restore_raw_settings(
+                        auth_args=auth_args,
+                        es_url=es_url,
+                        alias=alias,
+                        settings=settings,
+                        request_budget=request_budget,
+                    )
+                    if not restored:
+                        last_error = restore_error
+                        if time.monotonic() >= deadline:
+                            print(
+                                f"CCS restore timed out: {last_error}.",
+                                file=sys.stderr,
+                            )
+                            return 1
+                        time.sleep(args.poll_interval_seconds)
+                        continue
+                    restore_needed = False
+
                 verified, error = _verify_restored_cluster(
                     auth_args=auth_args,
                     source_url=source_url,
