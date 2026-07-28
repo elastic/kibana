@@ -20,10 +20,39 @@ import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../../store/selectors';
 import type { State } from '../../../common/store';
+import type { TimelineModel } from '../../store/model';
 import { buildSuperTimelineModel } from './build_super_timeline_model';
 
 export const MAX_SUPER_TIMELINE_COUNT = 10;
 const MIN_SUPER_TIMELINE_COUNT = 2;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const isTimelineDirty = (timeline: TimelineModel | null): boolean =>
+  !!timeline?.changed ||
+  (timeline?.status === TimelineStatusEnum.draft && timeline?.updated != null);
+
+interface FetchTimelinesResult {
+  models: TimelineModel[];
+  failedIds: string[];
+}
+
+const fetchTimelines = async (savedObjectIds: string[]): Promise<FetchTimelinesResult> => {
+  const settled = await Promise.allSettled(savedObjectIds.map((id) => resolveTimeline(id)));
+  const failedIds: string[] = [];
+  const models = settled
+    .map((result, idx) => {
+      if (result.status === 'rejected') {
+        failedIds.push(savedObjectIds[idx]);
+        return null;
+      }
+      return formatTimelineResponseToModel(result.value.timeline).timeline;
+    })
+    .filter((m): m is NonNullable<typeof m> => m !== null);
+  return { models, failedIds };
+};
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 /**
  * Hook that opens a Super Timeline from a list of saved object IDs.
@@ -84,12 +113,7 @@ export const useOpenSuperTimeline = () => {
         return;
       }
 
-      // Overwrite guard: confirm before replacing a dirty active timeline
-      const hasUnsavedChanges =
-        activeTimeline?.changed ||
-        (activeTimeline?.status === TimelineStatusEnum.draft && activeTimeline?.updated != null);
-
-      if (hasUnsavedChanges) {
+      if (isTimelineDirty(activeTimeline)) {
         const confirmed = await overlays?.openConfirm(
           i18n.translate('xpack.securitySolution.timeline.superTimeline.overwriteConfirmMessage', {
             defaultMessage: 'Opening a Super Timeline will discard your unsaved changes. Continue?',
@@ -111,18 +135,7 @@ export const useOpenSuperTimeline = () => {
 
       setIsLoading(true);
       try {
-        const settled = await Promise.allSettled(savedObjectIds.map((id) => resolveTimeline(id)));
-
-        const failedIds: string[] = [];
-        const timelineModels = settled
-          .map((result, idx) => {
-            if (result.status === 'rejected') {
-              failedIds.push(savedObjectIds[idx]);
-              return null;
-            }
-            return formatTimelineResponseToModel(result.value.timeline).timeline;
-          })
-          .filter((m): m is NonNullable<typeof m> => m !== null);
+        const { models: timelineModels, failedIds } = await fetchTimelines(savedObjectIds);
 
         if (failedIds.length > 0) {
           notifications.toasts.addWarning({
@@ -157,7 +170,6 @@ export const useOpenSuperTimeline = () => {
         }
 
         const esQueryConfig = getEsQueryConfig(uiSettings);
-
         const { model, skippedQueryTimelines } = buildSuperTimelineModel(timelineModels, {
           dataView,
           browserFields,
@@ -194,7 +206,7 @@ export const useOpenSuperTimeline = () => {
           preventSettingQuery: true,
         });
       } catch (error) {
-        notifications.toasts.addError(error as Error, {
+        notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
           title: i18n.translate('xpack.securitySolution.timeline.superTimeline.errorTitle', {
             defaultMessage: 'Failed to open Super Timeline',
           }),
