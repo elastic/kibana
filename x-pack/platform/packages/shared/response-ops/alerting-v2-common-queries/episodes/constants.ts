@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-export const TIME_FIELD = '@timestamp';
+export {
+  ALERT_EVENTS_DATA_STREAM,
+  ALERT_ACTIONS_DATA_STREAM,
+  DEFAULT_TIME_FIELD as TIME_FIELD,
+} from '@kbn/alerting-v2-constants';
 
 export const EPISODES_LIST_PAGE_SIZE = 1000;
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;

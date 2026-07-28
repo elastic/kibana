@@ -8,6 +8,13 @@
 export * from './src';
 
 export const DEFAULT_TIME_FIELD = '@timestamp';
+export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
+export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
+
+export const ALERTING_V2_SECTION_ID = 'alertingV2';
+export const ALERTING_V2_RULES_APP_ID = 'rules';
+export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
+
 export const ALERTING_V2_RULE_API_PATH = '/api/alerting/v2/rules' as const;
 export const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts' as const;
 export const ALERTING_V2_ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies' as const;
