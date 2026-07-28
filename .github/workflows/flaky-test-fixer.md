@@ -22,8 +22,20 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
 concurrency:
-  group: 'flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}'
+  # Keep one fixer lane per issue for the real trigger. Every other label event (e.g. the
+  # sibling `failure:*` labels the investigator applies in the same batch as `ai:fix-flaky`)
+  # gets its own group suffix, so it can skip without canceling a pending or in-flight fix run.
+  group: >-
+    flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'ai:fix-flaky' &&
+        github.event.label.name
+      ) ||
+      'fix'
+    }}
   cancel-in-progress: false
+  job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
@@ -41,12 +53,12 @@ engine:
   model: opus
   max-turns: 200
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -77,7 +89,7 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 sandbox:
   agent: awf
 

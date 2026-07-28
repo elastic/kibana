@@ -124,6 +124,8 @@ export interface DiscoveryJudgeScenario {
     criteria: SamplingCriterion[];
     /** Human-readable summary of the expected status for each event ID, e.g. `event_id=open (reason); event_id=dismissed (reason)`. */
     expected_ground_truth: string;
+    /** Expected judge-confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
     expect_assessment_note?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;

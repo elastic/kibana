@@ -393,6 +393,24 @@ export const CreateCaseRequest = lazySchema(() =>
       )
       .max(10)
       .optional(),
+    /**
+      * A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
+
+      */
+    template: z
+      .object({
+        /**
+         * The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+         */
+        id: z.string(),
+        /**
+      * The template version to apply. Omit to use (and pin) the latest version.
+
+      */
+        version: z.number().int().min(1).optional(),
+      })
+      .nullable()
+      .optional(),
   })
 );
 export type CreateCaseRequest = z.infer<typeof CreateCaseRequest>;
