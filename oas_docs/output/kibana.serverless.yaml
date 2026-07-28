@@ -87811,6 +87811,12 @@ components:
           minLength: 1
           title: Index pattern
           type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
+          type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
           title: Time field
