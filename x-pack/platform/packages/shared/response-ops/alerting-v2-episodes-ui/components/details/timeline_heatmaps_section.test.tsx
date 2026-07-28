@@ -14,9 +14,16 @@ import {
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
-import { AlertEpisodeSeverityHeatmapSection } from './severity_heatmap_section';
+import { AlertEpisodeTimelineHeatmapsSection } from './timeline_heatmaps_section';
 
 jest.mock('../../utils/run_esql_async_search');
+
+// Mock the heavy heatmap building blocks since the section dynamically imports them.
+jest.mock('./lifecycle_heatmap', () => ({
+  AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
+    <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
+  ),
+}));
 
 jest.mock('./severity_heatmap', () => ({
   AlertEpisodeSeverityHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
@@ -31,13 +38,13 @@ const mockServices = createMockServices();
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
-describe('AlertEpisodeSeverityHeatmapSection', () => {
+describe('AlertEpisodeTimelineHeatmapsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
   });
 
-  it('renders the severity heatmap once severity events are loaded', async () => {
+  it('renders both heatmaps inside a single shared panel once events are loaded', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -49,18 +56,21 @@ describe('AlertEpisodeSeverityHeatmapSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeSeverityHeatmapSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeTimelineHeatmapsSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeSeverityHeatmapMock')).toBeInTheDocument()
+      expect(screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSection')).toBeInTheDocument()
     );
-    expect(screen.getByTestId('alertingV2EpisodeSeverityHeatmapMock')).toHaveTextContent('1');
+
+    const panel = screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSection');
+    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeLifecycleHeatmapMock'));
+    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeSeverityHeatmapMock'));
   });
 
-  it('renders nothing when events lack supported severity', async () => {
+  it('renders only the lifecycle heatmap when there are no supported severity events', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -70,20 +80,17 @@ describe('AlertEpisodeSeverityHeatmapSection', () => {
       values: [['2024-01-01T00:00:00.000Z', 'active', null]],
     });
 
-    const { container } = render(
+    render(
       <I18nProvider>
-        <AlertEpisodeSeverityHeatmapSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeTimelineHeatmapsSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
 
     await waitFor(() =>
-      expect(
-        screen.queryByTestId('alertingV2EpisodeSeverityHeatmapSectionLoading')
-      ).not.toBeInTheDocument()
+      expect(screen.getByTestId('alertingV2EpisodeLifecycleHeatmapMock')).toBeInTheDocument()
     );
     expect(screen.queryByTestId('alertingV2EpisodeSeverityHeatmapMock')).not.toBeInTheDocument();
-    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders the loading state while events are loading', () => {
@@ -91,13 +98,13 @@ describe('AlertEpisodeSeverityHeatmapSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeSeverityHeatmapSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeTimelineHeatmapsSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
 
     expect(
-      screen.getByTestId('alertingV2EpisodeSeverityHeatmapSectionLoading')
+      screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSectionLoading')
     ).toBeInTheDocument();
   });
 
@@ -106,13 +113,15 @@ describe('AlertEpisodeSeverityHeatmapSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeSeverityHeatmapSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeTimelineHeatmapsSection episodeId="ep-1" services={mockServices} />
       </I18nProvider>,
       { wrapper }
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeSeverityHeatmapSectionError')).toBeInTheDocument()
+      expect(
+        screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSectionError')
+      ).toBeInTheDocument()
     );
   });
 });
