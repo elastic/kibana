@@ -36,6 +36,7 @@ export interface RuleCreateOptionsFlyoutProps {
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
+  onCreateFromLibrary?: () => void;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -46,6 +47,7 @@ export const RuleCreateOptionsFlyout = ({
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
+  onCreateFromLibrary,
   onCreateThresholdRule,
   legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
@@ -98,6 +100,7 @@ export const RuleCreateOptionsFlyout = ({
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled={createWithAgentDisabled}
           createWithAgentTooltipText={createWithAgentTooltipText}
+          onCreateFromLibrary={onCreateFromLibrary}
           onCreateThresholdRule={onCreateThresholdRule}
           legacyRuleTypes={legacyRuleTypes}
         />

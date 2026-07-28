@@ -84,6 +84,7 @@ jest.mock('./compose_discover_form', () => {
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
       readRecoveryStrategy = () => getValues('recoveryStrategy');
+      readMetadataName = () => getValues('metadata.name');
       return (
         <div data-test-subj="composeDiscoverFormMock">
           {/* Keep query rules mounted so validateStep → trigger(['query']) can fail. */}
@@ -113,6 +114,7 @@ interface SandboxFlyoutMockProps {
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
+let readMetadataName: (() => string) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
   QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
@@ -268,6 +270,7 @@ describe('ComposeDiscoverFlyout', () => {
     sandboxFlyoutProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
+    readMetadataName = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
       error: null,
@@ -579,6 +582,48 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+  });
+
+  describe('initialCreateData from template', () => {
+    const createData = {
+      kind: 'alert' as const,
+      metadata: {
+        name: 'Template rule',
+        description: 'Seeded from library',
+        tags: ['k8s'],
+      },
+      time_field: '@timestamp',
+      schedule: { every: '5m', lookback: '15m' },
+      query: {
+        format: 'composed' as const,
+        base: 'FROM metrics-* | STATS cpu = AVG(cpu)',
+        breach: { segment: 'WHERE cpu > 90' },
+      },
+      recovery_strategy: 'no_breach' as const,
+      grouping: { fields: ['host.name'] },
+    };
+
+    it('opens the sandbox with the seeded query committed', () => {
+      renderFlyout({ initialCreateData: createData });
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      expect(sandboxFlyoutProps?.query).toMatchObject({
+        format: 'composed',
+        base: createData.query.base,
+        breach: { segment: createData.query.breach.segment },
+      });
+      expect(readCommittedQuery?.()).toMatchObject({
+        format: 'composed',
+        base: createData.query.base,
+        breach: { segment: createData.query.breach.segment },
+      });
+    });
+
+    it('seeds form metadata from the create payload', () => {
+      renderFlyout({ initialCreateData: createData });
+
+      expect(readMetadataName?.()).toBe('Template rule');
     });
   });
 

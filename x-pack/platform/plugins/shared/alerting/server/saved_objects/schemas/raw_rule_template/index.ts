@@ -9,9 +9,21 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import { rawRuleTemplateSchema as rawRuleTemplateSchemaV1 } from './v1';
 import { rawRuleTemplateSchema as rawRuleTemplateSchemaV2 } from './v2';
-import { rawRuleTemplateSchema } from './v3';
+import { rawRuleTemplateSchema as rawRuleTemplateSchemaV3 } from './v3';
+import { rawRuleTemplateSchema as rawRuleTemplateSchemaV4 } from './v4';
+import {
+  rawRuleTemplateSchema,
+  rawRuleTemplateEngineV2Schema,
+} from './v5';
 
-export { rawRuleTemplateSchemaV1, rawRuleTemplateSchemaV2 };
-export { rawRuleTemplateSchema as rawRuleTemplateSchemaV3 };
+export {
+  rawRuleTemplateSchemaV1,
+  rawRuleTemplateSchemaV2,
+  rawRuleTemplateSchemaV3,
+  rawRuleTemplateSchemaV4,
+  rawRuleTemplateEngineV2Schema,
+};
+export { rawRuleTemplateSchema as rawRuleTemplateSchemaV5 };
 
 export type RawRuleTemplate = TypeOf<typeof rawRuleTemplateSchema>;
+export type RawRuleTemplateEngineV2 = TypeOf<typeof rawRuleTemplateEngineV2Schema>;

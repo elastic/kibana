@@ -178,6 +178,8 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
     nextState: INSTALL_STATES.CREATE_ALERTING_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
+  // Alerting follow-up after kibana assets: inactivity monitoring template + elastic_agent rules.
+  // See stepCreateAlertingAssets for details.
   create_alerting_assets: {
     onTransition: stepCreateAlertingAssets,
     nextState: INSTALL_STATES.VERIFY_ASSETS,

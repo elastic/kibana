@@ -26,7 +26,7 @@ export function extractFromSourceQuery(query: string): string {
 
     return trimmed.slice(fromCmd.location.min, fromCmd.location.max + 1).trim();
   } catch {
-    const match = trimmed.match(/^\s*(FROM\s+[^|]+)/i);
+    const match = trimmed.match(/^\s*((?:FROM|TS)\s+[^|]+)/i);
     return match ? match[1].trim() : '';
   }
 }

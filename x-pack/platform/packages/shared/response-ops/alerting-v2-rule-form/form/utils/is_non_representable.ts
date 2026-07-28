@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RecoveryStrategy, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RecoveryStrategy, RuleResponse } from '@kbn/alerting-v2-schemas';
 
 const REPRESENTABLE_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
   'no_breach',
@@ -13,9 +13,15 @@ const REPRESENTABLE_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
   'none',
 ];
 
+type RepresentabilityFields = Pick<
+  CreateRuleData | RuleResponse,
+  'kind' | 'query' | 'recovery_strategy' | 'no_data_strategy'
+>;
+
 /**
- * Determines whether a rule (from the API response) contains features that
- * the GUI form cannot represent. Such rules must be edited in YAML mode only.
+ * Determines whether a rule (from the API response or create payload) contains
+ * features that the GUI form cannot represent. Such rules must be edited in
+ * YAML mode only.
  *
  * Non-representable cases:
  * - `alert` kind with `standalone` query format (form requires composed base+segments)
@@ -25,7 +31,7 @@ const REPRESENTABLE_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
  * Note: `query.no_data` is not checked separately because it can only appear on
  * standalone format queries, which the `format === 'standalone'` check already catches.
  */
-export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
+export const isNonRepresentableRule = (rule: RepresentabilityFields): boolean => {
   if (rule.kind !== 'alert') return false;
 
   if (rule.query.format === 'standalone') return true;

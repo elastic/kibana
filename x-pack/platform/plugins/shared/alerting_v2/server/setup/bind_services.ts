@@ -85,17 +85,21 @@ import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { RuleTemplatesClient } from '../lib/rule_templates_client';
+import { RuleTemplateSavedObjectsClientToken } from '../lib/rule_templates_client/tokens';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -184,6 +188,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  bind(RuleTemplateSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_TEMPLATE_SAVED_OBJECT_TYPE] }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();

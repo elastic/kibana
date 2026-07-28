@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebounceFn } from '@kbn/react-hooks';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
@@ -42,6 +43,7 @@ import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
+  mapCreateRuleDataToComposeFormValues,
   mapRuleToComposeFormValues,
   mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
@@ -54,7 +56,13 @@ import {
   parseDiscoverQueryForBuilder,
   type BuilderState,
 } from './rule_builder';
-import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import type {
+  ComposeDiscoverAction,
+  ComposeDiscoverMode,
+  QueryTab,
+  RecoveryType,
+  StepId,
+} from './types';
 import { isBuilderConditionStepId } from './types';
 import { validateStep, evaluateStepValidation } from './validate_step';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
@@ -145,13 +153,26 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
 
 const getInitialRecoveryType = (
   hasInitialCustomRecovery: boolean,
-  rule: ComposeDiscoverFlyoutProps['rule']
+  recoveryStrategy: CreateRuleData['recovery_strategy'] | undefined,
+  hasExistingRule: boolean
 ): RecoveryType => {
   if (hasInitialCustomRecovery) return 'custom';
-  if (rule != null && (rule.recovery_strategy === 'none' || rule.recovery_strategy == null)) {
+  // Existing rules with unset/null recovery map to "none" (do not recover).
+  // Create seeds (templates) with unset recovery keep the form default (no_breach).
+  if (hasExistingRule && (recoveryStrategy === 'none' || recoveryStrategy == null)) {
+    return 'none';
+  }
+  if (!hasExistingRule && recoveryStrategy === 'none') {
     return 'none';
   }
   return 'default';
+};
+
+const isCreateQueryComplete = (data: CreateRuleData): boolean => {
+  if (data.query.format === 'composed') {
+    return Boolean(data.query.breach.segment.trim());
+  }
+  return Boolean(data.query.breach.query.trim());
 };
 
 /*
@@ -164,6 +185,11 @@ export interface ComposeDiscoverFlyoutProps {
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
   rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
+  /**
+   * Create-rule payload used to seed the form in create mode (e.g. from a rule
+   * template). Takes precedence over `initialQuery` when both are set.
+   */
+  initialCreateData?: CreateRuleData;
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
@@ -195,6 +221,8 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /** Optional step to open on (e.g. `notifications` / Actions). */
+  initialStepId?: StepId;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -243,6 +271,7 @@ export function ComposeDiscoverFlyout({
   historyKey,
   mode = 'create',
   rule,
+  initialCreateData,
   ruleId,
   onClose,
   services,
@@ -253,6 +282,7 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  initialStepId,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -265,13 +295,24 @@ export function ComposeDiscoverFlyout({
   const baseServices = services;
 
   const initialMapped =
-    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
+    (mode === 'edit' || mode === 'clone') && rule
+      ? mapRuleToComposeFormValues(rule)
+      : mode === 'create' && initialCreateData
+        ? mapCreateRuleDataToComposeFormValues(initialCreateData)
+        : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
-  const initialRecoveryType = getInitialRecoveryType(hasInitialCustomRecovery, rule);
+  const initialRecoveryType = getInitialRecoveryType(
+    hasInitialCustomRecovery,
+    rule?.recovery_strategy ?? initialCreateData?.recovery_strategy,
+    Boolean(rule)
+  );
 
-  const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
+  const forceYamlMode = Boolean(
+    (rule && isNonRepresentableRule(rule)) ||
+      (initialCreateData && isNonRepresentableRule(initialCreateData))
+  );
 
   const inlineResult = useMemo(
     () =>
@@ -287,15 +328,19 @@ export function ComposeDiscoverFlyout({
   );
 
   const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
+  const isCreateDataQueryComplete = Boolean(
+    initialCreateData && isCreateQueryComplete(initialCreateData)
+  );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
-    isQueryPrePopulated: isDiscoverQueryComplete,
+    isQueryPrePopulated: isDiscoverQueryComplete || isCreateDataQueryComplete,
     forceYamlMode,
+    initialStepId,
+    builderType,
   });
-
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   /* Wraps rawDispatch to snapshot the focused trigger before the sandbox opens so focus can be restored when it closes. */
   const dispatch = useCallback(
@@ -354,6 +399,9 @@ export function ComposeDiscoverFlyout({
       }
       return mapped;
     }
+    if (initialCreateData) {
+      return mapCreateRuleDataToComposeFormValues(initialCreateData);
+    }
     const shouldSeedFromDiscover =
       initialQuery !== undefined && (!builderType || builderParsedFromDiscover);
     if (shouldSeedFromDiscover) {
@@ -363,7 +411,15 @@ export function ComposeDiscoverFlyout({
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, discoverComposedQuery, builderType, builderParsedFromDiscover]);
+  }, [
+    rule,
+    mode,
+    initialCreateData,
+    initialQuery,
+    discoverComposedQuery,
+    builderType,
+    builderParsedFromDiscover,
+  ]);
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../../form/types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
+  mapCreateRuleDataToComposeFormValues,
   mapRuleToComposeFormValues,
   mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
@@ -643,6 +644,52 @@ describe('round-trip: non-representable fields survive load → save', () => {
     const formValues = mapRuleToComposeFormValues(rule);
     const request = composeFormToCreateRequest(formValues);
     expect(request.recovery_strategy).toBe('query');
+  });
+});
+
+describe('mapCreateRuleDataToComposeFormValues', () => {
+  const baseCreateData: CreateRuleData = {
+    kind: 'alert',
+    metadata: { name: 'From template', owner: 'test-owner', tags: ['tag1'] },
+    time_field: '@timestamp',
+    schedule: { every: '5m', lookback: '2m' },
+    query: {
+      format: 'composed',
+      base: BASE,
+      breach: { segment: ALERT_SEGMENT },
+    },
+    recovery_strategy: 'no_breach',
+    grouping: { fields: ['host.name'] },
+    state_transition: { pending_count: 3 },
+  };
+
+  it('maps create payload fields and defaults enabled to true', () => {
+    const result = mapCreateRuleDataToComposeFormValues(baseCreateData);
+    expect(result.metadata).toEqual({
+      name: 'From template',
+      enabled: true,
+      owner: 'test-owner',
+      tags: ['tag1'],
+    });
+    expect(result.schedule).toEqual({ every: '5m', lookback: '2m' });
+    expect(result.grouping).toEqual({ fields: ['host.name'] });
+    expect(result.stateTransition).toEqual({
+      pendingCount: 3,
+      pendingTimeframe: null,
+      recoveringCount: null,
+      recoveringTimeframe: null,
+    });
+    expect(result.stateTransitionAlertDelayMode).toBe('breaches');
+  });
+
+  it('matches mapRuleToComposeFormValues aside from enabled source', () => {
+    const fromCreate = mapCreateRuleDataToComposeFormValues(baseCreateData);
+    const fromRule = mapRuleToComposeFormValues({
+      ...baseCreateData,
+      id: 'rule-1',
+      enabled: true,
+    });
+    expect(fromCreate).toEqual(fromRule);
   });
 });
 

@@ -7,14 +7,15 @@
 
 import type { RuleQuery } from '../../form/types';
 
-const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
+/** Source commands that can be used for index/date-field resolution. */
+const SOURCE_QUERY_PATTERN = /^\s*(FROM|TS)\s+[a-zA-Z0-9_.*-]+/i;
 
 /**
  * Returns the ES|QL query used to resolve index date fields for time-field
  * selection. Uses the base query in alert (tracking) mode and the full breach
  * query in signal mode. Standalone alerts have no base, so they fall back to
- * the breach query (FROM is still extracted before field caps). Empty when the
- * query is not committed or has no FROM.
+ * the breach query (FROM/TS is still extracted before field caps). Empty when
+ * the query is not committed or has no source command.
  */
 export function getTimeFieldResolutionQuery(
   query: RuleQuery,
@@ -25,5 +26,5 @@ export function getTimeFieldResolutionQuery(
   const fullQuery = query.format === 'standalone' ? query.breach.query : '';
   // Prefer composed base for alerts; standalone alerts only have breach.query.
   const candidate = isAlert ? baseQuery || fullQuery : fullQuery;
-  return FROM_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
+  return SOURCE_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
 }

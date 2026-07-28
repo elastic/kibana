@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import { useHistory } from 'react-router-dom';
 import { UserCapabilities } from '../../services/user_capabilities';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { experimentalBadge } from '../../components/experimental_badge';
@@ -124,6 +125,7 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 
+  const history = useHistory();
   const canWrite = useService(UserCapabilities).canWrite('rules');
 
   const [
@@ -215,6 +217,10 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     openCreateBuilderFlyout('threshold');
   };
+  const onCreateFromLibrary = () => {
+    closeCreateOptionsFlyout();
+    history.push('/library');
+  };
 
   const showHeaderMenu = (hasRules || hasActiveFilters) && canWrite;
   const headerMenu = useMemo(
@@ -280,6 +286,7 @@ export const RulesListPage = () => {
             onCreateWithAgent={navigateToAgentBuilder}
             createWithAgentDisabled={!isRuleManagementABSkillAvailable}
             createWithAgentTooltipText={createWithAgentTooltipText}
+            onCreateFromLibrary={onCreateFromLibrary}
             onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
           />
         ) : (
@@ -358,6 +365,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           createWithAgentDisabled={!isRuleManagementABSkillAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
+          onCreateFromLibrary={onCreateFromLibrary}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
         />
       ) : null}

@@ -12,6 +12,7 @@ import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_cr
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
+const onCreateFromLibrary = jest.fn();
 const onCreateThresholdRule = jest.fn();
 
 const renderPanel = () =>
@@ -20,6 +21,7 @@ const renderPanel = () =>
       <RuleCreateOptionsPanel
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
+        onCreateFromLibrary={onCreateFromLibrary}
         onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
@@ -52,6 +54,14 @@ describe('RuleCreateOptionsPanel', () => {
     fireEvent.click(screen.getByTestId('createWithAgentCard'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onCreateFromLibrary when the "Create from library" card is clicked', () => {
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('createFromLibraryCard'));
+
+    expect(onCreateFromLibrary).toHaveBeenCalledTimes(1);
   });
 
   it('renders the rule builder divider between the second and third options', () => {

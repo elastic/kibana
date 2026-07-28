@@ -28,7 +28,8 @@ export {
   RULE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
-};
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from '../../common/saved_object_types';
 
 export const ActionPolicyAttributesToEncrypt = ['auth.apiKey'];
 

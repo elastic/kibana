@@ -518,6 +518,9 @@ export type {
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
 
-export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
+export type {
+  RawRuleTemplate,
+  RawRuleTemplateEngineV2,
+} from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

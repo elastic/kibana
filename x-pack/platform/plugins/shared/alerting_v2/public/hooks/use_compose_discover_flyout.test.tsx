@@ -188,6 +188,46 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
   });
+
+  it('passes initialCreateData when opened from a template', async () => {
+    const createData = {
+      kind: 'alert',
+      metadata: { name: 'From template' },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '15m' },
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE cpu > 90' },
+      },
+    };
+
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplate(createData as never);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.mode).toBe('create');
+    expect(capturedFlyoutProps.initialCreateData).toEqual(createData);
+    expect(capturedFlyoutProps.rule).toBeUndefined();
+  });
+
+  it('passes initialStepId when edit is opened on a specific step', async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openEditFlyout(editRule, { initialStepId: 'notifications' });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.mode).toBe('edit');
+    expect(capturedFlyoutProps.initialStepId).toBe('notifications');
+    expect(capturedFlyoutProps.rule).toEqual(editRule);
+  });
 });
 
 describe('useComposeDiscoverFlyout — edit submission wiring', () => {

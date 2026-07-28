@@ -8,7 +8,7 @@
 // Compose Discover flyout — stepped Edit Form + Discover Sandbox
 export { ComposeDiscoverFlyout } from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
-export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
+export type { ComposeDiscoverMode, StepId } from './flyout/compose_discover/types';
 
 // Rule Builder registry
 export { RULE_BUILDER_REGISTRY } from './flyout/compose_discover/rule_builder';

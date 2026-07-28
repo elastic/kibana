@@ -6,7 +6,7 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
@@ -71,6 +71,16 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
 
   return buildFilter({ filters: tags, field: 'tags', operator: 'or', type });
 };
+
+/**
+ * Restricts rule template finds to legacy/v1 templates.
+ * Matches engine:"v1" or a missing engine field (pre-engine templates).
+ * Excludes engine:"v2" (and any other explicit engine value).
+ */
+export const buildRuleTemplateV1EngineFilter = (
+  type = RULE_TEMPLATE_SAVED_OBJECT_TYPE
+): KueryNode =>
+  fromKueryExpression(`(${type}.attributes.engine: "v1" or not ${type}.attributes.engine: *)`);
 
 /**
  * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined

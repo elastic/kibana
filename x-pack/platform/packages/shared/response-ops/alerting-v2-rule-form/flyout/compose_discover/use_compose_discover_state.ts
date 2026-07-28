@@ -34,7 +34,28 @@ export interface InitialStateConfig {
   isQueryPrePopulated?: boolean;
   /** When true, the flyout opens directly in YAML mode with the sandbox open. */
   forceYamlMode?: boolean;
+  /** Optional step to open on (e.g. `notifications` after 1-click install). */
+  initialStepId?: StepId;
+  /** When set, step ids come from the builder step list. */
+  builderType?: string;
 }
+
+const resolveInitialStepIndex = ({
+  isAlert,
+  initialStepId,
+  builderType,
+}: {
+  isAlert: boolean;
+  initialStepId?: StepId;
+  builderType?: string;
+}): number => {
+  if (!initialStepId) {
+    return 0;
+  }
+  const stepIds = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
+  const index = stepIds.indexOf(initialStepId);
+  return index >= 0 ? index : 0;
+};
 
 export const createInitialState = ({
   mode,
@@ -42,15 +63,19 @@ export const createInitialState = ({
   initialRecoveryType = 'default',
   isQueryPrePopulated = false,
   forceYamlMode = false,
+  initialStepId,
+  builderType,
 }: InitialStateConfig): ComposeDiscoverState => {
   const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
+  const isAlert = initialKind === 'alert';
+  const step = resolveInitialStepIndex({ isAlert, initialStepId, builderType });
   return {
     mode,
-    step: 0,
+    step,
     recoveryType,
     activeTab: defaultTabForTabs(
-      getSandboxTabs(initialKind === 'alert', {
-        step: 0,
+      getSandboxTabs(isAlert, {
+        step,
         recoveryType,
         mode,
         manualSplitEnabled: false,

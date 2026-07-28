@@ -40,7 +40,7 @@ describe('getTimeFieldResolutionQuery', () => {
     expect(getTimeFieldResolutionQuery(composedQuery, true, false)).toBe('');
   });
 
-  it('returns empty when the candidate query has no FROM clause', () => {
+  it('returns empty when the candidate query has no FROM or TS clause', () => {
     expect(
       getTimeFieldResolutionQuery(
         { format: 'composed', base: '', breach: { segment: '| WHERE count > 1' } },
@@ -48,5 +48,14 @@ describe('getTimeFieldResolutionQuery', () => {
         true
       )
     ).toBe('');
+  });
+
+  it('returns a TS base query in alert mode when committed', () => {
+    const tsQuery: RuleQuery = {
+      format: 'composed',
+      base: 'TS metrics-kubeletstatsreceiver.otel-* | STATS AVG(cpu) BY host',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getTimeFieldResolutionQuery(tsQuery, true, true)).toBe(tsQuery.base);
   });
 });

@@ -39,7 +39,17 @@ export async function getRuleTemplate(
     id,
   });
 
+  const templateName =
+    'metadata' in result.attributes
+      ? result.attributes.metadata.name
+      : result.attributes.name;
+
   try {
+    if (!('ruleTypeId' in result.attributes)) {
+      throw Boom.badRequest(
+        `Rule template "${id}" uses the alerting v2 attribute shape and cannot be loaded via the v1 rule template API`
+      );
+    }
     await context.authorization.ensureAuthorizedByRuleType({
       ruleTypeId: result.attributes.ruleTypeId,
       operation: ReadOperations.Get,
@@ -53,7 +63,7 @@ export async function getRuleTemplate(
         savedObject: {
           type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
           id,
-          name: result.attributes.name,
+          name: templateName,
         },
         error,
       })
@@ -67,7 +77,7 @@ export async function getRuleTemplate(
       savedObject: {
         type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
         id,
-        name: result.attributes.name,
+        name: templateName,
       },
     })
   );
