@@ -83,6 +83,7 @@ const renderPanel = (props: Partial<PanelProps> = {}) => {
             isLoading={false}
             aiIndex={aiIndex}
             onSaved={onSaved}
+            isManaged={false}
             {...props}
             {...overrides}
           />
@@ -225,6 +226,12 @@ describe('AutomationsPanel', () => {
     rerender({ aiIndex });
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
+  });
+
+  it('hides the Edit button for managed AI indexes', () => {
+    renderPanel({ isManaged: true });
+
+    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 
   it('delegates the header actions to the editor', () => {

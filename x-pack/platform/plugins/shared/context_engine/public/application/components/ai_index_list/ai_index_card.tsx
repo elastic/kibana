@@ -7,16 +7,14 @@
 
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiText,
   EuiTextBlockTruncate,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
@@ -42,10 +40,6 @@ const AiIndexCardFooter = ({ aiIndex }: { aiIndex: AiIndexHttpItem }) => (
 );
 
 export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href: string }) => {
-  const { euiTheme } = useEuiTheme();
-
-  // Managed entries are rewritten on every registration, so their modified date
-  // reflects a Kibana restart rather than a user action.
   const footer = aiIndex.managed ? undefined : <AiIndexCardFooter aiIndex={aiIndex} />;
 
   return (
@@ -56,38 +50,9 @@ export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href:
       titleElement="h4"
       paddingSize="l"
       title={
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem
-            css={css`
-              min-inline-size: 0;
-            `}
-          >
-            <EuiTextBlockTruncate lines={1}>{aiIndex.id}</EuiTextBlockTruncate>
-            {aiIndex.managed && (
-              <EuiText
-                component="span"
-                size="xs"
-                color="subdued"
-                data-test-subj="contextAiIndexCardManaged"
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${euiTheme.size.xs};
-                  margin-block-start: ${euiTheme.size.xxs};
-                `}
-              >
-                <EuiIcon
-                  type="lock"
-                  size="s"
-                  data-test-subj="contextAiIndexCardManagedIcon"
-                  aria-hidden={true}
-                />
-                <FormattedMessage
-                  id="xpack.contextEngine.landing.card.managed"
-                  defaultMessage="Managed"
-                />
-              </EuiText>
-            )}
+        <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+          <EuiFlexItem className="eui-textTruncate">
+            <span className="eui-textTruncate">{aiIndex.id}</span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText
@@ -102,55 +67,49 @@ export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href:
         </EuiFlexGroup>
       }
       href={href}
-      css={css`
-        block-size: 100%;
-        ${aiIndex.managed ? `background-color: ${euiTheme.colors.backgroundBaseSubdued};` : ''}
-      `}
       footer={footer}
     >
       <EuiFlexGroup direction="column" gutterSize="m">
+        {aiIndex.managed && (
+          <EuiFlexItem grow={false}>
+            <EuiBadgeGroup gutterSize="s">
+              <EuiBadge color="hollow" iconType="lock" data-test-subj="contextAiIndexCardManaged">
+                <FormattedMessage
+                  id="xpack.contextEngine.landing.card.managed"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            </EuiBadgeGroup>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            color="subdued"
-            data-test-subj="contextAiIndexCardDescription"
-            css={css`
-              min-block-size: calc(${euiTheme.font.lineHeightMultiplier} * 2em);
-            `}
-          >
+          <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
             <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
           </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="documents"
-                data-test-subj="contextAiIndexCardSources"
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.landing.card.sourcesCount"
-                  defaultMessage="{count, plural, one {# source} other {# sources}}"
-                  values={{ count: aiIndex.sources.length }}
-                />
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="gear"
-                data-test-subj="contextAiIndexCardAutomations"
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.landing.card.automationsCount"
-                  defaultMessage="{count, plural, one {# automation} other {# automations}}"
-                  values={{ count: aiIndex.automations.length }}
-                />
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiBadgeGroup gutterSize="s">
+            <EuiBadge
+              color="hollow"
+              iconType="documents"
+              data-test-subj="contextAiIndexCardSources"
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.landing.card.sourcesCount"
+                defaultMessage="{count, plural, one {# source} other {# sources}}"
+                values={{ count: aiIndex.sources.length }}
+              />
+            </EuiBadge>
+            <EuiBadge color="hollow" iconType="gear" data-test-subj="contextAiIndexCardAutomations">
+              <FormattedMessage
+                id="xpack.contextEngine.landing.card.automationsCount"
+                defaultMessage="{count, plural, one {# automation} other {# automations}}"
+                values={{ count: aiIndex.automations.length }}
+              />
+            </EuiBadge>
+          </EuiBadgeGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCard>

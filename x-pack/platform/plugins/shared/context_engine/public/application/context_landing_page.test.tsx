@@ -147,7 +147,6 @@ describe('ContextLandingPage', () => {
     renderWithProviders(core);
 
     expect(await screen.findByTestId('contextAiIndexCardManaged')).toHaveTextContent('Managed');
-    expect(screen.getByTestId('contextAiIndexCardManagedIcon')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
   });
 

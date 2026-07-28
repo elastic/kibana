@@ -36,7 +36,13 @@ const sources: AiIndexSource[] = [
 describe('SourcesPanel', () => {
   it('shows the loading skeleton while loading and no rows', () => {
     renderWithProviders(
-      <SourcesPanel isLoading sources={[]} canEdit={false} onEditSources={jest.fn()} />
+      <SourcesPanel
+        isLoading
+        sources={[]}
+        canEdit={false}
+        onEditSources={jest.fn()}
+        isManaged={false}
+      />
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesLoading')).toBeInTheDocument();
@@ -46,7 +52,13 @@ describe('SourcesPanel', () => {
 
   it('shows the empty message when not loading and there are no sources', () => {
     renderWithProviders(
-      <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={jest.fn()} />
+      <SourcesPanel
+        isLoading={false}
+        sources={[]}
+        canEdit
+        onEditSources={jest.fn()}
+        isManaged={false}
+      />
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
@@ -55,7 +67,13 @@ describe('SourcesPanel', () => {
 
   it('renders one row per source', () => {
     renderWithProviders(
-      <SourcesPanel isLoading={false} sources={sources} canEdit onEditSources={jest.fn()} />
+      <SourcesPanel
+        isLoading={false}
+        sources={sources}
+        canEdit
+        onEditSources={jest.fn()}
+        isManaged={false}
+      />
     );
 
     expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(sources.length);
@@ -69,6 +87,7 @@ describe('SourcesPanel', () => {
         sources={[{ type: 'connector', value: 'connector-gdrive' }]}
         canEdit
         onEditSources={jest.fn()}
+        isManaged={false}
       />
     );
 
@@ -77,16 +96,42 @@ describe('SourcesPanel', () => {
 
   it('disables the edit button when editing is not allowed', () => {
     renderWithProviders(
-      <SourcesPanel isLoading={false} sources={sources} canEdit={false} onEditSources={jest.fn()} />
+      <SourcesPanel
+        isLoading={false}
+        sources={sources}
+        canEdit={false}
+        onEditSources={jest.fn()}
+        isManaged={false}
+      />
     );
 
     expect(screen.getByTestId('contextEditSourcesButton')).toBeDisabled();
   });
 
+  it('hides the edit button for managed AI indexes', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        sources={sources}
+        canEdit
+        onEditSources={jest.fn()}
+        isManaged
+      />
+    );
+
+    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+  });
+
   it('calls onEditSources when the edit button is clicked', () => {
     const onEditSources = jest.fn();
     renderWithProviders(
-      <SourcesPanel isLoading={false} sources={sources} canEdit onEditSources={onEditSources} />
+      <SourcesPanel
+        isLoading={false}
+        sources={sources}
+        canEdit
+        onEditSources={onEditSources}
+        isManaged={false}
+      />
     );
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));

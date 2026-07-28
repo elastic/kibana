@@ -47,6 +47,7 @@ describe('DescriptionPanel', () => {
         isLoading={false}
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
         onSaved={jest.fn()}
+        isManaged={false}
       />
     );
 
@@ -56,7 +57,7 @@ describe('DescriptionPanel', () => {
 
   it('renders the empty fallback when no description is provided', () => {
     renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} />
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
@@ -68,6 +69,7 @@ describe('DescriptionPanel', () => {
         isLoading
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
         onSaved={jest.fn()}
+        isManaged={false}
       />
     );
 
@@ -81,11 +83,20 @@ describe('DescriptionPanel', () => {
         isLoading={false}
         aiIndex={{ ...aiIndex, description: 'My custom description' }}
         onSaved={jest.fn()}
+        isManaged={false}
       />
     );
 
     fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
 
     expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
+  });
+
+  it('hides the edit button for managed AI indexes', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
+    );
+
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
   });
 });

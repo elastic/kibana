@@ -26,7 +26,7 @@ interface SourcesPanelProps {
   sources: AiIndexSource[];
   canEdit: boolean;
   onEditSources: () => void;
-  isManaged?: boolean;
+  isManaged: boolean;
 }
 
 export const SourcesPanel = ({

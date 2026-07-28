@@ -16,11 +16,6 @@ export interface AiIndexDest {
   value: string;
 }
 
-/**
- * The kind of source feeding an AI index. `esql` stores a raw ES|QL query;
- * `connector` stores the id of a Kibana action connector configured in the
- * space.
- */
 export type AiIndexSourceType = 'esql' | 'connector';
 
 export interface AiIndexSource {
