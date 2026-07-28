@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { type AgentName, environmentSchema } from '@kbn/apm-types';
 import type { TRANSACTION_NAME, SERVICE_NAME } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -27,7 +27,9 @@ export interface TopTracesPrimaryStatsResponse {
 
 export const tracesRoute = defineRoute<TopTracesPrimaryStatsResponse>()({
   endpoint: 'GET /internal/apm/traces',
-  params: z.object({
-    query: environmentSchema.merge(kuerySchema).merge(rangeSchema).merge(probabilitySchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: environmentSchema.merge(kuerySchema).merge(rangeSchema).merge(probabilitySchema),
+    })
+  ),
 });

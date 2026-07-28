@@ -12,7 +12,7 @@ import {
 } from '@kbn/apm-api-shared';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -25,6 +25,7 @@ import {
 } from '../fleet/source_maps';
 import { createApmSourceMap } from './create_apm_source_map';
 import { deleteApmSourceMap } from './delete_apm_sourcemap';
+import { throwMappedSourceMapRouteError } from './map_source_map_route_error';
 import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
 
 function throwNotImplementedIfSourceMapNotAvailable(featureFlags: ApmFeatureFlags): void {
@@ -58,32 +59,38 @@ const listSourceMapRoute = createApmServerRoute({
         return { artifacts, total };
       }
     } catch (e) {
-      throw Boom.internal('Something went wrong while fetching artifacts source maps', e);
+      throwMappedSourceMapRouteError(
+        e,
+        'Something went wrong while fetching artifacts source maps'
+      );
     }
   },
 });
 
 const MAX_LENGTH_1024 = 1024;
-export const uploadSourceMapParams = z.object({
-  body: z.object({
-    service_name: z.string().max(MAX_LENGTH_1024),
-    service_version: z.string().max(MAX_LENGTH_1024),
-    bundle_filepath: z.string().max(MAX_LENGTH_1024),
-    sourcemap: z
-      .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
-      .pipe(
-        z.string().transform((value, ctx): unknown => {
-          try {
-            return JSON.parse(value);
-          } catch (err) {
-            ctx.addIssue({ code: 'custom', message: err.message });
-            return z.NEVER;
-          }
-        })
-      )
-      .pipe(sourceMapSchema),
-  }),
-});
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const uploadSourceMapParams = lazySchema(() =>
+  z.object({
+    body: z.object({
+      service_name: z.string().max(MAX_LENGTH_1024),
+      service_version: z.string().max(MAX_LENGTH_1024),
+      bundle_filepath: z.string().max(MAX_LENGTH_1024),
+      sourcemap: z
+        .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
+        .pipe(
+          z.string().transform((value, ctx): unknown => {
+            try {
+              return JSON.parse(value);
+            } catch (err) {
+              ctx.addIssue({ code: 'custom', message: err.message });
+              return z.NEVER;
+            }
+          })
+        )
+        .pipe(sourceMapSchema),
+    }),
+  })
+);
 // Can not migrate to apm-api-shared, it depends on Fleet
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
@@ -152,7 +159,10 @@ const uploadSourceMapRoute = createApmServerRoute({
         return artifact;
       }
     } catch (e) {
-      throw Boom.internal('Something went wrong while creating a new source map', e);
+      // Fleet policy/artifact failures are often FleetError (not Boom). Map those
+      // to the correct <500 status so register_apm_server_routes does not log them
+      // as unexpected ERROR-level 500s.
+      throwMappedSourceMapRouteError(e, 'Something went wrong while creating a new source map');
     }
   },
 });
@@ -185,7 +195,10 @@ const deleteSourceMapRoute = createApmServerRoute({
         });
       }
     } catch (e) {
-      throw Boom.internal(`Something went wrong while deleting source map. id: ${id}`, e);
+      throwMappedSourceMapRouteError(
+        e,
+        `Something went wrong while deleting source map. id: ${id}`
+      );
     }
   },
 });
