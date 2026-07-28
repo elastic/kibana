@@ -291,6 +291,33 @@ describe('VegaParser._resolveEsQueries', () => {
       { data: { url: bypassExternalUrlCheck('url1') } }
     )
   );
+  test('signal-driven data URLs are not supported', async () => {
+    const vp = new VegaParser(
+      { data: { url: { signal: 'dynamicUrl' } } },
+      searchApiStub,
+      new TimeCache(),
+      0,
+      async () => ({
+        getFileLayers: async () => [],
+        getUrlForRegionLayer: async (layer) => layer.url,
+      }),
+      theme
+    );
+
+    let error;
+    try {
+      await vp._resolveDataUrls();
+    } catch (thrownError) {
+      error = thrownError;
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toBe(
+      'Signal-driven data URLs are not supported in Kibana Vega visualizations.'
+    );
+    expect(error.message).not.toMatch(/Elasticsearch|query parsing/i);
+    expect(searchApiStub.search).not.toHaveBeenCalled();
+  });
   test(
     'timefilter_min',
     check(

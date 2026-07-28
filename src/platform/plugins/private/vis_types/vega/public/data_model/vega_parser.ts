@@ -669,6 +669,17 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     } else if (_.isPlainObject(obj)) {
       if (key === 'data' && _.isPlainObject(obj.url)) {
+        // This interception prevents runtime signal-driven fetches and is relied upon by the
+        // sandboxed render boundary; do not make signal refs flow through to Vega's loader.
+        if ('signal' in obj.url) {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.signalDataUrlsUnsupportedErrorMessage', {
+              defaultMessage:
+                'Signal-driven data URLs are not supported in Kibana Vega visualizations.',
+            })
+          );
+        }
+
         // Assume that any  "data": {"url": {...}}  is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error(

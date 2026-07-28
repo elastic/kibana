@@ -13,6 +13,20 @@ Creation is gated by the `vega.standaloneEmbeddable` browser feature flag (off b
 embeddable definition itself is always registered so existing panels keep rendering after a flag
 rollback; only the creation actions attach and detach as the flag changes.
 
-The panel registers no server embeddable definition, so Dashboard's public REST API treats it as an
-unmapped panel: writes reject it and reads drop it with a `dropped_panel` warning. The Dashboard
-app's own internal save/load routes store and return it as-is.
+The `vega` panel type is **UI-only**: it registers no server embeddable definition and therefore has
+no runtime config schema. Dashboard's public REST API treats it as an unmapped panel — it is absent
+from the generated OpenAPI, public writes reject it, and public reads drop it with a `dropped_panel`
+warning. The Dashboard application's own internal save/load routes store and return the panel as-is
+(no server-side validation of the spec; validation is a render/editor concern). Public REST API
+support is deferred to a later change.
+
+The dedicated panel uses the existing Vega renderer and URL policy. External URLs are controlled by
+`vis_type_vega.enableExternalUrls`; no additional Vega URL setting exists.
+
+## Developer Notes
+
+`ExternalUrlService.isInternalUrl` currently treats same-origin Kibana URLs as internal. Vega
+`data.url` requests to those URLs can still use the viewer's Kibana session, so the sandboxed
+renderer must not be treated as a full SSRF or credentialed internal-request mitigation. The
+`openspec/changes/vega-sandboxed-rendering` design tracks this as the D9 gap; tighten the URL policy
+separately if Kibana later needs to restrict which internal endpoints Vega may query.
