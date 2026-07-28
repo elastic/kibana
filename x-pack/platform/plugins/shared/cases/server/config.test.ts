@@ -170,5 +170,30 @@ describe('config validation', () => {
       const config = ConfigSchema.validate({ chat: { enabled: false } });
       expect(config.chat.enabled).toBe(false);
     });
+
+    it('sets analyticsV2.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: true } });
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: false } });
+      expect(config.analyticsV2.enabled).toBe(false);
+    });
+
+    it('sets templates.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.templates.enabled).toBe(true);
+    });
+
+    it('allows templates.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ templates: { enabled: false } });
+      expect(config.templates.enabled).toBe(false);
+    });
   });
 });

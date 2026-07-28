@@ -8,28 +8,11 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useDocumentFlyoutTitle } from './use_document_flyout_title';
-import { useKibana } from '../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { useFlyoutApi } from '../../use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({}),
-}));
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/is_in_security_app');
-jest.mock('../components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../document/main', () => ({
-  DocumentFlyout: () => <div data-test-subj="documentFlyoutMock" />,
-}));
+jest.mock('../../use_flyout_api');
 jest.mock('../../document/main/components/severity', () => ({
   DocumentSeverity: () => <div data-test-subj="documentSeverityMock" />,
 }));
@@ -56,19 +39,22 @@ const eventHit = createHit({
   'host.name': 'host-1',
 });
 
+const attackHit = createHit({
+  'event.kind': 'signal',
+  'kibana.alert.rule.rule_type_id': 'attack-discovery',
+  'kibana.alert.attack_discovery.title': 'My Attack',
+});
+
 describe('useDocumentFlyoutTitle', () => {
-  const mockUseKibana = jest.mocked(useKibana);
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
-  const openSystemFlyout = jest.fn();
+  const openDocumentFlyoutFromIndexAsChild = jest.fn();
+  const openAttackFlyoutAsChild = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsInSecurityApp.mockReturnValue(true);
-    mockUseKibana.mockReturnValue({
-      services: {
-        overlays: { openSystemFlyout },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+    (useFlyoutApi as jest.Mock).mockReturnValue({
+      openDocumentFlyoutFromIndexAsChild,
+      openAttackFlyoutAsChild,
+    });
   });
 
   it('derives label and warning icon for alerts', () => {
@@ -85,39 +71,48 @@ describe('useDocumentFlyoutTitle', () => {
     expect(result.current.iconType).toBe('analyzeEvent');
   });
 
-  it('opens the document flyout with documentFlyoutHistoryKey and session inherit when in the Security app', () => {
+  it('derives the attack name and bolt icon for attack documents', () => {
+    const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: attackHit }));
+
+    expect(result.current.label).toBe('My Attack');
+    expect(result.current.iconType).toBe('bolt');
+  });
+
+  it('opens a regular document as a child flyout via openDocumentFlyoutFromIndexAsChild', () => {
     const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: alertHit }));
 
     act(() => {
       result.current.onTitleClick();
     });
 
-    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledTimes(1);
+    expect(openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledWith(
       expect.objectContaining({
-        historyKey: documentFlyoutHistoryKey,
-        session: 'inherit',
+        documentId: '1',
+        indexName: 'test',
+        origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
       })
     );
+    expect(openAttackFlyoutAsChild).not.toHaveBeenCalled();
   });
 
-  it('uses DOC_VIEWER_FLYOUT_HISTORY_KEY when not in the Security app', () => {
-    mockUseIsInSecurityApp.mockReturnValue(false);
-
-    const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: eventHit }));
+  it('opens an attack document via openAttackFlyoutAsChild (attack indices are not in the default data view)', () => {
+    const { result } = renderHook(() => useDocumentFlyoutTitle({ hit: attackHit }));
 
     act(() => {
       result.current.onTitleClick();
     });
 
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(openAttackFlyoutAsChild).toHaveBeenCalledTimes(1);
+    expect(openAttackFlyoutAsChild).toHaveBeenCalledWith(
       expect.objectContaining({
-        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
-        session: 'inherit',
+        attackId: '1',
+        indexName: 'test',
+        attackTitle: 'My Attack',
+        origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
       })
     );
+    expect(openDocumentFlyoutFromIndexAsChild).not.toHaveBeenCalled();
   });
 
   it('returns badge and timestamp nodes derived from the hit', () => {

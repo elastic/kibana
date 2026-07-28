@@ -31,6 +31,8 @@ import {
   EuiFieldText,
   EuiTextArea,
   EuiLink,
+  EuiFilterGroup,
+  EuiFilterButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -192,6 +194,10 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   });
 
   const error = queryError?.message ?? null;
+
+  const [collectorRuntime, setCollectorRuntime] = useState<'elastic-agent' | 'otelcol-contrib'>(
+    'elastic-agent'
+  );
 
   // Form state
   const [groupDisplayName, setGroupDisplayName] = useState('OTel Collector Group');
@@ -660,11 +666,41 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           <p>
             <FormattedMessage
               id="xpack.fleet.addCollectorFlyout.runCollectorInstruction"
-              defaultMessage="Run your collector. The following command uses the OTel contrib collector:"
+              defaultMessage="Select a runtime and run your collector:"
             />
           </p>
-          <EuiCodeBlock isCopyable language="yaml" paddingSize="m">
-            {'./otelcol-contrib --config ./otel-opamp.yaml '}
+          <EuiFilterGroup>
+            <EuiFilterButton
+              isToggle
+              isSelected={collectorRuntime === 'elastic-agent'}
+              hasActiveFilters={collectorRuntime === 'elastic-agent'}
+              onClick={() => setCollectorRuntime('elastic-agent')}
+            >
+              {i18n.translate('xpack.fleet.addCollectorFlyout.runtimeElasticAgent', {
+                defaultMessage: 'Elastic Agent',
+              })}
+            </EuiFilterButton>
+            <EuiFilterButton
+              isToggle
+              isSelected={collectorRuntime === 'otelcol-contrib'}
+              hasActiveFilters={collectorRuntime === 'otelcol-contrib'}
+              onClick={() => setCollectorRuntime('otelcol-contrib')}
+            >
+              {i18n.translate('xpack.fleet.addCollectorFlyout.runtimeOtelContrib', {
+                defaultMessage: 'OTel Contrib Collector',
+              })}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+          <EuiSpacer size="m" />
+          <EuiCodeBlock
+            isCopyable
+            language="bash"
+            paddingSize="m"
+            data-test-subj="runCollectorCommand"
+          >
+            {collectorRuntime === 'elastic-agent'
+              ? './otelcol --config ./otel-opamp.yaml'
+              : './otelcol-contrib --config ./otel-opamp.yaml'}
           </EuiCodeBlock>
         </EuiText>
       ),

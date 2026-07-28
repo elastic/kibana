@@ -28,6 +28,7 @@ import {
   CASE_DETAILS_REPORTER,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
+  CASE_DETAILS_TAGS_COMBOBOX_PILL,
   CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT,
   CASE_DETAILS_USERNAMES,
   PARTICIPANTS,
@@ -135,7 +136,25 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
       });
     });
 
-    cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
+    withCasesRedesign({
+      whenLegacy: () => {
+        // Legacy renders the tag values as badges inside `case-tags`, so the element text is
+        // exactly the concatenated tags.
+        cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
+      },
+      whenRedesign: () => {
+        // The redesign renders the tags field as an editable combobox whose `case-tags` wrapper
+        // also contains the field label and help text. Assert on the combobox pills instead so we
+        // verify the tag values themselves.
+        cy.get(CASE_DETAILS_TAGS_COMBOBOX_PILL).should(
+          'have.length',
+          (this.mycase as TestCase).tags.length
+        );
+        (this.mycase as TestCase).tags.forEach((caseTag) => {
+          cy.get(CASE_DETAILS_TAGS_COMBOBOX_PILL).should('contain.text', caseTag);
+        });
+      },
+    });
 
     EXPECTED_METRICS.forEach((metric) => {
       cy.get(CASES_METRIC(metric)).should('exist');

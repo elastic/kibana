@@ -8,53 +8,60 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutHeader } from '.';
 import { SERVICE_FLYOUT_DEFAULT_TAB_ID, SERVICE_FLYOUT_TABS } from '..';
+import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
+import * as ServiceBadgesModule from './service_badges';
 
-jest.mock('../hooks/use_service_links', () => ({
-  useServiceLinks: () => ({
-    overviewHref: '/app/apm/overview-href',
-    alertsHref: '/app/apm/alerts-href',
-  }),
+const mockUseServiceFlyoutLinks = jest.fn();
+jest.mock('../hooks/use_service_flyout_links', () => ({
+  useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
 }));
 
-// `ServiceBadges` is self-contained and covered by its own test; here we only assert that the
-// header renders it and forwards the right props.
 const mockServiceBadges = jest.fn();
-jest.mock('./service_badges', () => ({
-  ServiceBadges: (props: unknown) => {
-    mockServiceBadges(props);
-    return <div data-test-subj="serviceBadgesMock" />;
+
+const mockApmLocator = { getRedirectUrl: jest.fn() };
+
+const mockShare = {
+  url: {
+    locators: {
+      get: jest
+        .fn()
+        .mockImplementation((id: string) =>
+          id === APM_APP_LOCATOR_ID ? mockApmLocator : undefined
+        ),
+    },
   },
+} as any;
+
+const mockCore = {
+  application: { capabilities: { slo: { read: false }, apm: {} } },
+  http: { basePath: { prepend: (path: string) => path } },
+} as any;
+
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
-const baseNodeData: ServiceNodeData = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
-  isService: true,
+const baseNodeData: ServiceFlyoutService = {
+  name: 'opbeans-java',
   agentName: 'java',
 };
 
 function renderHeader({
-  nodeData = baseNodeData,
   selectedTabId = SERVICE_FLYOUT_DEFAULT_TAB_ID,
   onSelectedTabIdChange = jest.fn(),
 }: {
-  nodeData?: ServiceNodeData;
   selectedTabId?: (typeof SERVICE_FLYOUT_TABS)[number]['id'];
   onSelectedTabIdChange?: jest.Mock;
 } = {}) {
   return render(
     <IntlProvider locale="en">
       <ServiceFlyoutHeader
-        service={nodeData}
-        title={nodeData.label ?? nodeData.id}
+        title={baseNodeData.name}
         titleId="title-id"
-        environment="production"
-        kuery=""
-        rangeFrom="now-15m"
-        rangeTo="now"
         selectedTabId={selectedTabId}
         onSelectedTabIdChange={onSelectedTabIdChange}
       />
@@ -65,6 +72,38 @@ function renderHeader({
 describe('ServiceFlyoutHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
+      service: baseNodeData,
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+      },
+    });
+
+    // `ServiceBadges` is self-contained and covered by its own test; here we only assert that the
+    // header renders it.
+    jest.spyOn(ServiceBadgesModule, 'ServiceBadges').mockImplementation(() => {
+      mockServiceBadges();
+      return React.createElement('div', { 'data-test-subj': 'serviceBadgesMock' });
+    });
+
+    mockUseServiceFlyoutLinks.mockReturnValue({
+      apm: { overviewTab: '/app/apm/overview-href', alertsTab: '/app/apm/alerts-href' },
+      alerts: undefined,
+      slos: undefined,
+      discover: { traces: undefined, logs: undefined },
+    });
+    mockApmLocator.getRedirectUrl.mockReturnValue('/app/apm/overview-href');
+    mockShare.url.locators.get.mockImplementation((id: string) =>
+      id === APM_APP_LOCATOR_ID ? mockApmLocator : undefined
+    );
   });
 
   it('renders the overview title link and the service badges', () => {
@@ -75,20 +114,6 @@ describe('ServiceFlyoutHeader', () => {
     expect(titleLink).toHaveAttribute('data-ebt-action', 'viewService');
     expect(titleLink).toHaveAttribute('data-ebt-element', 'serviceFlyoutTitle');
     expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
-  });
-
-  it('forwards the service and query scope to ServiceBadges', () => {
-    renderHeader();
-
-    expect(mockServiceBadges).toHaveBeenCalledWith(
-      expect.objectContaining({
-        service: baseNodeData,
-        environment: 'production',
-        kuery: '',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
-      })
-    );
   });
 
   it('renders a tab per definition and selects the active one', () => {

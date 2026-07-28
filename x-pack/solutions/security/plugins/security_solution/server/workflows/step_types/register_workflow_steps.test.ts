@@ -6,7 +6,6 @@
  */
 
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
@@ -22,12 +21,10 @@ import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (server)', () => {
-  it('registers all steps when publicAttacksApiEnabled is true', () => {
+  it('registers all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, {
-      publicAttacksApiEnabled: true,
-    } as ExperimentalFeatures);
+    registerWorkflowSteps(workflowsExtensions);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
@@ -60,21 +57,5 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       disableRuleStepDefinition
     );
-  });
-
-  it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, {
-      publicAttacksApiEnabled: false,
-    } as ExperimentalFeatures);
-
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
-    const registeredSteps = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg
-    );
-    expect(registeredSteps).not.toContain(assignAttackStepDefinition);
-    expect(registeredSteps).not.toContain(setAttackStatusStepDefinition);
-    expect(registeredSteps).not.toContain(setAttackTagsStepDefinition);
   });
 });
