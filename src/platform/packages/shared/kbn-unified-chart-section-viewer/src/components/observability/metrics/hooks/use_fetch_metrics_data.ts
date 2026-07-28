@@ -28,6 +28,7 @@ import {
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
+import { stripNullDimensionWhere } from '../../../../common/utils/esql/strip_null_dimension_where';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -53,6 +54,7 @@ export function useFetchMetricsData({
   const { trackRequest } = useChartSectionInspector();
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
+  const { dataView } = fetchParams;
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
@@ -62,13 +64,11 @@ export function useFetchMetricsData({
   // "Unable to load visualization". The post-fetch state wipe (against
   // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
   const appliedDimensions = useMemo(() => {
-    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+    if (!selectedDimensionNames?.length || !dataView) {
       return selectedDimensionNames;
     }
-    return selectedDimensionNames.filter(
-      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
-    );
-  }, [selectedDimensionNames, fetchParams.dataView]);
+    return selectedDimensionNames.filter((dimension) => dataView.getFieldByName(dimension.name));
+  }, [selectedDimensionNames, dataView]);
 
   const appliedDimensionNames = useMemo(
     () => appliedDimensions?.map((dimension) => dimension.name),
@@ -83,7 +83,12 @@ export function useFetchMetricsData({
       appliedDimensionNames,
       (dimension) => `MV_CONTAINS(dimension_fields, ${escapeStringValue(dimension)})`
     );
-    return buildMetricsInfoQuery(esql, appliedDimensionNames, declaredDimensionFilter);
+    const metricsInfoSourceQuery = stripNullDimensionWhere(esql, appliedDimensionNames);
+    return buildMetricsInfoQuery(
+      metricsInfoSourceQuery,
+      appliedDimensionNames,
+      declaredDimensionFilter
+    );
   }, [esql, appliedDimensionNames]);
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
