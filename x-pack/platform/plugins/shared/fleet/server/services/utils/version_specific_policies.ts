@@ -8,7 +8,7 @@
 import { coerce, satisfies } from 'semver';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { escapeKuery } from '@kbn/es-query';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
 import * as AgentService from '../agents';
@@ -16,6 +16,21 @@ import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '.
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
 import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
+
+/** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
+const POLICY_BASE_ID_FIELD = 'policy_base_id';
+
+/**
+ * KQL matching agents assigned to a version-specific variant of the given base policy — but NOT the
+ * base policy itself. Term-based on `policy_base_id` (no wildcard/prefix), so it stays compatible
+ * with `search.allow_expensive_queries: false`. Agents enrolled via an older fleet-server during a
+ * mixed-version rollout that lack `policy_base_id` are covered by the startup backfill, consistent
+ * with the rest of Fleet's `policy_base_id` queries.
+ */
+export function buildVariantAgentsKuery(parentPolicyId: string): string {
+  const escapedId = escapeQuotes(parentPolicyId);
+  return `${POLICY_BASE_ID_FIELD}:"${escapedId}" and not policy_id:"${escapedId}"`;
+}
 
 export async function getAgentVersionsForVersionSpecificPolicies(): Promise<string[]> {
   const commonVersions = [];
@@ -78,6 +93,7 @@ export async function getVersionSpecificPolicies(
     const versionSpecificPolicy: FleetServerPolicy = {
       ...fleetServerPolicy,
       policy_id: versionedPolicyId,
+      policy_base_id: fullPolicy.id,
       data: {
         ...fleetServerPolicy.data,
         // The agent reports the policy id from `data.id` on checkin, so it must carry the
@@ -114,7 +130,7 @@ export async function reassignAgentsFromVersionSpecificPolicies(
   parentPolicyId: string
 ): Promise<void> {
   const logger = appContextService.getLogger();
-  const variantKuery = `policy_id:${escapeKuery(parentPolicyId)}${AGENT_POLICY_VERSION_SEPARATOR}*`;
+  const variantKuery = buildVariantAgentsKuery(parentPolicyId);
 
   const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {
     kuery: variantKuery,
@@ -147,12 +163,16 @@ export async function deleteVersionSpecificFleetServerPolicies(
   await esClient.deleteByQuery({
     index: AGENT_POLICY_INDEX,
     ignore_unavailable: true,
-    // TODO(https://github.com/elastic/kibana/pull/279716): a `prefix` query is rejected when
-    // `search.allow_expensive_queries` is disabled. Once `policy_base_id` is indexed on
-    // `.fleet-policies`, match variants with `policy_base_id: parentPolicyId` AND
-    // `must_not policy_id: parentPolicyId` (a bare `policy_base_id` term also matches the base
-    // policy document, which must be kept), reusing buildPolicyBaseId* helpers for the rollout fallback.
-    query: { prefix: { policy_id: `${parentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+    // Match only the variant documents: `policy_base_id` is the base id for both the base and its
+    // variants, so exclude the base document by `must_not policy_id: parentPolicyId`. Term-based
+    // (no `prefix`), so it works with `search.allow_expensive_queries: false`. Every `.fleet-policies`
+    // document carries `policy_base_id` (written on deploy and backfilled at startup).
+    query: {
+      bool: {
+        filter: [{ term: { [POLICY_BASE_ID_FIELD]: parentPolicyId } }],
+        must_not: [{ term: { policy_id: parentPolicyId } }],
+      },
+    },
     // Cleanup only; no reader needs the deletion visible synchronously, so avoid forcing a refresh.
     refresh: false,
   });

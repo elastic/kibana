@@ -82,6 +82,20 @@ const GuidedTourComponent: React.FC<GuidedTourProps> = ({
   // Only mount `EuiTourStep` once the current step's anchor is in the DOM. EuiTourStep resolves
   // its anchor a tick after mount; rendering before the anchor exists produces an unanchored
   // popover that never recovers.
+  //
+  // Scroll the active step's anchor into view so the tour doesn't open off-screen (e.g. the
+  // attach button at the bottom of a long case activity thread).
+  useEffect(() => {
+    if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
+      return;
+    }
+    const anchorEl = document.querySelector(currentStepConfig.anchor);
+    // jsdom does not implement scrollIntoView; guard so tours used in unit tests do not crash.
+    if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
+      anchorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isActive, currentStepConfig, isCurrentAnchorMounted]);
+
   if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
     return null;
   }

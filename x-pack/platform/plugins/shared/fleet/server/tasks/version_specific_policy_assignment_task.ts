@@ -29,6 +29,7 @@ import { agentPolicyService, appContextService, packagePolicyService } from '../
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import {
+  buildVariantAgentsKuery,
   deleteVersionSpecificFleetServerPolicies,
   hasAgentVersionConditionInInputTemplate,
 } from '../services/utils/version_specific_policies';
@@ -542,14 +543,13 @@ export class VersionSpecificPolicyAssignmentTask {
     soClient: SavedObjectsClientContract,
     signal: AbortSignal
   ) {
-    // Cheap first pass: enumerate the distinct policy ids present in `.fleet-policies`. That index
-    // is far smaller than `.fleet-agents` (one set of documents per policy, not per agent), so we
-    // drive the sweep off it rather than scanning agents. Working from the documents also means
-    // stale variants are cleaned up even once every agent has already moved off them.
-    // TODO(https://github.com/elastic/kibana/pull/279716): once `policy_base_id` is indexed on
-    // `.fleet-policies`, restrict to variant documents (`policy_id != policy_base_id`) and aggregate
-    // directly on `policy_base_id`, instead of aggregating every policy id and filtering the version
-    // suffix in memory.
+    // Cheap first pass: enumerate the distinct policy ids present in `.fleet-policies` via a terms
+    // aggregation (not gated by `search.allow_expensive_queries`). That index is far smaller than
+    // `.fleet-agents` (one set of documents per policy, not per agent), so we drive the sweep off it
+    // rather than scanning agents; working from the documents also means stale variants are cleaned
+    // up even once every agent has already moved off them. The version suffix is filtered in memory
+    // below, which keeps the aggregation to a single field and yields exactly the base ids that have
+    // variant documents.
     const policiesResponse = await esClient.search<
       unknown,
       { variant_policies: { buckets: Array<{ key: string }>; sum_other_doc_count: number } }
@@ -626,13 +626,16 @@ export class VersionSpecificPolicyAssignmentTask {
     signal: AbortSignal
   ) {
     try {
-      const variantAgentsKuery = buildVersionVariantsKueryFragment(parentPolicyId);
+      const variantAgentsKuery = buildVariantAgentsKuery(parentPolicyId);
 
       const agentIds: string[] = [];
+      // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
+      // regardless of active status. Skipping them would delete the variant documents below while an
+      // inactive agent still references one, leaving it stuck on a missing policy when it reactivates.
       const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
         kuery: variantAgentsKuery,
         perPage: AGENTS_BATCHSIZE,
-        showInactive: false,
+        showInactive: true,
       });
       for await (const agentsBatch of agentsFetcher) {
         throwIfAborted(signal);
@@ -647,7 +650,7 @@ export class VersionSpecificPolicyAssignmentTask {
         );
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
-        await reassignAgents(soClient, esClient, { agentIds, showInactive: false }, parentPolicyId);
+        await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
       }
 
       // Remove the now-stale variant documents so they don't linger in .fleet-policies.

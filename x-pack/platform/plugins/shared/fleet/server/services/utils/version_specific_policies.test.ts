@@ -50,6 +50,7 @@ jest.mock('../agent_policy', () => ({
 import * as AgentService from '../agents';
 
 import {
+  buildVariantAgentsKuery,
   deleteVersionSpecificFleetServerPolicies,
   getAgentVersionsForVersionSpecificPolicies,
   getVersionSpecificPolicies,
@@ -90,6 +91,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.3',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -97,6 +99,7 @@ describe('getVersionSpecificPolicies', () => {
           inputs: [],
         },
         policy_id: 'policy1#9.2',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -104,6 +107,7 @@ describe('getVersionSpecificPolicies', () => {
           inputs: [],
         },
         policy_id: 'policy1#8.9',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -137,6 +141,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.4',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -144,6 +149,7 @@ describe('getVersionSpecificPolicies', () => {
           inputs: [],
         },
         policy_id: 'policy1#9.1',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -164,6 +170,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.3',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -175,6 +182,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.2',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -182,6 +190,7 @@ describe('getVersionSpecificPolicies', () => {
           inputs: [],
         },
         policy_id: 'policy1#8.9',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -204,6 +213,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.4',
+        policy_base_id: 'policy1',
       },
       {
         data: {
@@ -215,6 +225,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.1',
+        policy_base_id: 'policy1',
       },
     ]);
   });
@@ -243,6 +254,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policyBothConditions#9.3',
+        policy_base_id: 'policyBothConditions',
       },
       {
         data: {
@@ -254,6 +266,7 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policyBothConditions#9.2',
+        policy_base_id: 'policyBothConditions',
       },
       {
         data: {
@@ -261,6 +274,7 @@ describe('getVersionSpecificPolicies', () => {
           inputs: [],
         },
         policy_id: 'policyBothConditions#8.9',
+        policy_base_id: 'policyBothConditions',
       },
     ]);
   });
@@ -277,20 +291,22 @@ describe('reassignAgentsFromVersionSpecificPolicies', () => {
     esClient.deleteByQuery.mockResolvedValue({});
   });
 
+  const variantKuery = 'policy_base_id:"policy1" and not policy_id:"policy1"';
+
   it('reassigns agents on variant policies back to the base policy', async () => {
     getAgentsByKueryMock.mockResolvedValue({ total: 3 });
 
     await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
 
     expect(getAgentsByKueryMock).toHaveBeenCalledWith(esClient, soClient, {
-      kuery: 'policy_id:policy1#*',
+      kuery: variantKuery,
       showInactive: false,
       perPage: 0,
     });
     expect(reassignAgentsMock).toHaveBeenCalledWith(
       soClient,
       esClient,
-      { kuery: 'policy_id:policy1#*', showInactive: false },
+      { kuery: variantKuery, showInactive: false },
       'policy1'
     );
   });
@@ -320,15 +336,28 @@ describe('deleteVersionSpecificFleetServerPolicies', () => {
     esClient.deleteByQuery.mockResolvedValue({});
   });
 
-  it('deletes the variant documents for the parent policy without forcing a refresh', async () => {
+  it('deletes only the variant documents via policy_base_id (excluding the base) without forcing a refresh', async () => {
     await deleteVersionSpecificFleetServerPolicies(esClient, 'policy1');
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: '.fleet-policies',
-        query: { prefix: { policy_id: 'policy1#' } },
+        query: {
+          bool: {
+            filter: [{ term: { policy_base_id: 'policy1' } }],
+            must_not: [{ term: { policy_id: 'policy1' } }],
+          },
+        },
         refresh: false,
       })
     );
+  });
+});
+
+describe('buildVariantAgentsKuery', () => {
+  it('matches variant assignments via policy_base_id and excludes the base policy (no wildcard)', () => {
+    const kuery = buildVariantAgentsKuery('policy1');
+    expect(kuery).toBe('policy_base_id:"policy1" and not policy_id:"policy1"');
+    expect(kuery).not.toContain('*');
   });
 });

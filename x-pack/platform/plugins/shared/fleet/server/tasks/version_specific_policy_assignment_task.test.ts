@@ -645,10 +645,17 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         [{ id: 'policy-1', spaceId: '*' }],
         expect.objectContaining({ ignoreMissing: true })
       );
+      // Inactive agents must be included, otherwise their variant doc is deleted below while they
+      // still reference it (https://github.com/elastic/kibana/pull/280250 review).
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ showInactive: true })
+      );
       expect(mockedReassignAgents).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        { agentIds: ['agent-1', 'agent-2'], showInactive: false },
+        { agentIds: ['agent-1', 'agent-2'], showInactive: true },
         'policy-1'
       );
       expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(

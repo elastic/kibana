@@ -10,7 +10,10 @@
 import type { Query } from '@kbn/es-query';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  applyInputDefaults,
+  getInputsFromDefinition,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import type { WorkflowTriggerTab } from './types';
@@ -21,6 +24,68 @@ export type NormalizedWorkflowInputs = JsonModelSchemaType | undefined;
 export function hasWorkflowInputFields(normalized?: NormalizedWorkflowInputs): boolean {
   const props = normalized?.properties;
   return Boolean(props && Object.keys(props).length > 0);
+}
+
+const OMITTED_DEFAULT = Symbol('omittedDefault');
+
+const omitUnchangedDefault = (
+  value: unknown,
+  defaultValue: unknown
+): unknown | typeof OMITTED_DEFAULT => {
+  if (Object.is(value, defaultValue)) {
+    return OMITTED_DEFAULT;
+  }
+
+  if (Array.isArray(value) && Array.isArray(defaultValue)) {
+    const isUnchanged =
+      value.length === defaultValue.length &&
+      value.every(
+        (nestedValue, index) =>
+          omitUnchangedDefault(nestedValue, defaultValue[index]) === OMITTED_DEFAULT
+      );
+    return isUnchanged ? OMITTED_DEFAULT : value;
+  }
+
+  if (
+    value === null ||
+    defaultValue === null ||
+    typeof value !== 'object' ||
+    typeof defaultValue !== 'object' ||
+    Array.isArray(value) ||
+    Array.isArray(defaultValue)
+  ) {
+    return value;
+  }
+
+  const defaultRecord = defaultValue as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (Object.hasOwn(defaultRecord, key)) {
+      const nestedResult = omitUnchangedDefault(nestedValue, defaultRecord[key]);
+      if (nestedResult !== OMITTED_DEFAULT) {
+        result[key] = nestedResult;
+      }
+    } else {
+      result[key] = nestedValue;
+    }
+  }
+
+  return Object.keys(result).length === 0 ? OMITTED_DEFAULT : result;
+};
+
+/**
+ * Removes values copied unchanged from schema defaults by the manual-run form.
+ * The execution engine can then apply and render those values as defaults while
+ * retaining user-edited values as caller-provided runtime data.
+ */
+export function omitUnchangedWorkflowInputDefaults(
+  inputs: Record<string, unknown>,
+  inputsSchema: NormalizedWorkflowInputs
+): Record<string, unknown> {
+  const defaults = applyInputDefaults(undefined, inputsSchema) ?? {};
+  const result = omitUnchangedDefault(inputs, defaults);
+  return result === OMITTED_DEFAULT ? {} : (result as Record<string, unknown>);
 }
 
 /** True when the RAC alerts index API failed due to missing `rac` / auth. */

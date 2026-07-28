@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CANCEL_DISCOVERY_LABEL, FIND_SIGNIFICANT_EVENTS_LABEL } from '../shared/translations';
 import { ContextMenuSplitButton } from '../shared/context_menu_split_button';
@@ -22,6 +23,8 @@ interface FindSignificantEventsButtonProps {
   isRunning: boolean;
   isCanceling?: boolean;
   isDisabled: boolean;
+  /** Tooltip shown on the primary action when it is disabled (e.g. pause). */
+  disabledTooltip?: ReactNode;
   size?: ContextMenuSplitButtonProps['size'];
   primaryDataTestSubj?: string;
 }
@@ -32,6 +35,7 @@ export const FindSignificantEventsButton = ({
   isRunning,
   isCanceling = false,
   isDisabled,
+  disabledTooltip,
   size = 's',
   primaryDataTestSubj = 'significant_events_discovery_button',
 }: FindSignificantEventsButtonProps) => {
@@ -55,12 +59,17 @@ export const FindSignificantEventsButton = ({
     [isRunning, isCanceling, onCancel]
   );
 
+  const isPrimaryDisabled = isDisabled || isRunning;
+
   return (
     <ContextMenuSplitButton
       primaryLabel={FIND_SIGNIFICANT_EVENTS_LABEL}
       primaryIconType="significantEvents"
       onPrimaryClick={onRun}
-      isPrimaryDisabled={isDisabled || isRunning}
+      isPrimaryDisabled={isPrimaryDisabled}
+      // Only attach the pause/status tooltip when start is blocked — not while
+      // the primary action is merely loading an in-progress run.
+      primaryDisabledTooltip={isDisabled ? disabledTooltip : undefined}
       isPrimaryLoading={isRunning}
       primaryDataTestSubj={primaryDataTestSubj}
       secondaryAriaLabel={SECONDARY_ARIA_LABEL}
