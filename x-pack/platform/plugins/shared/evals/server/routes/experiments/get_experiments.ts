@@ -15,10 +15,11 @@ import {
   parseExperimentsListingResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerGetExperimentsRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExperimentsRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXPERIMENTS_URL,
@@ -43,12 +44,14 @@ export const registerGetExperimentsRoute = ({ router, logger }: RouteDependencie
             suite_id: suiteId,
             model_id: modelId,
             branch,
+            search,
             dataset_id: datasetId,
             build_id: buildId,
             page,
             per_page: perPage,
           } = request.query;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const pagination = { page, perPage };
           const aggResponse = await evalsContext.evaluationScoreService.search({
@@ -57,8 +60,10 @@ export const registerGetExperimentsRoute = ({ router, logger }: RouteDependencie
               suiteId,
               modelId,
               branch,
+              search,
               datasetId,
               buildId,
+              spaceId,
             }),
             aggs: buildExperimentsListingAggregation(pagination),
           });
