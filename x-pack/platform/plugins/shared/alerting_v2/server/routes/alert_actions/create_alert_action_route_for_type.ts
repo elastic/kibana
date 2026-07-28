@@ -27,7 +27,6 @@ import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { ALERT_EVENT_NOT_FOUND_DESCRIPTION } from './alert_action_route_descriptions';
 
 interface CreateAlertActionRouteForTypeOptions<
   TAction extends CreateAlertActionBody['action_type']
@@ -87,7 +86,7 @@ export const createAlertActionRouteForType = <
         },
         404: {
           body: () => errorResponseSchema,
-          description: ALERT_EVENT_NOT_FOUND_DESCRIPTION,
+          description: 'Indicates the alert event was not found.',
         },
       },
     };
