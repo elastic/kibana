@@ -32,6 +32,7 @@ export interface ConnectorSpecWireResponse {
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
+  actions?: Array<{ name: string; description?: string; is_tool: boolean }>;
 }
 
 /** Client-side connector spec after normalising API casing. */
@@ -68,5 +69,15 @@ export function transformConnectorSpecResponse(
     },
     schema: wire.schema,
     isTestable: wire.is_testable,
+    isTestable: wire.is_testable ?? false,
+    ...(wire.actions !== undefined
+      ? {
+          actions: wire.actions.map(({ name, description: desc, is_tool: isTool }) => ({
+            name,
+            isTool,
+            ...(desc !== undefined ? { description: desc } : {}),
+          })),
+        }
+      : {}),
   };
 }
