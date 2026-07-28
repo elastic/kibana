@@ -16,92 +16,38 @@ export interface DiscoverPageInterface {
   waitUntilSearchingHasFinished: () => Promise<void>;
 }
 
-export const countSearchRequests = async (
-  page: ScoutPage,
-  type: 'ese' | 'esql'
-): Promise<number> => {
+// Anchored to exclude async polling URLs like /esql_async/{id}
+const getSearchEndpointPattern = (type: 'ese' | 'esql'): string => {
   const searchType = type === 'esql' ? 'esql_async' : type;
-  const entries = await page.evaluate(() =>
-    performance
-      .getEntries()
-      .filter(
-        (entry): entry is PerformanceResourceTiming =>
-          (entry as PerformanceResourceTiming).initiatorType === 'fetch' ||
-          (entry as PerformanceResourceTiming).initiatorType === 'xmlhttprequest'
-      )
-  );
-  // Use anchored match to exclude async polling URLs like /esql_async/{id}
-  return entries.filter((entry) =>
-    new RegExp(`/internal/search/${searchType}([?#]|$)`).test(entry.name)
-  ).length;
+  return `/internal/search/${searchType}([?#]|$)`;
 };
 
-const CHART_RENDER_COUNT_SELECTOR =
-  '[data-test-subj="unifiedHistogramChart"] [data-rendering-count]';
-
-// The Lens embeddable increments data-rendering-count each time it paints new data, so a counter
-// increase past a snapshot is a reliable "chart request completed" signal. The snapshot also tags
-// the chart's DOM node: if an action remounts the chart (e.g. new search, show after hide), the
-// counter restarts, so waitForChartRerender detects the untagged node and requires
-// data-render-complete instead (false on a fresh mount until the first data render).
-const snapshotChartRenderCount = async (page: ScoutPage): Promise<number> => {
-  return page.evaluate((selector) => {
-    const chartElement = document.querySelector(selector);
-    if (!chartElement) {
-      return 0;
-    }
-    (chartElement as Element & { __scoutRenderSnapshot?: boolean }).__scoutRenderSnapshot = true;
-    return Number(chartElement.getAttribute('data-rendering-count') ?? '0');
-  }, CHART_RENDER_COUNT_SELECTOR);
-};
-
-const waitForChartRerender = async (
-  page: ScoutPage,
-  previousRenderCount: number
-): Promise<void> => {
-  await page.waitForFunction(
-    ([selector, renderCount]) => {
-      const chartElement = document.querySelector(selector);
-      if (!chartElement) {
-        return false;
-      }
-      const isSameElement = (chartElement as Element & { __scoutRenderSnapshot?: boolean })
-        .__scoutRenderSnapshot;
-      if (!isSameElement) {
-        return chartElement.getAttribute('data-render-complete') === 'true';
-      }
-      return Number(chartElement.getAttribute('data-rendering-count') ?? '0') > renderCount;
-    },
-    [CHART_RENDER_COUNT_SELECTOR, previousRenderCount] as const
+const countSearchRequests = async (page: ScoutPage, type: 'ese' | 'esql'): Promise<number> => {
+  return page.evaluate(
+    (pattern) =>
+      performance
+        .getEntries()
+        .filter(
+          (entry): entry is PerformanceResourceTiming =>
+            (entry as PerformanceResourceTiming).initiatorType === 'fetch' ||
+            (entry as PerformanceResourceTiming).initiatorType === 'xmlhttprequest'
+        )
+        .filter((entry) => new RegExp(pattern).test(entry.name)).length,
+    getSearchEndpointPattern(type)
   );
 };
 
-// Clears the resource timing buffer, runs the optional action, waits for Discover's search to
-// settle, then returns the number of matching search requests. PerformanceResourceTiming entries
-// are added when responseEnd fires — before the fetch Promise resolves and before Discover can
-// clear the loading indicator — so the count is stable by the time waitUntilSearchingHasFinished
-// returns. No polling is needed; use a plain expect(count).toBe(N) at the call site.
-//
-// waitUntilSearchingHasFinished only tracks the documents grid indicator, not the chart's own
-// search request. Pass `waitForChartRerender: true` for actions that trigger a chart request so
-// the count also includes the chart's response (and a late response cannot leak into a later
-// measurement). Leave it off for actions that trigger no chart request — the wait would never
-// resolve.
 export const measureSearchRequests = async (
   page: ScoutPage,
   discover: DiscoverPageInterface,
   type: 'ese' | 'esql',
-  action?: () => Promise<void>,
-  {
-    waitForChartRerender: shouldWaitForChartRerender = false,
-  }: { waitForChartRerender?: boolean } = {}
+  expectedCount: number,
+  action?: () => Promise<void>
 ): Promise<number> => {
   await page.evaluate(() => {
     performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
     performance.clearResourceTimings();
   });
-
-  const previousRenderCount = shouldWaitForChartRerender ? await snapshotChartRenderCount(page) : 0;
 
   if (action) {
     await action();
@@ -109,8 +55,24 @@ export const measureSearchRequests = async (
 
   await discover.waitUntilSearchingHasFinished();
 
-  if (shouldWaitForChartRerender) {
-    await waitForChartRerender(page, previousRenderCount);
+  if (expectedCount > 0) {
+    await page
+      .waitForFunction(
+        ([pattern, expected]) =>
+          performance
+            .getEntries()
+            .filter(
+              (entry): entry is PerformanceResourceTiming =>
+                (entry as PerformanceResourceTiming).initiatorType === 'fetch' ||
+                (entry as PerformanceResourceTiming).initiatorType === 'xmlhttprequest'
+            )
+            .filter((entry) => new RegExp(pattern).test(entry.name)).length >= expected,
+        [getSearchEndpointPattern(type), expectedCount] as const,
+        { timeout: 10_000 }
+      )
+      .catch(() => {
+        // Fall through to the final count so the caller's assertion reports the actual number
+      });
   }
 
   return countSearchRequests(page, type);
