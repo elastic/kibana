@@ -17,7 +17,9 @@ jest.mock('./get_security_ml_job_ids', () => ({
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     dsl: {
-      getEuidFilterBasedOnEntityRecord: jest.fn().mockReturnValue({ term: { 'user.name': 'alice' } }),
+      getEuidFilterBasedOnEntityRecord: jest
+        .fn()
+        .mockReturnValue({ term: { 'user.name': 'alice' } }),
     },
   },
 }));
@@ -80,7 +82,10 @@ describe('searchEntityAnomalies', () => {
 
     await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-    expect(euid.dsl.getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith('user', mockEntityRecord);
+    expect(euid.dsl.getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith(
+      'user',
+      mockEntityRecord
+    );
     expect(mockMlAnomalySearch).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
