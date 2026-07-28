@@ -1,3 +1,5 @@
+REGRESSION_VERDICT: CLEAN
+
 # AO Eval Summary — endpoint-forensic-analysis vs elastic-defend-configuration-troubleshooting routing collision
 
 ## Comment addressed
