@@ -161,10 +161,7 @@ export const createTask = (
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
   return async ({ input }) => {
     const turnResult = await runConversationTurns(client, agentId, input.turns);
-    const { rounds, attachments } = await loadConversationState(
-      client,
-      turnResult.conversationId
-    );
+    const { rounds, attachments } = await loadConversationState(client, turnResult.conversationId);
 
     return {
       ...turnResult,
