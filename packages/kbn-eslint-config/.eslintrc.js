@@ -453,6 +453,8 @@ module.exports = {
     '@kbn/imports/no_undeclared_plugin_target': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
+    'no-eval': 'error',
+    'no-script-url': 'error',
     'no-prototype-builtins': 'error',
 
     /**
