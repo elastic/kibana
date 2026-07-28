@@ -3167,6 +3167,23 @@ print("200")
         self.assertIn('--base-url es_url', login)
         self.assertIn('--endpoint "/_security/user/$TEST_USERNAME"', login)
         self.assertIn("USER_PROVISIONING_SKIPPED", login)
+
+        # User management must never run against a cluster this session does
+        # not own, and skipping it by design must not abort the session.
+        user_section = login[
+            login.index("**Create test user**") : login.index("`environment.es_url`")
+        ]
+        self.assertIn(
+            'if [[ "$ENV_TYPE" != "user-provided" && "$ENV_TYPE" != "serverless" ]]',
+            user_section,
+        )
+        self.assertIn("USER_EXISTING_STATUS=skip", user_section)
+        self.assertIn("record_skipped_setup", user_section)
+        self.assertLess(
+            user_section.index("ENV_TYPE"),
+            user_section.index("USER_EXISTING_STATUS=$(curl"),
+        )
+        self.assertNotIn("USER_PROVISIONING_SKIPPED=true\n    ;;\n  200)", user_section)
         self.assertIn("Do not continue to Phase 2", login)
         self.assertIn("user-provisioning", explore)
         self.assertIn("do not explore", explore)
@@ -3199,6 +3216,15 @@ print("200")
         self.assertIn("CURL_TIMEOUT_ARGS=(", positive_control)
         self.assertIn('"${CURL_TIMEOUT_ARGS[@]}"', positive_control)
         self.assertIn("EXPLORATORY_TESTER_CURL_MAX_TIME", positive_control)
+
+        # Registration is mandatory, so SESSION_DIR must be required up front
+        # rather than guarded on one read and assumed everywhere else.
+        self.assertIn(': "${SESSION_DIR:?', positive_control)
+        self.assertNotIn('if [[ -n "${SESSION_DIR:-}" ]]', positive_control)
+        self.assertLess(
+            positive_control.index(': "${SESSION_DIR:?'),
+            positive_control.index('--session-dir "$SESSION_DIR"'),
+        )
         self.assertIn('ccs_state="mutation_pending"', break_remote)
         self.assertIn("capture-remote-cluster.py", break_remote)
         self.assertIn("restore-remote-cluster.py", break_remote)

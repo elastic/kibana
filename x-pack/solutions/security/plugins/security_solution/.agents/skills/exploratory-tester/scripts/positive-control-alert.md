@@ -2,7 +2,8 @@
 
 Used from `phases/2-explore.md` → "Confirm before logging" (absent-element path) and → "CCS-specific techniques", when you need to prove real data *exists* before concluding a feature is broken — i.e. to tell "the feature genuinely can't show this data" apart from "there is simply no data to show."
 
-**Requires:** a source-cluster API key (`config.json → credentials.api_key`).
+**Requires:** a source-cluster API key (`config.json → credentials.api_key`)
+and `$SESSION_DIR`, since every resource below is registered for cleanup.
 CCS also requires the remote credentials in `environment.ccs.remote`. Creates
 a temporary detection rule and a temporary source index — clean both up at the
 end of the session.
@@ -53,11 +54,10 @@ assigning ownership. A resource that was merely found remotely is reused; a
 resource reserved by this session is owned only after a successful create or
 reconciliation:
 ```bash
+: "${SESSION_DIR:?positive control registers resources and requires SESSION_DIR}"
 SOURCE_OWNERSHIP_FLAG=""
-SOURCE_RESOURCE_STATE=none
-if [[ -n "${SESSION_DIR:-}" ]]; then
-  SOURCE_RESOURCE_STATE=$(PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
-    python3 - "$SESSION_DIR" "$SOURCE_INDEX" <<'PY'
+SOURCE_RESOURCE_STATE=$(PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
+  python3 - "$SESSION_DIR" "$SOURCE_INDEX" <<'PY'
 import sys
 from pathlib import Path
 
@@ -78,8 +78,7 @@ print(
     else "none"
 )
 PY
-  )
-fi
+)
 SOURCE_HEAD_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
   -H "Authorization: ApiKey $DATA_API_KEY" \
   -X HEAD "$DATA_ES_URL/$SOURCE_INDEX")

@@ -238,14 +238,23 @@ the alias is retained in `config.json` for queries. On failure (empty
 
 **Create test user** (agent-managed stateful only):
 ```bash
-# User-provided environments already have their browser/API credentials;
-# skip user provisioning there. Agent-managed environments use basic auth.
 # The username is session-scoped, so concurrent sessions cannot claim or
-# delete one another's users.
+# delete one another's users. Only agent-managed environments are probed: a
+# privileged key on a user-provided or serverless cluster would otherwise
+# create and later delete a user on a cluster this session does not own.
 USER_PROVISIONING_SKIPPED=false
-USER_EXISTING_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
-  "${AUTH_ARGS[@]}" -X GET "$ES_URL/_security/user/$TEST_USERNAME")
+USER_EXISTING_STATUS=skip
+if [[ "$ENV_TYPE" != "user-provided" && "$ENV_TYPE" != "serverless" ]]; then
+  USER_EXISTING_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
+    "${AUTH_ARGS[@]}" -X GET "$ES_URL/_security/user/$TEST_USERNAME")
+fi
 case "$USER_EXISTING_STATUS" in
+  skip)
+    # Skipped by design: the provided credentials are the test credentials, so
+    # this is not a provisioning failure and must not stop the session.
+    record_skipped_setup "user-provisioning" \
+      "$ENV_TYPE environments use the provided credentials; no user is created"
+    ;;
   200)
     python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
       --session-dir "$SESSION_DIR" \
@@ -345,6 +354,11 @@ cleanup command, and report that exploration did not run.** Never explore as
 the admin setup user after test-user provisioning fails. Do not fall back to
 browser credentials for API calls.
 
+The `skip` branch is different: user-provided and serverless environments are
+never probed and record `skipped_setup` without setting
+`USER_PROVISIONING_SKIPPED`, because their provided credentials already are the
+test credentials. Those sessions continue to Phase 2.
+
 Serverless: skip user creation — roles are pre-provisioned. Add `{ "step": "role-creation:<role>", "reason": "serverless" }` to `skipped_setup`.
 
 If setup creates a custom role rather than using an existing role, reserve it
@@ -368,7 +382,7 @@ endpoint. Built-in or pre-existing roles must not be registered as owned.
 
 ## Step 1d — Switch to test user
 
-_Skip for user-provided environments — provided credentials are the test credentials._
+_Skip for user-provided and serverless environments — provided credentials are the test credentials, and no session user was created._
 If `USER_PROVISIONING_SKIPPED=true`, stop the session before Phase 2. Do not
 retain the authenticated admin setup session for exploration; run the
 restore-aware cleanup command and report the provisioning failure. The
