@@ -176,7 +176,7 @@ export interface SmlTypeDefinition {
 
   /**
    * Hidden saved object types that this type's `list` and `getSmlEntry` hooks
-   * require access to (e.g. ['action'] for connectors.
+   * require access to (e.g. ['action'] for connectors.)
    */
   requiredHiddenTypes?: readonly string[];
 }
