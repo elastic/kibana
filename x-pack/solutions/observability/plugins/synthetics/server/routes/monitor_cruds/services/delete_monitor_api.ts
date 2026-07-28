@@ -10,6 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { validatePermissions } from '../edit_monitor';
+import { assertCanUpdateMonitorInAllSpaces } from '../monitor_locations_utils';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
@@ -95,6 +96,18 @@ export class DeleteMonitorAPI {
             },
           }),
         };
+      }
+
+      const monitorSpaces = monitor.attributes[ConfigKey.KIBANA_SPACES] ?? [];
+      if (monitorSpaces.length > 0) {
+        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
+          this.routeContext,
+          monitorSpaces,
+          monitor.type
+        );
+        if (spaceAuthError) {
+          return { res: spaceAuthError };
+        }
       }
     }
 
