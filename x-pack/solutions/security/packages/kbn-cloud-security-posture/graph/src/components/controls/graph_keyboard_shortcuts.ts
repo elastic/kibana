@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const SELECT_TOOL_SHORTCUT = 'V';
-export const PAN_TOOL_SHORTCUT = 'Space';
 export const SEARCH_TOOL_SHORTCUT = 'S';
 export const DISPLAY_SHORTCUT = 'D';
 export const ZOOM_IN_SHORTCUT = '+';
@@ -14,6 +12,7 @@ export const ZOOM_OUT_SHORTCUT = '-';
 export const FIT_TO_SCREEN_SHORTCUT = '0';
 export const FULL_SCREEN_SHORTCUT = 'F';
 export const CENTER_SHORTCUT = 'C';
+export const MULTI_SELECT_SHORTCUT = 'Shift';
 
 /** @deprecated Use {@link DISPLAY_SHORTCUT} */
 export const APPLY_FILTERS_SHORTCUT = DISPLAY_SHORTCUT;

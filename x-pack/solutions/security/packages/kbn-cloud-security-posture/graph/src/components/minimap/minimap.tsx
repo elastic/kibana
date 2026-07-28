@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { MiniMap, type Node, type MiniMapNodeProps } from '@xyflow/react';
+import React, { useCallback, useState } from 'react';
+import { MiniMap, Panel, type Node, type MiniMapNodeProps } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   GRAPH_MINIMAP_ID,
+  GRAPH_MINIMAP_COLLAPSE_ID,
+  GRAPH_MINIMAP_EXPAND_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
@@ -19,6 +22,7 @@ import {
 import type { NodeViewModel } from '../types';
 import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
 import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import { GraphControlTooltip } from '../controls/graph_control_tooltip';
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
   data?: NodeViewModel;
@@ -110,6 +114,22 @@ const MiniMapNode = ({
   );
 };
 
+const CollapseLabel = i18n.translate('securitySolutionPackages.csp.graph.minimap.collapse', {
+  defaultMessage: 'Collapse minimap',
+});
+
+const ExpandLabel = i18n.translate('securitySolutionPackages.csp.graph.minimap.expand', {
+  defaultMessage: 'Expand minimap',
+});
+
+const MINIMAP_WIDTH = 200;
+const MINIMAP_HEIGHT = 120;
+const MINIMAP_PANEL_RADIUS = 8;
+const MINIMAP_PANEL_PADDING = 8;
+const MINIMAP_HEADER_HEIGHT = 24;
+const COLLAPSED_BUTTON_SIZE = 40;
+const COLLAPSED_BUTTON_RADIUS = 8;
+
 export interface MinimapProps {
   /**
    * Flag to determine if the minimap should be zoomable
@@ -131,11 +151,15 @@ export interface MinimapProps {
    * Nodes state from ReactFlow
    */
   nodesState?: Node<NodeViewModel>[];
+  /**
+   * Whether the minimap starts expanded. Defaults to true.
+   */
+  defaultExpanded?: boolean;
 }
 
 /**
  * Minimap component for the Graph. Provides a scaled-down overview of the entire graph
- * with navigation capabilities.
+ * with navigation capabilities, and can collapse to a map button.
  *
  * @component
  * @param {MinimapProps} props - The properties for the Minimap component.
@@ -147,9 +171,11 @@ export const Minimap = ({
   zoomStep = 2,
   style,
   nodesState,
+  defaultExpanded = true,
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
-  const minimapShadow = useEuiShadow('s');
+  const panelShadow = useEuiShadow('s');
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   // Create a mapping of node ids to their data for easy lookup
   const nodeDataMap = React.useMemo(() => {
@@ -182,15 +208,54 @@ export const Minimap = ({
   );
 
   const defaultStyle: React.CSSProperties = {
-    height: 120,
-    width: 200,
+    height: MINIMAP_HEIGHT,
+    width: MINIMAP_WIDTH,
     borderRadius: 4,
     overflow: 'hidden',
+    position: 'relative',
   };
+
+  const panelCss = css`
+    margin: 0;
+  `;
+
+  const expandedPanelCss = css`
+    position: relative;
+    width: ${MINIMAP_WIDTH + MINIMAP_PANEL_PADDING * 2}px;
+    padding: ${MINIMAP_HEADER_HEIGHT}px ${MINIMAP_PANEL_PADDING}px ${MINIMAP_PANEL_PADDING}px;
+    border: ${euiTheme.border.thin};
+    border-radius: ${MINIMAP_PANEL_RADIUS}px;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    ${panelShadow};
+  `;
+
+  const collapseButtonCss = css`
+    && {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+    }
+  `;
+
+  const collapsedButtonCss = css`
+    && {
+      width: ${COLLAPSED_BUTTON_SIZE}px;
+      height: ${COLLAPSED_BUTTON_SIZE}px;
+      min-width: ${COLLAPSED_BUTTON_SIZE}px;
+      border: ${euiTheme.border.thin};
+      border-radius: ${COLLAPSED_BUTTON_RADIUS}px;
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      ${panelShadow};
+    }
+  `;
 
   const minimapWrapperCss = css`
     & > .react-flow__minimap {
-      ${minimapShadow}
+      position: relative !important;
+      margin: 0 !important;
     }
 
     .react-flow__minimap-mask {
@@ -200,19 +265,47 @@ export const Minimap = ({
   `;
 
   return (
-    <div data-test-subj={GRAPH_MINIMAP_ID} css={minimapWrapperCss}>
-      <MiniMap<Node<NodeViewModel>>
-        bgColor={euiTheme.colors.backgroundBaseSubdued}
-        maskColor={euiTheme.colors.backgroundBasePlain}
-        maskStrokeColor={euiTheme.colors.borderBasePlain}
-        maskStrokeWidth={4}
-        nodeComponent={NodeRenderer}
-        style={{ ...defaultStyle, ...style }}
-        zoomable={zoomable}
-        pannable={pannable}
-        zoomStep={zoomStep}
-        position="bottom-left"
-      />
-    </div>
+    <Panel position="bottom-left" css={panelCss} data-test-subj={GRAPH_MINIMAP_ID}>
+      {isExpanded ? (
+        <div css={expandedPanelCss}>
+          <GraphControlTooltip content={CollapseLabel} position="top">
+            <EuiButtonIcon
+              iconType="minus"
+              color="text"
+              size="xs"
+              aria-label={CollapseLabel}
+              data-test-subj={GRAPH_MINIMAP_COLLAPSE_ID}
+              css={collapseButtonCss}
+              onClick={() => setIsExpanded(false)}
+            />
+          </GraphControlTooltip>
+          <div css={minimapWrapperCss}>
+            <MiniMap<Node<NodeViewModel>>
+              bgColor={euiTheme.colors.backgroundBaseSubdued}
+              maskColor={euiTheme.colors.backgroundBasePlain}
+              maskStrokeColor={euiTheme.colors.borderBasePlain}
+              maskStrokeWidth={4}
+              nodeComponent={NodeRenderer}
+              style={{ ...defaultStyle, ...style }}
+              zoomable={zoomable}
+              pannable={pannable}
+              zoomStep={zoomStep}
+            />
+          </div>
+        </div>
+      ) : (
+        <GraphControlTooltip content={ExpandLabel} position="top">
+          <EuiButtonIcon
+            iconType="map"
+            color="text"
+            size="m"
+            aria-label={ExpandLabel}
+            data-test-subj={GRAPH_MINIMAP_EXPAND_ID}
+            css={collapsedButtonCss}
+            onClick={() => setIsExpanded(true)}
+          />
+        </GraphControlTooltip>
+      )}
+    </Panel>
   );
 };

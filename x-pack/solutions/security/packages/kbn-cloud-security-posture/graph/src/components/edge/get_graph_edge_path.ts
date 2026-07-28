@@ -10,7 +10,7 @@ import type { EdgeProps } from '../types';
 import { GRID_SIZE } from '../constants';
 
 /** Corner radius for stepped graph edges. */
-export const GRAPH_EDGE_BORDER_RADIUS = 8;
+export const GRAPH_EDGE_BORDER_RADIUS = 24;
 
 /** Offset for stepped paths so parallel edges do not share the same corridor. */
 export const GRAPH_EDGE_STEP_OFFSET = GRID_SIZE * 2;

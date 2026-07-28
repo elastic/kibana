@@ -39,10 +39,7 @@ import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls, CONTROL_PANEL_MARGIN_RIGHT } from '../controls/controls';
-import {
-  GraphInteractionToolContext,
-  type GraphInteractionTool,
-} from '../controls/graph_interaction_tool_context';
+import { GraphInteractionToolContext } from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
 import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
 import { withZoomInvariant } from '../zoom/with_zoom_invariant';
@@ -173,7 +170,6 @@ export const Graph = memo<GraphProps>(
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
     const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
-    const [interactionTool, setInteractionTool] = useState<GraphInteractionTool>('select');
     const applyFiltersToggleRef = useRef<(() => void) | null>(null);
     const searchPanelToggleRef = useRef<(() => void) | null>(null);
     const focusSearchInputRef = useRef<(() => void) | null>(null);
@@ -455,14 +451,6 @@ export const Graph = memo<GraphProps>(
       focusSearchInputRef.current = focus;
     }, []);
 
-    const handleSelectToolShortcut = useCallback(() => {
-      setInteractionTool('select');
-    }, []);
-
-    const handlePanToolShortcut = useCallback(() => {
-      setInteractionTool('pan');
-    }, []);
-
     const handleToggleApplyFiltersShortcut = useCallback(() => {
       applyFiltersToggleRef.current?.();
     }, []);
@@ -477,8 +465,6 @@ export const Graph = memo<GraphProps>(
 
     useGraphInteractionKeyboardShortcuts({
       enabled: interactive,
-      onSelectTool: handleSelectToolShortcut,
-      onPanTool: handlePanToolShortcut,
       onToggleApplyFiltersPanel: handleToggleApplyFiltersShortcut,
       onToggleSearchPanel: handleToggleSearchPanelShortcut,
       onFocusSearchInput: handleFocusSearchInputShortcut,
@@ -508,49 +494,24 @@ export const Graph = memo<GraphProps>(
 
     const interactionToolContextValue = useMemo(
       () => ({
-        interactionTool,
-        setInteractionTool,
         registerApplyFiltersToggle,
         registerSearchPanelToggle,
         registerFocusSearchInput,
       }),
-      [
-        interactionTool,
-        registerApplyFiltersToggle,
-        registerSearchPanelToggle,
-        registerFocusSearchInput,
-      ]
+      [registerApplyFiltersToggle, registerSearchPanelToggle, registerFocusSearchInput]
     );
 
     const canDragInteract = isGraphInteractive && !isLocked;
-    const isPanTool = interactionTool === 'pan';
-    const isSelectTool = canDragInteract && !isPanTool;
-
-    useEffect(() => {
-      if (!isPanTool) {
-        return;
-      }
-
-      setNodes((currentNodes) => {
-        if (!currentNodes.some((node) => node.selected)) {
-          return currentNodes;
-        }
-
-        return currentNodes.map((node) => (node.selected ? { ...node, selected: false } : node));
-      });
-    }, [isPanTool, setNodes]);
 
     const reactFlowClassName = useMemo(
       () =>
         [
-          isPanTool ? 'graph-tool-pan' : 'graph-tool-select',
-          highlightOriginsOnly ? 'graph-highlight-origins-only' : null,
           searchFlowClasses.searchActive ? GRAPH_IN_PAGE_SEARCH_ACTIVE_CLASS : null,
           searchFlowClasses.filtersActive ? GRAPH_ENTITY_FILTERS_ACTIVE_CLASS : null,
         ]
           .filter(Boolean)
           .join(' '),
-      [highlightOriginsOnly, isPanTool, searchFlowClasses]
+      [searchFlowClasses]
     );
 
     const fullscreenContainerCss = css`
@@ -596,80 +557,80 @@ export const Graph = memo<GraphProps>(
       <GraphInteractionToolContext.Provider value={interactionToolContextValue}>
         <GraphSearchProvider>
           <GraphLayoutProvider value={graphLayoutContextValue}>
-          <GraphFullscreenContext.Provider value={fullscreenContextValue}>
-            <div
-              ref={graphContainerRef}
-              css={[fullscreenContainerCss, containerCss]}
-              {...rest}
-              tabIndex={interactive ? -1 : undefined}
-              onPointerDown={handleGraphPointerDown}
-            >
-              <SvgDefsMarker />
-              <ReactFlow
-                key={reactFlowKey}
-                data-test-subj={GRAPH_ID}
-                className={reactFlowClassName}
-                fitView={true}
-                fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
-                onInit={onInitCallback}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                nodes={nodesState}
-                edges={edgesState}
-                nodesConnectable={false}
-                edgesFocusable={false}
-                onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-                snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-                snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
-                onNodesChange={handleNodesChange}
-                onEdgesChange={onEdgesChange}
-                proOptions={{ hideAttribution: true }}
-                panOnDrag={canDragInteract && isPanTool}
-                panActivationKeyCode={null}
-                selectionOnDrag={isSelectTool}
-                selectionMode={SelectionMode.Partial}
-                selectionKeyCode={isPanTool ? null : 'Shift'}
-                multiSelectionKeyCode={isPanTool ? null : undefined}
-                selectNodesOnDrag={isSelectTool}
-                elementsSelectable={isSelectTool}
-                zoomOnScroll={isGraphInteractive && !isLocked}
-                zoomOnPinch={isGraphInteractive && !isLocked}
-                zoomOnDoubleClick={isGraphInteractive && !isLocked}
-                preventScrolling={interactive}
-                nodesDraggable={interactive && isSelectTool}
-                maxZoom={1.3}
-                minZoom={0.1}
-              >
-                <GraphSearchEffects nodes={nodes} onFlowClassesChange={setSearchFlowClasses} />
-                <GraphSelectionHandlers />
-                <ZoomNodeInternalsSync />
-                {interactive && (
-                  <Panel
-                    position="bottom-right"
-                    style={{ marginRight: CONTROL_PANEL_MARGIN_RIGHT, overflow: 'visible' }}
-                  >
-                    <Controls
-                      fitViewOptions={fitViewOptions}
-                      nodeIdsToCenterOn={originNodeIds}
-                      isFullScreen={isFullscreen}
-                      onToggleFullScreen={onToggleFullScreen}
-                    />
-                  </Panel>
-                )}
-                {children}
-                <Background id={backgroundId} />
-                {interactive && showMinimap && (
-                  <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
-                )}
-              </ReactFlow>
-              <GlobalGraphStyles />
+            <GraphFullscreenContext.Provider value={fullscreenContextValue}>
               <div
-                ref={overlayContainerRef}
-                css={overlayPortalCss}
-                data-test-subj="graphFullscreenOverlay"
-              />
-            </div>
-          </GraphFullscreenContext.Provider>
+                ref={graphContainerRef}
+                css={[fullscreenContainerCss, containerCss]}
+                {...rest}
+                tabIndex={interactive ? -1 : undefined}
+                onPointerDown={handleGraphPointerDown}
+              >
+                <SvgDefsMarker />
+                <ReactFlow
+                  key={reactFlowKey}
+                  data-test-subj={GRAPH_ID}
+                  className={reactFlowClassName}
+                  fitView={true}
+                  fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
+                  onInit={onInitCallback}
+                  nodeTypes={nodeTypes}
+                  edgeTypes={edgeTypes}
+                  nodes={nodesState}
+                  edges={edgesState}
+                  nodesConnectable={false}
+                  edgesFocusable={false}
+                  onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
+                  snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
+                  snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
+                  onNodesChange={handleNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  proOptions={{ hideAttribution: true }}
+                  panOnDrag={canDragInteract}
+                  panActivationKeyCode={null}
+                  selectionOnDrag={false}
+                  selectionMode={SelectionMode.Partial}
+                  selectionKeyCode={canDragInteract ? 'Shift' : null}
+                  multiSelectionKeyCode={canDragInteract ? 'Shift' : null}
+                  selectNodesOnDrag={false}
+                  elementsSelectable={canDragInteract}
+                  zoomOnScroll={isGraphInteractive && !isLocked}
+                  zoomOnPinch={isGraphInteractive && !isLocked}
+                  zoomOnDoubleClick={isGraphInteractive && !isLocked}
+                  preventScrolling={interactive}
+                  nodesDraggable={canDragInteract}
+                  maxZoom={1.3}
+                  minZoom={0.1}
+                >
+                  <GraphSearchEffects nodes={nodes} onFlowClassesChange={setSearchFlowClasses} />
+                  <GraphSelectionHandlers />
+                  <ZoomNodeInternalsSync />
+                  {interactive && (
+                    <Panel
+                      position="bottom-right"
+                      style={{ marginRight: CONTROL_PANEL_MARGIN_RIGHT, overflow: 'visible' }}
+                    >
+                      <Controls
+                        fitViewOptions={fitViewOptions}
+                        nodeIdsToCenterOn={originNodeIds}
+                        isFullScreen={isFullscreen}
+                        onToggleFullScreen={onToggleFullScreen}
+                      />
+                    </Panel>
+                  )}
+                  {children}
+                  <Background id={backgroundId} />
+                  {interactive && showMinimap && (
+                    <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+                  )}
+                </ReactFlow>
+                <GlobalGraphStyles />
+                <div
+                  ref={overlayContainerRef}
+                  css={overlayPortalCss}
+                  data-test-subj="graphFullscreenOverlay"
+                />
+              </div>
+            </GraphFullscreenContext.Provider>
           </GraphLayoutProvider>
         </GraphSearchProvider>
       </GraphInteractionToolContext.Provider>

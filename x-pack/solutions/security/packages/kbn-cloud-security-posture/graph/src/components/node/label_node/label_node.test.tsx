@@ -298,8 +298,11 @@ describe('LabelNode', () => {
         borderBaseDanger: '#ffc9c2',
         borderStrongDanger: '#c61e25',
         backgroundBasePlain: '#ffffff',
+        backgroundBasePrimary: '#e6f0ff',
         backgroundBaseSubdued: '#f6f9fc',
         borderBasePlain: '#cad3e2',
+        borderBaseProminent: '#98a2b3',
+        borderBasePrimary: '#0b64dd',
         textParagraph: '#1d2a3e',
       },
     } as EuiThemeComputed;
@@ -322,7 +325,14 @@ describe('LabelNode', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
       const colors = getEventPillColors(getEventPillTone(analysis), false, mockEuiTheme);
       expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePlain);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBasePlain);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseProminent);
+    });
+
+    it('returns active event colors when selected', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
+      const colors = getEventPillColors(getEventPillTone(analysis), true, mockEuiTheme);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePrimary);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBasePrimary);
     });
   });
 });

@@ -13,8 +13,6 @@ import {
 
 interface UseGraphInteractionKeyboardShortcutsArgs {
   enabled?: boolean;
-  onSelectTool: () => void;
-  onPanTool: () => void;
   onToggleApplyFiltersPanel: () => void;
   onToggleSearchPanel?: () => void;
   onFocusSearchInput?: () => void;
@@ -22,20 +20,14 @@ interface UseGraphInteractionKeyboardShortcutsArgs {
 
 export const useGraphInteractionKeyboardShortcuts = ({
   enabled = true,
-  onSelectTool,
-  onPanTool,
   onToggleApplyFiltersPanel,
   onToggleSearchPanel,
   onFocusSearchInput,
 }: UseGraphInteractionKeyboardShortcutsArgs): void => {
-  const onSelectToolRef = useRef(onSelectTool);
-  const onPanToolRef = useRef(onPanTool);
   const onToggleApplyFiltersPanelRef = useRef(onToggleApplyFiltersPanel);
   const onToggleSearchPanelRef = useRef(onToggleSearchPanel);
   const onFocusSearchInputRef = useRef(onFocusSearchInput);
 
-  onSelectToolRef.current = onSelectTool;
-  onPanToolRef.current = onPanTool;
   onToggleApplyFiltersPanelRef.current = onToggleApplyFiltersPanel;
   onToggleSearchPanelRef.current = onToggleSearchPanel;
   onFocusSearchInputRef.current = onFocusSearchInput;
@@ -53,18 +45,6 @@ export const useGraphInteractionKeyboardShortcuts = ({
       if ((event.metaKey || event.ctrlKey) && event.code === 'KeyK') {
         event.preventDefault();
         onFocusSearchInputRef.current?.();
-        return;
-      }
-
-      if (event.code === 'KeyV' && !hasModifierKeys(event)) {
-        event.preventDefault();
-        onSelectToolRef.current();
-        return;
-      }
-
-      if ((event.code === 'Space' || event.key === ' ') && !hasModifierKeys(event)) {
-        event.preventDefault();
-        onPanToolRef.current();
         return;
       }
 

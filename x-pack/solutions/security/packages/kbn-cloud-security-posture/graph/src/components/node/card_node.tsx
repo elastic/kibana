@@ -131,32 +131,57 @@ const SimplifiedCardContainer = styled.div`
 `;
 
 const CardShell = styled.div<{
-  borderColor: string;
+  defaultBorderColor: string;
+  activeBorderColor: string;
   bgColor: string;
-  shadow?: string;
+  selectedBgColor: string;
+  hoverShadow?: string;
+  dragShadow?: string;
 }>`
   position: relative;
   width: 100%;
-  border: 1.5px solid ${({ borderColor }) => borderColor};
+  border: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
   border-radius: ${CARD_BORDER_RADIUS}px;
   background: ${({ bgColor }) => bgColor};
   overflow: hidden;
   box-shadow: none;
-  transition: box-shadow ${CARD_INTERACTIVE_TRANSITION};
+  transition: box-shadow ${CARD_INTERACTIVE_TRANSITION}, border-color ${CARD_INTERACTIVE_TRANSITION},
+    background-color ${CARD_INTERACTIVE_TRANSITION}, border-width ${CARD_INTERACTIVE_TRANSITION};
 
-  .react-flow__node:not(.non-interactive):hover &,
-  .react-flow__node:not(.non-interactive).selected & {
-    ${({ shadow }) => shadow ?? ''}
+  /* Hover: lift + shadow; keep default border/fill */
+  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+    ${({ hoverShadow }) => hoverShadow ?? ''}
+  }
+
+  /* Selected: thick primary border + tinted fill; no shadow */
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
+    border-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-width: 2px;
+    background: ${({ selectedBgColor }) => selectedBgColor};
+  }
+
+  /* Grabbed: selected chrome + lift shadow */
+  .react-flow__node:not(.non-interactive).dragging & {
+    border-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-width: 2px;
+    background: ${({ selectedBgColor }) => selectedBgColor};
+    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
-const CardHeader = styled.div<{ bgColor: string }>`
+const CardHeader = styled.div<{ bgColor: string; selectedBgColor: string }>`
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
   background: ${({ bgColor }) => bgColor};
   position: relative;
+  transition: background-color ${CARD_INTERACTIVE_TRANSITION};
+
+  .react-flow__node:not(.non-interactive).selected &,
+  .react-flow__node:not(.non-interactive).dragging & {
+    background: ${({ selectedBgColor }) => selectedBgColor};
+  }
 `;
 
 const IconBox = styled.div<{
@@ -176,8 +201,7 @@ const IconBox = styled.div<{
   justify-content: center;
   transition: background-color 0.15s ease;
 
-  .react-flow__node:not(.non-interactive):hover &,
-  .react-flow__node:not(.non-interactive).selected & {
+  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
     background: ${({ emphasizedBackgroundColor }) => emphasizedBackgroundColor};
   }
 `;
@@ -274,14 +298,26 @@ const GroupStackWrapper = styled.div`
   width: 100%;
 `;
 
-const GroupStackTab = styled.div<{ borderColor: string; bgColor: string }>`
+const GroupStackTab = styled.div<{
+  defaultBorderColor: string;
+  activeBorderColor: string;
+  bgColor: string;
+}>`
   height: ${GROUP_STACK_HEIGHT}px;
-  border-left: 1.5px solid ${({ borderColor }) => borderColor};
-  border-right: 1.5px solid ${({ borderColor }) => borderColor};
-  border-bottom: 1.5px solid ${({ borderColor }) => borderColor};
+  border-left: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  border-right: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  border-bottom: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
   border-bottom-left-radius: ${CARD_BORDER_RADIUS}px;
   border-bottom-right-radius: ${CARD_BORDER_RADIUS}px;
   background: ${({ bgColor }) => bgColor};
+  transition: border-color ${CARD_INTERACTIVE_TRANSITION};
+
+  .react-flow__node:not(.non-interactive).selected &,
+  .react-flow__node:not(.non-interactive).dragging & {
+    border-left-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-right-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-bottom-color: ${({ activeBorderColor }) => activeBorderColor};
+  }
 `;
 
 const SimplifiedIconShell = styled.div`
@@ -292,26 +328,40 @@ const SimplifiedIconShell = styled.div`
 `;
 
 const SimplifiedIconBox = styled.div<{
-  borderColor: string;
+  defaultBorderColor: string;
+  activeBorderColor: string;
   bgColor: string;
-  emphasizedBackgroundColor: string;
-  interactiveShadow?: string;
+  selectedBgColor: string;
+  hoverShadow?: string;
+  dragShadow?: string;
 }>`
   width: 100%;
   height: 100%;
   border-radius: 8px;
-  border: 1px solid ${({ borderColor }) => borderColor};
+  border: 1px solid ${({ defaultBorderColor }) => defaultBorderColor};
   background: ${({ bgColor }) => bgColor};
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: none;
-  transition: background-color 0.15s ease, box-shadow ${CARD_INTERACTIVE_TRANSITION};
+  transition: background-color 0.15s ease, box-shadow ${CARD_INTERACTIVE_TRANSITION},
+    border-color ${CARD_INTERACTIVE_TRANSITION}, border-width ${CARD_INTERACTIVE_TRANSITION};
 
-  .react-flow__node:not(.non-interactive):hover &,
-  .react-flow__node:not(.non-interactive).selected & {
-    background: ${({ emphasizedBackgroundColor }) => emphasizedBackgroundColor};
-    box-shadow: ${({ interactiveShadow }) => interactiveShadow ?? 'none'};
+  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+    ${({ hoverShadow }) => hoverShadow ?? ''}
+  }
+
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
+    border-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-width: 2px;
+    background: ${({ selectedBgColor }) => selectedBgColor};
+  }
+
+  .react-flow__node:not(.non-interactive).dragging & {
+    border-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-width: 2px;
+    background: ${({ selectedBgColor }) => selectedBgColor};
+    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
@@ -491,12 +541,14 @@ interface SimplifiedCardProps {
   isGroup: boolean;
   resolvedIcon: string;
   count?: number;
-  iconBorderColor: string;
+  defaultBorderColor: string;
+  activeBorderColor: string;
   iconBg: string;
-  iconEmphasizedBg: string;
+  selectedBgColor: string;
   originOutlineColor: string;
   highlightAsOrigin?: boolean;
-  interactiveShadow?: string;
+  hoverShadow?: string;
+  dragShadow?: string;
   interactive?: boolean;
   showExpandButton?: boolean;
   expandButtonClick?: EntityNodeViewModel['expandButtonClick'];
@@ -541,12 +593,14 @@ const SimplifiedCard = ({
   isGroup,
   resolvedIcon,
   count,
-  iconBorderColor,
+  defaultBorderColor,
+  activeBorderColor,
   iconBg,
-  iconEmphasizedBg,
+  selectedBgColor,
   originOutlineColor,
   highlightAsOrigin = false,
-  interactiveShadow,
+  hoverShadow,
+  dragShadow,
   interactive,
   showExpandButton = true,
   expandButtonClick,
@@ -564,10 +618,12 @@ const SimplifiedCard = ({
           />
         )}
         <SimplifiedIconBox
-          borderColor={iconBorderColor}
+          defaultBorderColor={defaultBorderColor}
+          activeBorderColor={activeBorderColor}
           bgColor={iconBg}
-          emphasizedBackgroundColor={iconEmphasizedBg}
-          interactiveShadow={interactiveShadow}
+          selectedBgColor={selectedBgColor}
+          hoverShadow={hoverShadow}
+          dragShadow={dragShadow}
           data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
         >
           {isGroup && count !== undefined && (
@@ -656,9 +712,8 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   } = props.data as EntityNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
-  const cardShadow = useEuiShadow('s');
-  const simplifiedHoverShadow = useEuiShadow('xs');
-  const simplifiedActiveShadow = useEuiShadow('s');
+  const hoverShadow = useEuiShadow('xs');
+  const dragShadow = useEuiShadow('xs');
   const zoom = useViewportZoom();
   const isMultipleNodesSelected = useMultipleNodesSelected();
   const showExpandButton = interactive && !isMultipleNodesSelected;
@@ -687,13 +742,15 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const headerPrimaryText = isGroup ? entityTypeLabel ?? entityName : entityName;
   const headerSecondaryText = isGroup ? undefined : entityTypeLabel;
 
-  const borderColor = euiTheme.colors.borderBasePrimary;
+  const defaultBorderColor = euiTheme.colors.borderBaseProminent;
+  const activeBorderColor = euiTheme.colors.borderBasePrimary;
   const headerBg = euiTheme.colors.backgroundBasePrimary;
   const cardBg = euiTheme.colors.backgroundBasePlain;
+  const selectedBgColor = euiTheme.colors.backgroundBasePrimary;
   const iconBorderColor = euiTheme.colors.borderBaseSubdued;
   const iconBg = euiTheme.colors.backgroundBasePlain;
   const iconEmphasizedBg = euiTheme.colors.backgroundBaseSubdued;
-  const originOutlineColor = euiTheme.colors.primary;
+  const originOutlineColor = euiTheme.colors.borderBaseProminent;
   const resolvedIcon = resolveIcon(icon, tag);
 
   const showIp = ips && ips.length > 0;
@@ -715,12 +772,14 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         isGroup={isGroup}
         resolvedIcon={resolvedIcon}
         count={count}
-        iconBorderColor={iconBorderColor}
+        defaultBorderColor={defaultBorderColor}
+        activeBorderColor={activeBorderColor}
         iconBg={iconBg}
-        iconEmphasizedBg={iconEmphasizedBg}
+        selectedBgColor={selectedBgColor}
         originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
-        interactiveShadow={props.selected ? simplifiedActiveShadow : simplifiedHoverShadow}
+        hoverShadow={hoverShadow}
+        dragShadow={dragShadow}
         interactive={interactive}
         showExpandButton={showExpandButton}
         expandButtonClick={expandButtonClick}
@@ -746,9 +805,20 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
           width: 100%;
         `}
       >
-        <CardShell borderColor={borderColor} bgColor={cardBg} shadow={cardShadow}>
+        <CardShell
+          defaultBorderColor={defaultBorderColor}
+          activeBorderColor={activeBorderColor}
+          bgColor={cardBg}
+          selectedBgColor={selectedBgColor}
+          hoverShadow={hoverShadow}
+          dragShadow={dragShadow}
+        >
           {/* Header */}
-          <CardHeader bgColor={headerBg} data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}>
+          <CardHeader
+            bgColor={headerBg}
+            selectedBgColor={selectedBgColor}
+            data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
+          >
             <IconBox
               borderColor={iconBorderColor}
               bgColor={iconBg}
@@ -916,7 +986,11 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
 
         {isGroup && (
           <GroupStackWrapper>
-            <GroupStackTab borderColor={borderColor} bgColor={iconBg} />
+            <GroupStackTab
+              defaultBorderColor={defaultBorderColor}
+              activeBorderColor={activeBorderColor}
+              bgColor={iconBg}
+            />
           </GroupStackWrapper>
         )}
       </div>

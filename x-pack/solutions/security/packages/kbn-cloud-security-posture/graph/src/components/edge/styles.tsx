@@ -97,7 +97,6 @@ export const useEdgeColor = (edgeColor: EdgeViewModel['color']) => {
     case 'warning':
       return euiTheme.colors.warning;
     case 'primary':
-      return euiTheme.colors.primary;
     case 'subdued':
     default:
       return euiTheme.colors.borderBaseProminent;

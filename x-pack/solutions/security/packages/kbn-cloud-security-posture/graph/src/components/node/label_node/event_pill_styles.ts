@@ -57,9 +57,11 @@ export const getEventPillColors = (
 
   return {
     backgroundColor: isActive
-      ? euiTheme.colors.backgroundBaseSubdued
+      ? euiTheme.colors.backgroundBasePrimary
       : euiTheme.colors.backgroundBasePlain,
-    borderColor: euiTheme.colors.borderBasePlain,
+    borderColor: isActive
+      ? euiTheme.colors.borderBasePrimary
+      : euiTheme.colors.borderBaseProminent,
     textColor: euiTheme.colors.textParagraph,
   };
 };

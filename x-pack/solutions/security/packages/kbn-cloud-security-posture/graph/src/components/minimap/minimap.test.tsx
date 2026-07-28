@@ -18,6 +18,8 @@ import {
   GRAPH_STACK_NODE_ID,
   GRAPH_EDGE_ID,
   GRAPH_MINIMAP_ID,
+  GRAPH_MINIMAP_COLLAPSE_ID,
+  GRAPH_MINIMAP_EXPAND_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
@@ -36,7 +38,7 @@ describe('Minimap', () => {
     );
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap).toBeInTheDocument();
-    expect(minimap.firstChild?.firstChild?.childNodes).toHaveLength(2); // only <title> and <path> for mask
+    expect(minimap.querySelector('svg')?.childNodes).toHaveLength(2); // only <title> and <path> for mask
   });
 
   it('should be at the bottom-left corner with subdued viewport over a plain frame', async () => {
@@ -47,11 +49,47 @@ describe('Minimap', () => {
     );
 
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
-    expect(minimap.firstChild).toHaveStyle({
+    expect(minimap).toHaveClass('bottom left');
+    const flowMinimap = minimap.querySelector('.react-flow__minimap');
+    expect(flowMinimap).toHaveStyle({
       '--xy-minimap-background-color-props': '#F6F9FC',
       '--xy-minimap-mask-background-color-props': '#FFFFFF',
     });
-    expect(minimap.firstChild).toHaveClass('bottom left');
+  });
+
+  it('should collapse to a map button and expand again', () => {
+    render(
+      <ReactFlow>
+        <Minimap />
+      </ReactFlow>
+    );
+
+    expect(screen.getByTestId(GRAPH_MINIMAP_COLLAPSE_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_MINIMAP_EXPAND_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId(GRAPH_MINIMAP_COLLAPSE_ID));
+
+    expect(screen.queryByTestId(GRAPH_MINIMAP_COLLAPSE_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_MINIMAP_EXPAND_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeNull();
+
+    fireEvent.click(screen.getByTestId(GRAPH_MINIMAP_EXPAND_ID));
+
+    expect(screen.getByTestId(GRAPH_MINIMAP_COLLAPSE_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_MINIMAP_EXPAND_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeTruthy();
+  });
+
+  it('should start collapsed when defaultExpanded is false', () => {
+    render(
+      <ReactFlow>
+        <Minimap defaultExpanded={false} />
+      </ReactFlow>
+    );
+
+    expect(screen.getByTestId(GRAPH_MINIMAP_EXPAND_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_MINIMAP_COLLAPSE_ID)).not.toBeInTheDocument();
   });
 });
 

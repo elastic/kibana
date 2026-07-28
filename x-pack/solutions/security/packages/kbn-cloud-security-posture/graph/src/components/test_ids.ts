@@ -45,8 +45,6 @@ export const GRAPH_CONTROLS_CENTER_ID = `${GRAPH_INVESTIGATION_TEST_ID}Center` a
 export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView` as const;
 export const GRAPH_CONTROLS_FULL_SCREEN_ID = `${GRAPH_INVESTIGATION_TEST_ID}FullScreen` as const;
 
-export const GRAPH_BOTTOM_BAR_SELECT_TOOL_ID = `${GRAPH_INVESTIGATION_TEST_ID}SelectTool` as const;
-export const GRAPH_BOTTOM_BAR_PAN_TOOL_ID = `${GRAPH_INVESTIGATION_TEST_ID}PanTool` as const;
 export const GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ApplyFilters` as const;
 export const GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID =
@@ -65,6 +63,8 @@ export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
 export const GRAPH_STACKED_SHAPE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackedShape` as const;
 
 export const GRAPH_MINIMAP_ID = `${GRAPH_INVESTIGATION_TEST_ID}Minimap` as const;
+export const GRAPH_MINIMAP_COLLAPSE_ID = `${GRAPH_INVESTIGATION_TEST_ID}MinimapCollapse` as const;
+export const GRAPH_MINIMAP_EXPAND_ID = `${GRAPH_INVESTIGATION_TEST_ID}MinimapExpand` as const;
 export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;
 export const GRAPH_MINIMAP_LABEL_NODE_ID =

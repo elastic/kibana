@@ -9,17 +9,13 @@ import { renderHook } from '@testing-library/react';
 import { useGraphInteractionKeyboardShortcuts } from './use_graph_interaction_keyboard_shortcuts';
 
 describe('useGraphInteractionKeyboardShortcuts', () => {
-  it('invokes callbacks for select, pan, search, and display shortcuts', () => {
-    const onSelectTool = jest.fn();
-    const onPanTool = jest.fn();
+  it('invokes callbacks for search and display shortcuts', () => {
     const onToggleApplyFiltersPanel = jest.fn();
     const onToggleSearchPanel = jest.fn();
     const onFocusSearchInput = jest.fn();
 
     renderHook(() =>
       useGraphInteractionKeyboardShortcuts({
-        onSelectTool,
-        onPanTool,
         onToggleApplyFiltersPanel,
         onToggleSearchPanel,
         onFocusSearchInput,
@@ -36,30 +32,27 @@ describe('useGraphInteractionKeyboardShortcuts', () => {
       new KeyboardEvent('keydown', { code: 'KeyK', key: 'k', metaKey: true, bubbles: true })
     );
 
-    expect(onSelectTool).toHaveBeenCalledTimes(1);
-    expect(onPanTool).toHaveBeenCalledTimes(1);
     expect(onToggleSearchPanel).toHaveBeenCalledTimes(1);
     expect(onToggleApplyFiltersPanel).toHaveBeenCalledTimes(1);
     expect(onFocusSearchInput).toHaveBeenCalledTimes(1);
   });
 
   it('ignores shortcuts while typing in an input', () => {
-    const onSelectTool = jest.fn();
+    const onToggleSearchPanel = jest.fn();
     const input = document.createElement('input');
     document.body.appendChild(input);
     input.focus();
 
     renderHook(() =>
       useGraphInteractionKeyboardShortcuts({
-        onSelectTool,
-        onPanTool: jest.fn(),
         onToggleApplyFiltersPanel: jest.fn(),
+        onToggleSearchPanel,
       })
     );
 
-    input.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyV', bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS', bubbles: true }));
 
-    expect(onSelectTool).not.toHaveBeenCalled();
+    expect(onToggleSearchPanel).not.toHaveBeenCalled();
 
     input.remove();
   });

@@ -23,7 +23,7 @@ export const EdgeGroupNode = memo<NodeProps>((props: NodeProps) => {
       css={css`
         width: 100%;
         height: 100%;
-        border: 1.5px dashed ${euiTheme.colors.borderBaseSubdued};
+        border: 1.5px dashed ${euiTheme.colors.borderBaseProminent};
         border-radius: ${euiTheme.border.radius.medium};
         background: ${euiTheme.colors.backgroundBaseSubdued};
         pointer-events: none;

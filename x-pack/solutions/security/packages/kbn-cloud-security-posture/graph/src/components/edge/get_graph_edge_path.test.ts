@@ -43,7 +43,7 @@ describe('get_graph_edge_path', () => {
       expect(path).toBe('M 0,102L 200,102');
     });
 
-    it('returns a stepped path with 8px corners when a turn is required', () => {
+    it('returns a stepped path with 24px corners when a turn is required', () => {
       const path = getGraphEdgePath({
         sourceX: 0,
         sourceY: 100,
@@ -54,6 +54,7 @@ describe('get_graph_edge_path', () => {
       });
 
       expect(path).toContain('Q');
+      expect(path).toContain('24');
       expect(path).not.toBe('M 0,100L 200,160');
     });
 

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ReactFlow } from '@xyflow/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -19,9 +18,7 @@ import type { NodeViewModel } from '../types';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
   GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
-  GRAPH_BOTTOM_BAR_PAN_TOOL_ID,
   GRAPH_BOTTOM_BAR_SEARCH_ID,
-  GRAPH_BOTTOM_BAR_SELECT_TOOL_ID,
 } from '../test_ids';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
@@ -55,8 +52,6 @@ const originNode: NodeViewModel = {
 };
 
 const renderBottomBar = (
-  interactionTool: 'select' | 'pan' = 'select',
-  setInteractionTool = jest.fn(),
   registerApplyFiltersToggle = jest.fn(),
   registerSearchPanelToggle = jest.fn(),
   registerFocusSearchInput = jest.fn(),
@@ -68,8 +63,6 @@ const renderBottomBar = (
         <GraphSearchProvider>
           <GraphInteractionToolContext.Provider
             value={{
-              interactionTool,
-              setInteractionTool,
               registerApplyFiltersToggle,
               registerSearchPanelToggle,
               registerFocusSearchInput,
@@ -92,40 +85,17 @@ beforeEach(() => {
 });
 
 describe('BottomBar', () => {
-  it('renders keyboard shortcuts, tools, search, and display controls', () => {
+  it('renders keyboard shortcuts, search, and display controls', () => {
     renderBottomBar();
 
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID)).toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
   });
 
-  it('switches to pan tool when pan button is clicked', async () => {
-    const setInteractionTool = jest.fn();
-    renderBottomBar('select', setInteractionTool);
-
-    await userEvent.click(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID));
-
-    expect(setInteractionTool).toHaveBeenCalledWith('pan');
-  });
-
-  it('shows shortcut hints in tool button aria labels', () => {
+  it('shows shortcut hints in control button aria labels', () => {
     renderBottomBar();
 
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toHaveAttribute(
-      'aria-label',
-      'Select   V'
-    );
-    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID)).toHaveAttribute(
-      'aria-label',
-      'Pan   Space'
-    );
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toHaveAttribute(
       'aria-label',
       'Search   S'
@@ -141,8 +111,6 @@ describe('BottomBar', () => {
     const registerSearchPanelToggle = jest.fn();
     const registerFocusSearchInput = jest.fn();
     renderBottomBar(
-      'select',
-      jest.fn(),
       registerApplyFiltersToggle,
       registerSearchPanelToggle,
       registerFocusSearchInput
@@ -164,7 +132,7 @@ describe('BottomBar', () => {
         setShouldShowDisplayTourMock,
       ]);
 
-      renderBottomBar('select', jest.fn(), jest.fn(), jest.fn(), jest.fn(), [originNode]);
+      renderBottomBar(jest.fn(), jest.fn(), jest.fn(), [originNode]);
 
       expect(screen.getByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).toBeInTheDocument();
     });
@@ -180,7 +148,7 @@ describe('BottomBar', () => {
     it('does not open the tour when it was previously dismissed', () => {
       (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
 
-      renderBottomBar('select', jest.fn(), jest.fn(), jest.fn(), jest.fn(), [originNode]);
+      renderBottomBar(jest.fn(), jest.fn(), jest.fn(), [originNode]);
 
       expect(screen.queryByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).not.toBeInTheDocument();
     });
@@ -195,7 +163,7 @@ describe('BottomBar', () => {
         setShouldShowDisplayTourMock,
       ]);
 
-      renderBottomBar('select', jest.fn(), jest.fn(), jest.fn(), jest.fn(), [originNode]);
+      renderBottomBar(jest.fn(), jest.fn(), jest.fn(), [originNode]);
 
       expect(screen.getByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).toBeInTheDocument();
 
