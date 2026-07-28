@@ -121,6 +121,34 @@ export const DATE_WITHOUT_DATA = '04/01/2024 6:20:59 PM';
 
 export const EXTENDED_TIMEOUT = 45000; // 45 seconds
 
+// Pre-computed metrics-anomaly ML jobs/results replayed via the ML API; see metrics_anomalies_ml.ts.
+export const METRICS_ANOMALIES_ARCHIVE =
+  'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_anomalies';
+
+export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared';
+
+// metricbeat es_archive for the deprecated Metrics Explorer; loaded/unloaded in global setup/teardown.
+export const METRICS_AND_LOGS_ARCHIVE =
+  'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs';
+
+export const METRICS_AND_LOGS_INDEX_PATTERNS = ['metricbeat-*', 'filebeat-*'];
+
+export const ML_JOB_IDS = [
+  'kibana-metrics-ui-default-default-hosts_memory_usage',
+  'kibana-metrics-ui-default-default-hosts_network_out',
+  'kibana-metrics-ui-default-default-hosts_network_in',
+  'kibana-metrics-ui-default-default-k8s_network_out',
+  'kibana-metrics-ui-default-default-k8s_network_in',
+  'kibana-metrics-ui-default-default-k8s_memory_usage',
+] as const;
+
+// Absolute start dates (EuiSuperDatePicker input format) that bound the archived anomalies.
+export const ANOMALIES_DATE_WITH_DATA = 'Apr 21, 2021 @ 00:00:00.000';
+export const ANOMALIES_DATE_WITHOUT_DATA = 'Apr 23, 2021 @ 11:00:00.000';
+
+export const DEFAULT_ANOMALY_THRESHOLD = 50;
+export const LOWERED_ANOMALY_THRESHOLD = 25;
+
 /**
  * Budget for waiting on KPI Lens charts (the `.echMetricText__value`
  * signal). Under CI contention, the first Lens + elastic-charts render on a
