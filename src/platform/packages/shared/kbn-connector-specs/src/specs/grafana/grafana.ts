@@ -28,6 +28,17 @@ import {
   GrafanaListContactPointsInputSchema,
   GrafanaListMuteTimingsInputSchema,
   GrafanaGetNotificationPolicyTreeInputSchema,
+  type GrafanaGetAlertsInput,
+  type GrafanaGetAlertRuleInput,
+  type GrafanaGetSilenceInput,
+  type GrafanaCreateSilenceInput,
+  type GrafanaDeleteSilenceInput,
+  type GrafanaCreateAnnotationInput,
+  type GrafanaUpdateAnnotationInput,
+  type GrafanaDeleteAnnotationInput,
+  type GrafanaSearchDashboardsInput,
+  type GrafanaGetDashboardInput,
+  type GrafanaListContactPointsInput,
 } from './types';
 
 const buildBaseUrl = (ctx: ActionContext): string => {
@@ -131,7 +142,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Fetch currently firing, pending, silenced, and inhibited alerts from Grafana-managed Alertmanager. The primary read path into Grafana alerting.',
       input: GrafanaGetAlertsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaGetAlertsInput) => {
         const params: Record<string, boolean> = {};
         if (input.active !== undefined) params.active = input.active;
         if (input.silenced !== undefined) params.silenced = input.silenced;
@@ -171,7 +182,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Get a single Grafana alert rule by UID, including its condition, labels, and notification settings, so a workflow can inspect exactly what fired.',
       input: GrafanaGetAlertRuleInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaGetAlertRuleInput) => {
         try {
           const response = await ctx.client.get(
             `${buildBaseUrl(ctx)}/api/v1/provisioning/alert-rules/${input.uid}`,
@@ -206,7 +217,7 @@ export const Grafana: ConnectorSpec = {
       isTool: true,
       description: 'Get a single Grafana silence by ID, returning its matchers and expiry.',
       input: GrafanaGetSilenceInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaGetSilenceInput) => {
         try {
           const response = await ctx.client.get(
             `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silence/${input.silenceId}`,
@@ -224,7 +235,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Create a Grafana silence to mute alerts matching label matchers for a time window, so a workflow can suppress noise during maintenance or auto-remediation.',
       input: GrafanaCreateSilenceInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaCreateSilenceInput) => {
         try {
           const response = await ctx.client.post(
             `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silences`,
@@ -249,7 +260,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Expire a Grafana silence so matching alerts can fire again, closing the mute-and-restore loop once work completes.',
       input: GrafanaDeleteSilenceInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaDeleteSilenceInput) => {
         try {
           await ctx.client.delete(
             `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silence/${input.silenceId}`,
@@ -267,7 +278,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Post a Grafana dashboard annotation (deploy, remediation ran, incident opened) so operators see workflow context. Pass timeEnd to create a region/range annotation instead of a point-in-time marker.',
       input: GrafanaCreateAnnotationInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaCreateAnnotationInput) => {
         const body: Record<string, unknown> = { text: input.text };
         if (input.dashboardUID) body.dashboardUID = input.dashboardUID;
         if (input.panelId !== undefined) body.panelId = input.panelId;
@@ -290,7 +301,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Update an existing Grafana annotation (text, tags, or time range) — for example, set timeEnd to mark an incident resolved.',
       input: GrafanaUpdateAnnotationInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaUpdateAnnotationInput) => {
         const body: Record<string, unknown> = {};
         if (input.text !== undefined) body.text = input.text;
         if (input.tags !== undefined) body.tags = input.tags;
@@ -313,7 +324,7 @@ export const Grafana: ConnectorSpec = {
       isTool: true,
       description: 'Delete a Grafana annotation for cleanup or false-positive correction.',
       input: GrafanaDeleteAnnotationInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaDeleteAnnotationInput) => {
         try {
           await ctx.client.delete(`${buildBaseUrl(ctx)}/api/annotations/${input.annotationId}`, {
             headers: buildHeaders(ctx),
@@ -330,7 +341,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Search Grafana dashboards and folders by query string or tag, so a workflow can resolve the dashboard UID it needs to link or annotate.',
       input: GrafanaSearchDashboardsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaSearchDashboardsInput) => {
         const params: Record<string, string | number | boolean | string[]> = {};
         if (input.query) params.query = input.query;
         if (input.tag) params.tag = input.tag;
@@ -355,7 +366,7 @@ export const Grafana: ConnectorSpec = {
       description:
         'Get a Grafana dashboard by UID, returning its metadata and panels for linking/context.',
       input: GrafanaGetDashboardInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaGetDashboardInput) => {
         try {
           const response = await ctx.client.get(
             `${buildBaseUrl(ctx)}/api/dashboards/uid/${input.uid}`,
@@ -372,7 +383,7 @@ export const Grafana: ConnectorSpec = {
       isTool: true,
       description: 'List configured Grafana contact points (notification targets).',
       input: GrafanaListContactPointsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: GrafanaListContactPointsInput) => {
         const params: Record<string, string> = {};
         if (input.name) params.name = input.name;
         try {

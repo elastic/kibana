@@ -49,7 +49,6 @@ toc:
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
-          - file: connectors-kibana/grafana-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
         children:
           - file: connectors-kibana/crowdstrike-action-type.md
@@ -93,6 +92,7 @@ toc:
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
+          - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/hubspot-action-type.md
           - file: connectors-kibana/jina-action-type.md
