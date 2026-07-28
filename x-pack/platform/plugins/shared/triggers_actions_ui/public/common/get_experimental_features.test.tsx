@@ -22,7 +22,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
         ruleKqlBar: true,
-        showMustacheAutocompleteSwitch: false,
         alertDeletionSettingsEnabled: false,
       },
     });
@@ -54,10 +53,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('ruleKqlBar');
 
     expect(result).toEqual(true);
-
-    result = getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch');
-
-    expect(result).toEqual(false);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(
