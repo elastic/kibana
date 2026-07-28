@@ -67,15 +67,34 @@ describe('SpacesConfigurationModal', () => {
     await waitFor(() => expect(closeModal).toHaveBeenCalled());
   });
 
-  it('persists the unchanged preference when saving without toggling the switch', async () => {
+  it('disables the save button when the form has not been changed', () => {
     renderModal({ userSettings: { rememberSelectedSpace: true } });
 
-    await userEvent.click(screen.getByTestId('spacesConfigurationModalSaveButton'));
+    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled();
+    expect(updateUserProfile).not.toHaveBeenCalled();
+  });
 
-    expect(updateUserProfile).toHaveBeenCalledWith({
-      userSettings: { rememberSelectedSpace: true },
+  it('keeps the save button disabled when the switch is toggled back to the initial value', async () => {
+    const { unmount: unmountInitialOff } = renderModal({
+      userSettings: { rememberSelectedSpace: false },
     });
-    await waitFor(() => expect(closeModal).toHaveBeenCalled());
+
+    await userEvent.click(getRememberSelectedSpaceSwitch());
+    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeEnabled();
+
+    await userEvent.click(getRememberSelectedSpaceSwitch());
+    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled();
+    expect(updateUserProfile).not.toHaveBeenCalled();
+
+    unmountInitialOff();
+
+    renderModal({ userSettings: { rememberSelectedSpace: true } });
+
+    await userEvent.click(getRememberSelectedSpaceSwitch());
+    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeEnabled();
+    await userEvent.click(getRememberSelectedSpaceSwitch());
+    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled();
+    expect(updateUserProfile).not.toHaveBeenCalled();
   });
 
   it('disables the save button while the update is in flight', async () => {
@@ -87,6 +106,11 @@ describe('SpacesConfigurationModal', () => {
     );
 
     renderModal({ userSettings: { rememberSelectedSpace: false } });
+
+    await userEvent.click(getRememberSelectedSpaceSwitch());
+    await waitFor(() =>
+      expect(screen.getByTestId('spacesConfigurationModalSaveButton')).not.toBeDisabled()
+    );
 
     await userEvent.click(screen.getByTestId('spacesConfigurationModalSaveButton'));
 

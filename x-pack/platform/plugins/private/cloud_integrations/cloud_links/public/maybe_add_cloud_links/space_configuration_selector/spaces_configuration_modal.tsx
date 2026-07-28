@@ -12,18 +12,20 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiFormRow,
   useGeneratedHtmlId,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiButtonEmpty,
   EuiButton,
+  EuiDescribedFormGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormikProvider, useFormik, useFormikContext } from 'formik';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import type { UserProfileData, UserSettingsData } from '@kbn/user-profile-components';
+import { rememberLastSelectedSpaceConfigEditorStyles } from './spaces_configuration_modal.styles';
 
 type SpacesConfigurationFormValues = Pick<UserSettingsData, 'rememberSelectedSpace'>;
 
@@ -34,6 +36,8 @@ interface SpacesConfigurationModalProps {
 }
 
 function RememberLastSelectedSpaceConfigEditor() {
+  const { euiTheme } = useEuiTheme();
+  const styles = rememberLastSelectedSpaceConfigEditorStyles(euiTheme);
   const { values, setFieldValue } = useFormikContext<SpacesConfigurationFormValues>();
 
   const onChange = useCallback<ComponentProps<typeof EuiSwitch>['onChange']>(
@@ -44,30 +48,37 @@ function RememberLastSelectedSpaceConfigEditor() {
   );
 
   return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.rememberLastSelectedSpaceLabel',
+    <EuiDescribedFormGroup
+      title={
+        <h2>
+          {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.title', {
+            defaultMessage: 'Remember last selected space',
+          })}
+        </h2>
+      }
+      description={i18n.translate(
+        'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.description',
         {
-          defaultMessage: 'Remember last selected space',
+          defaultMessage: 'Kibana will redirect to last accessed space on login.',
         }
       )}
+      css={styles.formGroup}
+      fieldFlexItemProps={{ grow: false }}
+      fullWidth
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem>
           <EuiSwitch
-            compressed
-            label={i18n.translate(
-              'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.switchDescription',
-              {
-                defaultMessage: 'Kibana will redirect to last accessed space on login.',
-              }
-            )}
+            css={styles.switch}
+            label={null}
+            showLabel={false}
             checked={values.rememberSelectedSpace ?? false}
             onChange={onChange}
+            compressed
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiDescribedFormGroup>
   );
 }
 
@@ -120,6 +131,7 @@ export function SpacesConfigurationModal({
           data-test-subj="spacesConfigurationModalSaveButton"
           isLoading={formik.isSubmitting}
           onClick={formik.submitForm}
+          isDisabled={!formik.touched || !formik.dirty}
         >
           {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.closeButton', {
             defaultMessage: 'Save',
