@@ -85,6 +85,19 @@ interface State {
   mbMap: MapboxMap | undefined;
 }
 
+const MAP_SYNC_DEBOUNCE = 256;
+
+/**
+ * Waits long enough for the map's debounced sync cycle to complete.
+ *
+ * Redux state changes (layers, settings, etc.) are debounced by `MAP_SYNC_DEBOUNCE` ms
+ * before being flushed to Maplibre instance. This helper waits 1.5× that interval,
+ * giving the debounce time to fire and redux changes to flow to Maplibre instance.
+ *
+ * @returns A promise that resolves after the sync window elapses and redux state changes have been flushed to Maplibre instance.
+ */
+export const waitForMapSync = () => new Promise((resolve) => setTimeout(resolve, MAP_SYNC_DEBOUNCE * 1.5));
+
 export class MbMap extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
@@ -131,7 +144,7 @@ export class MbMap extends Component<Props, State> {
       this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
     }
-  }, 256);
+  }, MAP_SYNC_DEBOUNCE);
 
   _getMapExtentState(): MapExtentState {
     const zoom = this.state.mbMap!.getZoom();

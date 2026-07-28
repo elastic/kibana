@@ -232,7 +232,7 @@ export class SavedMap {
         layerList.push(...this._defaultLayers);
       }
     }
-    this._store.dispatch<any>(replaceLayerList(layerList));
+    await this._store.dispatch<any>(replaceLayerList(layerList));
     if (this._mapEmbeddableState?.hiddenLayers !== undefined) {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableState.hiddenLayers));
     }

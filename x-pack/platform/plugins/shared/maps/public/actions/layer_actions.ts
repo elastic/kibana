@@ -70,6 +70,7 @@ import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
+import { waitForMapSync } from '../connected_components/mb_map/mb_map';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -108,7 +109,7 @@ export function removeTrackedLayerStateForSelectedLayer() {
 }
 
 export function replaceLayerList(newLayerList: LayerDescriptor[]) {
-  return (
+  return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
@@ -122,6 +123,8 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
         dispatch(removeLayerFromLayerList(id));
       });
     }
+
+    await waitForMapSync();
 
     newLayerList.forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
