@@ -493,6 +493,22 @@
     ]
   },
   {
+    "id": "nightshift",
+    "name": "Nightshift Program Team",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/nightshift",
+      "label": "Team:nightshift"
+    },
+    "responsibilities": [
+      "Nightshift",
+      "Significant Events",
+      "Observability incident management"
+    ]
+  },
+  {
     "id": "nightshift-context-and-research",
     "name": "Nightshift Context & Research",
     "areas": [
