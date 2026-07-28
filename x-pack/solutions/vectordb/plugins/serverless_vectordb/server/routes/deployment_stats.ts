@@ -8,7 +8,12 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
+import {
+  fetchApiKeysStats,
+  fetchDashboardsCount,
+  fetchIndexStats,
+  fetchModelUsageCount,
+} from '../lib/deployment_stats';
 
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
@@ -25,18 +30,28 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        const [{ indicesCount, storeSizeBytes, vectorDocsCount }, dashboardsCount] =
-          await Promise.all([
-            fetchIndexStats(client, logger),
-            fetchDashboardsCount(savedObjectsClient, logger),
-          ]);
+        const [
+          { indicesCount, storeSizeBytes, vectorDocsCount, documentsCount },
+          dashboardsCount,
+          modelUsageCount,
+          { total: apiKeysTotal, expiring: apiKeysExpiring },
+        ] = await Promise.all([
+          fetchIndexStats(client, logger),
+          fetchDashboardsCount(savedObjectsClient, logger),
+          fetchModelUsageCount(client, logger),
+          fetchApiKeysStats(client, logger),
+        ]);
 
         return response.ok({
           body: {
             indicesCount,
             storeSizeBytes,
             vectorDocsCount,
+            documentsCount,
             dashboardsCount,
+            modelUsageCount,
+            apiKeysTotal,
+            apiKeysExpiring,
           },
         });
       } catch (error) {

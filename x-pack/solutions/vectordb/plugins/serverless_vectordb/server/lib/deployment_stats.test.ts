@@ -60,7 +60,12 @@ describe('fetchIndexStats', () => {
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 100, vectorDocsCount: 0 });
+    expect(result).toEqual({
+      indicesCount: 1,
+      storeSizeBytes: 100,
+      vectorDocsCount: 0,
+      documentsCount: 10,
+    });
     expect(client.asCurrentUser.esql.query).not.toHaveBeenCalled();
   });
 
@@ -266,7 +271,12 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     // index/size counts are still valid; only the vector doc count is unavailable
-    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 500, vectorDocsCount: null });
+    expect(result).toEqual({
+      indicesCount: 1,
+      storeSizeBytes: 500,
+      vectorDocsCount: null,
+      documentsCount: 10,
+    });
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -279,6 +289,7 @@ describe('fetchIndexStats', () => {
       indicesCount: null,
       storeSizeBytes: null,
       vectorDocsCount: null,
+      documentsCount: null,
     });
     expect(logger.warn).toHaveBeenCalled();
   });
@@ -289,7 +300,12 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     // a genuinely empty deployment reports real zeros, not null
-    expect(result).toEqual({ indicesCount: 0, storeSizeBytes: 0, vectorDocsCount: 0 });
+    expect(result).toEqual({
+      indicesCount: 0,
+      storeSizeBytes: 0,
+      vectorDocsCount: 0,
+      documentsCount: 0,
+    });
     expect(client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
   });
 });

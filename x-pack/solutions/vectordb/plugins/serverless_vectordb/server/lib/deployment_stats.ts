@@ -28,12 +28,14 @@ interface IndexStats {
   indicesCount: number | null;
   storeSizeBytes: number | null;
   vectorDocsCount: number | null;
+  documentsCount: number | null;
 }
 
 const INDEX_STATS_UNAVAILABLE: IndexStats = {
   indicesCount: null,
   storeSizeBytes: null,
   vectorDocsCount: null,
+  documentsCount: null,
 };
 
 const VECTOR_FIELD_TYPES = new Set(['dense_vector', 'sparse_vector', 'semantic_text', 'semantic']);
@@ -134,6 +136,7 @@ export const fetchIndexStats = async (
 
     const indicesCount = userIndices.length;
     const storeSizeBytes = userIndices.reduce((sum, index) => sum + (index.size_in_bytes ?? 0), 0);
+    const documentsCount = userIndices.reduce((sum, index) => sum + (index.num_docs ?? 0), 0);
 
     let vectorDocsCount: number | null = 0;
     if (indicesCount > 0) {
@@ -157,10 +160,58 @@ export const fetchIndexStats = async (
       }
     }
 
-    return { indicesCount, storeSizeBytes, vectorDocsCount };
+    return { indicesCount, storeSizeBytes, vectorDocsCount, documentsCount };
   } catch (error) {
     logger.warn(`Failed to fetch index stats for vectordb deployment stats: ${error.message}`);
     return INDEX_STATS_UNAVAILABLE;
+  }
+};
+
+/**
+ * Fetches the count of configured inference endpoints. Returns `null` on failure so
+ * a lookup error is distinguishable from "0 endpoints".
+ */
+export const fetchModelUsageCount = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<number | null> => {
+  try {
+    const result = await client.asCurrentUser.inference.get({ inference_id: '_all' });
+    return result.endpoints?.length ?? 0;
+  } catch (error) {
+    logger.warn(`Failed to fetch model usage count for vectordb deployment stats: ${error.message}`);
+    return null;
+  }
+};
+
+interface ApiKeysStats {
+  total: number | null;
+  expiring: number | null;
+}
+
+/**
+ * Fetches API key stats for the current user: total non-invalidated keys and those
+ * with an upcoming expiration. Returns `null` values on failure.
+ */
+export const fetchApiKeysStats = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<ApiKeysStats> => {
+  try {
+    const result = await client.asCurrentUser.security.getApiKey({ owner: true });
+    const keys = result.api_keys ?? [];
+    const now = Date.now();
+    const activeKeys = keys.filter((k) => !k.invalidated);
+    const total = activeKeys.length;
+    const expiring = activeKeys.filter(
+      (k) => k.expiration !== undefined && k.expiration > now
+    ).length;
+    return { total, expiring };
+  } catch (error) {
+    logger.warn(
+      `Failed to fetch API keys stats for vectordb deployment stats: ${error.message}`
+    );
+    return { total: null, expiring: null };
   }
 };
 

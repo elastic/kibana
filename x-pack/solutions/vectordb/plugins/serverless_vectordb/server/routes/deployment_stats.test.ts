@@ -14,7 +14,12 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
+import {
+  fetchApiKeysStats,
+  fetchDashboardsCount,
+  fetchIndexStats,
+  fetchModelUsageCount,
+} from '../lib/deployment_stats';
 import { registerDeploymentStatsRoute } from './deployment_stats';
 
 jest.mock('../lib/deployment_stats');
@@ -23,6 +28,10 @@ const mockFetchIndexStats = fetchIndexStats as jest.MockedFunction<typeof fetchI
 const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
   typeof fetchDashboardsCount
 >;
+const mockFetchModelUsageCount = fetchModelUsageCount as jest.MockedFunction<
+  typeof fetchModelUsageCount
+>;
+const mockFetchApiKeysStats = fetchApiKeysStats as jest.MockedFunction<typeof fetchApiKeysStats>;
 
 describe('registerDeploymentStatsRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
@@ -63,8 +72,11 @@ describe('registerDeploymentStatsRoute', () => {
       indicesCount: 3,
       storeSizeBytes: 1024,
       vectorDocsCount: 5,
+      documentsCount: 50,
     });
     mockFetchDashboardsCount.mockResolvedValue(2);
+    mockFetchModelUsageCount.mockResolvedValue(4);
+    mockFetchApiKeysStats.mockResolvedValue({ total: 9, expiring: 5 });
 
     const request = httpServerMock.createKibanaRequest();
     const response = httpServerMock.createResponseFactory();
@@ -76,7 +88,11 @@ describe('registerDeploymentStatsRoute', () => {
         indicesCount: 3,
         storeSizeBytes: 1024,
         vectorDocsCount: 5,
+        documentsCount: 50,
         dashboardsCount: 2,
+        modelUsageCount: 4,
+        apiKeysTotal: 9,
+        apiKeysExpiring: 5,
       },
     });
   });
@@ -86,8 +102,11 @@ describe('registerDeploymentStatsRoute', () => {
       indicesCount: 0,
       storeSizeBytes: 0,
       vectorDocsCount: 0,
+      documentsCount: 0,
     });
     mockFetchDashboardsCount.mockResolvedValue(0);
+    mockFetchModelUsageCount.mockResolvedValue(0);
+    mockFetchApiKeysStats.mockResolvedValue({ total: 0, expiring: 0 });
 
     const request = httpServerMock.createKibanaRequest();
     const response = httpServerMock.createResponseFactory();
@@ -96,6 +115,8 @@ describe('registerDeploymentStatsRoute', () => {
 
     expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger);
     expect(mockFetchDashboardsCount).toHaveBeenCalledWith(soClient, logger);
+    expect(mockFetchModelUsageCount).toHaveBeenCalledWith(esClient, logger);
+    expect(mockFetchApiKeysStats).toHaveBeenCalledWith(esClient, logger);
   });
 
   it('surfaces null values (unavailable) without failing the response', async () => {
@@ -103,8 +124,11 @@ describe('registerDeploymentStatsRoute', () => {
       indicesCount: null,
       storeSizeBytes: null,
       vectorDocsCount: null,
+      documentsCount: null,
     });
     mockFetchDashboardsCount.mockResolvedValue(null);
+    mockFetchModelUsageCount.mockResolvedValue(null);
+    mockFetchApiKeysStats.mockResolvedValue({ total: null, expiring: null });
 
     const request = httpServerMock.createKibanaRequest();
     const response = httpServerMock.createResponseFactory();
@@ -116,7 +140,11 @@ describe('registerDeploymentStatsRoute', () => {
         indicesCount: null,
         storeSizeBytes: null,
         vectorDocsCount: null,
+        documentsCount: null,
         dashboardsCount: null,
+        modelUsageCount: null,
+        apiKeysTotal: null,
+        apiKeysExpiring: null,
       },
     });
     expect(response.customError).not.toHaveBeenCalled();
