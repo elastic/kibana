@@ -38,13 +38,11 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
   return {
     id: CONNECTOR_SML_TYPE,
 
-    // Allow for crawling
     async *list(context) {
       const finder = context.savedObjectsClient.createPointInTimeFinder({
         type: 'action',
         perPage: 1000,
         namespaces: ['*'],
-        fields: ['updated_at'],
       });
       try {
         for await (const response of finder.find()) {
@@ -95,7 +93,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       }
     },
 
-    requiredHiddenTypes: ['action'] as const,
+    requiredHiddenTypes: ['action'],
 
     getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
 
