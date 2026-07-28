@@ -13,11 +13,11 @@ the page cannot safely own the header placement yet.
 
 ## Folder layout
 
-Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
-files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
-graduates to its own folder only when it gains real complexity of its own — an internal component
-split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
-until they earn a folder; don't pre-folder simple slots.
+Region components (back button, badges, tabs, description, metadata, app menu, title actions, etc.)
+live as flat files directly in `src/app_header/`, with shared data resolution in
+`src/app_header/hooks/`. A region graduates to its own folder only when it gains real complexity of
+its own — an internal component split, dedicated stories, or a README. Today only `title_area/` meets
+that bar. Keep new regions flat until they earn a folder; don't pre-folder simple slots.
 
 ## Which API should I use?
 
@@ -62,11 +62,29 @@ Pass a title object when the page title can be renamed from the header:
 The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
 saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
+## Description and metadata
+
+Use `description` only when short explanatory text materially helps users understand the page. It
+accepts plain text and an optional URL rendered with the fixed label "Learn more":
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description={{
+    text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+    learnMoreUrl: documentationUrl,
+  }}
+/>
+```
+
+Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
+structured entity facts such as status, owner, or creation time. Documentation links that are not
+part of a necessary description belong in the app menu via `docLink`.
+
 ## Title size
 
-The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
-metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
-is no size knob to set.
+The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —
+there is no size knob to set.
 
 ## Spacing
 
