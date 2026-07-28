@@ -13,9 +13,7 @@
     "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-schemas",
     "@kbn/tooling-log",
-    "@kbn/core",
     "@kbn/scout",
     "@kbn/data-forge",
-    "@kbn/kbn-client"
   ]
 }
