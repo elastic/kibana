@@ -11,17 +11,17 @@
 require('../src/setup_node_env/root');
 
 import('../src/dev/kbn_pm/src/commands/bootstrap/patch_unicorn_magic_exports.mjs')
-  .then(async ({ patchUnicornMagicExports }) => {
-    await patchUnicornMagicExports({
-      success(msg) {
+  .then(function (mod) {
+    return mod.patchUnicornMagicExports({
+      success: function (msg) {
         console.log(msg);
       },
-      info(msg) {
+      info: function (msg) {
         console.log(msg);
       },
     });
   })
-  .catch((error) => {
+  .catch(function (error) {
     console.error(error);
     process.exit(1);
   });
