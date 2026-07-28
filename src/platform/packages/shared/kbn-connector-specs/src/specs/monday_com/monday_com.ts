@@ -84,7 +84,7 @@ export const MondayCom: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
