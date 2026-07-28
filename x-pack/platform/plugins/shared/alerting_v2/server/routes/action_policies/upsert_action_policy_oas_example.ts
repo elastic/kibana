@@ -6,14 +6,14 @@
  */
 
 import type { AlertingOasOperationObject } from '../oas_types';
+import { buildOasOperation } from '../oas_utils';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
-  ACTION_POLICY_UPSERT_CONFLICT_RESPONSE,
+  ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   CREATE_ACTION_POLICY_REQUEST,
   actionPolicyResponseExample,
   invalidActionPolicyDataResponse,
 } from './action_policy_oas_shared_examples';
-import { buildOasOperation } from '../oas_utils';
 
 export const upsertActionPolicyOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
@@ -33,6 +33,6 @@ export const upsertActionPolicyOasExamples = (): AlertingOasOperationObject =>
       ),
       400: invalidActionPolicyDataResponse('upsert'),
       404: ACTION_POLICY_NOT_FOUND_RESPONSE,
-      409: ACTION_POLICY_UPSERT_CONFLICT_RESPONSE,
+      409: ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
     },
   });

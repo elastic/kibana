@@ -21,7 +21,6 @@ import {
 } from '../../lib/errors/action_policy_error_messages';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
-  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
@@ -125,12 +124,6 @@ export const ACTION_POLICY_NOT_FOUND_RESPONSE: OasExampleEntry = {
 export const ACTION_POLICY_VERSION_CONFLICT_RESPONSE: OasExampleEntry = {
   name: 'actionPolicyVersionConflict',
   summary: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
-  value: ACTION_POLICY_VERSION_CONFLICT_VALUE,
-};
-
-export const ACTION_POLICY_UPSERT_CONFLICT_RESPONSE: OasExampleEntry = {
-  name: 'actionPolicyVersionConflict',
-  summary: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
   value: ACTION_POLICY_VERSION_CONFLICT_VALUE,
 };
 
