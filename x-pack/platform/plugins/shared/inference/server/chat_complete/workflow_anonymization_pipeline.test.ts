@@ -25,11 +25,13 @@ const createOptions = ({
   invokeConnector,
   failureMode = 'block',
   abortSignal,
+  preLLMTimeoutMs = 0,
 }: {
   provider: WorkflowAnonymizationProvider;
   invokeConnector: jest.Mock;
   failureMode?: 'block' | 'allow_unsafe';
   abortSignal?: AbortSignal;
+  preLLMTimeoutMs?: number;
 }) => ({
   request: httpServerMock.createKibanaRequest(),
   namespace: 'space-a',
@@ -41,7 +43,7 @@ const createOptions = ({
   saltPromise: Promise.resolve('server-managed-salt'),
   regexWorker: createRegexWorkerServiceMock(),
   logger: loggerMock.create(),
-  workflowAnonymization: { provider, failureMode },
+  workflowAnonymization: { provider, failureMode, preLLMTimeoutMs },
   invocationState: { connectorInvoked: false },
   invokeConnector,
 });
@@ -339,6 +341,99 @@ describe('createWorkflowAnonymizationPipeline', () => {
       )
     ).rejects.toThrow('may only be invoked once');
     expect(invokeConnector).toHaveBeenCalledTimes(1);
+  });
+
+  describe('pre-LLM timeout', () => {
+    const makeStalledProvider = (): WorkflowAnonymizationProvider => ({
+      supportsSynchronousExecution: true,
+      execute: jest.fn(
+        ({ abortSignal: signal }) =>
+          new Promise<never>((_resolve, reject) => {
+            if (signal?.aborted) {
+              reject(signal.reason);
+              return;
+            }
+            signal?.addEventListener('abort', () => reject(signal!.reason), { once: true });
+          })
+      ),
+    });
+
+    it('clears the timeout when proceed.invoke is called before it fires', async () => {
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const invokeConnector = jest.fn().mockReturnValue(of(messageEvent('ok')));
+      const provider: WorkflowAnonymizationProvider = {
+        supportsSynchronousExecution: true,
+        execute: jest.fn(async ({ proceed }) => {
+          await proceed.invoke({ messages: protectedMessages, tokenMap: {} });
+          return { matched: true, content: 'ok' };
+        }),
+      };
+
+      await firstValueFrom(
+        createWorkflowAnonymizationPipeline(
+          createOptions({ provider, invokeConnector, preLLMTimeoutMs: 5000 })
+        ).pipe(toArray())
+      );
+
+      expect(clearTimeoutSpy).toHaveBeenCalled();
+      clearTimeoutSpy.mockRestore();
+    });
+
+    it('falls through to allow_unsafe direct path when timeout fires before proceed.invoke', async () => {
+      jest.useFakeTimers();
+      try {
+        const invokeConnector = jest
+          .fn()
+          .mockReturnValue(of(chunkEvent('fallback'), messageEvent('fallback')));
+        const options = createOptions({
+          provider: makeStalledProvider(),
+          invokeConnector,
+          failureMode: 'allow_unsafe',
+          preLLMTimeoutMs: 5000,
+        });
+
+        const completionPromise = firstValueFrom(
+          createWorkflowAnonymizationPipeline(options).pipe(toArray())
+        );
+        // Attach the handler before firing timers to avoid unhandled-rejection warnings.
+        const assertion = expect(completionPromise).resolves.toEqual([
+          chunkEvent('fallback'),
+          messageEvent('fallback'),
+        ]);
+        await jest.runAllTimersAsync();
+        await assertion;
+
+        expect(invokeConnector).toHaveBeenCalledTimes(1);
+        expect(options.logger.warn).toHaveBeenCalledWith(expect.stringContaining('allow_unsafe'));
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('propagates the timeout error when failureMode is block', async () => {
+      jest.useFakeTimers();
+      try {
+        const invokeConnector = jest.fn();
+        const options = createOptions({
+          provider: makeStalledProvider(),
+          invokeConnector,
+          failureMode: 'block',
+          preLLMTimeoutMs: 5000,
+        });
+
+        const completionPromise = firstValueFrom(
+          createWorkflowAnonymizationPipeline(options).pipe(toArray())
+        );
+        // Attach the handler before firing timers to avoid unhandled-rejection warnings.
+        const assertion = expect(completionPromise).rejects.toThrow('timed out');
+        await jest.runAllTimersAsync();
+        await assertion;
+
+        expect(invokeConnector).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 
   it('keeps relay and terminal state isolated across concurrent executions', async () => {
