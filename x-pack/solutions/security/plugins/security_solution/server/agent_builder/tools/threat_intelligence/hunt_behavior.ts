@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import {
   HUNT_BEHAVIOR_API_PATH,
   THREAT_INTEL_TOOL_IDS,
@@ -17,6 +17,14 @@ import { huntBehavior } from '../../../threat_intelligence/services';
 
 /**
  * Thin Agent Builder tool wrapper for the `hunt_behavior` domain action.
+ *
+ * Lives on the **registry** (not the skill's inline tool list) — the
+ * skill is at its 7-inline-tool hard cap and `hunt_orchestrator` (the
+ * one-call Tier1+Tier2 default) took the inline slot instead, since
+ * live testing showed the model reliably picks whichever hunt tool is
+ * immediately visible regardless of description wording. This tool
+ * remains fully callable for the "Tier 1 already done" / "skip the IOC
+ * sweep" case described below.
  *
  * Canonical execution surface is the internal HTTP route at
  * `HUNT_BEHAVIOR_API_PATH`. The route resolves a `ScopedModel` via the
@@ -45,7 +53,7 @@ const huntBehaviorSchema = z.object({
     .describe('Candidates with LLM confidence below this are dropped before catalog validation.'),
 });
 
-export const huntBehaviorTool: BuiltinSkillBoundedTool<typeof huntBehaviorSchema> = {
+export const huntBehaviorTool: BuiltinToolDefinition<typeof huntBehaviorSchema> = {
   id: THREAT_INTEL_TOOL_IDS.huntBehavior,
   type: ToolType.builtin,
   description:
@@ -61,6 +69,7 @@ export const huntBehaviorTool: BuiltinSkillBoundedTool<typeof huntBehaviorSchema
     'or explicitly do not want the environment IOC sweep. Agent Builder should call this tool ' +
     'directly; native Workflows and UI surfaces use the matching HTTP route.',
   schema: huntBehaviorSchema,
+  tags: ['threat-intel', 'hunt', 'behavior'],
   handler: async (params, { logger, modelProvider }) => {
     try {
       const model = await modelProvider.getDefaultModel();

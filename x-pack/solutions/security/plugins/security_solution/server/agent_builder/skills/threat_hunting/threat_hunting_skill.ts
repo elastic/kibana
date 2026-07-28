@@ -13,10 +13,14 @@ export const threatHuntingSkill = defineSkillType({
   name: 'threat-hunting',
   basePath: 'skills/security',
   description:
-    'Hypothesis-driven threat hunting using iterative ES|QL exploration. ' +
-    'Covers IOC search, anomaly identification, baseline comparison, lateral movement tracking, ' +
-    'and converting hunt findings into actionable intelligence. ' +
-    'Use when investigating suspected threats, running proactive hunts, or analyzing suspicious activity patterns.',
+    'Hypothesis-driven threat hunting using iterative ES|QL exploration, with NO source report ' +
+    'or advisory in hand. Covers IOC search, anomaly identification, baseline comparison, ' +
+    'lateral movement tracking, and converting hunt findings into actionable intelligence. ' +
+    'Use when investigating suspected threats, running proactive hunts from an analyst ' +
+    'hypothesis, or analyzing suspicious activity patterns. NOT for "run a threat hunt for ' +
+    'this report/advisory/paste" — when the user has a specific threat-intel report, blog ' +
+    'post, or pasted advisory to hunt against, use the `threat-intelligence` skill instead ' +
+    "(it sweeps the environment for that report's IOCs/techniques in one call).",
   content: `# Threat Hunting Guide
 
 ## When to Use This Skill

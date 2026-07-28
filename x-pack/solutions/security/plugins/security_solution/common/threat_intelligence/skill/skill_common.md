@@ -170,7 +170,35 @@ sources to enable. Body: `{ lookback_days?, index_patterns? }`.
 
 ## Orchestration Rules (shared)
 
+### For "run a threat hunt for this report" / "hunt for this" (combined tiers)
+
+When the user gives you report text (or a `report_id`) and asks for a
+**hunt** — wants to know both "is this hitting us right now" AND "what
+durable rule would catch it" — call `POST /api/threat_intelligence/hunt_orchestrator`
+directly with the report text or `report_id`. Do **not** manually chain
+`hunt_for_threat` + `hunt_behavior` for this request shape; the
+orchestrator runs both tiers in one call and threads the Tier 1
+affected-asset context into the Tier 2 LLM prompt for better
+corroboration. Only fall back to the granular `hunt_for_threat` /
+`hunt_behavior` tools when the user explicitly wants just one tier
+(e.g. "just check if we've seen these IOCs" → `hunt_for_threat` only,
+or "just extract technique IDs from this text, don't hunt my
+environment" → `hunt_behavior` only).
+
+1. Issue `POST /api/threat_intelligence/hunt_orchestrator` with the report
+   text or `report_id`.
+2. For each entry in the response's Tier 2 `attachment_hints[]` (one per
+   surviving behavior), emit a `threat-intel-finding-card` per the hint
+   payload, same as the analyst-paste flow below.
+3. Summarize the Tier 1 hit counts / affected hosts alongside the Tier 2
+   findings in one response.
+
 ### For analyst paste ("here's a Mandiant blog, what should we do?")
+
+Use this narrower flow only when the user wants **just** the
+behavioral-extraction step (no environment sweep) — e.g. they're
+building a report library, or they've already run the orchestrator hunt
+above and want to (re-)extract techniques from the raw text alone.
 
 1. Issue `POST /api/threat_intelligence/create_threat_report` with the pasted text and source name.
 2. Issue `POST /api/threat_intelligence/hunt_behavior` against the same text using the

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   HUNT_ORCHESTRATOR_API_PATH,
   HUNT_TIER2_WHEN_OPTIONS,
@@ -19,12 +19,16 @@ import { huntOrchestrator } from '../../../threat_intelligence/services';
 
 /**
  * Thin Agent Builder tool wrapper for the `hunt_orchestrator` domain
- * action. Lives on the **registry** (not the skill's inline tool list)
- * because the threat-intelligence skill is at its 7-inline-tool hard
- * cap and the granular `hunt_for_threat` / `hunt_behavior` tools remain
- * inline for fine-grained control. The orchestrator is the convenience
- * surface for one-call workflows (deliver threat digests, alert attribution
- * backfill) and for 3rd party agents that prefer a single round-trip.
+ * action. Lives **inline** on the skill's tool list (not the registry)
+ * so the model sees it by default without a registry lookup — live
+ * testing showed the model reliably picks whichever hunt tool is
+ * immediately visible, and description wording alone did not change
+ * routing when `hunt_orchestrator` was registry-only. `hunt_behavior`
+ * (the granular Tier-2-only tool) moved to the registry in its place;
+ * both remain fully callable, this only changes default visibility.
+ * The orchestrator is the convenience surface for one-call workflows
+ * (deliver threat digests, alert attribution backfill) and for 3rd
+ * party agents that prefer a single round-trip.
  *
  * Agent Builder should call this tool directly. Native Workflows and UI
  * surfaces use the matching HTTP route, and both entry points delegate to the
@@ -126,7 +130,7 @@ const huntOrchestratorSchema = z.object({
     ),
 });
 
-export const huntOrchestratorTool: BuiltinToolDefinition<typeof huntOrchestratorSchema> = {
+export const huntOrchestratorTool: BuiltinSkillBoundedTool<typeof huntOrchestratorSchema> = {
   id: THREAT_INTEL_TOOL_IDS.huntOrchestrator,
   type: ToolType.builtin,
   description:
@@ -142,7 +146,6 @@ export const huntOrchestratorTool: BuiltinToolDefinition<typeof huntOrchestrator
     'Agent Builder should call this tool directly; native Workflows ' +
     'and UI surfaces use the matching HTTP route.',
   schema: huntOrchestratorSchema,
-  tags: ['threat-intel', 'hunt', 'orchestrator'],
   handler: async (params, { esClient, logger, modelProvider }) => {
     let model;
     try {
