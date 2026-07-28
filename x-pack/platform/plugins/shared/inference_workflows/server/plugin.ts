@@ -107,18 +107,19 @@ export class InferenceWorkflowsPlugin
       getClient: () => deps.workflowsExtensions.initManagedWorkflowsClient(MANAGED_WORKFLOW_OWNER),
       logger: this.logger.get('managed_workflow'),
     });
-    const policyService = deps.anonymization?.getPolicyService();
-    if (policyService) {
-      if (!this.workflowsManagement) {
-        throw new Error('Workflows management API is unavailable');
-      }
-      this.legacyCustomizationMigration = createLegacyCustomizationMigration({
-        policyService,
-        management: this.workflowsManagement,
-        repository,
-        logger: this.logger.get('legacy_customization_migration'),
-      });
+    if (!this.workflowsManagement) {
+      throw new Error('Workflows management API is unavailable');
     }
+    this.legacyCustomizationMigration = createLegacyCustomizationMigration({
+      getLegacySettings: async () => {
+        const scopedClient = repository.asScopedToNamespace(DEFAULT_SPACE_ID);
+        const uiSettings = core.uiSettings.asScopedToClient(scopedClient);
+        return uiSettings.get<string | undefined>('ai:anonymizationSettings');
+      },
+      management: this.workflowsManagement,
+      repository,
+      logger: this.logger.get('legacy_customization_migration'),
+    });
     if (this.workflowDrivenEnabled) {
       void this.managedWorkflowInstaller.initialize(existingSpaceIds).catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);

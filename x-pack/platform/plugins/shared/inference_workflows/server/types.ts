@@ -6,7 +6,6 @@
  */
 
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { AnonymizationPluginStart } from '@kbn/anonymization-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
@@ -25,7 +24,6 @@ export interface InferenceWorkflowsSetupDeps {
 }
 
 export interface InferenceWorkflowsStartDeps {
-  anonymization?: AnonymizationPluginStart;
   inference: InferenceServerStart;
   spaces: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
