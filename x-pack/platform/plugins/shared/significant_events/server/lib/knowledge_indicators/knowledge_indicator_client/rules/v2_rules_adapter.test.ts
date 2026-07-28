@@ -22,6 +22,7 @@ function makeRulesClientMock() {
     updateRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
+    getTags: jest.fn().mockResolvedValue([]),
   };
 }
 
@@ -288,6 +289,24 @@ describe('RulesAdapterV2', () => {
       });
       const adapter = makeAdapter(mock);
       await expect(adapter.bulkDeleteRules(['x'])).rejects.toThrow(/V2 bulk delete failed/);
+    });
+  });
+
+  describe('findStreamNamesWithOwnedRules', () => {
+    it('derives distinct stream names from ownership tags, ignoring unrelated tags', async () => {
+      const mock = makeRulesClientMock();
+      mock.getTags.mockResolvedValueOnce([
+        'sigevents:stream:logs.nginx',
+        'production',
+        'sigevents:stream:logs.apache',
+        'sigevents:stream:logs.nginx',
+      ]);
+      const adapter = makeAdapter(mock);
+
+      const streamNames = await adapter.findStreamNamesWithOwnedRules();
+
+      expect(new Set(streamNames)).toEqual(new Set(['logs.nginx', 'logs.apache']));
+      expect(mock.getTags).toHaveBeenCalledTimes(1);
     });
   });
 });

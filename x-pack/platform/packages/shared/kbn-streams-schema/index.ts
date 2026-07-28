@@ -212,10 +212,6 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus, type TaskResult } from './src/tasks/types';
-
-export type { GenerateDescriptionResult } from './src/api/description_generation';
-
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 

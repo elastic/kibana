@@ -165,6 +165,20 @@ export class KnowledgeIndicatorClient {
     return this.reader.getStreamNamesWithKnowledgeIndicators();
   }
 
+  /**
+   * Streams the sync sweep must reconcile: those with active knowledge
+   * indicators unioned with those that still have Streams-owned rules. The KI
+   * set alone misses streams whose rules outlived all of their KIs — the very
+   * orphan-rule case the sweep exists to catch.
+   */
+  async getStreamNamesToReconcile(): Promise<string[]> {
+    const [withIndicators, withOwnedRules] = await Promise.all([
+      this.reader.getStreamNamesWithKnowledgeIndicators(),
+      this.orchestrator.findStreamNamesWithOwnedRules(),
+    ]);
+    return [...new Set([...withIndicators, ...withOwnedRules])];
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,

@@ -409,6 +409,10 @@ export class QueryRuleOrchestrator {
     return { deleted: targets.length };
   }
 
+  findStreamNamesWithOwnedRules(): Promise<string[]> {
+    return this.rulesManagementClient.findStreamNamesWithOwnedRules();
+  }
+
   async reconcileStream(
     definition: Streams.all.Definition
   ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
