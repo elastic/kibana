@@ -54,7 +54,6 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/task-manager-plugin'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'

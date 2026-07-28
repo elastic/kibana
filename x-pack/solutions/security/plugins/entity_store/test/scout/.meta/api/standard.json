@@ -1,5 +1,5 @@
 {
-  "sha1": "770d92edf55346625838d6f3f4f16290e0ae23c4",
+  "sha1": "b4b22713b3ee11950119cc52b4f793fd324e766f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -289,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 48,
+        "line": 57,
         "column": 10
       }
     },
@@ -305,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 65,
+        "line": 74,
         "column": 10
       }
     },
@@ -321,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 93,
+        "line": 103,
         "column": 10
       }
     },
@@ -337,7 +337,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 124,
+        "line": 135,
         "column": 10
       }
     },
@@ -353,7 +353,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 163,
+        "line": 175,
         "column": 10
       }
     },
@@ -369,7 +369,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 197,
+        "line": 210,
         "column": 10
       }
     },
@@ -1489,7 +1489,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 95,
+        "line": 108,
         "column": 10
       }
     },
@@ -1505,7 +1505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 121,
+        "line": 134,
         "column": 10
       }
     },
@@ -1521,7 +1521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 149,
+        "line": 164,
         "column": 10
       }
     },
@@ -1537,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 171,
+        "line": 186,
         "column": 10
       }
     },
@@ -1553,7 +1553,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 197,
+        "line": 212,
         "column": 10
       }
     },
@@ -1569,7 +1569,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 225,
+        "line": 242,
         "column": 10
       }
     },

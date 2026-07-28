@@ -15,5 +15,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      // matching test timeout
+      hookTimeout: 360000,
+    },
   };
 }

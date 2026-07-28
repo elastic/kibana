@@ -27,7 +27,7 @@ import { TitleArea } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
-import { useResolvedBadges, useShareAction } from './hooks';
+import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
   title?: AppHeaderTitle;
@@ -55,15 +55,11 @@ export interface AppHeaderViewProps {
   spacing?: AppHeaderSpacing;
   docLink?: string;
   showAddIntegrations?: boolean;
-  /**
-   * Omits the header's bottom border. Used when the content rendered below the header owns the
-   * separating line instead (e.g. Discover using UnifiedTabs).
-   */
-  borderless?: boolean;
 }
 
 interface AppHeaderViewInternalProps extends AppHeaderViewProps {
   titleAppend?: ReactNode;
+  borderless?: boolean;
 }
 
 const getPublicAppHeaderViewProps = ({
@@ -78,7 +74,6 @@ const getPublicAppHeaderViewProps = ({
   spacing,
   docLink,
   showAddIntegrations,
-  borderless,
 }: AppHeaderViewProps): AppHeaderViewProps => ({
   title,
   back,
@@ -91,7 +86,6 @@ const getPublicAppHeaderViewProps = ({
   spacing,
   docLink,
   showAddIntegrations,
-  borderless,
 });
 
 const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
@@ -113,6 +107,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
+    const canAccessIntegrations = useCanAccessIntegrations();
+    const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
 
     // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
     // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit
@@ -141,7 +137,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !!favorite ||
       !!metadata?.length ||
       !!docLink ||
-      !!showAddIntegrations ||
+      showIntegrations ||
       hasLegacyActionMenu;
 
     if (!show) {
@@ -210,6 +206,7 @@ export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, 
     {...getPublicAppHeaderViewProps(props)}
     title={props.title}
     titleAppend={tabsBar}
+    borderless={tabsBar != null}
   />
 ));
 
