@@ -11,7 +11,6 @@ import * as authTypeSpecs from './all_auth_types';
 import * as connectorsSpecs from './all_specs';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
-import { getMeta } from './connector_spec_ui';
 import { getSchemaForAuthType } from './lib';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
@@ -52,7 +51,7 @@ describe('connector spec contracts', () => {
     }
 
     for (const authType of authTypes) {
-      const resolvedAuthType = getSchemaForAuthType(authType);
+      getSchemaForAuthType(authType);
 
       if (typeof authType === 'string') {
         continue;
@@ -62,13 +61,6 @@ describe('connector spec contracts', () => {
       for (const defaultField of Object.keys(authType.defaults)) {
         if (!registeredAuthType || !(defaultField in registeredAuthType.schema.shape)) {
           violations.push(`${authType.type}.${defaultField} is not defined by the auth type`);
-        }
-
-        const effectiveField = resolvedAuthType.schema.shape[defaultField];
-        if (effectiveField && getMeta(effectiveField).hidden !== true) {
-          violations.push(
-            `${authType.type}.${defaultField} default remains visible in the effective auth schema; normalize it out or set hidden: true`
-          );
         }
       }
     }

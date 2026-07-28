@@ -116,7 +116,7 @@ describe('findConnectorSpecsOwnershipIssues', () => {
     expect(findConnectorSpecsOwnershipIssues(rootEntries, codeownersEntries)).toEqual([]);
   });
 
-  it('reports missing owners, non-Elastic owners, and unexpected files', () => {
+  it('reports missing owners, non-Elastic owners, and files at the specs root', () => {
     const rootEntries = [
       { name: 'github', isDirectory: true },
       { name: 'unowned_connector', isDirectory: true },
@@ -128,7 +128,7 @@ describe('findConnectorSpecsOwnershipIssues', () => {
 
     expect(findConnectorSpecsOwnershipIssues(rootEntries, codeownersEntries)).toEqual([
       'src/platform/packages/shared/kbn-connector-specs/src/specs/github/** must explicitly assign an @elastic team',
-      'src/platform/packages/shared/kbn-connector-specs/src/specs/unexpected.ts is an unexpected file',
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/unexpected.ts must be inside a connector directory, not at the specs root',
       'src/platform/packages/shared/kbn-connector-specs/src/specs/unowned_connector/** must explicitly assign an @elastic team',
     ]);
   });

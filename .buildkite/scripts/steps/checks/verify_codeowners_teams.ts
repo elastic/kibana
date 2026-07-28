@@ -80,7 +80,7 @@ export function findConnectorSpecsOwnershipIssues(
     const entryPath = `${CONNECTOR_SPECS_ROOT_PATTERN}/${rootEntry.name}`;
 
     if (!rootEntry.isDirectory) {
-      issues.push(`${entryPath} is an unexpected file`);
+      issues.push(`${entryPath} must be inside a connector directory, not at the specs root`);
       continue;
     }
 
@@ -151,7 +151,6 @@ function main(): void {
   }
 
   console.log('All CODEOWNERS teams are valid.');
-  console.log('All connector spec directories have explicit owners.');
 }
 
 if (require.main === module) {

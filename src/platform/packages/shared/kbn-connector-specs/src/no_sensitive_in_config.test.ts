@@ -13,6 +13,7 @@ import type { ConnectorSpec } from './connector_spec';
 import { getMeta } from './connector_spec_ui';
 
 type JsonSchema = Record<string, unknown>;
+const SENSITIVE_CONFIG_FIX = 'Move the field to an auth type so it is stored as encrypted secrets.';
 
 const isJsonSchema = (value: unknown): value is JsonSchema =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -21,10 +22,10 @@ const getSensitiveConfigViolations = (schema: JsonSchema, path = 'config'): stri
   const violations: string[] = [];
 
   if (schema.sensitive === true) {
-    violations.push(`${path} has sensitive: true`);
+    violations.push(`${path} has sensitive: true. ${SENSITIVE_CONFIG_FIX}`);
   }
   if (schema.widget === 'password') {
-    violations.push(`${path} has widget: 'password'`);
+    violations.push(`${path} has widget: 'password'. ${SENSITIVE_CONFIG_FIX}`);
   }
 
   if (isJsonSchema(schema.properties)) {
@@ -83,15 +84,7 @@ describe('connector spec config schemas', () => {
 
       const violations = getSensitiveConfigViolations(z.toJSONSchema(schema) as JsonSchema);
 
-      expect({
-        violations,
-        reason:
-          'Connector configuration is stored unencrypted. Use auth types and encrypted secrets for credentials.',
-      }).toEqual({
-        violations: [],
-        reason:
-          'Connector configuration is stored unencrypted. Use auth types and encrypted secrets for credentials.',
-      });
+      expect(violations).toEqual([]);
     }
   );
 
@@ -108,8 +101,8 @@ describe('connector spec config schemas', () => {
     });
 
     expect(getSensitiveConfigViolations(z.toJSONSchema(schema) as JsonSchema)).toEqual([
-      'config.nested.apiKey has sensitive: true',
-      "config.connections[].password has widget: 'password'",
+      `config.nested.apiKey has sensitive: true. ${SENSITIVE_CONFIG_FIX}`,
+      `config.connections[].password has widget: 'password'. ${SENSITIVE_CONFIG_FIX}`,
     ]);
   });
 });

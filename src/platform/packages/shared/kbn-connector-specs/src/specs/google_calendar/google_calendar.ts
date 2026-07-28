@@ -56,9 +56,7 @@ export const GoogleCalendar: ConnectorSpec = {
         isRecommended: true,
         isExperimental: true,
         overrides: {
-          meta: {
-            scope: { hidden: true, disabled: true },
-          },
+          meta: { scope: { disabled: true } },
         },
         defaults: {
           provider: 'google',

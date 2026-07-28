@@ -29,8 +29,8 @@ const authSchema = lazySchema(() =>
         .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
       tokenEndpointAuthMethod: z
         .enum(['client_secret_post', 'client_secret_basic'])
-        .optional()
-        .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true }),
+        .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true })
+        .optional(),
     })
     .meta({ label: i18n.OAUTH_LABEL })
 );

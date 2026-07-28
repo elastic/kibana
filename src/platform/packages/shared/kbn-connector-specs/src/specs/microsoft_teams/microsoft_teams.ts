@@ -58,9 +58,7 @@ export const MicrosoftTeams: ConnectorSpec = {
         type: 'ears',
         isRecommended: true,
         overrides: {
-          meta: {
-            scope: { hidden: true, disabled: true },
-          },
+          meta: { scope: { disabled: true } },
         },
         defaults: {
           provider: 'microsoft',
@@ -146,8 +144,6 @@ export const MicrosoftTeams: ConnectorSpec = {
         overrides: {
           meta: {
             scope: { hidden: true },
-            algorithm: { hidden: true },
-            certificateBinding: { hidden: true },
             tokenUrl: {
               label: i18n.translate(
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.label',
