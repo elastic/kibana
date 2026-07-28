@@ -197,16 +197,6 @@ export function isOtelExporterOutput<T extends { type?: ValueOf<OutputType> }>(
   return outputTypeSupportsOtelExporter(output.type);
 }
 
-<<<<<<< HEAD
-=======
-const BEATS_OUTPUT_TYPES: ReadonlyArray<ValueOf<OutputType>> = [
-  outputType.Elasticsearch,
-  outputType.RemoteElasticsearch,
-  outputType.Logstash,
-  outputType.Kafka,
-];
-
->>>>>>> 3593222d986a (Add OTLP handling in CRUD operations)
 /** Narrows any output to beats-style types (ES, RemoteES, Logstash, Kafka). */
 export function isBeatsOutput<T extends { type: ValueOf<OutputType> }>(
   output: T

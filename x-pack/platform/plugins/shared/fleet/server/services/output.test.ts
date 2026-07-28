@@ -2251,14 +2251,8 @@ describe('Output Service', () => {
         ssl: null,
       });
 
-<<<<<<< HEAD
       expect(soClient.update).toHaveBeenCalled();
       expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
-=======
-      expect(soClient.update).toBeCalled();
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
-        type: 'logstash',
->>>>>>> 3593222d986a (Add OTLP handling in CRUD operations)
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
@@ -3228,6 +3222,64 @@ describe('Output Service', () => {
         ).rejects.toThrow(
           'OTLP output cannot be used with agent policy "Mixed Policy" because it contains non-OTel inputs.'
         );
+      });
+
+      it('Should clear beats fields when changing an ES output to OTLP', async () => {
+        const soClient = getMockedSoClient({});
+        mockedAgentPolicyService.list.mockResolvedValue({
+          items: [{}],
+        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+        mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+        mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+        await outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        });
+
+        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+          type: 'otlp',
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          hosts: null,
+          ca_sha256: null,
+          ca_trusted_fingerprint: null,
+          config_yaml: null,
+          ssl: null,
+          shipper: null,
+          preset: null,
+          proxy_id: null,
+          write_to_logs_streams: null,
+          otel_exporter_config_yaml: null,
+          otel_disable_beatsauth: null,
+        });
+      });
+
+      it('Should clear otlp_exporter when changing an OTLP output to ES', async () => {
+        const soClient = getMockedSoClient({});
+        mockedAgentPolicyService.list.mockResolvedValue({
+          items: [{}],
+        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+        mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+        mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          type: 'elasticsearch',
+          hosts: ['http://test:9200'],
+        });
+
+        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+          type: 'elasticsearch',
+          hosts: ['http://test:9200'],
+          otlp_exporter: null,
+          preset: 'balanced',
+        });
       });
 
       it('Should preserve otlp_exporter on a same-type OTLP update', async () => {

@@ -44,7 +44,14 @@ import type {
   BeatsSoBaseAttributes,
   BeatsOutputSOAttributes,
 } from '../types';
-import type { NewBeatsOutput, UpdateOutput, UpdateTypedOutput } from '../../common/types';
+import type {
+  KafkaOutput,
+  NewBeatsOutput,
+  NewOtlpOutput,
+  NewRemoteElasticsearchOutput,
+  UpdateOutput,
+  UpdateTypedOutput,
+} from '../../common/types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -854,6 +861,24 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets.service_token as string;
         }
+      } else if (isOtlpOutput(output)) {
+        const otlpData = data as OutputSoOtlpAttributes;
+        const otlpSecrets = output.secrets?.otlp_exporter;
+        if (!output.otlp_exporter.api_key && otlpSecrets?.api_key) {
+          otlpData.otlp_exporter = {
+            ...otlpData.otlp_exporter,
+            api_key: otlpSecrets.api_key as string,
+          };
+        }
+        if (!output.otlp_exporter.tls?.key_pem && otlpSecrets?.tls?.key_pem) {
+          otlpData.otlp_exporter = {
+            ...otlpData.otlp_exporter,
+            tls: {
+              ...otlpData.otlp_exporter.tls,
+              key_pem: otlpSecrets.tls.key_pem as string,
+            },
+          };
+        }
       }
     }
 
@@ -1181,6 +1206,20 @@ class OutputService {
       target.ssl = null;
     };
 
+    const removeBeatsFields = (target: Nullable<Partial<BeatsSoBaseAttributes>>) => {
+      target.hosts = null;
+      target.ca_sha256 = null;
+      target.ca_trusted_fingerprint = null;
+      target.config_yaml = null;
+      target.ssl = null;
+      target.shipper = null;
+      target.preset = null;
+      target.proxy_id = null;
+      target.write_to_logs_streams = null;
+      target.otel_exporter_config_yaml = null;
+      target.otel_disable_beatsauth = null;
+    };
+
     if (isTypeChanged) {
       if (updateData.type === outputType.Elasticsearch) {
         updateData.preset = null;
@@ -1276,6 +1315,16 @@ class OutputService {
           updateData.username = null;
           updateData.password = null;
         }
+      }
+
+      if (isOtlpOutput(originalOutput)) {
+        // clear OTLP-only field when leaving OTLP; secrets cleaned up via getOutputSecretPaths
+        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+      }
+
+      if (isOtlpOutput(updateData)) {
+        // clear beats-only fields when switching to OTLP
+        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
       }
     }
 
@@ -1404,6 +1453,24 @@ class OutputService {
       ) {
         if (!typedFullUpdateData.service_token && typedFullUpdateData.secrets?.service_token) {
           updateData.service_token = typedFullUpdateData.secrets.service_token as string;
+        }
+      } else if (isOtlpOutput(updateData)) {
+        const otlpUpdateData = updateData as OutputSoOtlpAttributes;
+        const otlpSecrets = (data as Partial<NewOtlpOutput>).secrets?.otlp_exporter;
+        if (!otlpUpdateData.otlp_exporter?.api_key && otlpSecrets?.api_key) {
+          otlpUpdateData.otlp_exporter = {
+            ...otlpUpdateData.otlp_exporter,
+            api_key: otlpSecrets.api_key as string,
+          };
+        }
+        if (!otlpUpdateData.otlp_exporter?.tls?.key_pem && otlpSecrets?.tls?.key_pem) {
+          otlpUpdateData.otlp_exporter = {
+            ...otlpUpdateData.otlp_exporter,
+            tls: {
+              ...otlpUpdateData.otlp_exporter?.tls,
+              key_pem: otlpSecrets.tls.key_pem as string,
+            },
+          };
         }
       }
     }
