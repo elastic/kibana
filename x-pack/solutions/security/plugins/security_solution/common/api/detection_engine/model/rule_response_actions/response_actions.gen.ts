@@ -169,7 +169,7 @@ export const KillProcessParams = lazySchema(() =>
       /**
        * Field to use instead of process.pid
        */
-      field: z.string(),
+      field: z.string().max(2000),
       /**
        * Whether to overwrite field with process.pid
        */
@@ -197,7 +197,7 @@ export const SuspendProcessParams = lazySchema(() =>
       /**
        * Field to use instead of process.pid
        */
-      field: z.string(),
+      field: z.string().max(2000),
       /**
        * Whether to overwrite field with process.pid
        */
