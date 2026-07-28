@@ -93,7 +93,7 @@ export class DateNanosFormat extends FieldFormat {
     const pattern = this.param('pattern');
     const timezone = this.param('timezone');
     const fractPattern = analysePatternForFract(pattern);
-    const fallbackPattern = this.param('patternFallback');
+    const fallbackPattern = this.param('fallbackPattern');
 
     const timezoneChanged = this.timeZone !== timezone;
     const datePatternChanged = this.memoizedPattern !== pattern;

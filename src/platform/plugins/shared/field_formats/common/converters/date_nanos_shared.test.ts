@@ -104,6 +104,21 @@ describe('Date Nanos Format', () => {
     expect(date.convertToReact(dateMath)).toBe(dateMath);
   });
 
+  test('should format numeric values (ms) with the dateFormat fallback pattern', () => {
+    const fallback = 'MMM D, YYYY @ HH:mm:ss.SSS';
+    const getConfig: FieldFormatsGetConfigFn = (key: string) =>
+      ({
+        dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        dateFormat: fallback,
+        'dateFormat:tz': 'Browser',
+      }[key] as string);
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    // e.g. a min/max aggregation result, returned by Elasticsearch in ms
+    const ms = 1558361096357;
+    expect(formatter.convertToText(ms)).toBe(moment(ms).format(fallback));
+  });
+
   test('returns a plain string for a valid date', () => {
     const getConfig: FieldFormatsGetConfigFn = (key: string) =>
       ({
