@@ -62,8 +62,10 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // 'timestamp' (no @) is new here — its presence signals the TSDB columns have rendered
+      // Wait for both an arriving and a departing column: the arriving one alone can't
+      // distinguish the reconciled state from a stale render that also contains it
       await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
         'timestamp',
         'message',
@@ -74,16 +76,19 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // 'DestCountry' was absent in TSDB — its appearance signals flights columns have rendered
+      // Arriving: DestCountry (absent in TSDB); departing: message and extension
       await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
+      await page.testSubj.locator('dataGridHeaderCell-extension').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['timestamp', 'DestCountry']);
 
       await pageObjects.discover.selectDataView('logstash-*');
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // '@timestamp' (with @) is new — flights used 'timestamp' (no @)
+      // Arriving: '@timestamp' (flights used 'timestamp'); departing: DestCountry
       await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'extension']);
     }
   );
@@ -96,8 +101,10 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.unifiedFieldList.clickFieldListItemRemove('message');
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
-      // 'bytes' was just added — wait for it before asserting the full set
+      // Arriving: bytes; departing: DestCountry and message (just removed)
       await page.testSubj.locator('dataGridHeaderCell-bytes').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
+      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
         '@timestamp',
         'extension',
@@ -108,8 +115,10 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // 'timestamp' (no @) signals the TSDB columns have rendered
+      // Arriving: 'timestamp' (no @) and message; departing: '@timestamp'
       await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
         'timestamp',
         'extension',
@@ -121,8 +130,9 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // '@timestamp' (with @) is new — TSDB used 'timestamp' (no @)
+      // Arriving: '@timestamp' (TSDB used 'timestamp'); departing: message
       await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
         '@timestamp',
         'extension',
@@ -150,8 +160,10 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // 'timestamp' (no @) is new — logstash used '@timestamp'
+      // Arriving: 'timestamp' (no @); departing: '@timestamp' — other columns stay unchanged
+      // because discover:modifyColumnsOnSwitch is off
       await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'hidden' });
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
         'timestamp',
         'message',
