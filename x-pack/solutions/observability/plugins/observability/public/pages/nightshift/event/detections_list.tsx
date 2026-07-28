@@ -178,6 +178,11 @@ function DetectionCard({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" textAlign="left">
+                {formatTimestamp(detection['@timestamp'])}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 gutterSize="xs"
                 wrap
@@ -187,11 +192,6 @@ function DetectionCard({
                   row-gap: ${euiTheme.size.xs};
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" textAlign="left">
-                    {formatTimestamp(detection['@timestamp'])}
-                  </EuiText>
-                </EuiFlexItem>
                 {detection.change_point_type && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="default">{changePointLabel}</EuiBadge>
