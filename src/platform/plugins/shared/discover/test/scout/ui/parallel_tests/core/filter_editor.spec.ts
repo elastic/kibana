@@ -112,6 +112,7 @@ spaceTest.describe('Discover filter editor', { tag: '@local-stateful-classic' },
     expect(
       await filterBar.hasFilter({ field: 'nestedField.child', value: 'nestedValue', enabled: true })
     ).toBe(true);
+    await discover.waitUntilSearchingHasFinished();
     expect(await discover.getHitCount()).toBe('1');
   });
 
@@ -171,6 +172,7 @@ spaceTest.describe('Discover filter editor', { tag: '@local-stateful-classic' },
           operator: 'is between',
           value: { from: '2.0.0', to: '3.0.0' },
         });
+        await pageObjects.discover.waitUntilTabIsLoaded();
 
         expect(
           await filterBar.hasFilter({ field: 'version', value: '2.0.0 to 3.0.0', enabled: true })

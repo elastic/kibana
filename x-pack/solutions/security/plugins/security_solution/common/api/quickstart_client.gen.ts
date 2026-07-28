@@ -2351,6 +2351,14 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Run one or more Security Solution initialization flows for the current space.
+Each flow provisions a specific set of assets, for example list indices,
+security data views, prebuilt detection rules, endpoint protection, AI prompts,
+or detection rule monitoring assets. Only the requested flows are run, and the
+response reports a result for each one.
+
+    */
   async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
     return this.kbnClient

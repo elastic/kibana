@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const DEPRECATION_CALLOUT_TITLE = (count: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.deprecation.calloutTitle', {
     defaultMessage:
-      '{count} of your installed Elastic {count, plural, one {rule has} other {rules have}} been deprecated and {count, plural, one {is} other {are}} no longer being maintained',
+      '{count} of your installed Elastic rules {count, plural, one {has} other {have}} been deprecated and {count, plural, one {is} other {are}} no longer being maintained',
     values: { count },
   });
 

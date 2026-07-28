@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/278508
+issues:
+- https://github.com/elastic/kibana/issues/278506
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: "Fix Console autocomplete for nested mapping fields"
+description: "Console autocomplete suggests mapping options for nested object fields and multi-fields in index mapping bodies."
