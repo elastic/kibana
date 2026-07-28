@@ -8,5 +8,4 @@
 export {
   endpointForensicAnalysisSkill,
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
-  ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
 } from './endpoint_forensic_analysis_skill';
