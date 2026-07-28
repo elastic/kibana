@@ -8,7 +8,12 @@
 import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  ChatCompletionTokenCount,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import {
   type BaseFeature,
   type IgnoredFeature,
@@ -77,6 +82,8 @@ export interface IdentifyFeaturesOptions {
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
   searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 export async function identifyFeatures({
@@ -90,6 +97,8 @@ export async function identifyFeatures({
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
   searchSimilarFeatures,
+  additionalTools,
+  additionalToolCallbacks,
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
@@ -117,10 +126,11 @@ export async function identifyFeatures({
         known_feature_ids: knownFeatureIds,
         excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
       },
-      prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt, additionalTools }),
       inferenceClient,
-      maxSteps: 4,
+      maxSteps: additionalToolCallbacks ? 6 : 4,
       toolCallbacks: {
+        ...(additionalToolCallbacks ?? {}),
         search_similar_features: async (toolCall) => {
           if (!searchSimilarFeatures) {
             return {

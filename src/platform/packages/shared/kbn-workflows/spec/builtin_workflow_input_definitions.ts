@@ -22,6 +22,14 @@ import type { JsonSchema } from './schema/common/json_model_shape_schema';
 export const KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX = '#/kibana/definitions/' as const;
 
 /**
+ * Stable registry key for the alerting v2 notification group input definition.
+ * Use this constant in both the registry and any code that references the definition
+ * (e.g. `$ref: \`${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}\``).
+ */
+export const ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID =
+  'alertingV2NotificationGroup' as const;
+
+/**
  * JSON Schema mirror of the alerting v2 action-policy dispatch payload for workflow input authoring.
  * Use as a workflow **input** when a step should receive the grouped notification context
  * (e.g. `inputs.payload` on workflows triggered by `action_policy`).
@@ -76,6 +84,11 @@ const alertingV2NotificationGroup: JsonSchema = {
             description: 'Current lifecycle status of the alert episode',
             enum: ['inactive', 'pending', 'active', 'recovering'],
           },
+          severity: {
+            type: 'string',
+            description: 'Severity of the alert episode',
+            enum: ['info', 'low', 'medium', 'high', 'critical'],
+          },
           data: {
             type: 'object',
             description: 'Data of the alert episode',
@@ -86,8 +99,14 @@ const alertingV2NotificationGroup: JsonSchema = {
         additionalProperties: false,
       },
     },
+    rules: {
+      type: 'object',
+      description:
+        'Rule metadata keyed by rule id. Each value contains rule metadata (e.g. `{ name }`) for a rule referenced by the episodes. Access via `rules[episode.rule_id].name`.',
+      additionalProperties: true,
+    },
   },
-  required: ['id', 'policyId', 'groupKey', 'episodes'],
+  required: ['id', 'policyId', 'groupKey', 'episodes', 'rules'],
   additionalProperties: false,
 };
 
@@ -100,7 +119,7 @@ const alertingV2NotificationGroup: JsonSchema = {
  * runtime-only keys still resolve at execution via {@link resolveRef} if added before validate.
  */
 export const builtinWorkflowInputDefinitions: Record<string, JsonSchema> = {
-  alertingV2NotificationGroup,
+  [ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID]: alertingV2NotificationGroup,
 };
 
 const builtinRefList = Object.keys(builtinWorkflowInputDefinitions).map(
