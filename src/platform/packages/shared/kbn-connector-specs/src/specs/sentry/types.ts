@@ -222,13 +222,13 @@ export const SentryCreateIssueAlertRuleInputSchema = z.object({
     .default('all')
     .describe('Whether all, any, or none of the conditions must match to trigger the rule.'),
   conditions: z
-    .array(z.record(z.string(), z.unknown()))
+    .array(z.record(z.string().max(200), z.unknown()))
     .min(1)
     .describe(
       'Sentry condition objects, e.g. [{"id": "sentry.rules.conditions.first_seen_event.FirstSeenEventCondition"}]. See Sentry\'s issue alert rule docs for the full condition/action id catalog.'
     ),
   actions: z
-    .array(z.record(z.string(), z.unknown()))
+    .array(z.record(z.string().max(200), z.unknown()))
     .min(1)
     .describe(
       'Sentry action objects, e.g. [{"id": "sentry.rules.actions.notify_event.NotifyEventAction"}]. See Sentry\'s issue alert rule docs for the full condition/action id catalog.'
@@ -261,11 +261,11 @@ export const SentryUpdateIssueAlertRuleInputSchema = z.object({
     .optional()
     .describe('Whether all, any, or none of the conditions must match to trigger the rule.'),
   conditions: z
-    .array(z.record(z.string(), z.unknown()))
+    .array(z.record(z.string().max(200), z.unknown()))
     .optional()
     .describe('Replacement set of Sentry condition objects. Omit to leave conditions unchanged.'),
   actions: z
-    .array(z.record(z.string(), z.unknown()))
+    .array(z.record(z.string().max(200), z.unknown()))
     .optional()
     .describe('Replacement set of Sentry action objects. Omit to leave actions unchanged.'),
   frequency: z

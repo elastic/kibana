@@ -29,6 +29,20 @@ import {
   SentryUpdateIssueAlertRuleInputSchema,
   type SentryIssue,
   type SentryProject,
+  type SentryListIssuesInput,
+  type SentryGetIssueInput,
+  type SentryResolveIssueInput,
+  type SentryIgnoreIssueInput,
+  type SentryUnresolveIssueInput,
+  type SentryAssignIssueInput,
+  type SentryDeleteIssueInput,
+  type SentryListIssueEventsInput,
+  type SentryGetEventInput,
+  type SentryBulkUpdateIssuesInput,
+  type SentryListProjectsInput,
+  type SentryListIssueAlertRulesInput,
+  type SentryCreateIssueAlertRuleInput,
+  type SentryUpdateIssueAlertRuleInput,
 } from './types';
 
 const SENTRY_DEFAULT_BASE_URL = 'https://sentry.io/api/0';
@@ -158,7 +172,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'List Sentry issues for the organization (optionally scoped to a project), filtered by search query, environment, or time window. The primary read path for building a triage feed. Defaults to "is:unresolved" when no query is given.',
       input: SentryListIssuesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryListIssuesInput) => {
         const orgSlug = getOrgSlug(ctx);
         const params: Record<string, string | number> = {
           query: input.query ?? 'is:unresolved',
@@ -187,7 +201,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Get the full record for a single Sentry issue by ID: status, culprit, event/user counts, first/last seen, and assignee. Use to enrich an alert with error detail before deciding on an action.',
       input: SentryGetIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryGetIssueInput) => {
         try {
           const response = await ctx.client.get<SentryIssue>(
             `${buildBaseUrl(ctx)}/issues/${input.issueId}/`
@@ -204,7 +218,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Resolve a Sentry issue, the closing step of an incident workflow. Set inNextRelease to resolve conditionally on the next deploy instead of immediately.',
       input: SentryResolveIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryResolveIssueInput) => {
         const body = input.inNextRelease
           ? { status: 'resolvedInNextRelease' }
           : { status: 'resolved' };
@@ -225,7 +239,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Ignore (archive) a noisy Sentry issue so it drops out of the default review list. Pass ignoreDuration (minutes) to auto-unignore later, or omit to ignore indefinitely.',
       input: SentryIgnoreIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryIgnoreIssueInput) => {
         const body: Record<string, unknown> = { status: 'ignored' };
         if (input.ignoreDuration) {
           body.statusDetails = { ignoreDuration: input.ignoreDuration };
@@ -247,7 +261,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Move a Sentry issue back to unresolved. Use to re-escalate an issue on regression or a new event.',
       input: SentryUnresolveIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryUnresolveIssueInput) => {
         try {
           const response = await ctx.client.put<SentryIssue>(
             `${buildBaseUrl(ctx)}/issues/${input.issueId}/`,
@@ -265,7 +279,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Assign a Sentry issue to a user (by email/username, or "me") or a team (using "team:<team-slug>"), so automated routing puts the error group in front of the right owner.',
       input: SentryAssignIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryAssignIssueInput) => {
         try {
           const response = await ctx.client.put<SentryIssue>(
             `${buildBaseUrl(ctx)}/issues/${input.issueId}/`,
@@ -283,7 +297,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'List the events recorded under a Sentry issue, newest first. Use to inspect recurrence before deciding whether to resolve, ignore, or escalate. Pass cursor from a previous response to page further back.',
       input: SentryListIssueEventsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryListIssueEventsInput) => {
         const params: Record<string, string | boolean> = {};
         if (input.cursor) params.cursor = input.cursor;
         if (input.full !== undefined) params.full = input.full;
@@ -304,7 +318,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Get one Sentry event by project and event ID, including its stack trace, tags, and context. Use after listIssueEvents to inspect a specific occurrence in detail.',
       input: SentryGetEventInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryGetEventInput) => {
         const orgSlug = getOrgSlug(ctx);
         try {
           const response = await ctx.client.get(
@@ -322,7 +336,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Update the status and/or assignee of multiple Sentry issues in one call, so a cleanup workflow does not fan out one request per issue.',
       input: SentryBulkUpdateIssuesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryBulkUpdateIssuesInput) => {
         const orgSlug = getOrgSlug(ctx);
         const body: Record<string, unknown> = {};
         if (input.status) body.status = input.status;
@@ -346,7 +360,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Permanently delete a Sentry issue confirmed as noise or a duplicate. This is irreversible.',
       input: SentryDeleteIssueInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryDeleteIssueInput) => {
         try {
           await ctx.client.delete(`${buildBaseUrl(ctx)}/issues/${input.issueId}/`);
           return { deleted: true, issueId: input.issueId };
@@ -361,7 +375,7 @@ export const Sentry: ConnectorSpec = {
       description:
         "List the organization's Sentry projects, so a workflow can resolve a project slug before scoping another action.",
       input: SentryListProjectsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryListProjectsInput) => {
         const orgSlug = getOrgSlug(ctx);
         const params: Record<string, string> = {};
         if (input.cursor) params.cursor = input.cursor;
@@ -390,7 +404,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'List the issue alert rules configured on a Sentry project, so an onboarding workflow can audit existing monitor coverage.',
       input: SentryListIssueAlertRulesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryListIssueAlertRulesInput) => {
         const orgSlug = getOrgSlug(ctx);
         const params: Record<string, string> = {};
         if (input.cursor) params.cursor = input.cursor;
@@ -411,7 +425,7 @@ export const Sentry: ConnectorSpec = {
       description:
         "Create a new issue alert rule on a Sentry project, so an onboarding workflow can provision monitor coverage for a new service. Conditions/actions use Sentry's rule id catalog (see the Sentry issue alert rule docs).",
       input: SentryCreateIssueAlertRuleInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryCreateIssueAlertRuleInput) => {
         const orgSlug = getOrgSlug(ctx);
         try {
           const response = await ctx.client.post(
@@ -436,7 +450,7 @@ export const Sentry: ConnectorSpec = {
       description:
         'Update an existing Sentry issue alert rule (name, conditions, actions, or frequency) so an audit workflow can adjust thresholds on provisioned monitor coverage.',
       input: SentryUpdateIssueAlertRuleInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SentryUpdateIssueAlertRuleInput) => {
         const orgSlug = getOrgSlug(ctx);
         const body: Record<string, unknown> = {};
         if (input.name) body.name = input.name;
