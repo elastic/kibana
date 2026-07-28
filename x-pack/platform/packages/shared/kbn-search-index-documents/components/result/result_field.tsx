@@ -135,7 +135,11 @@ export const ResultField: React.FC<ResultFieldProps> = ({
       <EuiTableRow css={Styles.resultFieldSemanticVector(euiTheme)}>
         <EuiTableRowCell colSpan={2} className="resultFieldRowCell" truncateText={false}>
           <Styles.SemanticVectorGrid $padding={euiTheme.size.s}>
-            <TypeLine iconType="tokenSemanticText" label={fieldName} fieldTypeLabel={fieldTypeLabel} />
+            <TypeLine
+              iconType="tokenSemanticText"
+              label={fieldName}
+              fieldTypeLabel={fieldTypeLabel}
+            />
             <EuiText size="s" color="default">
               {fieldValue}
             </EuiText>
