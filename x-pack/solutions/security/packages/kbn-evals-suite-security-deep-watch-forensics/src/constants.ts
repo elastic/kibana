@@ -27,6 +27,13 @@ export const DEEP_WATCH_INDICES = {
 /** Skill ID used in routing assertions and Watch callables. */
 export const DEEP_WATCH_FORENSICS_SKILL_ID = 'deep-watch-forensics';
 
+/**
+ * The Agent Builder namespace prefix for deep-watch-forensics tools.
+ * The converse API emits tool calls as `security.deep_watch.*`, not
+ * `deep-watch-forensics.*`, so routing assertions must check both forms.
+ */
+export const DEEP_WATCH_TOOL_NAMESPACE = 'security.deep_watch';
+
 /** Default escalation context used in Deep Watch flow and composite pipeline tests. */
 export const DEFAULT_ESCALATION_CONTEXT = {
   alert_id: 'alert-apt29-lateral',

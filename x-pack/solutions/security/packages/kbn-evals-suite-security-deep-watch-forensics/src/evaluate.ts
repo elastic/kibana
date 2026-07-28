@@ -5,20 +5,5 @@
  * 2.0.
  */
 
-import { evaluate as base } from '@kbn/evals';
-import { FORENSIC_CASES } from './dataset';
-import type { ForensicExample } from './types';
-
-export const evaluate = base.extend<
-  {},
-  {
-    forensicCases: ForensicExample[];
-  }
->({
-  forensicCases: [
-    async (_fixtures, use) => {
-      await use(FORENSIC_CASES);
-    },
-    { scope: 'worker' },
-  ],
-});
+export { evaluate, tags, selectEvaluators } from '@kbn/evals';
+export { FORENSIC_CASES as forensicCases } from './dataset';

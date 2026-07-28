@@ -36,7 +36,11 @@
 import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { FORENSIC_CASES } from '../src/dataset';
-import { DEEP_WATCH_TOOL_IDS, DEEP_WATCH_FORENSICS_SKILL_ID } from '../src/constants';
+import {
+  DEEP_WATCH_TOOL_IDS,
+  DEEP_WATCH_FORENSICS_SKILL_ID,
+  DEEP_WATCH_TOOL_NAMESPACE,
+} from '../src/constants';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,8 +140,10 @@ base.describe('Deep Watch Forensics — L2 Leaf Quality', { tag: tags.stateful.c
         const toolIds = new Set(toolCallSteps.map((s) => s.tool_id).filter(Boolean));
 
         // ── Step 2: routing gates ───────────────────────────────────────────────
-        const skillInvoked = [...toolIds].some((id) =>
-          (id as string).includes(DEEP_WATCH_FORENSICS_SKILL_ID)
+        const skillInvoked = [...toolIds].some(
+          (id) =>
+            (id as string).includes(DEEP_WATCH_FORENSICS_SKILL_ID) ||
+            (id as string).includes(DEEP_WATCH_TOOL_NAMESPACE)
         );
         const packageEvidenceCalled = toolIds.has(DEEP_WATCH_TOOL_IDS.package_evidence);
         const produceDraftCalled = toolIds.has(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);

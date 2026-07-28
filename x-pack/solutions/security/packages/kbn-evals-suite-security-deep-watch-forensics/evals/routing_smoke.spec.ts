@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import {
   DEEP_WATCH_FORENSICS_SKILL_ID,
+  DEEP_WATCH_TOOL_NAMESPACE,
   DEEP_WATCH_TOOL_IDS,
   agentBuilderDefaultAgentId,
 } from '../src/constants';
@@ -92,8 +93,10 @@ evaluate.describe('Deep Watch Forensics — L0 Routing Smoke', { tag: tags.state
       const toolCallSteps = getToolCallSteps(result);
       const toolIds = new Set(toolCallSteps.map((s) => s.tool_id).filter(Boolean));
 
-      const skillInvoked = [...toolIds].some((id) =>
-        (id as string).includes(DEEP_WATCH_FORENSICS_SKILL_ID)
+      const skillInvoked = [...toolIds].some(
+        (id) =>
+          (id as string).includes(DEEP_WATCH_FORENSICS_SKILL_ID) ||
+          (id as string).includes(DEEP_WATCH_TOOL_NAMESPACE)
       );
       const correctToolCalled = expectToolCalled ? toolIds.has(expectToolCalled) : true;
 
