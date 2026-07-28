@@ -13,6 +13,7 @@ import type {
   PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { executionHistoryKeys } from './query_key_factory';
 
 const POLL_INTERVAL_MS = 10_000;
@@ -29,12 +30,16 @@ export const toCountNewExecutionEventsRequest = ({
   search,
   ruleIds,
   outcome,
-}: CountNewExecutionEventsUiParams): CountPolicyExecutionEventsRequest => ({
-  since,
-  search,
-  rule_ids: ruleIds,
-  outcome,
-});
+  ...rest
+}: CountNewExecutionEventsUiParams): Complete<CountPolicyExecutionEventsRequest> => {
+  assertAllFieldsMapped(rest);
+  return {
+    since,
+    search,
+    rule_ids: ruleIds,
+    outcome,
+  };
+};
 
 interface UseCountNewExecutionHistoryEventsParams {
   since: string;

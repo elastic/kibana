@@ -18,6 +18,7 @@ import type {
   FindActionPoliciesSortField,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
+import { assertAllFieldsMapped, type Complete } from '../../mapper_types';
 
 /** Filter dimension key for the enabled/disabled state filter. */
 export const ENABLED_FILTER_ID = 'enabled';
@@ -40,15 +41,19 @@ export const toFindActionPoliciesRequest = ({
   enabled,
   sortField,
   sortOrder,
-}: FindActionPoliciesUiParams): FindActionPoliciesRequest => ({
-  page,
-  per_page: perPage,
-  search,
-  tags,
-  enabled,
-  sort_field: sortField,
-  sort_order: sortOrder,
-});
+  ...rest
+}: FindActionPoliciesUiParams): Complete<FindActionPoliciesRequest> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    search,
+    tags,
+    enabled,
+    sort_field: sortField,
+    sort_order: sortOrder,
+  };
+};
 
 export type ActionPolicyContentListItem = ContentListItem & {
   policy: ActionPolicyResponse;

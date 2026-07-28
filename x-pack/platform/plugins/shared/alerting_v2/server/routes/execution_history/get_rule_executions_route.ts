@@ -23,6 +23,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH } from '../constants';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 
 export const toGetRuleExecutionsArgs = ({
   rule_id: ruleIds,
@@ -33,16 +34,20 @@ export const toGetRuleExecutionsArgs = ({
   sort_order: sortOrder,
   page,
   per_page: perPage,
-}: GetRuleExecutionsRequest): GetRuleExecutionsArgs => ({
-  ruleIds,
-  outcomes,
-  from,
-  to,
-  sort: sort === 'started_at' ? 'startedAt' : sort,
-  sortOrder,
-  page,
-  perPage,
-});
+  ...rest
+}: GetRuleExecutionsRequest): Complete<GetRuleExecutionsArgs> => {
+  assertAllFieldsMapped(rest);
+  return {
+    ruleIds,
+    outcomes,
+    from,
+    to,
+    sort: sort === 'started_at' ? 'startedAt' : sort,
+    sortOrder,
+    page,
+    perPage,
+  };
+};
 
 @injectable()
 export class GetRuleExecutionsRoute extends BaseAlertingRoute {

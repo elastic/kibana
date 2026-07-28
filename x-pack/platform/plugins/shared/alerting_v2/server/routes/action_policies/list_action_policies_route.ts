@@ -21,6 +21,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 
 export const toFindActionPoliciesArgs = ({
   page,
@@ -30,15 +31,19 @@ export const toFindActionPoliciesArgs = ({
   enabled,
   sort_field: sortField,
   sort_order: sortOrder,
-}: FindActionPoliciesRequest): FindActionPoliciesArgs => ({
-  page,
-  perPage,
-  search,
-  tags,
-  enabled,
-  sortField,
-  sortOrder,
-});
+  ...rest
+}: FindActionPoliciesRequest): Complete<FindActionPoliciesArgs> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    perPage,
+    search,
+    tags,
+    enabled,
+    sortField,
+    sortOrder,
+  };
+};
 
 @injectable()
 export class ListActionPoliciesRoute extends BaseAlertingRoute {

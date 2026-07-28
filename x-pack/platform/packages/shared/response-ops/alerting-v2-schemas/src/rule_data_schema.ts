@@ -20,7 +20,9 @@ import {
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
+  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
+  MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
   ID_MAX_LENGTH,
@@ -598,13 +600,14 @@ export const findRulesRequestSchema = z.object({
     .max(1000)
     .optional()
     .describe('The number of rules to return per page. Defaults to 20.'),
-  filter: z.string().optional().describe('The filter to apply to the rules.'),
+  filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
   sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
   sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
   search: z
     .string()
     .trim()
     .min(1)
+    .max(MAX_SEARCH_LENGTH)
     .optional()
     .describe('A text string to search across rule fields.'),
 });

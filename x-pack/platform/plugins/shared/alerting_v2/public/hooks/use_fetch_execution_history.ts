@@ -13,6 +13,7 @@ import type {
   PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { executionHistoryKeys } from './query_key_factory';
 
 export interface ListExecutionHistoryUiParams {
@@ -21,6 +22,7 @@ export interface ListExecutionHistoryUiParams {
   search?: string;
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
 }
 
 export const toListExecutionHistoryRequest = ({
@@ -29,13 +31,19 @@ export const toListExecutionHistoryRequest = ({
   search,
   ruleIds,
   outcome,
-}: ListExecutionHistoryUiParams): ListPolicyExecutionHistoryRequest => ({
-  page,
-  per_page: perPage,
-  search,
-  rule_ids: ruleIds,
-  outcome,
-});
+  episodeIds,
+  ...rest
+}: ListExecutionHistoryUiParams): Complete<ListPolicyExecutionHistoryRequest> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    search,
+    rule_ids: ruleIds,
+    outcome,
+    episode_ids: episodeIds,
+  };
+};
 
 interface UseFetchExecutionHistoryParams {
   page: number;

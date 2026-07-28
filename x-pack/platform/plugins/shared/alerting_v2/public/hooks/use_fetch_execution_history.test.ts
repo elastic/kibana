@@ -153,6 +153,7 @@ describe('toListExecutionHistoryRequest', () => {
         search: 'foo',
         ruleIds: ['rule-1', 'rule-2'],
         outcome: 'dispatched',
+        episodeIds: ['ep-1'],
       })
     ).toEqual({
       page: 1,
@@ -160,6 +161,7 @@ describe('toListExecutionHistoryRequest', () => {
       search: 'foo',
       rule_ids: ['rule-1', 'rule-2'],
       outcome: 'dispatched',
+      episode_ids: ['ep-1'],
     });
   });
 });

@@ -67,7 +67,9 @@ export type ListPolicyExecutionHistoryRequest = z.infer<
 >;
 
 export const countPolicyExecutionEventsRequestSchema = z.object({
-  since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
+  since: z.iso
+    .datetime()
+    .describe('ISO timestamp; count events with @timestamp greater than this.'),
   ...sharedFilterFields,
 });
 export type CountPolicyExecutionEventsRequest = z.infer<

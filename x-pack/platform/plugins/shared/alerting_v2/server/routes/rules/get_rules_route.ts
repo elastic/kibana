@@ -23,6 +23,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { listRulesOasExamples } from './list_rules_oas_example';
 
 export const toFindRulesArgs = ({
@@ -32,14 +33,18 @@ export const toFindRulesArgs = ({
   search,
   sort_field: sortField,
   sort_order: sortOrder,
-}: FindRulesRequest): FindRulesArgs => ({
-  page,
-  perPage,
-  filter,
-  search,
-  sortField,
-  sortOrder,
-});
+  ...rest
+}: FindRulesRequest): Complete<FindRulesArgs> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    perPage,
+    filter,
+    search,
+    sortField,
+    sortOrder,
+  };
+};
 
 @injectable()
 export class GetRulesRoute extends BaseAlertingRoute {

@@ -21,6 +21,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 
 export const toListExecutionHistoryArgs = ({
   page,
@@ -29,14 +30,18 @@ export const toListExecutionHistoryArgs = ({
   rule_ids: ruleIds,
   outcome,
   episode_ids: episodeIds,
-}: ListPolicyExecutionHistoryRequest): Omit<ListExecutionHistoryArgs, 'request'> => ({
-  page,
-  perPage,
-  search,
-  ruleIds,
-  outcome,
-  episodeIds,
-});
+  ...rest
+}: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    perPage,
+    search,
+    ruleIds,
+    outcome,
+    episodeIds,
+  };
+};
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {

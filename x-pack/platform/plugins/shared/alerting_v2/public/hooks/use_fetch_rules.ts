@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { FindRulesRequest, FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { ruleKeys } from './query_key_factory';
 
 export interface FindRulesUiParams {
@@ -28,14 +29,18 @@ export const toFindRulesRequest = ({
   search,
   sortField,
   sortOrder,
-}: FindRulesUiParams): FindRulesRequest => ({
-  page,
-  per_page: perPage,
-  filter,
-  search,
-  sort_field: sortField,
-  sort_order: sortOrder,
-});
+  ...rest
+}: FindRulesUiParams): Complete<FindRulesRequest> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    filter,
+    search,
+    sort_field: sortField,
+    sort_order: sortOrder,
+  };
+};
 
 export const useFetchRules = ({
   page,

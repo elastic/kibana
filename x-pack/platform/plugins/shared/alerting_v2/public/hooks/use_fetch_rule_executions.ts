@@ -13,6 +13,7 @@ import type {
   RuleExecutionOutcome,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { ruleExecutionKeys } from './query_key_factory';
 
 export interface GetRuleExecutionsUiParams {
@@ -35,16 +36,20 @@ export const toGetRuleExecutionsRequest = ({
   to,
   sort,
   sortOrder,
-}: GetRuleExecutionsUiParams): Partial<GetRuleExecutionsRequest> => ({
-  page,
-  per_page: perPage,
-  rule_id: ruleIds,
-  outcome,
-  from,
-  to,
-  sort: sort === 'startedAt' ? 'started_at' : sort,
-  sort_order: sortOrder,
-});
+  ...rest
+}: GetRuleExecutionsUiParams): Complete<Partial<GetRuleExecutionsRequest>> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    rule_id: ruleIds,
+    outcome,
+    from,
+    to,
+    sort: sort === 'startedAt' ? 'started_at' : sort,
+    sort_order: sortOrder,
+  };
+};
 
 export const useFetchRuleExecutions = (params: GetRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);
