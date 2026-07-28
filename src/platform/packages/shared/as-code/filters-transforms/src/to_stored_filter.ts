@@ -235,10 +235,10 @@ function convertFromFilterGroup(
       | AsCodeConditionFilter['condition']
       | AsCodeGroupFilter['group'];
 
-    // Create a clean base for sub-filters
-    // Sub-filters inherit index and $state when present
+    // Create a clean base for sub-filters: they inherit only the parent's index.
+    // $state is UI/session state and is intentionally not persisted (globalState filters are dropped
+    // entirely in from_stored_filter.ts; appState is re-derived at runtime).
     const cleanBase = {
-      ...(baseStored.$state ? { $state: baseStored.$state } : {}),
       meta: {
         ...(baseStored.meta.index ? { index: baseStored.meta.index } : {}),
       },
@@ -249,8 +249,8 @@ function convertFromFilterGroup(
       ? convertFromFilterGroup(typedCondition, cleanBase)
       : convertFromSimpleCondition(typedCondition, cleanBase);
 
-    // Clean up filter: remove $state, alias, and disabled from all sub-filters
-    const { $state, meta: filterMeta, ...cleanedUpFilter } = filter;
+    // Clean up filter: remove alias and disabled from all sub-filters
+    const { meta: filterMeta, ...cleanedUpFilter } = filter;
     const { alias, disabled, ...cleanedUpMeta } = filterMeta;
     return { ...cleanedUpFilter, meta: cleanedUpMeta };
   });
