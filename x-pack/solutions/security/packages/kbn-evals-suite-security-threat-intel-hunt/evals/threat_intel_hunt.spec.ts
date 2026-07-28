@@ -42,7 +42,7 @@ import {
 } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { REPORTS } from '../src/dataset';
-import { THREAT_INTEL_TOOL_IDS } from '../src/constants';
+import { THREAT_INTEL_TOOL_IDS, agentBuilderDefaultAgentId } from '../src/constants';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -127,7 +127,7 @@ base.describe(
           log.info(`[L2] Running ${example.id} — ${example.metadata?.category}`);
 
           const response = await agentBuilderClient.converse({
-            agentId: THREAT_INTEL_TOOL_IDS.hunt_behavior,
+            agentId: agentBuilderDefaultAgentId,
             input: example.input.question,
           });
 

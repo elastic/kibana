@@ -34,6 +34,9 @@ export const DEEP_WATCH_FORENSICS_SKILL_ID = 'deep-watch-forensics';
  */
 export const DEEP_WATCH_TOOL_NAMESPACE = 'security.deep_watch';
 
+/** Index where the produce_draft_forensic_report tool persists its reports. */
+export const DEEP_WATCH_FORENSICS_REPORTS_INDEX = '.kibana-deep-watch-forensics-reports';
+
 /** Default escalation context used in Deep Watch flow and composite pipeline tests. */
 export const DEFAULT_ESCALATION_CONTEXT = {
   alert_id: 'alert-apt29-lateral',
