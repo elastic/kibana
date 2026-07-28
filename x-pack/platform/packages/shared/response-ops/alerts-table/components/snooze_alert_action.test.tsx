@@ -184,7 +184,6 @@ describe('SnoozeAlertAction', () => {
 
       const snoozeItem = screen.getByTestId('snooze-alert-action-snooze');
       expect(snoozeItem).toBeInTheDocument();
-      // Submenu indicator must use hasPanel (right-side chevron), not a left icon
       expect(snoozeItem.querySelector('.euiContextMenu__arrow')).toBeInTheDocument();
       expect(snoozeItem.querySelector('.euiContextMenu__icon')).not.toBeInTheDocument();
     });
