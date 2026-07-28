@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-types';
 
 import { createManagedOtlpApiKey } from '../../services/api_keys';
 import type { FleetRequestHandler, PostManagedOtlpAPIKeyRequestSchema } from '../../types';
@@ -26,8 +27,8 @@ export const createManagedOtlpApiKeyHandler: FleetRequestHandler<
   // Pre-check: verify the caller holds the privileges the key will carry. Without
   // this, ES would still clamp silently and hand back a useless key.
   const privilegeCheck = await esClient.security.hasPrivileges({
-    cluster: ['manage_own_api_key'],
-    application: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+    cluster: [ClusterPrivilegeType.MANAGE_OWN_API_KEY],
+    application: [{ application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] }],
   });
 
   if (!privilegeCheck.has_all_requested) {
