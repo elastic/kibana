@@ -191,3 +191,8 @@ For a preflight without mutations:
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR" --dry-run
 ```
+`--dry-run` exits 1 with "Dry run cannot continue while CCS restoration is
+required" when the session still owes a CCS restore, because restoring is a
+mutation and the cleanup that follows it cannot be previewed. That is a
+report on the session's state, not a failure of the preflight: run the command
+again without `--dry-run` to restore and clean up for real.

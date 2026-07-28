@@ -83,6 +83,11 @@ with edit_session_config(session_dir / "config.json") as config:
         skipped_setup.append(entry)
 PY
 }
+
+session_resource_state() {
+  python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/session-resource-state.py \
+    --session-dir "$SESSION_DIR" --kind "$1" --id "$2"
+}
 ```
 
 After every successful setup mutation, immediately register the resource with
@@ -257,13 +262,22 @@ case "$USER_EXISTING_STATUS" in
       "$ENV_TYPE environments use the provided credentials; no user is created"
     ;;
   200)
+    # The username is session-scoped, so a pre-existing user means a previous
+    # attempt of this session created it — that is ours to clean up. Never
+    # downgrade a reservation here; that would silently drop it.
+    USER_RESOURCE_STATE=$(session_resource_state kibana_user "$TEST_USERNAME")
+    if [[ "$USER_RESOURCE_STATE" == "owned" || "$USER_RESOURCE_STATE" == "pending" ]]; then
+      USER_OWNERSHIP_ARGS=(--owned)
+    else
+      USER_OWNERSHIP_ARGS=(--reused)
+    fi
     python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
       --session-dir "$SESSION_DIR" \
       --kind kibana_user \
       --id "$TEST_USERNAME" \
       --endpoint "/_security/user/$TEST_USERNAME" \
       --base-url es_url \
-      --reused
+      "${USER_OWNERSHIP_ARGS[@]}"
     ;;
   404)
     # Reserve the final Elasticsearch resource before either creation path.
@@ -303,13 +317,15 @@ case "$USER_EXISTING_STATUS" in
           --owned
         ;;
       409)
+        # The user appeared between the probe and the create, so it pre-existed
+        # this reservation and discarding the reservation is deliberate.
         python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
           --session-dir "$SESSION_DIR" \
           --kind kibana_user \
           --id "$TEST_USERNAME" \
           --endpoint "/_security/user/$TEST_USERNAME" \
           --base-url es_url \
-          --reused
+          --reused --confirm-preexisting
         ;;
       401|403)
         python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
@@ -331,7 +347,7 @@ case "$USER_EXISTING_STATUS" in
           --endpoint "/_security/user/$TEST_USERNAME" \
           --base-url es_url \
           --probe-method GET \
-          --fail-on-absent || exit 1
+          --fail-on-absent || true
         exit 1
         ;;
     esac

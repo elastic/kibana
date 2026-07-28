@@ -10,6 +10,12 @@ import time
 import unittest
 from pathlib import Path
 
+# These scripts live inside a git checkout with no __pycache__ ignore rule, and
+# the suite spawns them as subprocesses that inherit this environment. Without
+# this, a test run leaves a directory of untracked .pyc files behind. Run the
+# suite as a script, or with -B, to also avoid caching the suite itself.
+sys.dont_write_bytecode = True
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 CREATE_SCRIPT = SCRIPT_DIR / "create-flow-spaces.py"
@@ -76,8 +82,26 @@ from session_resources import (  # noqa: E402
     register_resource,
     release_ccs_deployment_lease,
     refresh_ccs_deployment_lease,
+    resource_marker,
     run_curl,
 )
+
+
+def executable_lines(markdown: str) -> list[str]:
+    """Return the lines the agent runs verbatim from a skill document.
+
+    Only fenced code blocks count, and comment lines are dropped, so prose that
+    documents a forbidden pattern does not read as a use of it.
+    """
+    lines = []
+    inside_block = False
+    for line in markdown.split("\n"):
+        if line.startswith("```"):
+            inside_block = not inside_block
+            continue
+        if inside_block and not line.lstrip().startswith("#"):
+            lines.append(line)
+    return lines
 
 
 class SessionResourceContractTests(unittest.TestCase):
@@ -167,7 +191,7 @@ class SessionResourceContractTests(unittest.TestCase):
             "environment": {"ccs": {"remote_cluster_alias": "remote"}},
             "ccs_restore": {},
         }
-        for state in ("captured", "mutation_pending", "modified"):
+        for state in ("mutation_pending", "modified"):
             config["ccs_state"] = state
             self.assertTrue(ccs_cleanup_blocked(config))
 
@@ -178,6 +202,185 @@ class SessionResourceContractTests(unittest.TestCase):
         config["ccs_restore"] = {}
         config["environment"] = {}
         self.assertTrue(ccs_cleanup_blocked(config))
+
+    def test_captured_ccs_state_does_not_block_cleanup(self):
+        # break-remote-cluster.py journals mutation_pending before it issues the
+        # request, so a session still at captured never attempted a write and
+        # has nothing to restore. Blocking it would leak the session's own
+        # unrelated resources whenever another session holds the lease.
+        for environment in (
+            {"ccs": {"remote_cluster_alias": "remote"}},
+            {},
+        ):
+            config = {
+                "environment": environment,
+                "ccs_restore": {"endpoint": "/_cluster/settings"},
+                "ccs_state": "captured",
+            }
+            self.assertFalse(ccs_cleanup_blocked(config))
+
+    def _reserve_pending_user(self):
+        config = {
+            "session_id": "abcdef01",
+            "environment": {"type": "stateful-classic"},
+            "session_resources": [],
+        }
+        register_resource(
+            config,
+            kind="kibana_user",
+            resource_id="exploratory-tester-abcdef01",
+            owned=False,
+            endpoint="/_security/user/exploratory-tester-abcdef01",
+            base_url="es_url",
+            state="pending",
+        )
+        return config
+
+    def test_reused_registration_never_silently_discards_a_reservation(self):
+        # A pending entry means "we may have created this remotely". Silently
+        # downgrading it to reused clears the marker, which drops the resource
+        # from both pending_resources() and cleanup_candidates() — a leak with
+        # no warning. Callers must confirm pre-existence explicitly.
+        config = self._reserve_pending_user()
+
+        with self.assertRaisesRegex(ValueError, "pending reservation"):
+            register_resource(
+                config,
+                kind="kibana_user",
+                resource_id="exploratory-tester-abcdef01",
+                owned=False,
+                endpoint="/_security/user/exploratory-tester-abcdef01",
+                base_url="es_url",
+            )
+
+        resource = config["session_resources"][0]
+        self.assertEqual(resource["state"], "pending")
+        self.assertEqual(resource["marker"], resource_marker("abcdef01"))
+
+    def test_confirmed_preexisting_resources_may_downgrade_to_reused(self):
+        # A 409/"already exists" immediately after our own fresh reservation
+        # proves the resource pre-existed this session, so reuse is correct and
+        # deleting it would be wrong.
+        config = self._reserve_pending_user()
+
+        register_resource(
+            config,
+            kind="kibana_user",
+            resource_id="exploratory-tester-abcdef01",
+            owned=False,
+            endpoint="/_security/user/exploratory-tester-abcdef01",
+            base_url="es_url",
+            allow_pending_downgrade=True,
+        )
+
+        resource = config["session_resources"][0]
+        self.assertEqual(resource["state"], "reused")
+        self.assertIsNone(resource["marker"])
+        self.assertEqual(cleanup_candidates(config), [])
+
+    def test_owned_reservations_still_survive_a_reused_registration(self):
+        config = self._reserve_pending_user()
+        register_resource(
+            config,
+            kind="kibana_user",
+            resource_id="exploratory-tester-abcdef01",
+            owned=True,
+            endpoint="/_security/user/exploratory-tester-abcdef01",
+            base_url="es_url",
+        )
+        register_resource(
+            config,
+            kind="kibana_user",
+            resource_id="exploratory-tester-abcdef01",
+            owned=False,
+            endpoint="/_security/user/exploratory-tester-abcdef01",
+            base_url="es_url",
+        )
+
+        resource = config["session_resources"][0]
+        self.assertEqual(resource["state"], "owned")
+        self.assertEqual(
+            [item["id"] for item in cleanup_candidates(config)],
+            ["exploratory-tester-abcdef01"],
+        )
+
+    def test_reused_registration_still_records_genuinely_reused_resources(self):
+        config = {
+            "session_id": "abcdef01",
+            "environment": {"type": "stateful-classic"},
+            "session_resources": [],
+        }
+        register_resource(
+            config,
+            kind="kibana_user",
+            resource_id="someone-elses-user",
+            owned=False,
+            endpoint="/_security/user/someone-elses-user",
+            base_url="es_url",
+        )
+
+        resource = config["session_resources"][0]
+        self.assertEqual(resource["state"], "reused")
+        self.assertIsNone(resource["marker"])
+        self.assertEqual(cleanup_candidates(config), [])
+
+    def test_serverless_requires_an_api_key_like_user_provided(self):
+        # Phase 1 hard-requires credentials.api_key for serverless setup, so
+        # cleanup must not silently fall back to basic auth.
+        with self.assertRaisesRegex(ValueError, "api_key"):
+            build_auth_args(
+                {
+                    "environment": {"type": "serverless"},
+                    "credentials": {"username": "elastic", "password": "changeme"},
+                }
+            )
+
+        # stateful-ess is an agent-managed local Scout server, not Elastic
+        # Cloud, so basic auth remains correct there.
+        self.assertEqual(
+            build_auth_args(
+                {
+                    "environment": {"type": "stateful-ess"},
+                    "credentials": {"username": "elastic", "password": "changeme"},
+                }
+            ),
+            ["-u", "elastic:changeme"],
+        )
+
+    def test_null_credentials_do_not_raise_an_attribute_error(self):
+        # Callers only catch (OSError, ValueError); an AttributeError escapes as
+        # a traceback and aborts the rest of the cleanup run. An explicit null
+        # is treated like an absent key.
+        self.assertEqual(
+            build_auth_args(
+                {"environment": {"type": "stateful-classic"}, "credentials": None}
+            ),
+            ["-u", "elastic:changeme"],
+        )
+
+        with self.assertRaisesRegex(ValueError, "api_key"):
+            build_auth_args(
+                {"environment": {"type": "user-provided"}, "credentials": None}
+            )
+
+        with self.assertRaisesRegex(ValueError, "credentials"):
+            build_auth_args(
+                {"environment": {"type": "stateful-classic"}, "credentials": "oops"}
+            )
+
+    def test_ccs_deployment_lock_path_ignores_tmpdir(self):
+        # Cross-session exclusion is the whole point of the lease, so two
+        # sessions with different TMPDIR values must not silently get separate
+        # lease files for the same deployment.
+        config = {"environment": {"es_url": "http://localhost:9200"}}
+        first = ccs_deployment_lock_path(config, env={"TMPDIR": "/tmp/one"})
+        second = ccs_deployment_lock_path(config, env={"TMPDIR": "/tmp/two"})
+        self.assertEqual(first, second)
+
+        override = ccs_deployment_lock_path(
+            config, env={"EXPLORATORY_TESTER_CCS_LOCK_DIR": str(SCRIPT_DIR)}
+        )
+        self.assertEqual(override.parent, SCRIPT_DIR)
 
     def test_reconcile_pending_resource_transitions_by_probe_status(self):
         config = {
@@ -3185,6 +3388,16 @@ print("200")
             user_section.index("USER_EXISTING_STATUS=$(curl"),
         )
         self.assertNotIn("USER_PROVISIONING_SKIPPED=true\n    ;;\n  200)", user_section)
+        # The username is session-scoped, so an existing user on the 200 path
+        # belongs to this session whenever a reservation exists; registering it
+        # as reused there would discard the reservation and leak the user.
+        self.assertIn("USER_RESOURCE_STATE=$(session_resource_state", user_section)
+        self.assertIn("USER_OWNERSHIP_ARGS=(--owned)", user_section)
+        self.assertIn("--reused --confirm-preexisting", user_section)
+        self.assertLess(
+            user_section.index("USER_RESOURCE_STATE="),
+            user_section.index("USER_OWNERSHIP_ARGS="),
+        )
         self.assertIn("Do not continue to Phase 2", login)
         self.assertIn("user-provisioning", explore)
         self.assertIn("do not explore", explore)
@@ -3254,7 +3467,12 @@ print("200")
         self.assertIn("--method POST", positive_control)
         self.assertIn("kibana.alert.rule.rule_id", positive_control)
         self.assertIn("reconcile-session-resource.py", positive_control)
-        self.assertIn('SOURCE_OWNERSHIP_FLAG="--', positive_control)
+        self.assertIn("SOURCE_OWNERSHIP_ARGS=(--", positive_control)
+        # Discarding a reservation must always be explicit, never a bare --reused
+        # on a resource this session already reserved.
+        self.assertIn(
+            "SOURCE_OWNERSHIP_ARGS=(--reused --confirm-preexisting)", positive_control
+        )
         self.assertIn("SOURCE_CREATE_RESPONSE", positive_control)
         self.assertIn("SOURCE_DOCUMENT_RESPONSE", positive_control)
         self.assertIn("RUN_SOON_RESPONSE", positive_control)
@@ -3701,16 +3919,9 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # curl -X HEAD keeps waiting for a body that a HEAD response never
         # sends, so it stalls for the whole --max-time on keep-alive servers.
         for path in [*PHASES_DIR.glob("*.md"), *SCRIPT_DIR.glob("*.md")]:
-            commands = [
-                line
-                for line in path.read_text(encoding="utf-8").split("\n")
-                # Skip comments and headings so the explanation of this very
-                # rule does not trip it.
-                if not line.lstrip().startswith("#")
-            ]
             self.assertNotIn(
                 "-X HEAD",
-                "\n".join(commands),
+                "\n".join(executable_lines(path.read_text(encoding="utf-8"))),
                 f"{path.name} must probe with -I instead of an -X override",
             )
 
@@ -4114,6 +4325,125 @@ else:
             config = json.loads(config_path.read_text(encoding="utf-8"))
             self.assertEqual(config["session_resources"][0]["state"], "owned")
             self.assertTrue(config["session_resources"][0]["owned"])
+
+    def test_noise_setup_reuses_an_index_it_did_not_create(self):
+        # The index exists before this session reserves it, so the reservation
+        # must be discarded rather than promoted: deleting a pre-existing index
+        # during cleanup would destroy someone else's data.
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            config_path = session_dir / "config.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "stateful-classic",
+                            "es_url": "http://localhost:9220",
+                        },
+                        "session_resources": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import sys
+
+method = sys.argv[sys.argv.index("-X") + 1]
+if method == "PUT":
+    print("400")
+elif method == "GET":
+    print('{"mappings": {}}')
+else:
+    print("500")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(NOISE_SCRIPT),
+                    "--es-url",
+                    "http://localhost:9220",
+                    "--username",
+                    "elastic",
+                    "--password",
+                    "changeme",
+                    "--session-dir",
+                    str(session_dir),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+            self.assertNotIn("Refusing to discard", result.stderr)
+
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            resource = config["session_resources"][0]
+            self.assertEqual(resource["state"], "reused")
+            self.assertFalse(resource["owned"])
+            self.assertIsNone(resource["marker"])
+            self.assertEqual(cleanup_candidates(config), [])
+
+    def test_register_resource_cli_reports_a_refused_downgrade_cleanly(self):
+        # A traceback in the middle of a phase document is unreadable to the
+        # agent and hides which resource is at risk.
+        with tempfile.TemporaryDirectory() as raw_dir:
+            session_dir = Path(raw_dir)
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {"type": "stateful-classic"},
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "reserved-index",
+                                "endpoint": "/reserved-index",
+                                "base_url": "es_url",
+                                "state": "pending",
+                                "owned": False,
+                                "marker": "exploratory-tester:abc12345",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(REGISTER_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "reserved-index",
+                    "--endpoint",
+                    "/reserved-index",
+                    "--base-url",
+                    "es_url",
+                    "--reused",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 1)
+            self.assertNotIn("Traceback", result.stderr)
+            self.assertIn("reserved-index", result.stderr)
 
     def test_register_resource_cli_updates_the_manifest(self):
         with tempfile.TemporaryDirectory() as raw_dir:

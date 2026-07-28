@@ -35,6 +35,15 @@ def parse_args() -> argparse.Namespace:
     ownership.add_argument("--remove-pending", action="store_true")
     parser.add_argument("--protected", action="store_true")
     parser.add_argument(
+        "--confirm-preexisting",
+        action="store_true",
+        help=(
+            "With --reused, allow discarding this session's pending reservation "
+            "because the resource was confirmed to exist before the session "
+            "reserved it (for example a 409 on create)."
+        ),
+    )
+    parser.add_argument(
         "--flow-space",
         action="store_true",
         help="Also update created_flow_spaces/reused_flow_spaces",
@@ -45,35 +54,40 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     config_path = Path(args.session_dir) / "config.json"
-    with edit_session_config(config_path) as config:
-        if args.remove_pending:
-            remove_pending_resource(
+    try:
+        with edit_session_config(config_path) as config:
+            if args.remove_pending:
+                remove_pending_resource(
+                    config,
+                    kind=args.kind,
+                    resource_id=args.resource_id,
+                )
+                print(
+                    f"Removed pending {args.kind} {args.resource_id!r} "
+                    "reservation."
+                )
+                return 0
+
+            body = args.body_json
+            if body is not None:
+                body = json.dumps(json.loads(body), separators=(",", ":"))
+            resource = register_resource(
                 config,
                 kind=args.kind,
                 resource_id=args.resource_id,
+                owned=args.owned,
+                endpoint=args.endpoint,
+                method=args.method,
+                base_url=args.base_url,
+                protected=args.protected,
+                track_flow_space=args.flow_space,
+                body=body,
+                state="pending" if args.pending else None,
+                allow_pending_downgrade=args.confirm_preexisting,
             )
-            print(
-                f"Removed pending {args.kind} {args.resource_id!r} "
-                "reservation."
-            )
-            return 0
-
-        body = args.body_json
-        if body is not None:
-            body = json.dumps(json.loads(body), separators=(",", ":"))
-        resource = register_resource(
-            config,
-            kind=args.kind,
-            resource_id=args.resource_id,
-            owned=args.owned,
-            endpoint=args.endpoint,
-            method=args.method,
-            base_url=args.base_url,
-            protected=args.protected,
-            track_flow_space=args.flow_space,
-            body=body,
-            state="pending" if args.pending else None,
-        )
+    except (OSError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     print(
         f"Registered {args.kind} {args.resource_id!r} "
         f"({resource['state']})."

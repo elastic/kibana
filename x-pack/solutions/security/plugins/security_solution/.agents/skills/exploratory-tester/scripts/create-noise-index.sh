@@ -82,35 +82,8 @@ for INDEX in "$INDEX_PREFIX-000001" "$FALLBACK_INDEX_PREFIX-000001"; do
   RESOURCE_STATE_BEFORE=none
   PENDING_BEFORE=false
   if [[ -n "$SESSION_DIR" ]]; then
-    RESOURCE_STATE_BEFORE=$(PYTHONPATH="$SCRIPT_DIR" python3 - "$SESSION_DIR" "$INDEX" <<'PY'
-import sys
-from pathlib import Path
-
-from session_resources import (
-    load_session_config,
-    require_session_id,
-    resource_marker,
-    resource_state,
-)
-
-config = load_session_config(Path(sys.argv[1]) / "config.json")
-session_id = require_session_id(config)
-resource = next(
-    (
-        resource
-        for resource in config.get("session_resources", [])
-        if resource.get("kind") == "es_index"
-        and resource.get("id") == sys.argv[2]
-    ),
-    None,
-)
-print(
-    resource_state(resource)
-    if resource and resource.get("marker") == resource_marker(session_id)
-    else "none"
-)
-PY
-)
+    RESOURCE_STATE_BEFORE=$(python3 "$SCRIPT_DIR/session-resource-state.py" \
+      --session-dir "$SESSION_DIR" --kind es_index --id "$INDEX")
     if [[ "$RESOURCE_STATE_BEFORE" == "pending" ]]; then
       PENDING_BEFORE=true
     elif [[ "$RESOURCE_STATE_BEFORE" == "none" ]]; then
@@ -164,9 +137,11 @@ PY
       INDEX_READY=true
       INDEX_OWNED=false
       if [[ -n "$SESSION_DIR" ]]; then
-        OWNERSHIP_FLAG="--reused"
+        # The index existed before this run reserved it, so reuse is correct and
+        # discarding our own fresh reservation is deliberate.
+        OWNERSHIP_ARGS=(--reused --confirm-preexisting)
         if [[ "$RESOURCE_STATE_BEFORE" == "owned" || "$PENDING_BEFORE" == "true" ]]; then
-          OWNERSHIP_FLAG="--owned"
+          OWNERSHIP_ARGS=(--owned)
           INDEX_OWNED=true
         fi
         python3 "$SCRIPT_DIR/register-session-resource.py" \
@@ -175,7 +150,7 @@ PY
           --id "$INDEX" \
           --endpoint "/$INDEX" \
           --base-url es_url \
-          "$OWNERSHIP_FLAG"
+          "${OWNERSHIP_ARGS[@]}"
       fi
       break
     else

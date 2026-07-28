@@ -55,30 +55,9 @@ resource reserved by this session is owned only after a successful create or
 reconciliation:
 ```bash
 : "${SESSION_DIR:?positive control registers resources and requires SESSION_DIR}"
-SOURCE_OWNERSHIP_FLAG=""
-SOURCE_RESOURCE_STATE=$(PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
-  python3 - "$SESSION_DIR" "$SOURCE_INDEX" <<'PY'
-import sys
-from pathlib import Path
-
-from session_resources import load_session_config, resource_marker, resource_state, require_session_id
-
-config = load_session_config(Path(sys.argv[1]) / "config.json")
-session_id = require_session_id(config)
-resource = next(
-    (
-        item for item in config.get("session_resources", [])
-        if item.get("kind") == "es_index" and item.get("id") == sys.argv[2]
-    ),
-    None,
-)
-print(
-    resource_state(resource)
-    if resource and resource.get("marker") == resource_marker(session_id)
-    else "none"
-)
-PY
-)
+SOURCE_OWNERSHIP_ARGS=()
+SOURCE_RESOURCE_STATE=$(python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/session-resource-state.py \
+  --session-dir "$SESSION_DIR" --kind es_index --id "$SOURCE_INDEX")
 # -I, not -X HEAD: the latter makes curl wait for a response body that a HEAD
 # never sends, stalling for the whole --max-time against keep-alive servers.
 SOURCE_HEAD_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
@@ -87,9 +66,9 @@ SOURCE_HEAD_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_c
 case "$SOURCE_HEAD_STATUS" in
   200)
     if [[ "$SOURCE_RESOURCE_STATE" == "owned" || "$SOURCE_RESOURCE_STATE" == "pending" ]]; then
-      SOURCE_OWNERSHIP_FLAG="--owned"
+      SOURCE_OWNERSHIP_ARGS=(--owned)
     else
-      SOURCE_OWNERSHIP_FLAG="--reused"
+      SOURCE_OWNERSHIP_ARGS=(--reused)
     fi
     ;;
   404)
@@ -116,13 +95,15 @@ case "$SOURCE_HEAD_STATUS" in
           echo "Source index creation response was not acknowledged." >&2
           exit 1
         fi
-        SOURCE_OWNERSHIP_FLAG="--owned"
+        SOURCE_OWNERSHIP_ARGS=(--owned)
         ;;
       409)
         if [[ "$SOURCE_RESOURCE_STATE" == "pending" ]]; then
-          SOURCE_OWNERSHIP_FLAG="--owned"
+          SOURCE_OWNERSHIP_ARGS=(--owned)
         else
-          SOURCE_OWNERSHIP_FLAG="--reused"
+          # The index existed before this run reserved it, so discarding our own
+          # fresh reservation is deliberate.
+          SOURCE_OWNERSHIP_ARGS=(--reused --confirm-preexisting)
         fi
         ;;
       *)
@@ -134,7 +115,7 @@ case "$SOURCE_HEAD_STATUS" in
           --base-url "$SOURCE_BASE_URL" \
           --probe-method HEAD \
           --fail-on-absent || exit 1
-        SOURCE_OWNERSHIP_FLAG="--owned"
+        SOURCE_OWNERSHIP_ARGS=(--owned)
         ;;
     esac
     ;;
@@ -143,7 +124,10 @@ case "$SOURCE_HEAD_STATUS" in
     exit 1
     ;;
 esac
-: "${SOURCE_OWNERSHIP_FLAG:?Source index ownership was not resolved}"
+if (( ${#SOURCE_OWNERSHIP_ARGS[@]} == 0 )); then
+  echo "Source index ownership was not resolved." >&2
+  exit 1
+fi
 
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
   --session-dir "$SESSION_DIR" \
@@ -151,7 +135,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   --id "$SOURCE_INDEX" \
   --endpoint "/$SOURCE_INDEX" \
   --base-url "$SOURCE_BASE_URL" \
-  "$SOURCE_OWNERSHIP_FLAG"
+  "${SOURCE_OWNERSHIP_ARGS[@]}"
 ```
 Then index the document:
 ```bash
@@ -214,6 +198,11 @@ case "$RULE_HTTP_STATUS" in
       2>&1
     ) || true
     printf '%s\n' "$RULE_RECONCILIATION_OUTPUT" >&2
+    # The alert reservation exists only to clean up what this rule fires, so it
+    # follows the rule: dropped when the rule turned out never to be created,
+    # owned when the rule was adopted, and left pending when the rule's fate is
+    # still unknown. A _delete_by_query endpoint cannot be probed, so it can
+    # never be reconciled on its own.
     case "$RULE_RECONCILIATION_OUTPUT" in
       Removed\ absent\ pending\ *)
         python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
@@ -222,6 +211,17 @@ case "$RULE_HTTP_STATUS" in
           --id "positive-control-alerts-$RULE_ID" \
           --endpoint "/.alerts-security.alerts-$SPACE_ID/_delete_by_query" \
           --remove-pending
+        ;;
+      Reconciled\ *\ as\ owned.*)
+        python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/register-session-resource.py \
+          --session-dir "$SESSION_DIR" \
+          --kind es_alerts \
+          --id "positive-control-alerts-$RULE_ID" \
+          --endpoint "/.alerts-security.alerts-$SPACE_ID/_delete_by_query" \
+          --base-url es_url \
+          --method POST \
+          --body-json "$ALERT_DELETE_BODY" \
+          --owned
         ;;
     esac
     exit 1

@@ -21,6 +21,9 @@ DEFAULT_CURL_CONNECT_TIMEOUT_SECONDS = 10.0
 DEFAULT_CURL_MAX_TIME_SECONDS = 30.0
 DEFAULT_CCS_LEASE_TTL_SECONDS = 4 * 60 * 60
 CCS_LOCK_DIR_ENV = "EXPLORATORY_TESTER_CCS_LOCK_DIR"
+# A fixed shared location so the lease is deployment-scoped rather than
+# per-$TMPDIR. Override with CCS_LOCK_DIR_ENV.
+DEFAULT_CCS_LOCK_DIR = Path("/tmp/exploratory-tester")
 CCS_LEASE_TTL_ENV = "EXPLORATORY_TESTER_CCS_LEASE_TTL_SECONDS"
 CURL_CONNECT_TIMEOUT_ENV = "EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT"
 CURL_MAX_TIME_ENV = "EXPLORATORY_TESTER_CURL_MAX_TIME"
@@ -91,9 +94,6 @@ def edit_session_config(
         config = load_session_config(config_path)
         try:
             yield config
-        except BaseException:
-            raise
-        else:
             if persist:
                 write_session_config(config_path, config)
         finally:
@@ -194,17 +194,27 @@ def build_auth_args(
             )
     else:
         credentials = config.get("credentials", {})
+        if credentials is None:
+            credentials = {}
+    if not isinstance(credentials, dict):
+        raise ValueError("Session config field 'credentials' must be an object")
     environment_type = environment.get("type")
     api_key = credentials.get("api_key")
 
     if api_key:
         return ["-H", f"Authorization: ApiKey {api_key}"]
 
-    # Source user-provided deployments require a Kibana API key. Remote CCS
-    # credentials are independent and may use basic auth on a managed remote.
-    if not using_remote_credentials and environment_type == "user-provided":
+    # Source user-provided and serverless deployments require a Kibana API key;
+    # Phase 1 refuses to run setup without one, so cleanup must not silently
+    # fall back to basic auth. Remote CCS credentials are independent and may
+    # use basic auth on a managed remote.
+    if not using_remote_credentials and environment_type in {
+        "user-provided",
+        "serverless",
+    }:
         raise ValueError(
-            "User-provided environments require credentials.api_key for API calls"
+            f"{environment_type} environments require credentials.api_key "
+            "for API calls"
         )
 
     username = credentials.get("username", "elastic")
@@ -320,8 +330,11 @@ def ccs_deployment_lock_path(
 ) -> Path:
     environment = env if env is not None else os.environ
     lock_dir_value = environment.get(CCS_LOCK_DIR_ENV)
+    # Deliberately not tempfile.gettempdir(): it honours $TMPDIR, so two
+    # sessions with different TMPDIR values would take different lease files
+    # for the same deployment and both proceed to mutate it.
     lock_dir = (
-        Path(lock_dir_value) if lock_dir_value else Path(tempfile.gettempdir())
+        Path(lock_dir_value) if lock_dir_value else DEFAULT_CCS_LOCK_DIR
     )
     lock_dir.mkdir(parents=True, exist_ok=True)
     es_url = resolve_resource_base_url(config, "es_url")
@@ -630,20 +643,23 @@ def ccs_cleanup_blocked(config: dict[str, Any]) -> bool:
     ccs = environment.get("ccs") if isinstance(environment, dict) else None
     state = config.get("ccs_state")
     snapshot_present = isinstance(config.get("ccs_restore"), dict)
+    # "captured" is provably pre-mutation: break-remote-cluster.py journals
+    # "mutation_pending" before it issues the request, so a session still at
+    # "captured" has nothing to restore and must not be blocked from cleaning
+    # up its own unrelated resources.
     if not isinstance(ccs, dict) or not ccs:
-        if state == "restored":
+        if state in {"restored", "captured"}:
             return False
         return snapshot_present or state in {
-            "captured",
             "mutation_pending",
             "modified",
         }
     if state is not None:
         if state not in CCS_STATES:
             return True
-        if state in {"captured", "mutation_pending", "modified"}:
+        if state in {"mutation_pending", "modified"}:
             return True
-        if state == "unchanged" and isinstance(config.get("ccs_restore"), dict):
+        if state == "unchanged" and snapshot_present:
             return True
         return False
     return (
@@ -665,6 +681,7 @@ def register_resource(
     track_flow_space: bool = True,
     body: str | None = None,
     state: str | None = None,
+    allow_pending_downgrade: bool = False,
 ) -> dict[str, Any]:
     if kind not in RESOURCE_KINDS:
         raise ValueError(f"Unsupported session resource kind: {kind}")
@@ -682,9 +699,19 @@ def register_resource(
         resolved_state == "reused"
         and existing
         and existing.get("marker") == resource_marker(session_id)
-        and resource_state(existing) == "owned"
     ):
-        resolved_state = "owned"
+        existing_state = resource_state(existing)
+        if existing_state == "owned":
+            resolved_state = "owned"
+        elif existing_state == "pending" and not allow_pending_downgrade:
+            # Downgrading clears the marker, dropping the resource from both
+            # pending_resources() and cleanup_candidates(). Only a caller that
+            # has confirmed the resource pre-existed this session may do it.
+            raise ValueError(
+                f"Refusing to discard the pending reservation for {kind} "
+                f"{resource_id!r}: pass allow_pending_downgrade only after "
+                "confirming the resource existed before this session reserved it"
+            )
     if resolved_state == "owned":
         owned = True
     elif resolved_state in {"pending", "reused"}:

@@ -137,7 +137,6 @@ def _validate_snapshot(
     restore: object,
 ) -> tuple[
     str,
-    str,
     dict[str, object],
     dict[str, object],
     dict[str, object],
@@ -172,7 +171,7 @@ def _validate_snapshot(
     if expected_layer != _configuration_layer(settings, alias):
         raise ValueError("CCS restore snapshot provenance is inconsistent")
     validate_resource_endpoint(endpoint)
-    return endpoint, alias, payload, provenance, settings
+    return alias, payload, provenance, settings
 
 
 def _parse_json_body(body: str, description: str) -> object:
@@ -410,7 +409,7 @@ def main() -> int:
                 if read_ccs_deployment_lease(config) is not None:
                     refresh_ccs_deployment_lease(config)
                 restore_snapshot = copy.deepcopy(config.get("ccs_restore"))
-                endpoint, alias, payload, provenance, settings = _validate_snapshot(
+                alias, payload, provenance, settings = _validate_snapshot(
                     restore_snapshot
                 )
                 initial_state = config.get("ccs_state")

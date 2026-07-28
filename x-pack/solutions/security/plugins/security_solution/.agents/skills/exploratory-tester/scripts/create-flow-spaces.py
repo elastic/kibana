@@ -38,7 +38,7 @@ def main() -> int:
 
         session_id = ensure_session_manifest(config)
         write_session_config(config_path, config)
-        url = config["environment"]["url"]
+        url = config["environment"]["url"].rstrip("/")
         base_space_id = config["environment"].get(
             "space_id", "exploratory-testing"
         )
@@ -137,6 +137,8 @@ def main() -> int:
                 )
             elif http_code == "409":
                 flow["space_id"] = space_id
+                # A 409 against a reservation made in this run proves the space
+                # pre-existed the session, so reuse is correct here.
                 register_resource(
                     config,
                     kind="kibana_space",
@@ -146,6 +148,7 @@ def main() -> int:
                     )
                     or pending_before_remote,
                     endpoint=endpoint,
+                    allow_pending_downgrade=True,
                 )
                 print(
                     f"Flow {flow_number} ({flow['name']!r}): "
