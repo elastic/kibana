@@ -96,54 +96,6 @@ const generateInsights = async ({
   };
 };
 
-/**
- * Optional side-channel capture for offline report rendering.
- * The golden `.evaluation-scores` export stores only evaluator scores, and the
- * inner generation LLM span is not reliably exported to the trace store, so we
- * capture the verbatim generated insights (Chrysalis single-generation shape) here.
- * Opt-in via PERSONA_MATRIX_CAPTURE_AD + gitignored output -> CI-safe (no effect
- * when the env var is unset). Fires on BOTH the success path and the caught-error
- * path so a model that errors (e.g. Opus JSON-parse failure) is faithfully
- * recorded as a red error row.
- */
-function captureAdRun(
-  log: ToolingLog,
-  record: {
-    status: string;
-    discoveries: AttackDiscovery[];
-    alertsContextCount?: number;
-    latencyMs: number;
-    traceId?: string;
-    error?: string;
-  }
-): void {
-  const adCapturePath = process.env.PERSONA_MATRIX_CAPTURE_AD;
-  if (!adCapturePath) return;
-  try {
-    // Debug-only capture side-channel (gated behind PERSONA_MATRIX_CAPTURE_AD),
-    // used to render the persona-matrix Attack Discovery report from a real run.
-    // eslint-disable-next-line @kbn/eslint/require_kbn_fs
-    Fs.appendFile(
-      adCapturePath,
-      `${JSON.stringify({
-        model_id: process.env.EVAL_SUBJECT_MODEL_ID || process.env.PERSONA_MATRIX_MODEL_ID || null,
-        status: record.status,
-        discovery_count: record.discoveries.length,
-        alerts_context_count: record.alertsContextCount ?? null,
-        latency_ms: record.latencyMs,
-        trace_id: record.traceId ?? null,
-        error: record.error ?? null,
-        discoveries: record.discoveries,
-        captured_at: new Date().toISOString(),
-      })}\n`
-    ).catch((err) => {
-      log.warning(`[attack-discovery] capture write failed: ${String(err)}`);
-    });
-  } catch (err) {
-    log.warning(`[attack-discovery] capture write failed: ${String(err)}`);
-  }
-}
-
 export const runAttackDiscovery = async ({
   inferenceClient,
   attackDiscoveryClient,
@@ -157,7 +109,6 @@ export const runAttackDiscovery = async ({
   input: AttackDiscoveryTaskInput;
   log: ToolingLog;
 }): Promise<AttackDiscoveryTaskOutput> => {
-  const taskStart = Date.now();
   try {
     if (input.mode === 'generateApi') {
       if (!generateApiClient) {
@@ -177,15 +128,6 @@ export const runAttackDiscovery = async ({
       });
 
       const traceId = getCurrentTraceId() ?? undefined;
-
-      captureAdRun(log, {
-        status: result.status,
-        discoveries: result.discoveries,
-        alertsContextCount: result.alertsContextCount,
-        latencyMs: result.latencyMs,
-        traceId,
-        error: result.error,
-      });
 
       return {
         insights: result.discoveries.length > 0 ? result.discoveries : null,
@@ -207,13 +149,6 @@ export const runAttackDiscovery = async ({
         log,
         prompt,
         alerts: toAlertStrings(input.anonymizedAlerts),
-      });
-      captureAdRun(log, {
-        status: 'succeeded',
-        discoveries: res.insights ?? [],
-        alertsContextCount: input.anonymizedAlerts.length,
-        latencyMs: Date.now() - taskStart,
-        traceId: res.traceId,
       });
       return { insights: res.insights, traceId: res.traceId };
     }
@@ -261,14 +196,6 @@ export const runAttackDiscovery = async ({
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error(new Error(`runAttackDiscovery failed: ${message}`, { cause: e as Error }));
-    captureAdRun(log, {
-      status: 'failed',
-      discoveries: [],
-      alertsContextCount:
-        input.mode === 'bundledAlerts' ? input.anonymizedAlerts.length : undefined,
-      latencyMs: Date.now() - taskStart,
-      error: message,
-    });
     return { insights: null, errors: [message] };
   }
 };
