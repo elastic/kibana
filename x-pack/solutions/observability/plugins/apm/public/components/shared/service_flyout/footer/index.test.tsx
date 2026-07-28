@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceFlyoutFooter } from '.';
 
@@ -89,6 +89,10 @@ describe('ServiceFlyoutFooter', () => {
     mockUseServiceFlyoutLinks.mockReturnValue(makeLinks());
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it('enables the actions button and renders all action items when hrefs resolve', () => {
     renderFooter();
 
@@ -97,26 +101,24 @@ describe('ServiceFlyoutFooter', () => {
 
     openActionsMenu();
 
-    const tracesAction = screen.getByTestId(
-      'serviceFlyoutActionsMenuMenuItem-openTracesInDiscover'
-    );
+    const tracesAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover');
     expect(tracesAction).toHaveAttribute('href', '/app/discover/traces');
     expect(tracesAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
     expect(tracesAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
     expect(tracesAction).toHaveAttribute('data-ebt-detail', 'traces');
 
-    const logsAction = screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openLogsInDiscover');
+    const logsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openLogsInDiscover');
     expect(logsAction).toHaveAttribute('href', '/app/discover/logs');
     expect(logsAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
     expect(logsAction).toHaveAttribute('data-ebt-detail', 'logs');
 
-    const alertsAction = screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openAlerts');
+    const alertsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts');
     expect(alertsAction).toHaveAttribute(
       'href',
       expect.stringContaining('/app/observability/alerts')
     );
 
-    const slosAction = screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openSlos');
+    const slosAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openSlos');
     expect(slosAction).toHaveAttribute('href', '/app/slos?serviceName=opbeans-java');
   });
 
@@ -129,43 +131,46 @@ describe('ServiceFlyoutFooter', () => {
   });
 
   it('omits the alerts action when the alerts href is not available', () => {
-    mockUseServiceFlyoutLinks.mockReturnValue(makeLinks({ alertsHref: undefined }));
+    mockUseServiceFlyoutLinks.mockReturnValue({ ...makeLinks(), alerts: undefined });
     renderFooter();
     openActionsMenu();
 
+    expect(screen.queryByTestId('serviceFlyoutActionsMenuItem-openAlerts')).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('serviceFlyoutActionsMenuMenuItem-openAlerts')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openTracesInDiscover')
+      screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
     ).toBeInTheDocument();
   });
 
   it('omits the Discover actions when no Discover hrefs resolve', () => {
-    mockUseServiceFlyoutLinks.mockReturnValue(
-      makeLinks({ tracesHref: undefined, logsHref: undefined })
-    );
+    mockUseServiceFlyoutLinks.mockReturnValue({
+      ...makeLinks(),
+      discover: {
+        traces: { href: undefined, openInDiscoverTab: undefined },
+        logs: { href: undefined, openInDiscoverTab: undefined },
+      },
+    });
     renderFooter();
     openActionsMenu();
 
     expect(
-      screen.queryByTestId('serviceFlyoutActionsMenuMenuItem-openTracesInDiscover')
+      screen.queryByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('serviceFlyoutActionsMenuMenuItem-openLogsInDiscover')
+      screen.queryByTestId('serviceFlyoutActionsMenuItem-openLogsInDiscover')
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openAlerts')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts')).toBeInTheDocument();
   });
 
   it('disables the actions button when no hrefs resolve', () => {
-    mockUseServiceFlyoutLinks.mockReturnValue(
-      makeLinks({
-        tracesHref: undefined,
-        logsHref: undefined,
-        alertsHref: undefined,
-        slosHref: undefined,
-      })
-    );
+    mockUseServiceFlyoutLinks.mockReturnValue({
+      ...makeLinks(),
+      alerts: undefined,
+      slos: undefined,
+      discover: {
+        traces: { href: undefined, openInDiscoverTab: undefined },
+        logs: { href: undefined, openInDiscoverTab: undefined },
+      },
+    });
     renderFooter();
 
     expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
@@ -176,14 +181,10 @@ describe('ServiceFlyoutFooter', () => {
     renderFooter();
     openActionsMenu();
 
+    expect(screen.queryByTestId('serviceFlyoutActionsMenuItem-openAlerts')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutActionsMenuItem-openSlos')).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('serviceFlyoutActionsMenuMenuItem-openAlerts')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('serviceFlyoutActionsMenuMenuItem-openSlos')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openTracesInDiscover')
+      screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
     ).toBeInTheDocument();
   });
 
@@ -194,7 +195,7 @@ describe('ServiceFlyoutFooter', () => {
       openActionsMenu();
 
       expect(
-        screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openTracesInDiscover')
+        screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
       ).toHaveTextContent('Open traces in a Discover tab');
     });
 
@@ -203,7 +204,7 @@ describe('ServiceFlyoutFooter', () => {
       openActionsMenu();
 
       expect(
-        screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openTracesInDiscover')
+        screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
       ).toHaveTextContent('Open traces in Discover');
     });
 
@@ -215,7 +216,7 @@ describe('ServiceFlyoutFooter', () => {
       renderFooter();
       openActionsMenu();
 
-      fireEvent.click(screen.getByTestId('serviceFlyoutActionsMenuMenuItem-openTracesInDiscover'));
+      fireEvent.click(screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover'));
 
       expect(mockOpenInDiscoverTab).toHaveBeenCalledTimes(1);
     });
