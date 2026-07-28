@@ -11,4 +11,5 @@ import type { WorkflowAnonymizationProvider } from '../workflow_anonymization_pr
 export interface WorkflowAnonymizationOptions {
   readonly provider: WorkflowAnonymizationProvider;
   readonly failureMode: WorkflowAnonymizationFailureMode;
+  readonly preLLMTimeoutMs: number;
 }

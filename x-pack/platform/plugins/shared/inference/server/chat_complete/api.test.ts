@@ -196,7 +196,7 @@ describe('createChatCompleteApi', () => {
       esClient: mockEsClient,
       endpointIdCache,
       anonymization: { saltPromise: Promise.resolve('server-managed-salt') },
-      workflowAnonymization: { provider, failureMode: 'block' },
+      workflowAnonymization: { provider, failureMode: 'block', preLLMTimeoutMs: 0 },
     });
     const workflowChatComplete = createChatCompleteApi({ callbackApi: workflowCallbackApi });
 
@@ -243,7 +243,7 @@ describe('createChatCompleteApi', () => {
         esClient: mockEsClient,
         endpointIdCache,
         anonymization: { saltPromise: Promise.resolve('server-managed-salt') },
-        workflowAnonymization: { provider, failureMode: 'allow_unsafe' },
+        workflowAnonymization: { provider, failureMode: 'allow_unsafe', preLLMTimeoutMs: 0 },
       }),
     });
 
