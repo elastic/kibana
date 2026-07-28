@@ -118989,7 +118989,7 @@ components:
           properties:
             field:
               description: Field to use instead of process.pid
-              maximum: 2000
+              maxLength: 2000
               type: string
             kill_descendants:
               description: Whether to also terminate the descendant processes of the targeted process. This field is only available for use with v9.6.0 of the stack.
@@ -122054,7 +122054,7 @@ components:
           properties:
             field:
               description: Field to use instead of process.pid
-              maximum: 2000
+              maxLength: 2000
               type: string
             overwrite:
               default: true
