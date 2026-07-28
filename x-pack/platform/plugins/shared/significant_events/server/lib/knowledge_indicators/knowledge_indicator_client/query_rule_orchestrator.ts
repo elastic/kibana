@@ -20,6 +20,26 @@ import type { IndicatorWriter } from './indicator_writer';
 import type { IndicatorReader } from './indicator_reader';
 import { canQueryBeRuleBacked } from '../../significant_events/alerting/significant_events_alerting_context';
 
+/**
+ * Outcome of a promotion request. The two skip counts carry different user
+ * remedies, so they stay separate: a STATS KI cannot be promoted at all yet,
+ * while an ineligible MATCH becomes promotable once its query is rewritten as
+ * filter-only.
+ */
+export interface PromoteQueriesResult {
+  promoted: number;
+  /** STATS KIs, unbacked until rule-on-rule provisioning (#265778). */
+  skipped_stats: number;
+  /** MATCH KIs that are not filter-only, so no count series can be compiled. */
+  skipped_ineligible: number;
+}
+
+const EMPTY_PROMOTE_RESULT: PromoteQueriesResult = {
+  promoted: 0,
+  skipped_stats: 0,
+  skipped_ineligible: 0,
+};
+
 export class QueryRuleOrchestrator {
   constructor(
     private readonly rulesManagementClient: IRulesManagementClient,
@@ -50,47 +70,49 @@ export class QueryRuleOrchestrator {
 
     const toCreate: QueryLink[] = [];
     const toUpdate: QueryLink[] = [];
-    const demotedToStats: QueryLink[] = [];
+    const demotedIneligible: QueryLink[] = [];
     const allNext: Array<{ query: StreamQuery; rule_backed: boolean; rule_id: string }> = [];
 
     for (const query of queries) {
       const current = currentByQueryId.get(query.id);
       const queryType = deriveQueryType(query.esql.query);
-      const isStats = queryType === QUERY_TYPE_STATS;
+      const typedQuery = { ...query, type: queryType };
       const ruleId = computeRuleId(stream, query.id, query.esql.query);
-      const ruleBacked = canQueryBeRuleBacked(queryType);
+      const ruleBacked = canQueryBeRuleBacked({ type: queryType, esql: query.esql });
       if (!current) {
         const link: QueryLink = {
           stream_name: stream,
           rule_backed: ruleBacked,
           rule_id: ruleId,
-          query: { ...query, type: queryType },
+          query: typedQuery,
         };
         if (ruleBacked) toCreate.push(link);
-        allNext.push({ query: link.query, rule_backed: ruleBacked, rule_id: ruleId });
+        allNext.push({ query: typedQuery, rule_backed: ruleBacked, rule_id: ruleId });
       } else if (!current.rule_backed) {
         // Preserve intentionally unbacked queries; promotion is explicit via promoteQueries.
         allNext.push({
-          query: { ...query, type: queryType },
+          query: typedQuery,
           rule_backed: false,
           rule_id: current.rule_id,
         });
-      } else if (isStats && !canQueryBeRuleBacked(queryType)) {
-        demotedToStats.push(current);
-        allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
+      } else if (!ruleBacked) {
+        // Was rule-backed but is no longer installable (STATS, or MATCH that is
+        // not filter-only). Keep the KI stored; uninstall the rule.
+        demotedIneligible.push(current);
+        allNext.push({ query: typedQuery, rule_backed: false, rule_id: current.rule_id });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
           stream_name: stream,
           rule_backed: true,
           rule_id: ruleId,
-          query: { ...query, type: queryType },
+          query: typedQuery,
         };
         toCreate.push(link); // breaking change → recreate
-        allNext.push({ query: link.query, rule_backed: true, rule_id: ruleId });
+        allNext.push({ query: typedQuery, rule_backed: true, rule_id: ruleId });
       } else {
-        const link: QueryLink = { ...current, query };
+        const link: QueryLink = { ...current, query: typedQuery };
         toUpdate.push(link);
-        allNext.push({ query, rule_backed: true, rule_id: current.rule_id });
+        allNext.push({ query: typedQuery, rule_backed: true, rule_id: current.rule_id });
       }
     }
 
@@ -98,7 +120,7 @@ export class QueryRuleOrchestrator {
       (link) =>
         (link.rule_backed && !nextIds.has(link.query.id)) ||
         toCreate.some((c) => c.query.id === link.query.id && link.rule_backed) ||
-        demotedToStats.some((d) => d.query.id === link.query.id)
+        demotedIneligible.some((d) => d.query.id === link.query.id)
     );
 
     try {
@@ -242,34 +264,42 @@ export class QueryRuleOrchestrator {
   async promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number; skipped_stats: number }> {
+  ): Promise<PromoteQueriesResult> {
     const streamName = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(`Skipping promoteQueries because significant events feature is disabled.`);
-      return { promoted: 0, skipped_stats: 0 };
+      return EMPTY_PROMOTE_RESULT;
     }
 
     const { [streamName]: links } = await this.reader.getStreamToQueryLinksMap([streamName]);
     const idSet = new Set(queryIds);
     const candidates = links.filter((link) => idSet.has(link.query.id) && !link.rule_backed);
 
-    const skippedStats = candidates.filter((link) => !canQueryBeRuleBacked(link.query.type));
-    if (skippedStats.length > 0) {
+    const eligible: QueryLink[] = [];
+    const skipped: QueryLink[] = [];
+    for (const link of candidates) {
+      const target = canQueryBeRuleBacked({ type: link.query.type, esql: link.query.esql })
+        ? eligible
+        : skipped;
+      target.push(link);
+    }
+
+    const skippedStats = skipped.filter((link) => link.query.type === QUERY_TYPE_STATS).length;
+    const skippedIneligible = skipped.length - skippedStats;
+    if (skipped.length > 0) {
       this.logger.info(
-        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (STATS rule backing is not supported yet).`
+        `Skipping ${skipped.length} ineligible queries from promotion for stream "${streamName}" (${skippedStats} STATS, ${skippedIneligible} MATCH that is not filter-only).`
       );
     }
 
-    const toPromote = candidates
-      .filter((link) => canQueryBeRuleBacked(link.query.type))
-      .map((link) => ({
-        ...link,
-        rule_backed: true,
-        rule_id: computeRuleId(streamName, link.query.id, link.query.esql.query),
-      }));
+    const toPromote = eligible.map((link) => ({
+      ...link,
+      rule_backed: true,
+      rule_id: computeRuleId(streamName, link.query.id, link.query.esql.query),
+    }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0, skipped_stats: skippedStats.length };
+      return { promoted: 0, skipped_stats: skippedStats, skipped_ineligible: skippedIneligible };
     }
 
     await installQueries(this.rulesManagementClient, toPromote, []);
@@ -301,7 +331,11 @@ export class QueryRuleOrchestrator {
       throw storageError;
     }
 
-    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
+    return {
+      promoted: toPromote.length,
+      skipped_stats: skippedStats,
+      skipped_ineligible: skippedIneligible,
+    };
   }
 
   async promoteUnbackedQueries({
@@ -312,12 +346,12 @@ export class QueryRuleOrchestrator {
     queryIds?: string[];
     minSeverityScore?: number;
     streamDefinitions: Map<string, Streams.all.Definition>;
-  }): Promise<{ promoted: number; skipped_stats: number }> {
+  }): Promise<PromoteQueriesResult> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
         `Skipping promoteUnbackedQueries because significant events feature is disabled.`
       );
-      return { promoted: 0, skipped_stats: 0 };
+      return EMPTY_PROMOTE_RESULT;
     }
 
     const candidates = await this.reader.getPromotableUnbackedQueries({ minSeverityScore });
@@ -335,8 +369,7 @@ export class QueryRuleOrchestrator {
       byStream.set(link.stream_name, group);
     }
 
-    let promoted = 0;
-    let skippedStats = 0;
+    const totals: PromoteQueriesResult = { ...EMPTY_PROMOTE_RESULT };
     for (const [streamName, ids] of byStream) {
       const definition = streamDefinitions.get(streamName);
       if (!definition) {
@@ -344,11 +377,12 @@ export class QueryRuleOrchestrator {
         continue;
       }
       const result = await this.promoteQueries(definition, ids);
-      promoted += result.promoted;
-      skippedStats += result.skipped_stats;
+      totals.promoted += result.promoted;
+      totals.skipped_stats += result.skipped_stats;
+      totals.skipped_ineligible += result.skipped_ineligible;
     }
 
-    return { promoted, skipped_stats: skippedStats };
+    return totals;
   }
 
   async deleteQueries(
