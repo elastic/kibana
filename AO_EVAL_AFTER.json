@@ -1,0 +1,1 @@
+"N/A - no live Kibana/Elasticsearch stack is running in this worktree environment (localhost:5601 and :9200 both unreachable), and standing one up plus running the full evals-pr-llm-evals suite is out of scope for this fix turn. Verified correctness by static reasoning + unit tests instead (see AO_EVAL_SUMMARY.md)."

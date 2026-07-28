@@ -33,12 +33,15 @@ describe('endpointForensicAnalysisSkill', () => {
   });
 
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
+    expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(
       'elastic-defend-configuration-troubleshooting'
     );
     expect(endpointForensicAnalysisSkill.content).toContain(
       'Conflicting or incompatible security software'
     );
+    expect(endpointForensicAnalysisSkill.content).toContain('antivirus');
+    expect(endpointForensicAnalysisSkill.content).toContain('Naming a specific host does');
     expect(endpointForensicAnalysisSkill.content).toContain(
       'elastic-defend-configuration-troubleshooting'
     );

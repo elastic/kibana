@@ -26,8 +26,9 @@ export const endpointForensicAnalysisSkill = defineSkillType({
     'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
     'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
     'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
-    'NOT conflicting/incompatible security software, policy or configuration failures, endpoint health or missed check-ins, ' +
-    'performance/resource troubleshooting, or output/integration failures (use elastic-defend-configuration-troubleshooting).',
+    'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
+    'performance/resource troubleshooting, or output/integration failures — even when the question names a specific host ' +
+    '(use elastic-defend-configuration-troubleshooting).',
   content: `# Endpoint Forensic Analysis
 
 ## When to Use
@@ -38,11 +39,13 @@ Load when the analyst asks about a **specific host or incident** and needs foren
 - Lateral movement chain between hosts
 - Persistence mechanism enumeration
 
+Naming a specific host is **not** sufficient on its own — the question must also require forensic reconstruction (timeline, patient zero, lateral movement, persistence), not configuration/health/software-conflict diagnosis. See "Do not load" below.
+
 Do **not** load for:
 - Fleet-wide proactive hunts → threat-hunting
 - Alert triage from alert id only → alert-analysis
 - Host isolation / kill process / file retrieve → tell the analyst to use **Endpoint response actions** in Security (Fleet / Endpoint details). Do not invoke response-action tools from this skill.
-- Conflicting or incompatible security software (e.g. third-party antivirus conflicts) → elastic-defend-configuration-troubleshooting
+- Conflicting or incompatible security software, including antivirus/AV software (e.g. "does host X have conflicting antivirus", third-party AV conflicts) → elastic-defend-configuration-troubleshooting. Naming a specific host does **not** make this a forensic question — antivirus/AV conflict detection is always configuration troubleshooting, never forensic reconstruction.
 - Policy/configuration failures → elastic-defend-configuration-troubleshooting
 - Endpoint health and missed check-ins → elastic-defend-configuration-troubleshooting
 - Performance/resource troubleshooting → elastic-defend-configuration-troubleshooting
