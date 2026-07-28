@@ -65,6 +65,10 @@ export interface TsdbHelper {
     stream: string,
     timeRange: TsdbScenarioTimeRange
   ) => Promise<CleanupHandle>;
+  createDowngradedStream: (
+    stream: string,
+    timeRange: TsdbScenarioTimeRange
+  ) => Promise<CleanupHandle>;
   setupScenario: (
     initialIndex: string,
     indexes: TsdbScenarioIndex[],
@@ -145,18 +149,21 @@ const runCleanupActions = async (
   }
 };
 
-const getTsdbMapping = (removeTSDBFields = false): Record<string, MappingProperty> => ({
+const getTsdbMapping = (
+  removeTSDBFields = false,
+  includeTimeSeriesMetadata = true
+): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
   request: {
     type: 'keyword',
-    time_series_dimension: true,
+    ...(includeTimeSeriesMetadata ? { time_series_dimension: true } : {}),
   },
   ...(removeTSDBFields
     ? {}
     : {
         bytes_counter: {
           type: 'long',
-          time_series_metric: 'counter',
+          ...(includeTimeSeriesMetadata ? { time_series_metric: 'counter' as const } : {}),
         },
       }),
 });
@@ -200,7 +207,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                 }
               : {}),
             mappings: {
-              properties: getTsdbMapping(),
+              properties: getTsdbMapping(false, mode === 'tsdb'),
             },
           },
         });
@@ -314,6 +321,28 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         }
       };
 
+      const createDowngradedStream: TsdbHelper['createDowngradedStream'] = async (
+        stream,
+        timeRange
+      ) => {
+        const cleanup = async () => deleteDataStream(stream);
+        try {
+          log.info(`Creating TSDB data stream "${stream}"`);
+          await createDataStream(stream, 'tsdb');
+          await createDocs(stream, timeRange.beforeUpgrade, { isStream: true });
+
+          log.info(`Downgrading data stream "${stream}" to a regular data stream`);
+          await putDataStreamTemplate(stream, undefined);
+          await esClient.indices.rollover({ alias: stream });
+          await createDocs(stream, timeRange.afterUpgrade, { isStream: true });
+
+          return { cleanup };
+        } catch (error) {
+          await cleanup();
+          throw error;
+        }
+      };
+
       const setupScenario: TsdbHelper['setupScenario'] = async (
         initialIndex,
         indexes,
@@ -374,7 +403,12 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         }
       };
 
-      await use({ downsampleTSDBIndex, createUpgradedStream, setupScenario });
+      await use({
+        downsampleTSDBIndex,
+        createUpgradedStream,
+        createDowngradedStream,
+        setupScenario,
+      });
     },
     { scope: 'worker' },
   ],

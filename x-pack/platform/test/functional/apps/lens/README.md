@@ -11,13 +11,12 @@ This directory contains functional tests for the Lens visualization editor.
 | group8 | LogsDB upgrade scenarios | ~20 min |
 | group9 | TSDB upgrade scenarios | ~15 min |
 | group10 | LogsDB downgrade scenarios | ~20 min |
-| group11 | TSDB downgrade scenarios | ~15 min |
 
 ---
 
 ## LogsDB & TSDB Scenario-Based Tests
 
-Groups 8-11 use a **scenario-based testing pattern** to verify Lens works correctly with different Elasticsearch index modes and their combinations.
+Groups 8-10 use a **scenario-based testing pattern** to verify Lens works correctly with different Elasticsearch index modes and their combinations.
 
 ### What is LogsDB?
 
@@ -84,7 +83,7 @@ Time: ────────────────────────�
 
 **What's tested**: Lens can visualize data spanning both pre-upgrade (regular) and post-upgrade (specialized) periods.
 
-### Downgrade Scenarios (Groups 10 & 11)
+### Downgrade Scenarios (Group 10)
 
 Tests when a LogsDB/TSDB stream is **downgraded** to regular:
 
@@ -135,4 +134,3 @@ Each scenario runs **5 tests** per block:
 - `group8/logsdb.ts` - LogsDB upgrade scenarios
 - `group9/tsdb.ts` - TSDB upgrade scenarios  
 - `group10/logsdb_downgrade.ts` - LogsDB downgrade scenarios
-- `group11/tsdb_downgrade.ts` - TSDB downgrade scenarios

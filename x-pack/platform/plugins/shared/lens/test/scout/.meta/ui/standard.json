@@ -1,5 +1,5 @@
 {
-  "sha1": "a7e4fc48960039a0f133e4544db4006c74d6d869",
+  "sha1": "ba08f6c50148465b22f38eff8b1c3c33e1d53c03",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -184,6 +184,136 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/query_behavior.spec.ts",
         "line": 219,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea5b8638faec3e2-95e73ce22655808",
+      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream without additional indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
+        "line": 164,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea5b8638faec3e2-e9d2ccb4dd6cfe9",
+      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with a regular index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
+        "line": 173,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea5b8638faec3e2-bf75fc7d80eccc9",
+      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with a downsampled TSDB stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
+        "line": 185,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea5b8638faec3e2-806afd6883b3ea7",
+      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with regular and downsampled resources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
+        "line": 197,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea5b8638faec3e2-b733b138d262f4f",
+      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with another TSDB stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
+        "line": 210,
         "column": 7
       }
     }
