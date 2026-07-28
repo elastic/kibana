@@ -33,6 +33,7 @@ import {
   EuiLink,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -149,7 +150,8 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
-  const { cloud, docLinks } = useStartServices();
+  const { cloud, docLinks, application } = useStartServices();
+  const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
 
   const esApiKey = useGetCreateApiKey();
   const motlp = useManagedOtlp();
@@ -598,18 +600,32 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={onCreateApiKey}
-                    isLoading={isCreatingApiKey}
-                    isDisabled={!!apiKeyEncoded}
-                    iconType={apiKeyEncoded ? 'check' : undefined}
-                    color={apiKeyEncoded ? 'success' : 'primary'}
+                  <EuiToolTip
+                    content={
+                      !canCreateApiKey
+                        ? i18n.translate(
+                            'xpack.fleet.addCollectorFlyout.createApiKeyNoPermissionTooltip',
+                            {
+                              defaultMessage:
+                                "You don't have permission to create API keys. Contact your administrator.",
+                            }
+                          )
+                        : undefined
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
-                      defaultMessage="Create API key"
-                    />
-                  </EuiButton>
+                    <EuiButton
+                      onClick={onCreateApiKey}
+                      isLoading={isCreatingApiKey}
+                      isDisabled={!!apiKeyEncoded || !canCreateApiKey}
+                      iconType={apiKeyEncoded ? 'check' : undefined}
+                      color={apiKeyEncoded ? 'success' : 'primary'}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
+                        defaultMessage="Create API key"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
