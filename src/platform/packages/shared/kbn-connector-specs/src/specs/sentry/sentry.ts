@@ -473,6 +473,7 @@ export const Sentry: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.sentry.test.description', {
       defaultMessage: 'Verifies the Sentry connection by listing organization projects',
     }),
