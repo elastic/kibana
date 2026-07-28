@@ -7,7 +7,12 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { errorResponseSchema, type MatcherDataFieldsQuery } from '@kbn/alerting-v2-schemas';
+import {
+  errorResponseSchema,
+  matcherDataFieldsQuerySchema,
+  matcherDataFieldsResponseSchema,
+  type MatcherDataFieldsQuery,
+} from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
@@ -33,11 +38,11 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      query: matcherRuleEventFieldsQuerySchema,
+      query: matcherDataFieldsQuerySchema,
     },
     response: {
       200: {
-        body: () => matcherRuleEventFieldsResponseSchema,
+        body: () => matcherDataFieldsResponseSchema,
         description: 'Returns the available rule event field names.',
       },
       400: {
