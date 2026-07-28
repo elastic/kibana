@@ -39,7 +39,6 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
           '@timestamp': '2026-07-10T12:00:00Z',
         },
       ],
-      discoveries: [],
       events: [],
     },
     isLoading: false,

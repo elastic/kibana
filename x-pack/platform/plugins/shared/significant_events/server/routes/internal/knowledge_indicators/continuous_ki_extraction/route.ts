@@ -12,6 +12,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
   STREAMS_API_PRIVILEGES,
@@ -47,6 +48,7 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     getScopedClients,
     server,
     continuousKiOnboardingWorkflowService,
+    maintenanceService,
     logger,
   }): Promise<{ success: true }> => {
     if (!continuousKiOnboardingWorkflowService) {
@@ -59,6 +61,14 @@ export const putContinuousKIExtractionSettingsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const { continuousKiExtraction } = params.body;
+
+    // Feature toggles are owned by Pause/Resume while paused — no edits allowed.
+    if (
+      continuousKiExtraction.enabled !== undefined ||
+      continuousKiExtraction.intervalHours !== undefined
+    ) {
+      await assertNotPaused({ maintenanceService, request });
+    }
 
     const updates: Record<string, boolean | number | string> = {};
 
