@@ -36,14 +36,15 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
 
 /**
  * Build a `termsEnum` mock that serves a corpus permission universe keyed by
- * field. Returns a single complete page of its values.
- * Fields not present in the map return an empty, complete page (dimension
- * unused by the corpus).
+ * field and prefix. Returns only terms matching the prefix, mirroring real ES behavior.
+ * Fields not present in the map return an empty, complete page (dimension unused by corpus).
  */
 const buildTermsEnumMock = (universe: { kibana?: string[] }) =>
-  jest.fn().mockImplementation(async (req: { field: string }) => {
+  jest.fn().mockImplementation(async (req: { field: string; string?: string }) => {
     if (req.field === 'permissions.kibana.privileges.name') {
-      return { complete: true, terms: universe.kibana ?? [] };
+      const prefix = req.string ?? '';
+      const terms = (universe.kibana ?? []).filter((t) => t.startsWith(prefix));
+      return { complete: true, terms };
     }
     return { complete: true, terms: [] };
   });
@@ -661,88 +662,6 @@ describe('SmlService', () => {
       expect(logger.warn).toHaveBeenCalledWith('SML search failed: Connection refused');
     });
 
-    it('pushes an MV_CONTAINS authz filter into the query when securityAuthz is present', async () => {
-      // Corpus uses two Kibana privileges for the current space; caller is authorized for one.
-      // Tokens are composite `space|action` strings. The pre-aggregation pass enumerates
-      // tokens for the current space, strips the prefix for the _has_privileges call, and
-      // returns the authorized composite tokens for the in-query filter.
-      const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
-      termsEnumMock.mockImplementation(
-        buildTermsEnumMock({
-          kibana: ['default|saved_object:lens/get', 'default|saved_object:dashboard/get'],
-        })
-      );
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
-
-      esqlQueryMock.mockResolvedValue({
-        columns: makeEsqlColumns(true),
-        values: [],
-      } as any);
-
-      await smlService.search({
-        query: '*',
-        size: 10,
-        spaceId: 'default',
-        esClient: scopedClient,
-        request,
-      });
-
-      // The Kibana permission field is enumerated up front, prefix-filtered to the current space.
-      expect(termsEnumMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          field: 'permissions.kibana.privileges.name',
-          string: 'default|',
-        })
-      );
-
-      const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
-        query: string;
-        params?: unknown[];
-      };
-      // Authorized Kibana subset pushed as an MV_CONTAINS subset filter. The
-      // authorized set is bound as a single multivalue param (array), not an
-      // inline `[?, ?]` list (which ES|QL rejects).
-      expect(esql).toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
-      // The authorized set contains the composite token (not the raw action).
-      expect(params).toContainEqual(['default|saved_object:lens/get']);
-    });
-
-    it('restricts to public KIs when the caller holds nothing in a used dimension', async () => {
-      // Corpus uses a Kibana privilege the caller does NOT hold → the authorized
-      // array is empty, so MV_CONTAINS(?, field) admits only KIs whose required
-      // set is a subset of {} (i.e. public KIs with no required privilege).
-      const securityAuthz = createMockSecurityAuthz([]);
-      termsEnumMock.mockImplementation(
-        buildTermsEnumMock({ kibana: ['default|saved_object:dashboard/get'] })
-      );
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
-
-      esqlQueryMock.mockResolvedValue({
-        columns: makeEsqlColumns(true),
-        values: [],
-      } as any);
-
-      await smlService.search({
-        query: '*',
-        size: 10,
-        spaceId: 'default',
-        esClient: scopedClient,
-        request,
-      });
-
-      const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
-        query: string;
-        params?: unknown[];
-      };
-      // Clause is still emitted (dimension is used); the empty authorized array
-      // is what restricts to public KIs.
-      expect(esql).toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
-      expect(params).toContainEqual([]);
-    });
 
     it('emits no authz clause and skips enumeration when securityAuthz is absent', async () => {
       const service = createSmlService();
@@ -769,14 +688,16 @@ describe('SmlService', () => {
 
       // No security plugin → no enumeration, no authz filter, all rows returned.
       expect(termsEnumMock).not.toHaveBeenCalled();
-      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
-      expect(esql).not.toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
+      const call = esqlQueryMock.mock.calls[0]![0]! as { query: string; filter?: unknown };
+      expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
+      expect(call.filter).toBeUndefined();
       expect(result.results).toHaveLength(2);
     });
 
-    it('emits no authz clause when the corpus uses no permission dimensions', async () => {
-      // securityAuthz present but the corpus is permission-free → the universe
-      // is empty, so no privilege check and no authz WHERE clause.
+    it('emits empty-terms filter (F3 fail-closed) when corpus has no permission tokens', async () => {
+      // securityAuthz present but corpus has no permission tokens in the index →
+      // both termsEnum calls return empty. The filter is still emitted with terms:[]
+      // (fail-closed: matches no documents with a count requirement).
       const securityAuthz = createMockSecurityAuthz([]);
       // termsEnumMock default already returns empty pages.
       const service = createSmlService();
@@ -788,7 +709,7 @@ describe('SmlService', () => {
         values: [makeEsqlRow('entry-1', 'lens', 'Lens', 'r1', [], { content: '' })],
       } as any);
 
-      const result = await smlService.search({
+      await smlService.search({
         query: '*',
         size: 10,
         spaceId: 'default',
@@ -796,11 +717,17 @@ describe('SmlService', () => {
         request,
       });
 
-      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
-      expect(esql).not.toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
-      // The privilege check is skipped entirely when the universe is empty.
-      expect(securityAuthz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
-      expect(result.results).toHaveLength(1);
+      const call = esqlQueryMock.mock.calls[0]![0]! as { query: string; filter?: unknown };
+      expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
+      // Filter is emitted with empty terms (fail-closed).
+      expect(call.filter).toEqual({
+        terms_set: {
+          'permissions.kibana.privileges.name': {
+            terms: [],
+            minimum_should_match_field: 'permissions.kibana.privileges.count',
+          },
+        },
+      });
     });
 
     it('uses default size of 10 when not specified (outer LIMIT = size)', async () => {
@@ -1194,10 +1121,9 @@ describe('SmlService', () => {
       expect(result).toEqual({ results: [] });
     });
 
-    it('returns all ES results without post-filtering when corpus has no permissions (open access)', async () => {
-      // When the corpus uses no Kibana-privilege dimensions (empty universe), no
-      // terms_set filter is emitted and all documents are returned. Authorization
-      // is self-contained — there is no JS post-filter.
+    it('emits empty-terms filter (matches nothing) when corpus has no permission tokens (F3 fail-closed)', async () => {
+      // When the corpus has no permission tokens in the index (both termsEnum calls return empty),
+      // a terms_set filter with terms:[] is still emitted — fail-closed.
       const securityAuthz = createMockSecurityAuthzPartial(
         ['saved_object:dashboard/get'],
         ['saved_object:connector/get']
@@ -1206,36 +1132,12 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      // termsEnumMock returns empty universe by default → no filter emitted.
+      // termsEnumMock returns empty universe by default.
       esClient.search.mockResolvedValue({
-        hits: {
-          total: 2,
-          hits: [
-            {
-              _source: {
-                id: 'entry-allowed',
-                type: 'dashboard',
-                title: 'Allowed',
-                origin: { uri: 'd1' },
-                permissions: makePermissions(['default|saved_object:dashboard/get']),
-              },
-              _score: 3,
-            },
-            {
-              _source: {
-                id: 'entry-with-perms',
-                type: 'connector',
-                title: 'Connector',
-                origin: { uri: 'c1' },
-                permissions: makePermissions(['default|saved_object:connector/get']),
-              },
-              _score: 2,
-            },
-          ],
-        },
+        hits: { total: 0, hits: [] },
       } as any);
 
-      const result = await smlService.autocomplete({
+      await smlService.autocomplete({
         query: 'a',
         size: 10,
         spaceId: 'default',
@@ -1243,16 +1145,26 @@ describe('SmlService', () => {
         request,
       });
 
-      // Both results are returned — open access when corpus has no privilege dimensions.
-      expect(result.results).toHaveLength(2);
-      expect(result.results[0].id).toBe('entry-allowed');
-      expect(result.results[1].id).toBe('entry-with-perms');
+      // termsEnum called twice (spaceId| and *|).
+      expect(termsEnumMock).toHaveBeenCalledTimes(2);
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
+      expect(filterClauses).toHaveLength(1);
+      expect(filterClauses[0]).toEqual({
+        terms_set: {
+          'permissions.kibana.privileges.name': {
+            terms: [],
+            minimum_should_match_field: 'permissions.kibana.privileges.count',
+          },
+        },
+      });
     });
 
-    it('emits a terms_set authz filter when securityAuthz is present and corpus has permissions', async () => {
+    it('emits a bare terms_set authz filter when securityAuthz is present', async () => {
       // Corpus uses two Kibana privileges; caller holds one.
-      // The pre-aggregation pass emits a terms_set filter so only authorized
-      // docs are returned — space scoping is implicit in the composite tokens.
+      // The pre-aggregation pass emits a bare terms_set filter (no must_not/should wrapper)
+      // in both spaceId| and *| forms.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       termsEnumMock.mockImplementation(
         buildTermsEnumMock({
@@ -1273,22 +1185,19 @@ describe('SmlService', () => {
         request,
       });
 
+      // termsEnum called twice: spaceId| and *|.
+      expect(termsEnumMock).toHaveBeenCalledTimes(2);
+
       const call = esClient.search.mock.calls[0]![0]!;
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
       expect(filterClauses).toHaveLength(1);
+      // Bare terms_set — no bool/should wrapper, no must_not/exists branch.
       expect(filterClauses[0]).toEqual({
-        bool: {
-          should: [
-            { bool: { must_not: { exists: { field: 'permissions.kibana.privileges.name' } } } },
-            {
-              terms_set: {
-                'permissions.kibana.privileges.name': {
-                  terms: ['default|saved_object:dashboard/get'],
-                  minimum_should_match_field: 'permissions.kibana.privileges.count',
-                },
-              },
-            },
-          ],
+        terms_set: {
+          'permissions.kibana.privileges.name': {
+            terms: ['*|saved_object:dashboard/get', 'default|saved_object:dashboard/get'],
+            minimum_should_match_field: 'permissions.kibana.privileges.count',
+          },
         },
       });
     });
@@ -1362,7 +1271,7 @@ describe('SmlService', () => {
         ).rejects.toBeInstanceOf(SmlCorpusTooLargeError);
       });
 
-      it('treats a missing index as an empty universe (no authz clause)', async () => {
+      it('treats a missing index as an empty universe (emits empty-terms filter)', async () => {
         const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
         termsEnumMock.mockRejectedValue(createNotFoundError());
         const service = createSmlService();
@@ -1378,9 +1287,17 @@ describe('SmlService', () => {
           request,
         });
 
-        const { query: esql } = getEsql();
-        // No authz WHERE clause is emitted.
-        expect(esql).not.toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
+        const call = getEsql() as { query: string; filter?: unknown };
+        expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
+        // Empty corpus → empty authorized tokens → fail-closed filter.
+        expect(call.filter).toEqual({
+          terms_set: {
+            'permissions.kibana.privileges.name': {
+              terms: [],
+              minimum_should_match_field: 'permissions.kibana.privileges.count',
+            },
+          },
+        });
       });
     });
   });
@@ -1488,7 +1405,69 @@ describe('SmlService', () => {
       expect(result.get('item-1')).toBe(false);
     });
 
-    it('grants access for items with empty permissions', async () => {
+    it('grants access for items with *| global tokens when caller is authorized', async () => {
+      const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-global',
+                permissions: makePermissions(['*|saved_object:lens/get']),
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-global'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-global')).toBe(true);
+    });
+
+    it('denies access for items with only tokens for other spaces', async () => {
+      const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-other-space',
+                // Only tokens for a different space — no spaceId| or *| match for 'default'.
+                permissions: makePermissions(['other-space|saved_object:lens/get']),
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-other-space'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-other-space')).toBe(false);
+    });
+
+    it('denies access for items with empty permissions (fail-closed)', async () => {
+      // Items with no permission tokens have no spaceId| or *| tokens → fail-closed deny.
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
@@ -1515,7 +1494,7 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(result.get('item-1')).toBe(true);
+      expect(result.get('item-1')).toBe(false);
     });
 
     it('handles 404 error by returning false for all items', async () => {
@@ -1573,21 +1552,19 @@ describe('SmlService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('fails closed when checkPrivileges throws — denies items with deps, keeps trivial items', async () => {
+    it('fails closed when checkPrivileges throws — denies all items', async () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      // Documents store composite `space|action` tokens.
       esClient.search.mockResolvedValueOnce({
         hits: {
           total: 2,
           hits: [
-            // Truly trivial item — no kibana privs — passes regardless of authz state.
             {
               _source: {
-                id: 'trivial',
+                id: 'no-tokens',
                 permissions: makePermissions([]),
               },
             },
@@ -1606,13 +1583,15 @@ describe('SmlService', () => {
       checkPrivileges.mockRejectedValueOnce(new Error('cluster unreachable'));
 
       const result = await smlService.checkItemsAccess({
-        ids: ['trivial', 'with-deps'],
+        ids: ['no-tokens', 'with-deps'],
         spaceId: 'default',
         esClient: scopedClient,
         request,
       });
 
-      expect(result.get('trivial')).toBe(true);
+      // Both denied: no-tokens has no relevant tokens (fail-closed); with-deps has
+      // tokens but checkPrivileges failed → getAuthorizedPrivileges returns empty Set.
+      expect(result.get('no-tokens')).toBe(false);
       expect(result.get('with-deps')).toBe(false);
     });
   });

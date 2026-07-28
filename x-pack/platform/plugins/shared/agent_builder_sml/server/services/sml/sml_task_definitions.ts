@@ -27,14 +27,18 @@ import type { SmlService } from './types';
  * The crawler indexes ALL content across ALL spaces into the SML system index.
  * Access control is enforced at **query time**, not index time:
  *
- *  1. `searchSml` enforces authorization in-query via an MV_CONTAINS subset
- *     filter on composite `space|action` privilege tokens. Space scoping is
- *     implicit in the tokens.
- *  2. Autocomplete relies on Document Level Security (DLS) on the SML system
- *     index to enforce permissions at the Lucene level.
+ *  1. `searchSml` enforces authorization via a `terms_set` Query DSL filter
+ *     pushed into the ES|QL `_query` API's `filter` parameter. Composite
+ *     `space|action` tokens encode both the space and action, so a single
+ *     filter handles both dimensions.
+ *  2. `autocompleteSml` applies the same `terms_set` filter in the
+ *     Elasticsearch `_search` query. Both paths read as `asInternalUser`
+ *     (ES DLS does not apply); authorization is application-side.
+ *     ES-side DLS (elasticsearch#155197) protects direct ES access by
+ *     third parties using the same token semantics.
  *  3. `checkItemsAccess` (used by `sml_attach`) performs explicit privilege
- *     checks against each item's `permissions` array before allowing attachment
- *     resolution.
+ *     checks against each item's composite permission tokens before allowing
+ *     attachment resolution.
  *
  * When the security plugin is absent (development/testing), all results are
  * returned unfiltered, following the standard Kibana open-access convention.

@@ -182,7 +182,7 @@ export const isNotFoundError = (error: unknown): boolean => {
  * `_source.permissions` is somehow missing (legacy / test docs).
  */
 const emptyPermissions = (): SmlDocument['permissions'] => ({
-  kibana: { privileges: { name: [], count: 0 } },
+  kibana: { privileges: { name: [], raw: [], count: 0 } },
 });
 
 /**
@@ -311,31 +311,19 @@ const enumerateDistinctValues = async ({
 /**
  * Result of the request-scoped pre-aggregation pass.
  *
- * `authorizedActions` are the Kibana privilege values the caller is
- * authorized for, intersected against what the corpus actually uses. The
- * `kibanaUniverseNonEmpty` flag distinguishes "the corpus uses this
- * dimension but the caller holds nothing" (restrict to public KIs) from
- * "the corpus does not use this dimension at all" (no filter needed).
+ * `authorizedTokens` are the composite `space|action` and `*|action` tokens
+ * the caller is authorized for, intersected against what the corpus actually uses.
  */
 interface AuthorizedUniverse {
-  authorizedActions: string[];
-  kibanaUniverseNonEmpty: boolean;
+  authorizedTokens: string[];
 }
 
 /**
- * Pre-aggregation pass: discover the corpus's Kibana-privilege universe for the
- * current space and resolve, in a single `_has_privileges` call, which values the
- * caller is authorized for. The resulting set is pushed into the ES|QL search as an
- * in-query authorization filter.
- *
- * Tokens in the index are composite `space|action` strings. The `_terms_enum` call
- * is prefix-filtered to `spaceId|` so only tokens relevant to the current space are
- * returned. Raw action strings (with the prefix stripped) are then checked against
- * `_has_privileges`, and the authorized subset is returned as composite tokens so the
- * in-query `MV_CONTAINS` filter matches the stored document field correctly.
- *
- * If the corpus uses no Kibana privileges for the current space, the privilege check
- * is skipped entirely.
+ * Pre-aggregation pass: enumerate composite tokens from the corpus for both the
+ * current space (`spaceId|`) and the global wildcard (`*|`), then resolve which
+ * raw action strings the caller is authorized for via a single `_has_privileges`
+ * call. Returns authorized tokens in both prefixed forms so the `terms_set` filter
+ * matches documents regardless of which prefix they stored.
  */
 const resolveAuthorizedUniverse = async ({
   esClient,
@@ -350,45 +338,37 @@ const resolveAuthorizedUniverse = async ({
   logger: Logger;
   spaceId: string;
 }): Promise<AuthorizedUniverse> => {
-  const spacePrefix = `${spaceId}|`;
-  const kibanaUniverse = await enumerateDistinctValues({
-    field: PERM_KIBANA_FIELD,
-    esClient,
-    logger,
-    prefix: spacePrefix,
-  });
+  const [spaceTokens, globalTokens] = await Promise.all([
+    enumerateDistinctValues({ field: PERM_KIBANA_FIELD, esClient, logger, prefix: `${spaceId}|` }),
+    enumerateDistinctValues({ field: PERM_KIBANA_FIELD, esClient, logger, prefix: '*|' }),
+  ]);
 
-  const kibanaUniverseNonEmpty = kibanaUniverse.length > 0;
+  const rawActions = [
+    ...new Set([...spaceTokens, ...globalTokens].map((t) => t.slice(t.indexOf('|') + 1))),
+  ];
 
-  if (!kibanaUniverseNonEmpty) {
-    return {
-      authorizedActions: [],
-      kibanaUniverseNonEmpty,
-    };
-  }
-
-  // Parse raw action strings by stripping the `spaceId|` prefix.
-  const separator = '|';
-  const rawActions = kibanaUniverse.map((token) => token.substring(token.indexOf(separator) + 1));
-  const uniqueRawActions = [...new Set(rawActions)];
-
-  // Check which raw actions the user holds in the current space.
   const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: uniqueRawActions,
+    permissions: rawActions,
     request,
     securityAuthz,
     logger,
   });
 
-  // Reconstruct composite tokens directly from authorized actions.
-  // Each authorized raw action maps to exactly one composite token for the current space.
-  const authorizedTokens = [...authorizedPerms].map((action) => `${spaceId}|${action}`);
+  const authorizedTokens = [...authorizedPerms]
+    .flatMap((a) => [`${spaceId}|${a}`, `*|${a}`])
+    .sort();
 
-  return {
-    authorizedActions: authorizedTokens,
-    kibanaUniverseNonEmpty,
-  };
+  return { authorizedTokens };
 };
+
+const buildAuthzFilter = (authz: AuthorizedUniverse): Record<string, unknown> => ({
+  terms_set: {
+    [PERM_KIBANA_FIELD]: {
+      terms: authz.authorizedTokens,
+      minimum_should_match_field: 'permissions.kibana.privileges.count',
+    },
+  },
+});
 
 /**
  * Check whether the current user has access to specific SML items.
@@ -465,22 +445,20 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  // Composite tokens are `space|action`. Filter to the current space and parse
-  // raw action strings for the _has_privileges call.
   const spacePrefix = `${spaceId}|`;
-  const separator = '|';
+  const globalPrefix = '*|';
 
-  const allTokensForSpace = [
-    ...new Set(
-      [...docAuthz.values()]
-        .flat()
-        .filter((token) => token.startsWith(spacePrefix))
-    ),
-  ];
+  const relevantTokensByDoc = new Map<string, string[]>();
+  for (const [id, tokens] of docAuthz) {
+    relevantTokensByDoc.set(
+      id,
+      tokens.filter((t) => t.startsWith(spacePrefix) || t.startsWith(globalPrefix))
+    );
+  }
 
   const uniqueRawActions = [
     ...new Set(
-      allTokensForSpace.map((token) => token.substring(token.indexOf(separator) + 1))
+      [...relevantTokensByDoc.values()].flat().map((t) => t.slice(t.indexOf('|') + 1))
     ),
   ];
 
@@ -492,23 +470,14 @@ const checkItemsAccess = async ({
   });
 
   for (const id of ids) {
-    const kbnPrivs = docAuthz.get(id);
-    if (!kbnPrivs) {
+    const relevant = relevantTokensByDoc.get(id);
+    if (!relevant || relevant.length === 0) {
       accessMap.set(id, false);
-      continue;
-    }
-    const spaceTokens = kbnPrivs.filter((token) => token.startsWith(spacePrefix));
-    if (spaceTokens.length === 0) {
-      // No tokens for this space → public item.
-      accessMap.set(id, true);
       continue;
     }
     accessMap.set(
       id,
-      spaceTokens.every((token) => {
-        const rawAction = token.substring(token.indexOf(separator) + 1);
-        return authorizedPerms.has(rawAction);
-      })
+      relevant.every((t) => authorizedPerms.has(t.slice(t.indexOf('|') + 1)))
     );
   }
 
@@ -567,27 +536,16 @@ const buildSmlEsqlQuery = ({
   fields,
   constraints,
   filters,
-  authz,
 }: {
   query: string;
   size: number;
   fields?: string[];
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
-  authz?: AuthorizedUniverse;
 }): { esql: string; params: unknown[] } => {
   const params: unknown[] = [];
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
-
-  // Authorization pre-filter. The authorized set is bound as a single
-  // multivalue param (ES|QL rejects an inline `[?, ?]` list). A clause is
-  // emitted only when the corpus actually uses the Kibana-privileges
-  // dimension. See docblock for the subset semantics.
-  if (authz && authz.kibanaUniverseNonEmpty) {
-    params.push(authz.authorizedActions);
-    lines.push(`| WHERE MV_CONTAINS(?, ${PERM_KIBANA_FIELD})`);
-  }
 
   // runtime-imposed per-type id-allowlist constraints
   if (constraints) {
@@ -841,13 +799,10 @@ const searchSml = async ({
 }): Promise<{ results: SmlSearchResult[] }> => {
   logger.debug(`SML search: query=${JSON.stringify(query)}, size=${size}, spaceId='${spaceId}'`);
 
-  // Pre-aggregation: resolve the caller's authorized permission universe so the
-  // ES|QL query can filter to authorized docs in-query. Skipped when the
-  // security plugin is absent (dev / test) — open-access parity.
   let authz: AuthorizedUniverse | undefined;
   if (securityAuthz) {
     authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger, spaceId });
-    logger.debug(`SML search authz: actions=${authz.authorizedActions.length}`);
+    logger.debug(`SML search authz: tokens=${authz.authorizedTokens.length}`);
   }
 
   const { esql, params } = buildSmlEsqlQuery({
@@ -856,7 +811,6 @@ const searchSml = async ({
     fields,
     constraints,
     filters,
-    authz,
   });
 
   let response: { columns: Array<{ name: string; type: string }>; values: unknown[][] };
@@ -864,6 +818,7 @@ const searchSml = async ({
     response = await esClient.asInternalUser.esql.query({
       query: esql,
       ...(params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
+      ...(authz ? { filter: buildAuthzFilter(authz) } : {}),
     });
   } catch (error) {
     if (isNotFoundError(error) || isEsqlIndexMissingError(error)) {
@@ -893,7 +848,7 @@ const searchSml = async ({
       origin: { uri: String(row[colIndex.get('origin_uri')!] ?? '') },
       permissions: (() => {
         const names = toStringArray(row[colIndex.get('perm_kibana')!]);
-        return { kibana: { privileges: { name: names, count: names.length } } };
+        return { kibana: { privileges: { name: names, raw: [], count: 0 } } };
       })(),
     };
 
@@ -1083,7 +1038,7 @@ const autocompleteSml = async ({
   let authz: AuthorizedUniverse | undefined;
   if (securityAuthz) {
     authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger, spaceId });
-    logger.debug(`SML autocomplete authz: actions=${authz.authorizedActions.length}`);
+    logger.debug(`SML autocomplete authz: tokens=${authz.authorizedTokens.length}`);
   }
 
   try {
@@ -1091,25 +1046,8 @@ const autocompleteSml = async ({
 
     const filterClauses: Array<Record<string, unknown>> = [];
 
-    // Authorization filter: terms_set with minimum_should_match_field enforces
-    // AND semantics (all required composite tokens must be held). The bool/should
-    // arm passes documents with no required permissions (public items).
-    if (authz && authz.kibanaUniverseNonEmpty) {
-      filterClauses.push({
-        bool: {
-          should: [
-            { bool: { must_not: { exists: { field: PERM_KIBANA_FIELD } } } },
-            {
-              terms_set: {
-                [PERM_KIBANA_FIELD]: {
-                  terms: authz.authorizedActions,
-                  minimum_should_match_field: 'permissions.kibana.privileges.count',
-                },
-              },
-            },
-          ],
-        },
-      });
+    if (authz) {
+      filterClauses.push(buildAuthzFilter(authz));
     }
 
     const constraintsFilter = buildConstraintsFilter(constraints);
