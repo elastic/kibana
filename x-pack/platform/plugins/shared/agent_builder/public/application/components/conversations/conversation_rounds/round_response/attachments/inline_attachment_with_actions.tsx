@@ -13,7 +13,8 @@ import type {
 import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import type { AttachmentsService } from '../../../../../../services';
+import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
@@ -161,6 +162,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       hasBorder={true}
       css={css`
         overflow: visible; // allow vis actions to overflow
+        border-radius: ${AB_PANEL_RADIUS}px;
         ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
       `}
     >

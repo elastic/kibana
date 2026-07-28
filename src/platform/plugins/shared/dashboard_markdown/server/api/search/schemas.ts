@@ -11,28 +11,33 @@ import { schema } from '@kbn/config-schema';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  asCodeSearchRequestSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
-
-export const searchRequestQuerySchema = asCodeSearchRequestSchema;
 
 export const searchResponseBodySchema = schema.object({
   data: schema.arrayOf(
     schema.object({
-      id: schema.string({ meta: { description: 'The markdown library item ID.' } }),
+      id: schema.string({
+        meta: { description: 'The markdown library item ID.' },
+      }),
       data: schema.object({
         description: schema.maybe(
-          schema.string({ meta: { description: 'The markdown library item description.' } })
+          schema.string({
+            meta: { description: 'A short description of the markdown library item.' },
+          })
         ),
-        title: schema.string({ meta: { description: 'The markdown library item title.' } }),
+        title: schema.string({
+          meta: { description: 'The markdown library item title.' },
+        }),
       }),
       meta: asCodeMetaSchema,
     }),
     {
       minSize: 0,
       maxSize: PAGINATION_MAX_SIZE,
-      meta: { description: 'List of markdown library items matching the query.' },
+      meta: {
+        description: 'List of markdown library items matching the query.',
+      },
     }
   ),
   meta: asCodePaginationResponseMetaSchema,

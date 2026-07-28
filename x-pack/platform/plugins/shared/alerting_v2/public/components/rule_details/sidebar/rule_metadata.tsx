@@ -6,53 +6,41 @@
  */
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React, { useMemo } from 'react';
-import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { resolveDisplayName } from '../../../utils/resolve_display_name';
+import React from 'react';
+import { useRuleAuditMetadata } from '../../../hooks/use_rule_audit_metadata';
 import { useRule } from '../rule_context';
-import { EMPTY_VALUE } from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
 
 export const RuleMetadata: React.FunctionComponent = () => {
   const rule = useRule();
-  const uiSettings = useService(CoreStart('uiSettings'));
-  const dateFormat = uiSettings.get('dateFormat');
-  const formatDate = (value: string) => moment(value).format(dateFormat);
-
-  const metadataUids = useMemo(
-    () => [rule.createdBy, rule.updatedBy].filter((uid): uid is string => Boolean(uid)),
-    [rule.createdBy, rule.updatedBy]
-  );
-
-  const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
+  const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
+    useRuleAuditMetadata(rule);
 
   const metadataItems = [
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: resolveDisplayName(rule.createdBy, profileByUid, EMPTY_VALUE),
+      description: createdByDisplay,
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.createdDate', {
         defaultMessage: 'Created date',
       }),
-      description: formatDate(rule.createdAt),
+      description: createdAtFormatted,
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.lastUpdate', {
         defaultMessage: 'Last update',
       }),
-      description: formatDate(rule.updatedAt),
+      description: updatedAtFormatted,
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: resolveDisplayName(rule.updatedBy, profileByUid, EMPTY_VALUE),
+      description: updatedByDisplay,
     },
   ];
 

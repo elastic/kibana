@@ -113,11 +113,11 @@ export type QueryResult = ToolResultMixin<ToolResultType.query>;
 export enum SupportedChartType {
   Metric = 'metric',
   Gauge = 'gauge',
-  Tagcloud = 'tagcloud',
+  Tagcloud = 'tag_cloud',
   XY = 'xy',
   RegionMap = 'region_map',
   Heatmap = 'heatmap',
-  Datatable = 'datatable',
+  Datatable = 'data_table',
   Pie = 'pie',
   Treemap = 'treemap',
   Waffle = 'waffle',

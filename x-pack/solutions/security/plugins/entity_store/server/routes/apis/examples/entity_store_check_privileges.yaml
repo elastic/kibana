@@ -18,6 +18,21 @@ responses:
               has_all_required: true
               has_read_permissions: true
               has_write_permissions: true
+              has_install_permissions: true
+              install_privileges:
+                elasticsearch:
+                  cluster:
+                    manage_index_templates: true
+                    manage_ingest_pipelines: true
+                  index:
+                    "entities-latest-default":
+                      read: true
+                      manage: true
+                    ".entities.v2.latest.security_default-*":
+                      read: true
+                      manage: true
+                kibana:
+                  "saved_object:entity-engine-descriptor-v2/create": true
           missingPrivilegesExample:
             summary: "Missing privileges"
             description: "The current user is missing write privileges on the entity index."
@@ -32,6 +47,21 @@ responses:
               has_all_required: false
               has_read_permissions: true
               has_write_permissions: false
+              has_install_permissions: false
+              install_privileges:
+                elasticsearch:
+                  cluster:
+                    manage_index_templates: true
+                    manage_ingest_pipelines: false
+                  index:
+                    "entities-latest-default":
+                      read: true
+                      manage: true
+                    ".entities.v2.latest.security_default-*":
+                      read: true
+                      manage: true
+                kibana:
+                  "saved_object:entity-engine-descriptor-v2/create": true
 x-codeSamples:
   - lang: curl
     source: |

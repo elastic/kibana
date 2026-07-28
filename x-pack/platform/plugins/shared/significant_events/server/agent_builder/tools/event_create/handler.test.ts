@@ -15,62 +15,58 @@ jest.mock('../event_write/handler', () => ({
 const baseInput = {
   stream_names: ['logs.checkout'],
   title: 'Checkout latency',
+  symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
-  root_cause: 'Connection pool exhaustion',
-  criticality: 80,
+  severity: '60-high' as const,
   confidence: 0.8,
-  recommendations: ['Increase pool size'],
-  cause_kis: [],
-  dependency_edges: [],
-  infra_components: [],
 };
 
 describe('createEventToolHandler', () => {
   beforeEach(() => {
     (eventsWriteHandler as jest.Mock).mockResolvedValue({
-      event_id: 'event-1',
-      discovery_slug: 'agent-event-abcd1234',
-      status: 'promoted',
+      event_uuid: 'event-1',
+      event_id: 'agent-event-abcd1234',
+      status: 'open',
       written: true,
     });
   });
 
-  it('defaults status to "promoted" when omitted', async () => {
+  it('defaults status to "open" when omitted', async () => {
     await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ input: expect.objectContaining({ status: 'promoted' }) })
+      expect.objectContaining({ input: expect.objectContaining({ status: 'open' }) })
     );
   });
 
   it('passes explicit status through', async () => {
     await createEventToolHandler({
       eventClient: {} as never,
-      eventInput: { ...baseInput, status: 'acknowledged' },
+      eventInput: { ...baseInput, status: 'dismissed' as const },
     });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ input: expect.objectContaining({ status: 'acknowledged' }) })
+      expect.objectContaining({ input: expect.objectContaining({ status: 'dismissed' }) })
     );
   });
 
-  it('returns event_id from the write result and acknowledged: true', async () => {
+  it('returns event_uuid from the write result and acknowledged: true', async () => {
     const result = await createEventToolHandler({
       eventClient: {} as never,
       eventInput: baseInput,
     });
 
-    expect(result).toEqual({ event_id: 'event-1', acknowledged: true });
+    expect(result).toEqual({ event_uuid: 'event-1', acknowledged: true });
   });
 
-  it('omits discovery_slug from the delegated call — synthetic slug path always used', async () => {
+  it('does not include event_id — synthetic slug path always used', async () => {
     await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput });
 
     const delegatedInput = (eventsWriteHandler as jest.Mock).mock.calls[0][0].input;
-    expect(delegatedInput).not.toHaveProperty('discovery_slug');
+    expect(delegatedInput).not.toHaveProperty('event_id');
     expect(delegatedInput).not.toHaveProperty('discovery_id');
     expect(delegatedInput).not.toHaveProperty('assessment_note');
-    expect(delegatedInput).not.toHaveProperty('evidences');
+    expect(delegatedInput).not.toHaveProperty('signals');
     expect(delegatedInput).not.toHaveProperty('workflow_execution_id');
   });
 });

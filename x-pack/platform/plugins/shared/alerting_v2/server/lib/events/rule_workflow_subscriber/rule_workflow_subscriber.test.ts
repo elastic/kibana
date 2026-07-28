@@ -6,24 +6,15 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { createWorkflowsClientMock } from '@kbn/workflows-extensions/server/mocks';
 import type { LoggerService } from '../../services/logger_service/logger_service';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
-import { createWorkflowService } from '../../services/workflow_service/workflow_service.mock';
 import { RULE_CREATED_EVENT_TYPE, type RuleCreatedEvent } from '../rule_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
-import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { EventBus, Subscription } from '../event_bus';
+import { createWorkflowSubscriberMocks, handlerFor } from '../test_utils';
 import { RuleWorkflowSubscriber } from './rule_workflow_subscriber';
 import { RULE_WORKFLOW_TRIGGERS, RuleCreatedTriggerId } from './triggers';
-
-type CapturedHandler = (
-  event: AlertingDomainEvent,
-  context: AlertingPublisherContext
-) => void | Promise<void>;
 
 const ruleCreatedEvent: RuleCreatedEvent = {
   type: RULE_CREATED_EVENT_TYPE,
@@ -41,17 +32,16 @@ describe('RuleWorkflowSubscriber', () => {
   let request: KibanaRequest;
 
   beforeEach(() => {
-    bus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
-
-    ({ workflowService, workflowsExtensions } = createWorkflowService());
-    mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    workflowsExtensions.getClient.mockResolvedValue(
-      createWorkflowsClientMock({ emitEvent: mockEmitEvent })
-    );
-
-    ({ loggerService, mockLogger } = createLoggerService());
+    ({
+      bus,
+      workflowService,
+      workflowsExtensions,
+      mockEmitEvent,
+      loggerService,
+      mockLogger,
+      request,
+    } = createWorkflowSubscriberMocks());
     subscriber = new RuleWorkflowSubscriber(bus, workflowService, loggerService);
-    request = httpServerMock.createKibanaRequest();
   });
 
   describe('start()', () => {
@@ -75,22 +65,10 @@ describe('RuleWorkflowSubscriber', () => {
   });
 
   describe('event dispatch', () => {
-    /**
-     * Captures the handler the subscriber registered for `eventType` so
-     * tests can invoke it directly without going through the real bus.
-     */
-    const handlerFor = (eventType: AlertingDomainEvent['type']): CapturedHandler => {
-      const call = bus.subscribe.mock.calls.find(([type]) => type === eventType);
-      if (!call) {
-        throw new Error(`No handler registered for "${eventType}"`);
-      }
-      return call[1] as CapturedHandler;
-    };
-
     it("forwards context.request through WorkflowService, with the binding's triggerId and the event payload", async () => {
       subscriber.start();
 
-      await handlerFor(RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request });
+      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request });
 
       // The acting user's request must reach getClient so the workflow runs with
       // the same credentials/space that changed the rule (RNA #504 requirement 3).
@@ -105,7 +83,7 @@ describe('RuleWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request })
+        handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);

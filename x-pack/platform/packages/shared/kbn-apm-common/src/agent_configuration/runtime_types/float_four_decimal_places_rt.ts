@@ -5,29 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { either } from 'fp-ts/Either';
 import { z } from '@kbn/zod/v4';
 
-export const floatFourDecimalPlacesRt = new t.Type<string, string, unknown>(
-  'floatFourDecimalPlacesRt',
-  t.string.is,
-  (input, context) => {
-    return either.chain(t.string.validate(input, context), (inputAsString) => {
-      const inputAsFloat = parseFloat(inputAsString);
-      const maxFourDecimals = parseFloat(inputAsFloat.toFixed(4)) === inputAsFloat;
-
-      const isValid = inputAsFloat >= 0 && inputAsFloat <= 1 && maxFourDecimals;
-
-      return isValid
-        ? t.success(inputAsString)
-        : t.failure(input, context, 'Must be a number between 0.0000 and 1');
-    });
-  },
-  t.identity
-);
-
-// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
 export const floatFourDecimalPlacesSchema = z.string().refine(
   (inputAsString) => {
     const inputAsFloat = parseFloat(inputAsString);

@@ -7,6 +7,7 @@
 
 export {
   AgentType,
+  chatAgentTypeId,
   agentBuilderDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,

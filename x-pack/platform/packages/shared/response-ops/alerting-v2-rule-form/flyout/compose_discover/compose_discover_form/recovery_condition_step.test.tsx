@@ -112,6 +112,14 @@ describe('RecoveryConditionStep', () => {
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
 
+  it('does not render custom recovery content when recovery type is none', () => {
+    renderRecoveryStep({ recoveryType: 'none' });
+
+    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
+  });
+
   it('renders query summaries and edit button in custom mode', () => {
     renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
 

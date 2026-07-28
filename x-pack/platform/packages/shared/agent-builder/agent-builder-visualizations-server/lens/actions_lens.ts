@@ -18,6 +18,7 @@ export interface GenerateConfigAction {
   type: 'generate_config';
   success: boolean;
   config?: any; // Can be any shape - gets validated in ValidateConfigAction
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -26,6 +27,7 @@ export interface ValidateConfigAction {
   type: 'validate_config';
   success: boolean;
   config?: VisualizationConfig;
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -42,6 +44,10 @@ export type Action =
   | GenerateConfigAction
   | ValidateConfigAction
   | GenerateTimeRangeAction;
+
+export function isGenerateEsqlAction(action: Action): action is GenerateEsqlAction {
+  return action.type === 'generate_esql';
+}
 
 export function isGenerateConfigAction(action: Action): action is GenerateConfigAction {
   return action.type === 'generate_config';

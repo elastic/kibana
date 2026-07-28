@@ -10,8 +10,13 @@ import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
 
 /**
- * The type of an agent.
- * Only one type for now, this enum is mostly here for future-proofing.
+ * Id of the default agent type
+ */
+export const chatAgentTypeId = 'chat';
+
+/**
+ * @deprecated agent types are now an open set of registered type ids. Use plain strings
+ * (e.g. {@link chatAgentTypeId}) instead.
  */
 export enum AgentType {
   chat = 'chat',
@@ -31,9 +36,10 @@ export interface AgentDefinition {
    */
   id: string;
   /**
-   * The type of the agent (only for type for now, here for future-proofing)
+   * Id of the agent type this agent derives from.
+   * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
-  type: AgentType;
+  type: string;
   /**
    * Human-readable name for the agent.
    */

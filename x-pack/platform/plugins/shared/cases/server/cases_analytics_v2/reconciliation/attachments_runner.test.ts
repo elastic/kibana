@@ -356,6 +356,36 @@ describe('runAttachmentsReconciliation', () => {
     expect(findTypes).toContain(CASE_ATTACHMENT_SAVED_OBJECT);
   });
 
+  it('throws before fetching a page when the abort signal is already tripped, closing the one open PIT and leaving the cursor to be pinned by the caller', async () => {
+    const client = savedObjectsClientMock.create();
+    const writer = makeAttachmentsWriterMock();
+    stubDualSourceFinds(client, {
+      legacy: [makeAttachmentSO(CASE_COMMENT_SAVED_OBJECT, 'l-1')],
+      unified: [makeAttachmentSO(CASE_ATTACHMENT_SAVED_OBJECT, 'u-1')],
+    });
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      runAttachmentsReconciliation({
+        savedObjectsClient: client,
+        attachmentsWriter: writer,
+        logger,
+        lastRunAt: undefined,
+        signal: controller.signal,
+      })
+    ).rejects.toThrow(/aborted/);
+
+    // Bailed inside the first source type's walk before any page read or
+    // bulk dispatch — no attachments mirrored.
+    expect(client.find).not.toHaveBeenCalled();
+    expect(writer.bulkUpsertAttachmentsAwait).not.toHaveBeenCalled();
+    // The throw unwinds through the first source type's `finally` before
+    // the second source type's PIT is opened: one PIT opened, one closed.
+    expect(client.openPointInTimeForType).toHaveBeenCalledTimes(1);
+    expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+  });
+
   it('advances the cursor to tick start time on successful drain', async () => {
     const client = savedObjectsClientMock.create();
     const writer = makeAttachmentsWriterMock();

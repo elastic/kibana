@@ -19,6 +19,7 @@ import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { normalizeUrl } from '../../../lib/utils';
+import { getKibanaApiDocLinks } from '../../../lib/kb';
 import { sendRequest } from '../../hooks';
 import type { Actions } from '../../stores/request';
 
@@ -29,6 +30,7 @@ import {
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
+  getKibanaApiDocLink,
   getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
@@ -493,12 +495,33 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  public async getDocumentationLink(docLinkVersion: string): Promise<string | null> {
+  public async getDocumentationLink(
+    docLinkVersion: string,
+    kibanaApiReferenceLink?: string
+  ): Promise<string | null> {
     const requests = await this.getRequests();
     if (requests.length < 1) {
       return null;
     }
     const request = requests[0];
+
+    // Kibana requests (kbn:) aren't matched by the Elasticsearch autocomplete
+    // definitions, so we resolve their documentation separately: try to deep
+    // link to the specific operation, falling back to the general Kibana API
+    // reference instead of showing "Documentation page is not yet available
+    // for this API".
+    if (request.url.startsWith(KIBANA_API_PREFIX)) {
+      if (!kibanaApiReferenceLink) {
+        return null;
+      }
+      const operationLink = getKibanaApiDocLink(
+        request.method,
+        request.url,
+        getKibanaApiDocLinks(),
+        kibanaApiReferenceLink
+      );
+      return operationLink ?? kibanaApiReferenceLink;
+    }
 
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }

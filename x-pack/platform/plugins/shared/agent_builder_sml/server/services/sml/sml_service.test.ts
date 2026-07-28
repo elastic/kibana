@@ -914,6 +914,129 @@ describe('SmlService', () => {
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
+    const nameNestedQuery = (name: string) => ({
+      nested: {
+        path: 'discovery_labels',
+        query: {
+          multi_match: {
+            query: name,
+            type: 'bool_prefix',
+            operator: 'and',
+            fields: [
+              'discovery_labels.value',
+              'discovery_labels.value._2gram',
+              'discovery_labels.value._3gram',
+            ],
+          },
+        },
+        inner_hits: {
+          _source: ['discovery_labels.value', 'discovery_labels.kind'],
+          size: 10,
+          highlight: {
+            type: 'unified',
+            number_of_fragments: 0,
+            pre_tags: ['<em>'],
+            post_tags: ['</em>'],
+            encoder: 'html',
+            fields: {
+              'discovery_labels.value': {},
+            },
+          },
+        },
+      },
+    });
+
+    describe('"type/name" query syntax', () => {
+      it('splits into two independent nested queries, ANDed at the parent level', async () => {
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger });
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'connector/s3',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([
+          {
+            bool: {
+              must: [
+                {
+                  nested: {
+                    path: 'discovery_labels',
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            multi_match: {
+                              query: 'connector',
+                              type: 'bool_prefix',
+                              operator: 'and',
+                              fields: [
+                                'discovery_labels.value',
+                                'discovery_labels.value._2gram',
+                                'discovery_labels.value._3gram',
+                              ],
+                            },
+                          },
+                          { term: { 'discovery_labels.kind': 'type' } },
+                        ],
+                      },
+                    },
+                  },
+                },
+                nameNestedQuery('s3'),
+              ],
+            },
+          },
+        ]);
+      });
+
+      it('falls back to a single nested query for a bare trailing slash', async () => {
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger });
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'connector/',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([nameNestedQuery('connector/')]);
+      });
+
+      it('searches only by name when the query starts with a slash', async () => {
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger });
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: '/s3',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([nameNestedQuery('s3')]);
+      });
+    });
+
     it('threads per-type constraints through buildConstraintsFilter into the ES filter clauses', async () => {
       const service = createSmlService();
       service.setup({ logger });

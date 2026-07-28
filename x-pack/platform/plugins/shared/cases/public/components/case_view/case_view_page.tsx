@@ -122,11 +122,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(({ caseData, refreshRe
         <LensAttachReturnConsumer caseId={caseData.id} />
       )}
       <SavedObjectInAppUrlsProvider caseData={caseData}>
-        <CaseViewTabs
-          caseData={caseWithFilteredAttachments}
-          activeTab={activeTabId as CASE_VIEW_PAGE_TABS}
-          searchTerm={searchTerm}
-        />
+        <CaseViewTabs caseData={caseData} activeTab={activeTabId as CASE_VIEW_PAGE_TABS} />
         <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
             <CaseViewActivity caseData={caseWithFilteredAttachments} />

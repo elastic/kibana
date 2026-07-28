@@ -13,17 +13,14 @@ import type { SignificantEvent } from './data_stream';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
-  discovery_slug: 'agent-event-1',
-  status: 'promoted',
+  event_uuid: 'event-1',
+  event_id: 'agent-event-1',
+  status: 'open',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  root_cause: 'Test root cause',
-  criticality: 50,
+  severity: '40-medium',
   confidence: 0.8,
-  recommendations: ['Investigate the test signal'],
   ...overrides,
 });
 
@@ -36,8 +33,8 @@ const createInvestigation = (
 });
 
 /**
- * @param hits - results returned for the first esql query (findById)
- * @param lineageHits - when provided, returned for the second query (findByDiscoverySlug);
+ * @param hits - results returned for the first esql query (findByEventUuid)
+ * @param lineageHits - when provided, returned for the second query (findByEventId);
  *   when omitted both queries return the same `hits` (backward-compat behaviour).
  */
 const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEvent[]) => {
@@ -51,7 +48,7 @@ const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEv
 
   const queryMock = jest.fn().mockResolvedValue(makeResult(hits));
   if (lineageHits !== undefined) {
-    // Sequence the two internal esql calls: findById first, findByDiscoverySlug second.
+    // Sequence the two internal esql calls: findByEventUuid first, findByEventId second.
     queryMock
       .mockResolvedValueOnce(makeResult(hits))
       .mockResolvedValueOnce(makeResult(lineageHits));
@@ -68,13 +65,13 @@ const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEv
 
 describe('attachInvestigationToEvent', () => {
   it('appends a new investigation entry and creates a new event version', async () => {
-    const existing = createEvent({ event_id: 'event-1' });
+    const existing = createEvent({ event_uuid: 'event-1' });
     const { client, dataStreamClient } = createEventClient([existing]);
     const investigation = createInvestigation();
 
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation,
     });
 
@@ -85,13 +82,13 @@ describe('attachInvestigationToEvent', () => {
     const written: SignificantEvent = callArg.documents[0];
 
     expect(written.investigations).toEqual([investigation]);
-    expect(written.previous_event_id).toBe('event-1');
-    expect(written.event_id).not.toBe('event-1');
+    expect(written.previous_event_uuid).toBe('event-1');
+    expect(written.event_uuid).not.toBe('event-1');
   });
 
   it('replaces a pending entry with a terminal one, preserving started_at', async () => {
     const pending = createInvestigation();
-    const existing = createEvent({ event_id: 'event-1', investigations: [pending] });
+    const existing = createEvent({ event_uuid: 'event-1', investigations: [pending] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const terminal = createInvestigation({
@@ -99,7 +96,7 @@ describe('attachInvestigationToEvent', () => {
     });
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation: terminal,
     });
 
@@ -119,13 +116,13 @@ describe('attachInvestigationToEvent', () => {
       workflow_execution_id: 'exec-1',
       completed_at: '2026-01-01T01:30:00.000Z',
     });
-    const existing = createEvent({ event_id: 'event-1', investigations: [first] });
+    const existing = createEvent({ event_uuid: 'event-1', investigations: [first] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const second = createInvestigation({ workflow_execution_id: 'exec-2' });
     await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation: second,
     });
 
@@ -139,12 +136,12 @@ describe('attachInvestigationToEvent', () => {
 
   it('is idempotent: ignores when the entry is identical', async () => {
     const investigation = createInvestigation();
-    const existing = createEvent({ event_id: 'event-1', investigations: [investigation] });
+    const existing = createEvent({ event_uuid: 'event-1', investigations: [investigation] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation,
     });
 
@@ -158,7 +155,7 @@ describe('attachInvestigationToEvent', () => {
 
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'missing-event',
+      eventUuid: 'missing-event',
       investigation: createInvestigation(),
     });
 
@@ -167,18 +164,18 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('carries forward the previous_event_id lineage', async () => {
-    const existing = createEvent({ event_id: 'event-3', previous_event_id: 'event-2' });
+  it('carries forward the previous_event_uuid lineage', async () => {
+    const existing = createEvent({ event_uuid: 'event-3', previous_event_uuid: 'event-2' });
     const { client } = createEventClient([existing]);
 
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-3',
+      eventUuid: 'event-3',
       investigation: createInvestigation(),
     });
 
     expect(result.updated).toBe(1);
-    expect(result.event_id).not.toBe('event-3');
+    expect(result.event_uuid).not.toBe('event-3');
   });
 
   it('reconciles orphaned running entries from cancelled runs when a new execution attaches', async () => {
@@ -190,13 +187,13 @@ describe('attachInvestigationToEvent', () => {
      * returning true for it and the UI stops polling.
      */
     const orphaned = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const existing = createEvent({ event_id: 'event-1', investigations: [orphaned] });
+    const existing = createEvent({ event_uuid: 'event-1', investigations: [orphaned] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const incoming = createInvestigation({ workflow_execution_id: 'exec-2' });
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation: incoming,
     });
 
@@ -214,7 +211,7 @@ describe('attachInvestigationToEvent', () => {
 
   it('reconciles orphaned running entries when a terminal attach arrives for a new execution', async () => {
     const orphaned = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const existing = createEvent({ event_id: 'event-1', investigations: [orphaned] });
+    const existing = createEvent({ event_uuid: 'event-1', investigations: [orphaned] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const terminal = createInvestigation({
@@ -223,7 +220,7 @@ describe('attachInvestigationToEvent', () => {
     });
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation: terminal,
     });
 
@@ -247,13 +244,13 @@ describe('attachInvestigationToEvent', () => {
         completed_at: '2026-01-01T01:30:00.000Z',
       })
     );
-    const existing = createEvent({ event_id: 'event-1', investigations: fullInvestigations });
+    const existing = createEvent({ event_uuid: 'event-1', investigations: fullInvestigations });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const newInvestigation = createInvestigation({ workflow_execution_id: 'exec-100' });
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-1',
+      eventUuid: 'event-1',
       investigation: newInvestigation,
     });
 
@@ -262,23 +259,23 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('resolves lineage: terminal attach targets the latest slug version, not the frozen caller version', async () => {
+  it('resolves lineage: terminal attach targets the latest event version, not the frozen caller version', async () => {
     /**
-     * Regression: the investigation workflow passes the frozen inputs.context.event_id (E0) to
-     * both its pending and terminal kibana.request steps. Without lineage resolution, findById(E0)
+     * Regression: the investigation workflow passes the frozen inputs.context.event_uuid (E0) to
+     * both its pending and terminal kibana.request steps. Without lineage resolution, findByEventUuid(E0)
      * always returns E0, so the terminal write branches off E0 instead of chaining off the
      * pending-written E1 — producing siblings that lose prior investigation history.
      */
     const pending = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const e0 = createEvent({ event_id: 'event-0', discovery_slug: 'slug-1' });
+    const e0 = createEvent({ event_uuid: 'event-0', event_id: 'slug-1' });
     const e1 = createEvent({
-      event_id: 'event-1',
-      discovery_slug: 'slug-1',
-      previous_event_id: 'event-0',
+      event_uuid: 'event-1',
+      event_id: 'slug-1',
+      previous_event_uuid: 'event-0',
       '@timestamp': '2026-01-01T00:01:00.000Z',
       investigations: [pending],
     });
-    // findById returns only E0 (the frozen stale ref); findByDiscoverySlug returns the full lineage
+    // findByEventUuid returns only E0 (the frozen stale ref); findByEventId returns the full lineage
     const { client, dataStreamClient } = createEventClient([e0], [e0, e1]);
 
     const terminal = createInvestigation({
@@ -287,7 +284,7 @@ describe('attachInvestigationToEvent', () => {
     });
     const result = await attachInvestigationToEvent({
       eventClient: client,
-      eventId: 'event-0', // frozen stale reference as passed by the workflow
+      eventUuid: 'event-0', // frozen stale reference as passed by the workflow
       investigation: terminal,
     });
 
@@ -297,7 +294,7 @@ describe('attachInvestigationToEvent', () => {
     const written: SignificantEvent = callArg.documents[0];
 
     // Must chain off E1 (the true latest), not E0 (the frozen caller reference)
-    expect(written.previous_event_id).toBe('event-1');
+    expect(written.previous_event_uuid).toBe('event-1');
     // Replace-by-execution-id: pending entry replaced with terminal, not duplicated
     expect(written.investigations).toHaveLength(1);
     expect(written.investigations![0].started_at).toBe(pending.started_at);

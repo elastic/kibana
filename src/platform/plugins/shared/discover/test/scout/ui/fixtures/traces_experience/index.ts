@@ -9,11 +9,11 @@
 
 import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
-import type { DiscoverPageObjects, DiscoverTestFixtures } from '..';
+import type { DiscoverPageObjects } from '..';
 import { spaceTest as spaceBaseTest } from '..';
 import { TracesExperiencePage } from './page_objects';
 
-export interface TracesExperienceTestFixtures extends DiscoverTestFixtures {
+export interface TracesExperienceTestFixtures {
   pageObjects: DiscoverPageObjects & {
     tracesExperience: TracesExperiencePage;
   };
@@ -23,17 +23,8 @@ export const spaceTest = spaceBaseTest.extend<
   TracesExperienceTestFixtures,
   ScoutParallelWorkerFixtures
 >({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: TracesExperienceTestFixtures['pageObjects'];
-      page: TracesExperienceTestFixtures['page'];
-    },
-    use: (pageObjects: TracesExperienceTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    const extendedPageObjects = {
+  pageObjects: async ({ pageObjects, page }, use) => {
+    const extendedPageObjects: TracesExperienceTestFixtures['pageObjects'] = {
       ...pageObjects,
       tracesExperience: createLazyPageObject(
         TracesExperiencePage,

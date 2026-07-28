@@ -29,9 +29,11 @@ import type {
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
 import { validateCustomFields } from './validators';
 import { normalizeCreateCaseRequest } from './utils';
+import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
+import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
@@ -86,7 +88,12 @@ export const bulkCreate = async (
       validateRequest({ theCase, customFieldsConfiguration, hasPlatinumLicenseOrGreater });
 
       bulkCreateRequest.push(
-        createBulkCreateCaseRequest({ theCase, user, customFieldsConfiguration })
+        createBulkCreateCaseRequest({
+          theCase,
+          user,
+          customFieldsConfiguration,
+          templatesEnabled: clientArgs.config.templates.enabled,
+        })
       );
     }
 
@@ -196,6 +203,14 @@ const validateRequest = ({
 
   validateCustomFields(customFieldsValidationParams);
   validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
+
+  // bulkCreate has no HTTP route — its callers (the cases connector) resolve templates
+  // themselves and always pin a version. Server-side template expansion (which resolves an
+  // omitted version to latest) is deliberately limited to `create`: running it here would
+  // silently change connector behavior (e.g. template assignees under the rule's request
+  // context). Reject an unpinned reference instead of storing one that close-time
+  // `required_on_close` validation cannot resolve.
+  ensureTemplateVersionIsPinned(theCase.template);
 };
 
 const validateAssigneesUsage = ({
@@ -222,10 +237,12 @@ const createBulkCreateCaseRequest = ({
   theCase,
   customFieldsConfiguration,
   user,
+  templatesEnabled,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
   user: User;
+  templatesEnabled: boolean;
 }): BulkCreateCasesArgs['cases'][number] => {
   const { id, ...caseWithoutId } = theCase;
 
@@ -236,6 +253,22 @@ const createBulkCreateCaseRequest = ({
    */
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
+
+  // Mirror customFields into extended_fields so that automations writing to the legacy API
+  // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
+  // value overrides any pre-set mirror key (e.g. a template default in the request).
+  //
+  // Pass the RAW request customFields (caseWithoutId.customFields), not the post-fill array
+  // (normalizedCase.customFields). fillMissingCustomFields pads absent optional-no-default
+  // fields with { key, value: null }; those synthetic nulls would otherwise hit the merge's
+  // delete branch and wipe mirror keys the request never intended to clear.
+  if (templatesEnabled) {
+    normalizedCase.extended_fields =
+      mergeCustomFieldsIntoExtendedFields(
+        caseWithoutId.customFields,
+        normalizedCase.extended_fields
+      ) ?? undefined;
+  }
 
   return {
     id,

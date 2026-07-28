@@ -118,6 +118,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: 'unknown-episode' },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
@@ -137,6 +138,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
         body: { episode_id: 'unknown-episode' },
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
     }
   );
 

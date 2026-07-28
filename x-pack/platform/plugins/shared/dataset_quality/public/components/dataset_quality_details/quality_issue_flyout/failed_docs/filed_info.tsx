@@ -21,6 +21,7 @@ import React from 'react';
 import {
   failedDocsErrorsColumnName,
   failedDocsErrorsColumnNameTooltip,
+  failedDocsInfoTableCaption,
   overviewDegradedFieldsTableLoadingText,
 } from '../../../../../common/translations';
 import { useQualityIssues } from '../../../../hooks';
@@ -77,6 +78,7 @@ export const FailedFieldInfo = () => {
           </EuiText>
           <EuiHorizontalRule margin="xs" />
           <EuiBasicTable
+            tableCaption={failedDocsInfoTableCaption}
             tableLayout="fixed"
             responsiveBreakpoint={true}
             columns={failedDocsErrorsColumns}

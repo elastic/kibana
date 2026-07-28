@@ -161,14 +161,14 @@ export function HeaderActions({
   const { discoverUrl } = useDiscoverUrl({ alert, rule });
 
   const handleUntrackAlert = useCallback(async () => {
-    if (alert) {
+    if (alert && alertIndex) {
       await untrackAlerts({
-        indices: ['.internal.alerts-observability.*'],
+        indices: [alertIndex],
         alertUuids: [alert.fields[ALERT_UUID]],
       });
       onUntrackAlert();
     }
-  }, [alert, untrackAlerts, onUntrackAlert]);
+  }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 

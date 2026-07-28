@@ -79,6 +79,20 @@ describe('ServiceNow SIR service', () => {
         connectorUsageCollector,
       });
     });
+
+    test('wraps errors with the structured context suffix', async () => {
+      requestMock.mockImplementationOnce(() => {
+        const err = Object.assign(new Error('forbidden'), {
+          isAxiosError: true as const,
+          response: { status: 403, data: { error: { message: 'denied', detail: 'no access' } } },
+        });
+        throw err;
+      });
+
+      await expect(service.addEvent(itomEventParams)).rejects.toThrow(
+        /\[status=403\] \[method=post\] \[endpoint=event\]$/
+      );
+    });
   });
 
   describe('getChoices', () => {

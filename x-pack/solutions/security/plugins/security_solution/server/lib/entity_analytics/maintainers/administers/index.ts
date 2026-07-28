@@ -25,7 +25,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
@@ -35,11 +35,9 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
         : undefined;
 
     if (lastProcessedTimestamp) {
-      logger.info(
-        `Starting administers maintainer run (incremental from ${lastProcessedTimestamp})`
-      );
+      logger.info(`[administers] Starting run (incremental from ${lastProcessedTimestamp})`);
     } else {
-      logger.info('Starting administers maintainer run (full scan — first run)');
+      logger.info('[administers] Starting run (full scan — first run)');
     }
 
     const collector: RelationshipMaintainerTelemetryCollector = {
@@ -54,7 +52,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildAdministersConfigs(lastProcessedTimestamp),
-      abortController,
+      signal,
       telemetryCollector: collector,
     });
 
@@ -82,12 +80,12 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[administers] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should
     // re-process the same window to avoid missing entities.
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       logger.info('Run was aborted; watermark not advanced');
       return status.state;
     }

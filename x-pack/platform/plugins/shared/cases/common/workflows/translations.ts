@@ -145,7 +145,7 @@ export const GET_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.getCase.documentation.details',
   {
     defaultMessage:
-      'This step retrieves a complete case object from the cases system using its ID. You can optionally include comments and attachments in the response.',
+      'This step retrieves a complete case object from the cases system using its ID. The `include_comments` parameter is deprecated; use the `cases.getAllAttachments` step to retrieve case attachments.',
   }
 );
 

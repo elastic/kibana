@@ -24,12 +24,12 @@ export const ConfigSchema = schema.object({
   }),
   /**
    * Cases-as-data v2 — cluster-level analytics index populated by real-time
-   * saved-object hooks (see `server/cases_analytics_v2`). Off by default; v1
-   * (`analytics.index.enabled`) is the primary path until v2 has been validated
-   * in production. Enabling v2 has no effect on v1 — they coexist independently.
+   * saved-object hooks (see `server/cases_analytics_v2`). Enabled by default;
+   * v2 now runs alongside v1 (`analytics.index.enabled`). Enabling v2 has no
+   * effect on v1 — they coexist independently.
    */
   analyticsV2: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     /**
      * Reconciliation cadence in minutes. The reconciliation task is the
      * durability backstop for v2's fire-and-forget write hooks: every
@@ -114,10 +114,10 @@ export const ConfigSchema = schema.object({
     }),
   }),
   attachments: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   chat: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
@@ -153,17 +153,22 @@ export const ConfigSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
-  // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
+  // NOTE: this flag gates the templates feature (routes, UI, and the v1->v2
+  // backfill/migration task) but NOT saved-object registration — the
+  // `cases-templates` and `cases-field-definitions` SO types are always
+  // registered (see `saved_object_types/index.ts`), so toggling this flag off
+  // after it was on no longer throws "Missing mappings" errors. Any template /
+  // field-definition documents created while enabled remain in the index.
   templates: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
   // Once the redesigned UI fully replaces the current one, this config block will be removed.
   casesRedesign: schema.object({
-    list: schema.boolean({ defaultValue: false }),
-    details: schema.boolean({ defaultValue: false }),
-    settings: schema.boolean({ defaultValue: false }),
+    list: schema.boolean({ defaultValue: true }),
+    details: schema.boolean({ defaultValue: true }),
+    settings: schema.boolean({ defaultValue: true }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });

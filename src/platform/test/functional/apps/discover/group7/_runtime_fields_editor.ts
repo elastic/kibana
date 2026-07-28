@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Integration test for the runtime fields editor across many components and two plugins.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 

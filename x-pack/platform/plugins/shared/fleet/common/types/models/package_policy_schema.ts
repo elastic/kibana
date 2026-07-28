@@ -82,6 +82,26 @@ export const DeprecationInfoSchema = schema.object(
   { meta: { id: 'deprecation_info' } }
 );
 
+const PackagePolicyInputDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'package_policy_input_deprecation_info' } }
+);
+
+const PackagePolicyStreamDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'package_policy_stream_deprecation_info' } }
+);
+
+const SimplifiedPackagePolicyInputDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'simplified_package_policy_input_deprecation_info' } }
+);
+
+const SimplifiedPackagePolicyStreamDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'simplified_package_policy_stream_deprecation_info' } }
+);
+
 const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
@@ -118,7 +138,7 @@ const PackagePolicyStreamsSchema = {
       })
     )
   ),
-  deprecated: schema.maybe(DeprecationInfoSchema),
+  deprecated: schema.maybe(PackagePolicyStreamDeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
 
@@ -143,7 +163,7 @@ export const PackagePolicyInputsSchema = {
       })
     )
   ),
-  deprecated: schema.maybe(DeprecationInfoSchema),
+  deprecated: schema.maybe(PackagePolicyInputDeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
 
@@ -435,7 +455,7 @@ export const SimplifiedVarsSchema = schema.recordOf(
 );
 
 export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
-  schema.string({ maxLength: 1024 }),
+  schema.string({ maxLength: 255 }),
   schema.object({
     enabled: schema.maybe(
       schema.boolean({
@@ -444,7 +464,7 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
         },
       })
     ),
-    deprecated: schema.maybe(DeprecationInfoSchema),
+    deprecated: schema.maybe(SimplifiedPackagePolicyInputDeprecationInfoSchema),
     vars: schema.maybe(SimplifiedVarsSchema),
     condition: schema.maybe(
       schema.nullable(
@@ -458,7 +478,7 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
     ),
     streams: schema.maybe(
       schema.recordOf(
-        schema.string({ maxLength: 1024 }),
+        schema.string({ maxLength: 255 }),
         schema.object({
           enabled: schema.maybe(
             schema.boolean({
@@ -469,7 +489,7 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
           ),
           vars: schema.maybe(SimplifiedVarsSchema),
           var_group_selections: VarGroupSelectionsSchema,
-          deprecated: schema.maybe(DeprecationInfoSchema),
+          deprecated: schema.maybe(SimplifiedPackagePolicyStreamDeprecationInfoSchema),
           condition: schema.maybe(
             schema.nullable(
               schema.string({
@@ -852,7 +872,7 @@ export const OrphanedPackagePoliciesResponseSchema = schema.object(
 
 export const DryRunPackagePolicySchema = PackagePolicySchema.extends(
   {
-    id: schema.maybe(schema.string()),
+    id: schema.maybe(schema.string({ maxLength: 255 })),
     force: schema.maybe(schema.boolean()),
     revision: schema.maybe(schema.number()),
     updated_at: schema.maybe(schema.string()),

@@ -23,6 +23,7 @@ export interface GetEsqlColumnSchemaParams {
   index: string | string[];
   start?: number;
   end?: number;
+  signal: AbortSignal;
 }
 
 export async function getEsqlColumnSchema({
@@ -30,6 +31,7 @@ export async function getEsqlColumnSchema({
   index,
   start,
   end,
+  signal,
 }: GetEsqlColumnSchemaParams): Promise<EsqlColumnSchema[]> {
   const indices = Array.isArray(index) ? index : [index];
   const filter =
@@ -37,9 +39,12 @@ export async function getEsqlColumnSchema({
       ? { bool: { filter: dateRangeQuery(start, end) } }
       : undefined;
 
-  const response = (await esClient.esql.query({
+  const queryParams = {
     query: esql.from(indices).limit(0).print('basic'),
     ...(filter ? { filter } : {}),
+  };
+  const response = (await esClient.esql.query(queryParams, {
+    signal,
   })) as unknown as ESQLSearchResponse;
 
   return parseColumns(response);

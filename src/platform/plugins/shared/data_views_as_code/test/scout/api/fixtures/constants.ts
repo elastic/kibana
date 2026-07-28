@@ -15,7 +15,7 @@ import {
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-  [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
 };
 
 export const BASE_PATH = '/api/data_views';
