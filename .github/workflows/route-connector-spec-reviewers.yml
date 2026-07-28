@@ -1,0 +1,37 @@
+name: Route connector spec owner reviews
+
+on:
+  # This workflow uses trusted base-branch code and a write-capable token so it
+  # can route ownership declared by a fork PR without checking out PR code.
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: connector-spec-owner-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  route_connector_spec_owners:
+    name: Request new connector spec owners
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted base workflow script
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Request new connector spec owner reviews
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const routeConnectorSpecReviewers = require('./.github/scripts/route_connector_spec_reviewers');
+            await routeConnectorSpecReviewers.routeConnectorSpecReviewers({ github, context, core });

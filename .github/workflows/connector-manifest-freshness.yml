@@ -1,0 +1,37 @@
+name: Connector manifest freshness
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/platform/packages/shared/kbn-connector-specs/**'
+      - 'scripts/generate_connector_manifest.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: connector-manifest-freshness-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    name: connector_execution_manifest.json is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version-file: '.node-version'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn kbn bootstrap --ci
+
+      - name: Verify manifest is up to date
+        run: |
+          node scripts/jest \
+            src/platform/packages/shared/kbn-connector-specs/src/lib/connector_execution_manifest.test.ts \
+            --no-coverage

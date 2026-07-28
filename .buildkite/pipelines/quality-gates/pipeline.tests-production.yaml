@@ -61,6 +61,16 @@ steps:
       SERVICE_VERSION: ${SERVICE_VERSION:-""}
       TARGET_ENV: production-noncanary-ds-5
 
+  - label: ':electric_plug: Publish connector production manifest'
+    if: build.env("ENVIRONMENT") == "production-noncanary" && build.env("DEPLOYMENT_SLICES") =~ /(^|.*, *)production-noncanary-ds-5( *,.*|$$)/
+    command: .buildkite/scripts/pipelines/quality_gates/publish_connector_production_manifest.sh
+    env:
+      SERVICE_VERSION: ${SERVICE_VERSION:-""}
+    agents:
+      queue: kibana-default
+    concurrency: 1
+    concurrency_group: connector-production-manifest
+
   - input: 'Cancel bake time step early?'
     if: build.env("ENVIRONMENT") == "production-canary"
     fields:

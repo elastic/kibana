@@ -162,6 +162,11 @@ export const ActionTypeMenu = ({
 
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        // Support-only connectors (empty supportedFeatureIds) are registered and executable
+        // but must not appear in generic creation pickers.
+        if (actionType.supportedFeatureIds.length === 0) {
+          return false;
+        }
         if (shouldHideWorkflowsOnlyConnector(actionType.supportedFeatureIds, uiSettings)) {
           return false;
         }

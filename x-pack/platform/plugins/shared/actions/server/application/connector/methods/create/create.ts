@@ -74,6 +74,18 @@ export async function create({
   }
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
+  if (
+    actionType.source === ACTION_TYPE_SOURCES.spec &&
+    actionType.supportedFeatureIds.length === 0
+  ) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.supportOnlyConnectorCreationForbidden', {
+        defaultMessage:
+          'Connector type {actionTypeId} is support-only and cannot be used to create connectors yet.',
+        values: { actionTypeId },
+      })
+    );
+  }
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,

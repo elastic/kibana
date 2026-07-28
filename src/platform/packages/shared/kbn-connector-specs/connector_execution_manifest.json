@@ -1,0 +1,332 @@
+{
+  "schemaVersion": "1",
+  "connectors": [
+    {
+      "id": ".1password",
+      "supportedFeatureIds": [
+        "workflows"
+      ],
+      "executionFingerprint": "c82c03b7c494c05822ec4eaeef1d063115c9d267eb1d32aacb2fa7e3e2e528c1"
+    },
+    {
+      "id": ".abuseipdb",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "a4feb52dee05d0aee4be759a386ef39f2b8d2fe1867215b025bf3a6ad32d04e4"
+    },
+    {
+      "id": ".alienvault-otx",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "1729d57688407b55583be1f0fbbee1c8e58cdda29f8ed862ce6e25a5cc9cfcf7"
+    },
+    {
+      "id": ".amazon_s3",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "d447de7603bf3b32caa31e61106abe20068cc0ac834db57c92a2d448b46142bc"
+    },
+    {
+      "id": ".aws_lambda",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "7bd607f95045d88704b1daa9e13c0ec44afb2b60544963fb737a96cbbe8434dc"
+    },
+    {
+      "id": ".azure-blob",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "f28136cf7981c9b7ef0ff7d6b52a168508d9aae734f9dc4d6064236061d2ee00"
+    },
+    {
+      "id": ".bigquery",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "13325c0932f721c60d7ea752c89f3e0fccb8e8928ce74f6c297d415df9587645"
+    },
+    {
+      "id": ".box",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "f21891f2f1f04a64138e76a3772b7143035691e5a0fcf6579d70ae1debfee742"
+    },
+    {
+      "id": ".brave-search",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "8b79e82781eba200994c212344bcc6ba1844b81afafe23d293d20ee45e2ac700"
+    },
+    {
+      "id": ".confluence-cloud",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "bb21e2242f01266c04bacc7cff1c88c51da582bc9c1acdc27ccb94675a83cbca"
+    },
+    {
+      "id": ".dropbox",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "5c0aa94f90282b5e86a1c9f67f657368ed67d88994e106c4edc085745d7aa5e4"
+    },
+    {
+      "id": ".figma",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "0acf84296a0c17212073ebd3e344275b08e47d9b2b0dab3fc20a938eced072bc"
+    },
+    {
+      "id": ".firecrawl",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "4e23b63088149da4132194e76df5c5b5917dd239ed59fa5d4965f75d17bd5894"
+    },
+    {
+      "id": ".gcp_cloud_functions",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "451d71ebb37e42670f343358db7d5a5286f90e5c5c417e6be03479c8cf298ad0"
+    },
+    {
+      "id": ".github",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "4c907e8fccb165099f38c58a5e0c8dab50534abd45355b65e0a9c9a3139409fc"
+    },
+    {
+      "id": ".gmail",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "7d26f56b91db52028caf60a9cb57d65bc7cabbbb754033bbe1a821d6c855351c"
+    },
+    {
+      "id": ".google_calendar",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "2b7fa1c6deff357392916a5f63c1f52676306103fc9c74ecd8fc746b23e6ebd3"
+    },
+    {
+      "id": ".google_cloud_storage",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "693fe5ecb9a4467a19d7cee2fe729ec6b0b044e6ae2d2f3f8df4f322f68e9bef"
+    },
+    {
+      "id": ".google_drive",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "3f174806b645ced3ddba46a2bf0089bff433f4b13cbfbeff6abcf278acc80039"
+    },
+    {
+      "id": ".greynoise",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "0ebcdee8820404719c63975ab568c5b006321c8080583d3d5facb7618782d07f"
+    },
+    {
+      "id": ".hubspot",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "27409c7cd8d628f3c2929a277695e7b01b58cafc17f7fe93695b73fec82fb98e"
+    },
+    {
+      "id": ".jina",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "0d486f470f6c80c371e84d494902d64d5c324c5602d4453998029ba09fcc4171"
+    },
+    {
+      "id": ".jira-cloud",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "6be0f231ba5e8a52c89a39cf60404efc9198dd3018f2525599ce241fc84129f8"
+    },
+    {
+      "id": ".microsoft-teams",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "a473d983f422f613dc5ecf702fbe0fc4d38211562bd3ee1b7769f740ecc475a5"
+    },
+    {
+      "id": ".notion",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "90a0f1b03eebda14f8a334cd9b7a1df02dcd2f9ff232ce66c9f63b33f3c23c09"
+    },
+    {
+      "id": ".one_drive",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "c400a4a17226317ac2231b4b17049533353ca9f580d8a70aba39ab068569ae90"
+    },
+    {
+      "id": ".outlook",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "ee514fd460c253dd0265a8ae88715672eca99537a9f20b0cdae4e955673787fc"
+    },
+    {
+      "id": ".pagerduty_mcp",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "476e03142334a203666e61a6f53fef9afb35c65a4e4df7c634b7edc9ade7b7cf"
+    },
+    {
+      "id": ".salesforce",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "7cdd0c063141c96ed3ea836b18031e2675b7e9378d3f9c4e9575c1de3660279d"
+    },
+    {
+      "id": ".servicenow_search",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "b8d0645b764969796dd240a6d55a48d2a9c31e581cafcadb7a18896cad09bce8"
+    },
+    {
+      "id": ".sharepoint-online",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "6dfdf154617f46b4cb5a07ed18eede211cc4b2469371c7738ca698a571369b5f"
+    },
+    {
+      "id": ".sharepoint-server",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "342236ac5a072c8e5b35ebc8df189bf066c8ee37cc07b2e443fa9538c174f990"
+    },
+    {
+      "id": ".shodan",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "ab619ed35dd04d8ce4f86cc8e77bd042d6164c05aabfd349748d7ad687338947"
+    },
+    {
+      "id": ".slack2",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "056f7f48c364f470489b98f7788f8f83ef2ee02d6158251e9ac0ab348eb654df"
+    },
+    {
+      "id": ".snowflake",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "36efec4db023b1c1772018098cb21138b811436f6e0ffe5a26818b4c159d026c"
+    },
+    {
+      "id": ".sublime_security",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "fa1893d5ce7c109afeef26c8f96e23b4a866f542e20212c0c10fd6ee70835652"
+    },
+    {
+      "id": ".tavily_mcp",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "36284bd4875c9e347882989d3fae2f258849cff7978c862b60d140586e5fd4eb"
+    },
+    {
+      "id": ".urlvoid",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "a91bc6be038053a4787a7e7d9c22069bc91f8253f00dd705db2f6a6ea59e87ef"
+    },
+    {
+      "id": ".virustotal",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "e67962a4f49c68f622e7b181252bf0d7b48f02691037e05c2a9d4c47c0202e9b"
+    },
+    {
+      "id": ".zendesk",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "c2c673014854b553d17f8ebcf0de08c7524757cdd855621fd7ea246c0afea96b"
+    },
+    {
+      "id": ".zoom",
+      "supportedFeatureIds": [
+        "agentBuilder",
+        "workflows"
+      ],
+      "executionFingerprint": "e397af6781ac72d5bf8488433911109af5badb2ae33f241014ac6de3a4250091"
+    }
+  ]
+}
