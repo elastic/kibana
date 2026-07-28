@@ -60,6 +60,12 @@ spaceTest.describe(
         await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        // The overlay snapshots the rule's investigation fields when it opens.
+        await expect(pageObjects.documentFlyout.highlightedFieldChildLink('source.ip')).toBeVisible(
+          {
+            timeout: 15_000,
+          }
+        );
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({
@@ -92,6 +98,12 @@ spaceTest.describe(
         await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        // The overlay snapshots the rule's investigation fields when it opens.
+        await expect(pageObjects.documentFlyout.highlightedFieldChildLink('source.ip')).toBeVisible(
+          {
+            timeout: 15_000,
+          }
+        );
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({

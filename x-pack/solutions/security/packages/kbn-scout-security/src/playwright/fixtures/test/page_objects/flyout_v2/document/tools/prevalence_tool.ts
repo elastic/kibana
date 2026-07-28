@@ -45,12 +45,16 @@ export class PrevalenceTool {
       'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'
     );
     this.table = page.testSubj.locator('securitySolutionFlyoutPrevalenceDetailsTable');
-    this.hoverActionsPopover = page.testSubj.locator('hoverActionsPopover');
-    this.filterInAction = page.testSubj.locator('actionItem-security-default-cellActions-filterIn');
-    this.filterOutAction = page.testSubj.locator(
+    this.hoverActionsPopover = page.testSubj
+      .locator('hoverActionsPopover')
+      .filter({ visible: true });
+    this.filterInAction = this.hoverActionsPopover.getByTestId(
+      'actionItem-security-default-cellActions-filterIn'
+    );
+    this.filterOutAction = this.hoverActionsPopover.getByTestId(
       'actionItem-security-default-cellActions-filterOut'
     );
-    this.addToTimelineAction = page.testSubj.locator(
+    this.addToTimelineAction = this.hoverActionsPopover.getByTestId(
       'actionItem-security-default-cellActions-addToTimeline'
     );
     this.filterBadges = page.locator('[id^="popoverFor_filter"]');
