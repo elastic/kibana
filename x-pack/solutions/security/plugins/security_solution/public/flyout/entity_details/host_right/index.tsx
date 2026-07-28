@@ -12,6 +12,7 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -167,12 +168,14 @@ export const HostPanel = memo(function HostPanel({
         hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
     })
   );
+
+  const { from: alertFrom, to: alertTo } = useAlertTimeRange(scopeId);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.host,
     entityRecord: entityFromStoreResult.entityRecord,
-    to,
-    from,
+    to: alertTo,
+    from: alertFrom,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
   });
 

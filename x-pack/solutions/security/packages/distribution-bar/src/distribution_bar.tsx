@@ -93,11 +93,10 @@ const useStyles = () => {
     tooltip: css`
       opacity: 0;
       position: absolute;
-      width: 100%;
+      z-index: ${Number(euiTheme.levels.content) + 1};
       height: calc(
         ${euiTheme.base + 2}px + 14px + 7px
       ); // 2px border of the badge + 14px height of the tick + 7px height of the bar
-      text-align: right;
       top: calc(
         -${euiTheme.base + 2}px - 14px
       ); // 2px border of the badge + 14px height of the tick
@@ -112,9 +111,11 @@ const useStyles = () => {
       }
     `,
     tooltipFlipped: css`
-      text-align: left;
       left: 0;
       right: auto;
+    `,
+    tooltipActiveFilter: css`
+      z-index: ${Number(euiTheme.levels.content) + 2};
     `,
     tooltipContent: css`
       display: inline-block;
@@ -155,11 +156,11 @@ const shouldShowTooltip = ({
   isHoveringAnyStatsBar: boolean;
 }) => {
   if (isHovered) return true;
+  if (isCurrentFilter) return true;
 
-  const shouldShowBecauseOfFilter = isCurrentFilter;
   const shouldShowBecauseItIsLast = isLast && !hideLastTooltip && !hasFilterActive;
 
-  return !isHoveringAnyStatsBar && (shouldShowBecauseOfFilter || shouldShowBecauseItIsLast);
+  return !isHoveringAnyStatsBar && shouldShowBecauseItIsLast;
 };
 
 /**
@@ -169,7 +170,6 @@ const shouldShowTooltip = ({
 export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
   props
 ) {
-  console.log('DistributionBar props:', props);
   const styles = useStyles();
   const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
 
@@ -195,15 +195,20 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
       const partRect = partElement.getBoundingClientRect();
       const tooltipContentRect = tooltipContentElement.getBoundingClientRect();
 
-      // Check if tooltip would overflow the left edge when right-aligned.
-      // The tooltip is positioned right: 0 relative to the part, so it extends left from the part's right edge.
+      // Flip to left-aligned when right-aligned would overflow the left edge AND the right
+      // side of the segment has at least as much room as the left side. This prevents the
+      // flipped tooltip from causing a worse right overflow than the original left overflow.
       const tooltipLeftEdge = partRect.right - tooltipContentRect.width;
       if (tooltipLeftEdge < containerRect.left) {
-        flippedMap[stat.key] = true;
+        const spaceOnRight = containerRect.right - partRect.left;
+        const spaceOnLeft = partRect.right - containerRect.left;
+        if (spaceOnRight >= spaceOnLeft) {
+          flippedMap[stat.key] = true;
+        }
       }
     });
 
-    // Use functional update to bail out when nothing changed, preventing an infinite render loop.
+    // Use functional update to bail out when nothing changed
     setShouldFlipTooltip((prev) => {
       const hasChanged = stats.some(
         (stat) => (prev[stat.key] ?? false) !== (flippedMap[stat.key] ?? false)
@@ -269,6 +274,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
             styles.tooltip,
             showTooltip && styles.part.visibleTooltip,
             shouldFlip && styles.tooltipFlipped,
+            isCurrentFilter && styles.tooltipActiveFilter,
           ]}
         >
           <div
@@ -297,7 +303,16 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                     <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
                     {stat.isCurrentFilter && stat.reset && (
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="cross" size="m" onClick={stat.reset} aria-hidden={true} />
+                        <EuiIcon
+                          type="cross"
+                          size="m"
+                          aria-hidden={true}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHoveredKey(null);
+                            stat.reset?.(e);
+                          }}
+                        />
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
