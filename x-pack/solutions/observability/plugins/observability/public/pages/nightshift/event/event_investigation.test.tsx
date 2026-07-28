@@ -118,7 +118,7 @@ describe('EventInvestigation', () => {
     });
 
     expect(screen.getByTestId('nightshiftInvestigationSummaryCard')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationStatusIcon')).toHaveTextContent('Completed');
+    expect(screen.getByTestId('nightshiftInvestigationStatusIcon')).toHaveTextContent('Complete');
     expect(screen.getByTestId('nightshiftInvestigationHeadline')).toHaveTextContent(
       'Deployment regression in checkout service'
     );

@@ -10,7 +10,7 @@ import { useQuery, type QueryClient, type UseQueryResult } from '@kbn/react-quer
 import type { HttpSetup } from '@kbn/core/public';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from '../../../utils/kibana_react';
-import { NIGHTSHIFT_LANDING_SEVERITY } from '../common/nightshift_constants';
+import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/nightshift_constants';
 import { hasRunningInvestigations } from '../event/significant_event_status';
 
 /**
@@ -59,7 +59,7 @@ const fetchSignificantEvents = async ({
           perPage: NIGHTSHIFT_EVENTS_PAGE_SIZE,
           from,
           to,
-          severity: NIGHTSHIFT_LANDING_SEVERITY,
+          severity: [...NIGHTSHIFT_LANDING_SEVERITIES],
         },
         signal,
       }

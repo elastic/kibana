@@ -106,7 +106,6 @@ import {
 } from '../common/locators/cases';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 import { createNightshiftGlobalSearchProvider } from './pages/nightshift/app/nightshift_global_search_provider';
-import { NightshiftNavigationIcon } from './pages/nightshift/app/nightshift_mark_icon';
 
 const nightshiftTitle = i18n.translate('xpack.observability.nightshiftLinkTitle', {
   defaultMessage: 'Nightshift',
@@ -601,9 +600,6 @@ export class Plugin
 
     return {
       config,
-      nightshift: {
-        navigationIcon: NightshiftNavigationIcon,
-      },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
     };

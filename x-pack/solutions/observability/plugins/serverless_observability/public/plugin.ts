@@ -46,8 +46,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { observability, serverless, navigation, management, security, workflowsManagement } =
-      setupDeps;
+    const { serverless, navigation, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
     const significantEventsAvailable = core.featureFlags.getBooleanValue(
@@ -63,7 +62,6 @@ export class ServerlessObservabilityPlugin
         return createNavigationTree({
           core,
           significantEventsAvailable,
-          nightshiftNavigationIcon: observability.nightshift.navigationIcon,
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),

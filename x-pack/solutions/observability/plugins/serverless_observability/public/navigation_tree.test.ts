@@ -9,6 +9,7 @@ import { createNavigationTree, filterForFeatureAvailability } from './navigation
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 const getAdminSettingsNode = (
   options: Parameters<typeof createNavigationTree>[0]
@@ -46,12 +47,11 @@ describe('Navigation Tree', () => {
     const navigation = createNavigationTree({
       core,
       significantEventsAvailable: true,
-      nightshiftNavigationIcon: 'moon',
     });
 
     expect(navigation.body[0]).toMatchObject({
       link: 'observability-overview:nightshift',
-      icon: 'moon',
+      icon: NightshiftNavigationIcon,
     });
     expect(navigation.body[1]).toMatchObject({
       link: 'observability-overview',
@@ -62,7 +62,6 @@ describe('Navigation Tree', () => {
     const navigation = createNavigationTree({
       core,
       significantEventsAvailable: false,
-      nightshiftNavigationIcon: 'moon',
     });
 
     expect(

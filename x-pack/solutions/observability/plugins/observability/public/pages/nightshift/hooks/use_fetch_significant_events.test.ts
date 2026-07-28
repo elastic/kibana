@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_LANDING_SEVERITY } from '../common/nightshift_constants';
+import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/nightshift_constants';
 import {
   markEventInvestigationCompleteInCache,
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
@@ -73,7 +73,7 @@ describe('useFetchSignificantEvents', () => {
     });
   });
 
-  it('requests critical-severity events for the landing page', async () => {
+  it('requests critical and high-severity events for the landing page', async () => {
     renderHook(() => useFetchSignificantEvents());
 
     await capturedQueryFn!({ signal: undefined });
@@ -82,7 +82,7 @@ describe('useFetchSignificantEvents', () => {
       '/internal/significant_events/events',
       expect.objectContaining({
         query: expect.objectContaining({
-          severity: NIGHTSHIFT_LANDING_SEVERITY,
+          severity: NIGHTSHIFT_LANDING_SEVERITIES,
         }),
       })
     );

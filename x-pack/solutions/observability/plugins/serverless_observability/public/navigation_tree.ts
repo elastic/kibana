@@ -12,11 +12,11 @@ import type {
   RootNodeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 export function filterForFeatureAvailability<
   T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
@@ -30,7 +30,6 @@ export function filterForFeatureAvailability<
 export const createNavigationTree = ({
   core,
   significantEventsAvailable = false,
-  nightshiftNavigationIcon,
   streamsAvailable,
   overviewAvailable = true,
   genAiSettingsAvailable = true,
@@ -39,7 +38,6 @@ export const createNavigationTree = ({
 }: {
   core: CoreStart;
   significantEventsAvailable?: boolean;
-  nightshiftNavigationIcon?: IconType;
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   genAiSettingsAvailable?: boolean;
@@ -51,7 +49,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:nightshift' as const,
-          icon: nightshiftNavigationIcon,
+          icon: NightshiftNavigationIcon,
         },
         significantEventsAvailable
       ),
