@@ -15,19 +15,24 @@ import {
 } from '../domain_events';
 import type { EventBus } from '../event_bus';
 import {
-  RULE_EXECUTION_COMPLETED_EVENT_TYPE,
-  type RuleExecutionEvent,
-  type RuleExecutionCompletedPayload,
+  RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+  RULE_EXECUTION_FAILED_EVENT_TYPE,
+  type RuleExecutionSucceededEvent,
+  type RuleExecutionSucceededPayload,
+  type RuleExecutionFailedEvent,
+  type RuleExecutionFailedPayload,
 } from './events';
 
 /**
  * Public contract for the rule-executor event publisher.
  *
- * Called by {@link RuleExecutionPipeline} at the end of every run to emit a
- * `rule.execution.completed` event on the alerting bus.
+ * Called by {@link RuleExecutionPipeline} at the end of a run to emit a
+ * `rule.execution.succeeded` event on success or a `rule.execution.failed`
+ * event when the run throws.
  */
 export interface RuleExecutorEventPublisherContract {
-  publishExecutionCompleted(payload: RuleExecutionCompletedPayload): void;
+  publishExecutionSucceeded(payload: RuleExecutionSucceededPayload): void;
+  publishExecutionFailed(payload: RuleExecutionFailedPayload): void;
 }
 
 /**
@@ -47,9 +52,18 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
     @inject(Request) private readonly request: KibanaRequest
   ) {}
 
-  public publishExecutionCompleted(payload: RuleExecutionCompletedPayload): void {
-    const event: RuleExecutionEvent = {
-      type: RULE_EXECUTION_COMPLETED_EVENT_TYPE,
+  public publishExecutionSucceeded(payload: RuleExecutionSucceededPayload): void {
+    const event: RuleExecutionSucceededEvent = {
+      type: RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+      payload,
+    };
+
+    this.eventBus.publish(event, { request: this.request });
+  }
+
+  public publishExecutionFailed(payload: RuleExecutionFailedPayload): void {
+    const event: RuleExecutionFailedEvent = {
+      type: RULE_EXECUTION_FAILED_EVENT_TYPE,
       payload,
     };
 

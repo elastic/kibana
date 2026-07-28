@@ -148,18 +148,8 @@ const EntityAnalyticsDashboardInlineContent: React.FC<
 };
 
 const EntityAnalyticsDashboardCanvasContent: React.FC<
-  AttachmentRenderProps<EntityAnalyticsDashboardAttachment> & {
-    application: ApplicationStart;
-    searchSession?: ISessionService;
-    /**
-     * Dismisses the canvas flyout. Provided by the Agent Builder canvas render
-     * callbacks. Forwarded into `EntityListTable` so per-row navigation into
-     * the Entity Analytics home flyout can close the overlay first, otherwise
-     * the canvas renders on top of the just-opened entity flyout.
-     */
-    closeCanvas?: () => void;
-  }
-> = ({ attachment, application, searchSession, closeCanvas }) => {
+  AttachmentRenderProps<EntityAnalyticsDashboardAttachment>
+> = ({ attachment }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
@@ -167,6 +157,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
     if (!dimensions) return;
     setIsRiskPanelNarrow(dimensions.width < RISK_LEVEL_PANEL_STACK_WIDTH_THRESHOLD);
   }, []);
+
   const hasExplicitSeverityCount = data.severity_count != null;
   const inferredFromEntities = useMemo(
     () => inferSeverityCountFromEntities(data.entities ?? []),
@@ -474,7 +465,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
           </EuiTitle>
           <EuiSpacer size="m" />
           {data.entities.length ? (
-            <EntityListTable entities={data.entities} closeCanvas={closeCanvas} />
+            <EntityListTable entities={data.entities} />
           ) : (
             <EuiText size="s" color="subdued">
               {i18n.translate(
@@ -542,16 +533,18 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
         chrome={chrome}
         openSidebarConversation={props.openSidebarConversation}
         searchSession={searchSession}
+        closeCanvas={closeCanvas}
       >
-        <EntityAnalyticsDashboardCanvasContent
-          {...props}
-          application={application}
-          searchSession={searchSession}
-          closeCanvas={closeCanvas}
-        />
+        <EntityAnalyticsDashboardCanvasContent {...props} />
       </EntityAnalyticsAgentNavigationProvider>
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, openSidebarConversation }) => {
+    getActionButtons: ({
+      attachment,
+      openCanvas,
+      isCanvas,
+      openSidebarConversation,
+      closeCanvas,
+    }) => {
       if (isCanvas) {
         const data = attachment.data;
         return [
@@ -565,6 +558,7 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
             icon: 'popout',
             type: ActionButtonType.SECONDARY,
             handler: () => {
+              closeCanvas?.();
               navigateToEntityAnalyticsHomePageInApp({
                 application,
                 appId: APP_UI_ID,

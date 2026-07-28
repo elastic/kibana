@@ -7,28 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags, type KibanaRole, type RoleApiCredentials } from '@kbn/scout';
+import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import {
   COMMON_HEADERS,
+  DEV_TOOLS_READ_ROLE,
   DISCOVER_SESSION_API_BASE_PATH,
   KBN_ARCHIVES,
   TEST_DISCOVER_SESSION_ID,
 } from '../fixtures/constants';
-
-const DEV_TOOLS_READ_ROLE: KibanaRole = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: { dev_tools: ['read'] },
-      spaces: ['*'],
-    },
-  ],
-};
 
 const INVALID_DISCOVER_SESSION_ID = 'invalid-discover-session';
 

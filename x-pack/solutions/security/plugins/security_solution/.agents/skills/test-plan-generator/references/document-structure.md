@@ -33,7 +33,7 @@ This file defines the required sections of a test plan, their order, and the con
 - [What is explicitly covered by this test plan]
 
 **Out of scope:**
-- [What is explicitly excluded — deferred work, related features not touched by this issue, etc.]
+- [What is excluded] — [one-clause reason on the same line]. [Optional: follow-up issue link.]
 
 ## Terminology
 
@@ -143,6 +143,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 - **Terminology** is optional — omit the section entirely if the issue uses no domain-specific terms.
 - **RBAC / Permission Testing Matrix** — only include if the issue explicitly mentions roles, permissions, or access control. Do not add speculatively.
+- **Scope** must reflect the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) triggers (upgrade / CRUD per persisted object / dependency data lifecycle). Every *Out of scope* bullet carries a one-clause reason on the same line — bullets with no reason are indistinguishable from oversights.
 - If a section cannot be filled in due to missing information, apply the Core rule: stop and ask the user rather than leaving placeholder text in the draft.
 
 ## Pending work pattern

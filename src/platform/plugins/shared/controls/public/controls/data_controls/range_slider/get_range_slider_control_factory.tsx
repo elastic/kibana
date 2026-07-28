@@ -118,6 +118,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           selections.setValue(undefined);
         },
         hasSelections$: selections.hasRangeSelection$,
+        supportsJsonExport: true,
       });
 
       const dataLoadingSubscription = combineLatest([

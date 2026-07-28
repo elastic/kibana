@@ -111,10 +111,14 @@ jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state
 }));
 
 const mockOpenPreviewPanel = jest.fn();
+const mockOpenLeftPanel = jest.fn();
 const mockOnShowAlert = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openPreviewPanel: mockOpenPreviewPanel }),
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: mockOpenPreviewPanel,
+    openLeftPanel: mockOpenLeftPanel,
+  }),
   useExpandableFlyoutState: () => ({}),
   useExpandableFlyoutHistory: () => [],
   ExpandableFlyout: () => null,
@@ -1022,6 +1026,17 @@ describe('RiskInputsTab', () => {
     expect(getByRole('button', { name: 'Entity risk score' })).toHaveAttribute(
       'aria-pressed',
       'true'
+    );
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          path: expect.objectContaining({
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.ENTITY,
+          }),
+        }),
+      })
     );
   });
 

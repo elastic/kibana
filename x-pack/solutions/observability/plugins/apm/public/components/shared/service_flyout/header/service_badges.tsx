@@ -9,24 +9,13 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../../common/service_map';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { AlertsBadge } from '../../badge/alerts_badge';
 import { SloStatusBadge } from '../../slo_status_badge';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceBadgesData } from '../hooks/use_service_badges_data';
-import { useServiceLinks } from '../hooks/use_service_links';
-
-interface ServiceBadgesProps {
-  service: ServiceNodeData;
-  environment: Environment;
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
-}
+import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 /**
  * Resolves and renders the status badges (alerts, SLO, anomaly) for the service flyout header.
@@ -36,29 +25,19 @@ interface ServiceBadgesProps {
  * status is read straight from the node data since SLO summaries are evaluated over the SLO's own
  * window, not the flyout range.
  */
-export function ServiceBadges({
-  service,
-  environment,
-  kuery,
-  rangeFrom,
-  rangeTo,
-}: ServiceBadgesProps) {
-  const { core } = useApmPluginContext();
+export function ServiceBadges() {
+  const {
+    deps: { core, share },
+    service,
+    filters: { environment, rangeFrom, rangeTo, transactionType },
+  } = useServiceFlyoutContext();
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
-  const { alertsHref } = useServiceLinks({
-    serviceName: service.id,
-    rangeFrom,
-    rangeTo,
-    environment,
-    kuery,
-  });
-
-  const slosHref = useManageSlosUrl({ serviceName: service.id, environment });
+  const { slos: slosHref } = useServiceFlyoutLinks();
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
-    serviceName: service.id,
+    serviceName: service.name,
     environment,
     rangeFrom,
     rangeTo,
@@ -80,16 +59,24 @@ export function ServiceBadges({
         <EuiFlexItem grow={false}>
           <AlertsBadge
             count={alertsCount}
-            serviceName={service.id}
+            serviceName={service.name}
             data-test-subj="serviceFlyoutAlertsBadge"
             ebt={{
               action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
               element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
             }}
-            onClick={(event) => {
-              event.preventDefault();
-              navigateToUrl(alertsHref);
-            }}
+            navigationProps={
+              service.agentName && share?.url?.locators
+                ? {
+                    serviceName: service.name,
+                    agentName: service.agentName,
+                    environment,
+                    rangeFrom,
+                    rangeTo,
+                    locators: share.url.locators,
+                  }
+                : undefined
+            }
           />
         </EuiFlexItem>
       )}
@@ -98,7 +85,7 @@ export function ServiceBadges({
           <SloStatusBadge
             sloStatus={service.sloStatus ?? 'noSLOs'}
             sloCount={service.sloCount}
-            serviceName={service.id}
+            serviceName={service.name}
             {...(slosHref
               ? {
                   ebt: {
@@ -119,20 +106,20 @@ export function ServiceBadges({
           <AnomaliesBadge
             score={anomalyData.anomalyScore}
             detectorType={anomalyData.detectorType}
+            ebt={{
+              action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ANOMALIES_BADGE,
+            }}
             navigationProps={
-              service.agentName && anomalyData.anomalyEnvironment
+              service.agentName && anomalyData.anomalyEnvironment && share?.url?.locators
                 ? {
-                    serviceName: service.id,
+                    serviceName: service.name,
                     anomalyEnvironment: anomalyData.anomalyEnvironment,
                     agentName: service.agentName,
-                    query: {
-                      rangeFrom,
-                      rangeTo,
-                      environment,
-                      kuery,
-                      comparisonEnabled: true,
-                      serviceGroup: '',
-                    },
+                    rangeFrom,
+                    rangeTo,
+                    locators: share.url.locators,
+                    transactionType,
                   }
                 : undefined
             }

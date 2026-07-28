@@ -49,6 +49,8 @@ import {
   toStringArray,
 } from '../../../common/utils/attachments';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import type { InlineField } from '../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
@@ -695,25 +697,28 @@ export const processObservables = (
 
 /**
  *
- * For cases that have a template and extended fields, fetches the template definitions
- * and populates `extended_fields_labels` with a mapping from storage keys (e.g.,
- * `priority_as_keyword`) to user-facing labels (e.g., "Priority"). Cases without templates
- * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
+ * For cases that have extended fields, populates `extended_fields_labels` with a mapping from
+ * storage keys (e.g., `priority_as_keyword`) to user-facing labels (e.g., "Priority").
+ * Labels come from the case's template `fieldDefinitions` (when present) merged with global
+ * field-library definitions. Template labels win on key collision. Cases without extended
+ * fields are returned unchanged.
  *
  * @param cases - Array of cases to enrich
  * @param templateSOs - Pre-fetched template saved objects
+ * @param globalFields - Pre-parsed isGlobal inline field definitions (see
+ *   `parseFieldDefinitionsToInlineFields`) — accepted already-parsed since callers typically
+ *   need the same parsed list for extended-field filter/label-search resolution too.
  * @returns The enriched cases array, preserving original order
  */
 export const enrichCasesWithFieldLabels = (
   cases: Case[],
-  templateSOs: Array<SavedObject<Template>>
+  templateSOs: Array<SavedObject<Template>>,
+  globalFields: readonly InlineField[] = []
 ): Case[] => {
   type EligibleCase = Case & {
-    template: NonNullable<Case['template']>;
     extended_fields: NonNullable<Case['extended_fields']>;
   };
-  const isEligible = (c: Case): c is EligibleCase =>
-    c.template?.id != null && c.extended_fields != null;
+  const isEligible = (c: Case): c is EligibleCase => c.extended_fields != null;
 
   const eligibleCases = cases.filter(isEligible);
 
@@ -721,11 +726,18 @@ export const enrichCasesWithFieldLabels = (
     return cases;
   }
 
+  const globalLabelMap = Object.fromEntries(
+    globalFields.map((field) => [
+      getFieldSnakeKey(field.name, field.type),
+      field.label ?? field.name,
+    ])
+  );
+
   const labelsByTemplateKey = new Map<string, Record<string, string>>();
   for (const so of templateSOs) {
     const fieldKeyToLabel = Object.fromEntries(
       (so.attributes.fieldDefinitions ?? []).map((field) => [
-        `${field.name}_as_${field.type}`,
+        getFieldSnakeKey(field.name, field.type),
         field.label,
       ])
     );
@@ -737,8 +749,15 @@ export const enrichCasesWithFieldLabels = (
 
   const enrichedCasesById = new Map(
     eligibleCases.flatMap((c) => {
-      const fieldKeyToLabel = labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`);
-      return fieldKeyToLabel != null
+      const templateLabelMap =
+        c.template?.id != null
+          ? labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`)
+          : undefined;
+      const fieldKeyToLabel = {
+        ...globalLabelMap,
+        ...(templateLabelMap ?? {}),
+      };
+      return Object.keys(fieldKeyToLabel).length > 0
         ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
         : [];
     })
