@@ -15,6 +15,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { PluginWrapper } from './plugin';
 import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
+import type { NavDependencyReporter } from './nav_dependency_check';
 
 /**
  * Provides a plugin-specific context passed to the plugin's constructor. This is currently
@@ -134,20 +135,43 @@ export function createPluginStartContext<
   deps,
   plugin,
   runtimeResolver,
+  reportNavDependency,
 }: {
   deps: PluginsServiceStartDeps;
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   runtimeResolver: IRuntimePluginContractResolver;
+  reportNavDependency?: NavDependencyReporter;
 }): CoreStart {
+  // Dependencies this plugin declares in its manifest (any channel), used to decide
+  // whether a cross-plugin navigation is explicitly declared.
+  const declaredDependencies = new Set<string>([
+    ...plugin.requiredPlugins,
+    ...plugin.optionalPlugins,
+    ...plugin.runtimePluginDependencies,
+  ]);
+  const reportNav = reportNavDependency
+    ? (target: string) => reportNavDependency(plugin.name, declaredDependencies, target)
+    : undefined;
+
   return {
     analytics: deps.analytics,
     application: {
       applications$: deps.application.applications$,
       currentAppId$: deps.application.currentAppId$,
       capabilities: deps.application.capabilities,
-      navigateToApp: deps.application.navigateToApp,
+      navigateToApp: reportNav
+        ? (appId, options) => {
+            reportNav(options?.deepLinkId ? `${appId}:${options.deepLinkId}` : appId);
+            return deps.application.navigateToApp(appId, options);
+          }
+        : deps.application.navigateToApp,
       navigateToUrl: deps.application.navigateToUrl,
-      getUrlForApp: deps.application.getUrlForApp,
+      getUrlForApp: reportNav
+        ? (appId, options) => {
+            reportNav(options?.deepLinkId ? `${appId}:${options.deepLinkId}` : appId);
+            return deps.application.getUrlForApp(appId, options);
+          }
+        : deps.application.getUrlForApp,
       isAppRegistered: deps.application.isAppRegistered,
       currentLocation$: deps.application.currentLocation$,
     },

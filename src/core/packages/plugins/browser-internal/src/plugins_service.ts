@@ -18,6 +18,7 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { createNavDependencyReporter } from './nav_dependency_check';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -124,6 +125,19 @@ export class PluginsService
   }
 
   public async start(deps: PluginsServiceStartDeps): Promise<InternalPluginsServiceStart> {
+    // Cross-check (report mode): warn when a plugin navigates to another plugin's app
+    // without declaring the dependency. Gated to dev builds so we don't surface warnings
+    // in end-user browser consoles. See https://github.com/elastic/kibana/issues/66682
+    const reportNavDependency = this.coreContext.env.mode.dev
+      ? createNavDependencyReporter({
+          getAppOwner: (appId) => deps.application.getAppOwner(appId),
+          opaqueIdToPluginId: new Map<PluginOpaqueId, PluginName>(
+            [...this.plugins].map(([pluginName, plugin]) => [plugin.opaqueId, pluginName])
+          ),
+          logger: this.coreContext.logger.get('plugins', 'navigation-dependencies'),
+        })
+      : undefined;
+
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -145,6 +159,7 @@ export class PluginsService
           deps,
           plugin,
           runtimeResolver: this.runtimeResolver,
+          reportNavDependency,
         }),
         pluginDepContracts
       );

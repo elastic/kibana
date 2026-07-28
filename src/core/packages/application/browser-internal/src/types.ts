@@ -52,6 +52,15 @@ export interface InternalApplicationStart extends ApplicationStart {
   getComponent(): JSX.Element | null;
 
   /**
+   * Returns the opaque id of the plugin that registered the given application, or
+   * `undefined` if the application is unknown or was not registered by a plugin.
+   * Used by Core to attribute cross-plugin navigation to an owning plugin.
+   *
+   * @internal
+   */
+  getAppOwner(appId: string): PluginOpaqueId | undefined;
+
+  /**
    * The potential action menu set by the currently mounted app.
    * Consumed by the chrome header.
    *
