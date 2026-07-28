@@ -27,7 +27,7 @@ import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
-import { QueryRuleOrchestrator } from './query_rule_orchestrator';
+import { QueryRuleOrchestrator, type PromoteQueriesResult } from './query_rule_orchestrator';
 import { computeExpiresAt } from './serializers';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
 
@@ -269,7 +269,7 @@ export class KnowledgeIndicatorClient {
   promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number; skipped_stats: number }> {
+  ): Promise<PromoteQueriesResult> {
     return this.orchestrator.promoteQueries(definition, queryIds);
   }
 
@@ -277,7 +277,7 @@ export class KnowledgeIndicatorClient {
     queryIds?: string[];
     minSeverityScore?: number;
     streamDefinitions: Map<string, Streams.all.Definition>;
-  }): Promise<{ promoted: number; skipped_stats: number }> {
+  }): Promise<PromoteQueriesResult> {
     return this.orchestrator.promoteUnbackedQueries(args);
   }
 
