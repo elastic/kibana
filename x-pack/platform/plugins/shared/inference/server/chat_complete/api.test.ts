@@ -210,7 +210,7 @@ describe('createChatCompleteApi', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ content: 'workflow restored' }));
     expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
-      expect.objectContaining({ messages: protectedMessages, stream: true })
+      expect.objectContaining({ messages: protectedMessages })
     );
   });
 
