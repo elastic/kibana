@@ -46,6 +46,34 @@ const mockStatsAlerts = [
   },
 ];
 
+// Edge case: Very small RIGHTMOST segment — label must not overflow the right edge
+const mockStatsSmallRightmost = [
+  {
+    key: 'low',
+    count: 3000,
+    color: 'green',
+    label: 'Low',
+  },
+  {
+    key: 'medium',
+    count: 1500,
+    color: 'gold',
+    label: 'Medium',
+  },
+  {
+    key: 'high',
+    count: 800,
+    color: 'orange',
+    label: 'High',
+  },
+  {
+    key: 'critical',
+    count: 5,
+    color: 'red',
+    label: 'Critical',
+  },
+];
+
 // Edge case: Flip tooltip when the LEFTMOST segment (green/teal) is very small
 const mockStatsEdgeCase = [
   {
@@ -165,6 +193,14 @@ export const EdgeCaseSmallSegments = () => {
       </EuiTitle>
       <EuiSpacer size={'s'} />
       <DistributionBarComponent stats={mockStatsMultipleSmall} />
+      <EuiSpacer size={'m'} />
+    </React.Fragment>,
+    <React.Fragment key={'edge-case-small-rightmost'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Edge Case: Very Small Rightmost Segment'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={mockStatsSmallRightmost} />
       <EuiSpacer size={'m'} />
     </React.Fragment>,
   ];

@@ -99,7 +99,7 @@ export const UserPanel = memo(function UserPanel({
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
-  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const userStoreIdentityFields = useMemo(
     () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),

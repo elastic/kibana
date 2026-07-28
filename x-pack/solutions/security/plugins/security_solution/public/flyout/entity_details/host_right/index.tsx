@@ -94,7 +94,7 @@ export const HostPanel = memo(function HostPanel({
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const hostStoreIdentityFields = useMemo(
     () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
