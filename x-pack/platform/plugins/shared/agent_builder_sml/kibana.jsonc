@@ -9,6 +9,6 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["features", "taskManager"],
-    "optionalPlugins": ["security", "spaces", "contextEngine"]
+    "optionalPlugins": ["security", "spaces", "contextEngine", "workflowsExtensions"]
   }
 }

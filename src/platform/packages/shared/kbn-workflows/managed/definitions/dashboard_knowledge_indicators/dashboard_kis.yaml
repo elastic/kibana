@@ -1,0 +1,336 @@
+# Dashboard Knowledge Indicators
+#
+# Extracts Knowledge Indicators (KIs) from a Kibana dashboard and the
+# visualizations it contains, and writes them into the SML data index that backs
+# the "Elastic" AI index.
+#
+# Flow:
+#   get_dashboard -> foreach lens panel
+#     (resolve lens -> data view -> backing index -> mapping + samples -> distill -> sink)
+#   -> distill/sink one dashboard-level orientation KI
+#
+# Each panel KI carries a precomputed, parameterized ES|QL "map" plus a runnable
+# example query, so an agent can answer questions about the data a dashboard
+# represents without rebuilding the query from the panel config.
+#
+# Saved objects are read directly from the Kibana saved-objects index rather than
+# through the HTTP API: the workflow runs without a user request, and the
+# saved-objects index is the same source the SML crawler reads.
+#
+# Concurrency is keyed per dashboard so overlapping runs for the same dashboard
+# are dropped rather than racing on the same document ids.
+
+version: "1"
+name: "Dashboard Knowledge Indicators"
+description: >
+  Extracts Knowledge Indicators from a Kibana dashboard and its visualizations,
+  including a precomputed ES|QL map per panel, into the Elastic AI index.
+enabled: true
+tags:
+  - agent-builder
+  - context-engine
+  - knowledge-indicators
+  - dashboards
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "dashboard-kis-{{ inputs.dashboardId }}"
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: manual
+    inputs:
+      - name: dashboardId
+        type: string
+        required: true
+        description: "Saved object id of the dashboard to extract Knowledge Indicators from."
+      - name: spaceId
+        type: string
+        default: "default"
+        description: "Space the resulting Knowledge Indicators belong to."
+
+consts:
+  # Alias of the SML data index — the `dest` of the "Elastic" AI index.
+  target_index: ai-index-idx-sml-data
+  # Kibana saved objects live here; dashboards/lens/data views are read directly.
+  kibana_index: .kibana_analytics
+  # Sample size used to ground the generated ES|QL against real field values.
+  sample_size: 10
+
+steps:
+  # ---------------------------------------------------------------------------
+  # Step 1: Read the dashboard saved object.
+  # ---------------------------------------------------------------------------
+  - name: get_dashboard
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.kibana_index }}"
+      size: 1
+      query:
+        terms:
+          _id:
+            - "dashboard:{{ inputs.dashboardId }}"
+
+  # ---------------------------------------------------------------------------
+  # Step 2: Normalize the dashboard fields reused across steps. Reading nested
+  # `_source` off a search hit is untyped, so funnel it through data.set once.
+  # ---------------------------------------------------------------------------
+  - name: dashboard_facts
+    type: data.set
+    with:
+      dashboard_title: '{{ steps.get_dashboard.output.hits.hits[0]._source.dashboard.title }}'
+      dashboard_description: '{{ steps.get_dashboard.output.hits.hits[0]._source.dashboard.description }}'
+      dashboard_panels_json: '{{ steps.get_dashboard.output.hits.hits[0]._source.dashboard.panelsJSON }}'
+
+  # ---------------------------------------------------------------------------
+  # Step 3: One KI per panel. A dashboard's panels are its `lens` references.
+  # ---------------------------------------------------------------------------
+  - name: loop_panels
+    type: foreach
+    foreach: "{{ steps.get_dashboard.output.hits.hits[0]._source.references | where: 'type', 'lens' | json }}"
+    steps:
+      - name: get_lens
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.kibana_index }}"
+          size: 1
+          query:
+            terms:
+              _id:
+                - "lens:{{ foreach.item.id }}"
+
+      # Follow the Lens saved object to its data view, which names the backing index.
+      - name: get_dataview
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.kibana_index }}"
+          size: 1
+          query:
+            terms:
+              _id:
+                - "index-pattern:{{ steps.get_lens.output.hits.hits[0]._source.references[0].id }}"
+
+      - name: panel_facts
+        type: data.set
+        with:
+          panel_id: '{{ foreach.item.name | split: ":" | first }}'
+          backing_index: '{{ steps.get_dataview.output.hits.hits[0]._source["index-pattern"].title }}'
+          viz_type: '{{ steps.get_lens.output.hits.hits[0]._source.lens.visualizationType }}'
+          panel_title: '{{ steps.get_lens.output.hits.hits[0]._source.lens.title }}'
+
+      # Mapping + samples ground the generated ES|QL in real fields and values.
+      - name: get_mapping
+        type: elasticsearch.request
+        with:
+          method: GET
+          path: "/{{ variables.backing_index }}/_mapping"
+
+      - name: sample_docs
+        type: elasticsearch.search
+        with:
+          index: "{{ variables.backing_index }}"
+          size: "{{ consts.sample_size }}"
+          query:
+            match_all: {}
+
+      # No connector-id: the workflow's default AI connector is resolved at runtime.
+      - name: distill_panel_ki
+        type: ai.prompt
+        timeout: 120s
+        with:
+          prompt: |
+            You are building a Knowledge Indicator (KI) for ONE panel of a Kibana dashboard.
+            Downstream, an AI agent uses this KI to answer natural-language questions about the
+            data this panel represents WITHOUT rebuilding the query from scratch. The KI must
+            (a) describe what the panel shows and (b) carry a precomputed, runnable ES|QL "map"
+            that reproduces the panel's numbers against the backing index.
+
+            Rules:
+            - Ground everything in the provided panel config, mapping, and samples. Never invent
+              fields or values. If unknown, use an empty string/array.
+            - The ES|QL FROM clause MUST be the backing index named below.
+            - Reproduce the panel's aggregation faithfully (e.g. AVG/SUM/COUNT, terms breakdown,
+              date bucketing) using the panel's metric field(s).
+            - ES|QL correctness: use STATS ... BY for aggregations; wrap date-bucketing with
+              DATE_TRUNC(interval, <date_field>); string literals in double quotes; compare
+              keyword fields to quoted strings (not integers); use strict ISO-8601 date literals
+              (e.g. "2024-01-01T00:00:00.000Z") if you ever need a literal date.
+            - `esql_map` is a template that may use `?param` placeholders for values a caller
+              would supply (e.g. a specific status). `example_esql` MUST be fully runnable as-is
+              (no placeholders) and answer one of `answers_questions`.
+
+            Dashboard: {{ variables.dashboard_title }}
+            Dashboard description: {{ variables.dashboard_description }}
+            Panel title: {{ variables.panel_title }}
+            Panel visualization type: {{ variables.viz_type }}
+            Lens state (JSON): {{ steps.get_lens.output.hits.hits[0]._source.lens.state | json }}
+            Backing index: {{ variables.backing_index }}
+            Backing index mapping (JSON): {{ steps.get_mapping.output | json }}
+            Sample documents (JSON): {{ steps.sample_docs.output.hits.hits | map: '_source' | json }}
+          schema:
+            type: object
+            properties:
+              display_name:
+                type: string
+                description: Concise human-readable name for what this panel shows (<= 8 words).
+              represents:
+                type: string
+                description: 2-3 sentences describing the data/metric this panel represents and how it is computed.
+              when_to_use:
+                type: string
+                description: A single crisp heuristic for when an agent should use this KI to answer a question.
+              answers_questions:
+                type: array
+                description: 3-6 natural-language questions this panel's data can authoritatively answer.
+                items:
+                  type: string
+              key_fields:
+                type: array
+                description: The backing-index fields this panel relies on as "field — what it is".
+                items:
+                  type: string
+              esql_map:
+                type: string
+                description: Parameterized ES|QL (using ?param placeholders where relevant) that reproduces this panel's data against the backing index.
+              example_esql:
+                type: string
+                description: A fully runnable ES|QL query (no placeholders) that answers one of answers_questions.
+            required:
+              - display_name
+              - represents
+              - esql_map
+              - example_esql
+
+      # `extended_attrs` is the SML schema's escape hatch: the index is
+      # `dynamic: strict`, so panel facets cannot be top-level fields.
+      - name: sink_panel_ki
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.target_index }}"
+          id: "dashboard_panel_ki:{{ inputs.dashboardId }}:{{ variables.panel_id }}"
+          refresh: wait_for
+          document:
+            id: "dashboard_panel_ki:{{ inputs.dashboardId }}:{{ variables.panel_id }}"
+            type: dashboard_panel_ki
+            title: "{{ steps.distill_panel_ki.output.content.display_name | default: variables.panel_title }}"
+            origin:
+              uri: "dashboard_panel_ki://{{ inputs.dashboardId }}:{{ variables.panel_id }}"
+            ingestion_method: manual
+            created_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            updated_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            spaces:
+              - "{{ inputs.spaceId }}"
+            permissions:
+              kibana:
+                privileges:
+                  - name: "saved_object:dashboard/get"
+            tags:
+              - knowledge-indicator
+              - dashboard
+            references:
+              - uri: "dashboard://{{ inputs.dashboardId }}"
+            discovery_labels:
+              - value: "{{ variables.panel_title }}"
+                kind: panel
+              - value: "{{ variables.dashboard_title }}"
+                kind: dashboard
+            content: |
+              Dashboard "{{ variables.dashboard_title }}" — panel "{{ variables.panel_title }}".
+              {{ steps.distill_panel_ki.output.content.represents }}
+              Backing index: {{ variables.backing_index }}.
+              Questions answered: {{ steps.distill_panel_ki.output.content.answers_questions | join: " | " }}
+              When to use: {{ steps.distill_panel_ki.output.content.when_to_use }}
+              ES|QL map (template): {{ steps.distill_panel_ki.output.content.esql_map }}
+              Example ES|QL (runnable): {{ steps.distill_panel_ki.output.content.example_esql }}
+            description: |
+              {{ steps.distill_panel_ki.output.content.display_name }} — from the "{{ variables.dashboard_title }}" dashboard.
+              Key fields: {{ steps.distill_panel_ki.output.content.key_fields | join: "; " }}.
+            extended_attrs:
+              dashboard_id: "{{ inputs.dashboardId }}"
+              dashboard_title: "{{ variables.dashboard_title }}"
+              panel_id: "{{ variables.panel_id }}"
+              panel_title: "{{ variables.panel_title }}"
+              backing_index: "{{ variables.backing_index }}"
+              viz_type: "{{ variables.viz_type }}"
+              esql_map: "{{ steps.distill_panel_ki.output.content.esql_map }}"
+              example_esql: "{{ steps.distill_panel_ki.output.content.example_esql }}"
+    iteration-on-failure:
+      continue: true
+
+  # ---------------------------------------------------------------------------
+  # Step 4: One dashboard-level orientation KI that routes to the panel KIs.
+  # ---------------------------------------------------------------------------
+  - name: distill_dashboard_ki
+    type: ai.prompt
+    timeout: 120s
+    on-failure:
+      continue: true
+    with:
+      prompt: |
+        Write a short orientation Knowledge Indicator for a whole Kibana dashboard. Its job is
+        to tell an AI agent what the dashboard covers and to route the agent to the right panel.
+        Ground everything in the provided data. Do not invent panels.
+
+        Dashboard title: {{ variables.dashboard_title }}
+        Dashboard description: {{ variables.dashboard_description }}
+        Panels (JSON, stringified): {{ variables.dashboard_panels_json }}
+      schema:
+        type: object
+        properties:
+          display_name:
+            type: string
+            description: Human-readable dashboard name (<= 8 words).
+          overview:
+            type: string
+            description: 2-4 sentences on what this dashboard covers and the questions it can help answer.
+          panels_summary:
+            type: array
+            description: One short line per panel, "panel title — what it shows".
+            items:
+              type: string
+        required:
+          - display_name
+          - overview
+
+  - name: sink_dashboard_ki
+    type: elasticsearch.index
+    on-failure:
+      continue: true
+    with:
+      index: "{{ consts.target_index }}"
+      id: "dashboard_ki:{{ inputs.dashboardId }}"
+      refresh: wait_for
+      document:
+        id: "dashboard_ki:{{ inputs.dashboardId }}"
+        type: dashboard_ki
+        title: "{{ steps.distill_dashboard_ki.output.content.display_name | default: variables.dashboard_title }}"
+        origin:
+          uri: "dashboard_ki://{{ inputs.dashboardId }}"
+        ingestion_method: manual
+        created_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        updated_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        spaces:
+          - "{{ inputs.spaceId }}"
+        permissions:
+          kibana:
+            privileges:
+              - name: "saved_object:dashboard/get"
+        tags:
+          - knowledge-indicator
+          - dashboard
+        references:
+          - uri: "dashboard://{{ inputs.dashboardId }}"
+        discovery_labels:
+          - value: "{{ variables.dashboard_title }}"
+            kind: dashboard
+        content: |
+          Dashboard "{{ variables.dashboard_title }}".
+          {{ steps.distill_dashboard_ki.output.content.overview }}
+          Panels: {{ steps.distill_dashboard_ki.output.content.panels_summary | join: " | " }}
+          For specific numbers, use the per-panel KIs (origin dashboard_panel_ki://{{ inputs.dashboardId }}:<panelId>) and run their ES|QL map.
+        description: |
+          Orientation KI for the "{{ variables.dashboard_title }}" dashboard.
+        extended_attrs:
+          dashboard_id: "{{ inputs.dashboardId }}"
+          dashboard_title: "{{ variables.dashboard_title }}"

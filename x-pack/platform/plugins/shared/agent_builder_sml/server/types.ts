@@ -18,6 +18,10 @@ import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type {
   SmlTypeDefinition,
   SmlSearchResult,
   SmlSearchFilters,
@@ -32,12 +36,14 @@ export interface AgentBuilderSmlSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   contextEngine?: ContextEnginePluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgentBuilderSmlStartDependencies {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface AgentBuilderSmlPluginSetup {

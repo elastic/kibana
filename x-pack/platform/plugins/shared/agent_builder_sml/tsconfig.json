@@ -28,6 +28,8 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/es-errors",
-    "@kbn/context-engine-plugin"
+    "@kbn/context-engine-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions"
   ]
 }
