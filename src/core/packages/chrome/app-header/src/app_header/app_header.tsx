@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect } from 'react';
+import type { DistributiveOmit } from '@elastic/eui';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import type { AppHeaderBack, AppHeaderConfig, AppHeaderSpacing, AppHeaderTitle } from '../types';
 import { useHasLegacyActionMenu } from './hooks/chrome';
@@ -23,9 +24,7 @@ import { AppHeaderDescription } from './app_header_description';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
 
-type AppHeaderConfigWithoutBack<T> = T extends AppHeaderConfig ? Omit<T, 'back'> : never;
-
-export type AppHeaderViewProps = AppHeaderConfigWithoutBack<AppHeaderConfig> & {
+export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
   back?: AppHeaderBack | AppHeaderBack[];
   /**
    * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
