@@ -62,7 +62,7 @@ describe('registerDeploymentStatsRoute', () => {
     mockFetchIndexStats.mockResolvedValue({
       indicesCount: 3,
       storeSizeBytes: 1024,
-      vectorDocsCount: 5,
+      vectorsCount: 5,
     });
     mockFetchDashboardsCount.mockResolvedValue(2);
 
@@ -75,7 +75,7 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         indicesCount: 3,
         storeSizeBytes: 1024,
-        vectorDocsCount: 5,
+        vectorsCount: 5,
         dashboardsCount: 2,
       },
     });
@@ -85,7 +85,7 @@ describe('registerDeploymentStatsRoute', () => {
     mockFetchIndexStats.mockResolvedValue({
       indicesCount: 0,
       storeSizeBytes: 0,
-      vectorDocsCount: 0,
+      vectorsCount: 0,
     });
     mockFetchDashboardsCount.mockResolvedValue(0);
 
@@ -102,7 +102,7 @@ describe('registerDeploymentStatsRoute', () => {
     mockFetchIndexStats.mockResolvedValue({
       indicesCount: null,
       storeSizeBytes: null,
-      vectorDocsCount: null,
+      vectorsCount: null,
     });
     mockFetchDashboardsCount.mockResolvedValue(null);
 
@@ -115,7 +115,7 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         indicesCount: null,
         storeSizeBytes: null,
-        vectorDocsCount: null,
+        vectorsCount: null,
         dashboardsCount: null,
       },
     });

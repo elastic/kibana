@@ -17,7 +17,7 @@ export interface OnboardingApiPaths {
    *  Returns `{ id, name, encoded }` when a new key is created.
    *  Returns `{ id: null, name: null, encoded: null }` when an active onboarding key already exists. */
   apiKey: string;
-  /** GET endpoint returning `{ indicesCount, vectorDocsCount, storeSizeBytes }`. */
+  /** GET endpoint returning `{ indicesCount, vectorsCount, storeSizeBytes }`. */
   deploymentStats: string;
 }
 

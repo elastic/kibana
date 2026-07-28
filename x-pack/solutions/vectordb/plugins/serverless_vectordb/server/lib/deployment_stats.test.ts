@@ -11,6 +11,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { fetchDashboardsCount, fetchIndexStats } from './deployment_stats';
 
 describe('fetchIndexStats', () => {
@@ -42,29 +43,44 @@ describe('fetchIndexStats', () => {
   };
 
   /**
-   * Derives the ES|QL count from the indices named in the `FROM` clause so that `vectorDocsCount`
-   * assertions fail when the wrong indices are selected. A fixed count would pass no matter which
-   * indices were queried, leaving misclassification detectable only via the query string.
+   * Derives each `exists` aggregation's `doc_count` from the searched indices and field so that
+   * `vectorsCount` assertions fail when the wrong indices or fields are counted. Fixed counts would
+   * pass no matter what was requested, leaving misclassification detectable only via the request.
    */
-  const mockEsqlDocCounts = (docCountsByIndex: Record<string, number>) => {
-    client.asCurrentUser.esql.query.mockImplementation((async (request: { query: string }) => {
-      const [, fromClause] = /^FROM (.+) \| STATS/.exec(request.query) ?? [];
-      if (!fromClause) throw new Error(`Unparseable ES|QL query: ${request.query}`);
+  const mockVectorFieldDocCounts = (docCountsByIndex: Record<string, Record<string, number>>) => {
+    client.asCurrentUser.search.mockImplementation((async (request: SearchRequest) => {
+      const indices = request.index as string[];
 
-      const totalDocCount = fromClause
-        .split(',')
-        .map((name) => name.replace(/^"|"$/g, ''))
-        .reduce((sum, name) => {
-          const indexDocCount = docCountsByIndex[name];
-          if (indexDocCount === undefined) {
-            throw new Error(`ES|QL queried an index that is not a vector index: ${name}`);
+      const aggregations = Object.entries(request.aggs ?? {}).map(([aggName, aggregation]) => {
+        const { field } = (aggregation as { filter: { exists: { field: string } } }).filter.exists;
+
+        const docCount = indices.reduce((sum, indexName) => {
+          const docCountsByField = docCountsByIndex[indexName];
+          if (docCountsByField === undefined) {
+            throw new Error(`Searched an index that is not a vector index: ${indexName}`);
           }
-          return sum + indexDocCount;
+          return sum + (docCountsByField[field] ?? 0);
         }, 0);
 
-      return { columns: [{ name: 'doc_count', type: 'long' }], values: [[totalDocCount]] };
+        return [aggName, { doc_count: docCount }];
+      });
+
+      return { aggregations: Object.fromEntries(aggregations) };
     }) as any);
   };
+
+  /** The indices and vector fields each search counted, in call order. */
+  const searchedIndicesAndFields = () =>
+    client.asCurrentUser.search.mock.calls.map(([request]) => {
+      const { index, aggs } = request as SearchRequest;
+      return {
+        indices: index as string[],
+        fields: Object.values(aggs ?? {}).map(
+          (aggregation) =>
+            (aggregation as { filter: { exists: { field: string } } }).filter.exists.field
+        ),
+      };
+    });
 
   it('excludes dot-prefixed indices and aggregates count/size', async () => {
     mockMetering([
@@ -78,8 +94,8 @@ describe('fetchIndexStats', () => {
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 100, vectorDocsCount: 0 });
-    expect(client.asCurrentUser.esql.query).not.toHaveBeenCalled();
+    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 100, vectorsCount: 0 });
+    expect(client.asCurrentUser.search).not.toHaveBeenCalled();
   });
 
   it('restricts field caps to vector-relevant field types and skips metadata fields', async () => {
@@ -99,8 +115,9 @@ describe('fetchIndexStats', () => {
     });
   });
 
-  it('detects semantic_text via the field caps inference flag and counts docs via ES|QL', async () => {
-    // metering over-reports num_docs (20) for the semantic_text index; ES|QL returns the real 10.
+  it('counts documents holding a value for the field with an exists aggregation', async () => {
+    // metering over-reports num_docs (20) for the semantic_text index because it counts the nested
+    // chunk documents; aggregations only see the 10 top-level documents.
     // `semantic_text` is reported as `text` by field caps, so it is detected via `inference: true`.
     mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
     mockFieldCaps({
@@ -108,21 +125,66 @@ describe('fetchIndexStats', () => {
         text: { type: 'text', searchable: true, aggregatable: false, inference: true },
       },
     });
-    mockEsqlDocCounts({ vectordb: 10 });
+    mockVectorFieldDocCounts({ vectordb: { semantic_content: 10 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
+    expect(client.asCurrentUser.search).toHaveBeenCalledWith({
+      index: ['vectordb'],
+      size: 0,
+      track_total_hits: false,
+      ignore_unavailable: true,
+      aggs: { vector_field_0: { filter: { exists: { field: 'semantic_content' } } } },
+    });
+    expect(result.vectorsCount).toBe(10);
   });
 
-  it('counts docs from every vector index when only one of them uses semantic_text', async () => {
-    // Three indices holding 5 docs each. `content` is `semantic_text` in `semantic-index` and plain
-    // `text` in the other two, so field caps merges all three into one `text` capability with
+  it('counts each populated vector field of a document separately', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
+    mockFieldCaps({
+      embedding: {
+        dense_vector: { type: 'dense_vector', searchable: true, aggregatable: false },
+      },
+      content: {
+        text: { type: 'text', searchable: true, aggregatable: false, inference: true },
+      },
+    });
+    // All 10 documents carry an embedding; 7 of them also carry semantic content.
+    mockVectorFieldDocCounts({ vectordb: { embedding: 10, content: 7 } });
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['vectordb'], fields: ['content', 'embedding'] },
+    ]);
+    // 17 rather than 10 proves the second field of each document is counted too.
+    expect(result.vectorsCount).toBe(17);
+  });
+
+  it('ignores the internal chunk subfields a semantic_text field indexes its embeddings in', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 30, size_in_bytes: 500 }]);
+    mockFieldCaps({
+      content: {
+        text: { type: 'text', searchable: true, aggregatable: false, inference: true },
+      },
+      'content.inference.chunks.embeddings': {
+        sparse_vector: { type: 'sparse_vector', searchable: true, aggregatable: false },
+      },
+    });
+    mockVectorFieldDocCounts({ vectordb: { content: 10 } });
+
+    const result = await fetchIndexStats(client, logger);
+
+    // Counting the chunk subfield as well would report the same 10 values twice.
+    expect(searchedIndicesAndFields()).toEqual([{ indices: ['vectordb'], fields: ['content'] }]);
+    expect(result.vectorsCount).toBe(10);
+  });
+
+  it('counts every vector index when only one of them uses semantic_text', async () => {
+    // Three indices holding 5 documents each. `content` is `semantic_text` in `semantic-index` and
+    // plain `text` in the other two, so field caps merges all three into one `text` capability with
     // `inference: false` and no `indices` list. Reading only `inference` dropped `semantic-index`
-    // and under-reported the 15 docs as 10.
+    // and under-reported the 15 vectors as 10.
     mockMetering([
       // metering num_docs is inflated for semantic_text indices by the nested chunk documents.
       { name: 'semantic-index', num_docs: 10, size_in_bytes: 500 },
@@ -154,11 +216,20 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlDocCounts({ 'semantic-index': 5, 'dense-index': 5, 'byoe-index': 5 });
+    mockVectorFieldDocCounts({
+      'semantic-index': { content: 5 },
+      'dense-index': { embedding: 5 },
+      'byoe-index': { embedding: 5 },
+    });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(result.vectorDocsCount).toBe(15);
+    // The two indices mapping the same vector field are counted in a single search.
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['semantic-index'], fields: ['content'] },
+      { indices: ['dense-index', 'byoe-index'], fields: ['embedding'] },
+    ]);
+    expect(result.vectorsCount).toBe(15);
   });
 
   it('detects semantic_text when the same field is plain text in other indices', async () => {
@@ -181,14 +252,14 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlDocCounts({ 'semantic-only': 5, 'plain-a': 5, 'plain-b': 5 });
+    mockVectorFieldDocCounts({ 'semantic-only': { content: 5 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "semantic-only" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(5);
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['semantic-only'], fields: ['content'] },
+    ]);
+    expect(result.vectorsCount).toBe(5);
   });
 
   it('excludes non-inference indices from a partially mapped mixed inference field', async () => {
@@ -218,14 +289,14 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlDocCounts({ 'semantic-only': 5, 'plain-a': 5, 'no-content': 5 });
+    mockVectorFieldDocCounts({ 'semantic-only': { content: 5 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "semantic-only" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(5);
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['semantic-only'], fields: ['content'] },
+    ]);
+    expect(result.vectorsCount).toBe(5);
   });
 
   it('detects an inference field reported by its own `type` (no inference flag)', async () => {
@@ -237,14 +308,14 @@ describe('fetchIndexStats', () => {
         semantic_text: { type: 'semantic_text', searchable: true, aggregatable: false },
       },
     });
-    mockEsqlDocCounts({ vectordb: 10 });
+    mockVectorFieldDocCounts({ vectordb: { semantic_content: 10 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['vectordb'], fields: ['semantic_content'] },
+    ]);
+    expect(result.vectorsCount).toBe(10);
   });
 
   it('detects a `semantic` field by its own reported type', async () => {
@@ -254,17 +325,15 @@ describe('fetchIndexStats', () => {
         semantic: { type: 'semantic', searchable: true, aggregatable: false },
       },
     });
-    mockEsqlDocCounts({ vectordb: 10 });
+    mockVectorFieldDocCounts({ vectordb: { body: 10 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
+    expect(searchedIndicesAndFields()).toEqual([{ indices: ['vectordb'], fields: ['body'] }]);
+    expect(result.vectorsCount).toBe(10);
   });
 
-  it('only queries indices whose field caps report a vector field', async () => {
+  it('only searches indices whose field caps report a vector field', async () => {
     mockMetering([
       { name: 'vectordb', num_docs: 10, size_in_bytes: 500 },
       { name: 'plain-text', num_docs: 5, size_in_bytes: 50 },
@@ -282,15 +351,12 @@ describe('fetchIndexStats', () => {
       },
       title: { text: { type: 'text', searchable: true, aggregatable: false, inference: false } },
     });
-    mockEsqlDocCounts({ vectordb: 10, 'plain-text': 5 });
+    mockVectorFieldDocCounts({ vectordb: { embedding: 10 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
-    );
-    // 10 rather than 15 proves `plain-text` docs are excluded.
-    expect(result.vectorDocsCount).toBe(10);
+    expect(searchedIndicesAndFields()).toEqual([{ indices: ['vectordb'], fields: ['embedding'] }]);
+    expect(result.vectorsCount).toBe(10);
   });
 
   it('does not classify indices where the vector field is unmapped', async () => {
@@ -316,14 +382,14 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlDocCounts({ 'test-vector': 10, 'test-plain': 5000 });
+    mockVectorFieldDocCounts({ 'test-vector': { embedding: 10 } });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM "test-vector" | STATS doc_count = COUNT(*)' })
-    );
-    expect(result.vectorDocsCount).toBe(10);
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['test-vector'], fields: ['embedding'] },
+    ]);
+    expect(result.vectorsCount).toBe(10);
   });
 
   it('treats a vector field with no `indices` as present in every requested index', async () => {
@@ -342,19 +408,20 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlDocCounts({ 'vectordb-a': 10, 'vectordb-b': 10 });
+    mockVectorFieldDocCounts({
+      'vectordb-a': { embedding: 10 },
+      'vectordb-b': { embedding: 10 },
+    });
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: 'FROM "vectordb-a","vectordb-b" | STATS doc_count = COUNT(*)',
-      })
-    );
-    expect(result.vectorDocsCount).toBe(20);
+    expect(searchedIndicesAndFields()).toEqual([
+      { indices: ['vectordb-a', 'vectordb-b'], fields: ['embedding'] },
+    ]);
+    expect(result.vectorsCount).toBe(20);
   });
 
-  it('batches the ES|QL count when there are more than 500 vector indices', async () => {
+  it('batches the search when there are more than 500 vector indices', async () => {
     const indices = Array.from({ length: 501 }, (_, i) => ({
       name: `vectordb-${i}`,
       num_docs: 1,
@@ -367,29 +434,29 @@ describe('fetchIndexStats', () => {
         dense_vector: { type: 'dense_vector', searchable: true, aggregatable: false },
       },
     });
-    mockEsqlDocCounts(Object.fromEntries(indices.map(({ name }) => [name, 1])));
+    mockVectorFieldDocCounts(
+      Object.fromEntries(indices.map(({ name }) => [name, { embedding: 1 }]))
+    );
 
     const result = await fetchIndexStats(client, logger);
 
-    expect(client.asCurrentUser.esql.query).toHaveBeenCalledTimes(2);
-    const queries = client.asCurrentUser.esql.query.mock.calls.map(
-      ([request]) => (request as { query: string }).query
-    );
-    expect(queries[0]).toContain('"vectordb-0"');
-    expect(queries[0]).toContain('"vectordb-499"');
-    expect(queries[0]).not.toContain('"vectordb-500"');
-    expect(queries[1]).toBe('FROM "vectordb-500" | STATS doc_count = COUNT(*)');
-    expect(result.vectorDocsCount).toBe(501);
+    const [firstSearch, secondSearch] = searchedIndicesAndFields();
+    expect(client.asCurrentUser.search).toHaveBeenCalledTimes(2);
+    expect(firstSearch.indices).toHaveLength(500);
+    expect(firstSearch.indices[0]).toBe('vectordb-0');
+    expect(firstSearch.indices[499]).toBe('vectordb-499');
+    expect(secondSearch.indices).toEqual(['vectordb-500']);
+    expect(result.vectorsCount).toBe(501);
   });
 
-  it('returns a null vectorDocsCount (not 0) when the vector lookup fails', async () => {
+  it('returns a null vectorsCount (not 0) when the vector lookup fails', async () => {
     mockMetering([{ name: 'vectordb', num_docs: 10, size_in_bytes: 500 }]);
     client.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
 
     const result = await fetchIndexStats(client, logger);
 
-    // index/size counts are still valid; only the vector doc count is unavailable
-    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 500, vectorDocsCount: null });
+    // index/size counts are still valid; only the vector count is unavailable
+    expect(result).toEqual({ indicesCount: 1, storeSizeBytes: 500, vectorsCount: null });
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -401,7 +468,7 @@ describe('fetchIndexStats', () => {
     expect(result).toEqual({
       indicesCount: null,
       storeSizeBytes: null,
-      vectorDocsCount: null,
+      vectorsCount: null,
     });
     expect(logger.warn).toHaveBeenCalled();
   });
@@ -412,7 +479,7 @@ describe('fetchIndexStats', () => {
     const result = await fetchIndexStats(client, logger);
 
     // a genuinely empty deployment reports real zeros, not null
-    expect(result).toEqual({ indicesCount: 0, storeSizeBytes: 0, vectorDocsCount: 0 });
+    expect(result).toEqual({ indicesCount: 0, storeSizeBytes: 0, vectorsCount: 0 });
     expect(client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
   });
 });

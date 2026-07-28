@@ -69,7 +69,7 @@ export const HomePage = () => {
   const { stats, isLoading } = useDeploymentStats();
   const { agentsCount, isLoading: isAgentsCountLoading } = useAgentsCount();
   const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
-  const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
+  const hasData = (stats.vectorsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
 
   const statTiles = [
     {
@@ -81,7 +81,7 @@ export const HomePage = () => {
     {
       key: 'vectors',
       label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorDocsCount),
+      value: formatNumber(stats.vectorsCount),
       isLoading,
     },
     {

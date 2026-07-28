@@ -15,7 +15,7 @@ interface WorkflowsStats {
 
 interface DeploymentStatsResponse {
   indicesCount: number | null;
-  vectorDocsCount: number | null;
+  vectorsCount: number | null;
   storeSizeBytes: number | null;
   dashboardsCount: number | null;
 }
@@ -25,7 +25,7 @@ interface DeploymentStats extends DeploymentStatsResponse {
 
 const initialStats: DeploymentStats = {
   indicesCount: null,
-  vectorDocsCount: null,
+  vectorsCount: null,
   storeSizeBytes: null,
   workflowsCount: null,
   dashboardsCount: null,
@@ -46,7 +46,7 @@ export const useDeploymentStats = () => {
 
       return {
         indicesCount: esStats?.indicesCount ?? null,
-        vectorDocsCount: esStats?.vectorDocsCount ?? null,
+        vectorsCount: esStats?.vectorsCount ?? null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
         workflowsCount: workflowsResponse?.workflows
           ? (workflowsResponse.workflows.enabled ?? 0) + (workflowsResponse.workflows.disabled ?? 0)
