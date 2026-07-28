@@ -32,7 +32,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
-import type { DataViewListItemEnhanced } from './dataview_list';
+import { DATA_SOURCE_TYPES, type DiscoverSessionListItem } from './data_source_types';
+import type { DataViewListItemEnhanced, DiscoverSessionListItemEnhanced } from './dataview_list';
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
@@ -46,6 +47,13 @@ const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => 
   managed: adHocDataView.managed,
 });
 
+const mapDiscoverSession = (
+  discoverSession: DiscoverSessionListItem
+): DiscoverSessionListItemEnhanced => ({
+  ...discoverSession,
+  dataSourceType: DATA_SOURCE_TYPES.DISCOVER_SESSION,
+});
+
 const shrinkableContainerCss = css`
   min-width: 0;
   flex-direction: row;
@@ -54,9 +62,12 @@ const shrinkableContainerCss = css`
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
+  currentDiscoverSessionId,
   adHocDataViews,
   savedDataViews,
+  savedDiscoverSessions,
   onChangeDataView,
+  onChangeDiscoverSession,
   onAddField,
   onDataViewCreated,
   trigger,
@@ -66,11 +77,15 @@ export function ChangeDataView({
   onCreateDefaultAdHocDataView,
   onClosePopover,
   getDataViewHelpText,
+  showDataSourceTypeFilter,
   compressed = true,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
+  const [discoverSessionsList, setDiscoverSessionsList] = useState<
+    DiscoverSessionListItemEnhanced[]
+  >([]);
 
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -102,11 +117,13 @@ export function ChangeDataView({
         ? savedDataViews
         : (await data.dataViews.getIdsWithTitle()) ?? [];
       const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
+      const discoverSessionRefs = savedDiscoverSessions?.map(mapDiscoverSession) ?? [];
       setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs]);
+      setDiscoverSessionsList(discoverSessionRefs);
     };
 
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, savedDiscoverSessions]);
 
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
@@ -293,15 +310,24 @@ export function ChangeDataView({
         )}
         <DataViewSelector
           currentDataViewId={currentDataViewId}
+          currentDiscoverSessionId={currentDiscoverSessionId}
           searchListInputId={searchListInputId}
           dataViewsList={dataViewsList}
+          discoverSessionsList={discoverSessionsList}
           selectableProps={selectableProps}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
             closePopover();
             onChangeDataView(newId);
           }}
+          onChangeDiscoverSession={async (newId) => {
+            closePopover();
+            onChangeDiscoverSession?.(newId);
+          }}
           onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
+          showDataSourceTypeFilter={
+            showDataSourceTypeFilter ?? Boolean(savedDiscoverSessions?.length)
+          }
         />
       </React.Fragment>
     );
@@ -310,11 +336,14 @@ export function ChangeDataView({
   }, [
     closePopover,
     currentDataViewId,
+    currentDiscoverSessionId,
     dataViewEditor,
     dataViewsList,
+    discoverSessionsList,
     euiTheme.size.s,
     onAddField,
     onChangeDataView,
+    onChangeDiscoverSession,
     onCreateDefaultAdHocDataView,
     onCreate,
     onDataViewCreated,
@@ -322,6 +351,8 @@ export function ChangeDataView({
     onEditDataView,
     searchListInputId,
     selectableProps,
+    showDataSourceTypeFilter,
+    savedDiscoverSessions,
   ]);
 
   return (

@@ -11,28 +11,36 @@ import React, { Fragment, useEffect, useRef, useState } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
 import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewsList } from './dataview_list';
+import { DataViewsList, type DiscoverSessionListItemEnhanced } from './dataview_list';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { ExploreMatchingButton } from './explore_matching_button';
 
 export interface DataViewSelectorProps {
   currentDataViewId?: string;
+  currentDiscoverSessionId?: string;
   searchListInputId?: string;
   dataViewsList: DataViewListItem[];
+  discoverSessionsList?: DiscoverSessionListItemEnhanced[];
   selectableProps?: EuiSelectableProps;
   setPopoverIsOpen: (isOpen: boolean) => void;
   onChangeDataView: (dataViewId: string) => void;
+  onChangeDiscoverSession?: (discoverSessionId: string) => void;
   onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
+  showDataSourceTypeFilter?: boolean;
 }
 
 export const DataViewSelector = ({
   currentDataViewId,
+  currentDiscoverSessionId,
   searchListInputId,
   dataViewsList,
+  discoverSessionsList,
   selectableProps,
   setPopoverIsOpen,
   onChangeDataView,
+  onChangeDiscoverSession,
   onCreateDefaultAdHocDataView,
+  showDataSourceTypeFilter,
 }: DataViewSelectorProps) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { dataViews } = kibana.services;
@@ -67,8 +75,11 @@ export const DataViewSelector = ({
     <Fragment>
       <DataViewsList
         dataViewsList={dataViewsList}
+        discoverSessionsList={discoverSessionsList}
         onChangeDataView={onChangeDataView}
+        onChangeDiscoverSession={onChangeDiscoverSession}
         currentDataViewId={currentDataViewId}
+        currentDiscoverSessionId={currentDiscoverSessionId}
         selectableProps={{
           ...(selectableProps || {}),
           // @ts-expect-error Some EUI weirdness
@@ -82,6 +93,7 @@ export const DataViewSelector = ({
           },
         }}
         searchListInputId={searchListInputId}
+        showDataSourceTypeFilter={showDataSourceTypeFilter}
       />
       <ExploreMatchingButton
         noDataViewMatches={noDataViewMatches}

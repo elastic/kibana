@@ -12,6 +12,7 @@ import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ChangeDataView } from './change_dataview';
+import type { DiscoverSessionListItem } from './data_source_types';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
   label: string;
@@ -55,6 +56,23 @@ export interface DataViewPickerProps {
    */
   savedDataViews?: DataViewListItem[];
   /**
+   * Saved Discover sessions to include in the picker.
+   * When provided together with `onChangeDiscoverSession`, the picker renders mixed data source rows.
+   */
+  savedDiscoverSessions?: DiscoverSessionListItem[];
+  /**
+   * The id of the selected Discover session.
+   */
+  currentDiscoverSessionId?: string;
+  /**
+   * Callback that is called when the user changes the currently selected Discover session.
+   */
+  onChangeDiscoverSession?: (newId: string) => void;
+  /**
+   * Shows a data source type filter. Defaults to true when Discover sessions are provided.
+   */
+  showDataSourceTypeFilter?: boolean;
+  /**
    * EuiSelectable properties.
    */
   selectableProps?: EuiSelectableProps;
@@ -88,9 +106,12 @@ export interface DataViewPickerProps {
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
+  currentDiscoverSessionId,
   adHocDataViews,
   savedDataViews,
+  savedDiscoverSessions,
   onChangeDataView,
+  onChangeDiscoverSession,
   onEditDataView,
   onAddField,
   onDataViewCreated,
@@ -100,13 +121,16 @@ export const DataViewPicker = ({
   onCreateDefaultAdHocDataView,
   isDisabled,
   getDataViewHelpText,
+  showDataSourceTypeFilter,
   compressed = true,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
       isMissingCurrent={isMissingCurrent}
       currentDataViewId={currentDataViewId}
+      currentDiscoverSessionId={currentDiscoverSessionId}
       onChangeDataView={onChangeDataView}
+      onChangeDiscoverSession={onChangeDiscoverSession}
       onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
@@ -115,9 +139,11 @@ export const DataViewPicker = ({
       trigger={trigger}
       adHocDataViews={adHocDataViews}
       savedDataViews={savedDataViews}
+      savedDiscoverSessions={savedDiscoverSessions}
       selectableProps={selectableProps}
       isDisabled={isDisabled}
       getDataViewHelpText={getDataViewHelpText}
+      showDataSourceTypeFilter={showDataSourceTypeFilter}
       compressed={compressed}
     />
   );

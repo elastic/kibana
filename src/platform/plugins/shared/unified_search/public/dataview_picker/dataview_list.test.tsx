@@ -10,7 +10,7 @@
 import React from 'react';
 import type { DataViewListItemEnhanced, DataViewsListProps } from './dataview_list';
 import { DataViewsList } from './dataview_list';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 
@@ -205,6 +205,73 @@ describe('DataView list component', () => {
       // Only matching dataview should be visible
       expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: /^dataview-2 / })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('mixed data sources', () => {
+    const discoverSessions = [
+      {
+        id: 'discover-session-1',
+        title: 'Discover session 1',
+        dataSourceType: 'discoverSession' as const,
+      },
+    ];
+
+    it('should list data views and Discover sessions', async () => {
+      renderWithContainer(
+        <DataViewsList
+          {...props}
+          discoverSessionsList={discoverSessions}
+          showDataSourceTypeFilter={true}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getAllByRole('option')).toHaveLength(3);
+        expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^Discover session 1 / })).toBeInTheDocument();
+      });
+    });
+
+    it('should call onChangeDiscoverSession when a Discover session is selected', async () => {
+      const user = userEvent.setup();
+      const onChangeDiscoverSession = jest.fn();
+
+      renderWithContainer(
+        <DataViewsList
+          {...props}
+          discoverSessionsList={discoverSessions}
+          onChangeDiscoverSession={onChangeDiscoverSession}
+          showDataSourceTypeFilter={true}
+        />
+      );
+
+      await user.click(screen.getByRole('option', { name: /^Discover session 1 / }));
+
+      expect(onChangeDiscoverSession).toHaveBeenCalledWith('discover-session-1');
+      expect(changeDataViewSpy).not.toHaveBeenCalled();
+    });
+
+    it('should filter by data source type', async () => {
+      const user = userEvent.setup();
+
+      renderWithContainer(
+        <DataViewsList
+          {...props}
+          discoverSessionsList={discoverSessions}
+          showDataSourceTypeFilter={true}
+        />
+      );
+
+      await user.click(screen.getByTestId('dataSourceTypeFilterButton'));
+      fireEvent.click(screen.getByTestId('dataSourceTypeFilter-dataView'));
+
+      await waitFor(() => {
+        expect(screen.queryByRole('option', { name: /^dataview-1 / })).not.toBeInTheDocument();
+        expect(screen.queryByRole('option', { name: /^dataview-2 / })).not.toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /^Discover session 1 / })).toBeInTheDocument();
+      });
     });
   });
 });

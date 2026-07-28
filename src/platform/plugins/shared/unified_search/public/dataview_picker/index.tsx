@@ -10,6 +10,8 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
+export { DATA_SOURCE_TYPES } from './data_source_types';
+export type { DataSourceType, DiscoverSessionListItem } from './data_source_types';
 export type { DataViewPickerProps } from './data_view_picker';
 
 /**
