@@ -51,10 +51,7 @@ export const tagAttributesSchema = z
 
 export const tagRequestAttributesSchema = tagAttributesSchema
   .extend({
-    color: z.string().optional().meta({
-      description:
-        'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
-    }),
+    color: tagAttributesSchema.shape.color.optional(),
   })
   .strict()
   .meta({
