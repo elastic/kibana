@@ -106,6 +106,10 @@ describe(
         openEntityFlyoutFromHomeByName('Charlie Brown');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
+        // Scroll into view: with `entityAnalyticsAnomalyDetails` enabled, the
+        // Anomalies section renders above ResolutionSection and can push it
+        // below the flyout's initially-visible scroll area.
+        cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
         openResolutionTabFromRightPanel();
@@ -317,6 +321,10 @@ describe(
         openEntityFlyoutFromHomeByName('web-server-prod-1');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
+        // Scroll into view: with `entityAnalyticsAnomalyDetails` enabled, the
+        // Anomalies section renders above ResolutionSection and can push it
+        // below the flyout's initially-visible scroll area.
+        cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
         openResolutionTabFromRightPanel();
@@ -346,6 +354,10 @@ describe(
         openEntityFlyoutFromHomeByName('api-gateway-prod');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
+        // Scroll into view: with `entityAnalyticsAnomalyDetails` enabled, the
+        // Anomalies section renders above ResolutionSection and can push it
+        // below the flyout's initially-visible scroll area.
+        cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
         openResolutionTabFromRightPanel();

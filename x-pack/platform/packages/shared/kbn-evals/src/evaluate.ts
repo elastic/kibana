@@ -292,6 +292,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
+      // Optional space assignment for offline runs. Comma-separated so a run can
+      // target several spaces; omitted means the target Kibana's default space.
+      const spaceIds = process.env.EVAL_SPACE_ID
+        ? process.env.EVAL_SPACE_ID.split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : undefined;
 
       const executionId = buildExecutionId({
         baseExecutionId: process.env.TEST_RUN_ID,
@@ -331,6 +338,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               suiteId,
               executionId,
               buildkiteMetadata,
+              spaceIds,
               source: { kind: 'event', event },
               log,
             });

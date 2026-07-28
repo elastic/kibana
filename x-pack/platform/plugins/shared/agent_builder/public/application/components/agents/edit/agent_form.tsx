@@ -55,6 +55,7 @@ import { isValidAgentAvatarColor } from '../../../utils/color';
 import { labels } from '../../../utils/i18n';
 import { zodResolver } from '../../../utils/zod_resolver';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentTypeBadge, isPreconfiguredAgentType } from '../list/agent_type_badge';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
@@ -146,6 +147,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   };
   const {
     state: agentState,
+    agentType,
     isLoading,
     isSubmitting,
     submit,
@@ -557,6 +559,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             <EuiFlexItem data-test-subj="agentFormPageTitle">
               {isCreateMode ? labels.agents.newAgent : agentName}
             </EuiFlexItem>
+            {!isCreateMode && isPreconfiguredAgentType(agentType) && (
+              <EuiFlexItem grow={false}>
+                <AgentTypeBadge agentType={agentType} />
+              </EuiFlexItem>
+            )}
             {!isCreateMode && agentState?.created_by?.username && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="agentFormOwnerLabel">

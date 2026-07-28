@@ -16,6 +16,7 @@ import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import {
   formatFlyoutTitle,
   RULE_TITLE,
@@ -84,6 +85,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
       if (enableNewFlyout) {
         openRuleFlyout({
           ruleId: resolvedRuleId,
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
           title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
         });
       } else {

@@ -78,6 +78,7 @@ const mockStoredSummary: PersistedEntityAiSummary = {
   recommended_actions: ['Stored action'],
   generated_at: 1_700_000_000_000,
   generated_by: 'stored-user',
+  author_profile_uid: 'u_stored_user',
   staleness: {
     enabled_signals: ['risk_score'],
     snapshot: { risk_score: 42 },
@@ -451,6 +452,7 @@ describe('useFetchEntityDetailsHighlights', () => {
         summaryAsText: '',
         generatedAt: mockStoredSummary.generated_at,
         generatedBy: mockStoredSummary.generated_by,
+        authorProfileUid: mockStoredSummary.author_profile_uid,
       });
     });
 

@@ -37,6 +37,7 @@ import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_ma
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAccessControlModeBadge } from './agent_access_control_mode_badge';
+import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
@@ -113,7 +114,16 @@ export const AgentsList: React.FC = () => {
         );
         return (
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem grow={false}>{nameContent}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s" wrap>
+                <EuiFlexItem grow={false}>{nameContent}</EuiFlexItem>
+                {isPreconfiguredAgentType(agent.type) && (
+                  <EuiFlexItem grow={false}>
+                    <AgentTypeBadge agentType={agent.type} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="s">
                 {agent.description}

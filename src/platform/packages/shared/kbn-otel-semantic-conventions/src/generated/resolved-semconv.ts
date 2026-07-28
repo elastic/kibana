@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 145
- * Metric groups: 534
+ * Metric groups: 537
  * Hardcoded fields: 34
- * Total fields: 1201
+ * Total fields: 1202
  *
  * @internal
  *
- * WARNING: This object contains 1201+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1202+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -3119,6 +3119,13 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'o',
   },
+  'messaging.kafka.cluster.id': {
+    name: 'messaging.kafka.cluster.id',
+    description:
+      'The Kafka cluster id, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.',
+    type: 'keyword',
+    example: 'MkU3OEVBNTcwNTJENDM2Qk',
+  },
   'messaging.kafka.message.key': {
     name: 'messaging.kafka.message.key',
     description:
@@ -3477,11 +3484,6 @@ export const semconvFlat = {
     description: 'Container memory available.',
     type: 'double',
   },
-  'metrics.container.memory.paging.faults': {
-    name: 'metrics.container.memory.paging.faults',
-    description: 'Container memory paging faults.',
-    type: 'double',
-  },
   'metrics.container.memory.rss': {
     name: 'metrics.container.memory.rss',
     description: 'Container memory RSS.',
@@ -3500,6 +3502,11 @@ export const semconvFlat = {
   'metrics.container.network.io': {
     name: 'metrics.container.network.io',
     description: 'Network bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.paging.faults': {
+    name: 'metrics.container.paging.faults',
+    description: 'Container memory paging faults.',
     type: 'double',
   },
   'metrics.container.uptime': {
@@ -4421,11 +4428,6 @@ export const semconvFlat = {
     description: 'Node memory available.',
     type: 'double',
   },
-  'metrics.k8s.node.memory.paging.faults': {
-    name: 'metrics.k8s.node.memory.paging.faults',
-    description: 'Node memory paging faults.',
-    type: 'double',
-  },
   'metrics.k8s.node.memory.rss': {
     name: 'metrics.k8s.node.memory.rss',
     description: 'Node memory RSS.',
@@ -4449,6 +4451,11 @@ export const semconvFlat = {
   'metrics.k8s.node.network.io': {
     name: 'metrics.k8s.node.network.io',
     description: 'Network bytes for the Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.paging.faults': {
+    name: 'metrics.k8s.node.paging.faults',
+    description: 'Node memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.node.pod.allocatable': {
@@ -4537,11 +4544,6 @@ export const semconvFlat = {
     description: 'Pod memory available.',
     type: 'double',
   },
-  'metrics.k8s.pod.memory.paging.faults': {
-    name: 'metrics.k8s.pod.memory.paging.faults',
-    description: 'Pod memory paging faults.',
-    type: 'double',
-  },
   'metrics.k8s.pod.memory.rss': {
     name: 'metrics.k8s.pod.memory.rss',
     description: 'Pod memory RSS.',
@@ -4565,6 +4567,11 @@ export const semconvFlat = {
   'metrics.k8s.pod.network.io': {
     name: 'metrics.k8s.pod.network.io',
     description: 'Network bytes for the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.paging.faults': {
+    name: 'metrics.k8s.pod.paging.faults',
+    description: 'Pod memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.pod.status.phase': {

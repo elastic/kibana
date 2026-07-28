@@ -24,6 +24,7 @@ import { SignificantEventItem } from './significant_event_item';
 export interface SignificantEventListProps {
   title: string;
   events: SignificantEvent[];
+  selectedEventUuid?: string;
   statusColor: 'danger' | 'success';
   onEventClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
@@ -33,6 +34,7 @@ export interface SignificantEventListProps {
 export function SignificantEventList({
   title,
   events,
+  selectedEventUuid,
   statusColor,
   onEventClick,
   onChatClick,
@@ -105,6 +107,7 @@ export function SignificantEventList({
             >
               <SignificantEventItem
                 event={event}
+                isSelected={event.event_uuid === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
               />
