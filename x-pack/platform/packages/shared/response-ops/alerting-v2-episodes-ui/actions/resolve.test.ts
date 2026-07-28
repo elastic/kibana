@@ -65,7 +65,7 @@ describe('createResolveAction', () => {
 
   it('execute: POSTs unique-by-group DEACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createResolveAction(deps).execute({
       episodes: [

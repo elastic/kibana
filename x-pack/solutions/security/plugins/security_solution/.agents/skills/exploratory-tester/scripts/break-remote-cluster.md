@@ -14,10 +14,20 @@ Fill in `<REMOTE_ALIAS>` (from `config.json → environment.ccs.remote_cluster_a
 
 ### 1. Capture the exact live config — do this first
 ```bash
-curl -s -H "Authorization: ApiKey <API_KEY>" \
-  "<SOURCE_KIBANA_URL>/api/remote_clusters" | python3 -m json.tool
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/capture-remote-cluster.py \
+  --session-dir "$SESSION_DIR" \
+  --alias "<REMOTE_ALIAS>"
 ```
-Save the object for `<REMOTE_ALIAS>` verbatim — you will restore it byte-for-byte. Note `mode` (`proxy` or `sniff`), `proxyAddress` or `seeds`, `serverName`, and `skipUnavailable`.
+The script persists only the writable update payload in
+`config.json → ccs_restore.payload`; it excludes read-only status fields from
+the GET response. It also persists the restoration provenance
+(`isConfiguredByNode` and `hasDeprecatedProxySetting`) and the exact
+persistent/transient Elasticsearch settings layers. Legacy `proxy` settings
+remain in the raw snapshot instead of being sent through the Kibana serializer,
+and transient settings are restored to the transient layer. Inspect the
+payload and provenance and show them to the user before continuing. Note `mode`
+(`proxy` or `sniff`), `proxyAddress` or `seeds`, `serverName`,
+`skipUnavailable`, and `hasDeprecatedProxySetting`.
 
 ### 2. Get user confirmation
 
@@ -27,15 +37,21 @@ Show the user the captured config and ask, verbatim:
 
 Wait for an explicit yes. On anything else, skip the scenario and log the affected checklist step as `skipped: user declined remote-cluster break`.
 
-### 3. Break it — invalid proxyAddress, everything else unchanged
-
-Keep `mode`, `serverName`, and `skipUnavailable` exactly as captured; change only the address to something that cannot resolve:
+### 3. Journal and break it — invalid address, everything else unchanged
 ```bash
-curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
-  "<SOURCE_KIBANA_URL>/api/remote_clusters/<REMOTE_ALIAS>" \
-  -d '{ "mode": "<captured mode>", "proxyAddress": "invalid.broken.example:9400", "serverName": "<captured serverName>", "skipUnavailable": <captured skipUnavailable> }'
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/break-remote-cluster.py \
+  --session-dir "$SESSION_DIR" \
+  --alias "<REMOTE_ALIAS>"
 ```
-(For a `sniff`-mode cluster, replace `proxyAddress` with `"seeds": ["invalid.broken.example:9300"]`.)
+The script records `ccs_state="mutation_pending"` before issuing the shared
+cluster request, and changes it to `modified` only after the request succeeds.
+If the process crashes or the request fails, cleanup still treats the pending
+state as requiring restoration. For a persistent or transient snapshot it
+mutates the original Elasticsearch settings layer directly; for a
+node-configured cluster it uses the Kibana API to create a temporary
+persistent override. It never sends `hasDeprecatedProxySetting` through the
+Kibana serializer, so legacy proxy configuration is not silently converted to
+`proxy: null`.
 
 ### 4. Verify it is actually broken
 ```bash
@@ -49,19 +65,35 @@ Run the CCS "unreachable remote" flows now. Capture evidence exactly as for any 
 
 ### 6. Restore the exact original config
 ```bash
-curl -s -X PUT -H "Authorization: ApiKey <API_KEY>" -H "Content-Type: application/json" \
-  "<SOURCE_KIBANA_URL>/api/remote_clusters/<REMOTE_ALIAS>" \
-  -d '<the exact object captured in step 1>'
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-remote-cluster.py \
+  --session-dir "$SESSION_DIR"
 ```
 
-### 7. Verify reconnection before continuing
-```bash
-curl -s -H "Authorization: ApiKey <API_KEY>" "<SOURCE_ES_URL>/_remote/info?pretty"
-```
-Confirm `connected: true` again and that the socket/connection count matches what step 1 showed. **Do not proceed to the next flow, and do not end the session, until reconnection is verified.** If restore fails, tell the user immediately with the captured original config so they can restore it manually — treat a broken shared deployment as urgent.
+The script restores the raw persistent/transient settings layers from the
+durable snapshot, verifies the complete configuration and provenance, polls
+until `<REMOTE_ALIAS>.connected == true`, and only then sets
+`ccs_state="restored"`. **Do not proceed to the next flow, and do not end the
+session, until this command succeeds.** If restore fails, tell the user
+immediately with the persisted snapshot so they can restore it manually —
+treat a broken shared deployment as urgent.
 
 ## Notes
 
 - Only the SOURCE deployment holds the remote-cluster definition; run every command here against the SOURCE URLs, never the REMOTE cluster's.
+- Capture, break, and restore take a deployment-scoped lock derived from
+  `environment.es_url` (override directory with
+  `EXPLORATORY_TESTER_CCS_LOCK_DIR`) so concurrent exploratory sessions against
+  the same SOURCE cluster cannot mutate CCS at the same time.
+- Break also writes a deployment lease for the current `session_id`. While that
+  lease exists — including after the TTL clock expires — other sessions cannot
+  capture or break the same SOURCE CCS config (they would otherwise snapshot the
+  already-broken cluster or steal restore rights mid-exploration). Restore
+  releases the lease; `restore-and-cleanup-session.py` keeps it across restore
+  and releases an owned lease once CCS is safe again (even if resource cleanup
+  fails). Crash recovery of an abandoned *expired* lease requires an explicit
+  `break-remote-cluster.py --force-lease` after confirming the owning session is
+  dead; unexpired foreign leases can never be forced.
 - Break as late as possible and restore as early as possible — keep the shared deployment degraded for the shortest window that still lets you observe the UI.
-- If the session cap fires or the browser dies mid-scenario, restore first (steps 6-7), then handle the timeout/loss. Restoration takes priority over logging.
+- If the session cap fires or the browser dies mid-scenario, run step 6 first
+  from the persisted `SESSION_DIR`, then handle the timeout/loss. Restoration
+  takes priority over logging.
