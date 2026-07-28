@@ -13,13 +13,26 @@ import {
   countPolicyExecutionEventsRequestSchema,
   countPolicyExecutionEventsResponseSchema,
   errorResponseSchema,
+  type CountPolicyExecutionEventsRequest,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
+import type { CountNewEventsSinceArgs } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
-import { toCountNewEventsSinceArgs } from '../request_mappers';
+
+export const toCountNewEventsSinceArgs = ({
+  since,
+  search,
+  rule_ids: ruleIds,
+  outcome,
+}: CountPolicyExecutionEventsRequest): Omit<CountNewEventsSinceArgs, 'request'> => ({
+  since,
+  search,
+  ruleIds,
+  outcome,
+});
 
 @injectable()
 export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {

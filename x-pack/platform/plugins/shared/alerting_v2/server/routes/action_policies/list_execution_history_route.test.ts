@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { createRouteDependencies } from '../test_utils';
-import { ListExecutionHistoryRoute } from './list_execution_history_route';
+import {
+  ListExecutionHistoryRoute,
+  toListExecutionHistoryArgs,
+} from './list_execution_history_route';
 
 const createMocks = () => {
   const deps = createRouteDependencies();
@@ -108,5 +111,27 @@ describe('ListExecutionHistoryRoute', () => {
 
     expect(mocks.deps.response.customError).toHaveBeenCalledTimes(1);
     expect(mocks.deps.response.ok).not.toHaveBeenCalled();
+  });
+});
+
+describe('toListExecutionHistoryArgs', () => {
+  it('maps the snake_case request to camelCase client args (without request)', () => {
+    expect(
+      toListExecutionHistoryArgs({
+        page: 1,
+        per_page: 100,
+        search: 'foo',
+        rule_ids: ['rule-1', 'rule-2'],
+        outcome: 'dispatched',
+        episode_ids: ['ep-1'],
+      })
+    ).toEqual({
+      page: 1,
+      perPage: 100,
+      search: 'foo',
+      ruleIds: ['rule-1', 'rule-2'],
+      outcome: 'dispatched',
+      episodeIds: ['ep-1'],
+    });
   });
 });

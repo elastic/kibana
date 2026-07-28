@@ -8,12 +8,34 @@
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import type {
+  ListPolicyExecutionHistoryRequest,
   ListPolicyExecutionHistoryResponse,
   PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
-import { toListExecutionHistoryRequest } from './query_param_mappers';
+
+export interface ListExecutionHistoryUiParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  ruleIds?: string[];
+  outcome?: PolicyExecutionOutcomeFilter;
+}
+
+export const toListExecutionHistoryRequest = ({
+  page,
+  perPage,
+  search,
+  ruleIds,
+  outcome,
+}: ListExecutionHistoryUiParams): ListPolicyExecutionHistoryRequest => ({
+  page,
+  per_page: perPage,
+  search,
+  rule_ids: ruleIds,
+  outcome,
+});
 
 interface UseFetchExecutionHistoryParams {
   page: number;

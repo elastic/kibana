@@ -8,14 +8,33 @@
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import type {
+  CountPolicyExecutionEventsRequest,
   CountPolicyExecutionEventsResponse,
   PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
-import { toCountNewExecutionEventsRequest } from './query_param_mappers';
 
 const POLL_INTERVAL_MS = 10_000;
+
+export interface CountNewExecutionEventsUiParams {
+  since: string;
+  search?: string;
+  ruleIds?: string[];
+  outcome?: PolicyExecutionOutcomeFilter;
+}
+
+export const toCountNewExecutionEventsRequest = ({
+  since,
+  search,
+  ruleIds,
+  outcome,
+}: CountNewExecutionEventsUiParams): CountPolicyExecutionEventsRequest => ({
+  since,
+  search,
+  rule_ids: ruleIds,
+  outcome,
+});
 
 interface UseCountNewExecutionHistoryEventsParams {
   since: string;

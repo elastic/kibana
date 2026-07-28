@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowsSearchParams } from '@kbn/workflows';
-import type { GetRuleExecutionsUiParams } from './query_param_mappers';
+import type { GetRuleExecutionsUiParams } from './use_fetch_rule_executions';
 
 export const ruleKeys = {
   all: ['rule'] as const,

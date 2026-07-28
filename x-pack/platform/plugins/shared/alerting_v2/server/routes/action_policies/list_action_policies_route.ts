@@ -9,17 +9,36 @@ import {
   errorResponseSchema,
   findActionPoliciesRequestSchema,
   findActionPoliciesResponseSchema,
+  type FindActionPoliciesRequest,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import type { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
+import type { FindActionPoliciesArgs } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { toFindActionPoliciesArgs } from '../request_mappers';
+
+export const toFindActionPoliciesArgs = ({
+  page,
+  per_page: perPage,
+  search,
+  tags,
+  enabled,
+  sort_field: sortField,
+  sort_order: sortOrder,
+}: FindActionPoliciesRequest): FindActionPoliciesArgs => ({
+  page,
+  perPage,
+  search,
+  tags,
+  enabled,
+  sortField,
+  sortOrder,
+});
 
 @injectable()
 export class ListActionPoliciesRoute extends BaseAlertingRoute {

@@ -11,7 +11,10 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
-import { useFetchExecutionHistory } from './use_fetch_execution_history';
+import {
+  toListExecutionHistoryRequest,
+  useFetchExecutionHistory,
+} from './use_fetch_execution_history';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -138,5 +141,25 @@ describe('useFetchExecutionHistory', () => {
     rerender({ page: 2, perPage: 50 });
     await waitFor(() => expect(mockListExecutionHistory).toHaveBeenCalledTimes(2));
     expect(mockListExecutionHistory).toHaveBeenLastCalledWith({ page: 2, per_page: 50 });
+  });
+});
+
+describe('toListExecutionHistoryRequest', () => {
+  it('maps camelCase view state to the snake_case request', () => {
+    expect(
+      toListExecutionHistoryRequest({
+        page: 1,
+        perPage: 100,
+        search: 'foo',
+        ruleIds: ['rule-1', 'rule-2'],
+        outcome: 'dispatched',
+      })
+    ).toEqual({
+      page: 1,
+      per_page: 100,
+      search: 'foo',
+      rule_ids: ['rule-1', 'rule-2'],
+      outcome: 'dispatched',
+    });
   });
 });

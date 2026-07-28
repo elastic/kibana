@@ -7,11 +7,44 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import type { GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  GetRuleExecutionsRequest,
+  GetRuleExecutionsResponse,
+  RuleExecutionOutcome,
+} from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { ruleExecutionKeys } from './query_key_factory';
-import type { GetRuleExecutionsUiParams } from './query_param_mappers';
-import { toGetRuleExecutionsRequest } from './query_param_mappers';
+
+export interface GetRuleExecutionsUiParams {
+  page?: number;
+  perPage?: number;
+  ruleIds?: string[];
+  outcome?: RuleExecutionOutcome[];
+  from?: string;
+  to?: string;
+  sort?: 'startedAt' | 'duration';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export const toGetRuleExecutionsRequest = ({
+  page,
+  perPage,
+  ruleIds,
+  outcome,
+  from,
+  to,
+  sort,
+  sortOrder,
+}: GetRuleExecutionsUiParams): Partial<GetRuleExecutionsRequest> => ({
+  page,
+  per_page: perPage,
+  rule_id: ruleIds,
+  outcome,
+  from,
+  to,
+  sort: sort === 'startedAt' ? 'started_at' : sort,
+  sort_order: sortOrder,
+});
 
 export const useFetchRuleExecutions = (params: GetRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);

@@ -8,10 +8,34 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import type { FindRulesRequest, FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
-import { toFindRulesRequest } from './query_param_mappers';
+
+export interface FindRulesUiParams {
+  page?: number;
+  perPage?: number;
+  filter?: string;
+  search?: string;
+  sortField?: FindRulesSortField;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export const toFindRulesRequest = ({
+  page,
+  perPage,
+  filter,
+  search,
+  sortField,
+  sortOrder,
+}: FindRulesUiParams): FindRulesRequest => ({
+  page,
+  per_page: perPage,
+  filter,
+  search,
+  sort_field: sortField,
+  sort_order: sortOrder,
+});
 
 export const useFetchRules = ({
   page,

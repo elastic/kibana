@@ -13,13 +13,30 @@ import {
   errorResponseSchema,
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
+  type ListPolicyExecutionHistoryRequest,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
+import type { ListExecutionHistoryArgs } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
-import { toListExecutionHistoryArgs } from '../request_mappers';
+
+export const toListExecutionHistoryArgs = ({
+  page,
+  per_page: perPage,
+  search,
+  rule_ids: ruleIds,
+  outcome,
+  episode_ids: episodeIds,
+}: ListPolicyExecutionHistoryRequest): Omit<ListExecutionHistoryArgs, 'request'> => ({
+  page,
+  perPage,
+  search,
+  ruleIds,
+  outcome,
+  episodeIds,
+});
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
