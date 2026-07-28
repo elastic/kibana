@@ -22,7 +22,7 @@ import {
  *
  *   1. Declines to perform the operation — it calls NO mutating tool and emits
  *      no attachment claiming the operation succeeded.
- *   2. Calls the generic `platform.core.build_redirect_url` tool with the matching
+ *   2. Calls `security.build_redirect_url` with the matching
  *      `path` (+ a `flyout` object for the deep-link destinations) and renders the
  *      returned `url` as a markdown link.
  *   3. Explains in one short sentence why the operation lives in the UI.
@@ -35,7 +35,7 @@ const ENTITY_RESOLUTION_TAB_PATH = `${MANAGEMENT_BASE_PATH}/entity_resolution`;
 const STATUS_TAB_PATH = `${MANAGEMENT_BASE_PATH}/status`;
 const WATCHLISTS_TAB_PATH = `${MANAGEMENT_BASE_PATH}/watchlists`;
 
-const LINK_TOOL_ID = 'platform.core.build_redirect_url';
+const LINK_TOOL_ID = 'security.build_redirect_url';
 
 const MANAGED_WATCHLIST_NAMES = ['Privileged Users', 'High Risk Hosts'];
 
@@ -83,7 +83,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — entity analytics settings',
             description:
-              'Enabling/disabling Entity Analytics and clearing all entity data are global controls at the top of the management page — the agent redirects there (bare management page, no tab subpath) via platform.core.build_redirect_url with the management-page path.',
+              'Enabling/disabling Entity Analytics and clearing all entity data are global controls at the top of the management page — the agent redirects there (bare management page, no tab subpath) via security.build_redirect_url with the management-page path.',
             examples: [
               {
                 input: { question: 'Disable Entity Analytics.' },
@@ -135,7 +135,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — risk engine',
             description:
-              'Risk-scoring configuration and re-score-now intents redirect to the Risk Score management tab via platform.core.build_redirect_url with the risk_score tab path.',
+              'Risk-scoring configuration and re-score-now intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
             examples: [
               {
                 input: { question: 'Change the alert filters used by risk scoring.' },
@@ -183,7 +183,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — asset criticality bulk',
             description:
-              'Asset criticality bulk / CSV upload intents redirect to the Asset Criticality management tab via platform.core.build_redirect_url with the asset_criticality tab path.',
+              'Asset criticality bulk / CSV upload intents redirect to the Asset Criticality management tab via security.build_redirect_url with the asset_criticality tab path.',
             examples: [
               {
                 input: { question: 'Upload this CSV of asset criticalities.' },
@@ -234,7 +234,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — entity resolution bulk',
             description:
-              'Bulk-linking entities to resolution targets via a CSV import redirects to the Entity Resolution management tab via platform.core.build_redirect_url with the entity_resolution tab path. (Single-entity resolution opens a per-entity flyout and is not covered here.)',
+              'Bulk-linking entities to resolution targets via a CSV import redirects to the Entity Resolution management tab via security.build_redirect_url with the entity_resolution tab path. (Single-entity resolution opens a per-entity flyout and is not covered here.)',
             examples: [
               {
                 input: {
@@ -268,7 +268,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — engine status',
             description:
-              'Entity store / engine status questions redirect to the Status management tab via platform.core.build_redirect_url with the status tab path.',
+              'Entity store / engine status questions redirect to the Status management tab via security.build_redirect_url with the status tab path.',
             examples: [
               {
                 input: { question: 'Show me the status of the entity store engines.' },
@@ -299,7 +299,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — watchlist edit flyout',
             description:
-              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls platform.core.build_redirect_url with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool.',
+              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool.',
             examples: [
               {
                 input: {

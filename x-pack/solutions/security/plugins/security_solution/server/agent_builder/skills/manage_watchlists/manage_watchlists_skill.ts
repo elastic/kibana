@@ -6,7 +6,6 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { WATCHLISTS_UI_NAVIGATION_CONTENT } from '../ui_navigation';
 import {
   SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
@@ -16,6 +15,7 @@ import {
   SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
   SECURITY_UPDATE_WATCHLIST_TOOL_ID,
+  SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
 } from '../../tools';
 
 const content = `
@@ -147,6 +147,6 @@ export const manageWatchlistsSkill = defineSkillType({
     SECURITY_DELETE_WATCHLIST_TOOL_ID,
     SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
     SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
-    platformCoreTools.buildRedirectUrl,
+    SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
   ],
 });

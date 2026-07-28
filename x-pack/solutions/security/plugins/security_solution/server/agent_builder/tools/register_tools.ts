@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
+import { buildRedirectUrlTool } from './build_redirect_url_tool';
 import {
   addEntitiesToWatchlistTool,
   createWatchlistTool,
@@ -63,6 +64,7 @@ export const registerTools = (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(buildRedirectUrlTool(core, experimentalFeatures));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));

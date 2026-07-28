@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { noop } from 'lodash/fp';
+import { isEqual, noop, omit } from 'lodash/fp';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
@@ -59,7 +59,23 @@ import type {
   UserDescriptor,
 } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
-import { subscribeToFlyoutV2Navigation } from './flyout_v2_navigation';
+import { consumeFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
+
+/**
+ * Compares two flyoutV2 stacks ignoring `origin` (telemetry-only) so a writer rewrite of the
+ * same logical chain does not look like a new deep link.
+ */
+const areSameFlyoutV2Descriptors = (
+  a: FlyoutV2UrlParamValue | null | undefined,
+  b: FlyoutV2UrlParamValue | null | undefined
+): boolean => {
+  if (a === b) return true;
+  if (!a?.length || !b?.length || a.length !== b.length) return false;
+
+  return a.every((descriptor, index) =>
+    isEqual(omit('origin', descriptor), omit('origin', b[index]))
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Constants — which descriptor kinds require an async data fetch
@@ -682,13 +698,18 @@ export const openDescriptorAsChild = (
 // ---------------------------------------------------------------------------
 
 /**
- * Restore-on-mount hook: on first render, reads the `flyoutV2` (or `flyoutV2Timeline`) URL param,
- * resolves any `{id, index}` back to a DataTableRecord (for document/attack tool descriptors) or
- * Indicator (for IOC descriptors), then replays the ordered array via `useFlyoutApi()` — first
- * entry with session `'start'`, second entry via the `...AsChild` (`'inherit'`) form so both
- * the tool and its child reopen.
+ * Restore hook: on mount, reads the `flyoutV2` (or `flyoutV2Timeline`) URL param, resolves any
+ * `{id, index}` back to a DataTableRecord (for document/attack tool descriptors) or Indicator
+ * (for IOC descriptors), then replays the ordered array via `useFlyoutApi()` — first entry with
+ * session `'start'`, second entry via the `...AsChild` (`'inherit'`) form so both the tool and
+ * its child reopen.
  *
- * Gated on `useIsNewFlyoutEnabled()`. Runs at most once per mount.
+ * Also handles same-app deep links while Security stays mounted (Like from Agent Builder redirects):
+ *  - `history.listen` opens when an external navigation writes a new `flyoutV2` value
+ *  - writer self-updates are ignored via {@link consumeFlyoutV2UrlWrite}
+ *
+ * Gated on `useIsNewFlyoutEnabled()`. Mount restore runs at most once; same-app opens may fire
+ * whenever the URL changes to a different descriptor chain.
  *
  * Mount this hook in the Security Solution app shell, analogous to `useUrlState()` in
  * `app/home/index.tsx`. The `useFlyoutApi()` contract requires the Redux store, router, and
@@ -699,6 +720,10 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
   const hasRestoredRef = useRef(false);
+
+  // Last decoded flyoutV2 stack we treated as open
+  // history.listen compares against this and skips open when the URL shows the same stack again
+  const lastOpenedStackRef = useRef<FlyoutV2UrlParamValue | null>(null);
 
   // Read URL param exactly once (useState initializer runs on the first render only).
   const [descriptors] = useState<FlyoutV2UrlParamValue | null>(() => {
@@ -714,30 +739,53 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     return raw != null && decodeFlyoutV2UrlParam(raw) === null;
   });
 
-  // The restore state above is intentionally mount-only. Agent Builder can also navigate to a
-  // different entity while Entity Analytics is already mounted, so handle that same-app signal
-  // directly instead of waiting for a remount that will not happen.
+  // Same-app opens: react to external flyoutV2 URL writes while Security stays mounted.
   useEffect(() => {
+    if (!isNewFlyoutEnabled) return;
+
     let pendingOpen: ReturnType<typeof setTimeout> | undefined;
-    const unsubscribe = subscribeToFlyoutV2Navigation(
-      ({ urlParamKey: navigationParamKey, descriptors: next }) => {
-        if (!isNewFlyoutEnabled || navigationParamKey !== urlParamKey) return;
-        const [first, second] = next;
-        clearTimeout(pendingOpen);
-        pendingOpen = setTimeout(() => {
-          openDescriptorAsStart(first, {}, flyoutApi);
-          if (second) {
-            openDescriptorAsChild(second, {}, flyoutApi);
-          }
-        }, 0);
+
+    const openFromExternalNavigation = (next: FlyoutV2UrlParamValue): void => {
+      if (areSameFlyoutV2Descriptors(next, lastOpenedStackRef.current)) return;
+      lastOpenedStackRef.current = next;
+      const [first, second] = next;
+      clearTimeout(pendingOpen);
+      pendingOpen = setTimeout(() => {
+        openDescriptorAsStart(first, {}, flyoutApi);
+        if (second) {
+          openDescriptorAsChild(second, {}, flyoutApi);
+        }
+      }, 0);
+    };
+
+    const unlistenHistory = history.listen((location) => {
+      const wasSelfWrite = consumeFlyoutV2UrlWrite(urlParamKey);
+      const encodedParam = new URLSearchParams(location.search).get(urlParamKey);
+
+      if (encodedParam == null) {
+        // Param gone (flyout closed). Reset so the same stack can open again later.
+        // Also runs for writer closes — otherwise the next deep link looks like a duplicate.
+        lastOpenedStackRef.current = null;
+        return;
       }
-    );
+
+      const next = decodeFlyoutV2UrlParam(encodedParam);
+      if (!next?.length) return;
+
+      if (wasSelfWrite) {
+        // Writer already opened/updated the flyout; record the stack but do not open again.
+        lastOpenedStackRef.current = next;
+        return;
+      }
+
+      openFromExternalNavigation(next);
+    });
 
     return () => {
-      unsubscribe();
+      unlistenHistory();
       clearTimeout(pendingOpen);
     };
-  }, [flyoutApi, isNewFlyoutEnabled, urlParamKey]);
+  }, [flyoutApi, history, isNewFlyoutEnabled, urlParamKey]);
 
   // Strip malformed param once on mount.
   useEffect(() => {
@@ -856,6 +904,8 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // All required fetches are done. Mark restored before setTimeout so a fast
     // double-render cannot trigger a second open.
     hasRestoredRef.current = true;
+    // Same as history.listen: remember what we opened so the writer's URL rewrite does not reopen it.
+    lastOpenedStackRef.current = descriptors;
 
     // Build resolved context. `useEsDocSearch` already returns `DataTableRecord`s.
     const docHit = docHitRecord ?? undefined;

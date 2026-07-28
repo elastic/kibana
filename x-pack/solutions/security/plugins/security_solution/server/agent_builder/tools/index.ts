@@ -30,6 +30,10 @@ export {
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
 } from './entity_analytics';
 export {
+  buildRedirectUrlTool,
+  SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
+} from './build_redirect_url_tool';
+export {
   attackDiscoverySearchTool,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
 } from './attack_discovery_search_tool';

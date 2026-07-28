@@ -414,6 +414,22 @@ const KNOWN_KINDS = new Set<string>(Object.values(FLYOUT_DESCRIPTOR_KIND));
 const isKnownKind = (kind: unknown): kind is FlyoutDescriptorKind =>
   typeof kind === 'string' && KNOWN_KINDS.has(kind);
 
+/**
+ * Narrows a structural descriptor array to the public {@link FlyoutV2UrlParamValue} union.
+ * Returns null when the array is empty/missing or any entry has an unknown `kind`.
+ */
+export const toFlyoutV2UrlParamValue = (
+  value: ReadonlyArray<{ kind: string }> | null | undefined
+): FlyoutV2UrlParamValue | null => {
+  if (!value?.length) return null;
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== 'object' || !isKnownKind(entry.kind)) return null;
+  }
+
+  return value as FlyoutV2UrlParamValue;
+};
+
 // ---------------------------------------------------------------------------
 // Encode / decode
 // ---------------------------------------------------------------------------

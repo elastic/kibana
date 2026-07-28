@@ -8,15 +8,21 @@
 import { z } from '@kbn/zod/v4';
 import { encode } from '@kbn/rison';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../common/constants';
+import { translateLegacyStateToDescriptors } from '../../../common/flyout_v2';
+import type { ExperimentalFeatures } from '../../../common';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import { securityTool } from './constants';
 
-// A `flyout` panel maps to `@kbn/expandable-flyout` state: `id` is a registered panel key and
-// `params` are that panel's props. Both are domain-specific, so the schema stays generic and the
-// calling skill's instructions supply the exact values — the descriptions only tell the model to
-// use what it was given rather than invent anything.
+const FLYOUT_PARAM = 'flyout' as const;
+const FLYOUT_V2_PARAM = 'flyoutV2' as const;
+
+export const SECURITY_BUILD_REDIRECT_URL_TOOL_ID = securityTool('build_redirect_url');
+
+// Flyout panel parameters use v1 values, but the tool translates this to v2 descriptors when the new flyout is enabled
 const flyoutPanelSchema = z.object({
   id: z.string().describe('The id of the panel to open in this slot.'),
   params: z
@@ -31,7 +37,7 @@ export const buildRedirectUrlSchema = z.object({
   path: z
     .string()
     .describe(
-      `The destination as an app-relative Kibana path, starting with a single "/" — e.g. "/app/security/entity_analytics_management/risk_score". Use a path the calling skill's instructions give you; do NOT invent or guess one. Do NOT include the deployment base path or the "/s/<space>" segment (the tool adds them), and do NOT pass an absolute URL (no "http://", "https://", or "//host"). May include its own query string; when it does and a "flyout" is also provided, the flyout is appended with "&".`
+      `The destination as an app-relative Kibana path, starting with a single "/" — e.g. "/app/security/entity_analytics_management/risk_score". Use a path the calling skill's instructions give you; do NOT invent or guess one. Do NOT include the deployment base path or the "/s/<space>" segment (the tool adds them), and do NOT pass an absolute URL (no "http://", "https://", or "//host"). May include its own query string; when it does and a flyout param is also provided, the flyout is appended with "&".`
     ),
   flyout: z
     .object({
@@ -59,33 +65,40 @@ export const buildRedirectUrlSchema = z.object({
  * On read, `new URLSearchParams(search).get('flyout')` percent-decodes, then the flyout code
  * rison-decodes — so both encodings reverse.
  */
-const encodeFlyoutParam = (flyout: Record<string, unknown>): string =>
-  encodeURIComponent(encode(flyout)).replace(
+const encodeFlyoutQueryValue = (value: unknown): string =>
+  encodeURIComponent(encode(value)).replace(
     /[!'()*]/g,
     (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
   );
 
+const appendQueryParam = (path: string, key: string, value: unknown): string => {
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}${key}=${encodeFlyoutQueryValue(value)}`;
+};
+
 /**
- * Generic navigation tool: turns an app-relative Kibana path (optionally with expandable-flyout
- * state) into a fully-qualified in-app URL, resolving the deployment base path and the active space segment
+ * Turns an app-relative Security path (optionally with flyout state) into a fully-qualified
+ * in-app URL, resolving the deployment base path and the active space segment.
  */
 export const buildRedirectUrlTool = (
-  coreSetup: CoreSetup
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  experimentalFeatures: ExperimentalFeatures
 ): BuiltinToolDefinition<typeof buildRedirectUrlSchema> => ({
-  id: platformCoreTools.buildRedirectUrl,
+  id: SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
   type: ToolType.builtin,
-  description: `Build a clickable in-app link that redirects the user to a specific Kibana page — use it when an action can't (or shouldn't) be performed in chat and the user needs to complete it in the UI.
+  description: `Build a clickable in-app link that redirects the user to a specific Security Solution page — use it when an action can't (or shouldn't) be performed in chat and the user needs to complete it in the UI.
 
 **Only call this tool when a skill's instructions explicitly tell you to redirect the user and give you the destination.** The \`path\` (and any \`flyout\`) must come from those instructions — never construct, guess, or infer a Kibana path yourself. If no skill provided a destination, do not call this tool; a made-up path leads to a broken link.
 
 Returns a single \`url\`. Render it in your reply as a markdown link \`[title](url)\`, using the returned \`url\` as-is (do not edit it).
 
 - \`path\`: the app-relative path (starting with "/"), without the base path or space segment — the tool adds those for the current deployment and space.
-- \`flyout\` (optional): the \`left\` / \`right\` / \`preview\` panels to open on the target page. The tool encodes them into the URL.
+- \`flyout\` (optional): expandable \`{ left, right, preview }\` panels from the skill. When the new flyout is enabled, panels are translated to \`flyoutV2\` when a mapping exists.
 
 This tool only builds a link; it performs no action.`,
   schema: buildRedirectUrlSchema,
-  handler: async ({ path, flyout }, { spaceId, logger }) => {
+  tags: ['security', 'navigation', 'ui'],
+  handler: async ({ path, flyout }, { spaceId, logger, savedObjectsClient }) => {
     if (!path.startsWith('/') || path.startsWith('//')) {
       return {
         results: [
@@ -99,16 +112,32 @@ This tool only builds a link; it performs no action.`,
       };
     }
 
+    const [coreStart] = await core.getStartServices();
     let relativePath = path;
-    if (flyout && (flyout.left || flyout.right || flyout.preview)) {
-      const separator = relativePath.includes('?') ? '&' : '?';
-      relativePath = `${relativePath}${separator}flyout=${encodeFlyoutParam(flyout)}`;
+
+    if (flyout && Boolean(flyout.left || flyout.right || flyout.preview)) {
+      const useNewFlyout = experimentalFeatures.newFlyoutSystemDisabled
+        ? false
+        : await coreStart.uiSettings
+            .asScopedToClient(savedObjectsClient)
+            .get<boolean>(ENABLE_NEW_FLYOUT_SETTING);
+
+      if (useNewFlyout) {
+        const translated = translateLegacyStateToDescriptors(flyout);
+        if (translated?.length) {
+          relativePath = appendQueryParam(relativePath, FLYOUT_V2_PARAM, translated);
+        } else {
+          // Unmigrated panels - keep the legacy expandable encoding.
+          relativePath = appendQueryParam(relativePath, FLYOUT_PARAM, flyout);
+        }
+      } else {
+        relativePath = appendQueryParam(relativePath, FLYOUT_PARAM, flyout);
+      }
     }
 
-    const [coreStart] = await coreSetup.getStartServices();
     const url = addSpaceIdToPath(coreStart.http.basePath.serverBasePath, spaceId, relativePath);
 
-    logger.debug(`${platformCoreTools.buildRedirectUrl} built redirect url for path '${path}'`);
+    logger.debug(`${SECURITY_BUILD_REDIRECT_URL_TOOL_ID} built redirect url for path '${path}'`);
 
     return {
       results: [
@@ -119,5 +148,4 @@ This tool only builds a link; it performs no action.`,
       ],
     };
   },
-  tags: ['navigation', 'ui'],
 });

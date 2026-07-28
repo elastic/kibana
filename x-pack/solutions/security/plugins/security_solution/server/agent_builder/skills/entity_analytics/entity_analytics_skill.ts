@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import { ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT } from '../ui_navigation';
 import {
@@ -21,6 +20,7 @@ import {
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
   SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+  SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
 } from '../../tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
@@ -651,7 +651,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         ? [
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
-            platformCoreTools.buildRedirectUrl,
+            SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
             SECURITY_GET_WATCHLIST_ID_TOOL_ID,
             SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
           ]
