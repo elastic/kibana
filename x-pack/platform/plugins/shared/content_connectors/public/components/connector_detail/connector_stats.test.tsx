@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-jest.mock('./connector_detail', () => ({
-  ConnectorDetailTabId: {
-    CONFIGURATION: 'configuration',
-    DOCUMENTS: 'documents',
-  },
-}));
-
 import React from 'react';
 
 import { fireEvent, screen } from '@testing-library/react';
@@ -32,8 +25,13 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     createHref: ({ pathname }: { pathname: string }) => pathname,
-    push: jest.fn(),
   }),
+}));
+jest.mock('./connector_detail', () => ({
+  ConnectorDetailTabId: {
+    CONFIGURATION: 'configuration',
+    DOCUMENTS: 'documents',
+  },
 }));
 
 const CONNECTOR_ID = '65b72bc6-823e-4278-8f21-9864c8a93046';
