@@ -104,7 +104,11 @@ export function SpacesConfigurationModal({
   });
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
+    <EuiModal
+      data-test-subj="spacesConfigurationModal"
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle size="m" id={modalTitleId}>
           {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.title', {

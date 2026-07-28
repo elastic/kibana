@@ -185,6 +185,48 @@
         "line": 37,
         "column": 32
       }
+    },
+    {
+      "id": "c4d8e1a2b3f4567-11111111111111",
+      "title": "Space configuration modal renders remember last selected space settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_configuration.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "c4d8e1a2b3f4567-22222222222222",
+      "title": "Space configuration modal persists remember last selected space when saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_configuration.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "c4d8e1a2b3f4567-33333333333333",
+      "title": "Space configuration modal does not persist when discarding after toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_configuration.spec.ts",
+        "line": 64,
+        "column": 7
+      }
     }
   ]
 }
