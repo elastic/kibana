@@ -36,6 +36,8 @@ type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
  * tests that craft pathological ids.
  */
 export const getRuleUrl = (id: string) => `${RULE_API_PATH}/${encodeURIComponent(id)}`;
+export const getEnableRuleUrl = (id: string) => `${getRuleUrl(id)}/_enable`;
+export const getDisableRuleUrl = (id: string) => `${getRuleUrl(id)}/_disable`;
 
 /**
  * URL for a single action policy resource:
@@ -59,9 +61,22 @@ export const getUnsnoozeActionPolicyUrl = (id: string) => `${getActionPolicyUrl(
 export const getUpdateActionPolicyApiKeyUrl = (id: string) =>
   `${getActionPolicyUrl(id)}/_update_api_key`;
 
-export const getBulkActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk`;
+export const getBulkDeleteActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_delete`;
+
+export const getBulkEnableActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_enable`;
+
+export const getBulkDisableActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_disable`;
+
+export const getBulkSnoozeActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_snooze`;
+
+export const getBulkUnsnoozeActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_unsnooze`;
+
+export const getBulkUpdateApiKeyActionPoliciesUrl = () =>
+  `${ACTION_POLICY_API_PATH}/_bulk_update_api_key`;
 
 export const getBulkRulesUrl = () => `${RULE_API_PATH}/_bulk_get`;
+
+export const getRunRuleUrl = (id: string) => `${getRuleUrl(id)}/_run`;
 
 /**
  * URL for the list action policies endpoint, optionally with a query string.

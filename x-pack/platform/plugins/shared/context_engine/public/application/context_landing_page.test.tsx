@@ -19,7 +19,8 @@ import { ContextLandingPage } from './context_landing_page';
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
-  dest: { type: 'data_stream', value: '.ai-index-ds-my-ai-index' },
+  managed: false,
+  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
   date_created: '2026-07-17T00:00:00.000Z',
@@ -101,7 +102,7 @@ describe('ContextLandingPage', () => {
     expect(cards).toHaveLength(2);
 
     const firstLink = screen.getByRole('link', { name: /first/ });
-    expect(firstLink).toHaveAttribute('href', '/app/context_engine/indexes/first');
+    expect(firstLink).toHaveAttribute('href', '/app/context_engine/ai_index/first');
 
     const [firstSources, secondSources] = screen.getAllByTestId('contextAiIndexCardSources');
     expect(firstSources).toHaveTextContent('2 sources');
