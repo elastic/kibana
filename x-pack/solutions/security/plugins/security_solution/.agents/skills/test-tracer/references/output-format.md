@@ -13,7 +13,7 @@ The skill **always** starts with the `Scope of this run` block (defined below). 
 | `both` | off | Scope of this run → Plan ↔ Requirements → Plan ↔ Tests → Three-Way Merge → Slack one-liner |
 | `both` | on | Scope of this run → Plan ↔ Requirements → **Plan ↔ Tests — Summary (heatmap)** → **Three-Way Merge (degraded — candidate-coverage only)** → Slack one-liner (mixed variant) |
 
-The Three-Way Merge bucket (`NOT PLANNED, NOT IMPLEMENTED`) only exists in `both` mode — it requires both axes to be present. With `--summary-only` the bucket renders as `NOT PLANNED, NO CANDIDATE` and the section is labelled *degraded* to signal that `IMPLEMENTED, NOT PLANNED` cannot be detected by keyword overlap.
+The Three-Way Merge section only exists in `both` mode — it requires both axes to be present. In v1 the merge produces a single collapsed `NOT PLANNED` bucket (`IMPLEMENTED, NOT PLANNED` vs `NOT PLANNED, NOT IMPLEMENTED` requires v2's Phase 6.5 direct requirement-to-catalog matching pass, which v1 does not have). With `--summary-only` the section is additionally labelled *degraded* to signal that per-scenario matching used the heatmap rather than verdict-grade validation. See `SKILL.md` Verdict Taxonomy for the full bucket list.
 
 ---
 
@@ -36,6 +36,8 @@ Symbols: `✓` analyzed · `⊘` skipped (phase did not run) · `⚠` ran but pr
     tests         : <N> scope path(s) — <origins>
     walk-up       : <applied | suppressed (<reason>)>
     requirements  : <crawled> crawled, <explicit> explicit --issue, <skipped if --no-crawl>
+    crawl allowlist: <origin org> (+ <extra orgs from --allow-orgs>)
+    crawl skipped  : <N> cross-org URLs not fetched — <list of URLs, or "(none)">
 
   Coverage axes
     [✓|⊘|⚠] Plan ↔ Requirements   (<status detail>)
@@ -46,11 +48,26 @@ Symbols: `✓` analyzed · `⊘` skipped (phase did not run) · `⚠` ran but pr
 
 The `Sources` block is what makes the run reproducible — list each origin (`PR #N` / `path/to/file.md` / `--impl-scope <path>` / `--issue <url>`) so the report can be re-run later and still mean the same thing.
 
+The `crawl allowlist` and `crawl skipped` lines are the audit trail for Phase 2's cross-repo security posture. Every URL that was discovered during the crawl but rejected because its owning org was not in the allowlist appears in `crawl skipped` — so the user can decide whether to opt each URL in explicitly via `--issue <url>` or extend the allowlist via `--allow-orgs`. See SKILL.md Phase 2 for the full policy.
+
 The `walk-up` line is **mandatory** (always print, even in `plan` mode where it would say `not applicable`). Its purpose is to make scope expansion or suppression auditable: a consumer reading the report must always be able to tell whether the tests catalog included the automatic plugin + solution-test sibling, or only what the user passed explicitly. Possible values:
 - `applied (<plugin path> + <solution test sibling>)` — auto walk-up expanded the scope.
 - `applied via --with-walk-up (<paths>)` — user forced walk-up back on despite explicit impl signal.
 - `suppressed (<reason>)` — auto walk-up was skipped because the user passed explicit impl signals. Example reason: `"--impl-pr #263662 resolved 6 test files"` or `"--impl-scope provided (3 paths)"`.
 - `not applicable (mode = plan)` — tests axis is skipped entirely.
+
+### Six realistic invocation shapes
+
+Every real-world run maps to one of these six shapes. Each row lists the situation, the `test-tracer` invocation, and what the resolution logic produces before Phase 0 stops or proceeds. The Scope-of-run blocks that follow this table show the concrete header each shape prints.
+
+| # | Situation | Invocation | What gets resolved |
+|---|---|---|---|
+| 1 | Single PR has plan + impl + linked issues (ideal case, rare) | `--pr 259855` | scenarios + tests + issues all from PR #259855 |
+| 2 | Plan PR and impl PR are **separate** (the common reality) | `--plan-pr 259855 --impl-pr 263662` | scenarios from #259855 diff; tests scope = #263662's modified test dirs (walk-up suppressed — explicit impl signal); issues crawled from BOTH PR bodies + .md content |
+| 3 | Plan on disk (no PR), validate against a known plugin | `--plan-file path/to/plan.md --impl-scope x-pack/.../security_solution/` | scenarios from file; tests scope = explicit `--impl-scope` only (walk-up suppressed); issues from .md content only |
+| 4 | Plan on disk, no impl reference, auto-scope | `--plan-file path/to/plan.md` | scenarios from file; tests scope = walk-up (plugin root + solution-test sibling) — no explicit impl signal so walk-up applies; issues from .md content |
+| 5 | Anything + extra non-discoverable issues (e.g., epic referenced only in Slack) | `... --issue https://github.com/elastic/security-team/issues/123` | explicit issues merged with crawl results |
+| 6 | Anything + skip auto-crawl entirely (manual control) | `... --no-crawl --issue ...` | only `--issue` URLs feed requirements; nothing scraped |
 
 ### Concrete examples — one per realistic invocation shape
 
@@ -217,7 +234,7 @@ Numbering resets per bucket. Categories preserved verbatim from the requirements
 
 ## Plan ↔ Tests section (`impl` mode, or the middle section of `both`)
 
-For each scenario from Phase 1, lists matched test blocks from the Phase 6 catalog. The verdict per scenario is one of `IMPLEMENTED`, `NOT IMPLEMENTED`, `INCONCLUSIVE` (see SKILL.md Verdict Taxonomy). Numbering resets per bucket.
+For each scenario from Phase 1, lists matched test blocks from the Phase 6 catalog. The verdict per scenario is one of `CANDIDATE COVERAGE` *(v1 — name-only match)* / `IMPLEMENTED` *(v2 — assertion-inspected)*, `NOT IMPLEMENTED`, `INCONCLUSIVE` (see SKILL.md Verdict Taxonomy). Numbering resets per bucket.
 
 ```
 ============================================================
@@ -225,12 +242,12 @@ For each scenario from Phase 1, lists matched test blocks from the Phase 6 catal
 ============================================================
   Total scenarios     : <N>
   ─────────────────────────────────────────
-  Implemented         : <N> (<P>%)
+  Candidate coverage  : <N> (<P>%)      (v1 — name match only)
   Not implemented     : <N>  ← attention here
   Inconclusive        : <N>
 ============================================================
 
-  IMPLEMENTED
+  CANDIDATE COVERAGE   (v1 — validated verbatim block-name match; assertions not inspected)
     1. Scenario: User can delete a deprecated rule from its details page
          → test : x-pack/.../cypress/e2e/.../deprecated_rule_details_callout.cy.ts:174
                   "deletes a deprecated rule from its details page and navigates back to the rules list"
@@ -266,7 +283,7 @@ The `DRIFT FLAGS` block exists when the scenario has a validated match **but** t
 - **test-layer drift** — the plan's `**Automation**:` line says one layer (e.g., E2E) and the matched block is at a different layer (e.g., jest unit).
 - **sub-assertion gap** — the matched block covers part of the scenario but does not cover named sub-asserts from the `And` lines.
 
-A scenario can appear in both `IMPLEMENTED` (because it has a matched block) and `DRIFT FLAGS` (because the match diverges). That's intentional — the verdict and the drift are independent dimensions.
+A scenario can appear in both `CANDIDATE COVERAGE` / `IMPLEMENTED` (because it has a matched block) and `DRIFT FLAGS` (because the match diverges). That's intentional — the verdict and the drift are independent dimensions.
 
 ---
 
@@ -360,10 +377,10 @@ When both axes are requested but the impl axis is heatmap-only, the Three-Way Me
 |---|---|---|
 | `PLANNED & CANDIDATE-COVERED` | covered | scenario has ≥1 candidate block |
 | `PLANNED, NO CANDIDATE` | covered | zero candidates → strong negative signal |
-| `NOT PLANNED, NO CANDIDATE` | missing | zero candidates → unambiguous gap |
+| `NOT PLANNED` | missing | no scenario covers this requirement; heatmap has no per-requirement pass either |
 | `INCONCLUSIVE` | unclear | any failure mode |
 
-`IMPLEMENTED, NOT PLANNED` cannot exist in heatmap mode (the inverse direction needs a real verdict). The section explicitly says so to avoid the consumer reading silence as absence.
+The `IMPLEMENTED, NOT PLANNED` (positive) vs `NOT PLANNED, NOT IMPLEMENTED` (true blind spot) split requires v2's Phase 6.5 direct requirement-to-catalog matching pass. Neither v1 verdict-grade nor the degraded heatmap has that pass, so both collapse into a single `NOT PLANNED` bucket. The section explicitly says so to avoid the consumer reading silence as absence.
 
 ---
 
@@ -371,20 +388,21 @@ When both axes are requested but the impl axis is heatmap-only, the Three-Way Me
 
 This is the new artifact. Five buckets, ordered by where attention is most needed.
 
+Example — **v1 shape**. Note the collapsed `NOT PLANNED` bucket: in v1 the merge cannot distinguish "test exists without a scenario" (positive) from "true blind spot" because v1 has no requirement-to-catalog direct-lookup pass. Both cases surface under a single bucket with an "impl status: unknown" note. v2's Phase 6.5 reinstates the split.
+
 ```
 ============================================================
-  THREE-WAY COVERAGE REPORT
+  THREE-WAY COVERAGE REPORT   (v1)
 ============================================================
   Requirements                  : <N total>
   ─────────────────────────────────────────
-  Planned & implemented          : <N> (<P>%)
-  Planned, not implemented       : <N>  ← attention here
-  Implemented, not planned       : <N>  ← positive signal
-  Not planned, not implemented   : <N>  ← true gaps
+  Planned & covered              : <N> (<P>%)   (v1 — name-only match)
+  Planned, not covered           : <N>  ← attention here
+  Not planned (impl unknown)     : <N>  ← v2 will split into positive/gap
   Inconclusive                   : <N>
 ============================================================
 
-  PLANNED, NOT IMPLEMENTED   (the real gap — plan promised, code does not deliver)
+  PLANNED, NOT COVERED   (the real gap — plan promised, code has no matching block)
     1. [NEGATIVE] Save fails for invalid YAML
          → scenario : "Saving a rule with invalid YAML rejects the request with a 400"
          → expected : test under x-pack/.../test/scout/api/
@@ -395,11 +413,13 @@ This is the new artifact. Five buckets, ordered by where attention is most neede
          → expected : test under x-pack/.../test/scout/ui/
          → found    : no candidate test block
 
-  NOT PLANNED, NOT IMPLEMENTED   (gaps the test plan also missed — surface for plan update)
+  NOT PLANNED   (no scenario covers this requirement — impl status not derivable in v1)
     1. [EDGE CASE] Save with 10,000 rules
     2. [AUTH] API rejects requests with expired session token
+    3. [AUTH] API requires a specific privilege beyond role
+       [v2 will surface whether each of these has a matching test block or is a true blind spot]
 
-  PLANNED & IMPLEMENTED   (the good path)
+  PLANNED & COVERED   (v1 — validated verbatim block-name match; assertions not inspected)
     1. [FUNCTIONAL] User can create rule
          → scenario : "A user with editor access can create and save a new detection rule"
          → tests    : x-pack/.../test/scout/api/tests/create_rule.spec.ts:17
@@ -412,12 +432,6 @@ This is the new artifact. Five buckets, ordered by where attention is most neede
          → tests    : x-pack/.../test/scout/api/tests/auth.spec.ts:120
                       "POST /api/detection_engine/rules returns 403 for viewer role"
 
-  IMPLEMENTED, NOT PLANNED   (engineering wrote tests the plan forgot — credit them)
-    1. [AUTH] API requires a specific privilege beyond role
-         → test     : x-pack/.../test/scout/api/tests/privileges.spec.ts:55
-                      "POST /api/detection_engine/rules requires rules:create"
-         → suggestion : add scenario to test plan
-
   INCONCLUSIVE   (validation gate failed — see warnings above)
     1. [EDGE CASE] Concurrent rule edits
          → reason : matching gate rejected 2 hallucinated block names
@@ -426,7 +440,10 @@ This is the new artifact. Five buckets, ordered by where attention is most neede
 
 ### v1 vs v2 difference
 
-In v1, every match is `IMPLEMENTED` without a quality dimension. In v2, `PLANNED & IMPLEMENTED — WEAK` becomes its own bucket between `PLANNED & IMPLEMENTED` and `PLANNED, NOT IMPLEMENTED`, with the assertion line quoted:
+Two upgrades change the shape of this report in v2:
+
+1. **Assertion quality dimension.** In v1 every validated match is `CANDIDATE COVERAGE` — name-only. In v2 the same match promotes to `IMPLEMENTED` (assertion-inspected) and the report additionally emits `PLANNED & IMPLEMENTED — WEAK` for fragile assertions, quoting the offending line:
+2. **Direct requirement-to-catalog pass (Phase 6.5).** In v2 the `NOT PLANNED` bucket splits into `IMPLEMENTED, NOT PLANNED` (positive — engineering wrote tests the plan forgot; credit them) and `NOT PLANNED, NOT IMPLEMENTED` (true blind spots — surface for plan update).
 
 ```
   PLANNED & IMPLEMENTED — WEAK ⚠   (a test exists but its assertions are fragile)

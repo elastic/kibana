@@ -137,12 +137,22 @@ function containsTestSuiteMarker(absPath) {
 }
 
 /**
- * Detect which test framework a file uses. The detection is a best-effort
- * heuristic — when it cannot decide, it returns 'jest' as the default because
- * jest is the most common framework and the safest fallback.
+ * Detect which test framework a file uses. The classification order matches
+ * the test-file detection rule: Cypress by extension, Scout by imports, FTR
+ * by directory convention (`test_suites/` / `tests/` without a Jest-style
+ * `.test.*` / `.spec.*` name), and finally Jest as the safest fallback.
+ *
+ * Historically this function returned 'jest' for every non-Cypress, non-Scout
+ * file — including FTR / API-integration suites under `test_suites/`. That
+ * produced spurious "test-layer drift" findings in Phase 6 when a plan
+ * described integration coverage and the catalog labelled the matching block
+ * as jest. The FTR branch below fixes that at the source. See PR review on
+ * `_parser.mjs:L153`.
  */
 export function detectFramework(filePath, content) {
-  if (filePath.endsWith('.cy.ts') || filePath.endsWith('.cy.js')) {
+  const normalized = filePath.replace(/\\/g, '/');
+
+  if (/\.cy\.(ts|tsx|js|jsx|mjs)$/.test(normalized)) {
     return 'cypress';
   }
   if (/from\s+['"]@kbn\/scout(-[^'"]+)?['"]/.test(content)) {
@@ -150,6 +160,17 @@ export function detectFramework(filePath, content) {
     if (/\bspaceTest\s*\(/.test(content)) return 'scout-space';
     return 'scout-ui';
   }
+
+  // FTR / API-integration: file lives under a `test_suites/` or `tests/`
+  // ancestor AND does NOT carry a Jest-style `.test.*` / `.spec.*` filename.
+  // Files that do carry the Jest naming stay classified as jest even inside
+  // those directories (some plugins colocate unit tests there).
+  const isJestNamed = /\.(test|spec)\.(ts|tsx|js|jsx|mjs)$/.test(normalized);
+  const isUnderSuiteMarker = /\/(test_suites|tests)\//.test(normalized);
+  if (isUnderSuiteMarker && !isJestNamed) {
+    return 'ftr';
+  }
+
   return 'jest';
 }
 
@@ -344,11 +365,25 @@ function offsetsToLines(content, offsets) {
  */
 export function parseFileContent(content, framework) {
   // Step 1: find every test-call candidate by its source offset.
-  // We match `<kind>(<quote><name><quote>` with a string-aware scan so we
-  // don't pick up calls inside comments.
+  //
+  // The regex matches `<kind>` optionally followed by a modifier chain
+  // (`.skip`, `.only`, `.each`, `.for`, `.describe`, …), then the FIRST
+  // open-paren of the call. The loop then inspects what comes inside that
+  // paren:
+  //
+  //   • Non-table calls (`describe.only('name', () => {})`, `apiTest(...)`) —
+  //     the name-quote lives directly inside the first paren.
+  //   • Table calls (`it.each([...])('name', () => {})`) — the first paren
+  //     holds the table array; the SECOND paren holds the name.
+  //
+  // This is a widening of the earlier rule (bare kind followed by `(`), which
+  // silently dropped every `.skip` / `.only` / `.each` block and orphaned
+  // their children in the parent chain. See PR review on `_parser.mjs:L351`.
 
   const callPattern = new RegExp(
-    `\\b(${TEST_KINDS.join('|')}|cy\\.it)\\s*\\(\\s*(['"\`])`,
+    `\\b(${TEST_KINDS.join('|')}|cy\\.it)` +
+      `((?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*)` +
+      `\\s*\\(`,
     'g'
   );
 
@@ -364,28 +399,104 @@ export function parseFileContent(content, framework) {
     const start = m.index;
     if (!isInCodeRegion(codeRegions, start)) continue;
 
-    const quote = m[2];
-    const nameStart = m.index + m[0].length;
+    const kind = m[1];
+    const modifiers = m[2] || '';
+    const firstParenIdx = m.index + m[0].length - 1;
+
+    // `.each([...])` / `.for([...])` invokes the test kind TWICE — first with
+    // the table, then with (name, callback). We detect this by the trailing
+    // modifier and, when present, hop over the table paren to reach the
+    // name-bearing paren.
+    const lastMod = modifiers ? modifiers.split('.').pop() : '';
+    const hasTableModifier = lastMod === 'each' || lastMod === 'for';
+
+    let nameParenOpen;
+    if (hasTableModifier) {
+      const tableParenClose = skipBalancedParen(content, firstParenIdx);
+      if (tableParenClose < 0) continue;
+      const secondParen = findNextOpenParen(content, tableParenClose + 1);
+      if (secondParen < 0) continue;
+      nameParenOpen = secondParen;
+    } else {
+      nameParenOpen = firstParenIdx;
+    }
+
+    // Locate the name quote inside `nameParenOpen`. The first non-whitespace
+    // character must be `'`, `"`, or `` ` ``; anything else means this call
+    // shape doesn't carry a literal name and we skip it.
+    let q = nameParenOpen + 1;
+    while (q < content.length && /\s/.test(content[q])) q++;
+    const quote = content[q];
+    if (quote !== "'" && quote !== '"' && quote !== '`') continue;
+
+    const nameStart = q + 1;
     const nameEnd = findStringEnd(content, nameStart, quote);
     if (nameEnd < 0) continue;
 
-    const rawName = content.slice(nameStart, nameEnd);
-    const name = unescapeJsString(rawName, quote);
+    // Template-literal names with `${…}` interpolation are dynamic — the
+    // static substring alone violates the verbatim-name contract Phase 6
+    // relies on. We reconstruct the full template source (`${x} creates a
+    // rule`) as the canonical name and flag the block `dynamic: true` so
+    // the matching phase can treat it as a fuzzy candidate rather than
+    // demanding a byte-exact quote. See PR review on `_parser.mjs:L581`.
+    const isDynamic =
+      quote === '`' &&
+      content[nameEnd] === '$' &&
+      content[nameEnd + 1] === '{';
 
-    // Find the `{` that opens the block body. The body `{` lives INSIDE the
-    // test call's parens, not after them — `describe(name, () => { body })`.
-    // We find the call's close-paren first (string-aware) to bound the search,
-    // then locate the first real `{` between the call open and close.
-    const closeParen = findCallCloseParen(content, m.index);
-    if (closeParen < 0) continue;
-    const openBrace = findBodyOpenBrace(content, m.index, closeParen);
-    if (openBrace < 0) continue;
+    let name;
+    let nameCloseOffset;
+    if (isDynamic) {
+      const templateEnd = findTemplateLiteralEnd(content, nameStart);
+      if (templateEnd < 0) continue;
+      name = content.slice(nameStart, templateEnd);
+      nameCloseOffset = templateEnd + 1;
+    } else {
+      name = unescapeJsString(content.slice(nameStart, nameEnd), quote);
+      nameCloseOffset = nameEnd + 1;
+    }
+
+    // Find the callback body brace. Callers historically used the first `{`
+    // between the call's open- and close-paren, but that lands on
+    // destructuring patterns (`({ apiClient }) => {}`) and options objects
+    // (`.describe('n', { tag }, () => {})`) — the first `{` in code is NOT
+    // the body in either shape. `findCallbackBodyBrace` walks the call args
+    // tracking paren depth and only accepts a `{` that appears AFTER the
+    // `=>` (or `function(...)`) marker at paren-depth 0. See PR review on
+    // `_parser.mjs:L597`.
+    //
+    // Expression-body arrows (`it('name', () => foo({...}))`) have no block
+    // body brace at all — the callback's whole body is an expression. We
+    // still want to catalog these tests (they're valid leaves), so we fall
+    // back to using the arrow's offset as a pseudo-openBrace and the call's
+    // closing paren as a pseudo-closeBrace. Expression-body blocks can
+    // never contain nested tests, so no children get misparented.
+    const nameParenClose = findCallCloseParen(content, nameParenOpen);
+    if (nameParenClose < 0) continue;
+    const { bodyBrace, arrowOffset } = findCallbackBody(content, nameCloseOffset, nameParenClose);
+
+    let openBrace;
+    let precomputedCloseBrace = null;
+    let expressionBody = false;
+    if (bodyBrace >= 0) {
+      openBrace = bodyBrace;
+    } else if (arrowOffset >= 0) {
+      openBrace = arrowOffset;
+      precomputedCloseBrace = nameParenClose;
+      expressionBody = true;
+    } else {
+      continue;
+    }
 
     candidates.push({
-      kind: m[1],
+      kind,
+      modifiers,
       name,
+      dynamic: isDynamic,
       callOffset: m.index,
       openBrace,
+      precomputedCloseBrace,
+      expressionBody,
     });
   }
 
@@ -401,22 +512,34 @@ export function parseFileContent(content, framework) {
     }
   }
 
-  for (const c of candidates) c.closeBrace = closeFor.get(c.openBrace) ?? -1;
+  for (const c of candidates) {
+    // Expression-body blocks (arrow with no block body) bypass the tokenizer
+    // lookup — their span is the whole call, not a `{…}` pair.
+    if (c.precomputedCloseBrace != null) c.closeBrace = c.precomputedCloseBrace;
+    else c.closeBrace = closeFor.get(c.openBrace) ?? -1;
+  }
 
   // Drop candidates with no matching close (malformed source).
   const blocks = candidates.filter((c) => c.closeBrace > 0);
 
   // Step 3: compute parent chain. A block's parent chain is the list of
-  // enclosing `describe` blocks, outermost first. We sort by `openBrace`
-  // ascending and use a simple stack.
+  // enclosing describe-style container blocks, outermost first. We sort by
+  // `openBrace` ascending and use a simple stack.
+  //
+  // A block is a "container" if its identifier chain contains `describe`
+  // anywhere — that covers bare `describe(...)`, modifier variants
+  // (`describe.only`, `describe.skip`, `describe.each`), and Scout-style
+  // namespaced describes (`apiTest.describe`, `spaceTest.describe`,
+  // `apiTest.describe.only`, …). Leaf-only kinds (`it`, `test`, `apiTest`,
+  // `spaceTest`, `cy.it`) are still walked but never appear as parents.
   const sorted = [...blocks].sort((a, b) => a.openBrace - b.openBrace);
-  const enclosingStack = []; // {name, kind, closeBrace}
+  const enclosingStack = []; // {name, kind, modifiers, closeBrace}
   for (const b of sorted) {
     while (enclosingStack.length > 0 && enclosingStack[enclosingStack.length - 1].closeBrace < b.openBrace) {
       enclosingStack.pop();
     }
     b.parentChain = enclosingStack
-      .filter((p) => p.kind === 'describe')
+      .filter((p) => isContainerBlock(p.kind, p.modifiers))
       .map((p) => p.name);
     enclosingStack.push(b);
   }
@@ -432,6 +555,11 @@ export function parseFileContent(content, framework) {
     blockName: b.name,
     framework,
     parentChain: b.parentChain,
+    // `dynamic` is true when the block name came from a template literal with
+    // `${…}` interpolation. Phase 6 matching should treat these as fuzzy
+    // candidates (the `blockName` here is the raw template source, not the
+    // runtime-resolved string) rather than demanding a byte-exact quote.
+    dynamic: b.dynamic === true,
     // Internal fields useful to extract_test_block.mjs; the catalog builder
     // strips these before emitting JSON.
     _openBrace: b.openBrace,
@@ -586,18 +714,167 @@ function findStringEnd(content, start, quote) {
 }
 
 /**
- * Find the first real `{` between two offsets, skipping strings/template
- * literals/comments. Returns -1 if none is found.
+ * Locate the callback body inside a test call's argument list, returning
+ * both the body-brace offset (if any) and the arrow offset (if any).
  *
- * Used to locate a test block's body opener: in `describe(name, () => { body })`
- * the `{` we want lives between the test-call's open `(` and its matching `)`.
- * A naive `content.indexOf('{', closeParen)` would land on the NEXT test
- * block's body — which is the bug this function exists to fix.
+ * `fromOffset` is expected to be just past the name string's closing quote,
+ * still inside the call's parens; `toOffset` is the call's matching close-
+ * paren offset.
+ *
+ * The naive "first `{` in code state" approach is wrong for at least three
+ * common shapes:
+ *
+ *   apiTest('n', async ({ apiClient }) => { body })   // destructuring first
+ *   apiTest.describe('n', { tag: '@smoke' }, () => {})// options object first
+ *   describe('n', someArg, () => { body })            // arg with method call
+ *
+ * In each case the first depth-0 `{` is NOT the body. The correct body
+ * brace is the first `{` at paren-depth 0 that appears AFTER the callback
+ * marker — `=>` (arrow) or `function(...)` (function expression) — at
+ * paren-depth 0.
+ *
+ * Depth-0 `{` seen before the marker is an options object; we skip past
+ * its matching `}` and continue. Braces inside `(...)` (paren-depth > 0)
+ * are destructuring parameters and never match here.
+ *
+ * Expression-body arrows like `it('name', () => foo({...}))` have no body
+ * brace at all — the function returns `{ bodyBrace: -1, arrowOffset: N }`
+ * so the caller can decide to catalog the block using a pseudo-span
+ * bounded by the call's parens.
+ *
+ * Returns `{ bodyBrace: -1, arrowOffset: -1 }` when no callback marker
+ * is present at all (malformed source).
  */
-function findBodyOpenBrace(content, fromOffset, toOffset) {
+function findCallbackBody(content, fromOffset, toOffset) {
   let i = fromOffset;
   let state = 'code';
+  let parenDepth = 0;
+  let arrowOffset = -1;
+  let functionParamsEnd = -1;
+  let pastMarker = false;
+
   while (i < toOffset) {
+    const c = content[i];
+    const c2 = c + (content[i + 1] || '');
+
+    if (state === 'code') {
+      if (c2 === '//') { state = 'line-comment'; i += 2; continue; }
+      if (c2 === '/*') { state = 'block-comment'; i += 2; continue; }
+      if (c === "'") { state = 'single'; i++; continue; }
+      if (c === '"') { state = 'double'; i++; continue; }
+      if (c === '`') { state = 'template'; i++; continue; }
+      if (c === '(') { parenDepth++; i++; continue; }
+      if (c === ')') { parenDepth--; i++; continue; }
+
+      if (parenDepth === 0) {
+        if (!pastMarker) {
+          if (c2 === '=>') { arrowOffset = i; pastMarker = true; i += 2; continue; }
+          if (c === 'f' && isFunctionKeywordAt(content, i)) {
+            const paramsEnd = skipFunctionSignatureParams(content, i, toOffset);
+            if (paramsEnd < 0) return { bodyBrace: -1, arrowOffset: -1 };
+            functionParamsEnd = paramsEnd;
+            pastMarker = true;
+            i = paramsEnd + 1;
+            continue;
+          }
+          if (c === '{') {
+            const closeBrace = findMatchingCloseBrace(content, i);
+            if (closeBrace < 0) return { bodyBrace: -1, arrowOffset: -1 };
+            i = closeBrace + 1;
+            continue;
+          }
+        } else if (c === '{') {
+          return { bodyBrace: i, arrowOffset };
+        }
+      }
+      i++;
+      continue;
+    }
+    if (state === 'line-comment') {
+      if (c === '\n') state = 'code';
+      i++;
+      continue;
+    }
+    if (state === 'block-comment') {
+      if (c2 === '*/') { state = 'code'; i += 2; continue; }
+      i++;
+      continue;
+    }
+    if (state === 'single' || state === 'double') {
+      if (c === '\\') { i += 2; continue; }
+      if ((state === 'single' && c === "'") || (state === 'double' && c === '"')) state = 'code';
+      i++;
+      continue;
+    }
+    if (state === 'template') {
+      if (c === '\\') { i += 2; continue; }
+      if (c === '`') state = 'code';
+      i++;
+      continue;
+    }
+  }
+  // Reached end without finding a body brace. Report whichever marker (if
+  // any) we saw — an arrow signals expression body; a `function()` past-
+  // marker signals a malformed body (rare) and yields no arrow to fall
+  // back on.
+  return { bodyBrace: -1, arrowOffset: arrowOffset >= 0 ? arrowOffset : functionParamsEnd };
+}
+
+/**
+ * Return true when the block's identifier chain (`kind` + `modifiers`)
+ * describes a container — i.e. a describe-like block that may hold nested
+ * `it` / `test` / `apiTest` children.
+ *
+ * Any occurrence of `describe` in the chain qualifies, so all of the
+ * following are containers:
+ *
+ *   describe                    describe.only          describe.each
+ *   apiTest.describe            apiTest.describe.only
+ *   spaceTest.describe          spaceTest.describe.skip
+ *
+ * Bare `it`, `test`, `apiTest`, `spaceTest`, and `cy.it` (with or without
+ * `.only` / `.skip` / `.each` modifiers) are leaves.
+ */
+function isContainerBlock(kind, modifiers) {
+  if (kind === 'describe') return true;
+  if (!modifiers) return false;
+  return modifiers.split('.').filter(Boolean).includes('describe');
+}
+
+function isFunctionKeywordAt(content, i) {
+  if (i > 0 && /[A-Za-z0-9_$]/.test(content[i - 1])) return false;
+  if (content.substr(i, 8) !== 'function') return false;
+  const after = content[i + 8];
+  if (after !== undefined && /[A-Za-z0-9_$]/.test(after)) return false;
+  return true;
+}
+
+function skipFunctionSignatureParams(content, funcStart, toOffset) {
+  // From the 'f' of 'function', skip optional name and reach the params
+  // open-paren, then return the offset of its matching close-paren.
+  let i = funcStart + 8;
+  while (i < toOffset && /\s/.test(content[i])) i++;
+  while (i < toOffset && /[A-Za-z0-9_$]/.test(content[i])) i++;
+  while (i < toOffset && /\s/.test(content[i])) i++;
+  if (content[i] !== '(') return -1;
+  return skipBalancedParen(content, i);
+}
+
+/**
+ * Given the offset of an opening `(`, return the offset of its matching
+ * closing `)` — string-aware, so parens inside strings / comments / template
+ * literals don't affect the count. Returns -1 if unbalanced.
+ *
+ * Used to hop over the table paren in `.each([...])(name, ...)` and to bound
+ * a function-expression parameter list.
+ */
+function skipBalancedParen(content, openParenIdx) {
+  if (content[openParenIdx] !== '(') return -1;
+  let depth = 0;
+  let i = openParenIdx;
+  let state = 'code';
+  const n = content.length;
+  while (i < n) {
     const c = content[i];
     const c2 = c + (content[i + 1] || '');
     if (state === 'code') {
@@ -606,7 +883,113 @@ function findBodyOpenBrace(content, fromOffset, toOffset) {
       if (c === "'") { state = 'single'; i++; continue; }
       if (c === '"') { state = 'double'; i++; continue; }
       if (c === '`') { state = 'template'; i++; continue; }
-      if (c === '{') return i;
+      if (c === '(') depth++;
+      else if (c === ')') {
+        depth--;
+        if (depth === 0) return i;
+      }
+    } else if (state === 'line-comment') {
+      if (c === '\n') state = 'code';
+    } else if (state === 'block-comment') {
+      if (c2 === '*/') { state = 'code'; i += 2; continue; }
+    } else if (state === 'single' || state === 'double') {
+      if (c === '\\') { i += 2; continue; }
+      if ((state === 'single' && c === "'") || (state === 'double' && c === '"')) state = 'code';
+    } else if (state === 'template') {
+      if (c === '\\') { i += 2; continue; }
+      if (c === '`') state = 'code';
+    }
+    i++;
+  }
+  return -1;
+}
+
+/**
+ * Given the offset of an opening `{`, return the offset of its matching
+ * closing `}` — string-aware. Used to skip over an options-object argument
+ * that appears before the callback marker.
+ */
+function findMatchingCloseBrace(content, openBraceIdx) {
+  if (content[openBraceIdx] !== '{') return -1;
+  let depth = 0;
+  let i = openBraceIdx;
+  let state = 'code';
+  const n = content.length;
+  while (i < n) {
+    const c = content[i];
+    const c2 = c + (content[i + 1] || '');
+    if (state === 'code') {
+      if (c2 === '//') { state = 'line-comment'; i += 2; continue; }
+      if (c2 === '/*') { state = 'block-comment'; i += 2; continue; }
+      if (c === "'") { state = 'single'; i++; continue; }
+      if (c === '"') { state = 'double'; i++; continue; }
+      if (c === '`') { state = 'template'; i++; continue; }
+      if (c === '{') depth++;
+      else if (c === '}') {
+        depth--;
+        if (depth === 0) return i;
+      }
+    } else if (state === 'line-comment') {
+      if (c === '\n') state = 'code';
+    } else if (state === 'block-comment') {
+      if (c2 === '*/') { state = 'code'; i += 2; continue; }
+    } else if (state === 'single' || state === 'double') {
+      if (c === '\\') { i += 2; continue; }
+      if ((state === 'single' && c === "'") || (state === 'double' && c === '"')) state = 'code';
+    } else if (state === 'template') {
+      if (c === '\\') { i += 2; continue; }
+      if (c === '`') state = 'code';
+    }
+    i++;
+  }
+  return -1;
+}
+
+/**
+ * Given an offset immediately AFTER a template literal's opening backtick,
+ * return the offset of the matching closing backtick — walking past any
+ * `${…}` interpolations. Returns -1 if unclosed.
+ *
+ * Used to reconstruct dynamic block names like `${x} creates a rule` as
+ * their full template source (the static substring alone is empty or
+ * misleading; see the `findStringEnd` early-return on `${`).
+ */
+function findTemplateLiteralEnd(content, startAfterOpenBacktick) {
+  let i = startAfterOpenBacktick;
+  const n = content.length;
+  while (i < n) {
+    const c = content[i];
+    if (c === '\\') { i += 2; continue; }
+    if (c === '`') return i;
+    if (c === '$' && content[i + 1] === '{') {
+      const closeInterp = findMatchingCloseBrace(content, i + 1);
+      if (closeInterp < 0) return -1;
+      i = closeInterp + 1;
+      continue;
+    }
+    i++;
+  }
+  return -1;
+}
+
+/**
+ * Scan forward from `fromOffset` for the first `(` in code state. Used to
+ * locate the second paren of `.each([...])(name, …)`.
+ */
+function findNextOpenParen(content, fromOffset) {
+  let i = fromOffset;
+  let state = 'code';
+  const n = content.length;
+  while (i < n) {
+    const c = content[i];
+    const c2 = c + (content[i + 1] || '');
+    if (state === 'code') {
+      if (c2 === '//') { state = 'line-comment'; i += 2; continue; }
+      if (c2 === '/*') { state = 'block-comment'; i += 2; continue; }
+      if (c === "'") { state = 'single'; i++; continue; }
+      if (c === '"') { state = 'double'; i++; continue; }
+      if (c === '`') { state = 'template'; i++; continue; }
+      if (c === '(') return i;
     } else if (state === 'line-comment') {
       if (c === '\n') state = 'code';
     } else if (state === 'block-comment') {

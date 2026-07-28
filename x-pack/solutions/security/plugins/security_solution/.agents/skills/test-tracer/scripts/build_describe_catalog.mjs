@@ -17,8 +17,15 @@
  *
  * Output (stdout, JSON):
  *   [
- *     { path, line, blockName, framework, parentChain }
+ *     { path, line, blockName, framework, parentChain, dynamic? }
  *   ]
+ *
+ * `dynamic: true` is emitted only for blocks whose name came from a
+ * template literal with `${…}` interpolation (e.g. `it(\`\${x} creates a
+ * rule\`, …)`). The `blockName` field carries the raw template source
+ * rather than a runtime-resolved string; Phase 6 must treat dynamic
+ * blocks as fuzzy candidates instead of demanding a byte-exact quote.
+ * Static blocks omit the field to keep the JSON compact.
  *
  * Paths are emitted relative to `--cwd` (defaults to the current working dir).
  * This keeps catalogs portable across machines and stable in PR diffs.
@@ -87,7 +94,10 @@ OPTIONS:
 
 OUTPUT:
   JSON array on stdout:
-    [{ path, line, blockName, framework, parentChain }]
+    [{ path, line, blockName, framework, parentChain, dynamic? }]
+
+  'dynamic' is emitted only when the block name came from a template
+  literal with \${…} interpolation. Phase 6 treats these as fuzzy.
 
 EXIT CODES:
   0  success
@@ -163,13 +173,20 @@ async function main() {
 
       const relPath = path.relative(cwd, filePath);
       for (const b of blocks) {
-        catalog.push({
+        const entry = {
           path: relPath,
           line: b.line,
           blockName: b.blockName,
           framework: b.framework,
           parentChain: b.parentChain,
-        });
+        };
+        // Only surface `dynamic: true` in the JSON. Emitting `false` for
+        // every static block would bloat the catalog and add noise the LLM
+        // does not need. `dynamic: true` tells Phase 6 that `blockName` is
+        // a template-literal source (e.g. `${x} creates a rule`) and must
+        // be treated as a fuzzy candidate, not a verbatim quote target.
+        if (b.dynamic === true) entry.dynamic = true;
+        catalog.push(entry);
       }
     }
   }

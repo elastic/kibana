@@ -2,7 +2,7 @@
 
 Classifies an individual test block's assertion quality after Phase 6 matching.
 
-**v1 cut**: This file is not consulted in v1. Every validated match from Phase 6 is `IMPLEMENTED` with no quality dimension. Ship Phase 7 in v2 once Phase 6 matching is proven reliable on real PRs.
+**v1 cut**: This file is not consulted in v1. Every validated match from Phase 6 is `CANDIDATE COVERAGE` (name-only match) with no quality dimension. v2 adds the assertion inspection this rubric grades, and matches then promote to `IMPLEMENTED` (or `IMPLEMENTED — WEAK` for fragile assertions). Ship Phase 7 in v2 once Phase 6 matching is proven reliable on real PRs.
 
 Read this file only when Phase 7 is enabled.
 
@@ -10,7 +10,7 @@ Read this file only when Phase 7 is enabled.
 
 ## Why a quality dimension matters
 
-Block-name matching is necessary but not sufficient. The `bug-fix` skill in this repo explicitly warns that some assertion patterns are *fragile and misrepresentative* — they pass the test runner but do not catch the behaviour they claim to. Surfacing a `weak` verdict tells the QA *"there is a test here, but it would not catch a regression in this scenario"* — strictly more useful than `IMPLEMENTED`.
+Block-name matching is necessary but not sufficient. The `bug-fix` skill in this repo explicitly warns that some assertion patterns are *fragile and misrepresentative* — they pass the test runner but do not catch the behaviour they claim to. Surfacing a `weak` verdict tells the QA *"there is a test here, but it would not catch a regression in this scenario"* — strictly more useful than the name-only `CANDIDATE COVERAGE` verdict v1 emits.
 
 The anchoring source is `bug-fix/SKILL.md` lines 33–44 (Red Flags) and `bug-fix/SKILL.md` line 111 (the EuiToolTip removal anti-pattern). Quote those rules verbatim in the prompt; do not re-author them.
 
@@ -134,5 +134,5 @@ it('initializes the rule form', () => {
 ## Cross-cutting
 
 - **Do not invoke the model with a slice larger than 4K tokens.** If the slice is bigger, the block is too large to judge meaningfully; ask the user to narrow the scenario, do not silently truncate.
-- **Do not pass the scenario's expected verdict in the prompt.** Quality assessment must be independent of whether the scenario was previously classified as `IMPLEMENTED`.
+- **Do not pass the scenario's expected verdict in the prompt.** Quality assessment must be independent of whether the scenario was previously classified as `CANDIDATE COVERAGE` (v1) or otherwise flagged.
 - **Quality verdicts never modify Phase 4 (Plan ↔ Requirements).** That phase is about test plan completeness, not test code quality. The two reports must remain orthogonal — combining them creates verdict ambiguity.
