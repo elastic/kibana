@@ -239,7 +239,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 4.1 resu
 3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`.
 4. Accept an event continuation when its stored topology intersects the detection's topology ID set, **Alert symptom** is not positive/health, and **Current evidence** does not explicitly name a different active target or mechanism.
    Add accepted rules to `matched_rule_uuids`.
-5. When `has_more` is true and some discoveries remain unmatched, request `next_page`.
+5. When `has_more` is true and some discoveries remain unmatched, request `next_page` with all other parameters unchanged. Never re-call `platform_sig_events_event_search` with the same `topology_feature_ids` and a different `per_page`; `per_page` controls page size, not a retry mechanism. When `has_more` is false, the result set is complete — do not re-query.
 
 Assign each matched detection to at most one accepted event continuation. The continuation is a discovery that reuses the matched event's `event_id`. If multiple events continuation match a single detection, prefer greatest rule coverage, then evidence similarity. 
 
