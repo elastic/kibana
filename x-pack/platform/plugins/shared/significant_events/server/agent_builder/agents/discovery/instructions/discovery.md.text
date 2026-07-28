@@ -224,9 +224,9 @@ Run 3.1 then 3.2 for each detection
 
 1. Call `platform_sig_events_event_search` once with all distinct `rule_uuids` and `stream_names` from detections.
 2. A detection rule-matches an event only when `events[].signals[].rule_uuid` includes any rule from the detection.
-3. Accept that event continuation unless current evidence identifies a different active target or mechanism, or the authored KI scopes the detection away from it. 
+3. A `rule_uuid` match is sufficient to accept that event continuation. Reject only when the current evidence rows (not title or `symptom_hypothesis` wording) name a different active target or mechanism than the new detection, or the authored KI explicitly scopes the detection away from it. A difference in phrasing, title, or `symptom_hypothesis` framing between the existing event and the new detection is never, by itself, grounds for rejection — evaluate the underlying target/mechanism, not the wording.
   Add accepted rules to `matched_rule_uuids`.
-4. When `has_more` is true and some rules remain unmatched, request `next_page` with all other parameters unchanged.
+4. When `has_more` is true and some rules remain unmatched, request `next_page` with all other parameters unchanged. Never re-call `platform_sig_events_event_search` with the same `rule_uuids`/`stream_names` and a different `per_page`; `per_page` controls page size, not a retry mechanism. When `has_more` is false, the result set is complete — proceed to 3.2 for any unmatched rules instead of re-querying.
 
 #### 3.2. Topology Match
 
