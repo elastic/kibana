@@ -781,17 +781,41 @@ def reconcile_pending_resource(
             f"Session resource {kind} {resource_id!r} is not pending"
         )
     if http_code in RESOURCE_PRESENT_STATUSES:
+        existing = _find_resource(config, kind=kind, resource_id=resource_id)
+        pending = existing if isinstance(existing, dict) else {}
+        pending_method = pending.get("method")
+        pending_body = pending.get("body")
+        pending_protected = pending.get("protected")
+        pending_base_url = pending.get("base_url")
+        pending_endpoint = pending.get("endpoint")
         register_resource(
             config,
             kind=kind,
             resource_id=resource_id,
             owned=True,
-            endpoint=endpoint,
-            method=method,
-            protected=protected,
-            base_url=base_url,
+            endpoint=(
+                pending_endpoint
+                if isinstance(pending_endpoint, str) and pending_endpoint
+                else endpoint
+            ),
+            method=(
+                pending_method
+                if pending_method in {"DELETE", "POST"}
+                else method
+            ),
+            protected=(
+                bool(pending_protected)
+                if "protected" in pending
+                else protected
+            ),
+            base_url=(
+                pending_base_url
+                if pending_base_url
+                in {"url", "es_url", "ccs_remote_es_url"}
+                else base_url
+            ),
             track_flow_space=track_flow_space,
-            body=body,
+            body=pending_body if isinstance(pending_body, str) else body,
             state="owned",
         )
         return "owned"

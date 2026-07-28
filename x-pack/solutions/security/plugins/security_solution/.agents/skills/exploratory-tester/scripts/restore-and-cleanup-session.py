@@ -92,11 +92,12 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
-    try:
-        _release_owned_lease_if_ccs_safe(config_path)
-    except (OSError, ValueError) as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
+    if not args.dry_run:
+        try:
+            _release_owned_lease_if_ccs_safe(config_path)
+        except (OSError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
 
     return cleanup_result.returncode
 

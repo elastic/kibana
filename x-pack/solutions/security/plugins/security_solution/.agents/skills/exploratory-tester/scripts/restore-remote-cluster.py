@@ -392,7 +392,9 @@ def main() -> int:
         print("Timeout and poll interval must not be negative.", file=sys.stderr)
         return 1
     config_path = Path(args.session_dir) / "config.json"
-    deadline = time.monotonic() + args.timeout_seconds
+    # Deadline starts after the deployment lock is held so lock-wait time is
+    # not charged against --timeout-seconds.
+    deadline = 0.0
 
     def request_budget() -> float:
         remaining = deadline - time.monotonic()
@@ -402,6 +404,7 @@ def main() -> int:
 
     try:
         with ccs_operation_lock(config_path):
+            deadline = time.monotonic() + args.timeout_seconds
             with edit_session_config(config_path, persist=False) as config:
                 assert_ccs_deployment_lease_allows_session(config)
                 if read_ccs_deployment_lease(config) is not None:
