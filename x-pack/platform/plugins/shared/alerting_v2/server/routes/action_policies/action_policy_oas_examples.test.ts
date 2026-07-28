@@ -8,8 +8,9 @@
 import {
   actionPolicyResponseSchema,
   actionPolicyTagsResponseSchema,
-  bulkActionActionPoliciesBodySchema,
-  bulkActionActionPoliciesResponseSchema,
+  bulkByIdsSchema,
+  bulkResponseSchema,
+  bulkSnoozeActionPoliciesBodySchema,
   countPolicyExecutionEventsResponseSchema,
   createActionPolicyDataSchema,
   findActionPoliciesResponseSchema,
@@ -22,15 +23,14 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_RESPONSE,
+  BULK_BY_IDS_REQUEST,
+  BULK_RESPONSE,
   CREATE_ACTION_POLICY_REQUEST,
 } from './action_policy_oas_shared_examples';
 import { UPDATE_ACTION_POLICY_REQUEST } from './update_action_policy_oas_example';
 import { LIST_ACTION_POLICIES_RESPONSE } from './list_action_policies_oas_example';
 import { SNOOZE_ACTION_POLICY_REQUEST } from './snooze_action_policy_oas_example';
-import {
-  BULK_ACTION_ACTION_POLICIES_REQUEST,
-  BULK_ACTION_ACTION_POLICIES_RESPONSE,
-} from './bulk_action_action_policies_oas_example';
+import { BULK_SNOOZE_ACTION_POLICIES_REQUEST } from './bulk_snooze_action_policies_oas_example';
 import {
   MATCH_ACTION_POLICIES_FOR_RULE_REQUEST,
   MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
@@ -63,15 +63,17 @@ describe('action policy OAS example payloads', () => {
     );
   });
 
-  it('keeps bulk request example valid against bulkActionActionPoliciesBodySchema', () => {
-    expect(
-      bulkActionActionPoliciesBodySchema.safeParse(BULK_ACTION_ACTION_POLICIES_REQUEST).success
-    ).toBe(true);
+  it('keeps bulk-by-ids request example valid against bulkByIdsSchema', () => {
+    expect(bulkByIdsSchema.safeParse(BULK_BY_IDS_REQUEST).success).toBe(true);
   });
 
-  it('keeps bulk response example valid against bulkActionActionPoliciesResponseSchema', () => {
+  it('keeps bulk response example valid against bulkResponseSchema', () => {
+    expect(bulkResponseSchema.safeParse(BULK_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps bulk snooze request example valid against bulkSnoozeActionPoliciesBodySchema', () => {
     expect(
-      bulkActionActionPoliciesResponseSchema.safeParse(BULK_ACTION_ACTION_POLICIES_RESPONSE).success
+      bulkSnoozeActionPoliciesBodySchema.safeParse(BULK_SNOOZE_ACTION_POLICIES_REQUEST).success
     ).toBe(true);
   });
 

@@ -7,6 +7,8 @@
 
 import type {
   ActionPolicyResponse,
+  BulkByIdsParams,
+  BulkResponse,
   CreateActionPolicyDataInput,
   ErrorResponse,
 } from '@kbn/alerting-v2-schemas';
@@ -150,3 +152,28 @@ export const ACTION_POLICY_UPSERT_CONFLICT_RESPONSE: OasExampleEntry = {
   summary: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
   value: ACTION_POLICY_VERSION_CONFLICT_VALUE,
 };
+
+/** Request body shared across by-ID bulk action-policy operations. */
+export const BULK_BY_IDS_REQUEST: BulkByIdsParams = {
+  ids: [SAMPLE_ACTION_POLICY_ID, 'action-policy-2'],
+};
+
+/** Response shared across by-ID bulk action-policy operations. */
+export const BULK_RESPONSE: BulkResponse = {
+  affected_count: 2,
+  errors: [],
+};
+
+/** Static 400 body for bulk-by-ids routes that reject an invalid request body. */
+export const INVALID_BULK_BY_IDS_RESPONSE: OasExampleEntry = invalidResponseExample({
+  summary: INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION,
+  message: 'ids: Invalid input: expected array, received undefined',
+  details: {
+    errors: {
+      errors: [],
+      properties: {
+        ids: { errors: ['Invalid input: expected array, received undefined'] },
+      },
+    },
+  },
+});

@@ -17,7 +17,7 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { bulkActionActionPoliciesOasExamples } from './bulk_action_action_policies_oas_example';
+import { bulkSnoozeActionPoliciesOasExamples } from './bulk_snooze_action_policies_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
@@ -33,7 +33,7 @@ export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Snooze action policies in bulk by ID',
-    oasOperationObject: bulkActionActionPoliciesOasExamples,
+    oasOperationObject: bulkSnoozeActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {
