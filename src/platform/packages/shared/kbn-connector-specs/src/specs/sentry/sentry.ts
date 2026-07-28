@@ -143,7 +143,7 @@ export const Sentry: ConnectorSpec = {
             'core.kibanaConnectorSpecs.sentry.config.organizationSlug.helpText',
             {
               defaultMessage:
-                'The slug of your Sentry organization, found in the URL: sentry.io/organizations/<slug>/',
+                'The slug of your Sentry organization, found in the URL: sentry.io/organizations/your-slug/',
             }
           ),
         }),
@@ -156,7 +156,7 @@ export const Sentry: ConnectorSpec = {
           }),
           helpText: i18n.translate('core.kibanaConnectorSpecs.sentry.config.baseUrl.helpText', {
             defaultMessage:
-              'Leave empty to use Sentry SaaS (https://sentry.io/api/0). Set this for a self-hosted Sentry instance, e.g. https://sentry.example.com/api/0.',
+              'Leave empty to use Sentry SaaS (https://sentry.io/api/0). If your organization uses a region-specific data storage location, use its regional domain instead, e.g. https://us.sentry.io/api/0 or https://de.sentry.io/api/0. Set this for a self-hosted Sentry instance, e.g. https://sentry.example.com/api/0.',
           }),
         }),
     })
