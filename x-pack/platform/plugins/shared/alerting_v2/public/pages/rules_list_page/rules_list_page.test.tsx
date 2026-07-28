@@ -98,8 +98,9 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
 }));
 
+const mockUseFetchRuleTags = jest.fn();
 jest.mock('../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+  useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
 }));
 
 const mockCreateRuleMutate = jest.fn();
@@ -177,6 +178,7 @@ describe('RulesListPage', () => {
       mutate: mockToggleEnabledMutate,
       isLoading: false,
     });
+    mockUseFetchRuleTags.mockReturnValue({ data: ['prod'], isLoading: false, isError: false });
   });
 
   afterEach(() => {
@@ -1370,6 +1372,50 @@ describe('RulesListPage', () => {
 
       await waitFor(() => {
         expect(screen.queryByTestId('bulkEnableRules')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('tag search', () => {
+    const defaultRulesData = {
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    };
+
+    it('calls useFetchRuleTags with no search on initial render', () => {
+      mockUseFetchRules.mockReturnValue(defaultRulesData);
+      renderPage();
+
+      expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+        expect.objectContaining({ search: undefined })
+      );
+    });
+
+    it('debounces tag search input and passes it to useFetchRuleTags', async () => {
+      jest.useFakeTimers();
+      mockUseFetchRules.mockReturnValue(defaultRulesData);
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+      fireEvent.change(screen.getByTestId('rulesListTagsFilterSearch'), {
+        target: { value: 'pro' },
+      });
+
+      // Before debounce fires, should still be undefined
+      expect(mockUseFetchRuleTags).not.toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'pro' })
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      });
+
+      await waitFor(() => {
+        expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+          expect.objectContaining({ search: 'pro' })
+        );
       });
     });
   });

@@ -147,7 +147,9 @@ export const RulesListPage = () => {
   const [modeFilter, setModeFilter] = useState('');
   const [sortField, setSortField] = useState<FindRulesSortField>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [tagSearch, setTagSearch] = useState('');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const debouncedTagSearch = useDebouncedValue(tagSearch, SEARCH_DEBOUNCE_MS);
 
   const filter = useMemo(
     () =>
@@ -177,7 +179,9 @@ export const RulesListPage = () => {
     sortOrder: sortDirection,
   });
 
-  const { data: allTags } = useFetchRuleTags();
+  const { data: tagsData = [], isLoading: isTagsLoading } = useFetchRuleTags({
+    search: debouncedTagSearch || undefined,
+  });
 
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
     if (tablePage) {
@@ -198,7 +202,7 @@ export const RulesListPage = () => {
     }
   };
 
-  const availableTagOptions = allTags ?? [];
+  const availableTagOptions = tagsData;
   const hasActiveFilters = Boolean(filter) || Boolean(searchInput.trim());
   const isInitialLoad = isLoading && rulesData === undefined;
   const hasRules = (rulesData?.total ?? 0) > 0;
@@ -326,6 +330,9 @@ export const RulesListPage = () => {
                 <TagsFilterPopover
                   options={availableTagOptions}
                   value={tagsFilter}
+                  isLoading={isTagsLoading}
+                  search={tagSearch}
+                  onSearchChange={setTagSearch}
                   onChange={setTagsFilter}
                 />
                 <ModeFilterPopover value={modeFilter} onChange={setModeFilter} />

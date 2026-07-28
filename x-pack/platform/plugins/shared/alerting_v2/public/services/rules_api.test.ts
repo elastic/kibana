@@ -109,4 +109,48 @@ describe('RulesApi', () => {
       expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_run`);
     });
   });
+
+  describe('listTags', () => {
+    it('GET /rules/tags with no params when called with defaults', async () => {
+      http.get.mockResolvedValue({ tags: ['cpu', 'memory'] });
+
+      const result = await api.listTags();
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+        query: { search: undefined, kind: undefined },
+      });
+      expect(result).toEqual({ tags: ['cpu', 'memory'] });
+    });
+
+    it('forwards search param in the query', async () => {
+      http.get.mockResolvedValue({ tags: ['production'] });
+
+      await api.listTags({ search: 'pro' });
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+        query: { search: 'pro', kind: undefined },
+      });
+    });
+
+    it('forwards kind param in the query', async () => {
+      http.get.mockResolvedValue({ tags: ['alert-tag'] });
+
+      await api.listTags({ kind: 'alert' });
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+        query: { search: undefined, kind: 'alert' },
+      });
+    });
+
+    it('does not call the old _tags path', async () => {
+      http.get.mockResolvedValue({ tags: [] });
+
+      await api.listTags();
+
+      expect(http.get).not.toHaveBeenCalledWith(
+        expect.stringContaining('_tags'),
+        expect.anything()
+      );
+    });
+  });
 });
