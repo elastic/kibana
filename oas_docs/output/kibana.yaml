@@ -2926,7 +2926,7 @@ paths:
                       description: Custom instructions for the agent.
                       type: string
                     skill_ids:
-                      description: Skill IDs to enable for this execution.
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
                       items:
                         maxLength: 256
                         type: string
@@ -3395,7 +3395,7 @@ paths:
                       description: Custom instructions for the agent.
                       type: string
                     skill_ids:
-                      description: Skill IDs to enable for this execution.
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
                       items:
                         maxLength: 256
                         type: string
