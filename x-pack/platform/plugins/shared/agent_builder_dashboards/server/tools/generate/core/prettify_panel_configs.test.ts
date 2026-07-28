@@ -30,7 +30,7 @@ const createPanel = (
 
 const createResolvePanelContent = (
   title = 'Polished requests',
-  summary?: string
+  authoringNote?: string
 ): jest.MockedFunction<ResolvePanelContent> =>
   jest.fn<ReturnType<ResolvePanelContent>, Parameters<ResolvePanelContent>>(async () => ({
     type: 'success',
@@ -42,7 +42,7 @@ const createResolvePanelContent = (
         data_source: { type: 'esql', query: esql },
       },
     },
-    ...(summary ? { summary } : {}),
+    ...(authoringNote ? { authoringNote } : {}),
   }));
 
 describe('prettifyPanelConfigs', () => {
@@ -87,7 +87,7 @@ describe('prettifyPanelConfigs', () => {
       chartType: SupportedChartType.Metric,
       esql,
       additionalChartConfigInstructions: expect.stringContaining(
-        'summary must be one factual sentence'
+        '"authoring_note" must be one factual sentence'
       ),
       existingPanel: survivingPanel,
     });
@@ -100,10 +100,10 @@ describe('prettifyPanelConfigs', () => {
       newPanel,
     ]);
     expect(result.failures).toEqual([]);
-    expect(result.panelSummaries).toEqual([]);
+    expect(result.panelAuthoringNotes).toEqual([]);
   });
 
-  it('collects panel summaries from successful resolves', async () => {
+  it('collects panel authoring notes from successful resolves', async () => {
     const panel = createPanel('requests', {
       title: 'Requests',
       type: 'metric',
@@ -120,15 +120,15 @@ describe('prettifyPanelConfigs', () => {
       resolvePanelContent,
     });
 
-    expect(result.panelSummaries).toEqual([
+    expect(result.panelAuthoringNotes).toEqual([
       {
         panelId: 'requests',
-        summary: 'Right-aligned the metric value.',
+        authoringNote: 'Right-aligned the metric value.',
       },
     ]);
   });
 
-  it('omits panel summaries when the resolve has no summary', async () => {
+  it('omits panel authoring notes when the resolve has no authoring note', async () => {
     const panel = createPanel('requests', {
       title: 'Requests',
       type: 'metric',
@@ -142,7 +142,7 @@ describe('prettifyPanelConfigs', () => {
       resolvePanelContent,
     });
 
-    expect(result.panelSummaries).toEqual([]);
+    expect(result.panelAuthoringNotes).toEqual([]);
   });
 
   it('silently skips unsupported chart types and multi-query panels', async () => {

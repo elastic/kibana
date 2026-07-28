@@ -33,11 +33,6 @@ export type InlinePanelOperationType =
   | 'edit_panels'
   | 'prettify_panel_configs';
 
-export interface PanelSummary {
-  panelId: string;
-  summary: string;
-}
-
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {
   panelId: string;

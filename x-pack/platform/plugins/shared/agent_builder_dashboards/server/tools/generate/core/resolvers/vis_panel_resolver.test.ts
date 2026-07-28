@@ -151,50 +151,6 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('returns the authoring summary when prettifying panel configs', async () => {
-    mockedBuildLensConfig.mockResolvedValue({
-      ...createBuildLensConfigResult({ type: 'metric' }),
-      summary: 'Right-aligned the metric value.',
-    });
-
-    const resolveVisPanel = createVisPanelResolver({
-      logger,
-      modelProvider,
-      events,
-      esClient,
-    });
-
-    const result = await resolveVisPanel({
-      type: 'vis',
-      operationType: 'prettify_panel_configs',
-      identifier: 'panel-1',
-      nlQuery: 'Polish this visualization',
-      chartType: SupportedChartType.Metric,
-      esql: 'FROM logs-* | STATS count = COUNT(*)',
-      additionalChartConfigInstructions: 'Describe the changes.',
-      existingPanel: {
-        id: 'panel-1',
-        type: LENS_EMBEDDABLE_TYPE,
-        config: { type: 'metric' },
-        grid: { w: 12, h: 8, x: 0, y: 0 },
-      },
-    });
-
-    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        additionalChartConfigInstructions: 'Describe the changes.',
-      })
-    );
-    expect(result).toEqual({
-      type: 'success',
-      panelContent: {
-        type: LENS_EMBEDDABLE_TYPE,
-        config: { type: 'metric' },
-      },
-      summary: 'Right-aligned the metric value.',
-    });
-  });
-
   it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({

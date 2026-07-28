@@ -28,7 +28,7 @@ describe('generateDashboardTool', () => {
     });
   });
 
-  it('summarizes existing panel config fields without returning the full config', () => {
+  it('projects panels without their config and attaches authoring notes by panel id', () => {
     const dashboardData: DashboardAttachmentData = {
       title: 'Service overview',
       description: 'Production traffic',
@@ -47,10 +47,18 @@ describe('generateDashboardTool', () => {
           },
           grid: { x: 0, y: 0, w: 12, h: 8 },
         },
+        {
+          id: 'untouched',
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { title: 'Errors', type: 'metric' },
+          grid: { x: 12, y: 0, w: 12, h: 8 },
+        },
       ],
     };
 
-    expect(summarizeDashboard(dashboardData)).toEqual({
+    expect(
+      summarizeDashboard(dashboardData, new Map([['requests', 'Right-aligned the metric value.']]))
+    ).toEqual({
       title: 'Service overview',
       description: 'Production traffic',
       panels: [
@@ -58,14 +66,13 @@ describe('generateDashboardTool', () => {
           id: 'requests',
           type: LENS_EMBEDDABLE_TYPE,
           grid: { x: 0, y: 0, w: 12, h: 8 },
-          config: {
-            title: 'Request volume',
-            type: 'metric',
-            data_source: {
-              type: 'esql',
-              query: 'FROM logs-* | STATS requests = COUNT(*)',
-            },
-          },
+          authoring_note: 'Right-aligned the metric value.',
+        },
+        {
+          id: 'untouched',
+          type: LENS_EMBEDDABLE_TYPE,
+          grid: { x: 12, y: 0, w: 12, h: 8 },
+          authoring_note: undefined,
         },
       ],
       controls: [],

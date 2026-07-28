@@ -14,7 +14,6 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isSection,
-  type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
@@ -28,7 +27,6 @@ import {
   dashboardOperationSchema,
 } from './core';
 import { indexPanelsById } from './core/dashboard_state';
-import { summarizePanelConfig } from './core/panel_config';
 import { prettifyPanelConfigs } from './core/prettify_panel_configs';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
@@ -63,13 +61,6 @@ const generateDashboardSchema = z
     }
   });
 
-const summarizePanel = (panel: AttachmentPanel) => ({
-  type: panel.type,
-  id: panel.id,
-  grid: panel.grid,
-  config: summarizePanelConfig(panel.config),
-});
-
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
@@ -81,7 +72,7 @@ const summarizePanel = (panel: AttachmentPanel) => ({
  * authored in this run, keyed by panel id. Panels that were not authored now
  * (or whose engine returned no note) simply have no `authoring_note`.
  */
-const summarizeDashboard = (
+export const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,
   authoringNotesByPanelId: Map<string, string>
 ) => ({
@@ -170,14 +161,14 @@ Use operations[] to:
           esClient,
         });
 
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+        const operationResult = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
           resolvePanelContent,
         });
+        const { failures, panelAuthoringNotes, contentResolvedPanelIds } = operationResult;
         let dashboardData = operationResult.dashboardData;
-        const { failures, panelSummaries, contentResolvedPanelIds } = operationResult;
 
         if (prettify) {
           const prettifyResult = await prettifyPanelConfigs({
@@ -188,7 +179,7 @@ Use operations[] to:
           });
           dashboardData = prettifyResult.dashboardData;
           failures.push(...prettifyResult.failures);
-          panelSummaries.push(...prettifyResult.panelSummaries);
+          panelAuthoringNotes.push(...prettifyResult.panelAuthoringNotes);
         }
 
         // Data-aware default time range computation

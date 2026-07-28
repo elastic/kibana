@@ -15,13 +15,13 @@ import { indexPanelsById, updatePanelInDashboard } from './dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { ResolvePanelContent } from './operations/panels';
 import { getEsqlQueries } from './panel_config';
-import type { PanelSummary } from './resolve_panel';
+import type { PanelAuthoringNote } from './resolve_panel';
 import type { PanelFailure } from './utils';
 
 const prettifyNlQuery =
   'Polish this existing visualization while preserving its analysis intent, chart type, and ES|QL query.';
 const prettifyConfigInstructions =
-  'Apply chart configuration best practices. Preserve the existing analysis intent and chart type. Keep the provided ES|QL query unchanged. The summary must be one factual sentence describing only what changed from the existing chart configuration.';
+  'Apply chart configuration best practices. Preserve the existing analysis intent and chart type. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
 const supportedChartTypes = new Set<string>(Object.values(SupportedChartType));
 
 const getChartType = (panel: AttachmentPanel): SupportedChartType | undefined => {
@@ -72,11 +72,11 @@ export const prettifyPanelConfigs = async ({
 }): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: PanelFailure[];
-  panelSummaries: PanelSummary[];
+  panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
   const currentPanelIndex = indexPanelsById(dashboardData.panels);
   const failures: PanelFailure[] = [];
-  const panelSummaries: PanelSummary[] = [];
+  const panelAuthoringNotes: PanelAuthoringNote[] = [];
   const requests: PrettifyRequest[] = [];
 
   for (const existingPanel of existingPanels) {
@@ -127,13 +127,13 @@ export const prettifyPanelConfigs = async ({
     });
     nextDashboardData = updateResult.dashboardData;
 
-    if (attempt.summary) {
-      panelSummaries.push({
+    if (attempt.authoringNote) {
+      panelAuthoringNotes.push({
         panelId,
-        summary: attempt.summary,
+        authoringNote: attempt.authoringNote,
       });
     }
   }
 
-  return { dashboardData: nextDashboardData, failures, panelSummaries };
+  return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
 };
