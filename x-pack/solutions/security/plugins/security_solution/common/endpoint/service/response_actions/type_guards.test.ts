@@ -9,11 +9,11 @@ import {
   isCancelAction,
   isExecuteAction,
   isGetFileAction,
-  isKillProcess,
+  isKillProcessAction,
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
-  isSuspendProcess,
+  isSuspendProcessAction,
   isUploadAction,
 } from './type_guards';
 import type { ActionDetails } from '../../types';
@@ -110,25 +110,25 @@ describe('type_guards', () => {
     });
   });
 
-  describe('isKillProcess()', () => {
+  describe('isKillProcessAction()', () => {
     it('should return true for command `kill-process`', () => {
-      expect(isKillProcess(makeAction('kill-process'))).toBe(true);
+      expect(isKillProcessAction(makeAction('kill-process'))).toBe(true);
     });
 
     it('should return false for other commands', () => {
-      expect(isKillProcess(makeAction('suspend-process'))).toBe(false);
-      expect(isKillProcess(makeAction('isolate'))).toBe(false);
+      expect(isKillProcessAction(makeAction('suspend-process'))).toBe(false);
+      expect(isKillProcessAction(makeAction('isolate'))).toBe(false);
     });
   });
 
-  describe('isSuspendProcess()', () => {
+  describe('isSuspendProcessAction()', () => {
     it('should return true for command `suspend-process`', () => {
-      expect(isSuspendProcess(makeAction('suspend-process'))).toBe(true);
+      expect(isSuspendProcessAction(makeAction('suspend-process'))).toBe(true);
     });
 
     it('should return false for other commands', () => {
-      expect(isSuspendProcess(makeAction('kill-process'))).toBe(false);
-      expect(isSuspendProcess(makeAction('isolate'))).toBe(false);
+      expect(isSuspendProcessAction(makeAction('kill-process'))).toBe(false);
+      expect(isSuspendProcessAction(makeAction('isolate'))).toBe(false);
     });
   });
 });

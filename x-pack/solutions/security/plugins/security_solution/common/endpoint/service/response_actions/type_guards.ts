@@ -80,7 +80,7 @@ export const isCancelAction = (
   return action.command === 'cancel';
 };
 
-export const isKillProcess = (
+export const isKillProcessAction = (
   action: MaybeImmutable<SomeObjectWithCommand>
 ): action is ActionDetails<
   KillProcessActionOutputContent,
@@ -89,7 +89,7 @@ export const isKillProcess = (
   return action.command === 'kill-process';
 };
 
-export const isSuspendProcess = (
+export const isSuspendProcessAction = (
   action: MaybeImmutable<SomeObjectWithCommand>
 ): action is ActionDetails<
   SuspendProcessActionOutputContent,

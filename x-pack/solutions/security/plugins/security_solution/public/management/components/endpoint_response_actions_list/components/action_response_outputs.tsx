@@ -15,11 +15,11 @@ import {
   isCancelAction,
   isExecuteAction,
   isGetFileAction,
-  isKillProcess,
+  isKillProcessAction,
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
-  isSuspendProcess,
+  isSuspendProcessAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
@@ -161,7 +161,7 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              if (isKillProcess(action) || isSuspendProcess(action)) {
+              if (isKillProcessAction(action) || isSuspendProcessAction(action)) {
                 hostOutput = (
                   <KillSuspendProcessActionResult
                     action={action}
