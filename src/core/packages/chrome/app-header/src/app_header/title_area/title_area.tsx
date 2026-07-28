@@ -10,20 +10,19 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import type { AppHeaderBack, AppHeaderEditableTitle } from '../../types';
-import { useBackNavTargets } from '../hooks';
+import type { AppHeaderEditableTitle } from '../../types';
+import type { BackNavigation } from '../hooks';
 import { BackButton } from '../back_button';
 import { Title, isEditableTitle } from './title';
 
 export interface TitleAreaProps {
   title?: string | AppHeaderEditableTitle;
-  back?: AppHeaderBack | AppHeaderBack[];
+  backTargets: BackNavigation[];
   size?: 'xs' | 's';
 }
 
-export const TitleArea = React.memo<TitleAreaProps>(({ title, back, size }) => {
+export const TitleArea = React.memo<TitleAreaProps>(({ title, backTargets, size }) => {
   const { euiTheme } = useEuiTheme();
-  const backTargets = useBackNavTargets(back);
   const hasBack = backTargets.length > 0;
   const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
 

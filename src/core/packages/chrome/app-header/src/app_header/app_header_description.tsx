@@ -19,7 +19,8 @@ const learnMoreLinkText = i18n.translate('core.ui.chrome.appHeader.description.l
 
 export const AppHeaderDescription = React.memo<{
   description: AppHeaderDescriptionConfig;
-}>(({ description }) => {
+  offset?: boolean;
+}>(({ description, offset }) => {
   const { euiTheme } = useEuiTheme();
   const text = typeof description === 'string' ? description : description.text;
   const learnMoreUrl = typeof description === 'string' ? undefined : description.learnMoreUrl;
@@ -29,7 +30,10 @@ export const AppHeaderDescription = React.memo<{
       color="subdued"
       css={css`
         max-inline-size: 80ch;
-        padding-inline-start: ${euiTheme.size.xs};
+        ${offset &&
+        css`
+          padding-inline-start: ${euiTheme.size.xs};
+        `}
       `}
       size="xs"
     >
