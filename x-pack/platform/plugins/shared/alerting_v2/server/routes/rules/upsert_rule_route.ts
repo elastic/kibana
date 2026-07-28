@@ -21,7 +21,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { INVALID_QUERY_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_UPSERT_CONFLICT_DESCRIPTION,
@@ -59,7 +59,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+        description: INVALID_QUERY_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,

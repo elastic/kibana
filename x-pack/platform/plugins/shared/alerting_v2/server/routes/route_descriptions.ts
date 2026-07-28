@@ -6,5 +6,3 @@
  */
 
 export const INVALID_QUERY_PARAMETERS_DESCRIPTION = 'Indicates invalid query parameters.';
-export const INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION =
-  'Indicates an invalid schema or parameters.';
