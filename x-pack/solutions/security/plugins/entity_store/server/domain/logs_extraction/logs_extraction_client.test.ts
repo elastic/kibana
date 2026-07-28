@@ -113,10 +113,9 @@ jest.mock('../asset_manager/install_assets', () => ({
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
-const mockReinstallAssets =
-  reinstallSharedElasticsearchAssetsIfMissing as jest.MockedFunction<
-    typeof reinstallSharedElasticsearchAssetsIfMissing
-  >;
+const mockReinstallAssets = reinstallSharedElasticsearchAssetsIfMissing as jest.MockedFunction<
+  typeof reinstallSharedElasticsearchAssetsIfMissing
+>;
 
 function createMockEngineDescriptor(
   type: EntityType = 'user',

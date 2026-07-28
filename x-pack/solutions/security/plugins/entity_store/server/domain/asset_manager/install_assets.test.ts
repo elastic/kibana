@@ -166,7 +166,11 @@ describe('reinstallSharedElasticsearchAssetsIfMissing', () => {
     });
 
     expect(reinstalled).toBe(true);
-    expect(createDataStream).toHaveBeenCalledWith(expect.anything(), updatesDataStream, expect.anything());
+    expect(createDataStream).toHaveBeenCalledWith(
+      expect.anything(),
+      updatesDataStream,
+      expect.anything()
+    );
   });
 
   it('reinstalls and returns true when the metadata data stream is missing', async () => {
