@@ -210,6 +210,7 @@ For each detection, determine whether it continues an existing open event.
 - Use `platform_sig_events_event_search` with `status: "open"`, `view: "compact"`, `per_page: 50`, and `exclude_unconfirmed_signals: true`.
 - 4 calls total maximum. Each matching phase may inspect page 1 and at most one `next_page`.
 - Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a stream-only search.
+- Never re-call with the same filters and a different `per_page` to retry; `per_page` only controls page size. When `has_more` is true, page with `next_page` and all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
 
 For events returned by `platform_sig_events_event_search`, derive:
 - **Domain, Alert symptom, and Current evidence** — confirmed signal descriptions first, then `symptom_hypothesis`, `summary`, and `title`.
@@ -226,7 +227,7 @@ Run 3.1 then 3.2 for each detection
 2. A detection rule-matches an event only when `events[].signals[].rule_uuid` includes any rule from the detection.
 3. A `rule_uuid` match is sufficient to accept that event continuation. Reject only when the current evidence rows (not title or `symptom_hypothesis` wording) name a different active target or mechanism than the new detection, or the authored KI explicitly scopes the detection away from it. A difference in phrasing, title, or `symptom_hypothesis` framing between the existing event and the new detection is never, by itself, grounds for rejection — evaluate the underlying target/mechanism, not the wording.
   Add accepted rules to `matched_rule_uuids`.
-4. When `has_more` is true and some rules remain unmatched, request `next_page` with all other parameters unchanged. Never re-call `platform_sig_events_event_search` with the same `rule_uuids`/`stream_names` and a different `per_page`; `per_page` controls page size, not a retry mechanism. When `has_more` is false, the result set is complete — proceed to 3.2 for any unmatched rules instead of re-querying.
+4. When `has_more` is true and some rules remain unmatched, request `next_page` (see the no-retry rule above). When `has_more` is false, proceed to 3.2 for any unmatched rules.
 
 #### 3.2. Topology Match
 
@@ -239,7 +240,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 4.1 resu
 3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`.
 4. Accept an event continuation when its stored topology intersects the detection's topology ID set, **Alert symptom** is not positive/health, and **Current evidence** does not explicitly name a different active target or mechanism.
    Add accepted rules to `matched_rule_uuids`.
-5. When `has_more` is true and some discoveries remain unmatched, request `next_page` with all other parameters unchanged. Never re-call `platform_sig_events_event_search` with the same `topology_feature_ids` and a different `per_page`; `per_page` controls page size, not a retry mechanism. When `has_more` is false, the result set is complete — do not re-query.
+5. When `has_more` is true and some discoveries remain unmatched, request `next_page` (see the no-retry rule above).
 
 Assign each matched detection to at most one accepted event continuation. The continuation is a discovery that reuses the matched event's `event_id`. If multiple events continuation match a single detection, prefer greatest rule coverage, then evidence similarity. 
 

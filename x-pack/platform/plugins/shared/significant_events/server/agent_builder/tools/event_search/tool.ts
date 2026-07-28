@@ -129,7 +129,8 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.perPage', {
           defaultMessage:
-            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10.',
+            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10. ' +
+            'Controls page size only — never lower it on a repeated call to retry the same filters; use next_page instead.',
         })
       ),
     from: z
@@ -177,6 +178,11 @@ export function createSearchEventsTool({
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
           'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. Follow next_page while has_more is true. Omit status to return all states.',
+      })}
+
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
+        defaultMessage:
+          'Never re-call this tool with the same filters (rule_uuids, stream_names, topology_feature_ids, query) and a different per_page to retry — per_page only controls page size. When has_more is true, page again with next_page and all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
       })}
     `,
     schema: searchEventsSchema,
