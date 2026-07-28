@@ -63,6 +63,7 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
   start_date: z
     .string()
     .trim()
+    .max(64)
     .optional()
     .describe(
       'Inclusive ISO timestamp lower bound applied to @timestamp; overrides the default 24-hour window. Independent of episodeIds \u2014 e.g. set it to an episode\u2019s start time to scope results to that episode\u2019s lifetime.'
