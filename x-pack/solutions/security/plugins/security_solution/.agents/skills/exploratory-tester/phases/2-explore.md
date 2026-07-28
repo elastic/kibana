@@ -129,6 +129,22 @@ After each action, run the three detectors below **in sequence**. Each detector 
 
 ---
 
+**Detector bridge (inject once per flow, and again after every `browser_navigate`)**
+
+The three detectors below are called through an injected `window.__et` bridge instead of being pasted at every step — pasting all three scripts at every checklist step is the single largest source of repeated tool-call payload in this phase. `browser_navigate` resets the page's window context, so the bridge must be reinstalled after each navigation, not just once at flow start.
+
+1. **Inject** at the start of the flow, and immediately after every `browser_navigate` (including the recovery navigations described in "Pitfalls" below): call `browser_evaluate` with the full content of `scripts/inject-detectors.js` as the `function` argument.
+2. **Verify** the bridge installed: `browser_evaluate(function: "() => typeof window.__et")`. Expect `"object"`.
+3. **Fall back to paste** for the rest of this checklist step if either of these happens:
+   - The verify call in step 2 does not return `"object"`, or
+   - A later `window.__et.*` call itself errors (e.g. "window.__et is not defined") — this means the page context reset without a tracked `browser_navigate` (a full reload, a redirect, an iframe swap).
+
+   On fallback: paste the full content of the relevant detector script (`check-dom-anomalies.js`, `classify-console.js`, or `dedup-network.js`) for that call, as described in each detector's "Fallback: full paste" below. Re-attempt the bridge injection (step 1) at the next navigation or checklist step — do not keep pasting for the rest of the flow once the bridge is confirmed working again.
+
+Once the bridge is confirmed present, use the compact per-step calls below. **Do not paste the detector source itself while the bridge is up** — that defeats the purpose of injecting it once.
+
+---
+
 **Detector A — DOM state** (`browser_evaluate`)
 
 First, wait for the page to settle after the action:
@@ -137,12 +153,14 @@ First, wait for the page to settle after the action:
 
 **This 3-second wait is for wrong-state checks only (spinners, error banners, panel content).** If instead you're about to conclude that an *expected element is entirely absent* (a tab, a table's contents, a row) — do not log it yet. A single snapshot cannot distinguish a genuine permanent absence from a transient render race; see "Confirm before logging" below before treating it as a result.
 
-Then paste the full content of `scripts/check-dom-anomalies.js` as the function argument. Log each returned item at its indicated level:
+Call `browser_evaluate(function: "() => window.__et.dom()")`. Log each returned item at its indicated level:
 - `level1[]` items → Level 1 finding
 - `level2[]` items → Level 2 finding
 - `level3[spinner_present]` → **Level 3 normally**; but if the spinner has been visible for **more than 10 seconds** since the action was triggered → escalate to **Level 2**: "Loading indicator unresolved after 10 seconds"
 
-**Never conclude "no warning is shown" from an `innerText`/text search alone when a Lens or dashboard visualization is on the page.** Kibana renders CCS/partial-result warnings as an **icon-only badge** (`data-test-subj="searchResponseWarningsBadgeToogleButton"`) whose visible text and `title` attribute are only a count ("N warnings") — the actual "Problem with N cluster(s)" text renders **only inside the popover, after a click**. A plain text search will not find it (this produced a real false-negative finding). `check-dom-anomalies.js` now flags this badge at Level 2; when it appears, click it before writing the finding.
+**Never conclude "no warning is shown" from an `innerText`/text search alone when a Lens or dashboard visualization is on the page.** Kibana renders CCS/partial-result warnings as an **icon-only badge** (`data-test-subj="searchResponseWarningsBadgeToogleButton"`) whose visible text and `title` attribute are only a count ("N warnings") — the actual "Problem with N cluster(s)" text renders **only inside the popover, after a click**. A plain text search will not find it (this produced a real false-negative finding). `check-dom-anomalies.js` (and the injected `window.__et.dom()`) flags this badge at Level 2; when it appears, click it before writing the finding.
+
+**Fallback: full paste.** Paste the full content of `scripts/check-dom-anomalies.js` as the `function` argument instead of calling `window.__et.dom()`. Everything else in this section is unchanged.
 
 ---
 
@@ -150,12 +168,14 @@ Then paste the full content of `scripts/check-dom-anomalies.js` as the function 
 
 1. Call `browser_console_messages(level: "error")` — collect the message texts.
 2. Format them as a JSON string array: `["msg 1", "msg 2", ...]`
-3. Call `browser_evaluate` with the content of `scripts/classify-console.js`, replacing the `/*MESSAGES*/` placeholder with the array:
+3. Call `browser_evaluate(function: "() => window.__et.console([\"msg 1\", \"msg 2\", ...])")`, substituting in the array from step 2.
+4. Log each returned item at its indicated level. Do not log `suppressed[]` items.
+
+**Fallback: full paste.** Call `browser_evaluate` with the content of `scripts/classify-console.js`, replacing the `/*MESSAGES*/` placeholder with the array:
    ```
    // Replace:  )(/*MESSAGES*/)
    // With:     )(["msg 1", "msg 2", ...])
    ```
-4. Log each returned item at its indicated level. Do not log `suppressed[]` items.
 
 ---
 
@@ -163,12 +183,14 @@ Then paste the full content of `scripts/check-dom-anomalies.js` as the function 
 
 1. Call `browser_network_requests(static: false)` — parse each line of the form `N. [METHOD] https://... => [STATUS]` into `{method, url}`.
 2. Format as a JSON array: `[{"method":"GET","url":"https://..."},...]`
-3. Call `browser_evaluate` with the content of `scripts/dedup-network.js`, replacing `/*REQUESTS*/` with the array:
+3. Call `browser_evaluate(function: "() => window.__et.network([{\"method\":\"GET\",\"url\":\"https://...\"}, ...])")`, substituting in the array from step 2.
+4. Log each item in `findings[]` as a Level 2 finding.
+
+**Fallback: full paste.** Call `browser_evaluate` with the content of `scripts/dedup-network.js`, replacing `/*REQUESTS*/` with the array:
    ```
    // Replace:  )(/*REQUESTS*/)
    // With:     )([{"method":"GET","url":"https://..."}, ...])
    ```
-4. Log each item in `findings[]` as a Level 2 finding.
 
 ---
 
@@ -265,6 +287,7 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 - After `browser_navigate` in Security Solution, a side panel may re-open as a blocking dialog (e.g. "Admin and settings"). Check the first snapshot for an open `dialog` and press `Escape` before any other action.
 - `browser_navigate` times out when a `beforeunload` dialog is blocking (e.g. Timeline with unsaved changes). If navigation times out, call `browser_snapshot`. If a dialog is present, call `browser_handle_dialog(accept: true)` then retry.
 - After 2 failed attempts to type into a Monaco editor, log "partial interaction — Monaco editor prevented automated input" and move on.
+- Every `browser_navigate` — including retries after the two pitfalls above — clears `window.__et`. Reinject the detector bridge (see "Detector bridge" under "At every checklist step") before running any detector on the new page.
 
 ### Timebox outcomes
 
