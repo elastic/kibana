@@ -18,7 +18,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { apiHasUniqueId, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '../../common';
@@ -27,6 +27,7 @@ import type { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
 import type { initializeTrackOverlay } from './track_overlay';
 import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
+import { io } from 'fp-ts/lib/IO';
 
 export function initializeHistoryManager({
   unsavedChanges$,
@@ -53,42 +54,38 @@ export function initializeHistoryManager({
   cleanup: () => void;
 } {
   const dashboardCurrentState$ = new BehaviorSubject<DashboardState | undefined>(undefined);
-  const skippedStateKeys$: BehaviorSubject<{ [panelId: string]: string[] }> = new BehaviorSubject(
-    {}
-  );
+  const keepKeys$: BehaviorSubject<{ [panelId: string]: string[] }> = new BehaviorSubject({});
 
-  combineLatest([children$, childrenLoading$])
+  combineLatest([children$, childrenLoading$, unsavedChanges$])
     .pipe(
       // wait for children to be done loading before grabbing skipped keys
-      filter(([children, childrenLoading]) => childrenLoading),
-      map(([children]) => getSkippedKeys(children))
+      filter(([children, childrenLoading]) => !childrenLoading),
+      map(([children]) => {
+        console.log({ children });
+        const keys: { [id: string]: string[] } = {};
+        Object.entries(children).forEach(([uuid, child]) => {
+          keys[uuid] = apiPublishesUnsavedChanges(child) ? child.getKeysWithUnsavedChanges() : [];
+        });
+        return keys;
+      })
     )
-    .subscribe((skippedKeys) => {
-      skippedStateKeys$.next(skippedKeys);
+    .subscribe((keys) => {
+      console.log({ keys });
+      keepKeys$.next(keys);
     });
 
-  const onAnyStateChangeSubscription = combineLatest([
-    unsavedChanges$,
-    skippedStateKeys$.pipe(skip(1)),
-  ])
+  const onAnyStateChangeSubscription = unsavedChanges$
     .pipe(
       debounceTime(60),
       withLatestFrom(hasOverlays$),
-      filter(([[state, skippedKeys], hasOverlays]) => !hasOverlays) // do not push to history as long as an editor is open
+      filter(([state, hasOverlays]) => !hasOverlays) // do not push to history as long as an editor is open
     )
     .subscribe(() => {
       const { panels, ...state } = getState();
       // console.log('CURRENT STATE', { ...state, panels });
       dashboardCurrentState$.next({
         ...state,
-        panels: panels.sort(sortById).map((panel) => {
-          if ('config' in panel) {
-            const skippedKeys = skippedStateKeys$.getValue()[panel.id!];
-            return { ...panel, config: omit(panel.config, skippedKeys) };
-          } else {
-            return panel;
-          }
-        }),
+        panels: panels.sort(sortById),
       });
     });
 
@@ -97,6 +94,26 @@ export function initializeHistoryManager({
       disableUndoRedo$: hasOverlays$,
       state$: dashboardCurrentState$,
       maxSize: 10,
+      getPropertyFilter: () => {
+        return (key, context) => {
+          if (context.childName !== 'config') return true; // include all dashboard level keys
+          // if (context.children) return true; // compare all parent keys
+          const panelId =
+            context.parent &&
+            context.parent.parent &&
+            context.parent.parent.childName === 'panels' &&
+            context.parent.leftType === 'object' &&
+            'id' in (context.parent.left as object)
+              ? (context.parent.left as { id: string }).id
+              : undefined;
+          // console.log({ key, context, test: context.childName, panelId });
+          if (panelId) {
+            const keptKeys = keepKeys$.getValue()[panelId];
+            return keptKeys.includes(key);
+          }
+          return true;
+        };
+      },
     }
   );
 
@@ -115,18 +132,18 @@ export function initializeHistoryManager({
   };
 }
 
-const getSkippedKeys = (children: DashboardChildren): { [panelId: string]: string[] } => {
-  const skippedKeys: { [panelId: string]: string[] } = {};
-  Object.values(children).forEach((child) => {
-    if (apiHasUniqueId(child)) {
-      skippedKeys[child.uuid] = Object.entries(child.getComparators()).reduce(
-        (prev, [key, val]) => (val === 'skip' ? [...prev, key] : prev),
-        [] as string[]
-      );
-    }
-  });
-  return skippedKeys;
-};
+// const getSkippedKeys = (children: DashboardChildren): { [panelId: string]: string[] } => {
+//   const skippedKeys: { [panelId: string]: string[] } = {};
+//   Object.values(children).forEach((child) => {
+//     if (apiHasUniqueId(child)) {
+//       skippedKeys[child.uuid] = Object.entries(child.getComparators()).reduce(
+//         (prev, [key, val]) => (val === 'skip' ? [...prev, key] : prev),
+//         [] as string[]
+//       );
+//     }
+//   });
+//   return skippedKeys;
+// };
 
 const sortById = (
   { id: idA }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number],

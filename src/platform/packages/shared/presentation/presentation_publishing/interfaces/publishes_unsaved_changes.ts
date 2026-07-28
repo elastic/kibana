@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 
 export interface PublishesUnsavedChanges {
   hasUnsavedChanges$: Observable<boolean>; // Observable rather than publishingSubject because it should be derived.
+  getKeysWithUnsavedChanges: () => string[];
 }
 
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {

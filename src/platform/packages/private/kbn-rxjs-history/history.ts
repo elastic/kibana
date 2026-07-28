@@ -13,10 +13,12 @@ import { BehaviorSubject, pairwise, skip } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   state$,
+  getPropertyFilter,
   maxSize,
   disableUndoRedo$ = new BehaviorSubject<boolean>(true),
 }: {
   state$: BehaviorSubject<T | undefined>;
+  getPropertyFilter: () => Required<jsondiffpatch.Options>['propertyFilter'];
   maxSize: number;
   disableUndoRedo$?: BehaviorSubject<boolean>;
 }) {
@@ -37,8 +39,21 @@ export function startTrackingHistory<T extends object = {}>({
       undoOrRedoAction = false;
       return;
     }
-    const diff = jsondiffpatch.diff(previous, current);
-    // console.log({ previous, current, diff });
+
+    const instance = jsondiffpatch.create({
+      propertyFilter: getPropertyFilter(),
+      // propertyFilter: (key, context) => {
+      //   console.log({ key, context, test: context.childName });
+
+      //   if (context.childName !== 'config') return true;
+      //   // if (context.children) return true; // compare all parent keys
+      //   console.log({ key, context, test: context.childName });
+      //   const { left: before, right: after } = context;
+      //   return true;
+      // },
+    });
+    const diff = instance.diff(previous, current);
+    console.log({ previous, current, diff });
     if (!diff) return;
 
     const pointer = pointer$.getValue();
@@ -52,7 +67,7 @@ export function startTrackingHistory<T extends object = {}>({
     // add the new patch to the top of the history stack and increment (see note) the pointer
     history.push(diff);
     pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
-    // console.log({ history: [...history], diff, pointer: pointer$.getValue() });
+    console.log({ history: [...history], pointer: pointer$.getValue() });
   });
 
   const disabledActionsSubscription = pointer$.subscribe((pointer) => {

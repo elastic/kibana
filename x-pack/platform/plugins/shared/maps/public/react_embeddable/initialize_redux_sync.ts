@@ -67,11 +67,12 @@ export const reduxSyncComparators: StateComparators<
     if (!a || !b) {
       return a === b;
     }
+    console.log({ a, b, equal: Math.abs(a.zoom - b.zoom) < 0.1 });
 
     if (a.lat !== b.lat) return false;
     if (a.lon !== b.lon) return false;
     // Map may not restore reset zoom exactly
-    return Math.abs(a.zoom - b.zoom) < 0.05;
+    return Math.abs(a.zoom - b.zoom) < 0.1;
   },
   mapBuffer: 'skip',
   openTOCDetails: 'deepEquality',
