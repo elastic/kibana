@@ -178,6 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update id after data view field edit', async () => {
+      await discover.navigateToApp();
       await discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
       await header.waitUntilLoadingHasFinished();
 
