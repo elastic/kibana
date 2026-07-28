@@ -1075,4 +1075,59 @@ describe('MetricsGrid', () => {
       );
     });
   });
+
+  describe('recently explored', () => {
+    // The chart is mocked, so render a panel action control inside it to simulate the
+    // embeddable's quick-action buttons that the cell click handler looks for.
+    const renderChartWithPanelAction = () => {
+      (Chart as jest.Mock).mockImplementation(() => (
+        <div data-test-subj="chart">
+          <button type="button" data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL" />
+        </div>
+      ));
+    };
+
+    afterEach(() => {
+      (Chart as jest.Mock).mockImplementation(() => <div data-test-subj="chart" />);
+    });
+
+    it('records the metric as explored when a panel action is clicked', () => {
+      renderChartWithPanelAction();
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-chart-index="0"] [data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL"]'
+        ) as HTMLElement
+      );
+
+      expect(onMetricExplored).toHaveBeenCalledTimes(1);
+      expect(onMetricExplored).toHaveBeenCalledWith('metrics-*::system.cpu.utilization');
+    });
+
+    it('does not record the metric when clicking outside panel actions', () => {
+      renderChartWithPanelAction();
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(container.querySelector('[data-chart-index="0"]') as HTMLElement);
+
+      expect(onMetricExplored).not.toHaveBeenCalled();
+    });
+  });
 });

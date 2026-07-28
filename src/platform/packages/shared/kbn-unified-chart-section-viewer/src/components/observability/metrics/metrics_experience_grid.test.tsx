@@ -294,6 +294,7 @@ describe('MetricsExperienceGrid', () => {
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
@@ -473,6 +474,7 @@ describe('MetricsExperienceGrid', () => {
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
@@ -523,6 +525,7 @@ describe('MetricsExperienceGrid', () => {
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
 
@@ -568,6 +571,7 @@ describe('MetricsExperienceGrid', () => {
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange: jest.fn(),
       });
 
@@ -612,6 +616,7 @@ describe('MetricsExperienceGrid', () => {
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange: jest.fn(),
       });
 
@@ -661,6 +666,7 @@ describe('MetricsExperienceGrid', () => {
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange: jest.fn(),
       });
 
@@ -707,6 +713,7 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
         onGridSettingsChange,
         metricsSort: DEFAULT_METRICS_SORT,
         onMetricsSortChange: jest.fn(),

@@ -649,7 +649,7 @@ Every public API should have a release tag specified at the top of its documenta
 | -----| ------------| ------------- | ------------ |
 | Undocumented | Every public API should be documented, but if it isn't, we make no guarantees about it. These need to be eliminated and should become internal or documented. | | |
 | Experimental | A public API that may break or be removed at any time. | experimental[] | |
-| Beta | A public API that we make a best effort not to break or remove. However, there are no guarantees. | beta[] | |
+| Technical Preview | A public API that we make a best effort not to break or remove. However, there are no guarantees. | tech_preview[] | |
 | Stable | No breaking changes outside of a Major | stable[] | |
 | Deprecated | Do not use, will be removed. | deprecated[] | |
 
