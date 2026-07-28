@@ -194,8 +194,13 @@ const createUpgradeButtonColumn = (
   name: <RulesTableEmptyColumnName name={i18n.UPDATE_RULE_BUTTON} />,
   render: (ruleId: RuleSignatureId, record) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
+    // Route to the flyout ("Review") instead of a direct upgrade when the rule has unresolved
+    // conflicts (Enterprise) or would drop a legacy ML job (any tier). For below-Enterprise the
+    // ML coverage-loss case is the only one that applies, since `hasUnresolvedConflicts` is
+    // always false there.
     const isDisabledByConflicts =
-      isPrebuiltRulesCustomizationEnabled && record.hasUnresolvedConflicts;
+      (isPrebuiltRulesCustomizationEnabled && record.hasUnresolvedConflicts) ||
+      record.hasMlCoverageLossConflict;
     const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled;
     const spinner = (
       <EuiLoadingSpinner

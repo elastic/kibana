@@ -24,14 +24,15 @@ const RuleUpdateCalloutComponent = ({
   actionButton,
   onUpgrade,
 }: RuleUpdateCalloutProps): JSX.Element | null => {
-  const { upgradeReviewResponse, rulePreviewFlyout, openRulePreview } = usePrebuiltRulesUpgrade({
-    pagination: {
-      page: 1, // we only want to fetch one result
-      perPage: 1,
-    },
-    filterOptions: { ruleIds: [rule.rule_id] },
-    onUpgrade,
-  });
+  const { upgradeReviewResponse, rulePreviewFlyout, upgradeConflictsModal, openRulePreview } =
+    usePrebuiltRulesUpgrade({
+      pagination: {
+        page: 1, // we only want to fetch one result
+        perPage: 1,
+      },
+      filterOptions: { ruleIds: [rule.rule_id] },
+      onUpgrade,
+    });
 
   const isRuleUpgradeable = useMemo(
     () => upgradeReviewResponse !== undefined && upgradeReviewResponse.total > 0,
@@ -66,6 +67,7 @@ const RuleUpdateCalloutComponent = ({
       </EuiCallOut>
       <EuiSpacer size="l" />
       {rulePreviewFlyout}
+      {upgradeConflictsModal}
     </>
   );
 };

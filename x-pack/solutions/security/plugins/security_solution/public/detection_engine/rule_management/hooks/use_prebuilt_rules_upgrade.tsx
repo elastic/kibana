@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
@@ -29,7 +29,6 @@ import {
   UpgradeConflictResolutionEnum,
 } from '../../../../common/api/detection_engine';
 import { usePrebuiltRulesUpgradeState } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
-import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
 import {
   ConfirmRulesUpgrade,
   useUpgradeWithConflictsModal,
@@ -40,6 +39,7 @@ import { UpgradeFlyoutSubHeader } from '../../rule_management_ui/components/rule
 import { CustomizationDisabledCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/customization_disabled_callout';
 import { RuleUpgradeTab } from '../components/rule_details/three_way_diff';
 import { RuleTypeChangeCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_type_change_callout';
+import { MlJobCoverageLossCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/ml_job_coverage_loss_callout';
 import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
 import type { RulePreviewFlyoutCloseReason } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
@@ -135,11 +135,6 @@ export function usePrebuiltRulesUpgrade({
     usePrebuiltRulesUpgradeState(upgradeableRules);
   const ruleUpgradeStates = useMemo(() => Object.values(rulesUpgradeState), [rulesUpgradeState]);
 
-  const {
-    modal: confirmLegacyMlJobsUpgradeModal,
-    confirmLegacyMLJobs,
-    isLoading: areMlJobsLoading,
-  } = useOutdatedMlJobsUpgradeModal();
   const { modal: upgradeConflictsModal, confirmConflictsUpgrade } = useUpgradeWithConflictsModal();
 
   const { mutateAsync: upgradeRulesRequest } = usePerformUpgradeRules();
@@ -157,11 +152,6 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
-        // Handle MLJobs modal
-        if (!(await confirmLegacyMLJobs())) {
-          return;
-        }
-
         await upgradeRulesWithDryRun({
           mode: 'SPECIFIC_RULES',
           pick_version: 'MERGED',
@@ -179,9 +169,14 @@ export function usePrebuiltRulesUpgrade({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [rulesUpgradeState, confirmLegacyMLJobs, upgradeRulesWithDryRun, onUpgrade]
+    [rulesUpgradeState, upgradeRulesWithDryRun, onUpgrade]
   );
 
+  /**
+   * Direct upgrade to the target version with no dry run or conflicts modal. Used by the flyout
+   * "Update" button (below-Enterprise / rule-type change). Any ML coverage-loss warning shown in
+   * the flyout is purely informational and does not gate this upgrade.
+   */
   const upgradeRulesToTarget = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
       const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds.map((ruleId) => ({
@@ -193,11 +188,6 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
-        // Handle MLJobs modal
-        if (!(await confirmLegacyMLJobs())) {
-          return;
-        }
-
         await upgradeRulesRequest({
           mode: 'SPECIFIC_RULES',
           pick_version: 'TARGET',
@@ -215,7 +205,7 @@ export function usePrebuiltRulesUpgrade({
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmLegacyMLJobs, onUpgrade, rulesUpgradeState, upgradeRulesRequest]
+    [onUpgrade, rulesUpgradeState, upgradeRulesRequest]
   );
 
   const upgradeRules = useCallback(
@@ -238,11 +228,6 @@ export function usePrebuiltRulesUpgrade({
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
-      // Handle MLJobs modal
-      if (!(await confirmLegacyMLJobs())) {
-        return;
-      }
-
       if (isRulesCustomizationEnabled) {
         await upgradeRulesWithDryRun({
           mode: 'ALL_RULES',
@@ -269,7 +254,6 @@ export function usePrebuiltRulesUpgrade({
     upgradeableRules,
     upgradeRulesWithDryRun,
     upgradeRulesRequest,
-    confirmLegacyMLJobs,
     isRulesCustomizationEnabled,
     performUpgradeFilter,
   ]);
@@ -339,12 +323,25 @@ export function usePrebuiltRulesUpgrade({
         ruleUpgradeState.current_rule.rule_source.type === 'external' &&
         ruleUpgradeState.current_rule.rule_source.is_customized;
 
-      let headerCallout = null;
+      let primaryCallout: React.ReactNode = null;
       if (hasCustomizations && !isRulesCustomizationEnabled) {
-        headerCallout = <CustomizationDisabledCallout />;
+        primaryCallout = <CustomizationDisabledCallout />;
       } else if (hasRuleTypeChange && isRulesCustomizationEnabled) {
-        headerCallout = <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />;
+        primaryCallout = <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />;
       }
+
+      const mlCoverageLossCallout = ruleUpgradeState.hasMlCoverageLossConflict ? (
+        <MlJobCoverageLossCallout />
+      ) : null;
+
+      const headerCallout =
+        primaryCallout || mlCoverageLossCallout ? (
+          <>
+            {primaryCallout}
+            {primaryCallout && mlCoverageLossCallout ? <EuiSpacer size="s" /> : null}
+            {mlCoverageLossCallout}
+          </>
+        ) : null;
 
       let updateTabContent = (
         <PerFieldRuleDiffTab
@@ -365,6 +362,7 @@ export function usePrebuiltRulesUpgrade({
           <RuleUpgradeTab
             ruleUpgradeState={ruleUpgradeState}
             setRuleFieldResolvedValue={setRuleFieldResolvedValue}
+            header={headerCallout}
           />
         );
       }
@@ -451,14 +449,13 @@ export function usePrebuiltRulesUpgrade({
     ruleUpgradeStates,
     upgradeReviewResponse,
     isFetched,
-    isLoading: isLoading || areMlJobsLoading,
+    isLoading,
     isFetching,
     isRefetching,
     isInitializingPrebuiltRulesPackage,
     loadingRules,
     lastUpdated: dataUpdatedAt,
     rulePreviewFlyout,
-    confirmLegacyMlJobsUpgradeModal,
     upgradeConflictsModal,
     openRulePreview,
     reFetchRules: refetch,

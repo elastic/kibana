@@ -168,7 +168,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     loadingRules,
     lastUpdated,
     rulePreviewFlyout,
-    confirmLegacyMlJobsUpgradeModal,
     upgradeConflictsModal,
     openRulePreview,
     reFetchRules,
@@ -244,7 +243,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
-        {confirmLegacyMlJobsUpgradeModal}
         {upgradeConflictsModal}
         {children}
         {rulePreviewFlyout}

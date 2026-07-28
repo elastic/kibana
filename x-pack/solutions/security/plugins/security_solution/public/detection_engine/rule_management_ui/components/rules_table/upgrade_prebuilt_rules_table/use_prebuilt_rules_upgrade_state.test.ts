@@ -8,6 +8,7 @@
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import {
+  type MachineLearningJobId,
   type RuleResponse,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
@@ -217,6 +218,146 @@ describe('usePrebuiltRulesUpgradeState', () => {
           },
         }),
       });
+    });
+  });
+
+  // `v2_windows_rare_metadata_user` is in the affected-jobs allowlist; the `_ea` variant and
+  // `high_count_network_denies` are not.
+  describe('ML coverage-loss conflict (hasMlCoverageLossConflict)', () => {
+    const AFFECTED_JOB_ID = 'v2_windows_rare_metadata_user';
+    const REPLACEMENT_JOB_ID = 'v3_windows_rare_metadata_user_ea';
+    const UNAFFECTED_JOB_ID = 'high_count_network_denies';
+
+    const createMlRuleUpgradeInfoMock = ({
+      currentJobIds,
+      targetJobIds,
+    }: {
+      currentJobIds: MachineLearningJobId;
+      targetJobIds: MachineLearningJobId;
+    }): RuleUpgradeInfoForReview =>
+      createRuleUpgradeInfoMock({
+        diff: {
+          num_fields_with_updates: 1,
+          num_fields_with_conflicts: 0,
+          num_fields_with_non_solvable_conflicts: 0,
+          fields: {
+            machine_learning_job_id: {
+              base_version: currentJobIds,
+              current_version: currentJobIds,
+              target_version: targetJobIds,
+              merged_version: targetJobIds,
+              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              has_base_version: true,
+              has_update: true,
+              conflict: ThreeWayDiffConflict.NONE,
+            },
+          },
+        },
+      });
+
+    it('is true when the upgrade drops an affected ML job', () => {
+      const ruleUpgradeInfosMock = [
+        createMlRuleUpgradeInfoMock({
+          currentJobIds: AFFECTED_JOB_ID,
+          targetJobIds: REPLACEMENT_JOB_ID,
+        }),
+      ];
+
+      const { result } = renderHook(usePrebuiltRulesUpgradeState, {
+        initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.rulesUpgradeState['test-rule-id-1'].hasMlCoverageLossConflict).toBe(
+        true
+      );
+    });
+
+    it('is false when the ML job update retains the affected job', () => {
+      const ruleUpgradeInfosMock = [
+        createMlRuleUpgradeInfoMock({
+          currentJobIds: AFFECTED_JOB_ID,
+          targetJobIds: [AFFECTED_JOB_ID, REPLACEMENT_JOB_ID],
+        }),
+      ];
+
+      const { result } = renderHook(usePrebuiltRulesUpgradeState, {
+        initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.rulesUpgradeState['test-rule-id-1'].hasMlCoverageLossConflict).toBe(
+        false
+      );
+    });
+
+    it('is false when the rule references no affected ML job', () => {
+      const ruleUpgradeInfosMock = [
+        createMlRuleUpgradeInfoMock({
+          currentJobIds: UNAFFECTED_JOB_ID,
+          targetJobIds: REPLACEMENT_JOB_ID,
+        }),
+      ];
+
+      const { result } = renderHook(usePrebuiltRulesUpgradeState, {
+        initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.rulesUpgradeState['test-rule-id-1'].hasMlCoverageLossConflict).toBe(
+        false
+      );
+    });
+
+    it('is false when there is no ML job field diff', () => {
+      const ruleUpgradeInfosMock = [createRuleUpgradeInfoMock()];
+
+      const { result } = renderHook(usePrebuiltRulesUpgradeState, {
+        initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.rulesUpgradeState['test-rule-id-1'].hasMlCoverageLossConflict).toBe(
+        false
+      );
+    });
+
+    // Guardrail: the coverage-loss signal is scoped to the ML job field only. A non-solvable
+    // conflict on any other field must NOT set it (otherwise below-Enterprise upgrades would be
+    // gated on conflicts those users cannot resolve).
+    it('is false for a non-solvable conflict on a non-ML field', () => {
+      const ruleUpgradeInfosMock: RuleUpgradeInfoForReview[] = [
+        createRuleUpgradeInfoMock({
+          diff: {
+            num_fields_with_updates: 1,
+            num_fields_with_conflicts: 1,
+            num_fields_with_non_solvable_conflicts: 1,
+            fields: {
+              name: {
+                base_version: 'base',
+                current_version: 'current',
+                target_version: 'target',
+                merged_version: 'target',
+                diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+                merge_outcome: ThreeWayMergeOutcome.Merged,
+                has_base_version: true,
+                has_update: true,
+                conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+              },
+            },
+          },
+        }),
+      ];
+
+      const { result } = renderHook(usePrebuiltRulesUpgradeState, {
+        initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.rulesUpgradeState['test-rule-id-1'].hasMlCoverageLossConflict).toBe(
+        false
+      );
     });
   });
 

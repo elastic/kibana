@@ -23,11 +23,17 @@ import { RuleHasMissingBaseVersionCallout } from './missing_base_version_callout
 interface RuleUpgradeProps {
   ruleUpgradeState: RuleUpgradeState;
   setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
+  /**
+   * Optional callout rendered above the per-field conflict resolvers (e.g. the ML coverage-loss
+   * warning). Kept generic so this component doesn't depend on any specific callout.
+   */
+  header?: React.ReactNode;
 }
 
 export const RuleUpgrade = memo(function RuleUpgrade({
   ruleUpgradeState,
   setRuleFieldResolvedValue,
+  header,
 }: RuleUpgradeProps): JSX.Element {
   const totalNumOfFields = calcTotalNumOfFields(ruleUpgradeState);
   const numOfFieldsWithUpdates = calcNumOfFieldsWithUpdates(ruleUpgradeState);
@@ -56,6 +62,12 @@ export const RuleUpgrade = memo(function RuleUpgrade({
         numOfSolvableConflicts={numOfSolvableConflicts}
         numOfNonSolvableConflicts={numOfNonSolvableConflicts}
       />
+      {header ? (
+        <>
+          <EuiSpacer size="s" />
+          {header}
+        </>
+      ) : null}
       <EuiSpacer size="s" />
       {fieldNames.map((fieldName) => (
         <FieldUpgradeContextProvider
