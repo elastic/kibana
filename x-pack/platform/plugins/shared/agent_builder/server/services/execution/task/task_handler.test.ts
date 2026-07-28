@@ -17,7 +17,8 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
-import { deliverStream, type CallbackDeliveryService } from '../callback_delivery_service';
+import type { CallbackDeliveryService } from '../callback/callback_delivery_service';
+import { deliverCallbackEvents } from '../callback/deliver_callback_events';
 import {
   collectAndWriteEvents,
   handleAgentExecution,
@@ -27,7 +28,7 @@ import { createAgentExecutionClient } from '../persistence';
 
 jest.mock('../execution_runner');
 jest.mock('../persistence');
-jest.mock('../callback_delivery_service');
+jest.mock('../callback/deliver_callback_events');
 
 const handleAgentExecutionMock = handleAgentExecution as jest.MockedFunction<
   typeof handleAgentExecution
@@ -41,7 +42,9 @@ const serializeExecutionErrorMock = serializeExecutionError as jest.MockedFuncti
 const createAgentExecutionClientMock = createAgentExecutionClient as jest.MockedFunction<
   typeof createAgentExecutionClient
 >;
-const deliverStreamMock = deliverStream as jest.MockedFunction<typeof deliverStream>;
+const deliverCallbackEventsMock = deliverCallbackEvents as jest.MockedFunction<
+  typeof deliverCallbackEvents
+>;
 
 describe('TaskHandler event streaming and finalization', () => {
   const events: ChatEvent[] = [
@@ -89,7 +92,7 @@ describe('TaskHandler event streaming and finalization', () => {
       conversationId: 'conversation-1',
       nextInput: { message: 'hello' },
       callback: {
-        url: 'https://relay.example.com/events?token=abc',
+        url: 'https://callback.example.com/events?token=abc',
       },
     },
   } as const;
@@ -106,7 +109,7 @@ describe('TaskHandler event streaming and finalization', () => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     callbackDeliveryService = {} as unknown as jest.Mocked<CallbackDeliveryService>;
-    deliverStreamMock.mockResolvedValue(undefined);
+    deliverCallbackEventsMock.mockResolvedValue(undefined);
     executionClient = {
       get: jest.fn().mockResolvedValue(execution),
       updateStatus: jest.fn().mockResolvedValue(undefined),
@@ -138,12 +141,12 @@ describe('TaskHandler event streaming and finalization', () => {
 
   /**
    * The stream is connectable (no replay): events flow only while `run()` is in flight,
-   * so the mock must subscribe when it is called, like the real `deliverStream` does.
+   * so the mock must subscribe when it is called, like the real `deliverCallbackEvents` does.
    */
   const observeDeliveredStream = () => {
     const seen: ChatEvent[] = [];
     let error: unknown;
-    deliverStreamMock.mockImplementation(
+    deliverCallbackEventsMock.mockImplementation(
       ({ events$ }) =>
         new Promise((resolve) => {
           events$.subscribe({
@@ -165,8 +168,8 @@ describe('TaskHandler event streaming and finalization', () => {
   it('passes the same shared event stream to persistence and callback delivery', async () => {
     await run();
 
-    expect(deliverStreamMock).toHaveBeenCalledTimes(1);
-    expect(deliverStreamMock).toHaveBeenCalledWith({
+    expect(deliverCallbackEventsMock).toHaveBeenCalledTimes(1);
+    expect(deliverCallbackEventsMock).toHaveBeenCalledWith({
       execution,
       events$: expect.anything(),
       callbackDeliveryService,
@@ -174,7 +177,7 @@ describe('TaskHandler event streaming and finalization', () => {
     });
     expect(collectAndWriteEventsMock).toHaveBeenCalledTimes(1);
     expect(collectAndWriteEventsMock.mock.calls[0][0].events$).toBe(
-      deliverStreamMock.mock.calls[0][0].events$
+      deliverCallbackEventsMock.mock.calls[0][0].events$
     );
   });
 
@@ -203,7 +206,7 @@ describe('TaskHandler event streaming and finalization', () => {
 
   it('drains callback delivery before marking the execution completed', async () => {
     const order: string[] = [];
-    deliverStreamMock.mockImplementation(
+    deliverCallbackEventsMock.mockImplementation(
       () =>
         new Promise((resolve) =>
           setImmediate(() => {
@@ -227,7 +230,7 @@ describe('TaskHandler event streaming and finalization', () => {
 
     await run();
 
-    expect(deliverStreamMock).toHaveBeenCalledTimes(1);
+    expect(deliverCallbackEventsMock).toHaveBeenCalledTimes(1);
     expect(getError()).toEqual(new Error('setup failed'));
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
@@ -277,7 +280,7 @@ describe('TaskHandler event streaming and finalization', () => {
   it('drains callback delivery before finalizing a failed execution', async () => {
     const order: string[] = [];
     collectAndWriteEventsMock.mockRejectedValue(new Error('agent failed'));
-    deliverStreamMock.mockImplementation(
+    deliverCallbackEventsMock.mockImplementation(
       () =>
         new Promise((resolve) =>
           setImmediate(() => {

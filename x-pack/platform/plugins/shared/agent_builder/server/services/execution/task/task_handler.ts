@@ -20,7 +20,7 @@ import {
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
-import { deliverStream, type CallbackDeliveryService } from '../callback_delivery_service';
+import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -103,7 +103,7 @@ class TaskHandlerImpl implements TaskHandler {
     // 5. Attach both consumers — callback delivery (best-effort, never rejects) and
     // execution-document persistence — then connect. Events only start flowing on
     // connect, so neither consumer can miss them.
-    const deliveryPromise = deliverStream({
+    const callbackDeliveryPromise = deliverCallbackEvents({
       execution,
       events$,
       callbackDeliveryService: this.deps.callbackDeliveryService,
@@ -123,10 +123,10 @@ class TaskHandlerImpl implements TaskHandler {
       await persistencePromise;
 
       // 6. Drain callback delivery, then mark as completed
-      await deliveryPromise;
+      await callbackDeliveryPromise;
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
     } catch (error) {
-      await deliveryPromise;
+      await callbackDeliveryPromise;
       await this.handleExecutionFailure({ execution, executionClient, error });
     } finally {
       abortMonitor.stop();

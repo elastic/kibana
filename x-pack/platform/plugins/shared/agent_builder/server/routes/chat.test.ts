@@ -92,7 +92,7 @@ describe('callbackConversePayloadSchema', () => {
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     },
     callback: {
-      url: 'https://relay.example.com/events?token=abc',
+      url: 'https://callback.example.com/events?token=abc',
     },
   };
 
@@ -168,7 +168,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
-          url: `https://relay.example.com/events?token=${'x'.repeat(2048)}`,
+          url: `https://callback.example.com/events?token=${'x'.repeat(2048)}`,
         },
       })
     ).toThrow(/url/);
@@ -179,7 +179,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
-          url: 'ftp://relay.example.com/events',
+          url: 'ftp://callback.example.com/events',
         },
       })
     ).toThrow(/url/);
@@ -315,7 +315,7 @@ describe('registerChatRoutes', () => {
           execution_idempotency_key: 'Ev0PV23K4AB1',
           origin,
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         },
       },
@@ -326,7 +326,9 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: { execution_id: 'execution-1' },
     });
-    expect(validateCallbackUrl).toHaveBeenCalledWith('https://relay.example.com/events?token=abc');
+    expect(validateCallbackUrl).toHaveBeenCalledWith(
+      'https://callback.example.com/events?token=abc'
+    );
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
@@ -334,7 +336,7 @@ describe('registerChatRoutes', () => {
           conversationId: undefined,
           origin,
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         }),
       })
@@ -406,7 +408,7 @@ describe('registerChatRoutes', () => {
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
           },
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         },
       },
@@ -508,7 +510,7 @@ describe('registerChatRoutes', () => {
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
           },
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         },
       },
