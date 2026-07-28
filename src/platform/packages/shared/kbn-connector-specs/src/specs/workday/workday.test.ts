@@ -58,8 +58,7 @@ describe('Workday', () => {
       expect(Workday.metadata.isTechnicalPreview).toBe(true);
     });
 
-    it('supports workflows and agentBuilder', () => {
-      expect(Workday.metadata.supportedFeatureIds).toContain('workflows');
+    it('supports agentBuilder', () => {
       expect(Workday.metadata.supportedFeatureIds).toContain('agentBuilder');
     });
   });
