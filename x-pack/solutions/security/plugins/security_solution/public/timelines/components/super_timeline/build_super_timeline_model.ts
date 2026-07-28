@@ -7,7 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import type { DataView } from '@kbn/data-plugin/common';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import { buildCombinedFilter, BooleanRelation, FilterStateStore } from '@kbn/es-query';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
@@ -38,53 +38,37 @@ export interface BuildSuperTimelineModelResult {
   skippedQueryTimelines: SkippedQueryTimeline[];
 }
 
-/**
- * Merges N fully-resolved TimelineModels into a single transient Super Timeline model.
- *
- * What this does:
- * - Unions pinnedEventIds (deduped by key)
- * - Unions eventIdToNoteIds + noteIds (references only — no note objects are cloned)
- * - Combines all KQL/filter queries into a single OR CombinedFilter (one labelled sub-filter per
- *   source timeline). Timelines with EQL-only or ESQL-only queries contribute no sub-filter but
- *   are reported in `skippedQueryTimelines` so the caller can warn the user.
- * - Sets dateRange to the union of all source ranges (earliest start → latest end).
- * - Unions the column sets (first-seen order, falling back to defaultColumns).
- *
- * The returned model has `isSuperTimeline: true` and `superTimelineSourceIds` set.
- * It is NOT persisted — the persist path (`convertTimelineAsInput`) is an allow-list and neither
- * field is included, matching the existing pattern for runtime-only fields like `savedSearch` and
- * `changed`.
- */
-export const buildSuperTimelineModel = (
-  timelines: TimelineModel[],
-  deps: BuildSuperTimelineModelDeps
-): BuildSuperTimelineModelResult => {
-  const { dataView, browserFields, esQueryConfig } = deps;
-  const skippedQueryTimelines: SkippedQueryTimeline[] = [];
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-  if (timelines.length === 0) {
-    return {
-      model: {
-        ...timelineDefaults,
-        id: '',
-        title: SUPER_TIMELINE_TITLE,
-        isSuperTimeline: true,
-        superTimelineSourceIds: [],
-      } as TimelineModel,
-      skippedQueryTimelines,
-    };
+const isPlainObject = (val: unknown): val is Record<string, unknown> =>
+  val !== null && typeof val === 'object' && !Array.isArray(val);
+
+// dateRange values can be relative (e.g. "now-7d"), absolute ISO strings, or
+// numeric epoch ms (legacy saved objects store them as numbers).
+const toDateMathInput = (val: string | number): string =>
+  typeof val === 'number' ? new Date(val).toISOString() : val;
+
+const parseFilterQuery = (filterQuery: string): Record<string, unknown> | null => {
+  try {
+    return isPlainObject(JSON.parse(filterQuery)) ? JSON.parse(filterQuery) : null;
+  } catch {
+    return null;
   }
+};
 
-  // ── Pinned events ────────────────────────────────────────────────────────────
+// ── Merge functions ───────────────────────────────────────────────────────────
+
+const mergePinnedEvents = (timelines: TimelineModel[]) => {
   const pinnedEventIds: Record<string, boolean> = {};
   const pinnedEventsSaveObject: TimelineModel['pinnedEventsSaveObject'] = {};
-
   for (const timeline of timelines) {
     Object.assign(pinnedEventIds, timeline.pinnedEventIds);
     Object.assign(pinnedEventsSaveObject, timeline.pinnedEventsSaveObject);
   }
+  return { pinnedEventIds, pinnedEventsSaveObject };
+};
 
-  // ── Notes (reference union — no duplication) ─────────────────────────────────
+const mergeNotes = (timelines: TimelineModel[]) => {
   const noteIds: string[] = [];
   const seenNoteIds = new Set<string>();
   const eventIdToNoteIds: Record<string, string[]> = {};
@@ -107,83 +91,11 @@ export const buildSuperTimelineModel = (
       eventIdToNoteIds[eventId] = merged;
     }
   }
+  return { noteIds, eventIdToNoteIds };
+};
 
-  // ── Query merging: one CombinedFilter with OR semantics ──────────────────────
-  const subFilters: Array<{ meta: object; query: object }> = [];
-
-  for (const timeline of timelines) {
-    const title = timeline.title || timeline.savedObjectId || 'Untitled Timeline';
-    const id = timeline.savedObjectId ?? '';
-
-    // Use persisted fields to identify the primary query mode — NOT activeTab, which
-    // is runtime-only and always resets to TimelineTabs.query after formatTimelineResponseToModel.
-    // savedSearchId is the canonical ESQL indicator (persisted). eqlOptions.query is the
-    // canonical EQL indicator (persisted). Both survive a resolveTimeline → model round-trip.
-    const isEsqlTimeline = !!timeline.savedSearchId;
-    const isEqlTimeline = !isEsqlTimeline && !!timeline.eqlOptions?.query?.trim();
-
-    if (isEqlTimeline || isEsqlTimeline) {
-      skippedQueryTimelines.push({
-        id,
-        title,
-        reason: isEsqlTimeline ? 'esql' : 'eql',
-      });
-    } else {
-      const kqlQuery = {
-        query: timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-        language: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-      };
-
-      const combined = combineQueries({
-        config: esQueryConfig,
-        dataProviders: timeline.dataProviders ?? [],
-        dataView,
-        browserFields,
-        filters: timeline.filters ?? [],
-        kqlQuery,
-        kqlMode: timeline.kqlMode ?? 'filter',
-      });
-
-      if (combined?.filterQuery) {
-        subFilters.push({
-          meta: {
-            // Note: alias is intentionally omitted — buildCombinedFilter strips sub-filter
-            // aliases via cleanUpFilter, so only the outer SUPER_TIMELINE_QUERY_ALIAS is visible.
-            type: 'custom',
-            disabled: false,
-            negate: false,
-            key: 'query',
-            index: dataView.id,
-          },
-          query: JSON.parse(combined.filterQuery),
-        });
-      }
-    }
-  }
-
-  const mergedFilters =
-    subFilters.length > 0
-      ? [
-          buildCombinedFilter(
-            BooleanRelation.OR,
-            subFilters as Parameters<typeof buildCombinedFilter>[1],
-            { id: dataView.id },
-            false,
-            false,
-            SUPER_TIMELINE_QUERY_ALIAS,
-            FilterStateStore.APP_STATE
-          ),
-        ]
-      : [];
-
-  // ── Date range: earliest start → latest end ──────────────────────────────────
-  // dateRange values can be relative (e.g. "now-7d"), absolute ISO strings, or
-  // numeric epoch ms (legacy saved objects store them as numbers — see SavedDateRangePickerRuntimeType).
-  // Normalize numeric values to ISO strings before parsing so dateMath handles all cases.
-  const toDateMathInput = (val: string | number): string =>
-    typeof val === 'number' ? new Date(val).toISOString() : val;
-
-  const dateRange = timelines.reduce(
+const mergeDateRange = (timelines: TimelineModel[]) =>
+  timelines.reduce(
     (acc, timeline) => {
       const startMs =
         dateMath.parse(toDateMathInput(timeline.dateRange.start))?.valueOf() ?? Infinity;
@@ -204,30 +116,143 @@ export const buildSuperTimelineModel = (
     { start: '', end: '' }
   );
 
-  // ── Columns: union in first-seen order ───────────────────────────────────────
-  const seenColumnIds = new Set<string>();
+const mergeColumns = (timelines: TimelineModel[]): ColumnHeaderOptions[] => {
+  const seen = new Set<string>();
   const columns: ColumnHeaderOptions[] = [];
-
   for (const timeline of timelines) {
     for (const col of timeline.columns) {
-      if (!seenColumnIds.has(col.id)) {
-        seenColumnIds.add(col.id);
+      if (!seen.has(col.id)) {
+        seen.add(col.id);
         columns.push(col);
       }
     }
   }
-  const finalColumns = columns.length > 0 ? columns : timelineDefaults.defaultColumns;
+  return columns.length > 0 ? columns : timelineDefaults.defaultColumns;
+};
 
-  // ── Index names / data view: union ───────────────────────────────────────────
-  const seenIndexNames = new Set<string>();
+const mergeIndexNames = (timelines: TimelineModel[]): string[] => {
+  const seen = new Set<string>();
   for (const timeline of timelines) {
     for (const name of timeline.indexNames) {
-      seenIndexNames.add(name);
+      seen.add(name);
     }
   }
-  const indexNames = Array.from(seenIndexNames);
+  return Array.from(seen);
+};
 
-  // ── Source ids ───────────────────────────────────────────────────────────────
+// ── Query merging ─────────────────────────────────────────────────────────────
+
+interface TimelineSubFilterResult {
+  filter: Filter | null;
+  skipped: SkippedQueryTimeline | null;
+}
+
+const buildTimelineSubFilter = (
+  timeline: TimelineModel,
+  deps: BuildSuperTimelineModelDeps
+): TimelineSubFilterResult => {
+  const { dataView, browserFields, esQueryConfig } = deps;
+  const title = timeline.title || timeline.savedObjectId || 'Untitled Timeline';
+  const id = timeline.savedObjectId ?? '';
+
+  // Use persisted fields to identify the primary query mode — NOT activeTab, which
+  // is runtime-only and always resets to TimelineTabs.query after formatTimelineResponseToModel.
+  // savedSearchId is the canonical ESQL indicator; eqlOptions.query is the canonical EQL indicator.
+  const isEsqlTimeline = !!timeline.savedSearchId;
+  const isEqlTimeline = !isEsqlTimeline && !!timeline.eqlOptions?.query?.trim();
+
+  if (isEqlTimeline || isEsqlTimeline) {
+    return { filter: null, skipped: { id, title, reason: isEsqlTimeline ? 'esql' : 'eql' } };
+  }
+
+  const kqlQuery = {
+    query: timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
+    language: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
+  };
+
+  const combined = combineQueries({
+    config: esQueryConfig,
+    dataProviders: timeline.dataProviders ?? [],
+    dataView,
+    browserFields,
+    filters: timeline.filters ?? [],
+    kqlQuery,
+    kqlMode: timeline.kqlMode ?? 'filter',
+  });
+
+  if (!combined?.filterQuery) {
+    return { filter: null, skipped: null };
+  }
+
+  const parsedQuery = parseFilterQuery(combined.filterQuery);
+  if (parsedQuery === null) {
+    return { filter: null, skipped: { id, title, reason: 'eql' } };
+  }
+
+  return {
+    filter: {
+      meta: {
+        // alias intentionally omitted — buildCombinedFilter strips sub-filter aliases via
+        // cleanUpFilter, so only the outer SUPER_TIMELINE_QUERY_ALIAS is visible.
+        type: 'custom',
+        disabled: false,
+        negate: false,
+        key: 'query',
+        index: dataView.id,
+      },
+      query: parsedQuery,
+    },
+    skipped: null,
+  };
+};
+
+const buildMergedFilters = (
+  timelines: TimelineModel[],
+  deps: BuildSuperTimelineModelDeps
+): { filters: Filter[]; skippedQueryTimelines: SkippedQueryTimeline[] } => {
+  const results = timelines.map((timeline) => buildTimelineSubFilter(timeline, deps));
+  const subFilters = results.map((r) => r.filter).filter((f): f is Filter => f !== null);
+  const skippedQueryTimelines = results
+    .map((r) => r.skipped)
+    .filter((s): s is SkippedQueryTimeline => s !== null);
+
+  if (subFilters.length === 0) {
+    return { filters: [], skippedQueryTimelines };
+  }
+
+  return {
+    filters: [
+      buildCombinedFilter(
+        BooleanRelation.OR,
+        subFilters,
+        { id: deps.dataView.id },
+        false,
+        false,
+        SUPER_TIMELINE_QUERY_ALIAS,
+        FilterStateStore.APP_STATE
+      ),
+    ],
+    skippedQueryTimelines,
+  };
+};
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
+/**
+ * Merges N fully-resolved TimelineModels into a single transient Super Timeline model.
+ * The returned model has `isSuperTimeline: true` and is NOT persisted — `convertTimelineAsInput`
+ * is an allow-list and neither runtime-only field is included.
+ */
+export const buildSuperTimelineModel = (
+  timelines: TimelineModel[],
+  deps: BuildSuperTimelineModelDeps
+): BuildSuperTimelineModelResult => {
+  const { pinnedEventIds, pinnedEventsSaveObject } = mergePinnedEvents(timelines);
+  const { noteIds, eventIdToNoteIds } = mergeNotes(timelines);
+  const { filters, skippedQueryTimelines } = buildMergedFilters(timelines, deps);
+  const dateRange = mergeDateRange(timelines);
+  const columns = mergeColumns(timelines);
+  const indexNames = mergeIndexNames(timelines);
   const superTimelineSourceIds = timelines
     .map((t) => t.savedObjectId)
     .filter((id): id is string => id !== null);
@@ -240,20 +265,15 @@ export const buildSuperTimelineModel = (
     pinnedEventsSaveObject,
     noteIds,
     eventIdToNoteIds,
-    filters: mergedFilters,
-    // Clear KQL / data providers — queries live entirely in the CombinedFilter above
+    filters,
     dataProviders: [],
     kqlQuery: { filterQuery: null },
     dateRange,
-    columns: finalColumns,
-    defaultColumns: finalColumns,
+    columns,
+    defaultColumns: columns,
     indexNames,
-    // savedObjectId null: this timeline is never persisted
     savedObjectId: null,
-    // isSuperTimeline gates all read-only behaviour (CTA hiding, notes multi-fetch, etc.)
-    // runtime-only, not persisted (not in convertTimelineAsInput allow-list)
     isSuperTimeline: true,
-    // runtime-only, not persisted
     superTimelineSourceIds,
   };
 
