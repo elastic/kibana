@@ -78,7 +78,11 @@ export class LensApp {
       await searchInput.waitFor({ state: 'visible' });
       await searchInput.fill(options.search);
     }
-    await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    // Popover should close after selection; waiting avoids racing with subsequent assertions.
+    await this.chartSwitchList.waitFor({ state: 'hidden' });
   }
 
   async applyFlyoutChanges() {

@@ -32,7 +32,7 @@ messages** — for example:
 - Tool-call volume, the most-used tools, and tool error/success rates.
 - Trends of any of the above over time.
 - User prompts, LLM responses, system prompts, tool results, or other message content captured
-  in trace span events (when privacy settings allow).
+  as attributes on the chat spans (when privacy settings allow).
 - "What did users ask?" / "Show me recent prompts or conversations" about Agent Builder usage.
 
 ## Questions This Skill Can Answer
@@ -55,49 +55,36 @@ Do **not** use this skill when:
 
 ## Data Source
 
-Agent Builder ships OTel data to two per-space ES|QL sources. The inline tool selects the right
-one via \`dataSource\` — always pass it explicitly:
-
-| \`dataSource\` | Index pattern | Use for |
-|---|---|---|
-| \`"traces"\` | \`traces-agent_builder.otel-<space-id>\` | Spans: tokens, latency, tool calls, errors, model/provider breakdowns |
-| \`"logs"\` | \`logs-agent_builder.otel-<space-id>\` | Span events: user prompts, LLM responses, system prompts, tool results |
+Agent Builder ships all OTel data — span telemetry **and** captured message content — to a single
+per-space traces index: \`traces-agent_builder.otel-<space-id>\`.
 
 Always use \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` for trace questions. It resolves the
-current space's indices automatically. Do not use \`traces-agent_builder.otel-*\` or
-\`logs-agent_builder.otel-*\` wildcards, which would mix in other spaces' data.
+current space's index automatically. Do not use a \`traces-agent_builder.otel-*\` wildcard, which
+would mix in other spaces' data.
 
-**Choosing \`dataSource\`:** pick based on what the user is asking for, not the word "traces" in
-their question. Message-content questions still use \`dataSource: "logs"\` even when the user says
-"prompts in traces".
-
-| Question type | \`dataSource\` | Examples |
-|---|---|---|
-| Span telemetry | \`"traces"\` | token usage, latency, tool-call volume, error rates, model/provider stats |
-| Message content | \`"logs"\` | user prompts, LLM responses, system prompts, tool result text |
-
-If you need to run ES|QL manually, use the exact indices returned by the inline tool.
+If you need to run ES|QL manually, use the exact index returned by the inline tool.
 
 Always constrain the time range with \`@timestamp\` to the window the user asked about (default to
 the last 24 hours when they do not specify one).
 
-### Message content (span events in the logs index)
+### Message content (attributes on chat spans)
 
-User prompts, LLM responses, system prompts, and tool results are **not** stored as span attributes
-on the traces index. They are captured as OTel **span events** and routed by Elasticsearch to the
-logs index for the same space.
+User prompts, LLM responses, system prompts, and tool results follow the OTel GenAI v1.37.0
+convention: they are stored as **attributes on the \`chat\` spans** in the traces index (as JSON
+strings), not as separate span events or in a separate logs index.
 
-Each event is a log document linked to its parent span via \`trace_id\` and \`span_id\`.
-
-| Event name | Content | Privacy setting (Gen AI Settings) |
+| Attribute | Content | Privacy setting (Gen AI Settings) |
 |---|---|---|
-| \`gen_ai.user.message\` | User prompt text in \`attributes.content\` | \`agentBuilder:tracing:includeUserPrompts\` (off by default) |
-| \`gen_ai.assistant.message\` / \`gen_ai.choice\` | LLM response | \`agentBuilder:tracing:includeLlmResponses\` (off by default) |
-| \`gen_ai.system.message\` | System prompt | \`agentBuilder:tracing:includeSystemPrompt\` (off by default) |
-| \`gen_ai.tool.message\` | Tool result | \`agentBuilder:tracing:includeToolDetails\` (off by default) |
+| \`attributes.gen_ai.input.messages\` | Chat history sent to the model — user prompts plus prior assistant/tool turns | \`agentBuilder:tracing:includeUserPrompts\` / \`includeLlmResponses\` / \`includeToolDetails\` (roles filtered per setting; all off by default) |
+| \`attributes.gen_ai.output.messages\` | LLM response(s) | \`agentBuilder:tracing:includeLlmResponses\` (off by default) |
+| \`attributes.gen_ai.system_instructions\` | System prompt | \`agentBuilder:tracing:includeSystemPrompt\` (off by default) |
 
-If a message-content query returns no rows, explain that the relevant privacy setting may be disabled
-or the time window may be empty. Do not fabricate message text.
+Each attribute is a JSON string (an array of \`{ role, parts: [...] }\`, or \`{ type, content }\` for
+system instructions). Message text is not indexed as individual fields — \`KEEP\` the whole attribute
+and parse the JSON when you need the text.
+
+If a message-content query returns no rows or the attribute is empty, explain that the relevant
+privacy setting may be disabled or the time window may be empty. Do not fabricate message text.
 
 ### Span names (\`span.name\` field, traces index)
 
@@ -119,29 +106,23 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.
 - \`status.code\` — equals \`"Error"\` for failed spans.
 
-### Useful fields (logs index — span events)
+### Message-content fields (chat spans)
 
-- \`event_name\` — event type (e.g. \`gen_ai.user.message\`).
-- \`attributes.content\` — message text for user, assistant, and system events.
-- \`trace_id\` / \`span_id\` — link back to the parent span in the traces index.
+- \`attributes.gen_ai.input.messages\` — JSON string of the chat history (user prompts and prior turns).
+- \`attributes.gen_ai.output.messages\` — JSON string of the model response(s).
+- \`attributes.gen_ai.system_instructions\` — JSON string of the system prompt.
 
 ## How to Answer
 
-1. Decide \`dataSource\` from the question (see table above).
-2. Call \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` with \`prompt\` and \`dataSource\`:
-   - \`dataSource: "traces"\` — tokens, latency, tool calls, errors, and other span telemetry.
-   - \`dataSource: "logs"\` — user prompts, LLM responses, system prompts, and tool message content.
-3. Use ${platformCoreTools.executeEsql} only when you already have a validated ES|QL query from the inline tool.
-4. Prefer compact \`STATS\` aggregations over returning raw spans, and report the numbers in plain language.
-
-If a question needs both telemetry and message text, make separate tool calls with the appropriate
-\`dataSource\` for each part rather than defaulting to \`"traces"\`.
+1. Call \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` with a \`prompt\` describing what the user wants
+   (span telemetry such as tokens/latency/tool calls/errors, or message content such as prompts and responses).
+2. Use ${platformCoreTools.executeEsql} only when you already have a validated ES|QL query from the inline tool.
+3. Prefer compact \`STATS\` aggregations over returning raw spans, and report the numbers in plain language.
 
 ### Example query patterns
 
-These patterns assume the current space indices. Replace \`<traces-index>\` and \`<logs-index>\`
-with the indices returned by the inline tool. Use \`dataSource: "traces"\` for the traces examples
-and \`dataSource: "logs"\` for the logs example.
+These patterns assume the current space index. Replace \`<traces-index>\` with the index returned by
+the inline tool.
 
 Total tokens by model (last 24h):
 
@@ -197,25 +178,25 @@ FROM <traces-index>
 | LIMIT 15
 \`\`\`
 
-Recent user prompts (logs index; requires \`agentBuilder:tracing:includeUserPrompts\`):
+Recent user prompts (requires \`agentBuilder:tracing:includeUserPrompts\`):
 
 \`\`\`esql
-FROM <logs-index>
+FROM <traces-index>
 | WHERE @timestamp >= NOW() - 24 hours
-| WHERE event_name == "gen_ai.user.message"
+| WHERE span.name LIKE "chat *" AND attributes.gen_ai.input.messages IS NOT NULL
 | SORT @timestamp DESC
 | LIMIT 20
-| KEEP @timestamp, attributes.content, trace_id, span_id
+| KEEP @timestamp, attributes.gen_ai.input.messages, trace_id, span_id
 \`\`\`
 
 ## Edge Cases
 
 - If a query returns no rows, explain that the time window may be empty or that
   the \`${AGENT_BUILDER_TRACING_ENABLED_SETTING_ID}\` UI setting is not enabled. Do not fabricate values.
-- Using the wrong \`dataSource\` (e.g. \`"traces"\` for a user-prompt question) will query the wrong
-  index and return no message fields — always use \`"logs"\` for message content.
-- Message-content queries against the logs index return no rows when the corresponding privacy
-  setting is disabled (user prompts, LLM responses, system prompt, and tool details are all off by default).
+- Message content lives on chat spans (\`span.name LIKE "chat *"\`) as the \`attributes.gen_ai.*.messages\`
+  / \`attributes.gen_ai.system_instructions\` JSON attributes — filter to chat spans for prompt/response text.
+- Those attributes are empty when the corresponding privacy setting is disabled (user prompts, LLM
+  responses, system prompt, and tool details are all off by default).
 - Token fields can be missing on non-LLM spans; always filter to \`span.name LIKE "chat *"\`
   before aggregating token usage.
 - \`duration\` is in nanoseconds — never report it raw; convert to seconds (or ms) for the user.

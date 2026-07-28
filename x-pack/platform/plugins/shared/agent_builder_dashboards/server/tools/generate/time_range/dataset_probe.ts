@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { getEsqlDataSourceCarriers } from '@kbn/agent-builder-visualizations-server';
 import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
@@ -98,7 +98,7 @@ const resolveDataset = async (
   if (!index) {
     return null;
   }
-  const queryTimeField = getTimeFieldFromESQLQuery(query);
+  const queryTimeField = parseTimeFieldFromESQLQuery(query);
   if (queryTimeField) {
     return { index, timeField: queryTimeField };
   }

@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278461
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: "Add Manage Region Preferences for Elastic Inference Service"
+description: "Administrators can configure allowed geos and cloud regions for Elastic Inference Service endpoints in the Manage Region Preferences modal."
