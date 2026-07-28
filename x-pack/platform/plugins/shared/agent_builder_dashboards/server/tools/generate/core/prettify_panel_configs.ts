@@ -11,10 +11,10 @@ import type {
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { getEsqlQueriesFromLensConfig } from '@kbn/agent-builder-visualizations-server';
 import { indexPanelsById, updatePanelInDashboard } from './dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { ResolvePanelContent } from './operations/panels';
-import { getEsqlQueries } from './panel_config';
 import type { PanelAuthoringNote } from './resolve_panel';
 import type { PanelFailure } from './utils';
 
@@ -51,7 +51,7 @@ const toPrettifyRequest = (
     return undefined;
   }
 
-  const queries = getEsqlQueries(panel.config);
+  const queries = getEsqlQueriesFromLensConfig(panel.config);
   if (queries.length !== 1) {
     return undefined;
   }
