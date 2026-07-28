@@ -22,7 +22,7 @@ import {
   createSmlCrawlerStateStorage,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
-import { createSmlStorage, smlIndexName, type SmlStorage } from './sml_storage';
+import { createSmlStorage, smlIndexName, SML_SCHEMA_VERSION, type SmlStorage } from './sml_storage';
 
 export type { SmlCrawler };
 
@@ -67,7 +67,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const crawlStartTime = new Date().toISOString();
     this.logger.debug(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    const indexRebuilt = await this.applyMappingsOrRebuild({ storage });
+    const schemaDropped = await this.checkSchemaVersionOrDrop({ esClient, storage });
+    const indexRebuilt = schemaDropped || (await this.applyMappingsOrRebuild({ storage, esClient }));
 
     const integrityResetNeeded =
       indexRebuilt ||
@@ -143,10 +144,80 @@ export class SmlCrawlerImpl implements SmlCrawler {
     });
   }
 
+  /**
+   * Check if the live index's `_meta.sml_schema_version` matches `SML_SCHEMA_VERSION`.
+   * If the version is missing or stale, drops the index so it will be recreated with the
+   * correct shape on the next write.  Returns true when the index was dropped.
+   *
+   * A 404 from `getMapping` means the index doesn't exist yet — no action needed.
+   * All other errors are re-thrown.
+   */
+  private async checkSchemaVersionOrDrop({
+    esClient,
+    storage,
+  }: {
+    esClient: ElasticsearchClient;
+    storage: SmlStorage;
+  }): Promise<boolean> {
+    let storedVersion: number | undefined;
+
+    try {
+      const response = await esClient.indices.getMapping({ index: smlIndexName });
+      const indexData = Object.values(response)[0];
+      storedVersion = (indexData?.mappings?._meta as { sml_schema_version?: number } | undefined)
+        ?.sml_schema_version;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        // Index does not exist yet — will be created fresh with the correct shape.
+        return false;
+      }
+      throw error;
+    }
+
+    if (storedVersion === SML_SCHEMA_VERSION) {
+      return false;
+    }
+
+    this.logger.warn(
+      `SML crawler: SML schema version mismatch (stored: ${storedVersion ?? 'none'}, expected: ${SML_SCHEMA_VERSION}) — dropping index '${smlIndexName}' and forcing full re-crawl`
+    );
+
+    try {
+      await storage.getClient().clean();
+    } catch (cleanError) {
+      if (!isResponseError(cleanError) || cleanError.statusCode !== 404) {
+        throw cleanError;
+      }
+    }
+
+    return true;
+  }
+
   /** Returns true when the index was dropped due to a mapping update failure. */
-  private async applyMappingsOrRebuild({ storage }: { storage: SmlStorage }): Promise<boolean> {
+  private async applyMappingsOrRebuild({
+    storage,
+    esClient,
+  }: {
+    storage: SmlStorage;
+    esClient?: ElasticsearchClient;
+  }): Promise<boolean> {
     try {
       await storage.getClient().reconcileMappings();
+      // Stamp the current schema version into the index _meta so future crawls can detect drift.
+      if (esClient) {
+        try {
+          await esClient.indices.putMapping({
+            index: smlIndexName,
+            _meta: { sml_schema_version: SML_SCHEMA_VERSION },
+          });
+        } catch (stampError) {
+          if (!isResponseError(stampError) || stampError.statusCode !== 404) {
+            this.logger.warn(
+              `SML crawler: failed to stamp schema version on index '${smlIndexName}': ${(stampError as Error).message}`
+            );
+          }
+        }
+      }
       return false;
     } catch (error) {
       if (!isResponseError(error)) throw error;

@@ -12,6 +12,19 @@ import type { SmlDocument } from './types';
 
 export const smlIndexName = 'ai-index-idx-sml-data';
 
+/**
+ * Bump this constant whenever the shape of stored SML documents changes in a way
+ * that makes existing documents stale (e.g. new required composite-token fields,
+ * changed semantics of existing fields).  The crawler reads `_meta.sml_schema_version`
+ * from the live index; a mismatch causes a drop-and-recrawl even when the mapping
+ * change itself is compatible (additive) and would not trigger the normal rebuild path.
+ *
+ * History:
+ *   1 — original shape (pre-composite-token era)
+ *   2 — composite privilege tokens, `raw` field, implicit `login:` prefix, `count` semantics
+ */
+export const SML_SCHEMA_VERSION = 2;
+
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),
 };
