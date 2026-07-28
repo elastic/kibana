@@ -181,7 +181,7 @@ role_users.json
 .scout
 
 # Playwright
-**/test-results/.last-run.json
+**/test-results/
 
 .devcontainer/.env
 

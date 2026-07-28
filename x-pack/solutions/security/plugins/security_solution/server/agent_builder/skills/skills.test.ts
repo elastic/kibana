@@ -156,10 +156,10 @@ describe('Security Skills', () => {
       expect(inlineTools.map((tool) => tool.id)).toContain(THREAT_INTEL_TOOL_IDS.findThreatReports);
     });
 
-    it('does not expose advisory and orchestrator hunt as registry tools', () => {
+    it('exposes advisory synthesis and orchestrator hunt as registry tools', () => {
       const tools = threatIntelligenceSkill.getRegistryTools!();
-      expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.huntOrchestrator);
-      expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.synthesizeAdvisory);
+      expect(tools).toContain(THREAT_INTEL_TOOL_IDS.huntOrchestrator);
+      expect(tools).toContain(THREAT_INTEL_TOOL_IDS.synthesizeAdvisory);
     });
   });
 

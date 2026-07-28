@@ -35,7 +35,11 @@ import { tags, selectEvaluators, getToolCallSteps } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { REPORTS } from '../src/dataset';
-import { THREAT_INTEL_TOOL_IDS, THREAT_INTEL_FINDINGS_INDEX } from '../src/constants';
+import {
+  THREAT_INTEL_TOOL_IDS,
+  THREAT_INTEL_FINDINGS_INDEX,
+  agentBuilderDefaultAgentId,
+} from '../src/constants';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -79,7 +83,7 @@ base.describe(
 
         // ── Step 1: invoke the default agent ──────────────────────────────────
         const response = await agentBuilderClient.converse({
-          agentId: 'elastic-ai-agent',
+          agentId: agentBuilderDefaultAgentId,
           input: toQuestion(GOLDEN_REPORT),
         });
 
@@ -179,7 +183,7 @@ base.describe(
         log.info('[L3] Running tier1-only short-circuit test');
 
         const response = await agentBuilderClient.converse({
-          agentId: 'elastic-ai-agent',
+          agentId: agentBuilderDefaultAgentId,
           input: toQuestion(TIER1_ONLY_REPORT, { tier2_when: 'never' }),
         });
 

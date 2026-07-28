@@ -32,7 +32,12 @@ import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { runRulePreviewTool } from './run_rule_preview_tool';
-import { analyseEnvironmentTool, extractIocsTool } from './threat_intelligence';
+import {
+  analyseEnvironmentTool,
+  extractIocsTool,
+  huntOrchestratorTool,
+  synthesizeAdvisoryTool,
+} from './threat_intelligence';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -96,10 +101,14 @@ export const registerTools = (
   }
 
   // Threat-intelligence registry tools. Inline tools live on the skill;
-  // only extractIocs + analyseEnvironment are globally registered.
+  // extractIocs + analyseEnvironment + huntOrchestrator + synthesizeAdvisory
+  // are globally registered (the skill is at its 7-inline-tool cap, so these
+  // convenience/one-call tools live on the registry instead).
   if (experimentalFeatures.threatIntelligenceSkillEnabled) {
     agentBuilder.tools.register(extractIocsTool);
     agentBuilder.tools.register(analyseEnvironmentTool);
+    agentBuilder.tools.register(huntOrchestratorTool);
+    agentBuilder.tools.register(synthesizeAdvisoryTool);
   }
 
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {

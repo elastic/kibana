@@ -234,7 +234,7 @@ export function createCalibrationEvaluator(expectedByReport: Map<string, Set<str
 
       const pairs = behaviors.map((b) => {
         const confidence = clamp01(b.llm_confidence);
-        const correct = truth.has(b.technique_id) ? 1 : 0;
+        const correct = isTechniqueCorrect(b.technique_id, b.parent_technique_id, truth);
         return { technique_id: b.technique_id, confidence, correct };
       });
 

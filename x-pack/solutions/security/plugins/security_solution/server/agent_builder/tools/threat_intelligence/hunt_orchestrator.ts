@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import {
   HUNT_ORCHESTRATOR_API_PATH,
   HUNT_TIER2_WHEN_OPTIONS,
@@ -126,7 +126,7 @@ const huntOrchestratorSchema = z.object({
     ),
 });
 
-export const huntOrchestratorTool: BuiltinSkillBoundedTool<typeof huntOrchestratorSchema> = {
+export const huntOrchestratorTool: BuiltinToolDefinition<typeof huntOrchestratorSchema> = {
   id: THREAT_INTEL_TOOL_IDS.huntOrchestrator,
   type: ToolType.builtin,
   description:
@@ -140,6 +140,7 @@ export const huntOrchestratorTool: BuiltinSkillBoundedTool<typeof huntOrchestrat
     '`hunt_behavior` tools. Agent Builder should call this tool directly; native Workflows ' +
     'and UI surfaces use the matching HTTP route.',
   schema: huntOrchestratorSchema,
+  tags: ['threat-intel', 'hunt', 'orchestrator'],
   handler: async (params, { esClient, logger, modelProvider }) => {
     let model;
     try {

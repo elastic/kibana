@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import {
   GLOBAL_SPACE_ID,
   SEVERITY_LEVELS,
@@ -80,7 +80,7 @@ const synthesizeAdvisorySchema = z.object({
     ),
 });
 
-export const synthesizeAdvisoryTool: BuiltinSkillBoundedTool<typeof synthesizeAdvisorySchema> = {
+export const synthesizeAdvisoryTool: BuiltinToolDefinition<typeof synthesizeAdvisorySchema> = {
   id: THREAT_INTEL_TOOL_IDS.synthesizeAdvisory,
   type: ToolType.builtin,
   description:
@@ -93,6 +93,7 @@ export const synthesizeAdvisoryTool: BuiltinSkillBoundedTool<typeof synthesizeAd
     'Agent Builder should call this tool directly; native Workflows and UI surfaces use the ' +
     'matching HTTP route.',
   schema: synthesizeAdvisorySchema,
+  tags: ['threat-intel', 'advisory'],
   handler: async (params, { esClient, logger, modelProvider }) => {
     let model;
     try {
