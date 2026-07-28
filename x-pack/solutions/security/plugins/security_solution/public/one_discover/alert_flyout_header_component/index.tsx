@@ -25,6 +25,17 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DiscoverCellActions } from '../cell_actions';
 import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 import { getDocumentTitle } from '../../flyout_v2/document/main/utils/get_header_title';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import {
+  trackFlyoutMounted,
+  trackFlyoutOpen,
+} from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export const MISSING_METADATA_CALLOUT = i18n.translate(
   'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
@@ -102,7 +113,7 @@ export const AlertFlyoutHeader = ({
       return;
     }
 
-    services.overlays?.openSystemFlyout(
+    const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
         store,
@@ -112,10 +123,33 @@ export const AlertFlyoutHeader = ({
       {
         ...defaultToolsFlyoutProperties,
         historyKey,
+        session: FLYOUT_SESSION_KIND.START,
         title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       }
     );
+    if (ref) {
+      trackFlyoutOpen(services.telemetry, ref, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: FLYOUT_TOOL.NOTES,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    }
   }, [history, historyKey, hit, services, store]);
+
+  useEffect(() => {
+    if (!services) {
+      return;
+    }
+
+    return trackFlyoutMounted(services.telemetry, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.DISCOVER_TABLE,
+    });
+  }, [hit.id, services]);
 
   useEffect(() => {
     let isCanceled = false;
