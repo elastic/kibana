@@ -8,7 +8,6 @@
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { resolveTimeline } from '../../containers/api';
 import { formatTimelineResponseToModel } from '../open_timeline/helpers';
 import { useUpdateTimeline } from '../open_timeline/use_update_timeline';
@@ -22,6 +21,7 @@ import { selectTimelineById } from '../../store/selectors';
 import type { State } from '../../../common/store';
 import type { TimelineModel } from '../../store/model';
 import { buildSuperTimelineModel } from './build_super_timeline_model';
+import * as i18nStrings from './translations';
 
 export const MAX_SUPER_TIMELINE_COUNT = 10;
 const MIN_SUPER_TIMELINE_COUNT = 2;
@@ -82,14 +82,8 @@ export const useOpenSuperTimeline = () => {
     async (savedObjectIds: string[]) => {
       if (savedObjectIds.length > MAX_SUPER_TIMELINE_COUNT) {
         notifications.toasts.addWarning({
-          title: i18n.translate('xpack.securitySolution.timeline.superTimeline.capExceededTitle', {
-            defaultMessage: 'Too many timelines selected',
-          }),
-          text: i18n.translate('xpack.securitySolution.timeline.superTimeline.capExceededText', {
-            defaultMessage:
-              'You can combine at most {max} timelines into a Super Timeline. Select {max} or fewer.',
-            values: { max: MAX_SUPER_TIMELINE_COUNT },
-          }),
+          title: i18nStrings.CAP_EXCEEDED_TITLE,
+          text: i18nStrings.capExceededText(MAX_SUPER_TIMELINE_COUNT),
         });
         return;
       }
@@ -98,38 +92,18 @@ export const useOpenSuperTimeline = () => {
         // Caller is responsible for enforcing minimum — the batch action button is disabled for < 2.
         // If somehow reached programmatically, warn rather than silently no-op.
         notifications.toasts.addWarning({
-          title: i18n.translate(
-            'xpack.securitySolution.timeline.superTimeline.tooFewTimelinesTitle',
-            { defaultMessage: 'Select at least 2 timelines' }
-          ),
-          text: i18n.translate(
-            'xpack.securitySolution.timeline.superTimeline.tooFewTimelinesText',
-            {
-              defaultMessage: 'A Super Timeline requires at least {min} source timelines.',
-              values: { min: MIN_SUPER_TIMELINE_COUNT },
-            }
-          ),
+          title: i18nStrings.TOO_FEW_TIMELINES_TITLE,
+          text: i18nStrings.tooFewTimelinesText(MIN_SUPER_TIMELINE_COUNT),
         });
         return;
       }
 
       if (isTimelineDirty(activeTimeline)) {
-        const confirmed = await overlays?.openConfirm(
-          i18n.translate('xpack.securitySolution.timeline.superTimeline.overwriteConfirmMessage', {
-            defaultMessage: 'Opening a Super Timeline will discard your unsaved changes. Continue?',
-          }),
-          {
-            title: i18n.translate(
-              'xpack.securitySolution.timeline.superTimeline.overwriteConfirmTitle',
-              { defaultMessage: 'Discard unsaved changes?' }
-            ),
-            confirmButtonText: i18n.translate(
-              'xpack.securitySolution.timeline.superTimeline.overwriteConfirmButton',
-              { defaultMessage: 'Open Super Timeline' }
-            ),
-            'data-test-subj': 'superTimeline-overwrite-confirm-modal',
-          }
-        );
+        const confirmed = await overlays?.openConfirm(i18nStrings.OVERWRITE_CONFIRM_MESSAGE, {
+          title: i18nStrings.OVERWRITE_CONFIRM_TITLE,
+          confirmButtonText: i18nStrings.OVERWRITE_CONFIRM_BUTTON,
+          'data-test-subj': 'superTimeline-overwrite-confirm-modal',
+        });
         if (!confirmed) return;
       }
 
@@ -139,32 +113,15 @@ export const useOpenSuperTimeline = () => {
 
         if (failedIds.length > 0) {
           notifications.toasts.addWarning({
-            title: i18n.translate(
-              'xpack.securitySolution.timeline.superTimeline.partialFetchTitle',
-              { defaultMessage: 'Some timelines could not be loaded' }
-            ),
-            text: i18n.translate('xpack.securitySolution.timeline.superTimeline.partialFetchText', {
-              defaultMessage:
-                'The following timelines could not be fetched and were skipped: {ids}.',
-              values: { ids: failedIds.join(', ') },
-            }),
+            title: i18nStrings.PARTIAL_FETCH_TITLE,
+            text: i18nStrings.partialFetchText(failedIds.join(', ')),
           });
         }
 
         if (timelineModels.length < MIN_SUPER_TIMELINE_COUNT) {
           notifications.toasts.addWarning({
-            title: i18n.translate(
-              'xpack.securitySolution.timeline.superTimeline.tooFewSucceededTitle',
-              { defaultMessage: 'Not enough timelines loaded' }
-            ),
-            text: i18n.translate(
-              'xpack.securitySolution.timeline.superTimeline.tooFewSucceededText',
-              {
-                defaultMessage:
-                  'At least {min} timelines must load successfully to build a Super Timeline.',
-                values: { min: MIN_SUPER_TIMELINE_COUNT },
-              }
-            ),
+            title: i18nStrings.TOO_FEW_SUCCEEDED_TITLE,
+            text: i18nStrings.tooFewSucceededText(MIN_SUPER_TIMELINE_COUNT),
           });
           return;
         }
@@ -178,17 +135,10 @@ export const useOpenSuperTimeline = () => {
 
         if (skippedQueryTimelines.length > 0) {
           notifications.toasts.addWarning({
-            title: i18n.translate(
-              'xpack.securitySolution.timeline.superTimeline.skippedQueryTitle',
-              { defaultMessage: 'Some timeline queries could not be merged' }
+            title: i18nStrings.SKIPPED_QUERY_TITLE,
+            text: i18nStrings.skippedQueryText(
+              skippedQueryTimelines.map((t) => t.title).join(', ')
             ),
-            text: i18n.translate('xpack.securitySolution.timeline.superTimeline.skippedQueryText', {
-              defaultMessage:
-                'The following timelines use EQL or ESQL and their queries were not included: {titles}. Their pinned events and notes are still shown.',
-              values: {
-                titles: skippedQueryTimelines.map((t) => t.title).join(', '),
-              },
-            }),
           });
         }
 
@@ -198,18 +148,12 @@ export const useOpenSuperTimeline = () => {
           to: model.dateRange.end,
           id: TimelineId.active,
           notes: null,
-          timeline: {
-            ...model,
-            show: true,
-            activeTab: TimelineTabs.query,
-          },
+          timeline: { ...model, show: true, activeTab: TimelineTabs.query },
           preventSettingQuery: true,
         });
       } catch (error) {
         notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
-          title: i18n.translate('xpack.securitySolution.timeline.superTimeline.errorTitle', {
-            defaultMessage: 'Failed to open Super Timeline',
-          }),
+          title: i18nStrings.ERROR_TITLE,
         });
       } finally {
         setIsLoading(false);
