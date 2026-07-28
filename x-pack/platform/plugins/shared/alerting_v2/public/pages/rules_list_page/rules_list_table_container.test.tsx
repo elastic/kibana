@@ -233,9 +233,13 @@ describe('RulesListTableContainer', () => {
       });
     });
   });
-  
+
   describe('run rule', () => {
     it('calls runRule mutation when run action is clicked', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
       expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('runRule-rule-1'));
@@ -249,7 +253,6 @@ describe('RulesListTableContainer', () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
 
       await waitFor(() => {
         expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();

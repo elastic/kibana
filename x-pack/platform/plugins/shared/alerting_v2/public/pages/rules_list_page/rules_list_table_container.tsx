@@ -218,6 +218,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onDelete={(r) => setRuleToDelete(r)}
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
           onRun={(r) => runRuleMutation.mutate({ id: r.id })}
+          onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
         />
       ) : null}
       {ruleToDelete ? (

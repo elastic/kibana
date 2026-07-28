@@ -278,7 +278,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       handleToggleEnabled,
       isToggling,
       onClone,
-      showDeleteConfirmationModal,      
+      showDeleteConfirmationModal,
       handleRunRule,
       showUpdateApiKeyConfirmationModal,
     ]

@@ -44,6 +44,7 @@ export interface RuleSummaryFlyoutProps {
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
+  onUpdateApiKey?: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
@@ -59,6 +60,7 @@ export const RuleSummaryFlyout = ({
   onDelete,
   onToggleEnabled,
   onRun,
+  onUpdateApiKey,
   canWrite = true,
   session,
   ownFocus = true,
@@ -123,6 +125,7 @@ export const RuleSummaryFlyout = ({
                   onDelete={onDelete}
                   onToggleEnabled={onToggleEnabled}
                   onRun={onRun}
+                  onUpdateApiKey={onUpdateApiKey}
                 />
               </EuiFlexItem>
             )}
