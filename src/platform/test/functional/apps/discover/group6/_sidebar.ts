@@ -73,6 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.cleanSidebarLocalStorage();
     });
 
+    /**
+     * Migration recommendation: pare this down to a smoke test. It is well covered at the unit level.
+     */
     describe('field filtering', function () {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
         await unifiedFieldList.openSidebarFieldFilter();
@@ -138,6 +141,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: pare down to a smoke test. src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.test.tsx already covers the various search cases
+     */
     describe('search', function () {
       beforeEach(async () => {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
@@ -203,6 +209,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Integration test.
+     */
     describe('field stats', function () {
       it('should work for regular and pinned filters', async () => {
         await header.waitUntilLoadingHasFinished();
@@ -250,6 +259,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Cheap smoke test.
+     */
     describe('collapse expand', function () {
       it('should initially be expanded', async function () {
         await testSubjects.existOrFail('discover-sidebar');
@@ -269,6 +281,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. This is some heavy testing, but it's a pretty core feature. Look at maybe getting around some of the addRuntimeField and other UI-based fixture creation calls with API calls instead. Most of these test should look like "set up the scenario as fast as possible, load Discover, check the fields, done"
+     */
     describe('renders field groups', function () {
       it('should show field list groups excluding subfields', async function () {
         await unifiedFieldList.waitUntilSidebarHasLoaded();

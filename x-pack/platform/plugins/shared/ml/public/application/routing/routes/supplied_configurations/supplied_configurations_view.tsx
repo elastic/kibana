@@ -39,7 +39,6 @@ export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp)
     getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     getMlManagementBreadcrumb('SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB', navigateToApp),
   ],
-  enableDatePicker: false,
   'data-test-subj': 'mlPageSuppliedConfigurations',
 });
 

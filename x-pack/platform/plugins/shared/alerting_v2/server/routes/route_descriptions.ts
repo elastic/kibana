@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export const INVALID_QUERY_PARAMETERS_DESCRIPTION = 'Indicates invalid query parameters.';
-
-export const INVALID_REQUEST_PARAMETERS_OR_BODY_DESCRIPTION =
-  'Indicates invalid request parameters or body.';
-
-export const INVALID_REQUEST_BODY_DESCRIPTION = 'Indicates invalid request body.';
+export const INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION =
+  'Indicates an invalid schema or parameters.';

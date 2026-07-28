@@ -21,7 +21,7 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Sha256 } from '@kbn/crypto-browser';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
@@ -160,7 +160,7 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
     title: dataView.index,
-    name: dataView.index,
+    name: dataView.name ?? dataView.index,
     timeFieldName: dataView.timeFieldName,
     sourceFilters: [],
     ...fromApiFieldSettings(dataView.fieldSettings),
@@ -244,6 +244,7 @@ export function buildDataSourceStateNoESQL(
       return {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: dataViewSpec.title,
+        ...(dataViewSpec.name ? { name: dataViewSpec.name } : {}),
         time_field: dataViewSpec.timeFieldName,
         ...(dataViewSpec.allowHidden !== undefined
           ? { allow_hidden_indices: dataViewSpec.allowHidden }
@@ -329,6 +330,7 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
       return {
         index: dataSource.index_pattern,
         timeFieldName: dataSource.time_field ?? timeFieldName,
+        ...(dataSource.name ? { name: dataSource.name } : {}),
         ...(dataSource.allow_hidden_indices !== undefined
           ? { allowHidden: dataSource.allow_hidden_indices }
           : {}),
@@ -337,7 +339,7 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
     case 'esql':
       return {
         index: getIndexPatternFromESQLQuery(dataSource.query),
-        timeFieldName: getTimeFieldFromESQLQuery(dataSource.query),
+        timeFieldName: parseTimeFieldFromESQLQuery(dataSource.query),
         esqlQuery: dataSource.query,
       };
     case AS_CODE_DATA_VIEW_REFERENCE_TYPE:
