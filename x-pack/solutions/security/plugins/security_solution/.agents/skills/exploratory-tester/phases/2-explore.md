@@ -2,6 +2,12 @@
 
 ---
 
+Before starting Phase 2, inspect `config.json → skipped_setup`. If it contains
+`step: "user-provisioning"`, **do not explore**: stop, report that the
+session-user setup failed, and run the restore-aware cleanup command below.
+The authenticated admin setup session must never be used as an exploration
+identity.
+
 ## Session cap check — run before every flow
 
 Before starting each flow (single or parallel), check whether the session time cap has been reached:
@@ -20,6 +26,17 @@ EOF
 
 - **Exit 0** (within cap) → proceed with the flow.
 - **Exit 1** (cap reached) → mark this flow and all remaining flows as `not started: session time cap reached` in `config.json → skipped_setup`, then **jump to Phase 3 immediately**. Do not start any more flows.
+
+If the browser session is lost and exploration cannot continue, preserve the
+findings and run the restore-and-cleanup command before stopping. It restores
+CCS before cleanup when required, and Phase 3 repeats the same operation, so
+this is safe to retry:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
+  --session-dir "$SESSION_DIR"
+```
+The wrapper invokes `cleanup-session-resources.py` only after CCS restoration
+has succeeded.
 
 ---
 
