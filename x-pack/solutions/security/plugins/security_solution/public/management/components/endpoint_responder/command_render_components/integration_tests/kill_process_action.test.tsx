@@ -365,7 +365,7 @@ describe('When using the kill-process action from response actions console', () 
 
     const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
 
-    expect(output).toContain('ID 5');
+    expect(output).toContain('PID 5');
     expect(output).not.toContain('Name');
     expect(output).not.toContain('Entity ID');
   });

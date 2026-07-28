@@ -108,7 +108,7 @@ describe('KillSuspendProcessActionResult', () => {
     const { getByTestId } = render();
     const output = getByTestId(testPrefix).textContent ?? '';
 
-    expect(output).toContain('Action');
+    expect(output).toContain('Action result:');
     expect(output).toContain('PID 1234');
     expect(output).toContain('Entity ID entity-a');
     expect(output).toContain('Name malware.exe');
@@ -207,7 +207,7 @@ describe('KillSuspendProcessActionResult', () => {
     const output = getByTestId(testPrefix).textContent ?? '';
 
     expect(output).toContain('PID 111');
-    expect(output).not.toContain('Process ID 222');
+    expect(output).not.toContain('PID 222');
   });
 
   it('should render the result for the agentId provided', () => {
