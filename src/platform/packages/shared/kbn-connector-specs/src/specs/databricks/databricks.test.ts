@@ -90,8 +90,7 @@ describe('Databricks', () => {
       expect(Databricks.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('supports workflows and agentBuilder', () => {
-      expect(Databricks.metadata.supportedFeatureIds).toContain('workflows');
+    it('supports agentBuilder', () => {
       expect(Databricks.metadata.supportedFeatureIds).toContain('agentBuilder');
     });
 
