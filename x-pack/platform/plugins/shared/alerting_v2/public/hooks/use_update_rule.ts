@@ -34,10 +34,12 @@ export const useUpdateRule = () => {
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
-      // Content List uses its own QueryClient; refetchRef covers table-local
-      // mutations, but flyout edits need this shared invalidation.
+      // Content List uses its own QueryClient; tags under the provider land there too.
       void contentListQueryClient.invalidateQueries({
         queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),
+      });
+      void contentListQueryClient.invalidateQueries({
+        queryKey: [...ruleKeys.all, 'tags'],
       });
     },
     onError: (error: Error) => {

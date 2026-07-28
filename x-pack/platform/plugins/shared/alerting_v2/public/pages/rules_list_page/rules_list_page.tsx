@@ -26,9 +26,6 @@ import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/ru
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTable } from './rules_list_table';
 
-/** Kept for existing tests; Content List applies the same default debounce internally. */
-export const SEARCH_DEBOUNCE_MS = 300;
-
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 

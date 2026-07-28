@@ -10,6 +10,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { ContentListProvider } from '@kbn/content-list';
 import {
   CONTENT_LIST_ACTIONS,
+  contentListQueryClient,
   useContentListSelection,
   useContentListState,
 } from '@kbn/content-list-provider';
@@ -46,17 +47,40 @@ const createWrapper =
       </I18nProvider>
     );
 
+const waitForItems = async (result: {
+  current: {
+    contentSelection: { isSupported: boolean };
+    state?: { state: { items: ContentListItem[] } };
+  };
+}) => {
+  await waitFor(() => {
+    expect(result.current.contentSelection.isSupported).toBe(true);
+  });
+  // After clearing the shared Content List QueryClient, wait until findItems
+  // has populated the page — selectAllMatching no-ops on an empty items array.
+  if (result.current.state) {
+    await waitFor(() => {
+      expect(result.current.state!.state.items.length).toBeGreaterThan(0);
+    });
+  }
+};
+
 describe('useRulesSelectionMode', () => {
+  beforeEach(() => {
+    contentListQueryClient.clear();
+  });
+
   it('reports selectedCount equal to the IDs that getBulkParams will target', async () => {
     const { result } = renderHook(
       () => ({
         selectionMode: useRulesSelectionMode(),
         contentSelection: useContentListSelection(),
+        state: useContentListState(),
       }),
       { wrapper: createWrapper(40) }
     );
 
-    await waitFor(() => expect(result.current.contentSelection.isSupported).toBe(true));
+    await waitForItems(result);
 
     act(() => {
       result.current.contentSelection.setSelection(pageItems);
@@ -90,7 +114,7 @@ describe('useRulesSelectionMode', () => {
       { wrapper: createWrapper() }
     );
 
-    await waitFor(() => expect(result.current.contentSelection.isSupported).toBe(true));
+    await waitForItems(result);
 
     act(() => {
       result.current.contentSelection.setSelection(pageItems);
@@ -120,7 +144,7 @@ describe('useRulesSelectionMode', () => {
       { wrapper: createWrapper(40) }
     );
 
-    await waitFor(() => expect(result.current.contentSelection.isSupported).toBe(true));
+    await waitForItems(result);
 
     act(() => {
       result.current.selectionMode.selectAllMatching();
@@ -152,11 +176,12 @@ describe('useRulesSelectionMode', () => {
       () => ({
         selectionMode: useRulesSelectionMode(),
         contentSelection: useContentListSelection(),
+        state: useContentListState(),
       }),
       { wrapper: createWrapper(40) }
     );
 
-    await waitFor(() => expect(result.current.contentSelection.isSupported).toBe(true));
+    await waitForItems(result);
 
     act(() => {
       result.current.selectionMode.selectAllMatching();
@@ -178,7 +203,7 @@ describe('useRulesSelectionMode', () => {
     });
   });
 
-  it('preserves allMatching across page-index changes and re-checks visible rows', async () => {
+  it('preserves allMatching across page-index changes without re-checking rows', async () => {
     const { result } = renderHook(
       () => ({
         selectionMode: useRulesSelectionMode(),
@@ -188,7 +213,7 @@ describe('useRulesSelectionMode', () => {
       { wrapper: createWrapper(40) }
     );
 
-    await waitFor(() => expect(result.current.contentSelection.isSupported).toBe(true));
+    await waitForItems(result);
 
     act(() => {
       result.current.selectionMode.selectAllMatching();
@@ -204,8 +229,83 @@ describe('useRulesSelectionMode', () => {
 
     await waitFor(() => {
       expect(result.current.selectionMode.isAllSelected).toBe(true);
-      // Content List clears selection on page change; the hook re-syncs rows.
-      expect(result.current.contentSelection.selectedIds).toEqual(['rule-1', 'rule-2']);
+      expect(result.current.selectionMode.selectedCount).toBe(40);
+      expect(result.current.selectionMode.getBulkParams()).toEqual({
+        mode: 'by_query',
+        match_all: true,
+      });
+    });
+    // Content List clears selection on page change and the hook leaves it
+    // cleared, so the new page's rows render unchecked.
+    expect(result.current.contentSelection.selectedIds).toEqual([]);
+  });
+
+  it('exits allMatching when the user checks a row on a later page', async () => {
+    const { result } = renderHook(
+      () => ({
+        selectionMode: useRulesSelectionMode(),
+        contentSelection: useContentListSelection(),
+        state: useContentListState(),
+      }),
+      { wrapper: createWrapper(40) }
+    );
+
+    await waitForItems(result);
+
+    act(() => {
+      result.current.selectionMode.selectAllMatching();
+    });
+
+    act(() => {
+      result.current.state.dispatch({
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_INDEX,
+        payload: { index: 1 },
+      });
+    });
+    await waitFor(() => {
+      expect(result.current.selectionMode.isAllSelected).toBe(true);
+    });
+
+    act(() => {
+      result.current.contentSelection.setSelection([pageItems[0]]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectionMode.isAllSelected).toBe(false);
+      expect(result.current.selectionMode.getBulkParams()).toEqual({
+        mode: 'by_ids',
+        ids: ['rule-1'],
+      });
+    });
+  });
+
+  it('exits allMatching when the page size changes', async () => {
+    const { result } = renderHook(
+      () => ({
+        selectionMode: useRulesSelectionMode(),
+        contentSelection: useContentListSelection(),
+        state: useContentListState(),
+      }),
+      { wrapper: createWrapper(40) }
+    );
+
+    await waitForItems(result);
+
+    act(() => {
+      result.current.selectionMode.selectAllMatching();
+    });
+    expect(result.current.selectionMode.isAllSelected).toBe(true);
+
+    act(() => {
+      result.current.state.dispatch({
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_SIZE,
+        payload: { size: 10 },
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectionMode.isAllSelected).toBe(false);
+      expect(result.current.selectionMode.selectedCount).toBe(0);
     });
   });
 });

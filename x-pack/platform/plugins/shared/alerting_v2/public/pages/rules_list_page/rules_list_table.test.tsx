@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
+import { contentListQueryClient } from '@kbn/content-list-provider';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RulesListTable } from './rules_list_table';
@@ -120,6 +121,7 @@ const renderTable = () =>
 describe('RulesListTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    contentListQueryClient.clear();
     mockCapabilities = WRITE_CAPABILITIES;
     mockFindItems.mockResolvedValue({
       items: [toListItem(createRule())],

@@ -133,10 +133,12 @@ export const RulesListTable = ({
       item={itemConfig}
       features={{
         sorting: {
-          initialSort: { field: 'name', direction: 'asc' },
+          // Column.Name sorts by `title`; keep initialSort aligned so the header
+          // shows the active sort state and the first click toggles direction.
+          initialSort: { field: 'title', direction: 'asc' },
           fields: [
             {
-              field: 'name',
+              field: 'title',
               name: i18n.translate('xpack.alertingV2.rulesList.sort.name', {
                 defaultMessage: 'Name',
               }),

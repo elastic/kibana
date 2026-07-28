@@ -37,14 +37,30 @@ export interface UseRulesSelectionModeReturn {
   getBulkParams: () => BulkSelection;
 }
 
+const hasSameMembers = (a: readonly string[], b: readonly string[]): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  const aSet = new Set(a);
+  return b.every((id) => aSet.has(id));
+};
+
 /**
  * Thin selection-mode layer on top of Content List's page-scoped `selectedIds`.
  *
- * Content List cannot express select-all-by-query, and it clears selection on
- * page/filter/sort changes. This hook owns the `byIds` / `allMatching` intent,
- * resets it when the query or sort changes (but not on pagination), re-checks
- * visible rows while in `allMatching`, and exits to `byIds` when the user
- * unchecks a row or deselects the whole page.
+ * Content List cannot express select-all-by-query, so this hook owns the
+ * `byIds` / `allMatching` intent alongside it and follows the same shape as the
+ * detection rules table in Security Solution: `allMatching` survives pagination
+ * but is never written back into Content List's selection, so rows on later
+ * pages render unchecked while the bulk bar keeps reporting the full match
+ * total. Only the query, sort, or page size — the inputs that redefine which
+ * rules match — drop it back to `byIds`.
+ *
+ * Detecting a user un-check takes a baseline rather than an event: Content List
+ * wires EUI's `onSelectionChange` straight into its reducer with no
+ * consumer-visible callback, so the only way to tell a deliberate checkbox
+ * click apart from the reducer's own clearing is to compare `selectedIds`
+ * against what we last expected it to hold.
  */
 export const useRulesSelectionMode = (): UseRulesSelectionModeReturn => {
   const [mode, setMode] = useState<RulesSelectionMode>('byIds');
@@ -62,72 +78,57 @@ export const useRulesSelectionMode = (): UseRulesSelectionModeReturn => {
   const sortField = state.sort.field;
   const sortDirection = state.sort.direction;
   const pageIndex = state.page.index;
+  const pageSize = state.page.size;
   const totalItemCount = state.totalItems;
 
-  const previousQueryRef = useRef({ queryText, sortField, sortDirection });
+  const previousScopeRef = useRef({ queryText, sortField, sortDirection, pageSize });
   const previousPageIndexRef = useRef(pageIndex);
+  const expectedSelectionRef = useRef<readonly string[]>([]);
 
-  // Single effect owns mode reset + page sync so a query change that clears
-  // selectedIds cannot race with "re-check all rows" while still in allMatching.
   useEffect(() => {
-    const previousQuery = previousQueryRef.current;
-    const queryOrSortChanged =
-      previousQuery.queryText !== queryText ||
-      previousQuery.sortField !== sortField ||
-      previousQuery.sortDirection !== sortDirection;
-    previousQueryRef.current = { queryText, sortField, sortDirection };
+    const previousScope = previousScopeRef.current;
+    const scopeChanged =
+      previousScope.queryText !== queryText ||
+      previousScope.sortField !== sortField ||
+      previousScope.sortDirection !== sortDirection ||
+      previousScope.pageSize !== pageSize;
+    previousScopeRef.current = { queryText, sortField, sortDirection, pageSize };
 
-    if (queryOrSortChanged) {
-      previousPageIndexRef.current = pageIndex;
-      if (mode !== 'byIds') {
+    const pageChanged = previousPageIndexRef.current !== pageIndex;
+    previousPageIndexRef.current = pageIndex;
+
+    // The reducer empties `selectedIds` on all of these. Re-baseline first so
+    // the divergence check below cannot read that as a user un-check.
+    if (scopeChanged || pageChanged) {
+      expectedSelectionRef.current = [];
+      if (scopeChanged) {
         setMode('byIds');
       }
       return;
     }
 
     if (mode !== 'allMatching') {
-      previousPageIndexRef.current = pageIndex;
       return;
     }
 
-    if (items.length === 0) {
-      return;
+    if (!hasSameMembers(expectedSelectionRef.current, selectedIds)) {
+      // The user touched a checkbox, so their explicit choice replaces the
+      // broader select-all rather than silently widening it.
+      expectedSelectionRef.current = selectedIds;
+      setMode('byIds');
     }
-
-    const selectedIdSet = new Set(selectedIds);
-    const allChecked = items.every((item) => selectedIdSet.has(item.id));
-    if (allChecked) {
-      previousPageIndexRef.current = pageIndex;
-      return;
-    }
-
-    const pageChanged = previousPageIndexRef.current !== pageIndex;
-    previousPageIndexRef.current = pageIndex;
-
-    if (selectedIds.length === 0) {
-      if (pageChanged) {
-        // Pagination wiped selectedIds; restore checked appearance for the new page.
-        setSelection(items);
-      } else {
-        // Deselect-all on the same page — exit allMatching so bulk cannot still
-        // target the full filtered set while nothing looks selected.
-        setMode('byIds');
-      }
-      return;
-    }
-
-    // Partial selection means the user unchecked at least one row.
-    setMode('byIds');
-  }, [mode, items, selectedIds, setSelection, queryText, sortField, sortDirection, pageIndex]);
+  }, [mode, selectedIds, queryText, sortField, sortDirection, pageSize, pageIndex]);
 
   const selectAllMatching = useCallback(() => {
     setMode('allMatching');
     setSelection(items);
+    expectedSelectionRef.current = items.map((item) => item.id);
   }, [items, setSelection]);
 
   const clearSelection = useCallback(() => {
     setMode('byIds');
     clearContentListSelection();
+    expectedSelectionRef.current = [];
   }, [clearContentListSelection]);
 
   const getBulkParams = useCallback((): BulkSelection => {
