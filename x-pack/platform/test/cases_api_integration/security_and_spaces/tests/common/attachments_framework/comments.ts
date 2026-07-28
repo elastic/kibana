@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('legacy user comment interop', () => {
-      it('projects a legacy `user` comment into the v2 read shape', async () => {
+      it('reads a legacy `user` comment through the v2 read path (legacy type preserved in legacy mode)', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await createComment({
           supertest,
@@ -64,7 +64,9 @@ export default ({ getService }: FtrProviderContext): void => {
           commentId,
         });
 
-        expect(['comment', 'user']).to.contain(fetched.type);
+        // The legacy `/comments/{id}` route reads with mode=legacy, which preserves
+        // the legacy `user` type; unified projection only happens on mode=unified reads.
+        expect(fetched.type).to.be('user');
         expect(getCommentContent(fetched as unknown as Record<string, unknown>)).to.be(
           postCommentUserReq.comment
         );
