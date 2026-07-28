@@ -114,6 +114,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService,
+    endpointAppContextService,
     getOsqueryResponseActionsAuthzChecker,
   }) =>
   (type) => {

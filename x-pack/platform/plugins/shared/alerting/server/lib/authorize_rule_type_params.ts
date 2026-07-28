@@ -20,7 +20,7 @@ import type { RuleTypeParams, RuleTypeParamsAuthorizer } from '../types';
 export async function authorizeRuleTypeParams<Params extends RuleTypeParams>(
   params: Params,
   authorizer: RuleTypeParamsAuthorizer<Params> | undefined,
-  context: { request: KibanaRequest; previousParams?: Params }
+  context: { request: KibanaRequest; spaceId: string; previousParams?: Params }
 ): Promise<void> {
   if (!authorizer) {
     return;

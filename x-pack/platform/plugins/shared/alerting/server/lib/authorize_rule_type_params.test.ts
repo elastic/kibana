@@ -10,10 +10,11 @@ import { authorizeRuleTypeParams } from './authorize_rule_type_params';
 import type { RuleTypeParams, RuleTypeParamsAuthorizer } from '../types';
 
 const request = httpServerMock.createKibanaRequest();
+const spaceId = 'default';
 
 test('resolves without calling anything when no authorizer is provided', async () => {
   await expect(
-    authorizeRuleTypeParams({ foo: true }, undefined, { request })
+    authorizeRuleTypeParams({ foo: true }, undefined, { request, spaceId })
   ).resolves.toBeUndefined();
 });
 
@@ -23,10 +24,10 @@ test('calls the authorizer with params and context', async () => {
   const params = { foo: true };
   const previousParams = { foo: false };
 
-  await authorizeRuleTypeParams(params, authorizer, { request, previousParams });
+  await authorizeRuleTypeParams(params, authorizer, { request, spaceId, previousParams });
 
   expect(authorize).toHaveBeenCalledTimes(1);
-  expect(authorize).toHaveBeenCalledWith(params, { request, previousParams });
+  expect(authorize).toHaveBeenCalledWith(params, { request, spaceId, previousParams });
 });
 
 test('propagates the error thrown by the authorizer without wrapping it', async () => {
@@ -35,5 +36,7 @@ test('propagates the error thrown by the authorizer without wrapping it', async 
     authorize: jest.fn().mockRejectedValue(error),
   };
 
-  await expect(authorizeRuleTypeParams({ foo: true }, authorizer, { request })).rejects.toBe(error);
+  await expect(
+    authorizeRuleTypeParams({ foo: true }, authorizer, { request, spaceId })
+  ).rejects.toBe(error);
 });

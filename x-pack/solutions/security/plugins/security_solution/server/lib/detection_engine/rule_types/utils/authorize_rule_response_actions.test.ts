@@ -26,6 +26,7 @@ const paramsWithResponseActions = (responseActions?: RuleResponseAction[]): Rule
 describe('createResponseActionsParamsAuthorizer', () => {
   let endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
   const request = httpServerMock.createKibanaRequest();
+  const spaceId = 'default';
 
   beforeEach(() => {
     endpointAppContextService = createMockEndpointAppContextService();
@@ -35,7 +36,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
     const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
 
     await expect(
-      authorizer.authorize(paramsWithResponseActions(), { request })
+      authorizer.authorize(paramsWithResponseActions(), { request, spaceId })
     ).resolves.toBeUndefined();
   });
 
@@ -46,7 +47,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
     const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
 
     await expect(
-      authorizer.authorize(paramsWithResponseActions([isolateResponseAction()]), { request })
+      authorizer.authorize(paramsWithResponseActions([isolateResponseAction()]), { request, spaceId })
     ).resolves.toBeUndefined();
   });
 
@@ -57,7 +58,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
     const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
 
     const error = await authorizer
-      .authorize(paramsWithResponseActions([isolateResponseAction()]), { request })
+      .authorize(paramsWithResponseActions([isolateResponseAction()]), { request, spaceId })
       .catch((e) => e);
 
     expect(Boom.isBoom(error)).toBe(true);
@@ -78,6 +79,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
     await expect(
       authorizer.authorize(paramsWithResponseActions(responseActions), {
         request,
+        spaceId,
         previousParams: paramsWithResponseActions(responseActions),
       })
     ).resolves.toBeUndefined();
@@ -96,7 +98,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
       params: { savedQueryId: 'saved-query-1' },
     } as RuleResponseAction;
 
-    await authorizer.authorize(paramsWithResponseActions([osqueryAction]), { request });
+    await authorizer.authorize(paramsWithResponseActions([osqueryAction]), { request, spaceId });
 
     expect(getOsqueryResponseActionsAuthzChecker).toHaveBeenCalledWith(request);
     expect(osqueryCheck).toHaveBeenCalledWith(
@@ -119,7 +121,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
     });
 
     const error = await authorizer
-      .authorize(paramsWithResponseActions([osqueryAction()]), { request })
+      .authorize(paramsWithResponseActions([osqueryAction()]), { request, spaceId })
       .catch((e) => e);
 
     expect(Boom.isBoom(error)).toBe(true);
@@ -134,7 +136,7 @@ describe('createResponseActionsParamsAuthorizer', () => {
     });
 
     const error = await authorizer
-      .authorize(paramsWithResponseActions([osqueryAction()]), { request })
+      .authorize(paramsWithResponseActions([osqueryAction()]), { request, spaceId })
       .catch((e) => e);
 
     expect(Boom.isBoom(error)).toBe(true);

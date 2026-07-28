@@ -91,6 +91,7 @@ import {
   createSecurityRuleTypeWrapper,
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -384,6 +385,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
+      endpointAppContextService: this.endpointAppContextService,
       getOsqueryResponseActionsAuthzChecker,
     };
 

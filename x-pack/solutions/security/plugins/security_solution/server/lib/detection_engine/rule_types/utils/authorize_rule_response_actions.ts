@@ -40,14 +40,14 @@ export const createResponseActionsParamsAuthorizer = <TParams extends RuleParams
   endpointAppContextService,
   getOsqueryResponseActionsAuthzChecker,
 }: CreateResponseActionsParamsAuthorizerDeps): RuleTypeParamsAuthorizer<TParams> => ({
-  authorize: async (params, { request, previousParams }) => {
+  authorize: async (params, { request, spaceId, previousParams }) => {
     const responseActions = params.responseActions?.map(transformAlertToRuleResponseAction);
 
     try {
       await validateRuleResponseActions({
         endpointService: endpointAppContextService,
         endpointAuthz: await endpointAppContextService.getEndpointAuthz(request),
-        spaceId: endpointAppContextService.getActiveSpaceId(request),
+        spaceId,
         rulePayload: { response_actions: responseActions },
         // `validateRuleResponseActions` only reads `existingRule.params.responseActions`,
         // so a minimal object is sufficient here.

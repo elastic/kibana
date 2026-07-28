@@ -6,8 +6,8 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ConstructorOptions } from '../../../../rules_client';
-import { RulesClient } from '../../../../rules_client';
+import type { ConstructorOptions } from '../rules_client';
+import { RulesClient } from '../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,

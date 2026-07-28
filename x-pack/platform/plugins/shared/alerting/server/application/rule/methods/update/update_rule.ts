@@ -219,6 +219,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
     request: context.request,
+    spaceId: context.spaceId,
     previousParams: originalRuleSavedObject.attributes.params,
   });
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);

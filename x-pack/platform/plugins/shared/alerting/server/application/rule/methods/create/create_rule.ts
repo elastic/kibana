@@ -140,6 +140,7 @@ export async function createRule<Params extends RuleParams = never>(
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
     request: context.request,
+    spaceId: context.spaceId,
   });
   const username = await context.getUserName();
 

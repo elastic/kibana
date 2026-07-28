@@ -190,6 +190,7 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
  */
 export interface RuleTypeParamsAuthorizerContext<Params extends RuleTypeParams> {
   request: KibanaRequest;
+  spaceId: string;
   previousParams?: Params;
 }
 
