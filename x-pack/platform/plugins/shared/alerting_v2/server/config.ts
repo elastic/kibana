@@ -26,9 +26,28 @@ const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 /** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
 const MAX_ALERTS_PER_RUN = 10000;
 
+/** Default value of `xpack.alerting_v2.rules.run.alerts.maxDocSize`, in bytes. */
+const DEFAULT_MAX_ALERT_DOC_SIZE_BYTES = 5000;
+/** Lowest value `xpack.alerting_v2.rules.run.alerts.maxDocSize` may be set to. */
+const MIN_MAX_ALERT_DOC_SIZE_BYTES = 1024;
+/** Highest value `xpack.alerting_v2.rules.run.alerts.maxDocSize` may be set to (1 MiB). */
+const MAX_MAX_ALERT_DOC_SIZE_BYTES = 1024 * 1024;
+
 const rulesRunSchema = schema.object({
   alerts: schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
+    /**
+     * Upper bound on the JSON-serialized size (bytes) of a single alert
+     * event `data` payload. Rows exceeding it are truncated down to the
+     * rule's grouping fields (values clipped to fit) plus a truncation
+     * marker; episode identity is unaffected as group hashes are always
+     * computed from the full row.
+     */
+    maxDocSize: schema.number({
+      defaultValue: DEFAULT_MAX_ALERT_DOC_SIZE_BYTES,
+      min: MIN_MAX_ALERT_DOC_SIZE_BYTES,
+      max: MAX_MAX_ALERT_DOC_SIZE_BYTES,
+    }),
   }),
 });
 

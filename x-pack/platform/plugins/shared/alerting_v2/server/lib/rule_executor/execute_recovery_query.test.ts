@@ -66,6 +66,7 @@ describe('executeRecoveryQuery', () => {
       input,
       activeGroupHashes: toActive([recoveredHash]),
       breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 5000,
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
@@ -99,6 +100,7 @@ describe('executeRecoveryQuery', () => {
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1', 'hash-2']),
       breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 5000,
     });
 
     expect(events).toEqual([]);
@@ -135,6 +137,7 @@ describe('executeRecoveryQuery', () => {
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive([hashX, hashY]),
       breachedGroupHashes: new Set([hashX]),
+      maxDocSizeBytes: 5000,
     });
 
     const byGroup = Object.fromEntries(events.map((e: AlertEvent) => [e.group_hash, e.status]));
@@ -159,6 +162,7 @@ describe('executeRecoveryQuery', () => {
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
       breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 5000,
     }).catch((e: Error) => e);
 
     expect(error).toBeInstanceOf(Error);
@@ -180,6 +184,7 @@ describe('executeRecoveryQuery', () => {
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
       breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 5000,
     }).catch((e: Error) => e);
 
     expect(error).toBeInstanceOf(Error);
@@ -199,6 +204,7 @@ describe('executeRecoveryQuery', () => {
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
       breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 5000,
     }).catch((e: Error) => e);
 
     expect(error).toBeInstanceOf(Error);
@@ -221,6 +227,7 @@ describe('executeRecoveryQuery', () => {
       input,
       activeGroupHashes: toActive(['hash-1']),
       breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 5000,
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(

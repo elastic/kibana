@@ -93,4 +93,30 @@ describe('alerting_v2 config schema', () => {
       expect(() => configSchema.validate({ rules: { run: { alerts: { max: 10001 } } } })).toThrow();
     });
   });
+
+  describe('rules.run.alerts.maxDocSize', () => {
+    it('defaults to 5000 bytes', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.alerts.maxDocSize).toBe(5000);
+    });
+
+    it('accepts a configured value within bounds', () => {
+      expect(
+        configSchema.validate({ rules: { run: { alerts: { maxDocSize: 2048 } } } }).rules.run.alerts
+          .maxDocSize
+      ).toBe(2048);
+    });
+
+    it('rejects values below 1024 bytes', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { alerts: { maxDocSize: 1023 } } } })
+      ).toThrow();
+    });
+
+    it('rejects values above the 1 MiB ceiling', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { alerts: { maxDocSize: 1024 * 1024 + 1 } } } })
+      ).toThrow();
+    });
+  });
 });

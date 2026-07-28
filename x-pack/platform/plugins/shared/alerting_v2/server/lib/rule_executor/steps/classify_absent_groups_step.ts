@@ -6,6 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { getNoDataEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
 import {
@@ -30,6 +32,7 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import type { ActiveAlertGroupHash } from '../queries';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
+import type { PluginConfig } from '../../../config';
 
 /**
  * End-of-stream classifier for active groups that are **absent from the
@@ -62,12 +65,18 @@ import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   public readonly name = 'classify_absent_groups';
 
+  private readonly maxDocSizeBytes: number;
+
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
-    private readonly scopedQueryService: QueryServiceContract
-  ) {}
+    private readonly scopedQueryService: QueryServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+  ) {
+    this.maxDocSizeBytes = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.maxDocSize;
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return forwardThenFinalize(streamState, {
@@ -188,6 +197,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
         input,
         activeGroupHashes: activeGroups,
         breachedGroupHashes,
+        maxDocSizeBytes: this.maxDocSizeBytes,
       });
     }
 

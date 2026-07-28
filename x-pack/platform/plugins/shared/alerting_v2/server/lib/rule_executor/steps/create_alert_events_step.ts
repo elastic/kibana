@@ -6,6 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   createAlertEventsBatchBuilder,
@@ -17,16 +19,27 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { guardedExpandStep } from '../stream_utils';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import type { PluginConfig } from '../../../config';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'create_alert_events';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly maxDocSizeBytes: number;
+
+  constructor(
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+  ) {
+    this.maxDocSizeBytes = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.maxDocSize;
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
     let buildBatch: AlertEventsBatchBuilder | undefined;
+    let truncationWarningLogged = false;
 
     return guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
       const eventType = resolveAlertEventType(state.rule);
@@ -39,6 +52,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           scheduledTimestamp: state.input.scheduledAt,
           ruleVersion: state.rule.metadata.version,
           type: eventType,
+          maxDocSizeBytes: step.maxDocSizeBytes,
         });
 
         step.logger.debug({
@@ -46,11 +60,27 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         });
       }
 
-      const alertEventsBatch = buildBatch([...state.esqlRowBatch]);
+      const { alertEvents, truncatedEventsCount } = buildBatch([...state.esqlRowBatch]);
+
+      if (truncatedEventsCount > 0 && !truncationWarningLogged) {
+        truncationWarningLogged = true;
+        step.logger.warn({
+          message: `[${step.name}] Truncated the data payload of ${truncatedEventsCount} alert event(s) for rule ${state.input.ruleId}: rows exceeded the configured maxDocSize of ${step.maxDocSizeBytes} bytes`,
+        });
+      }
 
       yield {
         type: 'continue',
-        state: { ...state, alertEventsBatch },
+        state: { ...state, alertEventsBatch: alertEvents },
+        ...(truncatedEventsCount > 0
+          ? {
+              meta: {
+                counters: {
+                  [RULE_EXECUTION_COUNTERS.alertEventsDataTruncated]: truncatedEventsCount,
+                },
+              },
+            }
+          : {}),
       };
     });
   }

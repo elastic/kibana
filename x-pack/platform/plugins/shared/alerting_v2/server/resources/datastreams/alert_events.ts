@@ -10,7 +10,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 5;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 6;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -28,6 +28,9 @@ const mappings: MappingsDefinition = {
     },
     group_hash: { type: 'keyword' },
     data: { type: 'flattened' },
+    // Set when `data` was truncated to fit rules.run.alerts.maxDocSize.
+    // Lives outside `data` so user-defined ES|QL columns cannot collide.
+    data_truncated: { type: 'boolean' },
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
@@ -61,6 +64,7 @@ export const alertEventSchema = z.object({
   rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
   group_hash: z.string(),
   data: z.record(z.string(), z.unknown()),
+  data_truncated: z.boolean().optional(),
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
@@ -82,12 +86,16 @@ export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 export type AlertEventSeverity = z.infer<typeof alertEventSeveritySchema>;
 
 export const buildRuleEventDocument = (params: AlertEvent): AlertEvent => {
-  const { scheduled_timestamp, episode, severity, ...required } = params;
+  const { scheduled_timestamp, episode, severity, data_truncated, ...required } = params;
 
   const doc: AlertEvent = { ...required };
 
   if (scheduled_timestamp !== undefined) {
     doc.scheduled_timestamp = scheduled_timestamp;
+  }
+
+  if (data_truncated !== undefined) {
+    doc.data_truncated = data_truncated;
   }
 
   if (episode !== undefined) {

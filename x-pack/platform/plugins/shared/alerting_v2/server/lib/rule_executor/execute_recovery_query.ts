@@ -32,6 +32,7 @@ export const executeRecoveryQuery = async ({
   input,
   activeGroupHashes,
   breachedGroupHashes,
+  maxDocSizeBytes,
 }: {
   queryService: QueryServiceContract;
   logger: LoggerServiceContract;
@@ -40,6 +41,7 @@ export const executeRecoveryQuery = async ({
   input: RuleExecutionInput;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
+  maxDocSizeBytes: number;
 }): Promise<AlertEvent[]> => {
   const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -72,6 +74,7 @@ export const executeRecoveryQuery = async ({
       esqlResponse,
       scheduledTimestamp: input.scheduledAt,
       type: resolveAlertEventType(rule),
+      maxDocSizeBytes,
     });
   } catch (error) {
     if (isEsqlUserError(error)) {

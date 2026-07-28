@@ -20,6 +20,7 @@ import {
   alertEventType,
   buildRuleEventDocument,
 } from '../../resources/datastreams/alert_events';
+import { enforceAlertDataSize } from './alert_data_size_guardrail';
 import type { ActiveAlertGroupHash } from './queries';
 
 /**
@@ -124,9 +125,21 @@ export interface BuildAlertEventsBaseOpts {
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
   scheduledTimestamp: string;
+  /**
+   * Maximum JSON-serialized size (bytes) allowed for an event `data` payload.
+   * Rows exceeding it are truncated down to the rule's grouping fields plus a
+   * truncation marker. See `xpack.alerting_v2.rules.run.alerts.maxDocSize`.
+   */
+  maxDocSizeBytes: number;
 }
 
-export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
+export interface AlertEventsBatch {
+  alertEvents: AlertEvent[];
+  /** Number of events in `alertEvents` whose `data` payload was truncated. */
+  truncatedEventsCount: number;
+}
+
+export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEventsBatch;
 
 export function createAlertEventsBatchBuilder({
   ruleId,
@@ -135,6 +148,7 @@ export function createAlertEventsBatchBuilder({
   ruleAttributes,
   type,
   scheduledTimestamp,
+  maxDocSizeBytes,
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
@@ -146,10 +160,13 @@ export function createAlertEventsBatchBuilder({
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
-  return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
-    const alertEventsBatch: AlertEvent[] = [];
+  return (batch: Array<Record<string, unknown>>): AlertEventsBatch => {
+    const alertEvents: AlertEvent[] = [];
+    let truncatedEventsCount = 0;
 
     for (const rowDoc of batch) {
+      // Group hash and severity are always derived from the full row, so
+      // truncating the stored payload below never affects episode identity.
       const groupHash = buildGroupHash({
         rowDoc,
         groupKeyFields: groupingFields,
@@ -158,12 +175,22 @@ export function createAlertEventsBatchBuilder({
         },
       });
 
+      const { data, truncated } = enforceAlertDataSize({
+        rowDoc,
+        groupingFields,
+        maxBytes: maxDocSizeBytes,
+      });
+      if (truncated) {
+        truncatedEventsCount++;
+      }
+
       const doc = buildRuleEventDocument({
         '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
-        data: rowDoc,
+        data,
+        data_truncated: truncated ? true : undefined,
         status: 'breached',
         source,
         type,
@@ -172,10 +199,10 @@ export function createAlertEventsBatchBuilder({
       });
 
       index++;
-      alertEventsBatch.push(doc);
+      alertEvents.push(doc);
     }
 
-    return alertEventsBatch;
+    return { alertEvents, truncatedEventsCount };
   };
 }
 
@@ -325,6 +352,11 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
   type: AlertEventType;
+  /**
+   * Maximum JSON-serialized size (bytes) allowed for an event `data` payload.
+   * See `xpack.alerting_v2.rules.run.alerts.maxDocSize`.
+   */
+  maxDocSizeBytes: number;
 }
 /**
  * Creates `recovered` alert events by running a custom recovery query.
@@ -345,6 +377,7 @@ export function buildQueryRecoveryAlertEvents({
   esqlResponse,
   scheduledTimestamp,
   type,
+  maxDocSizeBytes,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
@@ -390,17 +423,24 @@ export function buildQueryRecoveryAlertEvents({
 
   const wroteAt = new Date().toISOString();
 
-  return Array.from(recoveredByGroupHash).map(([groupHash, data]) =>
-    buildRuleEventDocument({
+  return Array.from(recoveredByGroupHash).map(([groupHash, rowDoc]) => {
+    const { data, truncated } = enforceAlertDataSize({
+      rowDoc,
+      groupingFields,
+      maxBytes: maxDocSizeBytes,
+    });
+
+    return buildRuleEventDocument({
       '@timestamp': wroteAt,
       scheduled_timestamp: scheduledTimestamp,
       rule: { id: ruleId, version: ruleVersion },
       group_hash: groupHash,
       data,
+      data_truncated: truncated ? true : undefined,
       status: 'recovered',
       source: 'internal',
       type,
       space_id: spaceId,
-    })
-  );
+    });
+  });
 }

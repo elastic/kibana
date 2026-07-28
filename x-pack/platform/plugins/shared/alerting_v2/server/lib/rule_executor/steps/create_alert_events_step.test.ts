@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { CreateAlertEventsStep } from './create_alert_events_step';
 import {
   collectStreamResults,
@@ -14,13 +15,38 @@ import {
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import type { PluginConfig } from '../../../config';
+
+const DEFAULT_MAX_DOC_SIZE = 5000;
+
+const createPluginConfigAccessor = (maxDocSize = DEFAULT_MAX_DOC_SIZE) => {
+  const config: PluginConfig = {
+    enabled: true,
+    invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    rules: {
+      minimumScheduleInterval: '1m',
+      maxScheduledPerMinute: 400,
+      run: { alerts: { max: 10000, maxDocSize } },
+    },
+  };
+
+  return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+};
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
 
+  function createStep(maxDocSize?: number) {
+    const { loggerService, mockLogger } = createLoggerService();
+    return {
+      step: new CreateAlertEventsStep(loggerService, createPluginConfigAccessor(maxDocSize)),
+      mockLogger,
+    };
+  }
+
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
-    step = new CreateAlertEventsStep(loggerService);
+    ({ step } = createStep());
   });
 
   it('builds alert-typed events for kind: alert rule', async () => {
@@ -116,6 +142,62 @@ describe('CreateAlertEventsStep', () => {
     expect(results).toHaveLength(1);
     expect(results[0].type).toBe('continue');
     expect(results[0].state.alertEventsBatch).toEqual([]);
+  });
+
+  describe('maxDocSize guardrail', () => {
+    it('truncates oversized rows, emits the counter, and logs a warning once per run', async () => {
+      const { step: limitedStep, mockLogger } = createStep(1024);
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert' });
+      const oversizedBatch = [{ 'host.name': 'host-a', message: 'x'.repeat(5000) }];
+
+      const state1 = createRulePipelineState({ input, rule, esqlRowBatch: oversizedBatch });
+      const state2 = createRulePipelineState({ input, rule, esqlRowBatch: oversizedBatch });
+
+      const results = await collectStreamResults(
+        limitedStep.executeStream(createPipelineStream([state1, state2]))
+      );
+
+      expect(results).toHaveLength(2);
+      for (const result of results) {
+        if (result.type !== 'continue') {
+          throw new Error(`Expected a continue result, got ${result.type}`);
+        }
+        expect(result.state.alertEventsBatch?.[0].data_truncated).toBe(true);
+        expect(result.meta).toEqual({
+          counters: { [RULE_EXECUTION_COUNTERS.alertEventsDataTruncated]: 1 },
+        });
+      }
+
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('maxDocSize of 1024 bytes')
+      );
+    });
+
+    it('does not attach counters or warn when no row exceeds the limit', async () => {
+      const { step: limitedStep, mockLogger } = createStep(1024);
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert' });
+
+      const state = createRulePipelineState({
+        input,
+        rule,
+        esqlRowBatch: [{ 'host.name': 'host-a' }],
+      });
+
+      const [result] = await collectStreamResults(
+        limitedStep.executeStream(createPipelineStream([state]))
+      );
+
+      if (result.type !== 'continue') {
+        throw new Error(`Expected a continue result, got ${result.type}`);
+      }
+      expect(result.state.alertEventsBatch?.[0].data).toEqual({ 'host.name': 'host-a' });
+      expect(result.state.alertEventsBatch?.[0].data_truncated).toBeUndefined();
+      expect(result.meta).toBeUndefined();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {

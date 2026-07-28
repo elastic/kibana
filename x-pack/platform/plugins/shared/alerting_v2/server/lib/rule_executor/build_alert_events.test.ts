@@ -16,6 +16,8 @@ import {
 } from './build_alert_events';
 import type { BuildAlertEventsBaseOpts } from './build_alert_events';
 
+const DEFAULT_MAX_DOC_SIZE_BYTES = 5000;
+
 function buildAlertEventsFromEsqlResponse(
   opts: BuildAlertEventsBaseOpts & { esqlResponse: EsqlQueryResponse }
 ) {
@@ -28,7 +30,7 @@ function buildAlertEventsFromEsqlResponse(
     });
     return record;
   });
-  return buildBatch(rows);
+  return buildBatch(rows).alertEvents;
 }
 
 describe('resolveAlertEventType', () => {
@@ -73,11 +75,13 @@ describe('createAlertEventsBatchBuilder', () => {
       ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
-    const docs = buildBatch(rows);
+    const { alertEvents: docs, truncatedEventsCount } = buildBatch(rows);
 
     expect(docs).toHaveLength(2);
+    expect(truncatedEventsCount).toBe(0);
 
     const doc1 = docs[0];
     const doc2 = docs[1];
@@ -107,9 +111,10 @@ describe('createAlertEventsBatchBuilder', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
-    const docs = buildBatch([{ 'host.name': 'host-a' }]);
+    const { alertEvents: docs } = buildBatch([{ 'host.name': 'host-a' }]);
 
     expect(docs).toHaveLength(1);
     expect(docs[0].space_id).toBe('custom-space');
@@ -124,7 +129,8 @@ describe('createAlertEventsBatchBuilder', () => {
         ruleAttributes: { grouping: { fields: ['host.name'] } },
         scheduledTimestamp: '2024-12-31T23:59:00.000Z',
         type: 'signal',
-      })(rows);
+        maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
+      })(rows).alertEvents;
 
     it.each(['info', 'low', 'medium', 'high', 'critical'] as const)(
       'sets severity to %s when the row has a matching severity column',
@@ -181,6 +187,71 @@ describe('createAlertEventsBatchBuilder', () => {
       const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
 
       expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'SEV1' });
+    });
+  });
+
+  describe('maxDocSize guardrail', () => {
+    const buildBatchWithLimit = (maxDocSizeBytes: number) =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: ['host.name'] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'signal',
+        maxDocSizeBytes,
+      });
+
+    it('truncates oversized rows down to grouping fields, flags and counts them', () => {
+      const buildBatch = buildBatchWithLimit(200);
+
+      const { alertEvents, truncatedEventsCount } = buildBatch([
+        { 'host.name': 'host-a', message: 'x'.repeat(500) },
+        { 'host.name': 'host-b', message: 'small' },
+      ]);
+
+      expect(truncatedEventsCount).toBe(1);
+      expect(alertEvents[0].data).toEqual({ 'host.name': 'host-a' });
+      expect(alertEvents[0].data_truncated).toBe(true);
+      expect(alertEvents[1].data).toEqual({ 'host.name': 'host-b', message: 'small' });
+      expect(alertEvents[1].data_truncated).toBeUndefined();
+    });
+
+    it('keeps the group hash stable across truncated and non-truncated runs of the same group', () => {
+      const bigRow = { 'host.name': 'host-a', message: 'x'.repeat(500) };
+      const smallRow = { 'host.name': 'host-a', message: 'small' };
+
+      const { alertEvents: truncatedEvents } = buildBatchWithLimit(200)([bigRow]);
+      const { alertEvents: intactEvents } = buildBatchWithLimit(5000)([smallRow]);
+
+      expect(truncatedEvents[0].data_truncated).toBe(true);
+      // Same grouping value → same hash, regardless of truncation.
+      expect(truncatedEvents[0].group_hash).toBe(intactEvents[0].group_hash);
+    });
+
+    it('clips an oversized grouping field value instead of dropping it', () => {
+      const buildBatch = buildBatchWithLimit(200);
+
+      const { alertEvents, truncatedEventsCount } = buildBatch([{ 'host.name': 'h'.repeat(500) }]);
+
+      expect(truncatedEventsCount).toBe(1);
+      expect(alertEvents[0].data_truncated).toBe(true);
+      const data = alertEvents[0].data as Record<string, unknown>;
+      expect(data['host.name']).toEqual(expect.stringMatching(/^h+$/));
+      expect((data['host.name'] as string).length).toBeLessThan(200);
+      expect(JSON.stringify(data).length).toBeLessThanOrEqual(200);
+    });
+
+    it('still derives severity from the full row when data is truncated', () => {
+      const buildBatch = buildBatchWithLimit(200);
+
+      const { alertEvents } = buildBatch([
+        { 'host.name': 'host-a', severity: 'critical', message: 'x'.repeat(500) },
+      ]);
+
+      expect(alertEvents[0].severity).toBe('critical');
+      expect(alertEvents[0].data_truncated).toBe(true);
+      expect(alertEvents[0].data).toEqual({ 'host.name': 'host-a' });
     });
   });
 });
@@ -464,6 +535,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     const activeGroupHash = breachedEvents[0].group_hash;
@@ -478,6 +550,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     expect(events).toHaveLength(1);
@@ -505,6 +578,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse: { columns: [], values: [] },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     expect(events).toEqual([]);
@@ -526,6 +600,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     expect(events).toEqual([]);
@@ -554,6 +629,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     const activeGroupHash = breachedEvents[0].group_hash;
@@ -568,6 +644,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     expect(events).toHaveLength(1);
@@ -589,6 +666,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     const activeGroupHash = breachedEvents[0].group_hash;
@@ -604,6 +682,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     expect(events).toEqual([]);
@@ -623,6 +702,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     const events = buildQueryRecoveryAlertEvents({
@@ -635,9 +715,50 @@ describe('buildQueryRecoveryAlertEvents', () => {
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
     expect(events).toHaveLength(1);
     expect(events[0].space_id).toBe('custom-space');
+  });
+
+  it('truncates the data payload of oversized recovery rows', () => {
+    const breachedEvents = buildAlertEventsFromEsqlResponse({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      esqlResponse: {
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [['host-a']],
+      },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+      maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
+    });
+
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: breachedEvents[0].group_hash }],
+      breachedGroupHashes: new Set(),
+      esqlResponse: {
+        columns: [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'message', type: 'keyword' },
+        ],
+        values: [['host-a', 'x'.repeat(500)]],
+      },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+      maxDocSizeBytes: 200,
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].group_hash).toBe(breachedEvents[0].group_hash);
+    expect(events[0].data).toEqual({ 'host.name': 'host-a' });
+    expect(events[0].data_truncated).toBe(true);
   });
 });

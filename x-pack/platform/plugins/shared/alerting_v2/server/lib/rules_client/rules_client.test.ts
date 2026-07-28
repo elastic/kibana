@@ -106,7 +106,7 @@ describe('RulesClient', () => {
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
-        run: { alerts: { max: 10000 } },
+        run: { alerts: { max: 10000, maxDocSize: 5000 } },
         ...rulesConfigOverrides,
       },
     };
