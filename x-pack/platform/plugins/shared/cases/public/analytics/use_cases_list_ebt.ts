@@ -11,13 +11,12 @@ import {
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
 } from '../../common/constants';
-import type { ViewToggleId } from '../components/cases_redesign/all_cases/constants';
+import type { ViewToggleId } from '../../common/constants';
+import type { SortFieldCase, SortOrder } from '../../common/ui/types';
 import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
-import { isRegisteredOwner } from '../files';
-
-const getEbtOwner = (owner: string[]): string =>
-  owner[0] && isRegisteredOwner(owner[0]) ? owner[0] : 'unknown';
+import { getEbtOwner } from './get_ebt_owner';
+import type { FilterDimension } from './get_active_filter_dimensions';
 
 /**
  * Events Based Tracking for switching between the cases list "list" and "table" view modes
@@ -44,6 +43,12 @@ export interface UseCasesListPageViewEBTArgs {
   selectedColumns: string[];
   /** The number of rows selected per page */
   perPage: number;
+  /** The case field the list is sorted by at load time */
+  sortField: SortFieldCase;
+  /** The sort direction at load time */
+  sortOrder: SortOrder;
+  /** The bounded set of filter dimensions that are actively applied at load time */
+  activeFilterDimensions: FilterDimension[];
   /** Whether asynchronously loaded list configuration is ready to report */
   isReady?: boolean;
   /**
@@ -55,12 +60,16 @@ export interface UseCasesListPageViewEBTArgs {
 
 /**
  * Events Based Tracking for the cases list page load. Reports the view mode, selected
- * columns/fields, and page size that were active at load time.
+ * columns/fields, sorting, active filter dimensions, and page size that were active at load
+ * time.
  */
 export const useCasesListPageViewEBT = ({
   viewMode,
   selectedColumns,
   perPage,
+  sortField,
+  sortOrder,
+  activeFilterDimensions,
   isReady = true,
   enabled = true,
 }: UseCasesListPageViewEBTArgs) => {
@@ -79,6 +88,20 @@ export const useCasesListPageViewEBT = ({
       view_mode: viewMode,
       selected_columns: selectedColumns,
       per_page: perPage,
+      sort_field: sortField,
+      sort_order: sortOrder,
+      active_filter_dimensions: activeFilterDimensions,
     });
-  }, [analytics, enabled, isReady, owner, perPage, selectedColumns, viewMode]);
+  }, [
+    analytics,
+    enabled,
+    isReady,
+    owner,
+    perPage,
+    selectedColumns,
+    viewMode,
+    sortField,
+    sortOrder,
+    activeFilterDimensions,
+  ]);
 };

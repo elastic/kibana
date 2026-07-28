@@ -12,7 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 
 import { AttachmentAccordion } from './attachment_accordion';
 import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../../common/mock';
-import { CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE } from '../../../../common/constants';
+import { CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE } from '../../../../common/constants';
 
 describe('AttachmentAccordion', () => {
   it('renders the title, count badge, and children', () => {
@@ -52,7 +52,24 @@ describe('AttachmentAccordion', () => {
     );
   });
 
-  it('reports a case_view_attachments_sub_tab_clicked EBT event when the accordion is opened', () => {
+  it('reports a case_view_attachment_accordion_opened EBT event on initial mount, since accordions default to open', () => {
+    const coreStart = coreMock.createStart() as unknown as CoreStart;
+
+    renderWithTestingProviders(
+      <AttachmentAccordion id="alerts" title="Alerts" count={5}>
+        <div />
+      </AttachmentAccordion>,
+      { wrapperProps: { coreStart } }
+    );
+
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
+      { owner: mockedTestProvidersOwner[0], attachment_type: 'alerts' }
+    );
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports another case_view_attachment_accordion_opened EBT event each time the accordion is re-opened', () => {
     const coreStart = coreMock.createStart() as unknown as CoreStart;
 
     renderWithTestingProviders(
@@ -64,16 +81,18 @@ describe('AttachmentAccordion', () => {
 
     const toggleButton = screen.getByTestId('case-view-attachment-accordion-toggle-alerts');
 
-    // Collapse it first (already open by default) so the next click reports the "opened" event.
-    fireEvent.click(toggleButton);
-    expect(coreStart.analytics.reportEvent).not.toHaveBeenCalledWith(
-      CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
-      expect.anything()
-    );
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
 
+    // Collapsing must not report another "opened" event.
     fireEvent.click(toggleButton);
-    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
-      CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+
+    // Re-opening reports a second "opened" event.
+    fireEvent.click(toggleButton);
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(2);
+    expect(coreStart.analytics.reportEvent).toHaveBeenNthCalledWith(
+      2,
+      CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
       { owner: mockedTestProvidersOwner[0], attachment_type: 'alerts' }
     );
   });

@@ -9,6 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import {
   CASE_ATTACH_EVENTS_EVENT_TYPE,
   CASE_PAGE_VIEW_EVENT_TYPE,
+  CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
@@ -87,6 +88,27 @@ export const registerAnalytics = ({
   });
 
   analyticsService.registerEventType({
+    eventType: CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The solution ID (owner) in which the redesigned attachments accordion was opened',
+          optional: false,
+        },
+      },
+      attachment_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'Which attachments type the opened accordion renders',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
     eventType: CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
     schema: {
       owner: {
@@ -128,7 +150,11 @@ export const registerAnalytics = ({
         items: {
           type: 'keyword',
           _meta: {
-            description: 'A column/field currently selected for display in the cases list',
+            description:
+              'A column/field currently selected for display in the cases list. Built-in ' +
+              'fields use stable names (e.g. "status", "severity"). Custom field columns are ' +
+              'included as their per-space UUID key (max 36 chars); at most ' +
+              'MAX_CUSTOM_FIELDS_PER_CASE (10) distinct custom field keys can appear per space',
           },
         },
         _meta: {
@@ -141,6 +167,37 @@ export const registerAnalytics = ({
         type: 'integer',
         _meta: {
           description: 'The number of rows selected per page in the cases list',
+          optional: false,
+        },
+      },
+      sort_field: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The case field the list is sorted by at load time, e.g. "createdAt" or "severity"',
+          optional: false,
+        },
+      },
+      sort_order: {
+        type: 'keyword',
+        _meta: {
+          description: 'The sort direction at load time, either "asc" or "desc"',
+          optional: false,
+        },
+      },
+      active_filter_dimensions: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'A bounded filter dimension name (e.g. "status", "severity", "customFields") ' +
+              'that is actively applied to the cases list at load time. Underlying filter ' +
+              'values are never reported, only the dimension name',
+          },
+        },
+        _meta: {
+          description: 'The bounded set of filter dimensions actively applied at load time',
           optional: false,
         },
       },

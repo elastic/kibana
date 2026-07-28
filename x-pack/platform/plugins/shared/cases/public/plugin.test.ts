@@ -24,6 +24,7 @@ import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
   CASE_PAGE_VIEW_EVENT_TYPE,
+  CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
 } from '../common/constants';
@@ -154,6 +155,23 @@ describe('Cases Ui Plugin', () => {
             view_mode: expect.objectContaining({ type: 'keyword' }),
             selected_columns: expect.objectContaining({ type: 'array' }),
             per_page: expect.objectContaining({ type: 'integer' }),
+            sort_field: expect.objectContaining({ type: 'keyword' }),
+            sort_order: expect.objectContaining({ type: 'keyword' }),
+            active_filter_dimensions: expect.objectContaining({ type: 'array' }),
+          }),
+        })
+      );
+    });
+
+    it('registers the attachment accordion opened event type', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            attachment_type: expect.objectContaining({ type: 'keyword' }),
           }),
         })
       );

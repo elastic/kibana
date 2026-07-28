@@ -10,13 +10,13 @@ import {
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
   SECURITY_SOLUTION_OWNER,
-} from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
-import {
   VIEW_TOGGLE_LIST_ID,
   VIEW_TOGGLE_TABLE_ID,
-} from '../components/cases_redesign/all_cases/constants';
+} from '../../common/constants';
+import { SortFieldCase } from '../../common/ui/types';
+import { useKibana } from '../common/lib/kibana';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
+import type { FilterDimension } from './get_active_filter_dimensions';
 import { useCasesListPageViewEBT, useCasesListViewModeChangedEBT } from './use_cases_list_ebt';
 
 jest.mock('../common/lib/kibana', () => ({
@@ -34,6 +34,8 @@ const getMockServices = (reportEvent: jest.Mock) => ({
     },
   },
 });
+
+const noActiveFilterDimensions: FilterDimension[] = [];
 
 describe('cases list EBT hooks', () => {
   const reportEvent = jest.fn();
@@ -66,6 +68,9 @@ describe('cases list EBT hooks', () => {
           viewMode: VIEW_TOGGLE_TABLE_ID,
           selectedColumns: ['title', 'status'],
           perPage: 25,
+          sortField: SortFieldCase.createdAt,
+          sortOrder: 'desc',
+          activeFilterDimensions: noActiveFilterDimensions,
         })
       );
 
@@ -74,7 +79,32 @@ describe('cases list EBT hooks', () => {
         view_mode: VIEW_TOGGLE_TABLE_ID,
         selected_columns: ['title', 'status'],
         per_page: 25,
+        sort_field: SortFieldCase.createdAt,
+        sort_order: 'desc',
+        active_filter_dimensions: [],
       });
+    });
+
+    it('reports the active filter dimensions and sorting', () => {
+      renderHook(() =>
+        useCasesListPageViewEBT({
+          viewMode: VIEW_TOGGLE_TABLE_ID,
+          selectedColumns: ['title'],
+          perPage: 25,
+          sortField: SortFieldCase.severity,
+          sortOrder: 'asc',
+          activeFilterDimensions: ['status', 'customFields'],
+        })
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.objectContaining({
+          sort_field: SortFieldCase.severity,
+          sort_order: 'asc',
+          active_filter_dimensions: ['status', 'customFields'],
+        })
+      );
     });
 
     it('does not report when disabled', () => {
@@ -83,6 +113,9 @@ describe('cases list EBT hooks', () => {
           viewMode: VIEW_TOGGLE_TABLE_ID,
           selectedColumns: ['title'],
           perPage: 10,
+          sortField: SortFieldCase.createdAt,
+          sortOrder: 'desc',
+          activeFilterDimensions: noActiveFilterDimensions,
           enabled: false,
         })
       );
@@ -97,6 +130,9 @@ describe('cases list EBT hooks', () => {
             viewMode: VIEW_TOGGLE_TABLE_ID,
             selectedColumns,
             perPage: 10,
+            sortField: SortFieldCase.createdAt,
+            sortOrder: 'desc',
+            activeFilterDimensions: noActiveFilterDimensions,
             isReady,
           }),
         {
@@ -119,6 +155,9 @@ describe('cases list EBT hooks', () => {
         view_mode: VIEW_TOGGLE_TABLE_ID,
         selected_columns: ['title', 'custom-field'],
         per_page: 10,
+        sort_field: SortFieldCase.createdAt,
+        sort_order: 'desc',
+        active_filter_dimensions: [],
       });
 
       rerender({

@@ -1298,6 +1298,31 @@ describe('AllCasesListGeneric', () => {
           view_mode: VIEW_TOGGLE_TABLE_ID,
           selected_columns: expect.arrayContaining(['title', 'status', 'severity']),
           per_page: DEFAULT_QUERY_PARAMS.perPage,
+          sort_field: DEFAULT_QUERY_PARAMS.sortField,
+          sort_order: DEFAULT_QUERY_PARAMS.sortOrder,
+          active_filter_dimensions: [],
+        })
+      );
+    });
+
+    it('reports a cases_list_page_view EBT event on load in list view mode with the selected fields', async () => {
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_LIST_ID,
+        setViewMode: jest.fn(),
+      });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      await screen.findByTestId('cases-list-view');
+
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.objectContaining({
+          owner: SECURITY_SOLUTION_OWNER,
+          view_mode: VIEW_TOGGLE_LIST_ID,
+          // No optional fields are checked in the list view by default.
+          selected_columns: [],
+          per_page: DEFAULT_QUERY_PARAMS.perPage,
         })
       );
     });
