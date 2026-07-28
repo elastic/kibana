@@ -529,7 +529,6 @@ describe('createChatCompleteApi', () => {
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({
           executor: mockEndpointExecutor,
-          endpointProvider: 'openai',
           endpointModelId: 'gpt-4o',
         })
       );
@@ -624,7 +623,6 @@ describe('createChatCompleteApi', () => {
           executor: mockEndpointExecutor,
           temperature: 0.5,
           modelName: 'gpt-4o-mini',
-          endpointProvider: 'openai',
           endpointModelId: 'gpt-4o',
           logger,
         })

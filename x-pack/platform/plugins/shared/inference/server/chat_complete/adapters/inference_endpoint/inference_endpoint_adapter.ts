@@ -40,8 +40,7 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   functionCalling?: FunctionCallingMode;
   temperature?: number;
   modelName?: string;
-  // Endpoint identity is authoritative for provider-specific parameter support.
-  endpointProvider?: string;
+  // Endpoint model identity is authoritative for parameter support.
   endpointModelId?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
@@ -64,7 +63,6 @@ export const inferenceEndpointAdapter = {
       functionCalling,
       temperature = 0,
       modelName,
-      endpointProvider,
       endpointModelId,
       logger,
       abortSignal,
@@ -82,7 +80,6 @@ export const inferenceEndpointAdapter = {
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
       modelName,
-      endpointProvider,
       endpointModelId,
     });
 
@@ -110,7 +107,6 @@ const createEndpointRequest = ({
   simulatedFunctionCalling,
   temperature = 0,
   modelName,
-  endpointProvider,
   endpointModelId,
 }: {
   system?: string;
@@ -120,11 +116,9 @@ const createEndpointRequest = ({
   simulatedFunctionCalling: boolean;
   temperature?: number;
   modelName?: string;
-  endpointProvider?: string;
   endpointModelId?: string;
 }): OpenAIRequest => {
   const temperatureOptions = getTemperatureIfValid(temperature, {
-    provider: endpointProvider,
     modelId: endpointModelId,
   });
 

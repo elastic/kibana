@@ -187,7 +187,7 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('omits the default temperature for an unsupported Anthropic endpoint model', () => {
+    it('omits the default temperature for an unrecognized Claude endpoint model', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
       );
@@ -196,7 +196,6 @@ describe('inferenceEndpointAdapter', () => {
         .chatComplete({
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
-          endpointProvider: 'anthropic',
           endpointModelId: 'claude-sonnet-5',
         })
         .subscribe(noop);
@@ -210,7 +209,7 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('omits an explicit temperature for an unsupported Anthropic endpoint model', () => {
+    it('omits an explicit temperature for an unrecognized Claude endpoint model', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
       );
@@ -220,7 +219,6 @@ describe('inferenceEndpointAdapter', () => {
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
           temperature: 0.4,
-          endpointProvider: 'anthropic',
           endpointModelId: 'claude-opus-4.8',
         })
         .subscribe(noop);
@@ -234,7 +232,7 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('keeps the default temperature for a supported Anthropic endpoint model', () => {
+    it('keeps the default temperature for a supported Claude endpoint model', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
       );
@@ -243,7 +241,6 @@ describe('inferenceEndpointAdapter', () => {
         .chatComplete({
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
-          endpointProvider: 'anthropic',
           endpointModelId: 'claude-sonnet-4.5',
         })
         .subscribe(noop);
@@ -257,7 +254,7 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('omits temperature from simulated requests for unsupported Anthropic endpoint models', () => {
+    it('omits temperature from simulated requests for unrecognized Claude endpoint models', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
       );
@@ -268,7 +265,6 @@ describe('inferenceEndpointAdapter', () => {
           messages: [{ role: MessageRole.User, content: 'question' }],
           functionCalling: 'simulated',
           temperature: 0.4,
-          endpointProvider: 'anthropic',
           endpointModelId: 'claude-fable-5',
         })
         .subscribe(noop);

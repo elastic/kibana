@@ -358,7 +358,6 @@ function resolveAndCreatePipeline({
                 inferenceEndpointAdapter.chatComplete({
                   ...options,
                   executor,
-                  endpointProvider: endpointMeta.provider,
                   endpointModelId: endpointMeta.modelId,
                 }),
             };
@@ -400,7 +399,6 @@ function resolveAndCreatePipeline({
                   inferenceEndpointAdapter.chatComplete({
                     ...options,
                     executor: endpointExecutor,
-                    endpointProvider: endpointMeta.provider,
                     endpointModelId: endpointMeta.modelId,
                   }),
               };

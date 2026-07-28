@@ -68,30 +68,32 @@ describe('getTemperatureIfValid', () => {
     'anthropic.claude-mythos-5',
     'claude-opus-4.7',
     'us.anthropic.claude-opus-4_8-v1:0',
-  ].forEach((modelId) => {
-    it(`returns an empty object for unsupported Anthropic model ${modelId}`, () => {
-      expect(getTemperatureIfValid(0.7, { provider: 'anthropic', modelId })).toEqual({});
-    });
-  });
-
-  [
-    'claude-sonnet-4-5',
-    'claude-opus-4-6',
     'claude-haiku-5',
     'claude-sonnet-50',
     'claude-opus-4.80',
   ].forEach((modelId) => {
-    it(`keeps temperature for supported or unrecognized Anthropic model ${modelId}`, () => {
-      expect(getTemperatureIfValid(0.7, { provider: 'anthropic', modelId })).toEqual({
+    it(`returns an empty object for an unrecognized Claude model ${modelId}`, () => {
+      expect(getTemperatureIfValid(0.7, { modelId })).toEqual({});
+    });
+  });
+
+  [
+    'claude-haiku-4-5',
+    'anthropic/claude-sonnet-4.5-20250929',
+    'claude-sonnet-4_6',
+    'us.anthropic.claude-opus-4-1-v1:0',
+    'claude-opus-4.5-20251101',
+    'claude-opus-4-6',
+  ].forEach((modelId) => {
+    it(`keeps temperature for a supported Claude model ${modelId}`, () => {
+      expect(getTemperatureIfValid(0.7, { modelId })).toEqual({
         temperature: 0.7,
       });
     });
   });
 
-  it('keeps temperature for unaffected providers with the same model ID', () => {
-    expect(
-      getTemperatureIfValid(0.7, { provider: 'amazonbedrock', modelId: 'claude-sonnet-5' })
-    ).toEqual({
+  it('keeps temperature for a non-Claude endpoint model', () => {
+    expect(getTemperatureIfValid(0.7, { modelId: 'other-provider/model-5' })).toEqual({
       temperature: 0.7,
     });
   });
@@ -99,7 +101,6 @@ describe('getTemperatureIfValid', () => {
   it('uses endpoint model ID rather than the request model name for Anthropic compatibility', () => {
     expect(
       getTemperatureIfValid(0.7, {
-        provider: 'anthropic',
         modelId: 'claude-sonnet-4-5',
         modelName: 'claude-sonnet-5',
       })
@@ -108,11 +109,8 @@ describe('getTemperatureIfValid', () => {
     });
   });
 
-  it('keeps temperature when Anthropic endpoint metadata is incomplete', () => {
-    expect(getTemperatureIfValid(0.7, { provider: 'anthropic' })).toEqual({
-      temperature: 0.7,
-    });
-    expect(getTemperatureIfValid(0.7, { modelId: 'claude-sonnet-5' })).toEqual({
+  it('keeps temperature when endpoint model metadata is missing', () => {
+    expect(getTemperatureIfValid(0.7)).toEqual({
       temperature: 0.7,
     });
   });

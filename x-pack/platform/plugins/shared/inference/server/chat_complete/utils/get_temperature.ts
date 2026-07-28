@@ -8,23 +8,25 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
-// These Anthropic model families reject the temperature parameter entirely.
-// Model compatibility list is intentionally hard-coded until Elasticsearch exposes structured parameter capabilities.
-const ANTHROPIC_MODELS_WITHOUT_TEMPERATURE = [
-  'claude-sonnet-5',
-  'claude-fable-5',
-  'claude-mythos-5',
-  'claude-opus-4-7',
-  'claude-opus-4-8',
+// Omit temperature for unrecognized Claude models until Elasticsearch exposes parameter capabilities.
+const CLAUDE_MODELS_WITH_TEMPERATURE = [
+  'claude-haiku-4-5',
+  'claude-sonnet-4-5',
+  'claude-sonnet-4-6',
+  'claude-opus-4-1',
+  'claude-opus-4-5',
+  'claude-opus-4-6',
 ];
 
 const normalizeModelId = (modelId: string) => modelId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-const isAnthropicModelWithoutTemperature = (modelId: string) => {
+const shouldExcludeTemperatureForModelId = (modelId: string) => {
   const normalizedModelId = `-${normalizeModelId(modelId)}-`;
-  return ANTHROPIC_MODELS_WITHOUT_TEMPERATURE.some((model) =>
+  const isClaudeModel = normalizedModelId.includes('-claude-');
+  const isKnownToSupportTemperature = CLAUDE_MODELS_WITH_TEMPERATURE.some((model) =>
     normalizedModelId.includes(`-${model}-`)
   );
+  return isClaudeModel && !isKnownToSupportTemperature;
 };
 
 export const getTemperatureIfValid = (
@@ -32,12 +34,10 @@ export const getTemperatureIfValid = (
   {
     connector,
     modelName,
-    provider,
     modelId,
   }: {
     connector?: InferenceConnector;
     modelName?: string;
-    provider?: string;
     modelId?: string;
   } = {}
 ) => {
@@ -72,10 +72,9 @@ export const getTemperatureIfValid = (
     );
   }
 
-  shouldExcludeTemperature ||=
-    provider?.toLowerCase() === 'anthropic' &&
-    typeof modelId === 'string' &&
-    isAnthropicModelWithoutTemperature(modelId);
+  shouldExcludeTemperature =
+    shouldExcludeTemperature ||
+    (typeof modelId === 'string' && shouldExcludeTemperatureForModelId(modelId));
 
   if (shouldExcludeTemperature) {
     // Some models reject temperature entirely, so use the provider default.
