@@ -38,10 +38,11 @@ describe('useHasSlos', () => {
       isError: false,
     });
 
-    const { hasSlos, isLoading } = useHasSlos();
+    const { hasSlos, isLoading, isError } = useHasSlos();
 
     expect(hasSlos).toBe(false);
     expect(isLoading).toBe(false);
+    expect(isError).toBe(false);
   });
 
   it('returns hasSlos: true when at least one local SLO exists', () => {
@@ -77,6 +78,7 @@ describe('useHasSlos', () => {
     const { hasSlos } = useHasSlos();
 
     expect(hasSlos).toBe(true);
+    expect(useFetchSloDefinitionsWithRemoteMock).toHaveBeenCalledWith({ size: 1 });
   });
 
   it('returns isError: true and hasSlos: false on request failure', () => {

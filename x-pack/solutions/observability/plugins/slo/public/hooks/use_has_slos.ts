@@ -13,13 +13,6 @@ export interface UseHasSlosResponse {
   isError: boolean;
 }
 
-/**
- * Returns whether any SLO exists in the current space, including SLOs on
- * remote clusters surfaced via cross-cluster search.
- *
- * Uses the remote-aware definitions search endpoint so that spaces containing
- * only remote SLOs are not incorrectly treated as empty.
- */
 export const useHasSlos = (): UseHasSlosResponse => {
   const { data, isLoading, isError } = useFetchSloDefinitionsWithRemote({ size: 1 });
   const hasSlos = !!data?.results?.length;
