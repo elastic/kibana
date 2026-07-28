@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
@@ -183,17 +184,18 @@ export const RuleDetails = () => {
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={tags.join('\n')}>
                     {(copy) => (
-                      <EuiButtonIcon
-                        css={copyButtonCss}
-                        iconType="copyClipboard"
-                        size="xs"
-                        color="text"
-                        onClick={copy}
-                        isDisabled={tags.length === 0}
-                        data-test-subj="ruleDetailsTagsCopyButton"
-                        aria-label={RULE_TAG_COPY_LABEL}
-                        title={RULE_TAG_COPY_LABEL}
-                      />
+                      <EuiToolTip content={RULE_TAG_COPY_LABEL} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          css={copyButtonCss}
+                          iconType="copyClipboard"
+                          size="xs"
+                          color="text"
+                          onClick={copy}
+                          isDisabled={tags.length === 0}
+                          data-test-subj="ruleDetailsTagsCopyButton"
+                          aria-label={RULE_TAG_COPY_LABEL}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiCopy>
                 </EuiFlexItem>
