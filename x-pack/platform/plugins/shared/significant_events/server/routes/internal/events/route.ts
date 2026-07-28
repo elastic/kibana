@@ -183,7 +183,7 @@ const eventsLifecycleRoute = createServerRoute({
     access: 'internal',
     summary: 'Get event lifecycle',
     description:
-      'Get the full lifecycle chain for a significant event: detections, discoveries, and event versions.',
+      'Get the full lifecycle chain for a significant event: detections and event versions.',
   },
   security: {
     authz: {
@@ -201,22 +201,18 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
-      await getScopedClients({ request });
+    const { getEventClient, getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
-      return { detections: [], discoveries: [], events: [] };
+      return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
 
-    const [{ hits: events }, { hits: discoveries }] = await Promise.all([
-      getEventClient().findByEventId(eventId),
-      getDiscoveryClient().findByEventId(eventId),
-    ]);
+    const { hits: events } = await getEventClient().findByEventId(eventId);
 
     const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
@@ -251,7 +247,7 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, discoveries, events };
+    return { detections, events };
   },
 });
 

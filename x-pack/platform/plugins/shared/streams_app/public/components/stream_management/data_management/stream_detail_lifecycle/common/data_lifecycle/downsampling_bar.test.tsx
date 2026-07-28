@@ -71,6 +71,44 @@ describe('getDownsamplingLayout', () => {
     expect(layout[0].hidden).toBe(false);
     expect(layout[0].span).toBe(1);
   });
+
+  describe('with canonical column starts (stable layout)', () => {
+    it('places the delete segment at its canonical column instead of a sequential one', () => {
+      // ILM [hot(step), warm, delete]: delete must land at its canonical column (5), not column 3.
+      const segments: DownsamplingSegment[] = [
+        { grow: 5, step: { after: '0d', fixed_interval: '1h' }, stepIndex: 0, phaseName: 'hot' },
+        { grow: 3 },
+        { grow: false, isDelete: true },
+      ];
+
+      const layout = getDownsamplingLayout(segments, [1, 2, 5]);
+
+      const step = layout.find((entry) => entry.segment.step);
+      expect(step?.columnStart).toBe(1);
+      // The step spans up to the column before delete (4); the covered warm column is hidden.
+      expect(step?.span).toBe(4);
+      expect(layout[1].hidden).toBe(true);
+      const deleteSegment = layout.find((entry) => entry.segment.isDelete);
+      expect(deleteSegment?.columnStart).toBe(5);
+      expect(deleteSegment?.span).toBe(1);
+    });
+
+    it('places a step at its canonical column when earlier phases are gaps', () => {
+      // ILM [hot, cold(step)]: warm is a gap at column 2, so cold sits at its canonical column (3).
+      const segments: DownsamplingSegment[] = [
+        { grow: 5 },
+        { grow: 2, step: { after: '20d', fixed_interval: '1h' }, stepIndex: 0, phaseName: 'cold' },
+      ];
+
+      const layout = getDownsamplingLayout(segments, [1, 3]);
+
+      expect(layout[0].hidden).toBe(false);
+      expect(layout[0].columnStart).toBe(1);
+      const step = layout.find((entry) => entry.segment.step);
+      expect(step?.columnStart).toBe(3);
+      expect(step?.span).toBe(1);
+    });
+  });
 });
 
 describe('DownsamplingBar', () => {
