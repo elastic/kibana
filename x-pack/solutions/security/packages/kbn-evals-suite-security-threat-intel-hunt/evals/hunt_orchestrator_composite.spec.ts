@@ -45,7 +45,7 @@ const TIER1_ONLY_REPORT = REPORTS[3]; // insider-threat-credential-theft (T1078,
 const toQuestion = (report: typeof GOLDEN_REPORT, opts?: { tier2_when?: string }): string =>
   `Run a threat hunt for this report. ${
     opts?.tier2_when ? `Use tier2_when='${opts.tier2_when}'. ` : ''
-  }${`Report: ${report.input.title}\n${report.input.body_text}`}`;
+  }${`Report: ${report.input?.title}\n${report.input?.body_text}`}`;
 
 // ── Evaluators ───────────────────────────────────────────────────────────────
 
@@ -58,6 +58,11 @@ const compositeEvaluators = [
   'latency',
 ];
 
+// Suppress unused-var lint: this list is documentation of the evaluator names
+// used in scorecards above; the actual evaluator selection happens via
+// `selectEvaluators(evaluators)` at runtime.
+void compositeEvaluators;
+
 // ── Spec ─────────────────────────────────────────────────────────────────────
 
 base.describe(
@@ -68,7 +73,7 @@ base.describe(
       'golden-path: tier1 → tier2 → persist',
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        const selected = selectEvaluators(evaluators, compositeEvaluators);
+        const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
 
         log.info('[L3] Running golden-path composite test');
 
@@ -78,8 +83,7 @@ base.describe(
           input: toQuestion(GOLDEN_REPORT),
         });
 
-        const steps = getToolCallSteps(response.steps);
-        const toolCalls = steps.filter((s) => s.type === 'tool_call');
+        const toolCalls = getToolCallSteps(response);
         const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
 
         // ── Step 2: skill-invoked gate ────────────────────────────────────────
@@ -97,7 +101,7 @@ base.describe(
         // The orchestrator returns findings in its result; we verify the
         // assistant message mentions at least one expected technique.
         const messageLower = response.message.toLowerCase();
-        const hasFindings = GOLDEN_REPORT.output.techniques.some((tid) =>
+        const hasFindings = (GOLDEN_REPORT.output?.techniques ?? []).some((tid) =>
           messageLower.includes(tid.toLowerCase())
         );
 
@@ -111,7 +115,7 @@ base.describe(
               query: {
                 bool: {
                   must: [
-                    { term: { report_id: GOLDEN_REPORT.input.report_id } },
+                    { term: { report_id: GOLDEN_REPORT.input?.report_id } },
                     { range: { '@timestamp': { gte: 'now-1m' } } },
                   ],
                 },
@@ -119,7 +123,9 @@ base.describe(
               size: 10,
             });
             persistedCount = (searchRes.hits.hits as unknown[]).length;
-            log.info(`[L3] Persisted findings for ${GOLDEN_REPORT.input.report_id}: ${persistedCount}`);
+            log.info(
+              `[L3] Persisted findings for ${GOLDEN_REPORT.input?.report_id}: ${persistedCount}`
+            );
           } catch (e) {
             log.warning(`[L3] ES search failed: ${(e as Error).message}`);
           }
@@ -168,7 +174,7 @@ base.describe(
       'tier1-only: short-circuit with tier2_when=never',
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        const selected = selectEvaluators(evaluators, compositeEvaluators);
+        const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
 
         log.info('[L3] Running tier1-only short-circuit test');
 
@@ -177,14 +183,13 @@ base.describe(
           input: toQuestion(TIER1_ONLY_REPORT, { tier2_when: 'never' }),
         });
 
-        const steps = getToolCallSteps(response.steps);
-        const toolCalls = steps.filter((s) => s.type === 'tool_call');
+        const toolCalls = getToolCallSteps(response);
         const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
 
         const orchestratorInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_orchestrator);
         const behaviorInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior);
         const messageLower = response.message.toLowerCase();
-        const hasFindings = TIER1_ONLY_REPORT.output.techniques.some((tid) =>
+        const hasFindings = (TIER1_ONLY_REPORT.output?.techniques ?? []).some((tid) =>
           messageLower.includes(tid.toLowerCase())
         );
 
@@ -199,7 +204,7 @@ base.describe(
             query: {
               bool: {
                 must: [
-                  { term: { report_id: TIER1_ONLY_REPORT.input.report_id } },
+                  { term: { report_id: TIER1_ONLY_REPORT.input?.report_id } },
                   { range: { '@timestamp': { gte: 'now-1m' } } },
                 ],
               },

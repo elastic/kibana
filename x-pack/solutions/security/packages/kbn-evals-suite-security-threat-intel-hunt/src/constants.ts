@@ -13,3 +13,17 @@
  *   import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
  */
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
+
+/**
+ * Namespaced tool IDs for the threat-intel-hunt skill.
+ *
+ * These MUST stay in sync with the server-side definitions in
+ * `security_solution/server/agent_builder/skills/threat_intel_hunt/`.
+ */
+export const THREAT_INTEL_TOOL_IDS = {
+  hunt_behavior: 'threat_intel.hunt_behavior',
+  hunt_orchestrator: 'threat_intel.hunt_orchestrator',
+} as const;
+
+/** Index where the hunt_orchestrator tool persists threat-intel findings. */
+export const THREAT_INTEL_FINDINGS_INDEX = '.kibana-threat-intel-hunt-findings';

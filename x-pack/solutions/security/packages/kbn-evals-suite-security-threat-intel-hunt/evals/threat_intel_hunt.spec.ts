@@ -66,19 +66,19 @@ const toQuestion = (report: (typeof REPORTS)[number]): string =>
   `For each technique, provide: technique_id, technique_name, a hunt hypothesis ` +
   `(evidence_quote from the report), severity (low/medium/high/critical), ` +
   `confidence (0-1), risk_score (0-100), and a proposed ES|QL detection rule.\n\n` +
-  `Report title: ${report.input.title}\n${report.input.body_text}`;
+  `Report title: ${report.input?.title}\n${report.input?.body_text}`;
 
 const buildExamples = (): HuntEvalExample[] =>
   REPORTS.map((report) => ({
-    id: `hunt-${report.input.report_id}`,
+    id: `hunt-${report.input?.report_id}`,
     input: { question: toQuestion(report) },
     output: {
-      expectedTechniques: report.output.techniques,
+      expectedTechniques: report.output?.techniques ?? [],
       minBehaviors: 1,
-      maxBehaviors: report.output.techniques.length + 2, // allow some leniency
+      maxBehaviors: (report.output?.techniques.length ?? 0) + 2, // allow some leniency
     },
     metadata: {
-      report_id: report.input.report_id,
+      report_id: report.input?.report_id ?? 'unknown',
       category: 'threat-report',
     },
   }));
@@ -97,6 +97,11 @@ const allEvaluators = [
   'latency',
 ];
 
+// Suppress unused-var lint: this list is documentation of the evaluator names
+// used in scorecards above; the actual evaluator selection happens via
+// `selectEvaluators(evaluators)` at runtime.
+void allEvaluators;
+
 // ── Spec ─────────────────────────────────────────────────────────────────────
 
 base.describe(
@@ -114,10 +119,10 @@ base.describe(
 
     for (const example of examples) {
       base(
-        example.id,
+        example.id ?? `hunt-${example.metadata?.report_id ?? 'unknown'}`,
         { tag: tags.stateful.classic },
         async ({ agentBuilderClient, evaluators, log }) => {
-          const selected = selectEvaluators(evaluators, allEvaluators);
+          const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
 
           log.info(`[L2] Running ${example.id} — ${example.metadata?.category}`);
 
@@ -126,13 +131,12 @@ base.describe(
             input: example.input.question,
           });
 
-          const steps = getToolCallSteps(response.steps);
-          const toolCalls = steps.filter((s) => s.type === 'tool_call');
+          const toolCalls = getToolCallSteps(response);
           const toolIds = new Set(toolCalls.map((s) => s.tool_id).filter(Boolean));
           const behaviorStep = toolCalls.find(
             (s) => s.tool_id === THREAT_INTEL_TOOL_IDS.hunt_behavior
           );
-          const args = behaviorStep?.params as { behaviors?: unknown[] } | undefined;
+          const args = behaviorStep?.results as unknown as { behaviors?: unknown[] } | undefined;
           const behaviorCount = args?.behaviors?.length ?? 0;
 
           // ── Skill-invocation gate ───────────────────────────────────────────
