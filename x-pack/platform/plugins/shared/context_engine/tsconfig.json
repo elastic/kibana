@@ -32,6 +32,7 @@
     "@kbn/es-query",
     "@kbn/share-plugin",
     "@kbn/console-plugin",
+    "@kbn/core-security-server",
     "@kbn/security-plugin"
   ]
 }

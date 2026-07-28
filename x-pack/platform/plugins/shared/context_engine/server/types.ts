@@ -6,7 +6,6 @@
  */
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
@@ -16,7 +15,6 @@ export interface ContextEnginePluginStart {}
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
-  security?: SecurityPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
