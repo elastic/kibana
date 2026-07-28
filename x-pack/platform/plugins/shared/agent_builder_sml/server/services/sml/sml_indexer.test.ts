@@ -1025,8 +1025,18 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       // No ingestion_method term means both manual + crawled are removed.
+      // Space guard is present because createDeleteParams defaults spaces to ['default'].
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
+        {
+          bool: {
+            should: [
+              { prefix: { 'permissions.kibana.privileges.name': 'default|' } },
+              { prefix: { 'permissions.kibana.privileges.name': '*|' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
       ]);
     });
 
@@ -1045,6 +1055,15 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
+        {
+          bool: {
+            should: [
+              { prefix: { 'permissions.kibana.privileges.name': 'default|' } },
+              { prefix: { 'permissions.kibana.privileges.name': '*|' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
       ]);
     });
 
@@ -1063,6 +1082,59 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
+        {
+          bool: {
+            should: [
+              { prefix: { 'permissions.kibana.privileges.name': 'default|' } },
+              { prefix: { 'permissions.kibana.privileges.name': '*|' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ]);
+    });
+
+    it('scopes delete to caller space via token prefix filter', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.deleteAttachment(
+        createDeleteParams({
+          originId: 'att-space-a',
+          ingestionMethod: 'all',
+          spaces: ['space-a'],
+          esClient,
+        })
+      );
+
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query.bool.filter).toContainEqual({
+        bool: {
+          should: [
+            { prefix: { 'permissions.kibana.privileges.name': 'space-a|' } },
+            { prefix: { 'permissions.kibana.privileges.name': '*|' } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('omits space filter when spaces is empty (global delete for crawler)', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.deleteAttachment(
+        createDeleteParams({ originId: 'att-global', ingestionMethod: 'all', spaces: [], esClient })
+      );
+
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      // No space guard when spaces is empty — global delete.
+      expect(callArgs.query.bool.filter).toEqual([
+        { term: { 'origin.uri': 'lens://att-global' } },
       ]);
     });
 

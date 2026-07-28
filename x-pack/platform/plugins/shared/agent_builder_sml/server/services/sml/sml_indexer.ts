@@ -229,7 +229,7 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   async deleteAttachment(params: SmlIndexerDeleteAttachmentParams): Promise<void> {
-    const { originId, attachmentType, esClient } = params;
+    const { originId, attachmentType, esClient, spaces } = params;
     const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
 
     this.logger.info(
@@ -239,6 +239,7 @@ class SmlIndexerImpl implements SmlIndexer {
     await this.deleteEntry({
       originUri: `${attachmentType}://${originId}`,
       esClient,
+      ...(spaces && spaces.length > 0 ? { spaces } : {}),
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
   }
@@ -442,14 +443,27 @@ class SmlIndexerImpl implements SmlIndexer {
     originUri,
     esClient,
     ingestionMethod,
+    spaces,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
+    spaces?: string[];
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
     if (ingestionMethod) {
       filter.push({ term: { ingestion_method: ingestionMethod } });
+    }
+    if (spaces && spaces.length > 0) {
+      filter.push({
+        bool: {
+          should: [
+            ...spaces.map((s) => ({ prefix: { 'permissions.kibana.privileges.name': `${s}|` } })),
+            { prefix: { 'permissions.kibana.privileges.name': '*|' } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
     }
     const label = ingestionMethod ? `${ingestionMethod} entry` : 'entry';
 

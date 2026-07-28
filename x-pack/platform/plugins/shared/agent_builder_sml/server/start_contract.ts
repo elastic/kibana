@@ -67,9 +67,12 @@ export const buildDeleteAttachment =
         ? { includedHiddenTypes: params.includedHiddenTypes }
         : {}),
     });
+    const spaceId =
+      params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
     return smlService.deleteAttachment({
       originId: params.originId,
       attachmentType: params.attachmentType,
+      spaces: [spaceId],
       esClient: elasticsearch.client.asInternalUser,
       savedObjectsClient: soClient,
       logger,

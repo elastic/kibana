@@ -430,6 +430,16 @@ export type SmlIndexerParams = SmlIndexerOriginParams;
 export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
+  /**
+   * Space-isolation guard. The delete-by-query requires the doc to carry
+   * a composite permission token for one of the provided space IDs (or the
+   * global wildcard `*|`). NOTE: this is a whole-doc guard, not a partial
+   * delete — a multi-space doc is fully deleted if it matches any provided space.
+   *
+   * Omit (or pass an empty array) for global deletes (e.g. crawler origin-mode
+   * rewrites where the caller controls all spaces).
+   */
+  spaces?: string[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
