@@ -39,7 +39,6 @@ import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
 import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
-  apiCanCancelRequests,
   childrenUnsavedChanges$,
   apiHasLibraryTransforms,
   apiHasSerializableState,
@@ -692,11 +691,6 @@ export function initializeLayoutManager(
       },
     },
     cleanup: () => {
-      Object.values(children$.value).forEach((childApi) => {
-        if (apiCanCancelRequests(childApi)) {
-          childApi.cancelRequests();
-        }
-      });
       childrenChangesSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
     },
