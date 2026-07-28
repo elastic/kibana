@@ -106,6 +106,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'threat_intel.extract_diamond',
   'threat_intel.get_report',
   'threat_intel.correlate_synthesis_pack',
+  'threat_intel.hunt_orchestrator',
+  'threat_intel.synthesize_advisory',
 
   // Osquery
   `${internalNamespaces.osquery}.check_integration`,
