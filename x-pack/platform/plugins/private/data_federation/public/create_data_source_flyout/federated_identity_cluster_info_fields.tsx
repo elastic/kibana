@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiCopy, EuiFieldText, EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 
 function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
