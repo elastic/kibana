@@ -393,6 +393,7 @@ export class VisualizationsPlugin
         ]);
         const services: VisualizeServices = {
           ...coreStart,
+          isScreenshotMode: pluginsStart.screenshotMode.isScreenshotMode(),
           history,
           kbnUrlStateStorage: createKbnUrlStateStorage({
             history,
@@ -437,6 +438,7 @@ export class VisualizationsPlugin
 
         params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
+          coreStart.chrome.setIsVisible(false);
           params.element.classList.add(styles.visEditorScreenshotMode);
           injectGlobal(styles.globalScreenshotMode);
         }

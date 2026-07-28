@@ -198,7 +198,17 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           }}
         />
       </EuiFormRow>
-      {props.dataSectionExtra}
+      {props.dataSectionExtra && (
+        <div
+          css={css`
+            &:not(:empty) {
+              padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+            }
+          `}
+        >
+          {props.dataSectionExtra}
+        </div>
+      )}
       {!isFullscreen && selectedField && (
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
           <EuiText

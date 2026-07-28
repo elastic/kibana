@@ -7,7 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  buildPolicyIdOrVariantsKuery,
+} from '@kbn/fleet-plugin/common';
 import type {
   AgentlessPoliciesService,
   AgentService,
@@ -270,7 +273,7 @@ export class AgentlessConnectorsInfraService {
       const policyId = policy!.agent_policy_ids[0];
 
       const listAgentsResponse = await this.agentService.asInternalUser.listAgents({
-        kuery: `fleet-agents.policy_id:${policyId}`,
+        kuery: buildPolicyIdOrVariantsKuery(policyId, 'fleet-agents.policy_id'),
         showInactive: false,
       });
 

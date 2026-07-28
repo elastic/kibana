@@ -61,8 +61,8 @@ describe('buildResultsQuery', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'action_id: action-123',
+                term: {
+                  action_id: 'action-123',
                 },
               },
             ],
@@ -106,8 +106,13 @@ describe('buildResultsQuery', () => {
         bool: {
           filter: [
             {
-              query_string: {
-                query: 'action_id: action-456 AND agent.id: agent-789',
+              term: {
+                action_id: 'action-456',
+              },
+            },
+            {
+              term: {
+                'agent.id': 'agent-789',
               },
             },
           ],
@@ -135,8 +140,13 @@ describe('buildResultsQuery', () => {
         bool: {
           filter: [
             {
+              term: {
+                action_id: 'action-abc',
+              },
+            },
+            {
               query_string: {
-                query: 'action_id: action-abc AND osquery.calendarTime: *',
+                query: 'osquery.calendarTime: *',
               },
             },
           ],
@@ -180,8 +190,8 @@ describe('buildResultsQuery', () => {
               },
             },
             {
-              query_string: {
-                query: 'action_id: action-time',
+              term: {
+                action_id: 'action-time',
               },
             },
           ],
@@ -272,9 +282,18 @@ describe('buildResultsQuery', () => {
                 },
               },
               {
+                term: {
+                  action_id: 'action-full',
+                },
+              },
+              {
+                term: {
+                  'agent.id': 'agent-complete',
+                },
+              },
+              {
                 query_string: {
-                  query:
-                    'action_id: action-full AND agent.id: agent-complete AND agent.name: "test-agent" AND osquery.action: "executed"',
+                  query: 'agent.name: "test-agent" AND osquery.action: "executed"',
                 },
               },
             ],
@@ -362,13 +381,13 @@ describe('buildResultsQuery', () => {
       };
 
       const result = buildResultsQuery(options);
-      const filterQuery = result.query as any;
-      const queryString = filterQuery.bool.filter.find((f: any) => f.query_string)?.query_string
-        ?.query;
+      const filter = (result.query as any).bool.filter;
 
-      expect(queryString).toContain('schedule_id: sched-uuid-123');
-      expect(queryString).toContain('osquery_meta.schedule_execution_count: 7');
-      expect(queryString).not.toContain('action_id');
+      expect(filter).toContainEqual({ term: { schedule_id: 'sched-uuid-123' } });
+      expect(filter).toContainEqual({
+        term: { 'osquery_meta.schedule_execution_count': 7 },
+      });
+      expect(JSON.stringify(filter)).not.toContain('action_id');
     });
 
     it('should filter by action_id when scheduleId is not provided', () => {
@@ -383,12 +402,10 @@ describe('buildResultsQuery', () => {
       };
 
       const result = buildResultsQuery(options);
-      const filterQuery = result.query as any;
-      const queryString = filterQuery.bool.filter.find((f: any) => f.query_string)?.query_string
-        ?.query;
+      const filter = (result.query as any).bool.filter;
 
-      expect(queryString).toContain('action_id: action-456');
-      expect(queryString).not.toContain('schedule_id');
+      expect(filter).toContainEqual({ term: { action_id: 'action-456' } });
+      expect(JSON.stringify(filter)).not.toContain('schedule_id');
     });
   });
 

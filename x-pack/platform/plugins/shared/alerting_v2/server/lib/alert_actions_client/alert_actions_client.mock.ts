@@ -11,7 +11,7 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { createUserService, createUserProfile } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 
 export function createAlertActionsClient(): {
@@ -24,7 +24,7 @@ export function createAlertActionsClient(): {
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
   const { userService, userProfileService } = createUserService();
 
-  userProfileService.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
+  userProfileService.getCurrentProfileId.mockResolvedValue('test-uid');
 
   const alertActionsClient = new AlertActionsClient(queryService, storageService, userService);
 

@@ -13,6 +13,7 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
 
@@ -25,6 +26,10 @@ jest.mock('./get_custom_agents', () => ({
 
 jest.mock('./request_oauth_client_credentials_token', () => ({
   requestOAuthClientCredentialsToken: jest.fn(),
+}));
+
+jest.mock('./get_oauth_authorization_code_access_token', () => ({
+  getOAuthAuthorizationCodeAccessToken: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -351,5 +356,65 @@ describe('getAxiosInstance', () => {
 
     // this interceptor was cleared and the auth type specific one was used
     expect(getCustomAgents).not.toHaveBeenCalled();
+  });
+
+  test('401 handler passes tokenResponseOptions to getOAuthAuthorizationCodeAccessToken', async () => {
+    const mockGetToken = getOAuthAuthorizationCodeAccessToken as jest.Mock;
+    mockGetToken.mockResolvedValue('bearer xoxp-refreshed-token');
+
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+
+    const result = await getAxios({
+      connectorId: 'slack-connector',
+      connectorTokenClient,
+      secrets: {
+        authType: 'oauth_authorization_code',
+        clientId: 'slack-client-id',
+        clientSecret: 'slack-client-secret',
+        tokenUrl: 'https://slack.com/api/oauth.v2.access',
+        scope: 'channels:read chat:write',
+        accessTokenPath: 'authed_user.access_token',
+        tokenType: 'bearer',
+      },
+    });
+
+    // The initial configure call fetches a token
+    expect(mockGetToken).toHaveBeenCalledTimes(1);
+    mockGetToken.mockClear();
+    mockGetToken.mockResolvedValue('bearer xoxp-refreshed-token');
+
+    // Access the 401 response interceptor
+    // @ts-expect-error accessing internal axios interceptor handlers
+    const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
+
+    // Mock the retry request so it doesn't make a real HTTP call
+    jest.spyOn(result!, 'request').mockResolvedValue({ status: 200, data: 'ok' });
+
+    const mock401Error = {
+      response: { status: 401 },
+      config: {
+        headers: { Authorization: 'bearer xoxp-expired-token' },
+        _retry: false,
+      },
+      message: 'Request failed with status code 401',
+    };
+
+    await rejectionHandler(mock401Error);
+
+    expect(mockGetToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'slack-connector',
+        forceRefresh: true,
+        tokenResponseOptions: {
+          accessTokenPath: 'authed_user.access_token',
+          tokenTypePath: undefined,
+          tokenType: 'bearer',
+        },
+      })
+    );
   });
 });

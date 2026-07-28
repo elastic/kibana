@@ -196,14 +196,50 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
   }
 );
 
+export const colorByValuePaletteSchema = schema.object(
+  {
+    type: schema.literal('distributed_palette'),
+    palette: schema.oneOf(
+      [
+        schema.literal('status'),
+        schema.literal('temperature'),
+        schema.literal('complementary'),
+        schema.literal('negative'),
+        schema.literal('positive'),
+        schema.literal('cool'),
+        schema.literal('warm'),
+        schema.literal('gray'),
+      ],
+      {
+        meta: {
+          description: 'The name of the palette to apply across the value range.',
+        },
+      }
+    ),
+  },
+  {
+    meta: {
+      id: 'colorByValuePalette',
+      title: 'Color By Value (Palette)',
+      description:
+        'Color by value using a palette, with colors distributed across the range of values.',
+    },
+  }
+);
+
 export const colorByValueSchema = schema.oneOf(
-  [colorByValueAbsoluteSchema, colorByValuePercentageSchema, legacyColorByValueSchema],
+  [
+    colorByValueAbsoluteSchema,
+    colorByValuePercentageSchema,
+    colorByValuePaletteSchema,
+    legacyColorByValueSchema,
+  ],
   {
     meta: {
       id: 'colorByValue',
       title: 'Color By Value',
       description:
-        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.',
+        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.',
     },
   }
 );
@@ -387,6 +423,7 @@ export const allColoringTypeSchema = schema.oneOf(
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
+export type ColorByValuePaletteType = TypeOf<typeof colorByValuePaletteSchema>;
 export type ColorByValueAbsolute =
   | TypeOf<typeof colorByValueAbsoluteSchema>
   | TypeOf<typeof legacyColorByValueAbsoluteSchema>;

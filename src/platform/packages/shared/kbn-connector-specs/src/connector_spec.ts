@@ -86,6 +86,9 @@ export interface OAuthGetTokenOpts {
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
 
 export interface EarsGetTokenOpts {

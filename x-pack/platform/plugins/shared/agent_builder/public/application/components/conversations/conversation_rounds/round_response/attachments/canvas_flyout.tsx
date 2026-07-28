@@ -15,6 +15,7 @@ import { useConversationId } from '../../../../../context/conversation/use_conve
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { useCanvasContext } from './canvas_context';
 
 const DEFAULT_CANVAS_WIDTH = '50vw';
@@ -114,6 +115,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   }
 
   const { attachment, isSidebar } = canvasState;
+  const { renderCanvasContent } = uiDefinition;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
@@ -153,20 +155,22 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
-          {uiDefinition.renderCanvasContent(
-            {
-              attachment,
-              isSidebar,
-              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-            },
-            {
-              registerActionButtons,
-              updateOrigin,
-              closeCanvas,
-            }
-          )}
-        </React.Fragment>
+        <AttachmentRenderErrorBoundary key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+          {() =>
+            renderCanvasContent(
+              {
+                attachment,
+                isSidebar,
+                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              },
+              {
+                registerActionButtons,
+                updateOrigin,
+                closeCanvas,
+              }
+            )
+          }
+        </AttachmentRenderErrorBoundary>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

@@ -264,6 +264,7 @@ export class RulesClientFactory {
       .asScopedToNamespace(spaceId);
 
     return new RulesClient({
+      request,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,

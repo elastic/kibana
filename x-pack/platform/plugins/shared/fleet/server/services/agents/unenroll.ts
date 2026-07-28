@@ -89,11 +89,16 @@ export async function unenrollAgents(
     revoke?: boolean;
     batchSize?: number;
     showInactive?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const spaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
+    if (options.dryRun) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
+    }
     const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, {
       ...options,
@@ -111,6 +116,9 @@ export async function unenrollAgents(
     page: 1,
     perPage: batchSize,
   });
+  if (options.dryRun) {
+    return { count: res.total };
+  }
   if (res.total <= batchSize) {
     return await unenrollBatch(soClient, esClient, res.agents, {
       ...options,

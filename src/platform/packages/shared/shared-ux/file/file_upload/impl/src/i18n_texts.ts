@@ -39,8 +39,7 @@ export const i18nTexts = {
   }),
   fileTooLarge: (expectedSize: string) =>
     i18n.translate('sharedUXPackages.fileUpload.fileTooLargeErrorMessage', {
-      defaultMessage:
-        'File is too large. Maximum size is {expectedSize, plural, one {# byte} other {# bytes} }.',
+      defaultMessage: 'File is too large. Maximum size is {expectedSize}.',
       values: { expectedSize },
     }),
   mimeTypeNotSupported: (mimeType: string, supportedMimeTypes: string) =>
@@ -48,5 +47,12 @@ export const i18nTexts = {
       defaultMessage:
         'File mime type "{mimeType}" is not supported. Supported mime types are: {supportedMimeTypes}.',
       values: { mimeType, supportedMimeTypes },
+    }),
+  // Variant that omits the (potentially long) list of allowed types
+  // Opt in via the file kind's `listAllowedMimeTypesInError: false`.
+  mimeTypeNotSupportedConcise: (mimeType: string) =>
+    i18n.translate('sharedUXPackages.fileUpload.mimeTypeNotSupportedConciseErrorMessage', {
+      defaultMessage: 'File type "{mimeType}" is not supported.',
+      values: { mimeType },
     }),
 };

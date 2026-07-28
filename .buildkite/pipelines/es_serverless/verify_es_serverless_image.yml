@@ -69,13 +69,14 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 115
+          diskSizeGb: 120
         key: build_scout_tests
         timeout_in_minutes: 15
         depends_on:
           - build
         env:
           SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+          SCOUT_TEST_CHANNELS: ci-on-commit
           SERVERLESS_TESTS_ONLY: 'true'
           SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
         retry:
@@ -125,7 +126,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 110
+          diskSizeGb: 120
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -275,6 +276,8 @@ steps:
       - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
         label: 'Defend Workflows Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        env:
+          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

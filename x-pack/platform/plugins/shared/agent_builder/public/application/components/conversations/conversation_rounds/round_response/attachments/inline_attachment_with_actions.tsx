@@ -17,6 +17,7 @@ import type { AttachmentsService } from '../../../../../../services/attachments/
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -126,12 +127,16 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         previewBadgeState={resolvedPreviewBadgeState}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({
-          attachment,
-          isSidebar,
-          screenContext,
-          openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-        })}
+        <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+          {() =>
+            uiDefinition?.renderInlineContent?.({
+              attachment,
+              isSidebar,
+              screenContext,
+              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+            })
+          }
+        </AttachmentRenderErrorBoundary>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

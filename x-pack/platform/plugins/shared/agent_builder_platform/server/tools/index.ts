@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -29,9 +30,11 @@ import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 export const registerTools = ({
   coreSetup,
   setupDeps,
+  getSecurity,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
+  getSecurity: () => SecurityPluginStart | undefined;
 }) => {
   const { agentBuilder } = setupDeps;
 
@@ -51,7 +54,10 @@ export const registerTools = ({
 
   if (setupDeps.workflowsManagement) {
     tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      getWorkflowExecutionStatusTool({
+        workflowsManagement: setupDeps.workflowsManagement,
+        getSecurity,
+      }),
       resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement })
     );
   }

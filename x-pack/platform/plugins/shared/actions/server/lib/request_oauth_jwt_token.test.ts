@@ -29,9 +29,9 @@ describe('requestOAuthJWTToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        token_type: 'Bearer',
+        access_token: 'dfjsdfgdjhfgsjdf',
+        expires_in: 123,
       },
     });
     await requestOAuthJWTToken(
