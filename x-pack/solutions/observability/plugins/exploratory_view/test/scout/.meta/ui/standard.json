@@ -1,5 +1,9 @@
 {
   "sha1": "e0506c8a87559b09f04014dec96f2a071fe2dccb",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "1b513f723098bcd-67df9619ed61daf",
@@ -26,7 +30,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/step_duration.spec.ts",
         "line": 17,
-        "column": 7
+        "column": 97
       }
     },
     {

@@ -1,5 +1,5 @@
 {
-  "sha1": "42f2708e6f40a4076617113694676ce8f3548216",
+  "sha1": "76bff9e5782030724eb7a89f13f2abb39622af68",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -2017,6 +2017,136 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
         "line": 156,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-e037f77b7ffc210",
+      "title": "Get action policy tags API tags: should return an empty tags array when no action policies exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-bb003b9a6ed34b5",
+      "title": "Get action policy tags API tags: should return tags in a wrapped { tags } response shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 60,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-154eca43385b2df",
+      "title": "Get action policy tags API search: should return only tags matching the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-74b158f0d816a65",
+      "title": "Get action policy tags API search: should escape regex special characters in the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 95,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-11e9a5534da9960",
+      "title": "Get action policy tags API cap: should return at most 20 tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-843b9132d55ad3d",
+      "title": "Get action policy tags API validation: should return 400 when unknown query parameters are sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 125,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-76ab2fa59300f08",
+      "title": "Get action policy tags API path: old /suggestions/tags path should return 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 135,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-f39b2583d150f14",
+      "title": "Get action policy tags API authorization: should return 200 for a user with read-only action policy privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 141,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-817de199776431a",
+      "title": "Get action policy tags API authorization: should return 200 for a user with full action policy privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 155,
+        "column": 10
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-14fc100b0c79593",
+      "title": "Get action policy tags API authorization: should return 403 for a user without action policy privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 174,
         "column": 10
       }
     },
@@ -6540,20 +6670,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 47,
+        "line": 48,
         "column": 10
       }
     },
     {
-      "id": "b7a922248ef62f9-7fee33e4efa8965",
-      "title": "Get rule tags API tags: should return the unique union of tags across rules, sorted ascending",
+      "id": "b7a922248ef62f9-78a4aac65905833",
+      "title": "Get rule tags API tags: should return tags wrapped in { tags } response shape",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 10
       }
     },
@@ -6566,33 +6696,124 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 84,
+        "line": 73,
         "column": 10
       }
     },
     {
-      "id": "b7a922248ef62f9-fdaa3febd09601a",
-      "title": "Get rule tags API filter: should only return tags from rules matching the filter",
+      "id": "b7a922248ef62f9-d6d82856e30b85a",
+      "title": "Get rule tags API kind: should only return tags from alert-kind rules when kind=alert",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 109,
+        "line": 95,
         "column": 10
       }
     },
     {
-      "id": "b7a922248ef62f9-dc9caa1fe588586",
-      "title": "Get rule tags API filter: should return 400 for an invalid filter field",
+      "id": "b7a922248ef62f9-2d1c4e31b65e6b9",
+      "title": "Get rule tags API kind: should only return tags from signal-kind rules when kind=signal",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 146,
+        "line": 123,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-151c0d80530c21d",
+      "title": "Get rule tags API search: should return only tags matching the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 151,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-bf5355ef032b544",
+      "title": "Get rule tags API search: should escape regex special characters in the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-c08621f5e1709cc",
+      "title": "Get rule tags API cap: should return at most 20 tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 191,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-fa7b7430e922dab",
+      "title": "Get rule tags API validation: should return 400 for an invalid kind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 206,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-80ac226dab55e22",
+      "title": "Get rule tags API validation: should return 400 when the removed filter param is sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 214,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-39dd28f6f3e4b18",
+      "title": "Get rule tags API validation: should return 400 for unknown query parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 226,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-f3a857a5698600e",
+      "title": "Get rule tags API path: old /_tags path should return 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 235,
         "column": 10
       }
     },
@@ -6605,7 +6826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 161,
+        "line": 243,
         "column": 10
       }
     },
@@ -6618,7 +6839,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 177,
+        "line": 259,
         "column": 10
       }
     },
@@ -6631,7 +6852,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 196,
+        "line": 278,
         "column": 10
       }
     },

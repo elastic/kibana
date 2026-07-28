@@ -248,7 +248,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     });
   }
 
-  public async getDistinctTags(params?: { search?: string }): Promise<string[]> {
+  public async findTags(params?: { search?: string }): Promise<string[]> {
     const search = params?.search;
     const result = await this.client.find<
       ActionPolicySavedObjectAttributes,
@@ -260,8 +260,8 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
         tags: {
           terms: {
             field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: 100,
-            order: { _key: 'asc' },
+            size: 20,
+            order: { _count: 'desc' },
             ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
           },
         },

@@ -135,4 +135,38 @@ describe('ActionPoliciesApi', () => {
       expect(result).toEqual(['data.host.name', 'data.count']);
     });
   });
+
+  describe('fetchTags', () => {
+    it('GET /action_policies/tags with wrapped response', async () => {
+      http.get.mockResolvedValue({ tags: ['production', 'staging'] });
+
+      const result = await api.fetchTags();
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`, {
+        query: { search: undefined },
+      });
+      expect(result).toEqual({ tags: ['production', 'staging'] });
+    });
+
+    it('forwards search param in the query', async () => {
+      http.get.mockResolvedValue({ tags: ['production'] });
+
+      await api.fetchTags({ search: 'prod' });
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`, {
+        query: { search: 'prod' },
+      });
+    });
+
+    it('does not call the old suggestions/tags path', async () => {
+      http.get.mockResolvedValue({ tags: [] });
+
+      await api.fetchTags();
+
+      expect(http.get).not.toHaveBeenCalledWith(
+        expect.stringContaining('suggestions/tags'),
+        expect.anything()
+      );
+    });
+  });
 });

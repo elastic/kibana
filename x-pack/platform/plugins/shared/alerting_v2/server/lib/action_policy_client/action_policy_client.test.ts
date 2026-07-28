@@ -2406,7 +2406,7 @@ describe('ActionPolicyClient', () => {
     });
   });
 
-  describe('getAllTags', () => {
+  describe('getTags', () => {
     const makeFindAggResponse = (buckets: Array<{ key: string }>) => ({
       saved_objects: [],
       total: 0,
@@ -2422,7 +2422,7 @@ describe('ActionPolicyClient', () => {
         makeFindAggResponse([{ key: 'critical' }, { key: 'production' }, { key: 'staging' }])
       );
 
-      const result = await client.getAllTags();
+      const result = await client.getTags();
 
       expect(result).toEqual(['critical', 'production', 'staging']);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
@@ -2445,7 +2445,7 @@ describe('ActionPolicyClient', () => {
         makeFindAggResponse([{ key: 'production' }])
       );
 
-      const result = await client.getAllTags({ search: 'prod' });
+      const result = await client.getTags({ search: 'prod' });
 
       expect(result).toEqual(['production']);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
@@ -2464,7 +2464,7 @@ describe('ActionPolicyClient', () => {
     it('returns empty array when no tags exist', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindAggResponse([]));
 
-      const result = await client.getAllTags();
+      const result = await client.getTags();
 
       expect(result).toEqual([]);
     });
