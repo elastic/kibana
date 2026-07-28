@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiTab } from './genai_tab';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   isGenAiSpan: boolean;
@@ -22,6 +23,7 @@ export function getGenAiTabContent({ isGenAiSpan, genAi }: Props) {
   return {
     id: 'genai',
     'data-test-subj': 'genAiTab',
+    prepend: <TechnicalPreviewBadge icon="flask" />,
     name: i18n.translate('xpack.apm.propertiesTable.tabs.genAi', {
       defaultMessage: 'GenAI',
     }),
