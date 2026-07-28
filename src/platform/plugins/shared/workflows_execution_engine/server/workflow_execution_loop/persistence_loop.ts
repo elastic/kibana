@@ -8,7 +8,6 @@
  */
 
 import apm from 'elastic-apm-node';
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 
@@ -54,7 +53,7 @@ export async function persistenceLoop(
   params: WorkflowExecutionLoopParams,
   persistenceAbortSignal?: AbortSignal
 ) {
-  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+  while (params.workflowExecutionCursor.isExecuting) {
     if (persistenceAbortSignal?.aborted) {
       return;
     }

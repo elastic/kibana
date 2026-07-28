@@ -9,6 +9,7 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
 import {
   extractDiscoveriesFromToolCall,
+  extractRequestedEventIdsFromToolCall,
   extractSignificantEventsFromToolCall,
 } from './parse_agent_output';
 
@@ -125,6 +126,63 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
       'discovery_write input and result arrays are not aligned'
     );
+  });
+});
+
+describe('extractRequestedEventIdsFromToolCall', () => {
+  it('returns only event IDs explicitly passed by the agent in items[]', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-new',
+        params: { items: [{ kind: 'discovery', title: 'New event' }] },
+        results: [
+          { data: { results: [{ index: 0, event_id: 'handler-generated', written: true }] } },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-continuation',
+        params: {
+          items: [{ kind: 'discovery', title: 'Continuation', event_id: 'agent-selected' }],
+        },
+        results: [{ data: { results: [{ index: 0, event_id: 'agent-selected', written: true }] } }],
+      },
+    ];
+
+    expect(extractRequestedEventIdsFromToolCall(steps)).toEqual(['agent-selected']);
+  });
+
+  it('returns all agent-supplied event IDs from a multi-item bulk write', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-bulk',
+        params: {
+          items: [
+            { kind: 'discovery', title: 'New event' },
+            { kind: 'discovery', title: 'Continuation A', event_id: 'event-A' },
+            { kind: 'discovery', title: 'Continuation B', event_id: 'event-B' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                { index: 0, event_id: 'handler-generated', written: true },
+                { index: 1, event_id: 'event-A', written: true },
+                { index: 2, event_id: 'event-B', written: true },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractRequestedEventIdsFromToolCall(steps)).toEqual(['event-A', 'event-B']);
   });
 });
 
