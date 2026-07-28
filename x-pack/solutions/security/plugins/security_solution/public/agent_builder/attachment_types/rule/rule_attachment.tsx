@@ -14,7 +14,6 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
-import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { RuleInlineContent } from './rule_inline_content';
 import { buildRuleActionButtons } from './rule_action_buttons';
@@ -58,11 +57,7 @@ export const createRuleAttachmentDefinition = ({
       defaultMessage: 'Security Rule',
     }),
   getIcon: () => 'securityApp',
-  renderInlineContent: (props) => (
-    <UserPrivilegesProvider kibanaCapabilities={application.capabilities}>
-      <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
-    </UserPrivilegesProvider>
-  ),
+  renderInlineContent: (props) => <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />,
   getActionButtons: ({ attachment, updateOrigin }) => {
     const intent = getRuleAttachmentIntent(attachment);
     const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;

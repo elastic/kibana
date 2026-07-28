@@ -19,6 +19,7 @@ import type { SecurityAppStore } from '../../common/store/types';
 import { KibanaContextProvider } from '../../common/lib/kibana/kibana_react';
 import { UpsellingProvider } from '../../common/components/upselling_provider';
 import { CaseProvider } from '../../cases/components/provider/provider';
+import { UserPrivilegesProvider } from '../../common/components/user_privileges/user_privileges_context';
 import type { StartServices } from '../../types';
 import { APP_NAME } from '../../../common/constants';
 
@@ -121,11 +122,15 @@ export const SecurityReduxEmbeddedProvider: React.FC<SecurityReduxEmbeddedProvid
         >
           <NavigationProvider core={bundle.kibanaServices}>
             <Provider store={bundle.store}>
-              <UpsellingProvider upsellingService={bundle.kibanaServices.upselling}>
-                <CaseProvider>
-                  <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-                </CaseProvider>
-              </UpsellingProvider>
+              <UserPrivilegesProvider
+                kibanaCapabilities={bundle.kibanaServices.application.capabilities}
+              >
+                <UpsellingProvider upsellingService={bundle.kibanaServices.upselling}>
+                  <CaseProvider>
+                    <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+                  </CaseProvider>
+                </UpsellingProvider>
+              </UserPrivilegesProvider>
             </Provider>
           </NavigationProvider>
         </CellActionsProvider>
