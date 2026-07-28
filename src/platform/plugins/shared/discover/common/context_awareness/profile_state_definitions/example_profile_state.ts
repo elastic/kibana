@@ -9,10 +9,11 @@
 
 import type { RowControlProps } from '@kbn/discover-utils';
 import type { EuiPanelProps } from '@elastic/eui';
-import type { ProfileStateDefinition, ProfileStateRegistry } from '../../profile_state';
-import { ProfileStateType } from '../../profile_state';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ProfileStateDefinition } from '../profile_state';
+import { ProfileStateType } from '../profile_state';
 
-export interface ExampleProfileState {
+export interface ExampleProfileState extends SerializableRecord {
   timestampColor: string;
   rowControlColor: NonNullable<RowControlProps['color']>;
   boxColor: NonNullable<EuiPanelProps['color']>;
@@ -32,8 +33,4 @@ export const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileSta
     boxColor: { type: ProfileStateType.Url },
   },
   defaultState: EXAMPLE_PROFILE_STATE_DEFAULTS,
-};
-
-export const registerExampleProfileStateDefinitions = (registry: ProfileStateRegistry) => {
-  registry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
 };

@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsGridSettings } from '@kbn/discover-utils';
-
-export const getChangedSettings = (
-  draft: MetricsGridSettings,
-  applied: MetricsGridSettings
-): Partial<MetricsGridSettings> =>
-  Object.fromEntries(
-    (Object.keys(draft) as Array<keyof MetricsGridSettings>)
-      .filter((key) => draft[key] !== applied[key])
-      .map((key) => [key, draft[key]])
-  );
+export {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  type HistogramPercentile,
+  type MetricsGridSettings,
+  type SimpleAggregation,
+} from './metrics_grid_settings';

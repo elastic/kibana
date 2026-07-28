@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/unified-chart-section-viewer';
-import type { ProfileStateDefinition, ProfileStateRegistry } from '../../../profile_state';
-import { ProfileStateType } from '../../../profile_state';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
+import type { ProfileStateDefinition } from '../profile_state';
+import { ProfileStateType } from '../profile_state';
 
 export const METRICS_GRID_SETTINGS_STATE_DEF: ProfileStateDefinition<MetricsGridSettings> = {
   key: 'metricsGridSettings',
@@ -20,8 +19,4 @@ export const METRICS_GRID_SETTINGS_STATE_DEF: ProfileStateDefinition<MetricsGrid
     histogramPercentile: { type: ProfileStateType.Persistent },
   },
   defaultState: METRICS_GRID_SETTINGS_DEFAULTS,
-};
-
-export const registerMetricsProfileStateDefinitions = (registry: ProfileStateRegistry) => {
-  registry.registerDefinition(METRICS_GRID_SETTINGS_STATE_DEF);
 };

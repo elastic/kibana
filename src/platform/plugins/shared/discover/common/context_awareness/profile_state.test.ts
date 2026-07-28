@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TEST_PROFILE_STATE_DEF } from '../../public/context_awareness/__mocks__/profile_state';
 import {
-  createProfileStateAdapterFactory,
-  type ProfileStateAdapter,
   type ProfileStateDefinition,
   ProfileStateRegistry,
   ProfileStateType,
 } from './profile_state';
-import { TEST_PROFILE_STATE_DEF } from './__mocks__/profile_state';
 
 describe('ProfileStateRegistry', () => {
   it('registers and matches definitions', () => {
@@ -365,65 +363,5 @@ describe('ProfileStateRegistry', () => {
     ).toEqual({
       uiValue: 'ui',
     });
-  });
-});
-
-describe('createProfileStateAdapterFactory', () => {
-  const createRegisteredRegistry = () => {
-    const registry = new ProfileStateRegistry();
-    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    return registry;
-  };
-
-  const createTestAdapter = <TState extends object>(
-    state: TState
-  ): ProfileStateAdapter<TState> => ({
-    getState: () => state,
-    getState$: jest.fn(),
-    setState: jest.fn(),
-    updateState: jest.fn(),
-  });
-
-  it('creates an adapter for a registered definition', () => {
-    const createAdapterSpy = jest.fn();
-    const createAdapter = <TState extends object>(definition: ProfileStateDefinition<TState>) => {
-      createAdapterSpy(definition);
-      return createTestAdapter(definition.defaultState);
-    };
-    const getStateAdapter = createProfileStateAdapterFactory({
-      createAdapter,
-      profileStateRegistry: createRegisteredRegistry(),
-    });
-
-    const adapter = getStateAdapter(TEST_PROFILE_STATE_DEF);
-
-    expect(adapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
-    expect(createAdapterSpy).toHaveBeenCalledWith(TEST_PROFILE_STATE_DEF);
-  });
-
-  it('caches adapters by definition key', () => {
-    const createAdapterSpy = jest.fn();
-    const createAdapter = <TState extends object>(definition: ProfileStateDefinition<TState>) => {
-      createAdapterSpy(definition);
-      return createTestAdapter(definition.defaultState);
-    };
-    const getStateAdapter = createProfileStateAdapterFactory({
-      createAdapter,
-      profileStateRegistry: createRegisteredRegistry(),
-    });
-
-    expect(getStateAdapter(TEST_PROFILE_STATE_DEF)).toBe(getStateAdapter(TEST_PROFILE_STATE_DEF));
-    expect(createAdapterSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws when the profile state definition is not registered', () => {
-    const getStateAdapter = createProfileStateAdapterFactory({
-      createAdapter: jest.fn(),
-      profileStateRegistry: new ProfileStateRegistry(),
-    });
-
-    expect(() => getStateAdapter(TEST_PROFILE_STATE_DEF)).toThrow(
-      'State with key testProfileState is not registered.'
-    );
   });
 });
