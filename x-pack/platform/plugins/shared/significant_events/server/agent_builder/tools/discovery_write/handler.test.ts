@@ -235,6 +235,35 @@ describe('discoveryWriteBulkHandler with one item', () => {
     expect(result.written).toBe(true);
   });
 
+  it('does not skip when the candidate has a different change_point_type for the same rule', async () => {
+    const ruleUuid = 'rule-uuid-1';
+    const activeDoc = {
+      discovery_id: 'existing-disc-id',
+      event_id: 'some-event-id',
+      kind: 'discovery' as const,
+      stream_names: baseInput.stream_names,
+      signals: [createSignal(ruleUuid, { change_point_type: 'spike' })],
+      '@timestamp': new Date().toISOString(),
+    };
+    const discoveryClient = {
+      findLatest: jest.fn().mockResolvedValue({ hits: [activeDoc] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    // Submitted with a dip for the same rule — different change_point_type → bypass dedup
+    const result = await writeOne({
+      discoveryClient: discoveryClient as never,
+      input: {
+        ...baseInput,
+        signals: [createSignal(ruleUuid, { change_point_type: 'dip' })],
+        dedup_window: 'now-1h',
+      },
+    });
+
+    expect(result.written).toBe(true);
+  });
+
   it('skips dedup entirely for continuation writes (explicit event_id)', async () => {
     const discoveryClient = {
       // findLatest never called for dedup; findByEventId called once for signal merging
@@ -583,6 +612,56 @@ describe('discoveryWriteBulkHandler — continuation snapshot merge', () => {
 
     // auto event_id → no merging; no dedup_window → findLatest not called either
     expect(discoveryClient.findByEventId).not.toHaveBeenCalled();
+  });
+
+  it('accumulates causal_features and blast_radius from prior docs (causal wins over blast for the same feature_id)', async () => {
+    const discoveryClient = {
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [
+          {
+            kind: 'discovery',
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            causal_features: [
+              { feature_id: 'payment-svc', name: 'Payment service', stream_name: 'logs.otel' },
+            ],
+            blast_radius: [
+              {
+                type: 'dependency',
+                feature_id: 'checkout-svc',
+                source: 'checkout',
+                target: 'payment',
+                stream_name: 'logs.otel',
+              },
+            ],
+          },
+        ],
+      }),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    await writeOne({
+      discoveryClient: discoveryClient as never,
+      input: {
+        ...baseInput,
+        event_id: 'otel__x-abc12345',
+        signals: [createSignal('ruleA')],
+        // checkout-svc is in blast_radius of the prior doc; submitted as causal here → causal wins
+        causal_features: [
+          { feature_id: 'checkout-svc', name: 'Checkout service', stream_name: 'logs.otel' },
+        ],
+        blast_radius: [],
+      },
+    });
+
+    const persisted = discoveryClient.bulkCreate.mock.calls[0][0][0];
+    const causalIds = persisted.causal_features
+      .map((f: { feature_id: string }) => f.feature_id)
+      .sort();
+    const blastIds = persisted.blast_radius.map((f: { feature_id: string }) => f.feature_id).sort();
+    // Both payment-svc (prior causal) and checkout-svc (submitted causal) are causal
+    expect(causalIds).toEqual(['checkout-svc', 'payment-svc']);
+    // checkout-svc promoted from blast → causal, so blast_radius is empty
+    expect(blastIds).toEqual([]);
   });
 });
 
