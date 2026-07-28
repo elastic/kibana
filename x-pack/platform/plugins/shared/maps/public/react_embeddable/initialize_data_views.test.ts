@@ -54,9 +54,16 @@ describe('dataViews$', () => {
     onEmitMock.mockReset();
   });
 
-  test('Should emit when data view added', async () => {
+  test('Should emit when data view added', (done) => {
     const dataViewApi = initializeDataViews(createMapStore());
-    const subscription = dataViewApi.dataViews$.pipe(skip(1)).subscribe(onEmitMock);
+    dataViewApi.dataViews$.pipe(skip(1)).subscribe((dataViews) => {
+      expect(dataViews).toEqual([
+        {
+          id: '1234',
+        },
+      ]);
+      done();
+    });
 
     dataViewApi.setLayerList([
       createLayerDescriptor({
@@ -65,39 +72,31 @@ describe('dataViews$', () => {
         geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
       }),
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(onEmitMock.mock.calls).toHaveLength(1);
-    expect(onEmitMock.mock.calls[0][0]).toEqual([
-      {
-        id: '1234',
-      },
-    ]);
-
-    subscription.unsubscribe();
   });
 
-  test('Should emit when data view removed', async () => {
+  test('Should emit when data view removed', (done) => {
     const dataViewApi = initializeDataViews(createMapStore());
-    dataViewApi.setLayerList([
-      createLayerDescriptor({
-        indexPatternId: '1234',
-        geoFieldName: 'location',
-        geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
-      }),
-    ]);
-    const subscription = dataViewApi.dataViews$.pipe(skip(1)).subscribe(onEmitMock);
+    dataViewApi
+      .setLayerList([
+        createLayerDescriptor({
+          indexPatternId: '1234',
+          geoFieldName: 'location',
+          geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
+        }),
+      ])
+      .then(() => {
+        dataViewApi.dataViews$.pipe(skip(1)).subscribe((dataViews) => {
+          expect(dataViews).toEqual([]);
+          done();
+        });
 
-    dataViewApi.setLayerList([]);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(onEmitMock.mock.calls).toHaveLength(1);
-    expect(onEmitMock.mock.calls[0][0]).toEqual([]);
-
-    subscription.unsubscribe();
+        dataViewApi.setLayerList([]);
+      });
   });
 
-  test('Should emit not emit when data view ids do not change', async () => {
+  test('Should not emit when data view ids do not change', async () => {
     const dataViewApi = initializeDataViews(createMapStore());
-    dataViewApi.setLayerList([
+    await dataViewApi.setLayerList([
       createLayerDescriptor({
         indexPatternId: '1234',
         geoFieldName: 'location',
@@ -109,11 +108,10 @@ describe('dataViews$', () => {
         geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
       }),
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     const subscription = dataViewApi.dataViews$.pipe(skip(1)).subscribe(onEmitMock);
 
-    dataViewApi.setLayerList([
+    await dataViewApi.setLayerList([
       createLayerDescriptor({
         indexPatternId: '4567',
         geoFieldName: 'location',
@@ -125,7 +123,6 @@ describe('dataViews$', () => {
         geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
       }),
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(onEmitMock).not.toHaveBeenCalled();
 
     subscription.unsubscribe();
