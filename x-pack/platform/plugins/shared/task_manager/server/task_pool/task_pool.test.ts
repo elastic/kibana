@@ -518,6 +518,114 @@ describe('TaskPool', () => {
       taskHasExpired.resolve();
     });
 
+    test('a task whose expiration check throws is skipped without aborting cancellation of the rest of the pool', async () => {
+      const pool = new TaskPool({
+        capacity$: of(3),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      });
+
+      const halt = resolvable();
+      const brokenCancel = sinon.spy(() => Promise.resolve());
+      const expiredCancel = sinon.spy(() => Promise.resolve());
+      const healthyCancel = sinon.spy(() => Promise.resolve());
+      const now = new Date();
+
+      await pool.run([
+        // a runner in a corrupt state: computing its expiration throws, mirroring the
+        // production null-`startedAt` crash
+        {
+          ...mockTask({ id: 'broken' }),
+          async run() {
+            await halt;
+            return asOk({ state: {} });
+          },
+          get isExpired(): boolean {
+            throw new Error("Cannot read properties of null (reading 'valueOf')");
+          },
+          cancel: brokenCancel,
+        },
+        // a genuinely expired runner ordered AFTER the broken one: it must still be cancelled
+        {
+          ...mockTask({ id: 'expired' }),
+          async run() {
+            await halt;
+            return asOk({ state: {} });
+          },
+          isExpired: true,
+          get expiration() {
+            return now;
+          },
+          get startedAt() {
+            return now;
+          },
+          cancel: expiredCancel,
+        },
+        // a healthy running runner that must be left alone
+        {
+          ...mockTask({ id: 'healthy' }),
+          async run() {
+            await halt;
+            return asOk({ state: {} });
+          },
+          isExpired: false,
+          cancel: healthyCancel,
+        },
+      ]);
+
+      // pool.run() re-checks availableCapacity() with all three runners in the pool. The
+      // broken runner is left in place (not cancelled) so its throw can't abort the claim
+      // path; it is simply skipped and logged.
+      sinon.assert.notCalled(brokenCancel);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Failed to determine whether task TaskType "shooooo" is expired; skipping it`
+        )
+      );
+      // the genuinely expired runner ordered after it is still cancelled, healthy untouched
+      sinon.assert.calledOnce(expiredCancel);
+      sinon.assert.notCalled(healthyCancel);
+
+      // only the expired runner's slot is cleared; the broken runner keeps its slot instead
+      // of wedging the whole node
+      expect(pool.usedCapacity).toEqual(2);
+
+      // a subsequent capacity check still succeeds instead of throwing
+      let capacity: number | undefined;
+      expect(() => {
+        capacity = pool.availableCapacity();
+      }).not.toThrow();
+      expect(capacity).toEqual(1);
+
+      halt.resolve();
+    });
+
+    test('availableCapacity still returns if cancelExpiredTasks throws', () => {
+      const pool = new TaskPool({
+        capacity$: of(5),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      });
+
+      jest
+        .spyOn(pool as unknown as { cancelExpiredTasks: () => void }, 'cancelExpiredTasks')
+        .mockImplementation(() => {
+          throw new Error('boom');
+        });
+
+      let capacity: number | undefined;
+      expect(() => {
+        capacity = pool.availableCapacity();
+      }).not.toThrow();
+
+      expect(capacity).toEqual(5);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to cancel expired tasks')
+      );
+    });
+
     test('logs if cancellation errors', async () => {
       const pool = new TaskPool({
         capacity$: of(10),
