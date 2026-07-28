@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import type { TextInputProps } from './text_input';
 import { TextInput } from './text_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { wrap, createFieldInputServicesMock } from '../mocks';
 
 const name = 'Some text field';
 const id = 'some:text:field';
@@ -39,28 +40,53 @@ describe('TextInput', () => {
   });
 
   it('renders without errors', () => {
-    const { container } = render(<TextInput {...defaultProps} />);
+    const { container } = render(wrap(<TextInput {...defaultProps} />));
     expect(container).toBeInTheDocument();
   });
 
   it('renders the value prop', () => {
-    const { getByTestId } = render(<TextInput {...defaultProps} />);
+    const { getByTestId } = render(wrap(<TextInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toHaveValue('initial value');
   });
 
-  it('calls the onInputChange prop when the value changes', () => {
-    const { getByTestId } = render(<TextInput {...defaultProps} />);
+  it('calls the onInputChange prop when the value changes', async () => {
+    const { getByTestId } = render(wrap(<TextInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'string',
-      unsavedValue: 'new value',
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'string',
+        unsavedValue: 'new value',
+      })
+    );
+  });
+
+  it('calls the onInputChange prop with an error when the value fails validation', async () => {
+    const services = createFieldInputServicesMock();
+    services.validateChange = jest.fn().mockResolvedValue({
+      successfulValidation: true,
+      valid: false,
+      errorMessage: 'Invalid value',
     });
+
+    const { getByTestId } = render(wrap(<TextInput {...defaultProps} />, services));
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
+    fireEvent.change(input, { target: { value: 'invalid value' } });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'string',
+        unsavedValue: 'invalid value',
+        isInvalid: true,
+        error: 'Invalid value',
+      })
+    );
   });
 
   it('disables the input when isDisabled prop is true', () => {
-    const { getByTestId } = render(<TextInput {...defaultProps} isSavingEnabled={false} />);
+    const { getByTestId } = render(wrap(<TextInput {...defaultProps} isSavingEnabled={false} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     expect(input).toBeDisabled();
   });

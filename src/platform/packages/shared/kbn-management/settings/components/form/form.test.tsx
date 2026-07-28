@@ -72,7 +72,7 @@ describe('Form', () => {
     });
   });
 
-  it('renders bottom bar when a field is changed', () => {
+  it('renders bottom bar when a field is changed', async () => {
     const { getByTestId, queryByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
@@ -82,19 +82,19 @@ describe('Form', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument());
     expect(getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).toBeInTheDocument();
   });
 
   it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
+    const { getByTestId, findByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
@@ -107,13 +107,13 @@ describe('Form', () => {
   });
 
   it('clears changes when Cancel button is clicked', async () => {
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />));
+    const { getByTestId, findByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const cancelButton = getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
+    const cancelButton = await findByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
     act(() => {
       fireEvent.click(cancelButton);
     });
@@ -130,13 +130,15 @@ describe('Form', () => {
     });
     const testServices = { ...services, saveChanges: saveChangesWithError };
 
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, testServices));
+    const { getByTestId, findByTestId } = render(
+      wrap(<Form {...defaultFormParams} />, testServices)
+    );
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
@@ -153,7 +155,7 @@ describe('Form', () => {
       getSettingsMock(true),
       uiSettingsClientMock
     );
-    const { getByTestId } = render(
+    const { getByTestId, findByTestId } = render(
       wrap(
         <Form
           {...{
@@ -172,7 +174,7 @@ describe('Form', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
