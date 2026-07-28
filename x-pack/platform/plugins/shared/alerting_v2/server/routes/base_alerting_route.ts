@@ -147,9 +147,6 @@ export abstract class BaseAlertingRoute implements RouteHandler {
 
     const merged: AlertingRouteSchemas = { ...this.schemas, response };
 
-    // Only routes that validate requests can emit a schema-validation 400, so
-    // document it and map it to our ErrorResponse shape exclusively for them.
-    // A subclass-declared 400 keeps precedence.
     if (hasRequestSchemas) {
       if (response[400] === undefined) {
         response[400] = this.requestValidationErrorResponse;

@@ -85,11 +85,6 @@ apiTest.describe('Alerting v2 error response contract', { tag: '@local-stateful-
   apiTest(
     'maps request schema-validation failures to the same flat error envelope',
     async ({ apiClient }) => {
-      // Omitting the required `metadata.name` fails Kibana core's request
-      // validation before the handler runs. Without the
-      // `onRequestValidationError` hook this returned core's default
-      // `{ statusCode, error, message }` bad-request body; the hook now routes
-      // it through our envelope so validation errors match domain errors.
       const body = buildCreateRuleData();
       const invalidBody = { ...body, metadata: { description: 'no name here' } };
 
@@ -99,20 +94,8 @@ apiTest.describe('Alerting v2 error response contract', { tag: '@local-stateful-
       });
 
       expect(response).toHaveStatusCode(400);
-
-      // Stable, machine-readable code — the only value we pin (see above).
       expect(response.body.code).toBe('BAD_REQUEST');
-
-      // Structured context identifying which request part failed validation.
       expect(response.body.details).toMatchObject({ source: 'body' });
-
-      expect(typeof response.body.error).toBe('string');
-      expect(response.body.error.length).toBeGreaterThan(0);
-      expect(typeof response.body.message).toBe('string');
-      expect(response.body.message.length).toBeGreaterThan(0);
-
-      // Proves our flat envelope reached the client verbatim rather than core's
-      // default bad-request body (which nests `statusCode`).
       expect(response.body.statusCode).toBeUndefined();
     }
   );

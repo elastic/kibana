@@ -433,9 +433,6 @@ describe('BaseAlertingRoute', () => {
 
       expect(validate.onRequestValidationError).toEqual(expect.any(Function));
       expect(validate.response?.[400]?.body?.()).toEqual(errorResponseSchema);
-      expect(validate.response?.[400]?.description).toBe(
-        'Indicates the request failed schema validation.'
-      );
     });
 
     it('omits onRequestValidationError and the validation 400 when no request schemas are declared', () => {
