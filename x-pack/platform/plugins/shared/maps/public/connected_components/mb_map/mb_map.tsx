@@ -131,8 +131,8 @@ export class MbMap extends Component<Props, State> {
       }
       this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
-      this.props.onMapSync();
     }
+    this.props.onMapSync();
   }, 256);
 
   _getMapExtentState(): MapExtentState {
