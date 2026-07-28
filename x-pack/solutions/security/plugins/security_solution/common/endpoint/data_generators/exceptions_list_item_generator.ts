@@ -6,6 +6,7 @@
  */
 
 import {
+  type ExportExceptionDetails,
   type ExceptionListItemSchema,
   type CreateExceptionListItemSchema,
   type UpdateExceptionListItemSchema,
@@ -542,4 +543,56 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
     }
   };
+
+  /**
+   * Generates a Buffer that can be used as a file attachment for an _import API call.
+   */
+  generateImportBuffer(
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    itemsArray: Partial<ExceptionListItemSchema>[] = [{}, {}, {}],
+    listNamespace: 'agnostic' | 'single' = 'agnostic'
+  ): Buffer {
+    const items = itemsArray.map((override) => this.generateEndpointArtifact(listId, override));
+
+    return Buffer.from(
+      `
+          ${this.generateImportListInfo(listId, listNamespace)}
+          ${items.map((item) => JSON.stringify(item)).join('\n')}
+          ${JSON.stringify(
+            this.generateImportDetails({ exported_exception_list_item_count: items.length })
+          )}
+          `,
+      'utf8'
+    );
+  }
+
+  /**
+   * Generates the list info section of the import file for an _import API call.
+   */
+  generateImportListInfo(listId: string, namespace: 'agnostic' | 'single' = 'agnostic'): string {
+    const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
+      return listDefinition.id === listId;
+    }) ?? {
+      id: listId,
+      name: `random list for ${listId}`,
+      description: `random description for ${listId}`,
+    };
+
+    return `{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${listInfo.description}","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${listInfo.name}","namespace_type":"${namespace}","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}`;
+  }
+
+  /**
+   * Generates the details section of the import file for an _import API call.
+   */
+  generateImportDetails(override: Partial<ExportExceptionDetails> = {}): ExportExceptionDetails {
+    return {
+      exported_exception_list_count: 1,
+      exported_exception_list_item_count: 3,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
+      ...override,
+    };
+  }
 }

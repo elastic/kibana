@@ -17,11 +17,7 @@ import {
   IMPORTED_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import type {
-  ExceptionListItemSchema,
-  ExportExceptionDetails,
-  ImportExceptionsResponseSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ImportExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import { SECURITY_FEATURE_ID, RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import {
@@ -102,6 +98,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
   const kbnServer = getService('kibanaServer');
+
+  const exceptionsGenerator = new ExceptionsListItemGenerator();
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
     config.get('kbnTestServer.serverArgs', []) as string[]
@@ -226,7 +224,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_TAG] }]),
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
+                      { tags: [CURRENT_SPACE_OWNER_TAG] },
+                    ]),
                     'import_data.ndjson'
                   )
                   .expect(403)
@@ -240,7 +240,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_TAG] }]),
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
+                      { tags: [CURRENT_SPACE_OWNER_TAG] },
+                    ]),
                     'import_data.ndjson'
                   )
                   .expect(403)
@@ -254,7 +256,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_TAG] }]),
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
+                      { tags: [CURRENT_SPACE_OWNER_TAG] },
+                    ]),
                     'import_data.ndjson'
                   )
                   .expect(200);
@@ -270,7 +274,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'assigned-per-policy-artifact',
                           tags: [
@@ -328,7 +332,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         { item_id: 'wrong-item', tags: [OTHER_SPACE_OWNER_TAG] },
                         {
                           item_id: 'good-item',
@@ -374,7 +378,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'wrong-item',
                           tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -421,7 +425,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         { tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG] },
                         { tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG] },
                         { tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG] },
@@ -450,7 +454,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'to-other-space',
                           tags: [
@@ -492,7 +496,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'visible-in-current-space',
                           tags: [OTHER_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -556,7 +560,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       .on('error', createSupertestErrorLogger(log))
                       .attach(
                         'file',
-                        buildImportBuffer(artifact.listId, [
+                        exceptionsGenerator.generateImportBuffer(artifact.listId, [
                           {
                             item_id: 'global-artifact-with-invalid-space-id',
                             tags: [buildSpaceOwnerIdTag('i-dont-exist'), GLOBAL_ARTIFACT_TAG],
@@ -609,7 +613,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       .on('error', createSupertestErrorLogger(log))
                       .attach(
                         'file',
-                        buildImportBuffer(artifact.listId, [
+                        exceptionsGenerator.generateImportBuffer(artifact.listId, [
                           {
                             item_id: 'global-artifact-with-invalid-space-id',
                             tags: [buildSpaceOwnerIdTag('i-dont-exist-1'), GLOBAL_ARTIFACT_TAG],
@@ -666,7 +670,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'with-invalid-policy-id',
                           tags: [
@@ -730,7 +734,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(
+                      exceptionsGenerator.generateImportBuffer(
                         artifact.listId,
                         [
                           {
@@ -771,7 +775,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log).ignoreCodes([400]))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'global-artifact-with-single-namespace',
                           tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -814,7 +818,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
                       { item_id: 'imported-artifact', tags: [CURRENT_SPACE_OWNER_TAG] },
                     ]),
                     'import_data.ndjson'
@@ -906,7 +910,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       .on('error', createSupertestErrorLogger(log))
                       .attach(
                         'file',
-                        buildImportBuffer(artifact.listId, [
+                        exceptionsGenerator.generateImportBuffer(artifact.listId, [
                           {
                             name: "i'm imported!",
                             tags: [CURRENT_SPACE_OWNER_TAG],
@@ -958,7 +962,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       .on('error', createSupertestErrorLogger(log))
                       .attach(
                         'file',
-                        buildImportBuffer(artifact.listId, [
+                        exceptionsGenerator.generateImportBuffer(artifact.listId, [
                           {
                             name: "i'm imported!",
                             tags: [CURRENT_SPACE_OWNER_TAG],
@@ -1011,12 +1015,12 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 const generator = new ExceptionsListItemGenerator();
 
                 const importedJson = `
-                    ${buildListInfo('some_other_list_id')}
+                    ${exceptionsGenerator.generateImportListInfo('some_other_list_id')}
                     ${JSON.stringify(generator.generate({ list_id: 'some_other_list_id' }))}
-                    ${buildListInfo('another_list_id')}
+                    ${exceptionsGenerator.generateImportListInfo('another_list_id')}
                     ${JSON.stringify(generator.generate({ list_id: 'another_list_id' }))}
                     ${JSON.stringify(
-                      buildDetails({
+                      exceptionsGenerator.generateImportDetails({
                         exported_exception_list_count: 2,
                         exported_exception_list_item_count: 2,
                       })
@@ -1035,16 +1039,16 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 const generator = new ExceptionsListItemGenerator();
 
                 const importedJson = `
-                    ${buildListInfo('some_other_list_id')}
+                    ${exceptionsGenerator.generateImportListInfo('some_other_list_id')}
                     ${JSON.stringify(generator.generate({ list_id: 'some_other_list_id' }))}
-                    ${buildListInfo(artifact.listId)}
+                    ${exceptionsGenerator.generateImportListInfo(artifact.listId)}
                     ${JSON.stringify(
                       generator.generateEndpointArtifact(artifact.listId, {
                         tags: [CURRENT_SPACE_OWNER_TAG],
                       })
                     )}
                     ${JSON.stringify(
-                      buildDetails({
+                      exceptionsGenerator.generateImportDetails({
                         exported_exception_list_count: 2,
                         exported_exception_list_item_count: 2,
                       })
@@ -1080,7 +1084,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
                       {
                         item_id: 'imported-artifact',
                         tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -1122,7 +1126,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
                       {
                         item_id: 'imported-artifact',
                         tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -1153,7 +1157,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 .on('error', createSupertestErrorLogger(log))
                 .attach(
                   'file',
-                  buildImportBuffer(artifact.listId, [
+                  exceptionsGenerator.generateImportBuffer(artifact.listId, [
                     {
                       item_id: 'imported-artifact-without-existing-comment',
                       tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -1225,7 +1229,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 .on('error', createSupertestErrorLogger(log))
                 .attach(
                   'file',
-                  buildImportBuffer(artifact.listId, [
+                  exceptionsGenerator.generateImportBuffer(artifact.listId, [
                     {
                       item_id: 'imported-artifact',
                       tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
@@ -1259,7 +1263,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'imported-artifact',
                           tags: [],
@@ -1285,7 +1289,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(
+                      exceptionsGenerator.generateImportBuffer(
                         artifact.listId,
                         [
                           {
@@ -1312,7 +1316,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         {
                           item_id: 'imported-artifact',
                           tags: [],
@@ -1335,7 +1339,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [
+                    exceptionsGenerator.generateImportBuffer(artifact.listId, [
                       {
                         item_id: 'imported-artifact',
                         tags: [],
@@ -1358,7 +1362,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         { item_id: 'imported-artifact', tags: [] },
                       ]),
                       'import_data.ndjson'
@@ -1395,7 +1399,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .on('error', createSupertestErrorLogger(log))
                     .attach(
                       'file',
-                      buildImportBuffer(artifact.listId, [
+                      exceptionsGenerator.generateImportBuffer(artifact.listId, [
                         { item_id: 'imported-artifact', tags: [] },
                       ]),
                       'import_data.ndjson'
@@ -1423,7 +1427,11 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               .post(`${EXCEPTION_LIST_URL}/_import`)
               .set('kbn-xsrf', 'true')
               .on('error', createSupertestErrorLogger(log).ignoreCodes([400]))
-              .attach('file', buildImportBuffer(listId), 'import_data.ndjson')
+              .attach(
+                'file',
+                exceptionsGenerator.generateImportBuffer(listId),
+                'import_data.ndjson'
+              )
               .expect(400);
 
             expect(body.message).toEqual(
@@ -1479,10 +1487,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
           .on('error', createSupertestErrorLogger(log))
           .attach(
             'file',
-            buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id, [
-              { tags: [] },
-              { tags: [] },
-            ]),
+            exceptionsGenerator.generateImportBuffer(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              [{ tags: [] }, { tags: [] }]
+            ),
             'import_exceptions.ndjson'
           )
           .expect(200);
@@ -1502,10 +1510,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
           .on('error', createSupertestErrorLogger(log))
           .attach(
             'file',
-            buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id, [
-              { tags: [CURRENT_SPACE_OWNER_TAG] },
-              { tags: [CURRENT_SPACE_OWNER_TAG] },
-            ]),
+            exceptionsGenerator.generateImportBuffer(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              [{ tags: [CURRENT_SPACE_OWNER_TAG] }, { tags: [CURRENT_SPACE_OWNER_TAG] }]
+            ),
             'import_exceptions.ndjson'
           )
           .expect(200);
@@ -1529,7 +1537,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
           .on('error', createSupertestErrorLogger(log))
           .attach(
             'file',
-            buildImportBuffer(
+            exceptionsGenerator.generateImportBuffer(
               ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
               [{ namespace_type: 'single' }],
               'single'
@@ -1585,47 +1593,6 @@ const buildRole = (
 
 const anEndpointArtifactErrorOf = (message: string) => (res: { body: { message: string } }) =>
   expect(res.body.message).toBe(`EndpointArtifactError: ${message}`);
-
-const buildImportBuffer = (
-  listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-  itemsArray: Partial<ExceptionListItemSchema>[] = [{}, {}, {}],
-  listNamespace: 'agnostic' | 'single' = 'agnostic'
-): Buffer => {
-  const generator = new ExceptionsListItemGenerator();
-
-  const items = itemsArray.map((override) => generator.generateEndpointArtifact(listId, override));
-
-  return Buffer.from(
-    `
-      ${buildListInfo(listId, listNamespace)}
-      ${items.map((item) => JSON.stringify(item)).join('\n')}
-      ${JSON.stringify(buildDetails({ exported_exception_list_item_count: items.length }))}
-      `,
-    'utf8'
-  );
-};
-
-const buildListInfo = (listId: string, namespace: 'agnostic' | 'single' = 'agnostic'): string => {
-  const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
-    return listDefinition.id === listId;
-  }) ?? {
-    id: listId,
-    name: `random list for ${listId}`,
-    description: `random description for ${listId}`,
-  };
-
-  return `{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${listInfo.description}","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${listInfo.name}","namespace_type":"${namespace}","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}`;
-};
-
-const buildDetails = (override: Partial<ExportExceptionDetails> = {}): ExportExceptionDetails => ({
-  exported_exception_list_count: 1,
-  exported_exception_list_item_count: 3,
-  missing_exception_list_item_count: 0,
-  missing_exception_list_items: [],
-  missing_exception_lists: [],
-  missing_exception_lists_count: 0,
-  ...override,
-});
 
 const deleteExceptionList = async (
   supertest: TestAgent,
