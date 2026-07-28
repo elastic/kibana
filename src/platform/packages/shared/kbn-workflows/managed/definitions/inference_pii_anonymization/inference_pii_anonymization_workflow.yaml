@@ -1,5 +1,5 @@
 name: "Protect sensitive inference data"
-enabled: true
+enabled: false
 description: "Protects common identifiers around inference completion calls. Author: Elastic"
 version: "1"
 tags:
