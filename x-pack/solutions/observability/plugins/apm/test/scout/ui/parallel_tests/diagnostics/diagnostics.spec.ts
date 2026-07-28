@@ -22,15 +22,8 @@ test.describe(
   () => {
     test('shows OK status badges on the summary tab as a superuser', async ({
       browserAuth,
-      config,
       pageObjects: { diagnosticsPage },
     }) => {
-      // Live-cluster badge state (APM integration package / index templates) differs on serverless.
-      test.skip(
-        !!config.serverless,
-        'APM integration package / index-template state differs on serverless'
-      );
-
       await browserAuth.loginAsAdmin();
       await diagnosticsPage.goto();
 

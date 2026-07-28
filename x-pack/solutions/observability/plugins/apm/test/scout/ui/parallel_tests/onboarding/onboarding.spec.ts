@@ -86,22 +86,9 @@ test.describe(
 
     test('creates an API key successfully with the right privileges', async ({
       browserAuth,
-      config,
       pageObjects: { onboardingPage },
     }) => {
-      test.setTimeout(120000);
-
-      // Creating an agent key requires the `apm` application privilege
-      // (`event:write`) plus `manage_own_api_key`. These are Elasticsearch
-      // application privileges that the Kibana role API can't grant, so we use
-      // the built-in superuser (the route itself suggests using superuser).
-      // Built-in roles are not supported on serverless.
-      test.skip(
-        !!config.serverless,
-        'loginWithBuiltInRole(superuser) is not supported on serverless'
-      );
-
-      await browserAuth.loginWithBuiltInRole('superuser');
+      await browserAuth.loginAsAdmin();
       await onboardingPage.goto();
 
       await onboardingPage.createApiKeyButton.click();
