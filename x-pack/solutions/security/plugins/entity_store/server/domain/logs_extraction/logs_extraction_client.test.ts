@@ -1796,13 +1796,17 @@ describe('LogsExtractionClient', () => {
       expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
     });
 
-    it('does not retry when nothing of ours was missing (source-index error)', async () => {
+    it('retries even when a sibling task already recreated the assets (reinstall is a no-op)', async () => {
+      // Extraction runs for all entity types in parallel. A sibling task can recreate the shared
+      // index between our query failing and our own reinstall check, so reinstall reports nothing
+      // was missing (false). We must still retry — the index is back and the retry can succeed.
       mockReinstallAssets.mockResolvedValue(false);
-      mockExecuteEsqlQuery.mockRejectedValue(indexNotFoundError);
+      mockExecuteEsqlQuery.mockRejectedValueOnce(indexNotFoundError);
+      mockExtractSuccessSequence(successResponse);
 
       const result = await client.extractLogs('user');
 
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
       expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
     });
 
@@ -1822,7 +1826,7 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(false);
-      // Healed once, retried once, no further heal attempts (no loop).
+      // Reinstalled once, retried once, no further attempts (no loop).
       expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
     });
 

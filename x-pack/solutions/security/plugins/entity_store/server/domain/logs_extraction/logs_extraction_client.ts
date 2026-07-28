@@ -159,8 +159,7 @@ export class LogsExtractionClient {
     } catch (error) {
       // A missing shared index/data stream (e.g. deleted out from under a running engine) makes
       // the extraction query throw `index_not_found`. Recreate our own assets if they are gone
-      // and retry once; if nothing was missing the error was about a source index, so fall
-      // through to normal handling.
+      // and retry once.
       if (isIndexNotFoundError(error)) {
         // Guard: if the engine was uninstalled while this task was running, the engine
         // descriptor SO is already gone. Skip self-heal so we don't reinstate an index
@@ -174,20 +173,23 @@ export class LogsExtractionClient {
         }
 
         if (engineStillStarted) {
-          const healed = await reinstallSharedElasticsearchAssetsIfMissing({
+          // Recreate our shared assets if they are missing. We retry regardless of whether *this*
+          // call recreated them: extraction runs for all entity types in parallel, so a sibling
+          // task (or the scheduled run) may have already recreated the shared index in the gap
+          // between our query failing and this check. Gating the retry on "did we win the heal
+          // race" would make every loser report a spurious failure even though the index is back.
+          await reinstallSharedElasticsearchAssetsIfMissing({
             esClient: this.esClient,
             logger: this.logger,
             namespace: this.namespace,
           });
-          if (healed) {
-            this.logger.info(
-              `Recreated missing entity store assets; retrying extraction for ${type}`
-            );
-            try {
-              return await this.runExtraction(type, opts);
-            } catch (retryError) {
-              return await this.handleError(retryError, type, false);
-            }
+          this.logger.info(
+            `Retrying extraction for ${type} after ensuring entity store assets exist`
+          );
+          try {
+            return await this.runExtraction(type, opts);
+          } catch (retryError) {
+            return await this.handleError(retryError, type, false);
           }
         }
       }
