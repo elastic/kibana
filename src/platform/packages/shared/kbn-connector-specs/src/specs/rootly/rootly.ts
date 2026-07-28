@@ -33,6 +33,23 @@ import {
   type JsonApiListResponse,
   type JsonApiResource,
   type JsonApiSingleResponse,
+  type RootlyCreateIncidentInput,
+  type RootlyGetIncidentInput,
+  type RootlyListIncidentsInput,
+  type RootlyUpdateIncidentInput,
+  type RootlyIncidentLifecycleInput,
+  type RootlyTriageIncidentInput,
+  type RootlyAssignIncidentUserInput,
+  type RootlyCreateActionItemInput,
+  type RootlyListActionItemsInput,
+  type RootlyCreateTimelineEventInput,
+  type RootlyListServicesInput,
+  type RootlyListTeamsInput,
+  type RootlyAddIncidentSubscribersInput,
+  type RootlyListAlertsInput,
+  type RootlyGetAlertInput,
+  type RootlyAcknowledgeAlertInput,
+  type RootlyResolveAlertInput,
 } from './types';
 
 const ROOTLY_BASE_URL = 'https://api.rootly.com/v1';
@@ -108,7 +125,7 @@ export const Rootly: ConnectorSpec = {
       description:
         "Declare a new Rootly incident, the core outbound action that mobilizes responders from a Kibana alert. Returns the new incident's ID. Use listSeverities and listServices to resolve real severity/service IDs first.",
       input: RootlyCreateIncidentInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyCreateIncidentInput) => {
         const attributes: Record<string, unknown> = { title: input.title };
         if (input.summary) attributes.summary = input.summary;
         if (input.severityId) attributes.severity_id = input.severityId;
@@ -136,7 +153,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Get a single Rootly incident by ID, so a workflow can branch on its current state before it acts.',
       input: RootlyGetIncidentInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyGetIncidentInput) => {
         try {
           const response = await ctx.client.get<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}`,
@@ -154,7 +171,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'List Rootly incidents filtered by status, severity, service, team, free-text search, or creation time window, so a workflow can dedupe and correlate before it acts.',
       input: RootlyListIncidentsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyListIncidentsInput) => {
         const params: Record<string, string | number> = {};
         if (input.status) params['filter[status]'] = input.status;
         if (input.severityId) params['filter[severity_id]'] = input.severityId;
@@ -186,7 +203,7 @@ export const Rootly: ConnectorSpec = {
       description:
         "Patch a Rootly incident's title, summary, severity, services, teams, or labels in place, so a workflow can enrich or reclassify an incident as it learns more.",
       input: RootlyUpdateIncidentInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyUpdateIncidentInput) => {
         const attributes: Record<string, unknown> = {};
         if (input.title) attributes.title = input.title;
         if (input.summary) attributes.summary = input.summary;
@@ -212,7 +229,7 @@ export const Rootly: ConnectorSpec = {
       isTool: true,
       description: 'Move a Rootly incident into triage while severity is still being assessed.',
       input: RootlyTriageIncidentInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyTriageIncidentInput) => {
         try {
           const response = await ctx.client.put<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/in_triage`,
@@ -231,7 +248,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Move a Rootly incident to mitigated once impact is contained, the first lifecycle transition a response workflow drives to closure.',
       input: RootlyIncidentLifecycleInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyIncidentLifecycleInput) => {
         const attributes = input.message ? { mitigation_message: input.message } : {};
         try {
           const response = await ctx.client.put<JsonApiSingleResponse>(
@@ -251,7 +268,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Move a Rootly incident to resolved once remediation is verified, closing the incident lifecycle.',
       input: RootlyIncidentLifecycleInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyIncidentLifecycleInput) => {
         const attributes = input.message ? { resolution_message: input.message } : {};
         try {
           const response = await ctx.client.put<JsonApiSingleResponse>(
@@ -270,7 +287,7 @@ export const Rootly: ConnectorSpec = {
       isTool: true,
       description: 'Cancel a Rootly incident as a false positive so it does not skew metrics.',
       input: RootlyIncidentLifecycleInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyIncidentLifecycleInput) => {
         const attributes = input.message ? { cancellation_message: input.message } : {};
         try {
           const response = await ctx.client.put<JsonApiSingleResponse>(
@@ -290,7 +307,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Assign a responder to a Rootly incident by user ID and incident role ID (e.g. Incident Commander), so automated mobilization routes the incident to a person, not just a queue.',
       input: RootlyAssignIncidentUserInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyAssignIncidentUserInput) => {
         try {
           const response = await ctx.client.post<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/assign_role_to_user`,
@@ -314,7 +331,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Subscribe stakeholders to a Rootly incident so they receive updates, an automated notification fan-out from the workflow.',
       input: RootlyAddIncidentSubscribersInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyAddIncidentSubscribersInput) => {
         try {
           const response = await ctx.client.post<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/add_subscribers`,
@@ -333,7 +350,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'File a follow-up task on a Rootly incident, so remediation work is tracked and reminders can be driven.',
       input: RootlyCreateActionItemInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyCreateActionItemInput) => {
         const attributes: Record<string, unknown> = { summary: input.summary };
         if (input.description) attributes.description = input.description;
         if (input.kind) attributes.kind = input.kind;
@@ -360,7 +377,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'List action items on a Rootly incident (or org-wide if incidentId is omitted), filtered by status or priority.',
       input: RootlyListActionItemsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyListActionItemsInput) => {
         const params: Record<string, string> = {};
         if (input.status) params['filter[status]'] = input.status;
         if (input.priority) params['filter[priority]'] = input.priority;
@@ -386,7 +403,7 @@ export const Rootly: ConnectorSpec = {
       description:
         "Post a note or milestone to a Rootly incident's timeline, so automated actions are recorded where responders read the incident history.",
       input: RootlyCreateTimelineEventInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyCreateTimelineEventInput) => {
         const attributes: Record<string, unknown> = { event: input.event };
         if (input.visibility) attributes.visibility = input.visibility;
 
@@ -428,7 +445,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'List the Rootly service catalog, so a workflow can attach the affected service by reference when it opens or updates an incident.',
       input: RootlyListServicesInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyListServicesInput) => {
         const params: Record<string, string> = {};
         if (input.name) params['filter[name]'] = input.name;
         try {
@@ -450,7 +467,7 @@ export const Rootly: ConnectorSpec = {
       isTool: true,
       description: 'List Rootly teams, so a workflow can set incident ownership by reference.',
       input: RootlyListTeamsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyListTeamsInput) => {
         const params: Record<string, string> = {};
         if (input.name) params['filter[name]'] = input.name;
         try {
@@ -470,7 +487,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'List Rootly alerts filtered by status or source, feeding triage and correlation from the monitoring signal before an incident is declared.',
       input: RootlyListAlertsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyListAlertsInput) => {
         const params: Record<string, string | number> = {};
         if (input.status) params['filter[status]'] = input.status;
         if (input.source) params['filter[source]'] = input.source;
@@ -493,7 +510,7 @@ export const Rootly: ConnectorSpec = {
       isTool: true,
       description: 'Get a single Rootly alert by ID.',
       input: RootlyGetAlertInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyGetAlertInput) => {
         try {
           const response = await ctx.client.get<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/alerts/${input.alertId}`,
@@ -511,7 +528,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Acknowledge a Rootly alert so on-call sees it is being handled. The alert must be in "triggered" status.',
       input: RootlyAcknowledgeAlertInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyAcknowledgeAlertInput) => {
         try {
           const response = await ctx.client.post<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/alerts/${input.alertId}/acknowledge`,
@@ -530,7 +547,7 @@ export const Rootly: ConnectorSpec = {
       description:
         'Resolve a Rootly alert when the condition clears, closing the alert loop from a workflow. Optionally cascades to resolve linked incidents.',
       input: RootlyResolveAlertInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: RootlyResolveAlertInput) => {
         const attributes: Record<string, unknown> = {};
         if (input.resolutionMessage) attributes.resolution_message = input.resolutionMessage;
         if (input.resolveRelatedIncidents !== undefined) {
