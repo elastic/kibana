@@ -235,6 +235,14 @@ export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
+/** --- Timeline heatmaps section --- */
+export const TIMELINE_HEATMAPS_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timelineHeatmapsSection.loadError',
+  {
+    defaultMessage: 'Could not load episode timeline.',
+  }
+);
+
 /** --- Metadata details list --- */
 export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',
