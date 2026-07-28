@@ -24,6 +24,12 @@ export interface CPSConfigType {
 
 export interface CPSPluginStart {
   cpsManager?: ICPSManager;
+  /**
+   * `true` when the active product tier is eligible for cross-project search
+   * (CPS) configuration. Consumers (such as the spaces management UI) should
+   * use this to gate CPS-related UI sections.
+   */
+  isTierEligible: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
