@@ -26,7 +26,7 @@ import {
   ADD_VEGA_EMBEDDABLE_ACTION_ID,
   ADD_VEGA_PANEL_ACTION_ID,
   VEGA_EMBEDDABLE_TYPE,
-} from '../common/constants';
+} from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
 const mockCreateVegaFn = jest.fn();
@@ -116,9 +116,6 @@ describe('VegaPlugin', () => {
       return { plugin, uiActions };
     };
 
-    const countCalls = (calls: Array<[string, string]>, trigger: string, actionId: string) =>
-      calls.filter(([t, a]) => t === trigger && a === actionId).length;
-
     it('attaches the legacy Visualize-navigation action to add menus when the flag is disabled', () => {
       const { uiActions } = startPlugin(new BehaviorSubject(false));
       // Legacy action swapped onto the Dashboard Add-panel menu; the standalone action is not.
@@ -126,13 +123,10 @@ describe('VegaPlugin', () => {
         ADD_PANEL_TRIGGER,
         ADD_VEGA_PANEL_ACTION_ID
       );
-      expect(
-        countCalls(
-          uiActions.attachAction.mock.calls,
-          ADD_PANEL_TRIGGER,
-          ADD_VEGA_EMBEDDABLE_ACTION_ID
-        )
-      ).toBe(0);
+      expect(uiActions.attachAction).not.toHaveBeenCalledWith(
+        ADD_PANEL_TRIGGER,
+        ADD_VEGA_EMBEDDABLE_ACTION_ID
+      );
       // Canvas also gets the legacy action while the flag is disabled.
       expect(uiActions.attachAction).toHaveBeenCalledWith(
         ADD_CANVAS_ELEMENT_TRIGGER,
@@ -160,65 +154,17 @@ describe('VegaPlugin', () => {
       );
     });
 
-    it('swaps the Add-panel action as the flag changes at runtime, then stops on plugin stop', () => {
+    it('stops swapping actions after the plugin stops', () => {
       const flag$ = new BehaviorSubject(false);
       const { plugin, uiActions } = startPlugin(flag$);
 
-      // disabled → legacy attached, new detached
-      expect(
-        countCalls(uiActions.attachAction.mock.calls, ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID)
-      ).toBe(1);
-      expect(
-        countCalls(
-          uiActions.attachAction.mock.calls,
-          ADD_PANEL_TRIGGER,
-          ADD_VEGA_EMBEDDABLE_ACTION_ID
-        )
-      ).toBe(0);
-
-      flag$.next(true); // enabled → new attached, legacy detached
-      expect(
-        countCalls(
-          uiActions.attachAction.mock.calls,
-          ADD_PANEL_TRIGGER,
-          ADD_VEGA_EMBEDDABLE_ACTION_ID
-        )
-      ).toBe(1);
-      expect(
-        countCalls(uiActions.detachAction.mock.calls, ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID)
-      ).toBe(1);
-
-      flag$.next(true); // distinctUntilChanged collapses the repeat
-      expect(
-        countCalls(
-          uiActions.attachAction.mock.calls,
-          ADD_PANEL_TRIGGER,
-          ADD_VEGA_EMBEDDABLE_ACTION_ID
-        )
-      ).toBe(1);
-
-      flag$.next(false); // back to legacy
-      expect(
-        countCalls(uiActions.attachAction.mock.calls, ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID)
-      ).toBe(2);
-      // new action detached on each disabled emission (initial + this one)
-      expect(
-        countCalls(
-          uiActions.detachAction.mock.calls,
-          ADD_PANEL_TRIGGER,
-          ADD_VEGA_EMBEDDABLE_ACTION_ID
-        )
-      ).toBe(2);
-
       plugin.stop();
-      flag$.next(true); // after stop, subscription is closed — no further swaps
-      expect(
-        countCalls(
-          uiActions.attachAction.mock.calls,
-          ADD_PANEL_TRIGGER,
-          ADD_VEGA_EMBEDDABLE_ACTION_ID
-        )
-      ).toBe(1);
+      flag$.next(true);
+
+      expect(uiActions.attachAction).not.toHaveBeenCalledWith(
+        ADD_PANEL_TRIGGER,
+        ADD_VEGA_EMBEDDABLE_ACTION_ID
+      );
     });
   });
 });

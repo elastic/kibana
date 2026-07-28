@@ -7,27 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, VEGA_EMBEDDABLE_TYPE } from '../constants';
 import { getDefaultSpec } from '../default_spec';
-import type { VegaByValueState } from './types';
-import type { VegaEmbeddableApi } from './vega_embeddable';
+import type { VegaByValueState, VegaEmbeddableApi } from './vega_embeddable';
 
 export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
   grouping: [ADD_PANEL_VISUALIZATION_GROUP],
+  order: 0,
   getIconType: () => 'visVega',
   getDisplayName: () => 'Vega',
+  getDisplayNameTooltip: () =>
+    i18n.translate('visTypeVega.dashboard.addPanelActionDescription', {
+      defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
+      description: 'Vega and Vega-Lite are product names and should not be translated',
+    }),
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, returnFocus }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const vegaEmbeddable = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
       panelType: VEGA_EMBEDDABLE_TYPE,
       serializedState: { spec: getDefaultSpec() },
     });
-    vegaEmbeddable?.onEdit({ isNewPanel: true });
+    vegaEmbeddable?.onEdit({ isNewPanel: true, returnFocus });
   },
 });

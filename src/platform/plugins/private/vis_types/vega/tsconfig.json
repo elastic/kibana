@@ -7,7 +7,6 @@
   "include": [
     "server/**/*",
     "public/**/*",
-    "common/**/*",
     "*.ts",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/test_utils/vega_map_test.json",

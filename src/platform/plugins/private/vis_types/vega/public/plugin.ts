@@ -49,7 +49,7 @@ import {
   ADD_VEGA_PANEL_ACTION_ID,
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
-} from '../common/constants';
+} from './constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -108,15 +108,9 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    let runtimePromise:
-      | Promise<{ vegaVisType: typeof import('./vega_type').vegaVisType }>
-      | undefined;
-    const loadVegaRuntime = async () => {
-      if (runtimePromise) {
-        return runtimePromise;
-      }
-
-      runtimePromise = Promise.all([core.getStartServices(), import('./async_module')]).then(
+    let runtimePromise: Promise<typeof import('./async_module')> | undefined;
+    const loadVegaRuntime = () =>
+      (runtimePromise ??= Promise.all([core.getStartServices(), import('./async_module')]).then(
         ([[, startDeps], runtime]) => {
           if (!startDeps.expressions.getFunction('vega')) {
             expressions.registerFunction(() => runtime.createVegaFn(visualizationDependencies));
@@ -124,9 +118,7 @@ export class VegaPlugin implements Plugin<void, void> {
           }
           return runtime;
         }
-      );
-      return runtimePromise;
-    };
+      ));
 
     visualizations.createBaseVisualizationAsync('vega', async () => {
       const { vegaVisType } = await loadVegaRuntime();

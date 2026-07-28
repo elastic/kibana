@@ -62,7 +62,6 @@ fileGroups:
   src:
     - server/**/*
     - public/**/*
-    - common/**/*
     - '*.ts'
     - public/test_utils/vega_map_test.json
     - public/test_utils/vegalite_graph.json

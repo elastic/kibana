@@ -15,7 +15,7 @@ import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
@@ -179,6 +179,19 @@ describe('vegaEmbeddableFactory', () => {
       expect(sharedItem).toHaveAttribute('data-render-complete', 'true');
       expect(renderComplete).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('gives the flyout the focus targets to restore when it closes', async () => {
+    const { api } = await buildEmbeddable();
+    const returnFocus = jest.fn();
+
+    api.onEdit({ isNewPanel: true, returnFocus });
+    expect(mockOpenLazyFlyout.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        returnFocus,
+        flyoutProps: expect.objectContaining({ focusedPanelId: api.uuid }),
+      })
+    );
   });
 
   it('restores the original spec when editing is cancelled', async () => {

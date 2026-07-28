@@ -19,10 +19,6 @@ Embeddables require registration in both server and public.
 ### registerEmbeddableServerDefinition
 Server registration defines the embeddable schema and other information required to include embeddables in public REST APIs like "dashboards as code". 
 
-For example, the Vega Dashboard panel registers the stable `vega` type with a by-value schema that
-requires `spec: string`. Do not add a by-reference branch when a panel has no library representation;
-the registered schema is the Dashboard REST contract.
-
 ### registerEmbeddablePublicDefinition
 Public registration defines the embeddable's UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 
 

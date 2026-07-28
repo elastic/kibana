@@ -16,8 +16,9 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
   HasDrilldowns,
+  SerializedDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, combineLatest, map, merge, skip, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
 import type { Query } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { parse } from 'hjson';
@@ -40,20 +41,21 @@ import {
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
+  type SerializedTimeRange,
+  type SerializedTitles,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../../common/constants';
-import type { VegaByValueState } from './types';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { toVegaEmbeddableExpressionAst } from '../to_ast';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { specUsesEsql } from '../lib/spec_uses_esql';
-import { createInspectorAdapters, type VegaInspectorAdapters } from '../vega_inspector';
+import { createInspectorAdapters } from '../vega_inspector';
 
 const parseSpec = (specString: string) => {
   try {
@@ -63,24 +65,29 @@ const parseSpec = (specString: string) => {
   }
 };
 
-const getSpecUsesEsql = (specString: string): boolean => {
-  const spec = parseSpec(specString);
-  return spec ? specUsesEsql(spec) : false;
-};
+/**
+ * By-value state for the dedicated Dashboard Vega panel. The panel is UI-only: it is not
+ * registered as a server embeddable, so it has no runtime schema and is treated as an unmapped
+ * panel by the public Dashboard REST API (dropped on read, rejected on write).
+ */
+export type VegaByValueState = SerializedTitles &
+  SerializedTimeRange &
+  SerializedDrilldowns & {
+    /** The Vega or Vega-Lite specification as an HJSON or JSON string. */
+    spec: string;
+  };
 
-const getProjectRoutingOverrides = (specString: string): ProjectRoutingOverrides => {
-  const spec = parseSpec(specString);
-  return spec ? extractProjectRoutingOverrides(spec) : undefined;
-};
-
-const getDataViews = async (specString: string): Promise<DataView[] | undefined> => {
-  const spec = parseSpec(specString);
-  return spec ? extractIndexPatternsFromSpec(spec) : undefined;
-};
+interface VegaEditCapabilities extends Omit<HasEditCapabilities, 'onEdit'> {
+  /**
+   * Widened from `HasEditCapabilities` so the Add panel action can hand back the focus it
+   * captured; the panel context menu calls this with no arguments.
+   */
+  onEdit: (options?: { isNewPanel?: boolean; returnFocus?: () => void }) => Promise<void>;
+}
 
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   HasDrilldowns &
-  HasEditCapabilities &
+  VegaEditCapabilities &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
@@ -112,31 +119,27 @@ export const vegaEmbeddableFactory = (
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
-    const usesEsql$ = new BehaviorSubject(getSpecUsesEsql(initialState.spec));
-    const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
-      getProjectRoutingOverrides(initialState.spec)
-    );
+    const usesEsql$ = new BehaviorSubject(false);
+    const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
-    const specSubscription = spec$.subscribe((spec) => {
-      const usesEsql = getSpecUsesEsql(spec);
-      if (usesEsql$.getValue() !== usesEsql) {
-        usesEsql$.next(usesEsql);
-      }
-      projectRoutingOverrides$.next(getProjectRoutingOverrides(spec));
-    });
-    const dataViewsSubscription = spec$
-      .pipe(switchMap((spec) => getDataViews(spec)))
-      .subscribe((dataViews) => {
-        if (dataViews) {
-          dataViews$.next(dataViews);
-        }
-      });
+
+    // A spec change is parsed once for all three derived subjects. `switchMap` is used instead
+    // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
+    const specSubscription = spec$
+      .pipe(
+        map(parseSpec),
+        tap((spec) => {
+          usesEsql$.next(spec ? specUsesEsql(spec) : false);
+          projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
+        }),
+        switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
+      )
+      .subscribe((dataViews) => dataViews$.next(dataViews));
+
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({ expression: '' });
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const rendered$ = new BehaviorSubject(false);
-    const inspectorAdapters$ = new BehaviorSubject<VegaInspectorAdapters>(
-      createInspectorAdapters()
-    );
+    let inspectorAdapters = createInspectorAdapters();
     let abortController = new AbortController();
 
     const stateApi = initializeStateApi<VegaByValueState>({
@@ -184,14 +187,16 @@ export const vegaEmbeddableFactory = (
       supportedTriggers: () => [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU],
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
-      onEdit: async ({ isNewPanel = false } = {}) => {
+      onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const initialSpec = spec$.getValue();
         openLazyFlyout({
           core,
           parentApi,
+          returnFocus,
           flyoutProps: {
             size: 'm',
             type: 'push',
+            focusedPanelId: uuid,
           },
           loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
             const { VegaEditorFlyout } = await import('./vega_editor_flyout');
@@ -217,7 +222,7 @@ export const vegaEmbeddableFactory = (
           },
         });
       },
-      getInspectorAdapters: () => inspectorAdapters$.getValue(),
+      getInspectorAdapters: () => inspectorAdapters,
     });
 
     const fetchSubscription = combineLatest([spec$, fetch$(api)]).subscribe(([spec, data]) => {
@@ -245,13 +250,13 @@ export const vegaEmbeddableFactory = (
         },
         searchSessionId: data.searchSessionId,
         interactive: !areTriggersDisabled(api),
-        inspectorAdapters: inspectorAdapters$.getValue(),
+        inspectorAdapters,
         executionContext: {
           ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
           child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
         },
         onData$: (_, adapters) => {
-          inspectorAdapters$.next(typeof adapters === 'function' ? adapters() : adapters);
+          inspectorAdapters = typeof adapters === 'function' ? adapters() : adapters;
           dataLoading$.next(false);
         },
         onRender$: () => rendered$.next(true),
@@ -283,7 +288,6 @@ export const vegaEmbeddableFactory = (
             abortController.abort();
             fetchSubscription.unsubscribe();
             specSubscription.unsubscribe();
-            dataViewsSubscription.unsubscribe();
             drilldownsManager.cleanup();
           },
           []

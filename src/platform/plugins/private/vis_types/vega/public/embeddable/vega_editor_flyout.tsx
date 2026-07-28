@@ -26,14 +26,8 @@ const bodyCss = css({
   '.euiFlyoutBody__overflowContent': {
     display: 'flex',
     height: '100%',
+    '.vgaEditor': { minHeight: 0 },
   },
-});
-
-const editorContainerCss = css({
-  display: 'flex',
-  flex: '1 1 auto',
-  minHeight: 0,
-  width: '100%',
 });
 
 export const VegaEditorFlyout = ({
@@ -90,9 +84,7 @@ export const VegaEditorFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyCss}>
-        <div css={editorContainerCss}>
-          <VegaSpecEditor editorValue={spec} onChange={setSpec} />
-        </div>
+        <VegaSpecEditor editorValue={spec} onChange={setSpec} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
