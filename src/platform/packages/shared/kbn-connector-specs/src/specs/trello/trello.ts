@@ -46,6 +46,7 @@ export const Trello: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
+    supportedFeatureIds: [],
   },
 
   auth: {
