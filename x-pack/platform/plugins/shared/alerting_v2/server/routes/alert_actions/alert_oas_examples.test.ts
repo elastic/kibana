@@ -7,7 +7,7 @@
 
 import {
   bulkCreateAlertActionBodySchema,
-  bulkCreateAlertActionResponseSchema,
+  bulkResponseSchema,
   createAckAlertActionBodySchema,
   createActivateAlertActionBodySchema,
   createAssignAlertActionBodySchema,
@@ -86,9 +86,7 @@ describe('alert OAS example payloads', () => {
     ).toBe(true);
   });
 
-  it('keeps bulk response example valid against bulkCreateAlertActionResponseSchema', () => {
-    expect(
-      bulkCreateAlertActionResponseSchema.safeParse(BULK_CREATE_ALERT_ACTION_RESPONSE).success
-    ).toBe(true);
+  it('keeps bulk response example valid against bulkResponseSchema', () => {
+    expect(bulkResponseSchema.safeParse(BULK_CREATE_ALERT_ACTION_RESPONSE).success).toBe(true);
   });
 });

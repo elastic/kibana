@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BulkCreateAlertActionBody,
-  BulkCreateAlertActionResponse,
-} from '@kbn/alerting-v2-schemas';
+import type { BulkCreateAlertActionBody, BulkResponse } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
@@ -27,9 +24,9 @@ export const BULK_CREATE_ALERT_ACTION_REQUEST: BulkCreateAlertActionBody = [
   },
 ];
 
-export const BULK_CREATE_ALERT_ACTION_RESPONSE: BulkCreateAlertActionResponse = {
-  processed: 2,
-  total: 2,
+export const BULK_CREATE_ALERT_ACTION_RESPONSE: BulkResponse = {
+  affected_count: 2,
+  errors: [],
 };
 
 const INVALID_BULK_CREATE_ALERT_ACTION_RESPONSE = invalidResponseExample({
