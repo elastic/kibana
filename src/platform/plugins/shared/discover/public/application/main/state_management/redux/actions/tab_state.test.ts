@@ -18,18 +18,25 @@ import {
 } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  DISCOVER_QUERY_MODE_KEY,
+} from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
-import type { ProfileStateDefinition } from '../../../../../context_awareness';
-import { ProfileStateType } from '../../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../../../../common/context_awareness';
 
-interface SecondaryProfileState {
+interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;
 }
 
@@ -625,9 +632,10 @@ describe('tab_state actions', () => {
 
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
-      const { internalState, runtimeStateManager, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId, services } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
+      const storageSetSpy = jest.spyOn(services.storage, 'set');
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
       const prevDefaultProfileState = tab.defaultProfileState;
@@ -687,14 +695,20 @@ describe('tab_state actions', () => {
       });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
       expect(tab.defaultProfileState.resetId).not.toEqual('');
+
+      expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
+        currentMode: 'classic',
+        defaultMode: 'classic',
+      });
     });
   });
 
   describe('transitionFromDataViewToESQL', () => {
     it('should transition from Data View mode to ES|QL mode', async () => {
-      const { internalState, runtimeStateManager, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId, services } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
+      const storageSetSpy = jest.spyOn(services.storage, 'set');
 
       const query = { query: "foo: 'bar'", language: 'kuery' };
       const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
@@ -782,6 +796,11 @@ describe('tab_state actions', () => {
       });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
       expect(tab.defaultProfileState.resetId).not.toEqual('');
+
+      expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
+        currentMode: 'esql',
+        defaultMode: 'classic',
+      });
     });
   });
 
