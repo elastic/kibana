@@ -21,6 +21,7 @@ import {
   traceCorrelatedLogs,
   minimalTraceCorrelatedLogs,
   deepTrace,
+  otelTrace,
 } from '../fixtures/traces_experience';
 
 globalSetupHook(
@@ -172,6 +173,9 @@ globalSetupHook(
 
       await logsEsClient.index(minimalLogData);
       log.debug('[setup:traces] Minimal trace log data indexed');
+
+      await apmEsClient.index(otelTrace(timeRange));
+      log.debug('[setup:traces] OTel trace data indexed');
     }
   }
 );
