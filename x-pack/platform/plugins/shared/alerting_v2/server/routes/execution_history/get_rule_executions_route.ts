@@ -24,6 +24,8 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH } from '../constants';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { getRuleExecutionsOasExamples } from './get_rule_executions_oas_example';
 
 export const toGetRuleExecutionsArgs = ({
   rule_id: ruleIds,
@@ -61,6 +63,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
+    oasOperationObject: getRuleExecutionsOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -73,7 +76,7 @@ export class GetRuleExecutionsRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid query parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
