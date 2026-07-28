@@ -221,6 +221,23 @@ describe('GraphQLConnector', () => {
         })
       ).rejects.toThrow('Only query operations are allowed');
     });
+
+    it('rejects multi-operation documents that contain a mutation', async () => {
+      await expect(
+        GraphQLConnector.actions.query.handler(mockContext, {
+          query: 'query Q { __typename } mutation M { createUser(name: "x") { id } }',
+          operationName: 'M',
+        })
+      ).rejects.toThrow('Only query operations are allowed');
+    });
+
+    it('rejects syntactically invalid GraphQL documents', async () => {
+      await expect(
+        GraphQLConnector.actions.query.handler(mockContext, {
+          query: '{ not valid !!!',
+        })
+      ).rejects.toThrow();
+    });
   });
 
   // ---------------------------------------------------------------------------

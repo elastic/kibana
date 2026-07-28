@@ -17,6 +17,7 @@
  * - Multiple auth modes: none, Basic, Bearer, OAuth authorization code, or OAuth client credentials
  */
 
+import { parse, OperationTypeNode } from 'graphql';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
@@ -357,9 +358,12 @@ export const GraphQLConnector: ConnectorSpec = {
         'Throws if the server returns any GraphQL errors.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
-        // Best-effort guard: reject documents whose first operation is a mutation.
-        // isTool:false on `mutation` only prevents agent exposure, not direct misuse.
-        if (/^\s*mutation[\s({]/.test(input.query)) {
+        const doc = parse(input.query);
+        if (
+          doc.definitions.some(
+            (d) => d.kind === 'OperationDefinition' && d.operation !== OperationTypeNode.QUERY
+          )
+        ) {
           throw new Error(
             'Only query operations are allowed in this action. Use the mutation action for mutations.'
           );
