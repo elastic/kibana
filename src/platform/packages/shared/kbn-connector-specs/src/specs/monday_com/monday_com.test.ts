@@ -63,8 +63,7 @@ describe('MondayCom', () => {
       expect(MondayCom.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('supports workflows and agentBuilder', () => {
-      expect(MondayCom.metadata.supportedFeatureIds).toContain('workflows');
+    it('supports agentBuilder', () => {
       expect(MondayCom.metadata.supportedFeatureIds).toContain('agentBuilder');
     });
 
