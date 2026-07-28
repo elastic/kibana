@@ -41,6 +41,7 @@ export interface RulesApiService {
   bulkDelete: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkDisable: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkEnable: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkUpdateApiKey: (params: BulkByIdsParams) => Promise<BulkResponse>;
   deleteByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   enableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   disableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
@@ -174,6 +175,16 @@ export const getRulesApiService = ({
         const response = await kbnClient.request<BulkResponse>({
           method: 'POST',
           path: `${RULE_API_PATH}/_bulk_enable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    bulkUpdateApiKey: (params: BulkByIdsParams) =>
+      measurePerformanceAsync(log, 'rules.bulkUpdateApiKey', async () => {
+        const response = await kbnClient.request<BulkResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_update_api_key`,
           headers: COMMON_HEADERS,
           body: params,
         });
