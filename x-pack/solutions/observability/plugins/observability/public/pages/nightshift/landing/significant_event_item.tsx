@@ -178,7 +178,7 @@ export function SignificantEventItem({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {onCloseClick && event.status !== 'closed' && (
+              {onCloseClick && event.status === 'open' && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate(

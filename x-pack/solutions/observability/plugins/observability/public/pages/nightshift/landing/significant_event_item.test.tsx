@@ -127,16 +127,14 @@ describe('SignificantEventItem', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('shows progress while closing and hides the action for closed events', () => {
-    const { rerender } = renderItem({ onCloseClick: jest.fn(), isClosing: true });
+  it('shows progress while closing', () => {
+    renderItem({ onCloseClick: jest.fn(), isClosing: true });
 
     expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
+  });
 
-    rerender(
-      <I18nProvider>
-        <SignificantEventItem event={{ ...mockEvent, status: 'closed' }} onCloseClick={jest.fn()} />
-      </I18nProvider>
-    );
+  it.each(['closed', 'dismissed'] as const)('hides the close action for %s events', (status) => {
+    renderItem({ event: { ...mockEvent, status }, onCloseClick: jest.fn() });
 
     expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
   });
