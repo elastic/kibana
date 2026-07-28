@@ -149,7 +149,10 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (resolveUnifiedAttachmentType(comment, owner) === FILE_ATTACHMENT_TYPE) {
           return comment;
         }
-        if (comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE && isUnifiedReferenceAttachmentRequest(comment)) {
+        if (
+          comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE &&
+          isUnifiedReferenceAttachmentRequest(comment)
+        ) {
           const meta = (comment.metadata ?? {}) as {
             entityName?: string;
             entityType?: string;
