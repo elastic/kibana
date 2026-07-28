@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/data-views-plugin'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package
