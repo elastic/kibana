@@ -167,6 +167,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('cancel');
     }
 
+    // v9.6.0 introduced Kill-Process descendents
+    if (gte(agentVersion, '9.6.0')) {
+      capabilities.push('kill_process_descendents');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

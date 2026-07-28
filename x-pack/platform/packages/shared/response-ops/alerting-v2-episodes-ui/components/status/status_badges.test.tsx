@@ -131,4 +131,16 @@ describe('AlertEpisodeStatusBadges', () => {
     );
     expect(screen.getByText(expectedLabel)).toBeInTheDocument();
   });
+
+  it('renders flapping badge when isFlapping is true', () => {
+    renderWithI18n(<AlertEpisodeStatusBadges status={ALERT_EPISODE_STATUS.ACTIVE} isFlapping />);
+    expect(screen.getByTestId('alertEpisodeFlappingBadge')).toBeInTheDocument();
+  });
+
+  it('does not render flapping badge when isFlapping is false', () => {
+    renderWithI18n(
+      <AlertEpisodeStatusBadges status={ALERT_EPISODE_STATUS.ACTIVE} isFlapping={false} />
+    );
+    expect(screen.queryByTestId('alertEpisodeFlappingBadge')).not.toBeInTheDocument();
+  });
 });

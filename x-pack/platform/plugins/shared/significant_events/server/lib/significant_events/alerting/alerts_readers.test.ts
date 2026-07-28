@@ -20,7 +20,12 @@ const LOOKBACK = 'now-30m';
 const BUCKET_INTERVAL = '30s';
 
 const makeQueryLink = (
-  overrides: { rule_id?: string; stream_name?: string; title?: string } = {}
+  overrides: {
+    rule_id?: string;
+    stream_name?: string;
+    title?: string;
+    severity_score?: number;
+  } = {}
 ): QueryLink => ({
   query: {
     id: 'q1',
@@ -28,7 +33,7 @@ const makeQueryLink = (
     title: overrides.title ?? 'Test rule',
     description: 'desc',
     esql: { query: 'FROM logs | WHERE body.text:"error"' },
-    severity_score: 60,
+    severity_score: overrides.severity_score ?? 60,
   },
   stream_name: overrides.stream_name ?? 'logs.test',
   rule_backed: true,
@@ -159,6 +164,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     expect(result.by_rule.buckets).toEqual([
       {
         key: RULE_UUID,
+        severity_score: 60,
         doc_count: 42,
         rule_name: {
           top: [{ metrics: { 'kibana.alert.rule.name': 'Linked rule title' } }],

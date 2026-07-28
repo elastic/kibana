@@ -2400,14 +2400,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "Serve swagger docs",
-      "matchDepNames": [
-        "@types/express",
-        "express",
-        "swagger-jsdoc",
-        "swagger-ui-express",
-        "zod-to-json-schema"
-      ],
+      "groupName": "express",
+      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],

@@ -7,7 +7,13 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ContextEngineStartDependencies } from '../../types';
 
-const useTypedKibana = () => useKibana<CoreStart>();
+export interface ContextEngineServices extends CoreStart {
+  share: ContextEngineStartDependencies['share'];
+  console?: ContextEngineStartDependencies['console'];
+}
+
+const useTypedKibana = () => useKibana<ContextEngineServices>();
 
 export { useTypedKibana as useKibana };

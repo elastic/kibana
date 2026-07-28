@@ -29,6 +29,7 @@ import { DeleteTableItemsModal } from '../../../stream_detail_significant_events
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { StreamPicker } from '../shared/stream_picker';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { useKiGeneration } from './ki_generation_context';
 import { useKnowledgeIndicatorsTable } from './use_knowledge_indicators_table';
 import { useKnowledgeIndicatorsColumns } from './use_knowledge_indicators_columns';
@@ -46,6 +47,7 @@ import {
 
 export function KnowledgeIndicatorsTable() {
   const { euiTheme } = useEuiTheme();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
   const {
@@ -93,6 +95,7 @@ export function KnowledgeIndicatorsTable() {
   );
 
   const isRunDisabled =
+    blocksActivity ||
     generationStreamNames.length === 0 ||
     isConnectorCatalogUnavailable ||
     featuresConnectors.loading ||
@@ -190,6 +193,7 @@ export function KnowledgeIndicatorsTable() {
           onRunFeaturesOnly={onRunFeaturesOnly}
           onRunQueriesOnly={onRunQueriesOnly}
           isRunDisabled={isRunDisabled}
+          runDisabledTooltip={activityBlockTooltip}
           isConfigDisabled={generationStreamNames.length === 0}
           isLoading={isScheduling}
         />
@@ -252,6 +256,8 @@ export function KnowledgeIndicatorsTable() {
         isSelectionActionsDisabled={isSelectionActionsDisabled}
         selectionContainsNonExcludable={selectionContainsNonExcludable}
         hasPromotableSelected={hasPromotableSelected}
+        blocksActivity={blocksActivity}
+        activityBlockTooltip={activityBlockTooltip}
         onSearchChange={handleSearchChange}
         onStatusFilterChange={handleStatusFilterChange}
         onSelectedTypesChange={handleSelectedTypesChange}

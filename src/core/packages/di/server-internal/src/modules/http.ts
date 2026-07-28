@@ -32,7 +32,7 @@ export function loadHttp({ bind, onActivation }: ContainerModuleLoadOptions): vo
       try {
         return await scope.get(route, { autobind: true }).handle();
       } finally {
-        scope.unbindAll();
+        scope.unbindAllAsync();
       }
     };
 
