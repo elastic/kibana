@@ -323,9 +323,9 @@ export class OtelAppender implements DisposableAppender {
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
-    includeResources: schema.maybe(schema.arrayOf(schema.string())),
+    includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
     // Resource-attribute keys to also emit as per-record log attributes.
-    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string())),
+    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
     // Template-based derived attributes: target key -> template with {field} placeholders.
     fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     fieldRenames: schema.maybe(
