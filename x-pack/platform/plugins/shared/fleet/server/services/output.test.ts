@@ -14,11 +14,15 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import { RESERVED_CONFIG_YML_KEYS, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
 import type { NewElasticsearchOutput } from '../../common/types';
+<<<<<<< HEAD
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   SERVERLESS_DEFAULT_OUTPUT_ID,
 } from '../constants';
+=======
+import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
+>>>>>>> 5d1cc5f1f566 (Adjust type narrowing in outputSavedObjectToOutput)
 
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';

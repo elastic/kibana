@@ -137,9 +137,6 @@ export function outputIdToUuid(id: string) {
 const isBeatsSOOutput = (attrs: OutputSOAttributes): attrs is BeatsOutputSOAttributes =>
   isBeatsOutput(attrs);
 
-const isOtlpSOOutput = (attrs: OutputSOAttributes): attrs is OutputSoOtlpAttributes =>
-  isOtlpOutput(attrs);
-
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
 
@@ -159,14 +156,8 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     };
   }
 
-  if (isOtlpSOOutput(so.attributes)) {
-    const { output_id: outputId, ...attributes } = so.attributes;
-    return { id: outputId ?? so.id, ...attributes };
-  }
-
-  const { output_id: outputId, ...attributes } =
-    so.attributes as unknown as OutputSoBaseAttributes & Record<string, unknown>;
-  return { id: outputId ?? so.id, ...attributes } as unknown as Output;
+  const { output_id: outputId, ...attributes } = so.attributes;
+  return { id: outputId ?? so.id, ...attributes };
 }
 
 async function getAgentPoliciesPerOutput(
