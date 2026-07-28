@@ -280,7 +280,7 @@ function createChatCompletePipeline({
               metadata,
               timeout,
               maxContentLength,
-              stream: workflowAnonymization ? true : stream,
+              stream,
             }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
         ).pipe(
           tap(() => {
