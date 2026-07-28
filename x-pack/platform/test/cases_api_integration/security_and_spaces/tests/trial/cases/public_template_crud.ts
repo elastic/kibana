@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../../common/lib/api';
 import type { User } from '../../../../common/lib/authentication/types';
 import {
-  noKibanaPrivileges,
   obsOnly,
   secOnly,
   secOnlyManageTemplates,
@@ -252,7 +251,17 @@ export default ({ getService }: FtrProviderContext): void => {
         await requestAs('delete', `${TEMPLATES_URL}/${created.templateId}`, auth).expect(204);
       });
 
-      for (const user of [secOnly, secOnlyRead, secOnlyNoManageTemplates]) {
+      // cases `all` includes manageTemplates (`includeIn: 'all'`) — same as the internal
+      // manage_templates_sub_privilege suite.
+      it('allows a user with full cases access to create a template', async () => {
+        await requestAs('post', TEMPLATES_URL, { user: secOnly, space: 'space1' })
+          .send(writeBodyFor('Full Access Template'))
+          .expect(200);
+      });
+
+      // secOnlyRead: cases read only. secOnlyNoManageTemplates: minimal_all without the
+      // manageTemplates sub-privilege. (secOnly is NOT denied — see test above.)
+      for (const user of [secOnlyRead, secOnlyNoManageTemplates]) {
         it(`returns 403 on create for "${user.username}" (no manage templates privilege)`, async () => {
           await requestAs('post', TEMPLATES_URL, { user, space: 'space1' })
             .send(writeBodyFor(`Denied Template ${user.username}`))
@@ -266,32 +275,35 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(writeBodyFor('Guarded Template'))
           .expect(200);
 
-        // cases `all` grants template read but not manage — the id is legitimately visible.
-        const readerAuth = { user: secOnly, space: 'space1' };
+        // minimal_all grants template read but not manage — the id is legitimately visible.
+        const readerAuth = { user: secOnlyNoManageTemplates, space: 'space1' };
         await requestAs('put', `${TEMPLATES_URL}/${created.templateId}`, readerAuth)
           .send(writeBodyFor('Guarded Template Renamed'))
           .expect(403);
         await requestAs('delete', `${TEMPLATES_URL}/${created.templateId}`, readerAuth).expect(403);
       });
 
-      it('returns 404 (not 403) on update/delete probes from a user with no cases access', async () => {
+      it('returns 404 (not 403) on update/delete probes from a user with no access to the template owner', async () => {
         const manageAuth = { user: secOnlyManageTemplates, space: 'space1' };
         const { body: created } = await requestAs('post', TEMPLATES_URL, manageAuth)
           .send(writeBodyFor('Hidden Template'))
           .expect(200);
 
-        for (const user of [noKibanaPrivileges, obsOnly]) {
-          await requestAs('put', `${TEMPLATES_URL}/${created.templateId}`, {
-            user,
-            space: 'space1',
-          })
-            .send(writeBodyFor('Hidden Template Probe'))
-            .expect(404);
-          await requestAs('delete', `${TEMPLATES_URL}/${created.templateId}`, {
-            user,
-            space: 'space1',
-          }).expect(404);
-        }
+        // obsOnly has observability cases access (including manageTemplates via includeIn: 'all')
+        // but nothing for securitySolutionFixture — hide-existence must return 404, not 403.
+        // (noKibanaPrivileges is covered by the broader cases RBAC suites; space/authz middleware
+        // can short-circuit to 403 before the template client runs, so it is not a clean
+        // existence-hiding probe.)
+        await requestAs('put', `${TEMPLATES_URL}/${created.templateId}`, {
+          user: obsOnly,
+          space: 'space1',
+        })
+          .send(writeBodyFor('Hidden Template Probe'))
+          .expect(404);
+        await requestAs('delete', `${TEMPLATES_URL}/${created.templateId}`, {
+          user: obsOnly,
+          space: 'space1',
+        }).expect(404);
       });
 
       it('owner scoping: a securitySolution manage-templates user cannot create an observability template', async () => {
