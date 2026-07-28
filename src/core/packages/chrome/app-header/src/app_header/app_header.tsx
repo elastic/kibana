@@ -21,12 +21,7 @@ import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
 import { AppHeaderDescription } from './app_header_description';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
-import {
-  useBackNavTargets,
-  useCanAccessIntegrations,
-  useResolvedBadges,
-  useShareAction,
-} from './hooks';
+import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
 
 type AppHeaderConfigWithoutBack<T> = T extends AppHeaderConfig ? Omit<T, 'back'> : never;
 
@@ -104,7 +99,6 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
-    const backTargets = useBackNavTargets(back);
     const canAccessIntegrations = useCanAccessIntegrations();
     const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
 
@@ -146,7 +140,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} backTargets={backTargets} size={titleSize} />}
+        title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         titleAppend={titleAppend}
@@ -155,7 +149,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
         }
         secondaryContent={
           description ? (
-            <AppHeaderDescription description={description} hasBack={backTargets.length > 0} />
+            <AppHeaderDescription description={description} />
           ) : metadata?.length ? (
             <AppHeaderMetadata metadata={metadata} />
           ) : undefined
