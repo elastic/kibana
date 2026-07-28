@@ -278,11 +278,6 @@ export class IndicatorReader {
    */
   async getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
     const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
-    const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
-    const streamNames = new Set<string>();
-    for (const doc of docs) {
-      streamNames.add(doc['stream.name']);
-    }
-    return [...streamNames].sort();
+    return this.revisionReader.fetchDistinctStreamNames(where, IS_NOT_DELETED);
   }
 }
