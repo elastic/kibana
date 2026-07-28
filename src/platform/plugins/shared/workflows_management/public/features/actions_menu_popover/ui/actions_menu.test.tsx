@@ -177,4 +177,131 @@ describe('ActionsMenu', () => {
     const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     expect(searchInput).toBeInTheDocument();
   });
+
+  describe('keyboard navigation', () => {
+    beforeEach(() => {
+      Element.prototype.scrollIntoView = jest.fn();
+    });
+
+    const getKeyboardActiveLabel = () => {
+      const active = document.querySelector('.actionsMenu-keyboardActive');
+      return active?.textContent ?? null;
+    };
+
+    it('selects the first item on ArrowDown and the last on ArrowUp from search', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      // Wrap: from first Up goes to last actionable root item
+      expect(getKeyboardActiveLabel()).toContain('If Condition');
+    });
+
+    it('wraps from the last item back to the first on ArrowDown', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      expect(getKeyboardActiveLabel()).toContain('If Condition');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+    });
+
+    it('enters a category on ArrowRight and focuses the first child', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
+
+      expect(screen.getByText('Manual')).toBeInTheDocument();
+      // Children are sorted A–Z, so Alert is first (also appears in the preview panel).
+      expect(getKeyboardActiveLabel()).toContain('Alert');
+    });
+
+    it('enters a category on Enter and focuses the first child', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(screen.getByText('Manual')).toBeInTheDocument();
+      expect(getKeyboardActiveLabel()).toContain('Alert');
+    });
+
+    it('leaves a category on ArrowLeft and focuses the category just left', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
+      expect(getKeyboardActiveLabel()).toContain('Alert');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowLeft' });
+
+      expect(screen.getByText('If Condition')).toBeInTheDocument();
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+    });
+
+    it('does nothing on ArrowRight for a leaf item', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('If Condition');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
+
+      expect(getKeyboardActiveLabel()).toContain('If Condition');
+      expect(screen.queryByText('Manual')).not.toBeInTheDocument();
+      expect(onActionSelected).not.toHaveBeenCalled();
+    });
+
+    it('adds a leaf on Enter', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(onActionSelected).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'if', label: 'If Condition' })
+      );
+    });
+
+    it('returns to search and clears selection when typing', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText(
+        'Search step, command or # to go to a step'
+      ) as HTMLInputElement;
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+
+      fireEvent.keyDown(searchInput, { key: 'a' });
+
+      expect(getKeyboardActiveLabel()).toBeNull();
+      expect(document.activeElement).toBe(searchInput);
+      expect(searchInput.value).toContain('a');
+    });
+  });
 });

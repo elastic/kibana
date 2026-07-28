@@ -55,14 +55,54 @@ const REQUEST_ACTION_URL = 'https://github.com/elastic/workflows';
 
 const LIST_SLIDE_MS = 220;
 
+const KEYBOARD_ACTIVE_CLASS = 'actionsMenu-keyboardActive';
+
+/** Post-navigation keyboard focus target for the left list. */
+type PendingListFocus = 'first' | 'none' | { optionId: string };
+
+function getActionableDisplayOptions(options: EuiSelectableOption[]): EuiSelectableOption[] {
+  return options.filter((option) => !option.isGroupLabel && !option.disabled);
+}
+
+function getOptionActionId(option: EuiSelectableOption): string | undefined {
+  const itemData = getMenuItemData(option);
+  if (itemData?.kind === 'action') {
+    return itemData.action.id;
+  }
+  return (option as { id?: string }).id;
+}
+
+function getSelectableOptionKey(option: EuiSelectableOption): string | undefined {
+  const itemData = getMenuItemData(option);
+  if (!itemData) {
+    const id = getOptionActionId(option);
+    return id ? `action:${id}` : undefined;
+  }
+  switch (itemData.kind) {
+    case 'action':
+      return `action:${itemData.action.id}`;
+    case 'command':
+      return `command:${itemData.command.id}`;
+    case 'jump':
+      return `jump:${itemData.entry.id}`;
+    case 'nav':
+      return `nav:${itemData.target}`;
+  }
+}
+
+function isCategoryOption(option: EuiSelectableOption): boolean {
+  const itemData = getMenuItemData(option);
+  const action =
+    itemData?.kind === 'action' ? itemData.action : (option as unknown as ActionOptionData);
+  return isActionGroup(action) || isActionConnectorGroup(action);
+}
+
 function getNavDirection(fromPath: string[], toPath: string[]): 'forward' | 'back' {
-  const isPrefix =
-    fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
+  const isPrefix = fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
   if (isPrefix) {
     return 'forward';
   }
-  const isAncestor =
-    toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
+  const isAncestor = toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
   if (isAncestor) {
     return 'back';
   }
@@ -136,9 +176,12 @@ export function ActionsMenu({
   const { euiTheme } = useEuiTheme();
   const { workflowsExtensions } = useKibana().services;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
   const listViewportRef = useRef<HTMLDivElement | null>(null);
   const listPaneRef = useRef<HTMLDivElement | null>(null);
   const isSlidingRef = useRef(false);
+  const pendingListFocusRef = useRef<PendingListFocus | null>(null);
+  const keyboardIndexRef = useRef<number | null>(null);
   const defaultOptions = useMemo(
     () => getActionOptions(euiTheme, workflowsExtensions),
     [euiTheme, workflowsExtensions]
@@ -150,18 +193,26 @@ export function ActionsMenu({
   const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
   const [pinnedOption, setPinnedOption] = useState<ActionOptionData | null>(null);
   const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
+  /** Index into actionable (non-label) display options; null = nothing keyboard-selected. */
+  const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
+  keyboardIndexRef.current = keyboardIndex;
 
   const focusSearch = useCallback(() => {
     searchInputRef.current?.focus({ preventScroll: true });
   }, []);
 
-  // Spotlight-style: keep the search field focused whenever the menu is open,
-  // including after browsing into categories.
+  const clearKeyboardSelection = useCallback(() => {
+    setKeyboardIndex(null);
+    setHoveredOption(null);
+    setHoveredJumpEntry(null);
+  }, []);
+
+  // Focus search when the menu first mounts; arrow keys then own list selection.
   useEffect(() => {
     focusSearch();
-  }, [focusSearch, currentPath]);
+  }, [focusSearch]);
 
-  /** Prevent clicks in the menu from stealing focus away from search. */
+  /** Prevent clicks in the menu chrome from stealing focus away from search. */
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`)) {
@@ -196,6 +247,78 @@ export function ActionsMenu({
     currentPath,
   });
 
+  const actionableDisplayOptions = useMemo(
+    () => getActionableDisplayOptions(displayOptions),
+    [displayOptions]
+  );
+  const actionableDisplayOptionsRef = useRef(actionableDisplayOptions);
+  actionableDisplayOptionsRef.current = actionableDisplayOptions;
+
+  const currentPathRef = useRef(currentPath);
+  currentPathRef.current = currentPath;
+
+  const syncPreviewFromSelectableOption = useCallback((option: EuiSelectableOption) => {
+    const itemData = getMenuItemData(option);
+    if (itemData?.kind === 'jump') {
+      setHoveredJumpEntry(itemData.entry);
+      setHoveredOption(null);
+      return;
+    }
+    if (itemData?.kind === 'command' || itemData?.kind === 'nav') {
+      return;
+    }
+    const action =
+      itemData?.kind === 'action' ? itemData.action : (option as unknown as ActionOptionData);
+    setHoveredOption(action);
+    setHoveredJumpEntry(null);
+  }, []);
+
+  const setKeyboardIndexAndPreview = useCallback(
+    (index: number | null) => {
+      setKeyboardIndex(index);
+      if (index == null) {
+        return;
+      }
+      const option = actionableDisplayOptionsRef.current[index];
+      if (option) {
+        syncPreviewFromSelectableOption(option);
+      }
+    },
+    [syncPreviewFromSelectableOption]
+  );
+
+  // Apply pending keyboard focus after category enter/leave re-renders the list.
+  useEffect(() => {
+    const pending = pendingListFocusRef.current;
+    if (pending == null || pending === 'none') {
+      if (pending === 'none') {
+        pendingListFocusRef.current = null;
+      }
+      return;
+    }
+    pendingListFocusRef.current = null;
+
+    const actionable = getActionableDisplayOptions(displayOptions);
+    if (pending === 'first') {
+      if (actionable.length === 0) {
+        setKeyboardIndex(null);
+        return;
+      }
+      setKeyboardIndexAndPreview(0);
+      return;
+    }
+
+    const idx = actionable.findIndex((option) => getOptionActionId(option) === pending.optionId);
+    setKeyboardIndexAndPreview(idx >= 0 ? idx : null);
+  }, [displayOptions, currentPath, setKeyboardIndexAndPreview]);
+
+  // Keep the keyboard-active row visible while wrapping through long lists.
+  useEffect(() => {
+    if (keyboardIndex == null) return;
+    const active = menuContainerRef.current?.querySelector(`.${KEYBOARD_ACTIVE_CLASS}`);
+    active?.closest('.euiSelectableListItem')?.scrollIntoView({ block: 'nearest' });
+  }, [keyboardIndex, currentPath]);
+
   const isSearching =
     searchTerm.trim().length > 0 &&
     !searchTerm.trimStart().startsWith('#') &&
@@ -209,6 +332,11 @@ export function ActionsMenu({
   const handleListMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       const el = e.target as HTMLElement;
+
+      // Mouse hover takes over highlight + preview from keyboard selection.
+      if (keyboardIndexRef.current != null) {
+        setKeyboardIndex(null);
+      }
 
       const jumpTarget = el.closest('[data-jump-id]');
       if (jumpTarget) {
@@ -240,7 +368,8 @@ export function ActionsMenu({
   );
 
   const navigateToPath = useCallback(
-    (nextPath: string[]) => {
+    (nextPath: string[], pendingFocus: PendingListFocus = 'none') => {
+      pendingListFocusRef.current = pendingFocus;
       const applyNavigation = () => {
         let nextOptions: ActionOptionData[] = defaultOptions;
         for (const id of nextPath) {
@@ -256,11 +385,12 @@ export function ActionsMenu({
         setPinnedOption(null);
         setHoveredOption(null);
         setHoveredJumpEntry(null);
+        // Clear now; pending focus effect re-selects after the list re-renders.
+        setKeyboardIndex(null);
       };
 
       const pathUnchanged =
-        nextPath.length === currentPath.length &&
-        nextPath.every((id, i) => id === currentPath[i]);
+        nextPath.length === currentPath.length && nextPath.every((id, i) => id === currentPath[i]);
       if (pathUnchanged) {
         applyNavigation();
         return;
@@ -296,8 +426,7 @@ export function ActionsMenu({
 
       // Park the incoming pane off-screen before React swaps the list content
       pane.style.transition = 'none';
-      pane.style.transform =
-        direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
+      pane.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
 
       applyNavigation();
 
@@ -332,7 +461,8 @@ export function ActionsMenu({
       if (isActionGroup(action)) {
         const nextPath = action.pathIds ?? [...currentPath, action.id];
         setSearchTerm('');
-        navigateToPath([...nextPath]);
+        // Mouse/click browse: no keyboard selection at the new level.
+        navigateToPath([...nextPath], 'none');
       } else {
         setPinnedOption(null);
         onActionSelected(action);
@@ -377,10 +507,23 @@ export function ActionsMenu({
       ? rawSearch.slice(1).trim()
       : rawSearch;
 
+    const keyboardOption =
+      keyboardIndex != null ? actionableDisplayOptions[keyboardIndex] : undefined;
+    const isKeyboardActive =
+      keyboardOption != null &&
+      getSelectableOptionKey(keyboardOption) != null &&
+      getSelectableOptionKey(keyboardOption) === getSelectableOptionKey(rawOption);
+    const keyboardActiveClassName = isKeyboardActive ? KEYBOARD_ACTIVE_CLASS : undefined;
+
     if (itemData?.kind === 'command') {
       const { command } = itemData;
       return (
-        <div css={styles.actionOptionWrapper} data-command-id={command.id}>
+        <div
+          css={styles.actionOptionWrapper}
+          className={keyboardActiveClassName}
+          data-command-id={command.id}
+        >
+          {' '}
           <EuiFlexGroup
             alignItems="center"
             css={styles.actionOption}
@@ -435,7 +578,12 @@ export function ActionsMenu({
 
     if (itemData?.kind === 'jump') {
       return (
-        <div css={styles.compactOptionWrapper} data-jump-id={itemData.entry.id}>
+        <div
+          css={styles.compactOptionWrapper}
+          className={keyboardActiveClassName}
+          data-jump-id={itemData.entry.id}
+        >
+          {' '}
           <EuiText size="s">
             <EuiHighlight search={effectiveSearch} highlightAll>
               {rawOption.label}
@@ -447,7 +595,7 @@ export function ActionsMenu({
 
     if (itemData?.kind === 'nav') {
       return (
-        <div css={styles.compactOptionWrapper}>
+        <div css={styles.compactOptionWrapper} className={keyboardActiveClassName}>
           <EuiFlexGroup
             alignItems="center"
             justifyContent="spaceBetween"
@@ -479,7 +627,7 @@ export function ActionsMenu({
     return (
       <div
         css={styles.actionOptionWrapper}
-        className="actionOptionWrapper"
+        className={['actionOptionWrapper', keyboardActiveClassName].filter(Boolean).join(' ')}
         data-option-id={action.id}
       >
         <EuiFlexGroup alignItems="center" css={styles.actionOption} gutterSize="none">
@@ -626,6 +774,43 @@ export function ActionsMenu({
     handleStepOrGroupSelected(action);
   };
 
+  const handleChangeRef = useRef(handleChange);
+  handleChangeRef.current = handleChange;
+
+  const enterCategoryFromKeyboard = useCallback(() => {
+    const index = keyboardIndexRef.current;
+    if (index == null) return;
+    const option = actionableDisplayOptionsRef.current[index];
+    if (!option || !isCategoryOption(option)) return;
+    const itemData = getMenuItemData(option);
+    const action =
+      itemData?.kind === 'action' ? itemData.action : (option as unknown as ActionOptionData);
+    if (!isActionGroup(action)) return;
+    const nextPath = action.pathIds ?? [...currentPathRef.current, action.id];
+    setSearchTerm('');
+    navigateToPath([...nextPath], 'first');
+  }, [navigateToPath]);
+
+  const leaveCategoryFromKeyboard = useCallback(() => {
+    const path = currentPathRef.current;
+    if (path.length === 0) return;
+    const exitedId = path[path.length - 1];
+    navigateToPath(path.slice(0, -1), { optionId: exitedId });
+  }, [navigateToPath]);
+
+  const activateKeyboardOption = useCallback(() => {
+    const index = keyboardIndexRef.current;
+    if (index == null) return;
+    const option = actionableDisplayOptionsRef.current[index];
+    if (!option) return;
+    // Enter on a category drills in and selects the first child (keyboard path).
+    if (isCategoryOption(option)) {
+      enterCategoryFromKeyboard();
+      return;
+    }
+    handleChangeRef.current([], {} as React.BaseSyntheticEvent, option);
+  }, [enterCategoryFromKeyboard]);
+
   /** Lower rank = higher priority in search results (Steps: mode only). */
   const MAX_ACTION_MATCH_RANK = 5;
 
@@ -654,6 +839,7 @@ export function ActionsMenu({
     setPinnedOption(null);
     setHoveredOption(null);
     setHoveredJumpEntry(null);
+    setKeyboardIndex(null);
 
     if (searchValue.length > 0) {
       setCurrentPath([]);
@@ -690,18 +876,75 @@ export function ActionsMenu({
   const handleSearchChangeRef = useRef(handleSearchChange);
   handleSearchChangeRef.current = handleSearchChange;
 
-  // If focus leaves the search field (e.g. arrow-key option focus), typing still searches.
+  const setKeyboardIndexAndPreviewRef = useRef(setKeyboardIndexAndPreview);
+  setKeyboardIndexAndPreviewRef.current = setKeyboardIndexAndPreview;
+
+  // List keyboard navigation + typing returns focus to search.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const input = searchInputRef.current;
       if (!input || !document.body.contains(input)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (document.activeElement === input) return;
+
+      const menuEl = menuContainerRef.current;
+      if (menuEl && !menuEl.contains(document.activeElement) && document.activeElement !== input) {
+        // Ignore keys when focus is completely outside the menu.
+        if (!menuEl.contains(e.target as Node)) return;
+      }
+
+      const actionable = actionableDisplayOptionsRef.current;
+      const isSearchFocused = document.activeElement === input;
+      const keyboardIdx = keyboardIndexRef.current;
+      const inListNavMode = keyboardIdx != null;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (actionable.length === 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!inListNavMode) {
+          setKeyboardIndexAndPreviewRef.current(e.key === 'ArrowDown' ? 0 : actionable.length - 1);
+          return;
+        }
+
+        const delta = e.key === 'ArrowDown' ? 1 : -1;
+        const next = (keyboardIdx + delta + actionable.length) % actionable.length;
+        setKeyboardIndexAndPreviewRef.current(next);
+        return;
+      }
+
+      if (e.key === 'ArrowRight') {
+        if (!inListNavMode) return; // caret movement in search
+        e.preventDefault();
+        e.stopPropagation();
+        enterCategoryFromKeyboard();
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        if (!inListNavMode) return; // caret movement in search
+        e.preventDefault();
+        e.stopPropagation();
+        leaveCategoryFromKeyboard();
+        return;
+      }
+
+      if (e.key === 'Enter' && inListNavMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        activateKeyboardOption();
+        return;
+      }
+
+      // Typing while list-focused returns to search and clears selection.
+      if (isSearchFocused && !inListNavMode) return;
 
       const isPrintable = e.key.length === 1;
       if (!isPrintable && e.key !== 'Backspace' && e.key !== 'Delete') return;
 
       e.preventDefault();
+      e.stopPropagation();
+      clearKeyboardSelection();
       focusSearch();
 
       if (isPrintable) {
@@ -715,7 +958,13 @@ export function ActionsMenu({
 
     document.addEventListener('keydown', onKeyDown, true);
     return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, [focusSearch]);
+  }, [
+    activateKeyboardOption,
+    clearKeyboardSelection,
+    enterCategoryFromKeyboard,
+    focusSearch,
+    leaveCategoryFromKeyboard,
+  ]);
 
   const displayOptionsNoTooltip = useMemo(
     () => displayOptions.map((o) => ({ ...o, toolTipContent: '' })),
@@ -805,10 +1054,19 @@ export function ActionsMenu({
         inputRef: (node: HTMLInputElement | null) => {
           searchInputRef.current = node;
         },
-        onBlur: () => {
-          // Restore focus unless the menu is unmounting
+        onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+          const next = e.relatedTarget as Node | null;
+          const menuEl = menuContainerRef.current;
+          // Keep list keyboard nav possible; only pull focus back if it left the menu.
+          if (menuEl && next && menuEl.contains(next)) {
+            return;
+          }
           requestAnimationFrame(() => {
             if (searchInputRef.current && document.body.contains(searchInputRef.current)) {
+              const active = document.activeElement;
+              if (menuContainerRef.current?.contains(active)) {
+                return;
+              }
               focusSearch();
             }
           });
@@ -826,7 +1084,7 @@ export function ActionsMenu({
       singleSelection
     >
       {(list, search) => (
-        <div css={styles.container} onMouseDown={keepSearchFocused}>
+        <div ref={menuContainerRef} css={styles.container} onMouseDown={keepSearchFocused}>
           {/* Full-width header: title + search */}
           <div css={styles.header}>
             <div css={styles.titleRow}>
@@ -1098,26 +1356,27 @@ const componentStyles = {
         // Never underline option text — EUI focus/hover styles add it by default
         textDecoration: 'none !important',
       },
-      // EUI keeps a focused row after mouseDown; that must not compete with :hover.
-      // Only the hovered row should show the highlight (one at a time).
-      '& .euiSelectableListItem.euiSelectableListItem-isFocused:not(:hover), & .euiSelectableListItem[aria-selected="true"]:not(:hover)':
+      // EUI keeps a focused row after mouseDown; suppress that so only hover OR our
+      // keyboard-active row shows the highlight (one at a time).
+      '& .euiSelectableListItem.euiSelectableListItem-isFocused:not(:hover):not(:has(.actionsMenu-keyboardActive)), & .euiSelectableListItem[aria-selected="true"]:not(:hover):not(:has(.actionsMenu-keyboardActive))':
         {
           backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
           color: 'inherit',
         },
-      '& .euiSelectableListItem:hover': {
+      '& .euiSelectableListItem:hover, & .euiSelectableListItem:has(.actionsMenu-keyboardActive)': {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         color: 'inherit',
       },
-      // Info / plus affordances only on hovered leaf rows
+      // Info / plus affordances only on hovered or keyboard-active leaf rows
       '& .euiSelectableListItem .rowActions': {
         opacity: 0,
         pointerEvents: 'none',
       },
-      '& .euiSelectableListItem:hover .rowActions': {
-        opacity: 1,
-        pointerEvents: 'auto',
-      },
+      '& .euiSelectableListItem:hover .rowActions, & .euiSelectableListItem:has(.actionsMenu-keyboardActive) .rowActions':
+        {
+          opacity: 1,
+          pointerEvents: 'auto',
+        },
     }),
   actionOptionWrapper: css({
     width: '100%',
