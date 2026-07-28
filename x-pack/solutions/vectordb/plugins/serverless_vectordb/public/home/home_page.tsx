@@ -10,16 +10,9 @@ import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
-  EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiPanel,
   EuiShowFor,
   EuiSpacer,
-  EuiStat,
-  EuiText,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
@@ -28,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useDeploymentStats } from '../hooks/use_deployment_stats';
 import { formatBytes, formatNumber } from '../utils/format';
 import { HomePageBanner } from './home_page_banner';
+import { HomePageStatPanel } from './home_page_stat_panel';
 import { AddDataSection } from './add_data_section';
 import { ChatWithYourDataSection } from './chat_with_data_section';
 import { useKibana } from '../hooks/use_kibana';
@@ -37,51 +31,6 @@ const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
   border-left: ${euiTheme.border.thin};
   height: ${euiTheme.size.l};
 `;
-
-interface StatCardProps {
-  iconType: string;
-  title: string;
-  onTitleClick: () => void;
-  testSubj: string;
-  stats: Array<{ key: string; label: string; value: string; isLoading: boolean }>;
-}
-
-const StatCard = ({ iconType, title, onTitleClick, testSubj, stats }: StatCardProps) => (
-  <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="m" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink onClick={onTitleClick}>
-          <EuiText size="s">
-            <strong>{title}</strong>
-          </EuiText>
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="arrowRight" size="s" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EuiFlexGroup gutterSize="l" responsive={false}>
-      {stats.map(({ key, label, value, isLoading }) => (
-        <EuiFlexItem key={key}>
-          <EuiStat
-            title={isLoading ? <EuiLoadingSpinner size="m" /> : value}
-            description={
-              <EuiText size="xs" color="subdued">
-                <strong>{label}</strong>
-              </EuiText>
-            }
-            descriptionElement="div"
-            titleSize="s"
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  </EuiPanel>
-);
 
 export const HomePage = () => {
   const {
@@ -185,58 +134,29 @@ export const HomePage = () => {
 
           {/* Data card */}
           <EuiFlexItem>
-            <EuiPanel hasBorder paddingSize="m" data-test-subj="homePageDataCard">
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="indexMapping" size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiLink onClick={navigateToIndexManagement}>
-                    <EuiText size="s">
-                      <strong>
-                        {i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
-                          defaultMessage: 'Data',
-                        })}
-                      </strong>
-                    </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="arrowRight" size="s" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexGroup gutterSize="xl" responsive={false} wrap>
-                {dataStats.map(({ key, label, value, isLoading: statIsLoading }) => (
-                  <EuiFlexItem key={key}>
-                    <EuiStat
-                      title={statIsLoading ? <EuiLoadingSpinner size="m" /> : value}
-                      description={
-                        <EuiText size="xs" color="subdued">
-                          <strong>{label}</strong>
-                        </EuiText>
-                      }
-                      descriptionElement="div"
-                      titleSize="s"
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPanel>
+            <HomePageStatPanel
+              iconType="database"
+              title={i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
+                defaultMessage: 'Data',
+              })}
+              onTitleClick={navigateToIndexManagement}
+              testSubj="homePageDataCard"
+              metrics={dataStats}
+            />
           </EuiFlexItem>
 
           {/* Dashboards / Workflows / API Keys cards */}
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <StatCard
-                  iconType="dashboardApp"
+                <HomePageStatPanel
+                  iconType="productDashboard"
                   title={i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.title', {
                     defaultMessage: 'Dashboards',
                   })}
                   onTitleClick={navigateToDashboards}
                   testSubj="homePageDashboardsCard"
-                  stats={[
+                  metrics={[
                     {
                       key: 'dashboardsTotal',
                       label: STAT_TILE_LABELS.dashboardsTotal,
@@ -253,14 +173,14 @@ export const HomePage = () => {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <StatCard
-                  iconType="branch"
+                <HomePageStatPanel
+                  iconType="workflow"
                   title={i18n.translate('xpack.serverlessVectordb.home.workflowsCard.title', {
                     defaultMessage: 'Workflows',
                   })}
                   onTitleClick={navigateToWorkflows}
                   testSubj="homePageWorkflowsCard"
-                  stats={[
+                  metrics={[
                     {
                       key: 'workflowsTotal',
                       label: STAT_TILE_LABELS.workflowsTotal,
@@ -277,14 +197,14 @@ export const HomePage = () => {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <StatCard
+                <HomePageStatPanel
                   iconType="key"
                   title={i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.title', {
                     defaultMessage: 'API Keys',
                   })}
                   onTitleClick={navigateToApiKeys}
                   testSubj="homePageApiKeysCard"
-                  stats={[
+                  metrics={[
                     {
                       key: 'apiKeysTotal',
                       label: STAT_TILE_LABELS.apiKeysTotal,

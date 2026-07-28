@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiCodeBlock, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -17,7 +17,7 @@ export const ChatWithYourDataSection = () => {
 
   return (
     <>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.serverlessVectordb.home.chat.title', {
             defaultMessage: 'Chat with your data',
@@ -34,27 +34,33 @@ export const ChatWithYourDataSection = () => {
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCodeBlock language="bash" isCopyable paddingSize="s" fontSize="m">
-        {'$ npx skills add elastic/agent-skills'}
-      </EuiCodeBlock>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
+      <EuiPanel color="subdued" paddingSize="s" grow={false}>
+        <EuiCodeBlock language="bash" transparentBackground isCopyable paddingSize="none" fontSize="m">
+          {'$ npx skills add elastic/agent-skills'}
+        </EuiCodeBlock>
+      </EuiPanel>
+      <EuiSpacer size="l" />
+      <EuiText size="s" color="subdued">
         <p>
-          {i18n.translate('xpack.serverlessVectordb.home.chat.skipSetup', {
-            defaultMessage: 'Skip the setup and use with our agent.',
+          {i18n.translate('xpack.serverlessVectordb.home.chat.skipSetupTitle', {
+            defaultMessage: 'Or skip the setup and start chatting now.',
           })}
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiButton
-        onClick={() => agentBuilder.toggleChat()}
-        data-test-subj="openElasticAgentButton"
-        data-telemetry-id="serverlessVectordb-home-chat-openElasticAgent"
-      >
-        {i18n.translate('xpack.serverlessVectordb.home.chat.openAgent', {
-          defaultMessage: 'Open Elastic Agent',
-        })}
-      </EuiButton>
+      <span>
+        <EuiButton
+          color="text"
+          size="s"
+          onClick={() => agentBuilder.toggleChat()}
+          data-test-subj="openElasticAgentButton"
+          data-telemetry-id="serverlessVectordb-home-chat-openElasticAgent"
+        >
+          {i18n.translate('xpack.serverlessVectordb.home.chat.openAgent', {
+            defaultMessage: 'Open Elastic Agent',
+          })}
+        </EuiButton>
+      </span>
     </>
   );
 };
