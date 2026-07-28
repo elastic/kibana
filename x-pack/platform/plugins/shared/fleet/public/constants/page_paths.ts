@@ -97,8 +97,6 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';

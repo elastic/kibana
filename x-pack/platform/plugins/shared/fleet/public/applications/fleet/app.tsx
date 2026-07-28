@@ -82,14 +82,11 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
     authz.fleet.readAgentPolicies ||
     authz.fleet.readSettings;
 
-  const hasIntegrationsCreateOrUpdatePrivileges = authz.integrations.all;
-
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
-  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
   const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
@@ -118,9 +115,6 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
             if (!hasAnyFleetReadPrivileges) {
               setPermissionsError('MISSING_PRIVILEGES');
             }
-            if (!hasIntegrationsCreateOrUpdatePrivileges && isAddIntegrationsPath) {
-              setPermissionsError('MISSING_PRIVILEGES');
-            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -132,16 +126,11 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [
-    notifications.toasts,
-    hasAnyFleetReadPrivileges,
-    hasIntegrationsCreateOrUpdatePrivileges,
-    isAddIntegrationsPath,
-  ]);
+  }, [notifications.toasts, hasAnyFleetReadPrivileges]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
-      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
+      <ErrorLayout isAddIntegrationsPath={false}>
         {isPermissionsLoading ? (
           <Loading />
         ) : (
@@ -157,7 +146,7 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
 
   if (!isInitialized || initializationError) {
     return (
-      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
+      <ErrorLayout isAddIntegrationsPath={false}>
         {initializationError ? (
           <Error
             title={
