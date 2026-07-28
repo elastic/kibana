@@ -46,9 +46,9 @@ const runScenario = async (
   indexes: TsdbScenarioIndex[]
 ): Promise<ScenarioResult> => {
   const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
-  // Mixed mappings produce a field-caps metric conflict, so Lens must not apply TSDB restrictions.
+  // Mixed regular/TSDB mappings omit metric metadata from field caps, including with another TSDB stream.
 
-  await test.step('allow aggregations when the downgraded stream has mixed mappings', async () => {
+  await test.step('support the counter field when downgrade produces mixed mappings', async () => {
     await pageObjects.lens.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
