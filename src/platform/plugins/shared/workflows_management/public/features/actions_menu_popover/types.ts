@@ -18,10 +18,6 @@ export interface EditorCommand {
   shortcut?: string[];
 }
 
-export interface ActionSelectionOptions {
-  withParams?: Record<string, unknown>;
-}
-
 export type IconVariant =
   | 'trigger'
   | 'platform'

@@ -9,44 +9,33 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiIcon,
-  EuiIconTip,
   EuiImage,
   EuiLink,
   EuiNotificationBadge,
-  EuiSelect,
   EuiTab,
   EuiTabs,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
-import { AddSplitButton } from './add_split_button';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { stepSchemas } from '../../../../common/step_schemas';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_workflow_json_schema';
 import { usesInverseIconColor } from '../lib/get_action_options';
-import {
-  buildWithParamsFromFormValues,
-  getFieldsFromZodSchema,
-  type StepField,
-} from '../lib/get_step_preview_fields';
-import type { ActionOptionData, ActionSelectionOptions, JumpToStepEntry } from '../types';
+import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
+import type { ActionOptionData, JumpToStepEntry } from '../types';
 import {
   isActionConnectorGroup,
   isActionConnectorOption,
@@ -60,11 +49,9 @@ interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
   hoveredJumpEntry?: JumpToStepEntry | null;
   onStepSelected: (action: ActionOptionData) => void;
-  onAddStep?: (action: ActionOptionData, options?: ActionSelectionOptions) => void;
+  onAddStep?: (action: ActionOptionData) => void;
   /** Pin step detail; when `parentSection` is set, also navigate left into that category. */
   onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
-  /** Fired when configure mode starts/ends so the parent can lock list hover. */
-  onConfiguringChange?: (isConfiguring: boolean) => void;
 }
 
 export function ActionsMenuPreviewPanel({
@@ -73,33 +60,24 @@ export function ActionsMenuPreviewPanel({
   onStepSelected,
   onAddStep,
   onPinPreview,
-  onConfiguringChange,
 }: ActionsMenuPreviewPanelProps) {
   const styles = useMemoCss(panelStyles);
   const [activeTab, setActiveTab] = useState<TabId>('inputs');
-  /** Step locked into the configure form; ignores list hover until cancel/confirm. */
-  const [configuringStep, setConfiguringStep] = useState<ActionOptionData | null>(null);
 
-  useEffect(() => {
-    onConfiguringChange?.(configuringStep != null);
-    return () => onConfiguringChange?.(false);
-  }, [configuringStep, onConfiguringChange]);
-
-  const previewStep = configuringStep ?? hoveredOption;
-  const isGroup = previewStep
-    ? isActionGroup(previewStep) || isActionConnectorGroup(previewStep)
+  const isGroup = hoveredOption
+    ? isActionGroup(hoveredOption) || isActionConnectorGroup(hoveredOption)
     : false;
-  const isLeaf = previewStep ? !isGroup : false;
+  const isLeaf = hoveredOption ? !isGroup : false;
 
   const stepDef = useMemo(() => {
-    if (!previewStep || !isLeaf) return undefined;
-    return stepSchemas.getStepDefinition(previewStep.id);
-  }, [previewStep, isLeaf]);
+    if (!hoveredOption || !isLeaf) return undefined;
+    return stepSchemas.getStepDefinition(hoveredOption.id);
+  }, [hoveredOption, isLeaf]);
 
   const connectorDef = useMemo(() => {
-    if (!previewStep || !isLeaf || stepDef) return undefined;
-    return stepSchemas.getAllConnectorsMapCache()?.get(previewStep.id);
-  }, [previewStep, isLeaf, stepDef]);
+    if (!hoveredOption || !isLeaf || stepDef) return undefined;
+    return stepSchemas.getAllConnectorsMapCache()?.get(hoveredOption.id);
+  }, [hoveredOption, isLeaf, stepDef]);
 
   const inputFields = useMemo(() => {
     const schema =
@@ -131,40 +109,6 @@ export function ActionsMenuPreviewPanel({
 
   const fields = activeTab === 'inputs' ? inputFields : outputFields;
 
-  const handleStartConfigure = useCallback(() => {
-    if (!hoveredOption || isActionGroup(hoveredOption) || isActionConnectorGroup(hoveredOption)) {
-      return;
-    }
-    onPinPreview?.(hoveredOption);
-    setConfiguringStep(hoveredOption);
-  }, [hoveredOption, onPinPreview]);
-
-  const handleCancelConfigure = useCallback(() => {
-    setConfiguringStep(null);
-  }, []);
-
-  const handleConfirmConfigure = useCallback(
-    (withParams: Record<string, unknown>) => {
-      if (!configuringStep) return;
-      onAddStep?.(configuringStep, { withParams });
-      setConfiguringStep(null);
-    },
-    [configuringStep, onAddStep]
-  );
-
-  if (configuringStep) {
-    return (
-      <StepConfigurePanel
-        key={configuringStep.id}
-        step={configuringStep}
-        fields={inputFields}
-        onCancel={handleCancelConfigure}
-        onConfirm={handleConfirmConfigure}
-        styles={styles}
-      />
-    );
-  }
-
   if (!hoveredOption) {
     if (hoveredJumpEntry) {
       return <JumpStepPanel entry={hoveredJumpEntry} />;
@@ -195,7 +139,6 @@ export function ActionsMenuPreviewPanel({
       examples={examples}
       docUrl={docUrl}
       onAdd={() => onAddStep?.(hoveredOption)}
-      onConfigure={handleStartConfigure}
       styles={styles}
     />
   );
@@ -371,7 +314,7 @@ function SectionPreviewPanel({
 }: {
   section: ActionOptionData;
   onStepSelected: (action: ActionOptionData) => void;
-  onAddStep?: (action: ActionOptionData, options?: ActionSelectionOptions) => void;
+  onAddStep?: (action: ActionOptionData) => void;
   onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
@@ -421,7 +364,6 @@ function StepDetailPanel({
   examples,
   docUrl,
   onAdd,
-  onConfigure,
   styles,
 }: {
   step: ActionOptionData;
@@ -433,7 +375,6 @@ function StepDetailPanel({
   examples: string[];
   docUrl?: string;
   onAdd: () => void;
-  onConfigure: () => void;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
   const displayTitle = step.label || step.id;
@@ -443,318 +384,121 @@ function StepDetailPanel({
       : null;
 
   return (
-    <div css={styles.configurePanel}>
-      <div css={styles.configureBody}>
-        <div css={styles.titleBlock}>
-          <p css={styles.titleBlockText}>{displayTitle}</p>
-          {displayDescription && <p css={styles.descriptionText}>{displayDescription}</p>}
-          {docUrl && (
-            <EuiLink
-              href={docUrl}
-              target="_blank"
-              external
-              data-test-subj="actionsMenuPreviewDocumentation"
+    <div css={styles.panel}>
+      <div css={styles.titleBlock}>
+        <p css={styles.titleBlockText}>{displayTitle}</p>
+        {displayDescription && <p css={styles.descriptionText}>{displayDescription}</p>}
+        <EuiFlexGroup alignItems="center" gutterSize="m" css={styles.detailActions}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="plus"
+              flush="left"
+              onClick={onAdd}
+              data-test-subj="actionsMenuPreviewAdd"
             >
-              <FormattedMessage
-                id="workflows.actionsMenu.preview.documentationLink"
-                defaultMessage="Documentation"
-              />
-            </EuiLink>
-          )}
-        </div>
-
-        <div css={styles.tabsAndFields}>
-          <EuiTabs size="s" css={styles.tabs}>
-            <EuiTab isSelected={activeTab === 'inputs'} onClick={() => onTabChange('inputs')}>
-              <FormattedMessage id="workflows.actionsMenu.preview.inputs" defaultMessage="Inputs" />
-              {inputCount > 0 && (
-                <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
-                  {inputCount}
-                </EuiNotificationBadge>
-              )}
-            </EuiTab>
-            <EuiTab isSelected={activeTab === 'outputs'} onClick={() => onTabChange('outputs')}>
-              <FormattedMessage
-                id="workflows.actionsMenu.preview.outputs"
-                defaultMessage="Outputs"
-              />
-              {outputCount > 0 && (
-                <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
-                  {outputCount}
-                </EuiNotificationBadge>
-              )}
-            </EuiTab>
-            <EuiTab isSelected={activeTab === 'examples'} onClick={() => onTabChange('examples')}>
-              <FormattedMessage
-                id="workflows.actionsMenu.preview.examples"
-                defaultMessage="Examples"
-              />
-            </EuiTab>
-          </EuiTabs>
-
-          {activeTab === 'examples' ? (
-            <div css={styles.fieldList}>
-              {examples.length === 0 ? (
-                <div css={styles.emptyFields}>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="workflows.actionsMenu.preview.noExamples"
-                      defaultMessage="No examples available."
-                    />
-                  </EuiText>
-                </div>
-              ) : (
-                examples.map((example, idx) => (
-                  <div key={idx} css={styles.yamlPreview}>
-                    <pre css={styles.codeText}>{example}</pre>
-                  </div>
-                ))
-              )}
-            </div>
-          ) : (
-            <div css={styles.fieldList}>
-              {fields.length === 0 ? (
-                <div css={styles.emptyFields}>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="workflows.actionsMenu.preview.noFields"
-                      defaultMessage="No fields available."
-                    />
-                  </EuiText>
-                </div>
-              ) : (
-                fields.map((field, idx) => (
-                  <React.Fragment key={field.name}>
-                    {idx > 0 && <div css={styles.fieldDivider} />}
-                    <div css={styles.fieldRow}>
-                      <div css={styles.fieldLabelRow}>
-                        <EuiText size="xs" css={styles.fieldName}>
-                          {field.name}
-                        </EuiText>
-                        <span css={styles.typeBadge}>{field.typeName}</span>
-                        {field.required && (
-                          <span css={styles.requiredBadge}>
-                            <FormattedMessage
-                              id="workflows.actionsMenu.preview.required"
-                              defaultMessage="Required"
-                            />
-                          </span>
-                        )}
-                      </div>
-                      {field.description && (
-                        <EuiText size="xs" color="subdued" css={styles.fieldDescription}>
-                          {field.description}
-                        </EuiText>
-                      )}
-                    </div>
-                  </React.Fragment>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div css={styles.configureFooter}>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <AddSplitButton
-              onAdd={onAdd}
-              onConfigureAndAdd={onConfigure}
-              anchorPosition="upRight"
-              addTestSubj="actionsMenuPreviewAdd"
-              menuTestSubj="actionsMenuPreviewAddMenu"
-              configureTestSubj="actionsMenuPreviewConfigureAndAdd"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </div>
-  );
-}
-
-function StepConfigurePanel({
-  step,
-  fields,
-  onCancel,
-  onConfirm,
-  styles,
-}: {
-  step: ActionOptionData;
-  fields: StepField[];
-  onCancel: () => void;
-  onConfirm: (withParams: Record<string, unknown>) => void;
-  styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
-}) {
-  const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(fields.map((field) => [field.name, '']))
-  );
-  const firstFieldRef = useRef<HTMLInputElement | HTMLSelectElement | null>(null);
-
-  const displayTitle = step.label || step.id;
-
-  const canSubmit = useMemo(
-    () => fields.every((field) => !field.required || (values[field.name] ?? '').trim() !== ''),
-    [fields, values]
-  );
-
-  useEffect(() => {
-    if (fields.length === 0) return;
-    // Defer past the actions-menu search focus lock (blur → rAF restore).
-    const frame = requestAnimationFrame(() => {
-      firstFieldRef.current?.focus({ preventScroll: true });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [fields.length]);
-
-  const handleChange = useCallback((name: string, value: string) => {
-    setValues((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleConfirm = useCallback(() => {
-    if (!canSubmit) return;
-    onConfirm(buildWithParamsFromFormValues(fields, values));
-  }, [canSubmit, fields, onConfirm, values]);
-
-  const setFirstFieldRef = useCallback((node: HTMLInputElement | HTMLSelectElement | null) => {
-    firstFieldRef.current = node;
-  }, []);
-
-  return (
-    <div css={styles.configurePanel}>
-      <div css={styles.configureBody}>
-        <div css={styles.titleBlock}>
-          <p css={styles.titleBlockText}>{displayTitle}</p>
-          <p css={styles.descriptionText}>
-            <FormattedMessage
-              id="workflows.actionsMenu.preview.configureDescription"
-              defaultMessage="Set input values before adding this step to your workflow."
-            />
-          </p>
-        </div>
-
-        <EuiForm
-          component="form"
-          css={styles.configureForm}
-          data-actions-menu-allow-focus
-          onSubmit={(e) => e.preventDefault()}
-        >
-          {fields.length === 0 ? (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="workflows.actionsMenu.preview.configureNoFields"
-                defaultMessage="This step has no configurable inputs."
-              />
-            </EuiText>
-          ) : (
-            fields.map((field, index) => (
-              <EuiFormRow
-                key={field.name}
-                label={
-                  <span css={styles.configureFieldLabel}>
-                    <span>{field.name}</span>
-                    {field.description && (
-                      <EuiIconTip
-                        type="info"
-                        color="subdued"
-                        position="top"
-                        content={field.description}
-                        iconProps={{ tabIndex: -1 }}
-                        aria-label={i18n.translate(
-                          'workflows.actionsMenu.preview.fieldInfoAriaLabel',
-                          {
-                            defaultMessage: 'About {fieldName}',
-                            values: { fieldName: field.name },
-                          }
-                        )}
-                      />
-                    )}
-                    <span css={styles.typeBadge}>{field.typeName}</span>
-                    {field.required ? (
-                      <span css={styles.requiredBadge}>
-                        <FormattedMessage
-                          id="workflows.actionsMenu.preview.required"
-                          defaultMessage="Required"
-                        />
-                      </span>
-                    ) : (
-                      <span css={styles.optionalBadge}>
-                        <FormattedMessage
-                          id="workflows.actionsMenu.preview.optional"
-                          defaultMessage="Optional"
-                        />
-                      </span>
-                    )}
-                  </span>
-                }
-                fullWidth
-              >
-                {field.enumOptions && field.enumOptions.length > 0 ? (
-                  <EuiSelect
-                    fullWidth
-                    compressed
-                    inputRef={index === 0 ? setFirstFieldRef : undefined}
-                    options={[
-                      {
-                        value: '',
-                        text: i18n.translate('workflows.actionsMenu.preview.selectOption', {
-                          defaultMessage: 'Select…',
-                        }),
-                      },
-                      ...field.enumOptions.map((option) => ({ value: option, text: option })),
-                    ]}
-                    value={values[field.name] ?? ''}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    data-test-subj={`actionsMenuConfigureField-${field.name}`}
-                  />
-                ) : (
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    inputRef={index === 0 ? setFirstFieldRef : undefined}
-                    value={values[field.name] ?? ''}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    data-test-subj={`actionsMenuConfigureField-${field.name}`}
-                  />
-                )}
-              </EuiFormRow>
-            ))
-          )}
-        </EuiForm>
-      </div>
-
-      <div css={styles.configureFooter}>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={onCancel} data-test-subj="actionsMenuConfigureCancel">
-              <FormattedMessage id="workflows.actionsMenu.preview.cancel" defaultMessage="Cancel" />
+              <FormattedMessage id="workflows.actionsMenu.preview.add" defaultMessage="Add" />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              onClick={handleConfirm}
-              isDisabled={!canSubmit}
-              data-test-subj="actionsMenuConfigureConfirm"
-            >
-              <FormattedMessage
-                id="workflows.actionsMenu.preview.addToWorkflow"
-                defaultMessage="Add to workflow"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {docUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiLink href={docUrl} target="_blank" external>
+                <FormattedMessage
+                  id="workflows.actionsMenu.preview.documentationLink"
+                  defaultMessage="Documentation"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
+      </div>
+
+      <div css={styles.tabsAndFields}>
+        <EuiTabs size="s" css={styles.tabs}>
+          <EuiTab isSelected={activeTab === 'inputs'} onClick={() => onTabChange('inputs')}>
+            <FormattedMessage id="workflows.actionsMenu.preview.inputs" defaultMessage="Inputs" />
+            {inputCount > 0 && (
+              <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
+                {inputCount}
+              </EuiNotificationBadge>
+            )}
+          </EuiTab>
+          <EuiTab isSelected={activeTab === 'outputs'} onClick={() => onTabChange('outputs')}>
+            <FormattedMessage id="workflows.actionsMenu.preview.outputs" defaultMessage="Outputs" />
+            {outputCount > 0 && (
+              <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
+                {outputCount}
+              </EuiNotificationBadge>
+            )}
+          </EuiTab>
+          <EuiTab isSelected={activeTab === 'examples'} onClick={() => onTabChange('examples')}>
+            <FormattedMessage
+              id="workflows.actionsMenu.preview.examples"
+              defaultMessage="Examples"
+            />
+          </EuiTab>
+        </EuiTabs>
+
+        {activeTab === 'examples' ? (
+          <div css={styles.fieldList}>
+            {examples.length === 0 ? (
+              <div css={styles.emptyFields}>
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="workflows.actionsMenu.preview.noExamples"
+                    defaultMessage="No examples available."
+                  />
+                </EuiText>
+              </div>
+            ) : (
+              examples.map((example, idx) => (
+                <div key={idx} css={styles.yamlPreview}>
+                  <pre css={styles.codeText}>{example}</pre>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div css={styles.fieldList}>
+            {fields.length === 0 ? (
+              <div css={styles.emptyFields}>
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="workflows.actionsMenu.preview.noFields"
+                    defaultMessage="No fields available."
+                  />
+                </EuiText>
+              </div>
+            ) : (
+              fields.map((field, idx) => (
+                <React.Fragment key={field.name}>
+                  {idx > 0 && <div css={styles.fieldDivider} />}
+                  <div css={styles.fieldRow}>
+                    <div css={styles.fieldLabelRow}>
+                      <EuiText size="xs" css={styles.fieldName}>
+                        {field.name}
+                      </EuiText>
+                      <span css={styles.typeBadge}>{field.typeName}</span>
+                      {field.required && (
+                        <span css={styles.requiredBadge}>
+                          <FormattedMessage
+                            id="workflows.actionsMenu.preview.required"
+                            defaultMessage="Required"
+                          />
+                        </span>
+                      )}
+                    </div>
+                    {field.description && (
+                      <EuiText size="xs" color="subdued" css={styles.fieldDescription}>
+                        {field.description}
+                      </EuiText>
+                    )}
+                  </div>
+                </React.Fragment>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -957,44 +701,9 @@ const panelStyles = {
       color: euiTheme.colors.textParagraph,
       margin: 0,
     }),
-  configurePanel: css({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden',
+  detailActions: css({
+    marginTop: '2px',
   }),
-  configureBody: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: 1,
-      minHeight: 0,
-      overflowY: 'auto',
-      padding: '12px 16px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: euiTheme.size.base,
-    }),
-  configureForm: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    '& .euiFormRow__label': {
-      width: '100%',
-    },
-  }),
-  configureFieldLabel: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    flexWrap: 'wrap',
-    width: '100%',
-  }),
-  configureFooter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
   descriptionText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontSize: '12px',
@@ -1074,16 +783,6 @@ const panelStyles = {
       fontWeight: 500,
       lineHeight: '16px',
       color: euiTheme.colors.textDanger,
-      letterSpacing: '0.02em',
-    }),
-  optionalBadge: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginLeft: 'auto',
-      flexShrink: 0,
-      fontSize: '10px',
-      fontWeight: 500,
-      lineHeight: '16px',
-      color: euiTheme.colors.textSubdued,
       letterSpacing: '0.02em',
     }),
   fieldDescription: css({

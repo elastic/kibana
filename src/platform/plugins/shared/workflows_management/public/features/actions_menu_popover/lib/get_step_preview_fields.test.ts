@@ -8,13 +8,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { buildWithParamsFromFormValues, getFieldsFromZodSchema } from './get_step_preview_fields';
+import { getFieldsFromZodSchema } from './get_step_preview_fields';
 
 describe('getFieldsFromZodSchema', () => {
-  it('marks optional fields and extracts enum options', () => {
+  it('marks optional fields and extracts descriptions', () => {
     const schema = z.object({
       mode: z.enum(['fast', 'accurate']).describe('Processing mode'),
-      note: z.string().optional().describe('Optional note on the outer schema'),
+      note: z.string().describe('Optional note').optional(),
     });
 
     expect(getFieldsFromZodSchema(schema)).toEqual([
@@ -23,36 +23,13 @@ describe('getFieldsFromZodSchema', () => {
         typeName: expect.any(String),
         description: 'Processing mode',
         required: true,
-        enumOptions: ['fast', 'accurate'],
       },
       {
         name: 'note',
         typeName: 'STRING',
-        description: 'Optional note on the outer schema',
+        description: 'Optional note',
         required: false,
-        enumOptions: undefined,
       },
     ]);
-  });
-});
-
-describe('buildWithParamsFromFormValues', () => {
-  const fields = [
-    { name: 'required_a', typeName: 'STRING', required: true },
-    { name: 'optional_b', typeName: 'STRING', required: false },
-    { name: 'optional_c', typeName: 'STRING', required: false },
-  ];
-
-  it('keeps empty required fields as empty strings and omits empty optional fields', () => {
-    expect(
-      buildWithParamsFromFormValues(fields, {
-        required_a: '  ',
-        optional_b: 'hello',
-        optional_c: '',
-      })
-    ).toEqual({
-      required_a: '',
-      optional_b: 'hello',
-    });
   });
 });

@@ -15,7 +15,6 @@ export interface StepField {
   typeName: string;
   description?: string;
   required: boolean;
-  enumOptions?: string[];
 }
 
 function formatZodTypeName(raw: string): string {
@@ -36,21 +35,6 @@ function unwrapSchema(schema: z.ZodType, depth = 0): z.ZodType {
   return schema;
 }
 
-function getEnumOptions(schema: z.ZodType): string[] | undefined {
-  if (schema.def.type !== 'enum') {
-    return undefined;
-  }
-  const entries = (schema as z.ZodEnum).def.entries;
-  if (Array.isArray(entries)) {
-    return entries.map(String);
-  }
-  return Object.values(entries as Record<string, string>).map(String);
-}
-
-function getSchemaDescription(schema: z.ZodType): string | undefined {
-  return (schema as { description?: string }).description;
-}
-
 export function getFieldsFromZodSchema(schema: z.ZodType | undefined): StepField[] {
   if (!schema) return [];
   const unwrapped = unwrapSchema(schema);
@@ -63,32 +47,8 @@ export function getFieldsFromZodSchema(schema: z.ZodType | undefined): StepField
     return {
       name,
       typeName: formatZodTypeName(rawType),
-      description: getSchemaDescription(inner) ?? getSchemaDescription(fieldSchema as z.ZodType),
+      description: (inner as { description?: string }).description,
       required: !isOptional,
-      enumOptions: getEnumOptions(inner),
     };
   });
-}
-
-/**
- * Build `with` params for YAML insertion from configure-form values.
- * Required empties become `""`; optional empties are omitted.
- */
-export function buildWithParamsFromFormValues(
-  fields: StepField[],
-  values: Record<string, string>
-): Record<string, unknown> {
-  const withParams: Record<string, unknown> = {};
-  for (const field of fields) {
-    const raw = values[field.name] ?? '';
-    const trimmed = raw.trim();
-    if (trimmed === '') {
-      if (field.required) {
-        withParams[field.name] = '';
-      }
-    } else {
-      withParams[field.name] = raw;
-    }
-  }
-  return withParams;
 }

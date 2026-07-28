@@ -37,7 +37,6 @@ import { flattenOptions, getActionOptions, usesInverseIconColor } from '../lib/g
 import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
 import {
   type ActionOptionData,
-  type ActionSelectionOptions,
   type EditorCommand,
   getMenuItemData,
   type IconVariant,
@@ -48,23 +47,22 @@ import {
   type JumpToStepEntry,
 } from '../types';
 
-export type { ActionSelectionOptions, EditorCommand, JumpToStepEntry };
+export type { EditorCommand, JumpToStepEntry };
 
 const SEARCH_INPUT_NAME = 'actions-menu-search';
-
-/** Elements that may steal focus from the spotlight search field. */
-const ALLOW_FOCUS_AWAY_FROM_SEARCH = `input[name="${SEARCH_INPUT_NAME}"], input:not([type="hidden"]), textarea, select, [contenteditable="true"], [data-actions-menu-allow-focus]`;
 
 const REQUEST_ACTION_URL = 'https://github.com/elastic/workflows';
 
 const LIST_SLIDE_MS = 220;
 
 function getNavDirection(fromPath: string[], toPath: string[]): 'forward' | 'back' {
-  const isPrefix = fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
+  const isPrefix =
+    fromPath.length <= toPath.length && fromPath.every((id, i) => id === toPath[i]);
   if (isPrefix) {
     return 'forward';
   }
-  const isAncestor = toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
+  const isAncestor =
+    toPath.length < fromPath.length && toPath.every((id, i) => id === fromPath[i]);
   if (isAncestor) {
     return 'back';
   }
@@ -78,7 +76,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export interface ActionsMenuProps {
-  onActionSelected: (action: ActionOptionData, options?: ActionSelectionOptions) => void;
+  onActionSelected: (action: ActionOptionData) => void;
   commands?: EditorCommand[];
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
@@ -152,8 +150,6 @@ export function ActionsMenu({
   const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
   const [pinnedOption, setPinnedOption] = useState<ActionOptionData | null>(null);
   const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
-  /** While true, list hover must not replace the right-panel configure session. */
-  const [isConfigureLocked, setIsConfigureLocked] = useState(false);
 
   const focusSearch = useCallback(() => {
     searchInputRef.current?.focus({ preventScroll: true });
@@ -165,10 +161,10 @@ export function ActionsMenu({
     focusSearch();
   }, [focusSearch, currentPath]);
 
-  /** Prevent clicks in the menu from stealing focus away from search — except form fields. */
+  /** Prevent clicks in the menu from stealing focus away from search. */
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest(ALLOW_FOCUS_AWAY_FROM_SEARCH)) {
+    if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`)) {
       return;
     }
     e.preventDefault();
@@ -212,9 +208,6 @@ export function ActionsMenu({
 
   const handleListMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
-      // Keep the configure form stable — accidental hover must not switch steps.
-      if (isConfigureLocked) return;
-
       const el = e.target as HTMLElement;
 
       const jumpTarget = el.closest('[data-jump-id]');
@@ -243,7 +236,7 @@ export function ActionsMenu({
         setHoveredJumpEntry(null);
       }
     },
-    [flatOptions, hoveredOption, hoveredJumpEntry, isConfigureLocked, jumpToStepEntries]
+    [flatOptions, hoveredOption, hoveredJumpEntry, jumpToStepEntries]
   );
 
   const navigateToPath = useCallback(
@@ -266,7 +259,8 @@ export function ActionsMenu({
       };
 
       const pathUnchanged =
-        nextPath.length === currentPath.length && nextPath.every((id, i) => id === currentPath[i]);
+        nextPath.length === currentPath.length &&
+        nextPath.every((id, i) => id === currentPath[i]);
       if (pathUnchanged) {
         applyNavigation();
         return;
@@ -302,7 +296,8 @@ export function ActionsMenu({
 
       // Park the incoming pane off-screen before React swaps the list content
       pane.style.transition = 'none';
-      pane.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
+      pane.style.transform =
+        direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
 
       applyNavigation();
 
@@ -347,24 +342,20 @@ export function ActionsMenu({
   );
 
   const handleAddStep = useCallback(
-    (action: ActionOptionData, selectionOptions?: ActionSelectionOptions) => {
+    (action: ActionOptionData) => {
       setPinnedOption(null);
-      onActionSelected(action, selectionOptions);
+      onActionSelected(action);
     },
     [onActionSelected]
   );
 
-  const handlePinPreview = useCallback(
-    (action: ActionOptionData, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (isConfigureLocked) return;
-      setPinnedOption(action);
-      setHoveredOption(action);
-      setHoveredJumpEntry(null);
-    },
-    [isConfigureLocked]
-  );
+  const handlePinPreview = useCallback((action: ActionOptionData, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPinnedOption(action);
+    setHoveredOption(action);
+    setHoveredJumpEntry(null);
+  }, []);
 
   const handleAddFromRow = useCallback(
     (action: ActionOptionData, e: React.MouseEvent) => {
@@ -700,16 +691,12 @@ export function ActionsMenu({
   handleSearchChangeRef.current = handleSearchChange;
 
   // If focus leaves the search field (e.g. arrow-key option focus), typing still searches.
-  // Do not hijack keystrokes when the user is editing a configure-form control.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const input = searchInputRef.current;
       if (!input || !document.body.contains(input)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (document.activeElement === input) return;
-
-      const active = document.activeElement as HTMLElement | null;
-      if (active?.closest(ALLOW_FOCUS_AWAY_FROM_SEARCH)) return;
 
       const isPrintable = e.key.length === 1;
       if (!isPrintable && e.key !== 'Backspace' && e.key !== 'Delete') return;
@@ -819,12 +806,8 @@ export function ActionsMenu({
           searchInputRef.current = node;
         },
         onBlur: () => {
-          // Restore spotlight focus unless the user moved into a form control
+          // Restore focus unless the menu is unmounting
           requestAnimationFrame(() => {
-            const active = document.activeElement as HTMLElement | null;
-            if (active?.closest(ALLOW_FOCUS_AWAY_FROM_SEARCH)) {
-              return;
-            }
             if (searchInputRef.current && document.body.contains(searchInputRef.current)) {
               focusSearch();
             }
@@ -926,9 +909,7 @@ export function ActionsMenu({
                 hoveredJumpEntry={hoveredJumpEntry}
                 onStepSelected={handleStepOrGroupSelected}
                 onAddStep={handleAddStep}
-                onConfiguringChange={setIsConfigureLocked}
                 onPinPreview={(action, parentSection) => {
-                  if (isConfigureLocked) return;
                   // From a category preview: open that category on the left so the
                   // list matches the right panel, then pin this step's detail.
                   if (
