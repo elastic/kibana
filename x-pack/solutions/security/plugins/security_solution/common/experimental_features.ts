@@ -327,7 +327,7 @@ export const allowedExperimentalValues = Object.freeze({
    * source timelines into the active timeline slot. Disabled by default until GA.
    * Epic: elastic/security-team#14357
    */
-  superTimeline: false,
+  superTimeline: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
