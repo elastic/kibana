@@ -344,7 +344,7 @@ describe('findRuleTemplates', () => {
         output: {
           statusCode: 403,
         },
-        message: 'Unauthorized to find rules for any rule types.',
+        message: 'Unauthorized to find rules for any rule types',
       });
 
       expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
