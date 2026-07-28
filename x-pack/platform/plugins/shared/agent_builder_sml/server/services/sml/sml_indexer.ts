@@ -302,9 +302,8 @@ class SmlIndexerImpl implements SmlIndexer {
       updated_at: now,
       spaces,
       permissions: {
-        kibana: { privileges: compositePrivileges },
+        kibana: { privileges: compositePrivileges, count: compositePrivileges.length },
       },
-      permissions_count: compositePrivileges.length,
       ingestion_method: ingestionMethod,
     };
     if (entry.description !== undefined) {

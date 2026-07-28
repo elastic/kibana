@@ -45,7 +45,7 @@ interface SmlKibanaPrivilege {
  * on stored documents to keep the schema rigid and predictable.
  */
 export interface SmlPermissions {
-  kibana: { privileges: SmlKibanaPrivilege[] };
+  kibana: { privileges: SmlKibanaPrivilege[]; count: number };
 }
 
 /**
@@ -228,14 +228,11 @@ export interface SmlDocument {
    * Permissions required to access the underlying element. The `name` of each
    * privilege is a composite `space|action` token (e.g. `"default|saved_object:dashboard/get"`).
    * Always present on stored documents; the inner privileges array may be empty.
-   */
-  permissions: SmlPermissions;
-  /**
-   * Number of composite tokens in `permissions.kibana.privileges`. Stored so
-   * that Elasticsearch's `terms_set` query can use `minimum_should_match_field`
+   * The `count` field stores the number of composite tokens in `privileges`,
+   * used by Elasticsearch's `terms_set` query with `minimum_should_match_field`
    * for AND-semantics enforcement via the ImplicitPrivilegesProvider.
    */
-  permissions_count: number;
+  permissions: SmlPermissions;
   /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
 }

@@ -78,11 +78,11 @@ const smlStorageSchemaProperties = {
               name: types.keyword({}),
             },
           }),
+          count: types.long({}),
         },
       }),
     },
   }),
-  permissions_count: types.long({}),
   ingestion_method: types.keyword({}),
 };
 

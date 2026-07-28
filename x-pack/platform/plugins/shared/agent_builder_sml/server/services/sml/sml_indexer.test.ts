@@ -194,9 +194,9 @@ describe('createSmlIndexer', () => {
         permissions: {
           kibana: {
             privileges: [{ name: 'default|perm1' }, { name: 'space-2|perm1' }],
+            count: 2,
           },
         },
-        permissions_count: 2,
         ingestion_method: 'crawled',
         discovery_labels: [
           { value: 'My Viz', kind: 'title' },
@@ -274,9 +274,8 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default'],
         permissions: {
-          kibana: { privileges: [{ name: 'default|saved_object:dashboard/get' }] },
+          kibana: { privileges: [{ name: 'default|saved_object:dashboard/get' }], count: 1 },
         },
-        permissions_count: 1,
         ingestion_method: 'crawled',
       });
     });
@@ -695,7 +694,7 @@ describe('createSmlIndexer', () => {
 
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [] },
+          kibana: { privileges: [], count: 0 },
         });
       });
 
@@ -738,7 +737,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'default|saved_object:lens/get' }] },
+          kibana: { privileges: [{ name: 'default|saved_object:lens/get' }], count: 1 },
         });
       });
 
@@ -773,7 +772,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'default|p1' }] },
+          kibana: { privileges: [{ name: 'default|p1' }], count: 1 },
         });
       });
 
@@ -851,7 +850,7 @@ describe('createSmlIndexer', () => {
         expect(ops).toHaveLength(1);
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(ops[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'default|p1' }] },
+          kibana: { privileges: [{ name: 'default|p1' }], count: 1 },
         });
       });
     });
