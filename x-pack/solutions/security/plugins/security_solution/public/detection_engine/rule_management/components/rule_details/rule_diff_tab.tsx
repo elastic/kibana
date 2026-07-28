@@ -58,6 +58,13 @@ export const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   'rule_source',
   /* Technical property that changes at rule runtime. */
   'execution_summary',
+  /*
+    Server-populated fields that are auto-added when a rule is saved via the form.
+    They are not part of the user-facing rule definition and would show as spurious
+    diffs when comparing an AI-proposed rule against its saved counterpart.
+  */
+  'license',
+  'meta',
 ];
 
 /**
