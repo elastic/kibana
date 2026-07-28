@@ -207,12 +207,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       query: searchSourceFields.query,
       filters: searchSourceFields.parent?.filter, // time range filter
       columns,
-      // Cast bridges ESQLControlVariable[] to the `& SerializableRecord` field type.
-      ...(esqlVariables?.length
-        ? {
-            esqlVariables: esqlVariables as DiscoverAppLocatorParams['esqlVariables'],
-          }
-        : {}),
+      ...(esqlVariables?.length ? { esqlVariables } : {}),
     };
   };
 

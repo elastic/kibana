@@ -21,6 +21,12 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_VERSION_CONFLICT_DESCRIPTION,
+} from './rule_response_descriptions';
+import { updateRuleOasExamples } from './update_rule_oas_example';
 
 @injectable()
 export class UpdateRuleRoute extends BaseAlertingRoute {
@@ -33,6 +39,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Update a rule',
+    oasOperationObject: updateRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -46,15 +53,15 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates a rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description: 'Indicates the rule was concurrently updated by another caller.',
+        description: RULE_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

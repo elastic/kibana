@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isBoom } from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
@@ -42,4 +43,59 @@ export const assertUserError = (err: unknown) => {
     throw createTaskRunError(err as Error, TaskErrorSource.USER);
   }
   throw err;
+};
+
+export const buildAnomalyAlertTimeFilter = ({
+  lastRunTime,
+  startedAt,
+  lookbackInterval,
+}: {
+  lastRunTime: Date | null;
+  startedAt: Date;
+  lookbackInterval: string;
+}): QueryDslQueryContainer => {
+  const timestampRangeFilter = {
+    timestamp: {
+      gte: `now-${lookbackInterval}`,
+      lte: 'now',
+    },
+  };
+
+  if (!lastRunTime) {
+    return {
+      range: timestampRangeFilter,
+    };
+  }
+
+  return {
+    bool: {
+      should: [
+        {
+          bool: {
+            filter: [
+              { exists: { field: 'event.ingested' } },
+              {
+                range: {
+                  'event.ingested': {
+                    gte: lastRunTime.toISOString(),
+                    // Exclude docs indexed during this run so the next run (gte: this startedAt) does not match them again.
+                    lt: startedAt.toISOString(),
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          bool: {
+            must_not: { exists: { field: 'event.ingested' } },
+            filter: {
+              range: timestampRangeFilter,
+            },
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
 };

@@ -393,6 +393,24 @@ export const CreateCaseRequest = lazySchema(() =>
       )
       .max(10)
       .optional(),
+    /**
+      * A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
+
+      */
+    template: z
+      .object({
+        /**
+         * The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+         */
+        id: z.string(),
+        /**
+      * The template version to apply. Omit to use (and pin) the latest version.
+
+      */
+        version: z.number().int().min(1).optional(),
+      })
+      .nullable()
+      .optional(),
   })
 );
 export type CreateCaseRequest = z.infer<typeof CreateCaseRequest>;
@@ -1219,6 +1237,72 @@ export const GetCaseTemplatesResponse = lazySchema(() =>
   })
 );
 export type GetCaseTemplatesResponse = z.infer<typeof GetCaseTemplatesResponse>;
+
+/**
+  * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
+
+  */
+export const ApplicableFieldsResponse = lazySchema(() =>
+  z.object({
+    fields: z.array(
+      z.object({
+        /**
+      * The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).
+
+      */
+        key: z.string(),
+        /**
+         * The field name as authored in the field definition.
+         */
+        name: z.string(),
+        /**
+         * The human-readable label. Falls back to `name` when no label is authored.
+         */
+        label: z.string(),
+        /**
+         * The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.
+         */
+        type: z.string(),
+        /**
+      * The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.
+
+      */
+        control: z.string(),
+        /**
+         * Whether a value must be supplied at write time.
+         */
+        required: z.boolean(),
+        /**
+         * Whether the field must be filled before the case can be closed.
+         */
+        requiredOnClose: z.boolean(),
+        /**
+      * When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.
+
+      */
+        displayOnly: z.boolean(),
+        /**
+         * The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.
+         */
+        options: z.array(z.string()).optional(),
+        /**
+         * The default value, as a string, when the field definition declares one.
+         */
+        defaultValue: z.string().optional(),
+        /**
+      * Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.
+
+      */
+        source: z.enum(['global', 'template']),
+        /**
+         * Whether the field is a global (library-wide) definition.
+         */
+        isGlobal: z.boolean(),
+      })
+    ),
+  })
+);
+export type ApplicableFieldsResponse = z.infer<typeof ApplicableFieldsResponse>;
 
 /**
   * Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.

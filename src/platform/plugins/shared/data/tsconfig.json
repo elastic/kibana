@@ -75,7 +75,8 @@
     "@kbn/css-utils",
     "@kbn/shared-ux-utility",
     "@kbn/date-range-picker-presets-common",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }

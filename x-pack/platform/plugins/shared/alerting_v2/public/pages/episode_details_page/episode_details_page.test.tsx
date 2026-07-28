@@ -66,6 +66,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => ({
+  useEpisodeFlapping: jest.fn(() => ({ isFlapping: false, isLoading: false })),
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(),
   READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
@@ -93,12 +97,8 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section',
   AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
-  AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section', () => ({
-  AlertEpisodeSeverityHeatmapSection: () => <div data-test-subj="stubSeverityHeatmapSection" />,
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section', () => ({
+  AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
@@ -243,8 +243,7 @@ describe('EpisodeDetailsPage', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('stubLifecycleHeatmapSection')).toBeInTheDocument();
-    expect(screen.getByTestId('stubSeverityHeatmapSection')).toBeInTheDocument();
+    expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });
 
   it('renders the app header title, tabs, back link, and badges', () => {
@@ -264,39 +263,10 @@ describe('EpisodeDetailsPage', () => {
     );
   });
 
-  it('renders the rule description in the header area', () => {
-    renderPage();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderDescription')).toHaveTextContent(
-      'Rule description'
-    );
-  });
-
-  it('omits the header metadata row when the rule has no description', () => {
-    const loadedRuleState = fetchRuleResult.ruleState as unknown as {
-      status: RuleStateStatus;
-      ruleId: string;
-      rule: { metadata: Record<string, unknown> };
-    };
-
-    mockUseFetchRule.mockReturnValue({
-      ...fetchRuleResult,
-      ruleState: {
-        ...loadedRuleState,
-        rule: {
-          ...loadedRuleState.rule,
-          metadata: { ...loadedRuleState.rule.metadata, description: undefined },
-        },
-      },
-    } as unknown as FetchRuleResult);
-
+  it('does not render rule audit metadata in the header area', () => {
     renderPage();
 
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDescription')
-    ).not.toBeInTheDocument();
   });
 
   it('hides the metadata tab when the rule is not loaded', () => {

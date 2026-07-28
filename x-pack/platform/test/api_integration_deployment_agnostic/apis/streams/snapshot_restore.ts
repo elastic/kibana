@@ -181,7 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.web-app,logs.otel.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
+                  'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
               },
             },
           },
@@ -193,13 +193,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
         // Verify the underlying alerting rule was created
-        const rulesBeforeSnapshot = await alertingApi.searchRules(
-          roleAuthc,
-          'alert.attributes.name:"Slow Requests"'
+        const rulesBeforeSnapshot = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'Slow Requests',
+        });
+        expect(rulesBeforeSnapshot.body.items).to.have.length(1);
+        expect(rulesBeforeSnapshot.body.items[0].metadata.name).to.eql(
+          'Slow Requests (match count)'
         );
-        expect(rulesBeforeSnapshot.body.data).to.have.length(1);
-        expect(rulesBeforeSnapshot.body.data[0].name).to.eql('Slow Requests');
-        expect(rulesBeforeSnapshot.body.data[0].enabled).to.be(true);
+        expect(rulesBeforeSnapshot.body.items[0].enabled).to.be(true);
 
         // Step 4: Index documents to test processing and routing
         const parentDoc = {
@@ -351,17 +352,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(restoredQueries.queries).to.have.length(1);
         expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
         expect(restoredQueries.queries[0].esql.query).to.eql(
-          'FROM logs.otel.web-app,logs.otel.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
+          'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled
-        const rulesAfterRestore = await alertingApi.searchRules(
-          roleAuthc,
-          'alert.attributes.name:"Slow Requests"'
-        );
-        expect(rulesAfterRestore.body.data).to.have.length(1);
-        expect(rulesAfterRestore.body.data[0].name).to.eql('Slow Requests');
-        expect(rulesAfterRestore.body.data[0].enabled).to.be(true);
+        const rulesAfterRestore = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'Slow Requests',
+        });
+        expect(rulesAfterRestore.body.items).to.have.length(1);
+        expect(rulesAfterRestore.body.items[0].metadata.name).to.eql('Slow Requests (match count)');
+        expect(rulesAfterRestore.body.items[0].enabled).to.be(true);
 
         // Step 10: Verify processing still works after restore by indexing new documents
         const newParentDoc = {

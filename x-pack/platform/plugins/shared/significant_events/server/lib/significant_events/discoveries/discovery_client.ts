@@ -35,6 +35,11 @@ import { FIELD_DISCOVERY_ID, FIELD_EVENT_ID } from '../field_names';
 /** Shape of a raw ES document before the `processed` flag is computed. */
 type RawDiscoveryRow = Omit<Discovery, 'processed'>;
 
+const toDiscovery = (raw: RawDiscoveryRow, processedEventIds: Set<string>): Discovery => ({
+  ...raw,
+  processed: processedEventIds.has(raw.event_id),
+});
+
 const PROCESSED_CHUNK_SIZE = 250;
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
@@ -88,10 +93,7 @@ export class DiscoveryClient {
       result.hits.map((h) => h.event_id).filter((id): id is string => Boolean(id))
     );
     return {
-      hits: result.hits.map((raw) => ({
-        ...raw,
-        processed: processedEventIds.has(raw.event_id),
-      })),
+      hits: result.hits.map((raw) => toDiscovery(raw, processedEventIds)),
     };
   }
 
@@ -115,10 +117,7 @@ export class DiscoveryClient {
 
     return {
       ...result,
-      hits: result.hits.map((raw) => ({
-        ...raw,
-        processed: processedEventIds.has(raw.event_id),
-      })),
+      hits: result.hits.map((raw) => toDiscovery(raw, processedEventIds)),
     };
   }
 
@@ -149,10 +148,7 @@ export class DiscoveryClient {
     );
 
     return {
-      hits: result.hits.map((raw) => ({
-        ...raw,
-        processed: processedEventIds.has(raw.event_id),
-      })),
+      hits: result.hits.map((raw) => toDiscovery(raw, processedEventIds)),
     };
   }
 
@@ -170,10 +166,7 @@ export class DiscoveryClient {
     );
 
     return {
-      hits: result.hits.map((raw) => ({
-        ...raw,
-        processed: processedEventIds.has(raw.event_id),
-      })),
+      hits: result.hits.map((raw) => toDiscovery(raw, processedEventIds)),
     };
   }
 
@@ -191,10 +184,7 @@ export class DiscoveryClient {
     );
 
     return {
-      hits: result.hits.map((raw) => ({
-        ...raw,
-        processed: processedEventIds.has(raw.event_id),
-      })),
+      hits: result.hits.map((raw) => toDiscovery(raw, processedEventIds)),
     };
   }
 }

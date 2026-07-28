@@ -11,7 +11,7 @@ import { type IconType } from '@elastic/eui';
 import {
   getConnectorSpecIcon,
   getDataUrlFromReactComponent,
-  HardcodedIcons,
+  HardcodedIconDataUrls,
   resolveIconToDataUrl,
 } from '@kbn/workflows-ui';
 
@@ -28,13 +28,13 @@ export interface GetIconBase64Params {
   kind: 'trigger' | 'step';
 }
 
-const DEFAULT_CONNECTOR_DATA_URL = HardcodedIcons.default;
+const DEFAULT_CONNECTOR_DATA_URL = HardcodedIconDataUrls.default;
 
 const triggerIconDataUrlCache = new Map<string, string>();
 
 function defaultFallbackForStep(params: GetIconBase64Params): string {
   if (params.fromRegistry) {
-    return HardcodedIcons.kibana;
+    return HardcodedIconDataUrls.kibana;
   }
   return DEFAULT_CONNECTOR_DATA_URL;
 }
@@ -61,10 +61,10 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
       return value;
     };
     try {
-      const resolved = await resolveIconToDataUrl(icon, HardcodedIcons.trigger);
+      const resolved = await resolveIconToDataUrl(icon, HardcodedIconDataUrls.trigger);
       return setCacheAndReturn(resolved);
     } catch {
-      return setCacheAndReturn(HardcodedIcons.trigger);
+      return setCacheAndReturn(HardcodedIconDataUrls.trigger);
     }
   }
 
@@ -75,7 +75,7 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
     if (actionTypeId === 'kibana') {
       return getDataUrlFromReactComponent(KibanaLogo, DEFAULT_CONNECTOR_DATA_URL);
     }
-    const hardcodedIcon = HardcodedIcons[actionTypeId];
+    const hardcodedIcon = HardcodedIconDataUrls[actionTypeId];
     if (hardcodedIcon) {
       return hardcodedIcon;
     }
@@ -94,5 +94,5 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
 
 /** Sync bolt fallback data URL for default trigger styling (e.g. when async resolution is not needed). */
 export function getTriggerBoltFallbackDataUrl(): string {
-  return HardcodedIcons.trigger;
+  return HardcodedIconDataUrls.trigger;
 }

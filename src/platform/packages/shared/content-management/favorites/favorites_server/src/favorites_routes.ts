@@ -41,6 +41,8 @@ export function registerFavoritesRoutes({
   favoritesRegistry: FavoritesRegistry;
 }) {
   const typeSchema = schema.string({
+    minLength: 1,
+    maxLength: 256,
     validate: (type) => {
       if (!favoritesRegistry.hasType(type)) {
         return `Unknown favorite type: ${type}`;
@@ -75,7 +77,7 @@ export function registerFavoritesRoutes({
       path: '/internal/content_management/favorites/{type}/{id}/favorite',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 256 }),
           type: typeSchema,
         }),
         body: schema.maybe(
@@ -145,7 +147,7 @@ export function registerFavoritesRoutes({
       path: '/internal/content_management/favorites/{type}/{id}/unfavorite',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 256 }),
           type: typeSchema,
         }),
       },

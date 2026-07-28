@@ -37,6 +37,7 @@ import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/h
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../lib/telemetry';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -110,7 +111,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
     if (enableNewFlyout && hit) {
-      openAnalyzer({ hit, onAlertUpdated: () => refetch?.() });
+      openAnalyzer({ hit, onAlertUpdated: () => refetch?.(), origin: FLYOUT_ORIGIN.ROW_ACTION });
     } else {
       navigateToAnalyzer();
     }

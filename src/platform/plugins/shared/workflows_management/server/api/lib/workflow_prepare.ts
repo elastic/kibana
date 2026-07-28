@@ -224,5 +224,13 @@ export const applyFieldUpdates = (
     );
   }
 
+  // Keep definition.enabled in sync with the top-level enabled column so that
+  // any consumer of the parsed definition (e.g. export) always sees the current
+  // value.  The YAML-update path performs this same sync in workflow_crud_service;
+  // mirror it here for the field-only path.
+  if (patch.enabled !== undefined && existingSource?.definition) {
+    patch.definition = { ...existingSource.definition, enabled: patch.enabled };
+  }
+
   return { patch, validationErrors };
 };
