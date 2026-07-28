@@ -11,6 +11,6 @@
     "browser": true,
     "configPath": ["xpack", "inferenceWorkflows"],
     "requiredPlugins": ["inference", "spaces", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": ["anonymization", "searchInferenceEndpoints"]
+    "optionalPlugins": ["searchInferenceEndpoints"]
   }
 }
