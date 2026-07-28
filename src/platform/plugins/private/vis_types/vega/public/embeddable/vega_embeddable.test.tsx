@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../common/constants';
-import { vegaEmbeddableFactory, type VegaEmbeddableApi } from './vega_embeddable';
+import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
 
@@ -38,7 +38,6 @@ describe('vegaEmbeddableFactory', () => {
     timeRange$,
   };
   const executeTriggerActions = jest.fn();
-  const inspector = { isAvailable: jest.fn(), open: jest.fn() };
   let latestRendererParams: ExpressionRendererParams | undefined;
 
   const buildEmbeddable = async () => {
@@ -51,7 +50,6 @@ describe('vegaEmbeddableFactory', () => {
         },
       },
       uiActions: { executeTriggerActions },
-      inspector,
     });
     const uuid = 'vega-panel';
 
@@ -75,8 +73,6 @@ describe('vegaEmbeddableFactory', () => {
     filters$.next([]);
     timeRange$.next({ from: 'now-15m', to: 'now', mode: 'relative' });
     executeTriggerActions.mockReset();
-    inspector.isAvailable.mockReset();
-    inspector.open.mockReset();
     mockOpenLazyFlyout.mockReset();
     removePanel.mockReset();
   });
@@ -144,26 +140,43 @@ describe('vegaEmbeddableFactory', () => {
     expect(api.rendered$.getValue()).toBe(false);
   });
 
-  it('publishes render completion, opens the Vega inspector, and routes filter events', async () => {
+  it('routes filter events through ON_APPLY_FILTER', async () => {
     const { api, Component } = await buildEmbeddable();
     render(<Component />);
 
     await waitFor(() => expect(latestRendererParams).toBeDefined());
-    latestRendererParams?.onRender$?.(1);
-    expect(api.rendered$.getValue()).toBe(true);
-
-    inspector.isAvailable.mockReturnValue(true);
-    api.openInspector();
-    expect(inspector.open).toHaveBeenCalledWith(expect.anything(), { title: 'Initial title' });
-
     await latestRendererParams?.onEvent?.({
       name: 'applyFilter',
       data: { filters: [{ meta: {}, query: { match_all: {} } }] },
     });
     expect(api.supportedTriggers()).toEqual(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS);
     expect(executeTriggerActions).toHaveBeenCalledWith(VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS[0], {
-      embeddable: api as VegaEmbeddableApi,
+      embeddable: api,
       filters: [{ meta: {}, query: { match_all: {} } }],
+    });
+  });
+
+  it('exposes shared-item render metadata for Reporting', async () => {
+    const { api, Component } = await buildEmbeddable();
+    const { container } = render(<Component />);
+    const sharedItem = container.querySelector('[data-shared-item]');
+    const renderComplete = jest.fn();
+
+    expect(sharedItem).toHaveAttribute('data-title', 'Initial title');
+    expect(sharedItem).toHaveAttribute('data-description', '');
+    expect(sharedItem).toHaveAttribute('data-render-complete', 'false');
+
+    sharedItem?.addEventListener('renderComplete', renderComplete);
+
+    await waitFor(() => expect(latestRendererParams).toBeDefined());
+    await act(async () => {
+      latestRendererParams?.onRender$?.(1);
+    });
+
+    await waitFor(() => {
+      expect(api.rendered$.getValue()).toBe(true);
+      expect(sharedItem).toHaveAttribute('data-render-complete', 'true');
+      expect(renderComplete).toHaveBeenCalledTimes(1);
     });
   });
 

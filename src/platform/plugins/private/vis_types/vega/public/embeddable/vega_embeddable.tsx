@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
@@ -27,13 +29,19 @@ import {
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
+  type HasEditCapabilities,
   type ProjectRoutingOverrides,
+  type PublishesDataLoading,
   type PublishesDataViews,
+  type PublishesWritableDescription,
+  type PublishesWritableTitle,
   type PublishesEsqlUsage,
   type PublishesProjectRoutingOverrides,
+  type PublishesRendered,
   type HasSupportedTriggers,
   timeRangeComparators,
   titleComparators,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -69,24 +77,21 @@ const getDataViews = async (specString: string): Promise<DataView[] | undefined>
   return spec ? extractIndexPatternsFromSpec(spec) : undefined;
 };
 
-export interface VegaEmbeddableApi
-  extends DefaultEmbeddableApi<VegaByValueState>,
-    HasDrilldowns,
-    HasSupportedTriggers,
-    PublishesEsqlUsage,
-    PublishesProjectRoutingOverrides,
-    PublishesDataViews {
-  rendered$: BehaviorSubject<boolean>;
-  getInspectorAdapters: () => VegaInspectorAdapters | undefined;
-  getTypeDisplayName: () => string;
-  isEditingEnabled: () => boolean;
-  onEdit: (options?: { isNewPanel?: boolean }) => void;
-  openInspector: () => unknown;
-}
+export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
+  HasDrilldowns &
+  HasEditCapabilities &
+  HasInspectorAdapters &
+  HasSupportedTriggers &
+  PublishesDataLoading &
+  PublishesWritableDescription &
+  PublishesWritableTitle &
+  PublishesEsqlUsage &
+  PublishesProjectRoutingOverrides &
+  PublishesDataViews &
+  PublishesRendered;
 
 interface VegaEmbeddableDependencies {
   expressions: Pick<VegaPluginStartDependencies['expressions'], 'ReactExpressionRenderer'>;
-  inspector: Pick<VegaPluginStartDependencies['inspector'], 'isAvailable' | 'open'>;
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
 }
 
@@ -178,7 +183,7 @@ export const vegaEmbeddableFactory = (
       supportedTriggers: () => VEGA_EMBEDDABLE_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
-      onEdit: ({ isNewPanel = false } = {}) => {
+      onEdit: async ({ isNewPanel = false } = {}) => {
         const initialSpec = spec$.getValue();
         openLazyFlyout({
           core,
@@ -212,12 +217,6 @@ export const vegaEmbeddableFactory = (
         });
       },
       getInspectorAdapters: () => inspectorAdapters$.getValue(),
-      openInspector: () => {
-        const adapters = inspectorAdapters$.getValue();
-        return adapters && deps.inspector.isAvailable(adapters)
-          ? deps.inspector.open(adapters, { title: titleManager.api.title$.getValue() ?? 'Vega' })
-          : undefined;
-      },
     });
 
     const fetchSubscription = combineLatest([spec$, fetch$(api)]).subscribe(([spec, data]) => {
@@ -270,6 +269,14 @@ export const vegaEmbeddableFactory = (
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const rendered = useStateFromPublishingSubject(rendered$);
+        const [hideTitle, title, description] = useBatchedPublishingSubjects(
+          api.hideTitle$,
+          api.title$,
+          api.description$
+        );
+        const domNode = useRef<HTMLDivElement>(null);
+
         useEffect(
           () => () => {
             abortController.abort();
@@ -280,7 +287,25 @@ export const vegaEmbeddableFactory = (
           },
           []
         );
-        return <deps.expressions.ReactExpressionRenderer {...expressionParams} />;
+
+        useEffect(() => {
+          if (rendered && domNode.current) {
+            dispatchRenderComplete(domNode.current);
+          }
+        }, [rendered]);
+
+        return (
+          <div
+            ref={domNode}
+            css={{ width: '100%', height: '100%' }}
+            data-render-complete={rendered}
+            data-title={hideTitle ? '' : title ?? ''}
+            data-description={description ?? ''}
+            data-shared-item
+          >
+            <deps.expressions.ReactExpressionRenderer {...expressionParams} />
+          </div>
+        );
       },
     };
   },
