@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiTextColor, EuiText } from '@elastic/eui';
+import { EuiTextColor, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ProcessResult } from './components/process_result';
@@ -45,6 +45,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
     const getTestId = useTestIdGenerator(dataTestSubj);
     const agentId = _agentId || action.agents[0];
     const command = action.command;
+    const hostActionOutput = action.outputs?.[agentId]?.content;
 
     const { wasSuccessful, isCompleted } = useMemo(() => {
       return (
@@ -83,6 +84,10 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
       return <></>;
     }
 
+    if (!isCompleted) {
+      return <></>;
+    }
+
     return (
       <EuiText size={textSize} data-test-subj={getTestId()}>
         {!isCompleted && (
@@ -99,6 +104,27 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                   defaultMessage="Action result:"
                 />
                 <div>{processResult}</div>
+
+                {hostActionOutput && hostActionOutput.descendants && (
+                  <div>
+                    <EuiSpacer />
+
+                    <FormattedMessage
+                      id="xpack.securitySolution.management.killProcessActionResult.descendantsLabel"
+                      defaultMessage="Descendants ({count})"
+                      values={{ count: hostActionOutput.descendants.length }}
+                    />
+
+                    {hostActionOutput.descendants.map((descendantResult) => {
+                      return (
+                        <ProcessResult
+                          processResult={descendantResult}
+                          key={`pid-${descendantResult.pid}`}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             ) : (
               <EndpointActionFailureMessage
