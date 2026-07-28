@@ -36,6 +36,23 @@ function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
   return undefined;
 }
 
+function isCurrentLocation(href: string): boolean {
+  try {
+    const currentUrl = new URL(window.location.href);
+    const targetUrl = new URL(href, currentUrl);
+    const normalizePath = (path: string) => path.replace(/\/+$/, '');
+
+    return (
+      targetUrl.origin === currentUrl.origin &&
+      normalizePath(targetUrl.pathname) === normalizePath(currentUrl.pathname) &&
+      targetUrl.search === currentUrl.search &&
+      normalizePath(targetUrl.hash) === normalizePath(currentUrl.hash)
+    );
+  } catch {
+    return false;
+  }
+}
+
 interface FallbackProps {
   hasContent: boolean;
   back?: AppHeaderBack[];
@@ -61,7 +78,7 @@ function useFallbackProps(): FallbackProps {
     const backTargets: AppHeaderBack[] = [];
     for (let i = breadcrumbs.length - 2; i >= 0; i--) {
       const crumb = breadcrumbs[i];
-      if (crumb.href) {
+      if (crumb.href && !isCurrentLocation(crumb.href)) {
         backTargets.push({
           href: crumb.href,
           onClick: crumb.onClick,

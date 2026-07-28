@@ -10,6 +10,7 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
+  DEFAULT_TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsSchema } from './common';
@@ -372,7 +373,7 @@ export const createRuleDataBaseSchema = z
       .string()
       .min(1)
       .max(128)
-      .default('@timestamp')
+      .default(DEFAULT_TIME_FIELD)
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     query: querySchema,
@@ -500,6 +501,7 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
@@ -537,7 +539,6 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strict()
   .check((ctx) => {
@@ -640,35 +641,7 @@ export const ruleTagsResponseSchema = z
   })
   .describe('All unique tags across rules.');
 
-/** Bulk operation response schema. */
-export const bulkOperationResponseSchema = z
-  .object({
-    rules: z.array(ruleResponseSchema).describe('The rules that the operation was applied to.'),
-    errors: z
-      .array(
-        z.object({
-          id: z.string().describe('The identifier of the rule that failed.'),
-          error: z.object({
-            message: z.string().describe('The error message.'),
-            statusCode: z.number().describe('The HTTP status code.'),
-          }),
-        })
-      )
-      .describe('Errors encountered during the bulk operation.'),
-    truncated: z
-      .boolean()
-      .optional()
-      .describe(
-        'True when the request used a filter that matched more rules than were included in this operation.'
-      ),
-    totalMatched: z
-      .number()
-      .optional()
-      .describe('Total number of rules matching the filter when truncated is true.'),
-  })
-  .describe('Result of a bulk rule operation.');
-
-export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;
+export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
 export const ruleIdSchema = z
   .string()

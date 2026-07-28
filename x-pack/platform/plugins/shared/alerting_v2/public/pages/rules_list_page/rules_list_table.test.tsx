@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
@@ -88,6 +88,7 @@ const defaultProps: RulesListTableProps = {
   onClone: jest.fn(),
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
+  onRun: jest.fn(),
   onTableChange: jest.fn(),
 };
 
@@ -177,9 +178,7 @@ describe('RulesListTable', () => {
 
       fireEvent.mouseOver(screen.getByText('Alert'));
 
-      await waitFor(() => {
-        expect(screen.getByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
-      });
+      expect(await screen.findByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
       expect(
         screen.queryByText('Mode can be changed in the rule edit form')
       ).not.toBeInTheDocument();
@@ -190,9 +189,7 @@ describe('RulesListTable', () => {
 
       fireEvent.mouseOver(screen.getByText('Signal'));
 
-      await waitFor(() => {
-        expect(screen.getByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
-      });
+      expect(await screen.findByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
     });
 
     it('renders tag badges for rules with tags', () => {
@@ -297,34 +294,40 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 5 rules');
     });
 
-    it('shows "Select first {max} rules" without disclosure until select-all is active', () => {
+    it('disables Select all and shows a help tip when total exceeds the bulk cap', () => {
       renderTable({
         selectedCount: 1,
         isAllSelected: false,
-        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 2000,
       });
 
-      const btn = screen.getByTestId('selectAllRulesButton');
-      expect(btn).toHaveTextContent('Select first');
-      expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
-
-      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+      expect(screen.getByTestId('selectAllRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('bulkSelectAllLimitTooltip')).toBeInTheDocument();
     });
 
-    it('shows disclosure only after select-all when total exceeds bulk cap', () => {
+    it('explains the cap in the Select all help tip', async () => {
       renderTable({
-        selectedCount: BULK_FILTER_MAX_RULES,
-        isAllSelected: true,
-        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 2000,
       });
 
-      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('Selected');
-      expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
-        /10,?000/
-      );
-      const disc = screen.getByTestId('bulkSelectAllLimitDisclosure');
-      expect(disc).toHaveTextContent('Only the first');
-      expect(disc.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+      fireEvent.mouseOver(screen.getByTestId('bulkSelectAllLimitTooltip'));
+
+      const disc = await screen.findByTestId('bulkSelectAllLimitDisclosure');
+      expect(disc).toHaveTextContent('Select all is available only when');
+      expect(disc).toHaveTextContent('Narrow your filter');
+    });
+
+    it('enables Select all with no help tip when total is within the bulk cap', () => {
+      renderTable({
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES,
+      });
+
+      expect(screen.getByTestId('selectAllRulesButton')).toBeEnabled();
+      expect(screen.queryByTestId('bulkSelectAllLimitTooltip')).not.toBeInTheDocument();
     });
 
     it('hides "Select all" button when all selected', () => {
@@ -357,9 +360,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkEnableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
@@ -372,9 +373,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkDisableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkDisableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkDisableRules'));
 
@@ -387,9 +386,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkDeleteRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkDeleteRules'));
 
@@ -401,9 +398,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkEnableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
@@ -420,9 +415,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('editRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('editRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
@@ -435,9 +428,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('cloneRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cloneRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
@@ -450,9 +441,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('deleteRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
 
@@ -465,6 +454,34 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
       expect(screen.queryByTestId('toggleEnabledRule-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('calls onRun when run action is clicked for an enabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('disables the run action for a disabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
+
+      expect(await screen.findByTestId('runRule-rule-2')).toBeInTheDocument();
+
+      expect(screen.getByTestId('runRule-rule-2')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-2'));
+
+      expect(onRun).not.toHaveBeenCalled();
     });
   });
 

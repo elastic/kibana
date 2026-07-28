@@ -42,6 +42,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('should show the case view page correctly', async () => {
+        if (await cases.common.isRedesignEnabled()) {
+          await testSubjects.existOrFail('appHeaderTitle');
+
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+          await testSubjects.existOrFail('case-view-tab-title-attachments');
+          await testSubjects.existOrFail('description');
+
+          await testSubjects.existOrFail('case-view-activity');
+
+          await testSubjects.existOrFail('case-view-assignees-field-panel');
+          await testSubjects.existOrFail('sidebar-severity');
+          await testSubjects.existOrFail('case-view-participants-field-panel');
+          await testSubjects.existOrFail('case-tags');
+          await testSubjects.existOrFail('cases-categories');
+          await testSubjects.existOrFail('case-view-sidebar-connectors');
+          return;
+        }
+
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('header-page-supplements');
         await testSubjects.existOrFail('case-action-bar-wrapper');
@@ -68,21 +86,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('edits a case title from the case view page', async () => {
         const newTitle = `test-${uuidv4()}`;
 
-        await testSubjects.click('editable-title-header-value');
-        await testSubjects.setValue('editable-title-input-field', newTitle);
-        await testSubjects.click('editable-title-submit-btn');
-
-        // wait for backend response
-        await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).equal(newTitle);
-        });
+        await cases.common.editCaseTitle(newTitle);
+        await cases.common.assertCaseTitle(newTitle);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="title-update-action"]');
       });
 
-      it('shows error message when title is more than 160 characters', async () => {
+      it('shows error message when title is more than 160 characters', async function () {
+        // The redesign validates the title length server-side (surfaced as a toast) rather than with
+        // an inline form error, so this legacy client-side validation flow does not apply.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         const longTitle = Array(161).fill('x').toString();
 
         await testSubjects.click('editable-title-header-value');
@@ -163,28 +180,35 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds a category to a case', async () => {
         const category = uuidv4();
-        await testSubjects.click('category-edit-button');
-        await comboBox.setCustom('comboBoxInput', category);
-        await testSubjects.click('edit-category-submit');
+        await cases.common.addCategory(category);
 
-        // validate category was added
-        await testSubjects.existOrFail('category-viewer-' + category);
+        // Legacy renders a dedicated viewer; the redesign edits the value in place, so we rely on the
+        // user action below to confirm the update landed.
+        if (!(await cases.common.isRedesignEnabled())) {
+          await testSubjects.existOrFail('category-viewer-' + category);
+        }
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-update-action"]');
       });
 
       it('deletes a category from a case', async () => {
-        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+        await cases.common.removeCategory();
 
-        await testSubjects.click('category-remove-button');
-
-        await testSubjects.existOrFail('no-categories');
+        if (!(await cases.common.isRedesignEnabled())) {
+          await testSubjects.existOrFail('no-categories');
+        }
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
-      it('shows error when category is more than 50 characters', async () => {
+      it('shows error when category is more than 50 characters', async function () {
+        // The redesign surfaces category length validation inline on the always-visible combo box
+        // rather than through the legacy edit form, so this flow does not apply.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         const longCategory = Array(51).fill('x').toString();
         await testSubjects.click('category-edit-button');
         await comboBox.setCustom('comboBoxInput', longCategory);
@@ -200,18 +224,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
-        await testSubjects.click('tag-list-edit-button');
-        await comboBox.setCustom('comboBoxInput', tag);
-        await testSubjects.click('edit-tags-submit');
+        await cases.common.addTag(tag);
 
-        // validate tag was added
-        await testSubjects.existOrFail('tag-' + tag);
+        // Legacy renders a dedicated tag element; the redesign edits the value in place, so we rely on
+        // the user action below to confirm the update landed.
+        if (!(await cases.common.isRedesignEnabled())) {
+          await testSubjects.existOrFail('tag-' + tag);
+        }
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
       });
 
-      it('shows error when tag is more than 256 characters', async () => {
+      it('shows error when tag is more than 256 characters', async function () {
+        // The redesign surfaces tag length validation inline on the always-visible combo box rather
+        // than through the legacy edit form, so this flow does not apply.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         const longTag = Array(257).fill('a').toString();
 
         await testSubjects.click('tag-list-edit-button');
@@ -231,11 +262,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes a tag from a case', async () => {
-        await testSubjects.click('tag-list-edit-button');
-        // find the tag button and click the close button
-        const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
-        await button.click();
-        await testSubjects.click('edit-tags-submit');
+        if (await cases.common.isRedesignEnabled()) {
+          await comboBox.clear('case-tags');
+          await testSubjects.click('template-field-confirm-tags');
+          await header.waitUntilLoadingHasFinished();
+        } else {
+          await testSubjects.click('tag-list-edit-button');
+          // find the tag button and click the close button
+          const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
+          await button.click();
+          await testSubjects.click('edit-tags-submit');
+        }
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
@@ -248,10 +285,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await find.byCssSelector(
             '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
           );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
-          );
+          // validates dropdown tag (legacy renders the status badge inside the action-bar dropdown)
+          if (!(await cases.common.isRedesignEnabled())) {
+            await testSubjects.existOrFail(
+              'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+            );
+          }
         });
 
         it('changes a case status to closed via dropdown-menu', async () => {
@@ -261,13 +300,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await find.byCssSelector(
             '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
           );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-closed'
-          );
+          // validates dropdown tag (legacy renders the status badge inside the action-bar dropdown)
+          if (!(await cases.common.isRedesignEnabled())) {
+            await testSubjects.existOrFail(
+              'case-view-status-dropdown > case-status-badge-popover-button-closed'
+            );
+          }
         });
 
-        it("reopens a case from the 'reopen case' button", async () => {
+        it("reopens a case from the 'reopen case' button", async function () {
+          // The redesign has no action-bar quick-action button (`case-view-status-action-button`);
+          // status is changed only from the header badge, covered by the dropdown-menu tests above.
+          if (await cases.common.isRedesignEnabled()) {
+            return this.skip();
+          }
+
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
           await header.waitUntilLoadingHasFinished();
           await testSubjects.click('case-view-status-action-button');
@@ -290,7 +337,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           );
         });
 
-        it("marks in progress a case from the 'mark in progress' button", async () => {
+        it("marks in progress a case from the 'mark in progress' button", async function () {
+          // The redesign has no action-bar quick-action button (`case-view-status-action-button`);
+          // status is changed only from the header badge, covered by the dropdown-menu tests above.
+          if (await cases.common.isRedesignEnabled()) {
+            return this.skip();
+          }
+
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
           await header.waitUntilLoadingHasFinished();
           await testSubjects.click('case-view-status-action-button');
@@ -313,7 +366,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           );
         });
 
-        it("closes a case from the 'close case' button", async () => {
+        it("closes a case from the 'close case' button", async function () {
+          // The redesign has no action-bar quick-action button (`case-view-status-action-button`);
+          // status is changed only from the header badge, covered by the dropdown-menu tests above.
+          if (await cases.common.isRedesignEnabled()) {
+            return this.skip();
+          }
+
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
           await header.waitUntilLoadingHasFinished();
           await testSubjects.click('case-view-status-action-button');
@@ -725,6 +784,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      beforeEach(async function () {
+        // The redesign consolidates the activity type filters into a single dropdown
+        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
+        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
+        // these assertions read; the redesign filter bar has its own unit coverage.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
+      });
+
       it('filters by all by default', async () => {
         const allBadge = await find.byCssSelector(
           '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
@@ -810,6 +879,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.waitForCasesToBeListed();
         await cases.casesTable.goToFirstListedCase();
         await header.waitUntilLoadingHasFinished();
+      });
+
+      beforeEach(async function () {
+        // The redesign renders all activity (paged actions, the show-more row, and the latest actions)
+        // in a single `user-actions-list`, whereas these assertions expect the legacy two-list DOM with
+        // fixed per-list counts; the redesign pagination has its own unit coverage.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
       });
 
       after(async () => {
@@ -986,11 +1064,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('should render the reporter correctly', async () => {
-        const reporter = await cases.singleCase.getReporter();
-
-        const reporterText = await reporter.getVisibleText();
-
-        expect(reporterText).to.be('elastic');
+        expect(await cases.singleCase.getReporterName()).to.be('elastic');
       });
     });
 
@@ -998,6 +1072,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
         await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+      });
+
+      beforeEach(async function () {
+        // The redesign renders reporter/participants as app-header metadata and sidebar avatars rather
+        // than the legacy username lists these assertions read, so this suite targets the legacy UI.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
       });
 
       afterEach(async () => {
@@ -1082,7 +1164,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         },
       ];
 
-      before(async () => {
+      before(async function () {
+        // The redesign only renders case-view custom fields when templates v2 (`templates.enabled`) is
+        // on, which defaults off; these assertions target the legacy sidebar custom-field editors.
+        if (await cases.common.isRedesignEnabled()) {
+          return this.skip();
+        }
+
         await cases.navigation.navigateToApp();
         await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
         await cases.api.createCase({

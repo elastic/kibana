@@ -8,13 +8,11 @@
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import {
   DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  INDEX_PATTERN_REGEX,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
@@ -40,6 +38,7 @@ import {
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEsqlRow } from './types';
+import { buildIntegrationRuntimeEvals } from './runtime_evaluations';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -47,6 +46,8 @@ interface BuildEsqlQueryParams {
   originAlertIds: OriginEventId[];
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
+  integrationRuntimeEvalsEnabled?: boolean;
+  showUnknownTarget: boolean;
 }
 
 /**
@@ -70,6 +71,7 @@ export const fetchEvents = async ({
   esQuery,
   pinnedIds,
   projectRouting,
+  integrationRuntimeEvalsEnabled,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -82,6 +84,7 @@ export const fetchEvents = async ({
   esQuery?: EsQuery;
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
+  integrationRuntimeEvalsEnabled?: boolean;
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -119,9 +122,13 @@ export const fetchEvents = async ({
     originAlertIds,
     alertsMappingsIncluded,
     pinnedIds,
+    integrationRuntimeEvalsEnabled,
+    showUnknownTarget,
   });
 
-  logger.trace(`Executing events query [project_routing: ${projectRouting ?? 'default'}]`);
+  logger.trace(
+    `Executing events query [project_routing: ${projectRouting ?? 'default'}] [${query}]`
+  );
 
   return esClient.asCurrentUser.helpers
     .esql({
@@ -151,23 +158,6 @@ const buildDslFilter = (
           },
         },
       },
-      ...(showUnknownTarget
-        ? []
-        : [
-            {
-              bool: {
-                should: [
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
-                ].map((field) => ({
-                  exists: { field },
-                })),
-                minimum_should_match: 1,
-              },
-            },
-          ]),
       {
         bool: {
           should: [
@@ -194,6 +184,25 @@ const buildDslFilter = (
     ],
   },
 });
+
+/**
+ * Pre-casts all typed EUID source fields to KEYWORD before EUID resolution.
+ * Under unmapped_fields="NULLIFY", absent fields are null-typed at plan time.
+ * getEuidEsqlEvaluation emits TO_STRING(field) inside CASE branches — ES|QL
+ * validates those at plan time even for branches that can never execute, causing
+ * "partiallyFold produced type [NULL] but expected [KEYWORD]" on indices where
+ * these fields are unmapped. Unconditional: EUID resolution always runs.
+ */
+const buildEuidSourceFieldCasts = (): string => {
+  const actorFields = (TYPED_ENTITY_PREFIXES as readonly string[])
+    .flatMap((prefix) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[prefix as keyof EuidSourceFields])
+    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
+  const targetFields = (TYPED_ENTITY_PREFIXES as readonly string[])
+    .flatMap((prefix) => GRAPH_TARGET_EUID_SOURCE_FIELDS[prefix as keyof EuidSourceFields])
+    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'));
+  const uniqueFields = [...new Set([...actorFields, ...targetFields])];
+  return uniqueFields.map((f) => `| EVAL \`${f}\` = TO_STRING(\`${f}\`)`).join('\n');
+};
 
 /**
  * Builds v2 actor resolution using EUID computation.
@@ -393,11 +402,40 @@ const buildEsqlQuery = ({
   originAlertIds,
   alertsMappingsIncluded,
   pinnedIds,
+  integrationRuntimeEvalsEnabled,
+  showUnknownTarget,
 }: BuildEsqlQueryParams): string => {
-  const query = `SET unmapped_fields="nullify";
+  // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
+  // parents under unmapped_fields="LOAD" (currently throws verification_exception for fields
+  // like m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
+  // greenhouse.audit.event.meta.name, cisco_meraki.*.vap).
+  // When LOAD is restored, keep the global user.id cast below and add similar casts for any
+  // other field known to be mapped with the wrong type in some integration index.
+  // See NULLIFY_WORKAROUNDS.md for the full revert checklist and the user.id audit results.
+  const query = `SET unmapped_fields="NULLIFY";
 FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
+| EVAL  __actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL
+| EVAL  __action_exists = event.action IS NOT NULL
+| EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset, "")
+${
+  integrationRuntimeEvalsEnabled !== false
+    ? `// Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
+// "long" (e.g. aws_bedrock.invocation) and LIKE type errors in aws_bedrock enrichment.
+// Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
+// Gated behind integrationRuntimeEvalsEnabled so users can disable it as an escape hatch.
+| EVAL user.id = TO_STRING(user.id)
+${buildIntegrationRuntimeEvals({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}`
+    : ''
+}
+// Recompute after runtime evals so entity.target.id set by integration runtime evals is visible.
+| EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
+    OR host.target.id IS NOT NULL OR host.target.name IS NOT NULL
+    OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
+    OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
+${showUnknownTarget ? '' : '| WHERE __target_exists'}
+${buildEuidSourceFieldCasts()}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}
@@ -406,16 +444,18 @@ ${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
-// Create actor and target data - entity object built by TypeScript enrichment
+// sourceFields is nested inside "entity" so these strings are schema-valid as-is.
+// rebuildDocData rewrites doc.entity with enrichment data (reading sourceFields from entity.sourceFields),
+// but if JSON parsing fails it returns the raw string unchanged — which must already pass validation.
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":{", ${buildActorSourceFieldsEsql()}, "}",
   ${JSON_OBJECT_END})
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":{", ${buildTargetSourceFieldsEsql()}, "}",
   ${JSON_OBJECT_END})
 // Per-target → source-document mapping ("<targetEntityId>\\n<_id>"), collected via VALUES so
 // that after STATS drops targetEntityId from the group key we can still attribute each target
@@ -423,7 +463,6 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // group's own docIds, which keeps label nodes split by document exactly as they would be if the
 // query still grouped by targetEntityId.
 | EVAL targetDocMap = CONCAT(COALESCE(targetEntityId, ""), "\\n", _id)
-
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code

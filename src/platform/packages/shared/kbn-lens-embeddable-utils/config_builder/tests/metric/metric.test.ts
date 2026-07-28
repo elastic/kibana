@@ -194,7 +194,7 @@ describe('Metric', () => {
       const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
 
       expect(viz.palette?.params?.rangeType).toBe('number');
-      expect(viz.palette?.params?.continuity).toBe('none');
+      expect(viz.palette?.params?.continuity).toBe('all');
       expect(apiOutput.metrics[0].color).toEqual(config.metrics[0].color);
     });
 
@@ -230,8 +230,8 @@ describe('Metric', () => {
       const viz = so.state.visualization as MetricVisualizationState;
 
       expect(viz.palette?.params?.rangeType).toBe('number');
-      // Continuity has no meaning for a distributed palette and is always set to 'none'
-      expect(viz.palette?.params?.continuity).toBe('none');
+      // A distributed palette always opens both bounds so out-of-range values stay colored
+      expect(viz.palette?.params?.continuity).toBe('all');
       expect(viz.palette?.params?.steps).toBe(3);
       expect(viz.palette?.params?.stops).toBeUndefined();
       expect(viz.palette?.params?.colorStops).toBeUndefined();
@@ -282,8 +282,8 @@ describe('Metric', () => {
 
       expect(outViz.palette?.params?.rangeType).toBe('percent');
       expect(outViz.palette?.params?.steps).toBe(3);
-      // Continuity has no meaning for a distributed palette and is always set to 'none'
-      expect(outViz.palette?.params?.continuity).toBe('none');
+      // A distributed palette always opens both bounds so out-of-range values stay colored
+      expect(outViz.palette?.params?.continuity).toBe('all');
       expect(outViz.palette?.params?.stops).toBeUndefined();
       expect(outViz.palette?.params?.colorStops).toBeUndefined();
     });

@@ -24,7 +24,7 @@ export const rt = {
     name: commonSchemas.fileName,
     alt: commonSchemas.fileAlt,
     meta: commonSchemas.fileMeta,
-    mimeType: schema.maybe(schema.string()),
+    mimeType: schema.maybe(commonSchemas.fileMimeType),
   }),
 };
 

@@ -1,5 +1,9 @@
 {
-  "sha1": "494b4ceee5efce568fe97077741564ad2c7b206e",
+  "sha1": "c82d85a201138b4e7123991a7078161633137180",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "adc95c83352db02-9a16baae7c78495",
@@ -10,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 84,
+        "line": 98,
         "column": 9
       }
     },
@@ -23,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 104,
+        "line": 118,
         "column": 9
       }
     },
@@ -36,7 +40,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 119,
+        "line": 133,
+        "column": 9
+      }
+    },
+    {
+      "id": "adc95c83352db02-595b9fbb5601d93",
+      "title": "[NON-MKI] Security — Application Connections management surfaces an \"Expired\" status for an expired connection that stays revocable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
+        "line": 149,
         "column": 9
       }
     },
@@ -49,7 +66,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 135,
+        "line": 173,
         "column": 9
       }
     }
