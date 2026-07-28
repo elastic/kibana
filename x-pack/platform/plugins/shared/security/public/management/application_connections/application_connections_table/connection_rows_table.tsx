@@ -11,7 +11,8 @@ import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { isConnectionActive, useConnectionTableColumns } from './connection_table_columns';
+import { isRevocable } from './application_connections_filters';
+import { useConnectionTableColumns } from './connection_table_columns';
 import { labels } from '../constants/i18n';
 import type { ApplicationConnection } from '../constants/types';
 import type { OAuthClient, OAuthConnection } from '../service/application_connections_api_client';
@@ -68,7 +69,7 @@ export const ConnectionRowsTable: FunctionComponent<ConnectionRowsTableProps> = 
   const selectionConfig: EuiTableSelectionType<ApplicationConnection> = {
     selected: selectedItems,
     onSelectionChange: handleSelectionChange,
-    selectable: isConnectionActive,
+    selectable: isRevocable,
     selectableMessage: (selectable, { connection }) =>
       selectable
         ? labels.connectionColumns.selectRowLabel(connection.name ?? connection.id)
