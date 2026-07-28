@@ -7227,7 +7227,7 @@ components:
           properties:
             field:
               description: Field to use instead of process.pid
-              maximum: 2000
+              maxLength: 2000
               type: string
             kill_descendants:
               description: Whether to also terminate the descendant processes of the targeted
@@ -10677,7 +10677,7 @@ components:
           properties:
             field:
               description: Field to use instead of process.pid
-              maximum: 2000
+              maxLength: 2000
               type: string
             overwrite:
               default: true
