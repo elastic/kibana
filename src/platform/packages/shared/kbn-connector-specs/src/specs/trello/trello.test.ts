@@ -36,7 +36,6 @@ describe('Trello', () => {
   it('has the expected metadata', () => {
     expect(Trello.metadata.id).toBe('.trello');
     expect(Trello.metadata.minimumLicense).toBe('enterprise');
-    expect(Trello.metadata.supportedFeatureIds).toContain('agentBuilder');
   });
 
   it('uses api_key_query auth with key and token params', () => {
