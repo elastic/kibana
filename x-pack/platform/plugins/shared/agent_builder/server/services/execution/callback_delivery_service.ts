@@ -38,10 +38,6 @@ export class CallbackDeliveryService {
     this.actions = actions;
   }
 
-  /**
-   * Returns the execution's callback URL, or undefined when no callback is configured.
-   * Callback delivery is only supported for conversation-mode executions.
-   */
   getCallbackUrl(execution: AgentExecution): string | undefined {
     return execution.executionMode === AgentExecutionMode.conversation
       ? execution.agentParams.callback?.url
