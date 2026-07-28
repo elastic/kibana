@@ -230,11 +230,18 @@ export interface SmlDocument {
    */
   permissions: SmlPermissions;
   /**
-   * Number of required Kibana privileges on this document. Stored alongside
-   * `permissions` so that Elasticsearch's `terms_set` query can use
-   * `minimum_should_match_field` for AND-semantics privilege enforcement in DLS.
+   * Composite `space|privilege` tokens for DLS filtering. Contains the
+   * cross-product of `spaces` × `permissions.kibana.privileges[*].name`.
+   * Empty when either dimension is absent (e.g. global `'*'` space entries
+   * or privilege-free public entries).
    */
-  permissions_count: number;
+  dls_tokens: string[];
+  /**
+   * Number of entries in `dls_tokens`. Stored alongside `dls_tokens` so that
+   * Elasticsearch's `terms_set` query can use `minimum_should_match_field`
+   * for AND-semantics DLS enforcement via the ImplicitPrivilegesProvider.
+   */
+  dls_tokens_count: number;
   /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
 }

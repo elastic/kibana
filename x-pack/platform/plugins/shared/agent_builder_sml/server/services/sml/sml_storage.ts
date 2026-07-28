@@ -82,7 +82,8 @@ const smlStorageSchemaProperties = {
       }),
     },
   }),
-  permissions_count: types.long({}),
+  dls_tokens: types.keyword({}),
+  dls_tokens_count: types.long({}),
   ingestion_method: types.keyword({}),
 };
 
