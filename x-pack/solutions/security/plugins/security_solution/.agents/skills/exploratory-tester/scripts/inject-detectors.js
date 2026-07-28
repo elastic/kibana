@@ -6,20 +6,25 @@
  * Regenerate: node scripts/__tests__/build-injector.mjs
  * Verify:     node scripts/__tests__/equivalence.test.mjs
  *
- * Usage: pass as the `function` argument to browser_evaluate ONCE at flow start,
+ * Usage: pass as the `function` argument to browser_evaluate ONCE per flow,
  * and again after every browser_navigate (navigation resets the window context):
  *
  *   browser_evaluate(function: "<paste full file content>")
  *
- * Per-step detector calls are then:
+ * Per-step detector calls are then (illustrative — real args are JSON, quoted with "):
  *   browser_evaluate(function: "() => window.__et.dom()")
- *   browser_evaluate(function: "() => window.__et.console(["msg1","msg2"])")
- *   browser_evaluate(function: "() => window.__et.network([{"method":"GET","url":"https://..."}])")
+ *   browser_evaluate(function: "() => window.__et.console(['msg1', 'msg2'])")
+ *   browser_evaluate(function: "() => window.__et.network([{method: 'GET', url: 'https://...'}])")
  *
  * Fallback: if browser_evaluate fails or window.__et is undefined after injection,
  * fall back to the original paste procedure (paste full script content each time).
  *
- * Token savings vs paste: ~129 KB/flow → ~9 KB/flow (93% reduction in detector payload).
+ * Cost model: a flow with V browser_navigate calls injects V+1 times
+ * (~7 KB each) instead of pasting all three detector scripts (~113 KB total)
+ * at every one of its checklist steps. The fewer navigations per flow, the
+ * closer the savings get to the ~93% reduction seen with a single injection;
+ * a flow that navigates on every step sees a much smaller reduction, since
+ * the per-navigation reinjection cost then dominates.
  */
 (() => {
   window.__et = {

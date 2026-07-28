@@ -1,10 +1,13 @@
 /**
  * Equivalence test harness for exploratory-tester detectors.
  *
- * Verifies two things for every fixture:
+ * Verifies three things:
  *   1. CORRECTNESS — the detector produces the expected classification.
  *   2. EQUIVALENCE — paste-mode and inject-mode produce byte-identical output.
- *      (Guards against PR 2 accidentally changing detector behavior.)
+ *      (Guards against the inject-mode bridge accidentally changing detector behavior.)
+ *   3. NO DRIFT — the committed inject-detectors.js is byte-identical to what
+ *      build-injector.mjs would generate right now from the canonical sources.
+ *      (Catches "edited a detector, forgot to regenerate" before it ships.)
  *
  * No test framework required. Run from anywhere inside the Kibana repo:
  *
@@ -20,6 +23,7 @@ import { readFileSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
+import { extractInner, buildInjectorSource } from './injector-builder.mjs';
 
 const require = createRequire(import.meta.url);
 const { JSDOM } = require('jsdom');
@@ -77,13 +81,9 @@ function consolePaste(messages) {
 }
 
 function consoleInject(messages) {
-  // Extract the inner arrow function from the IIFE wrapper:
-  //   ((messages) => { body })(/*MESSAGES*/)
-  // → (messages) => { body }
-  // indexOf locates the IIFE start (after the JSDoc header); lastIndexOf finds the invocation end.
-  const iffeStart = consoleScript.indexOf('((messages)');
-  const markerIdx = consoleScript.lastIndexOf(')(/*MESSAGES*/)');
-  const innerSrc = consoleScript.slice(iffeStart + 1, markerIdx);
+  // Same extraction the generator uses (see injector-builder.mjs#extractInner):
+  //   ((messages) => { body })(/*MESSAGES*/)  →  (messages) => { body }
+  const innerSrc = extractInner(consoleScript, '((messages)', '/*MESSAGES*/');
   const inner = eval(`(${innerSrc})`); // eslint-disable-line no-eval
   return inner(messages);
 }
@@ -95,9 +95,7 @@ function networkPaste(requests) {
 
 function networkInject(requests) {
   // Same extraction pattern as consoleInject.
-  const iffeStart = networkScript.indexOf('((requests)');
-  const markerIdx = networkScript.lastIndexOf(')(/*REQUESTS*/)');
-  const innerSrc = networkScript.slice(iffeStart + 1, markerIdx);
+  const innerSrc = extractInner(networkScript, '((requests)', '/*REQUESTS*/');
   const inner = eval(`(${innerSrc})`); // eslint-disable-line no-eval
   return inner(requests);
 }
@@ -179,7 +177,7 @@ console.log('\n── DOM detector: correctness ──────────�
     'dom-level3-spinner → type is spinner_present');
 }
 
-console.log('\n── DOM detector: paste ≡ inject (PR 2 equivalence gate) ────────────────');
+console.log('\n── DOM detector: paste ≡ inject (equivalence gate) ──────────────────────');
 
 for (const name of [
   'dom-clean',
@@ -398,6 +396,24 @@ for (const name of [
   const inject   = injectorNetwork(requests);
   assert(deepEqual(paste, inject),
     `${name}: paste output === injector output`);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// DRIFT GATE: committed inject-detectors.js === freshly generated output
+// Catches the case where a detector script was edited but the generator was
+// never re-run — without this, that mismatch would only surface as a subtle
+// runtime difference, not a test failure.
+// ══════════════════════════════════════════════════════════════════════════
+
+console.log('\n── Drift gate: inject-detectors.js matches build-injector.mjs output ───');
+
+{
+  const expected = buildInjectorSource({ domScript, consoleScript, networkScript });
+  assert(injectorScript === expected,
+    'committed inject-detectors.js is byte-identical to a fresh build-injector.mjs run',
+    injectorScript === expected
+      ? ''
+      : 'Run: node x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/__tests__/build-injector.mjs');
 }
 
 // ══════════════════════════════════════════════════════════════════════════
