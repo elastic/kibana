@@ -30,15 +30,11 @@ import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
-import type {
-  ParsedMetricItem,
-  Dimension,
-  UnifiedMetricsGridProps,
-  MetricsGridSettings,
-} from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
+import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import { FEATURE_FLAGS } from '../../../common/constants';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 
