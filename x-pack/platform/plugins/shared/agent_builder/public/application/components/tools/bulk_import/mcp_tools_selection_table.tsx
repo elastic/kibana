@@ -57,6 +57,7 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
 }) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Track when "select all" is active to prevent the table's internal selection
   // mechanism from limiting selection to only the visible page items.
@@ -78,11 +79,14 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
     return tools.filter((tool) => selectedNames.has(tool.name));
   }, [tools, selectedTools]);
 
-  // Must match EUI's fixed sort (name asc) so currentPageTools aligns with
-  // what EuiBasicTable receives as its items prop.
+  // Mirror EUI's sort so currentPageTools always aligns with the displayed page.
   const sortedFilteredTools = useMemo(
-    () => [...filteredTools].sort((a, b) => a.name.localeCompare(b.name)),
-    [filteredTools]
+    () =>
+      [...filteredTools].sort((a, b) => {
+        const cmp = a.name.localeCompare(b.name);
+        return sortDirection === 'asc' ? cmp : -cmp;
+      }),
+    [filteredTools, sortDirection]
   );
 
   const currentPageTools = useMemo(
@@ -218,10 +222,11 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
         itemId="name"
         selection={selection}
         search={searchConfig}
-        onTableChange={({ page }: CriteriaWithPagination<McpTool>) => {
+        onTableChange={({ page, sort }: CriteriaWithPagination<McpTool>) => {
           // EuiBasicTable clears selection before firing onChange on page changes.
           // Capture now and restore below; React batches both calls so this one wins.
           const selectionToRestore = selectedMcpToolsRef.current;
+          if (sort) setSortDirection(sort.direction as 'asc' | 'desc');
           if (page) {
             if (page.size !== tablePageSize) {
               setTablePageSize(page.size);
@@ -229,8 +234,8 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
             } else {
               setTablePageIndex(page.index);
             }
+            onChange(selectionToRestore);
           }
-          onChange(selectionToRestore);
         }}
         pagination={{
           initialPageSize: DEFAULT_PAGE_SIZE,
@@ -242,7 +247,7 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
         sorting={{
           sort: {
             field: 'name',
-            direction: 'asc',
+            direction: sortDirection,
           },
         }}
         loading={isLoading}

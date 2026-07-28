@@ -12,6 +12,7 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiInMemoryTableProps,
+  type EuiSearchBarOnChangeArgs,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import {
   EuiInMemoryTable,
   EuiPanel,
   EuiRadioGroup,
+  EuiSearchBar,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -59,7 +61,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   readOnly = false,
 }) => {
   const form = useFormContext();
-  // Read the form's reset value so the edit case initialises correctly.
+  // Read the form's reset value so the edit case initializes correctly.
   const formDefault = form.getFieldDefaultValue<string[] | null | undefined>(
     SELECTED_ACTIONS_FIELD
   );
@@ -106,16 +108,18 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState<EuiSearchBarOnChangeArgs['query']>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const filteredActions = useMemo(() => {
-    if (!searchQuery) return actions;
-    const q = searchQuery.toLowerCase();
-    return actions.filter(
-      (a) => a.name.toLowerCase().includes(q) || (a.description ?? '').toLowerCase().includes(q)
-    );
-  }, [actions, searchQuery]);
+  const filteredActions = useMemo(
+    () =>
+      searchQuery
+        ? EuiSearchBar.Query.execute(searchQuery, actions, {
+            defaultFields: ['name', 'description'],
+          })
+        : actions,
+    [actions, searchQuery]
+  );
 
   const sortedFilteredActions = useMemo(
     () =>
@@ -131,7 +135,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
     [sortedFilteredActions, pageIndex, pageSize]
   );
 
-  // After select-all, EUI fires onSelectionChange twice (all items, then page-clamped). Skip the second.
+  // handleSelectAll already set the correct value; skip EUI's reactive onSelectionChange.
   const isSelectAllActiveRef = useRef(false);
 
   // Refs keep callbacks stable; recreating them triggers EUI's componentDidUpdate → loop.
@@ -241,23 +245,30 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
             </EuiText>
           )}
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="pagesSelect"
+            iconSide="left"
+            onClick={handleSelectAll}
+            disabled={readOnly}
+            data-test-subj="connectorActionSelectorSelectAll"
+          >
+            {i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.selectAll', {
+              defaultMessage: 'Select all',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         {selectedCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="pagesSelect"
-                  iconSide="left"
-                  onClick={handleSelectAll}
-                  disabled={readOnly}
-                  data-test-subj="connectorActionSelectorSelectAll"
-                >
+                <EuiText size="xs">
                   {i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.selectedCount', {
                     defaultMessage: '{count} selected',
                     values: { count: selectedCount },
                   })}
-                </EuiButtonEmpty>
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
@@ -296,7 +307,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
           data-test-subj="connectorActionSelectorMode"
         />
       </EuiFormRow>
-      {!isAll && (
+      {!isAll && actions.length > 0 && (
         <>
           <EuiSpacer size="s" />
           <EuiPanel hasBorder paddingSize="m">
@@ -313,9 +324,11 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
                     { defaultMessage: 'Search actions' }
                   ),
                 },
-                onChange: ({ queryText }: { queryText: string }) => {
-                  setSearchQuery(queryText);
-                  setPageIndex(0);
+                onChange: ({ query, error }: EuiSearchBarOnChangeArgs) => {
+                  if (!error) {
+                    setSearchQuery(query);
+                    setPageIndex(0);
+                  }
                 },
               }}
               onTableChange={({ page, sort }: CriteriaWithPagination<ConnectorActionDef>) => {
