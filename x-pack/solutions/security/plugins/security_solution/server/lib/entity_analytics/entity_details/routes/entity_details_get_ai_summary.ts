@@ -40,6 +40,9 @@ const toPersistedSummary = (doc: AiSummaryMetadataDoc): PersistedEntityAiSummary
   recommended_actions: doc['Ai_summary.recommended_actions'] ?? null,
   generated_at: doc['Ai_summary.generated_at'],
   generated_by: doc['Ai_summary.generated_by'],
+  ...(doc['Ai_summary.author_profile_uid'] != null && {
+    author_profile_uid: doc['Ai_summary.author_profile_uid'],
+  }),
   staleness: {
     enabled_signals: doc['Ai_summary.staleness'].enabled_signals,
     snapshot: doc['Ai_summary.staleness'].snapshot,

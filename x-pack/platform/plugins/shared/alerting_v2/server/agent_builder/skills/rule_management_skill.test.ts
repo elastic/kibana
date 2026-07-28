@@ -23,6 +23,12 @@ describe('createRuleManagementSkill', () => {
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
+  it('marks the skill as experimental so it is gated behind agent builder experimental features', () => {
+    const skill = createRuleManagementSkill(createDeps());
+
+    expect(skill.experimental).toBe(true);
+  });
+
   it('gates the skill on the alerting:v2:enabled advanced setting', () => {
     const skill = createRuleManagementSkill(createDeps());
 

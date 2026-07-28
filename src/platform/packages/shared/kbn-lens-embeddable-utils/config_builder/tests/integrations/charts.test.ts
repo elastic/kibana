@@ -28,6 +28,7 @@ const stableChartTypes = new Set([
   'lnsPie',
   'lnsTagcloud',
   'lnsMetric',
+  'lnsLegacyMetric',
   'lnsXY',
 ]);
 

@@ -18,6 +18,9 @@ export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 // https://github.com/elastic/kibana/issues/151913
 export const MAX_QUERY_SIZE = 10000;
 
+// number of additional group pages revealed each time the "Show more" pagination control is used
+export const PAGE_BATCH_SIZE = 20;
+
 // there is known limitation for max size of runtime field which is used in the runtime_mappings script
 export const MAX_RUNTIME_FIELD_SIZE = 100;
 
@@ -113,7 +116,9 @@ export const getGroupingQuery = ({
           bucket_truncate: {
             bucket_sort: {
               sort,
-              from: pageNumber,
+              // the terms agg above never returns more than MAX_QUERY_SIZE buckets, so requesting
+              // an offset beyond that window would always come back empty
+              from: Math.min(pageNumber ?? 0, Math.max(MAX_QUERY_SIZE - size, 0)),
               size,
             },
           },

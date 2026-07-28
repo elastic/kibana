@@ -22,6 +22,7 @@ export interface ResolvedApiEndpoint {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   url?: string;
+  usesManagedInput: boolean;
 }
 
 export function useApiEndpoints(): {
@@ -62,6 +63,7 @@ export function useApiEndpoints(): {
       logo: definition.logo,
       euiIconType: definition.euiIconType,
       url: definition.getUrl(endpointContext),
+      usesManagedInput: definition.usesManagedInput(endpointContext),
     }));
   }, [
     data?.elasticsearchUrl,
@@ -71,5 +73,9 @@ export function useApiEndpoints(): {
     managedOtlpPrwEndpointEnabled,
   ]);
 
-  return { endpoints, isLoading: isPending(status), isError: status === FETCH_STATUS.FAILURE };
+  return {
+    endpoints,
+    isLoading: isPending(status),
+    isError: status === FETCH_STATUS.FAILURE,
+  };
 }

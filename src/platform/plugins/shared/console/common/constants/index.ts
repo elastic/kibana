@@ -16,6 +16,7 @@ export {
   OVERRIDES_SUBFOLDER,
   MANUAL_SUBFOLDER,
   API_DOCS_LINK,
+  KIBANA_API_DOC_LINKS_FILE,
 } from './autocomplete_definitions';
 export { DEFAULT_INPUT_VALUE } from './editor_input';
 export { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from './copy_as';

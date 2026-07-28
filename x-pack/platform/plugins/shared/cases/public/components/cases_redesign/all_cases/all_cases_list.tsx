@@ -24,6 +24,7 @@ import { CasesList } from './components/list_view';
 import { VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CasesMetrics } from './components/cases_metrics';
+import { CasesListOnboarding } from './onboarding/cases_list_onboarding';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { initialData, useGetCases } from '../../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -112,6 +113,24 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases([]);
     }, [setSelectedCases]);
 
+    const toggleCaseSelection = useCallback((theCase: CaseUI, isSelected: boolean) => {
+      setSelectedCases((currentSelectedCases) => {
+        if (isSelected) {
+          return currentSelectedCases.some((selectedCase) => selectedCase.id === theCase.id)
+            ? currentSelectedCases
+            : [...currentSelectedCases, theCase];
+        }
+
+        return currentSelectedCases.filter((selectedCase) => selectedCase.id !== theCase.id);
+      });
+    }, []);
+
+    const selectAllCasesOnPage = useCallback(() => {
+      setSelectedCases(data.cases);
+    }, [data.cases]);
+
+    const isSelectable = !isReadOnlyPermissions(permissions);
+
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
         let newQueryParams = queryParams;
@@ -150,17 +169,17 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onViewModeChange = useCallback(
       (mode: ViewToggleId) => {
-        deselectCases();
         setViewMode(mode);
       },
-      [deselectCases, setViewMode]
+      [setViewMode]
     );
 
     const onSortOrderChange = useCallback(
       (sortOrder: 'asc' | 'desc') => {
+        deselectCases();
         setQueryParams({ sortField: SortFieldCase.createdAt, sortOrder });
       },
-      [setQueryParams]
+      [deselectCases, setQueryParams]
     );
 
     const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
@@ -188,9 +207,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       () => ({
         onSelectionChange: setSelectedCases,
         selected: selectedCases,
-        selectable: () => !isReadOnlyPermissions(permissions),
+        selectable: () => isSelectable,
       }),
-      [permissions, selectedCases]
+      [isSelectable, selectedCases]
     );
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
@@ -232,6 +251,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       <>
         <EuiProgress size="xs" color="accent" className="essentialAnimation" css={cssStyling} />
 
+        {!isSelectorView ? <CasesListOnboarding /> : null}
+
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
@@ -272,6 +293,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           deselectCases={deselectCases}
           onClearFilters={onClearFilters}
           showClearFiltersButton={showClearFiltersButton}
+          viewMode={viewMode}
+          onSelectAll={selectAllCasesOnPage}
+          totalOnPage={data.cases.length}
         />
         {viewMode === VIEW_TOGGLE_TABLE_ID ? (
           <>
@@ -301,6 +325,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             onChange={tableOnChangeCallback}
             disableActions={selectedCases.length > 0}
             selectedFields={selectedFields}
+            selectedCases={selectedCases}
+            onSelectionChange={toggleCaseSelection}
+            isSelectable={isSelectable}
           />
         )}
       </>

@@ -54,7 +54,6 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/task-manager-plugin'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'
@@ -90,7 +89,7 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
 tags:
   - plugin
   - prod

@@ -18,7 +18,6 @@ import { getOpenEntityFlyoutLabel, VIEW_ENTITY_DETAILS } from './translations';
 import { getEntityIcon } from './utils';
 
 const ENTITY_BADGE_NAME_CLASS = 'leadEntityBadge__name';
-const ENTITY_BADGE_NAME_MAX_WIDTH = 220;
 
 // Lets the badge shrink below its content width (rather than overflowing the
 // card) when the surrounding card/panel is narrower than the badge's natural
@@ -67,7 +66,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
           font-weight: ${euiTheme.font.weight.medium};
           display: inline-block;
           min-width: 0;
-          max-width: min(${ENTITY_BADGE_NAME_MAX_WIDTH}px, 100%);
+          max-width: 100%;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -124,7 +123,16 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
   // sit inside other clickable elements (cards/panels) that are themselves
   // rendered as `<button>`, and nested buttons are invalid HTML.
   return (
-    <EuiToolTip content={VIEW_ENTITY_DETAILS} position="top">
+    <EuiToolTip
+      content={VIEW_ENTITY_DETAILS}
+      position="top"
+      // EuiToolTip's anchor wrapper defaults to `display: inline-block`, which
+      // sizes itself to its own preferred content width rather than
+      // respecting the badge's `max-width: 100%` below it, letting long names
+      // overflow their container. `inline` lets it flow within the
+      // surrounding line box instead, so the max-width constraint applies.
+      anchorProps={{ style: { display: 'inline' } }}
+    >
       <span
         role="button"
         tabIndex={0}

@@ -156,13 +156,7 @@ export const SEEDED_RULES: SeededRule[] = [
   {
     name: 'Process Injection T1055',
     description: 'Detects process injection via SetWindowsHookEx',
-    tags: [
-      'MITRE',
-      'Domain: Endpoint',
-      'OS: Windows',
-      'Tactic: Defense Evasion',
-      'Technique: T1055',
-    ],
+    tags: ['MITRE', 'Domain: Endpoint', 'OS: Windows', 'Tactic: Stealth', 'Technique: T1055'],
     type: 'eql',
     enabled: true,
     severity: 'critical',
@@ -170,7 +164,7 @@ export const SEEDED_RULES: SeededRule[] = [
     indexPattern: ENDPOINT_INDEX,
     threat: {
       tacticId: 'TA0005',
-      tacticName: 'Defense Evasion',
+      tacticName: 'Stealth',
       techniqueId: 'T1055',
       techniqueName: 'Process Injection',
     },
@@ -228,7 +222,7 @@ export const SEEDED_RULES: SeededRule[] = [
     },
   },
   {
-    // Intentionally has NO "Tactic: Defense Evasion" tag — only structured threat data.
+    // Intentionally has NO "Tactic: Stealth" tag — only structured threat data.
     name: 'Process Hollowing Detection',
     description: 'Detects process hollowing attempts without tactic tag',
     tags: ['MITRE', 'Domain: Endpoint', 'OS: Windows'],
@@ -239,7 +233,7 @@ export const SEEDED_RULES: SeededRule[] = [
     indexPattern: ENDPOINT_INDEX,
     threat: {
       tacticId: 'TA0005',
-      tacticName: 'Defense Evasion',
+      tacticName: 'Stealth',
       techniqueId: 'T1055',
       techniqueName: 'Process Injection',
     },

@@ -10,10 +10,12 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { getEuidFromObject } from '../../../../../../common/domain/euid';
 import { SEED_IDENTITY_PREFILTER_FIELDS, type RelatedUserBundle, type SeedEntity } from './types';
 
+// User identities — and the `related.user` alias list this rule reads — live in
+// the per-IDP `.user-*` data streams (IDP integrations reroute user docs there).
 const SOURCE_INDEX_BY_NAMESPACE: Record<string, string> = {
-  active_directory: 'logs-entityanalytics_ad.entity-*',
-  entra_id: 'logs-entityanalytics_entra_id.entity-*',
-  okta: 'logs-entityanalytics_okta.entity-*',
+  active_directory: 'logs-entityanalytics_ad.user-*',
+  entra_id: 'logs-entityanalytics_entra_id.user-*',
+  okta: 'logs-entityanalytics_okta.user-*',
 };
 
 const RELATED_USER_FIELD = 'related.user';

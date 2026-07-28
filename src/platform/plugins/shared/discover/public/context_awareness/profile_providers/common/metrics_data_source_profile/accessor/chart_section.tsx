@@ -25,6 +25,7 @@ import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import type { ProfileStateAdapter } from '../../../../profile_state';
 import { METRICS_GRID_SETTINGS_STATE_DEF } from '../profile_state';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
+import { RecentMetricsStorage } from './recent_metrics_storage';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
@@ -39,7 +40,8 @@ const MetricsExperienceGridWrapper = (
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const { discoverShared, dataViews, notifications, docLinks, logger } = useDiscoverServices();
+  const { discoverShared, dataViews, notifications, docLinks, logger, core, storage } =
+    useDiscoverServices();
 
   const gridSettings = useObservable(
     gridSettingsStateAdapter.getState$(),
@@ -60,6 +62,21 @@ const MetricsExperienceGridWrapper = (
     [dispatch, updateAppState]
   );
 
+  const recentMetricsStorage = useMemo(
+    () => new RecentMetricsStorage(core.http.basePath.get(), storage),
+    [core.http.basePath, storage]
+  );
+
+  const getRecentlyExploredMetrics = useCallback(
+    () => recentMetricsStorage.get(),
+    [recentMetricsStorage]
+  );
+
+  const onMetricExplored = useCallback(
+    (metricUniqueKey: string) => recentMetricsStorage.add(metricUniqueKey),
+    [recentMetricsStorage]
+  );
+
   const externalServices = useMemo(
     () => ({
       discoverShared,
@@ -67,8 +84,9 @@ const MetricsExperienceGridWrapper = (
       notifications,
       docLinks,
       logger: logger.get(METRICS_DATA_SOURCE_PROFILE_ID),
+      featureFlags: core.featureFlags,
     }),
-    [discoverShared, dataViews, notifications, docLinks, logger]
+    [discoverShared, dataViews, notifications, docLinks, logger, core.featureFlags]
   );
 
   return (
@@ -81,6 +99,8 @@ const MetricsExperienceGridWrapper = (
       externalServices={externalServices}
       gridSettings={gridSettings}
       onGridSettingsChange={onGridSettingsChange}
+      getRecentlyExploredMetrics={getRecentlyExploredMetrics}
+      onMetricExplored={onMetricExplored}
     />
   );
 };

@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
   CustomMetricExpressionParams,
@@ -241,7 +242,7 @@ export const getData = async (
             bucketKey: bucket.key,
             flattenGrouping,
             container: containerList,
-            ...additionalContextSource,
+            ...(additionalContextSource ? unflattenObject(additionalContextSource) : {}),
           };
         }
       }

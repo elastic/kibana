@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { act, render, renderHook } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Streams } from '@kbn/streams-schema';
 import { useDlmFrozenPhaseGating } from './use_dlm_frozen_phase_gating';
+
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 // Controlled mocks shared with the jest.mock factories below (must be `mock`-prefixed).
 let mockLicense: { hasAtLeast: (level: string) => boolean } | undefined;
@@ -130,7 +133,7 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       expect(
         document.querySelector('[data-test-subj="streamsDlmFrozenEnterpriseGatingModal"]')
       ).toBeTruthy();
@@ -154,7 +157,7 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       expect(
         document.querySelector(
           '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalTitle"]'
@@ -182,7 +185,7 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       const manageButton = document.querySelector(
         '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalManageRepositoriesButton"]'
       );
@@ -213,7 +216,7 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       expect(
         document.querySelector(
           '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalTitle"]'

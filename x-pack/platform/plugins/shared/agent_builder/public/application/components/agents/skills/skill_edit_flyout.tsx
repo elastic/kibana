@@ -67,7 +67,6 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   useEffect(() => {
     if (skill) {
       reset({
-        id: skill.id,
         name: skill.name,
         description: skill.description,
         content: skill.content,
@@ -85,7 +84,6 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   const onSubmit = useCallback(
     async (data: SkillFormData) => {
       await editSkill({
-        name: data.name,
         description: data.description,
         content: data.content,
         tool_ids: data.tool_ids,
@@ -132,7 +130,11 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
         ) : (
           <FormProvider {...form}>
             <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
-              <SkillForm control={control} toolOptions={toolOptions} readonlySkillId={skillId} />
+              <SkillForm
+                control={control}
+                toolOptions={toolOptions}
+                readonlySkillName={skill?.name ?? skillId}
+              />
             </EuiForm>
           </FormProvider>
         )}

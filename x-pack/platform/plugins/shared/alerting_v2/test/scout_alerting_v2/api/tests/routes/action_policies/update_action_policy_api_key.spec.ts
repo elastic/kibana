@@ -96,6 +96,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ACTION_POLICY_NOT_FOUND');
   });
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {

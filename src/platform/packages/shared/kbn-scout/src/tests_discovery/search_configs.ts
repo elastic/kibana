@@ -46,7 +46,7 @@ export const getScoutCiExcludedConfigs = (): string[] => {
  *
  * @param log - Tooling log instance for warnings
  * @param modulesWithTests - Array of modules to filter
- * @returns Filtered array containing only enabled modules
+ * @returns Filtered array containing enabled modules
  */
 export const filterModulesByScoutCiConfig = (
   log: ToolingLog,
@@ -68,35 +68,24 @@ export const filterModulesByScoutCiConfig = (
   const filteredOutDisabledItems: string[] = [];
 
   const filteredModulesWithTests = modulesWithTests.filter((module) => {
-    if (module.type === 'plugin') {
-      if (!allRegisteredPlugins.has(module.name)) {
-        unregisteredItems.push(`${module.name} (plugin)`);
-        return false;
-      }
-      if (allDisabled.has(module.name)) {
-        filteredOutDisabledItems.push(`${module.name} (plugin)`);
-        return false;
-      }
-      return true;
-    } else {
-      // module.type === 'package'
-      if (!allRegisteredPackages.has(module.name)) {
-        unregisteredItems.push(`${module.name} (package)`);
-        return false;
-      }
-      if (allDisabled.has(module.name)) {
-        filteredOutDisabledItems.push(`${module.name} (package)`);
-        return false;
-      }
-      return true;
+    const allRegistered = module.type === 'plugin' ? allRegisteredPlugins : allRegisteredPackages;
+
+    if (!allRegistered.has(module.name)) {
+      unregisteredItems.push(`${module.name} (${module.type})`);
+      return false;
     }
+    if (allDisabled.has(module.name)) {
+      filteredOutDisabledItems.push(`${module.name} (${module.type})`);
+      return false;
+    }
+    return true;
   });
 
   if (unregisteredItems.length > 0) {
+    const unregisteredList = unregisteredItems.map((item) => `- ${item}`).join('\n');
+
     throw createFailError(
-      `The following plugin(s)/package(s) are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredItems
-        .map((item) => `- ${item}`)
-        .join('\n')}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
+      `The following plugin(s)/package(s) are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredList}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
     );
   }
 

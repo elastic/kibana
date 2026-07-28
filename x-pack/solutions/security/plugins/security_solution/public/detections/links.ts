@@ -55,6 +55,7 @@ const attacksSubLink: LinkItem = {
     }),
   ],
   id: SecurityPageName.attacks,
+  licenseType: 'enterprise',
   path: ATTACKS_PATH,
   title: ATTACKS,
   description: i18n.translate('xpack.securitySolution.appLinks.attacks.description', {

@@ -154,3 +154,20 @@ export function getRecoverEsqlSegment(
   }
   return query.recovery.query;
 }
+
+const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
+  query: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
+    defaultMessage: 'Custom',
+  }),
+  no_breach: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
+    defaultMessage: 'Default',
+  }),
+  none: i18n.translate('xpack.alertingV2.ruleDetails.recoveryNone', {
+    defaultMessage: 'No recovery',
+  }),
+};
+
+export function formatRecoveryStrategy(strategy?: RecoveryStrategy | null): string {
+  if (strategy == null) return EMPTY_VALUE;
+  return RECOVERY_STRATEGY_LABELS[strategy];
+}

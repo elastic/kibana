@@ -35,7 +35,18 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/es-mappings",
     "@kbn/inference-common",
+    "@kbn/inference-tracing",
     "@kbn/zod",
-    "@kbn/es-types"
+    "@kbn/evals-runner",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows-yaml",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/core-spaces-common",
+    "@kbn/crypto",
+    "@kbn/std",
+    "@kbn/repo-info"
   ]
 }

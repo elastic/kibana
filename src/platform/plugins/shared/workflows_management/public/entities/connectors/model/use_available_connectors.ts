@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis';
 import { useQuery } from '@kbn/react-query';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';

@@ -12,7 +12,11 @@ export { log } from './log';
 export { parseEsLog } from './parse_es_log';
 export { findMostRecentlyChanged } from './find_most_recently_changed';
 export { extractConfigFiles, isFile, copyFileSync } from './extract_config_files';
-export { NativeRealm, SYSTEM_INDICES_SUPERUSER } from './native_realm';
+export {
+  NativeRealm,
+  SYSTEM_INDICES_SUPERUSER,
+  SYSTEM_INDICES_SUPERUSER_PASSWORD,
+} from './native_realm';
 export { buildSnapshot } from './build_snapshot';
 export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';

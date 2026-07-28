@@ -43,6 +43,7 @@ import {
   TAGS,
   UPDATED,
 } from './translations';
+import { isCaseViewPath } from '../../common/navigation';
 
 const keyColumnWidth = { minWidth: 110 };
 const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
@@ -78,7 +79,8 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
   const toggleExpanded = useCallback(() => {
     setExpanded((_expanded) => !_expanded);
   }, []);
-
+  // Need to use the global here since the agent builder sidebar does not have access to react-router's context
+  const isOpenedInSidebarOnThisCasesDetailsPage = isCaseViewPath(window.location.pathname, data.id);
   const caseUrls = useMemo(() => {
     return getCaseUrls({ application, data });
   }, [application, data]);
@@ -107,19 +109,21 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
               <strong>{CASE_HEADER}</strong>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="popout"
-              iconSide="right"
-              href={caseUrls.case}
-              target="_blank"
-              color="text"
-              data-test-subj="case-attachment-go-to-case"
-            >
-              {GO_TO_CASE}
-            </EuiButton>
-          </EuiFlexItem>
+          {isOpenedInSidebarOnThisCasesDetailsPage ? null : (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="popout"
+                iconSide="right"
+                href={caseUrls.case}
+                target="_blank"
+                color="text"
+                data-test-subj="case-attachment-go-to-case"
+              >
+                {GO_TO_CASE}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>

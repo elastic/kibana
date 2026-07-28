@@ -19,6 +19,8 @@ import {
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  OWNER_TO_PREFIX_MAP,
+  registerOwnerPrefix,
 } from '../../constants/attachments';
 import { AttachmentType, ExternalReferenceStorageType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
@@ -108,6 +110,24 @@ describe('migration_utils', () => {
     it('does not produce undefined prefixes for unknown owners', () => {
       expect(toUnifiedAttachmentType(AttachmentType.event, 'unknownOwner')).toBe(
         AttachmentType.event
+      );
+    });
+  });
+
+  describe('registerOwnerPrefix', () => {
+    const customOwner = 'customFixtureOwner';
+
+    afterEach(() => {
+      delete OWNER_TO_PREFIX_MAP[customOwner];
+    });
+
+    it('lets a dynamically registered owner resolve legacy alert/event to a unified type', () => {
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(AttachmentType.alert);
+
+      registerOwnerPrefix(customOwner, 'security');
+
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(
+        SECURITY_ALERT_ATTACHMENT_TYPE
       );
     });
   });

@@ -29,8 +29,8 @@ type DeactivateAlertActionBody = Extract<
  *
  * Failures throw `Boom.badRequest` carrying
  * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path catches that
- * (400-class) and silent-skips, the single path lets it propagate to
- * the route as a 400 response.
+ * (400-class) and records it as a per-item error, the single path lets it
+ * propagate to the route as a 400 response.
  */
 const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
   const status = alertEvent.episode_status;

@@ -23,6 +23,21 @@ const testParamWithNewLine = {
   value: `-----BEGIN CERTIFICATE-----\nMIICMzBgNV\n\npAqEAJlQND\n-----END CERTIFICATE-----`,
 };
 
+/**
+ * Security regression guard: the resolved secret (with `hideParams: false`) must
+ * never surface anywhere in the inspect response, regardless of which field emits
+ * it. Asserts each non-empty line of the cert independently since `JSON.stringify`
+ * escapes the embedded newlines.
+ */
+const assertNoRawSecret = (apiResponse: unknown) => {
+  const serialized = JSON.stringify(apiResponse);
+  for (const line of testParamWithNewLine.value.split('\n')) {
+    if (line.trim().length > 0) {
+      expect(serialized).not.toContain(line);
+    }
+  }
+};
+
 const DECODED_BROWSER_CODE =
   '// asset:/Users/vigneshh/elastic/synthetics/examples/todos/basic.journey.ts\nimport { journey, step, expect } from "@elastic/synthetics";\njourney("check if title is present", ({ page, params }) => {\n  step("launch app", async () => {\n    await page.goto(params.url);\n  });\n  step("assert title", async () => {\n    const header = await page.$("h1");\n    expect(await header.textContent()).toBe("todos");\n  });\n});\n';
 
@@ -111,14 +126,14 @@ apiTest.describe(
               urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
               max_redirects: '3',
               max_attempts: 2,
-              password: testParamWithNewLine.value,
+              password: '********',
               proxy_url: 'http://proxy.com',
               'response.include_body': 'never',
               'response.include_headers': true,
               'check.response.status': ['200', '201'],
-              'check.request.body': 'testValue',
-              'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
-              username: 'test-username',
+              'check.request.body': '********',
+              'check.request.headers': '********',
+              username: '********',
               mode: 'any',
               'response.include_body_max_bytes': '1024',
               ipv4: true,
@@ -135,6 +150,8 @@ apiTest.describe(
           ],
         },
       ]);
+
+      assertNoRawSecret(apiResponse);
     });
 
     apiTest('inspect project browser monitor', async ({ apiClient }) => {
@@ -239,9 +256,10 @@ apiTest.describe(
       delete compiledStream.processors[0].add_fields.fields.config_id;
       delete compiledStream.processors[0].add_fields.fields.kibanaUrl;
 
-      expect(enabledStream?.vars?.password.value).toBe(
-        '"-----BEGIN CERTIFICATE-----\n\nMIICMzBgNV\n\n\npAqEAJlQND\n\n-----END CERTIFICATE-----"'
-      );
+      // Fleet `vars` entries keep their `{ value, type }` shape; only the value is redacted.
+      expect(enabledStream?.vars?.password?.value).toBe('********');
+
+      assertNoRawSecret(apiResponse);
 
       expect(enabledStream?.compiled_stream).toStrictEqual({
         __ui: { is_tls_enabled: false },
@@ -258,14 +276,14 @@ apiTest.describe(
         max_attempts: 2,
         proxy_url: 'http://proxy.com',
         tags: ['tag1', 'tag2'],
-        username: 'test-username',
-        password: testParamWithNewLine.value,
+        username: '********',
+        password: '********',
         'response.include_headers': true,
         'response.include_body': 'never',
         'response.include_body_max_bytes': 1024,
         'check.request.method': null,
-        'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
-        'check.request.body': 'testValue',
+        'check.request.headers': '********',
+        'check.request.body': '********',
         'check.response.status': ['200', '201'],
         mode: 'any',
         ipv4: true,

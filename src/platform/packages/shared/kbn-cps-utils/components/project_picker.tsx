@@ -72,15 +72,16 @@ export const ProjectPicker = ({
       disableScreenReaderOutput
     >
       <EuiButtonEmpty
-        aria-label={strings.getProjectPickerButtonAriaLabel()}
+        aria-label={strings.projectPickerButtonAriaLabel}
         data-test-subj="project-picker-button"
         size="s"
         iconType="crossProjectSearch"
         onClick={() => setShowPopover(!showPopover)}
         color="text"
+        css={styles.button}
       >
         {activeProjectsCount === totalProjectCount
-          ? strings.allButtonLabel()
+          ? strings.allButtonLabel
           : `${activeProjectsCount}/${totalProjectCount}`}
       </EuiButtonEmpty>
     </EuiToolTip>
@@ -148,7 +149,7 @@ export const ProjectPicker = ({
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
           projects={projects}
-          isReadonly={isReadonly}
+          controlsState={isReadonly ? 'disabled' : 'enabled'}
         />
       </EuiPopover>
     </EuiTourStep>
@@ -168,7 +169,7 @@ export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount
     <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
       <EuiButtonIcon
         css={styles.disabledButton}
-        aria-label={strings.getProjectPickerButtonAriaLabel()}
+        aria-label={strings.projectPickerButtonAriaLabel}
         data-test-subj="project-picker-button-disabled"
         size="xs"
         isDisabled
@@ -180,6 +181,10 @@ export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount
 };
 
 const projectPickerStyles = {
+  button: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSubdued,
+    }),
   popover: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: euiTheme.base * 35,

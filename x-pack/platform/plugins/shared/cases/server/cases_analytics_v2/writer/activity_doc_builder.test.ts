@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
+} from '../../../common/constants';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  COMMENT_REF_NAME,
+  CASE_ATTACHMENT_REF_NAME,
+} from '../../common/constants';
 import { makeUserAction } from '../__test_helpers__';
 import { buildActivityDoc } from './activity_doc_builder';
 
@@ -165,6 +173,51 @@ describe('buildActivityDoc', () => {
       expect(doc.action.assignees_changed).toBeUndefined();
       expect(doc.action.tags_changed).toBeUndefined();
       expect(doc.action.connector_id_new).toBeUndefined();
+    });
+  });
+
+  describe('attachment reference id', () => {
+    it('resolves attachment_reference_id from a legacy cases-comments reference', () => {
+      const doc = buildActivityDoc(
+        makeUserAction('ua-1', {
+          type: 'comment',
+          payload: { comment: { type: 'user', comment: 'hi', owner: 'securitySolution' } },
+          references: [
+            { id: 'case-1', type: CASE_SAVED_OBJECT, name: 'associated-cases' },
+            { id: 'comment-1', type: CASE_COMMENT_SAVED_OBJECT, name: COMMENT_REF_NAME },
+          ],
+        })
+      );
+      expect(doc.action.attachment_reference_id).toBe('comment-1');
+    });
+
+    it('resolves attachment_reference_id from a unified cases-attachments reference', () => {
+      const doc = buildActivityDoc(
+        makeUserAction('ua-1', {
+          type: 'comment',
+          payload: { comment: { type: 'user', comment: 'hi', owner: 'securitySolution' } },
+          references: [
+            { id: 'case-1', type: CASE_SAVED_OBJECT, name: 'associated-cases' },
+            {
+              id: 'attachment-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              name: CASE_ATTACHMENT_REF_NAME,
+            },
+          ],
+        })
+      );
+      expect(doc.action.attachment_reference_id).toBe('attachment-1');
+    });
+
+    it('leaves attachment_reference_id unset when no comment/attachment reference is present', () => {
+      const doc = buildActivityDoc(
+        makeUserAction('ua-1', {
+          type: 'status',
+          payload: { status: 'open' },
+          references: [{ id: 'case-1', type: CASE_SAVED_OBJECT, name: 'associated-cases' }],
+        })
+      );
+      expect(doc.action.attachment_reference_id).toBeUndefined();
     });
   });
 });

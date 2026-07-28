@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { visualizationSmlType } from './visualization';
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
@@ -152,7 +152,7 @@ describe('visualizationSmlType', () => {
     });
   });
 
-  describe('getSmlData', () => {
+  describe('getSmlEntry', () => {
     it('returns chunk with correct type, title, content (permissions are handled by getPermissions)', async () => {
       const savedObject = {
         id: 'viz-1',
@@ -177,19 +177,15 @@ describe('visualizationSmlType', () => {
       };
       mockSavedObjectsClient.get.mockResolvedValue(savedObject);
 
-      const result = await visualizationSmlType.getSmlData!('viz-1', createContext() as never);
+      const result = await visualizationSmlType.getSmlEntry!('viz-1', createContext() as never);
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('lens', 'viz-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: 'visualization',
-            title: 'My Visualization',
-            content: 'My Visualization\nA test viz\nlnsXY\nFROM test',
-          },
-        ],
+        type: 'visualization',
+        title: 'My Visualization',
+        content: 'My Visualization\nA test viz\nlnsXY\nFROM test',
       });
-      expect(result!.chunks[0]).not.toHaveProperty('permissions');
+      expect(result).not.toHaveProperty('permissions');
     });
 
     it('content includes title, description, chartType, esql joined by newline', async () => {
@@ -216,9 +212,9 @@ describe('visualizationSmlType', () => {
       };
       mockSavedObjectsClient.get.mockResolvedValue(savedObject);
 
-      const result = await visualizationSmlType.getSmlData!('viz-2', createContext() as never);
+      const result = await visualizationSmlType.getSmlEntry!('viz-2', createContext() as never);
 
-      expect(result!.chunks[0].content).toBe(
+      expect(result!.content).toBe(
         'Sales Chart\nMonthly sales\nlnsPie\nFROM sales | STATS sum(amount)'
       );
     });
@@ -227,7 +223,7 @@ describe('visualizationSmlType', () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
       const context = createContext();
 
-      const result = await visualizationSmlType.getSmlData!('missing-viz', context as never);
+      const result = await visualizationSmlType.getSmlEntry!('missing-viz', context as never);
 
       expect(result).toBeUndefined();
       expect(context.logger.warn).toHaveBeenCalledWith(
@@ -249,12 +245,12 @@ describe('visualizationSmlType', () => {
       };
       mockSavedObjectsClient.get.mockResolvedValue(savedObject);
 
-      const result = await visualizationSmlType.getSmlData!(
+      const result = await visualizationSmlType.getSmlEntry!(
         'viz-minimal',
         createContext() as never
       );
 
-      expect(result!.chunks[0]).toEqual({
+      expect(result).toEqual({
         type: 'visualization',
         title: 'Minimal Viz',
         content: 'Minimal Viz\nlnsXY',
@@ -267,7 +263,6 @@ describe('visualizationSmlType', () => {
       const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
       expect(permissions).toEqual({
         kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-        elasticsearch: { indices: [] },
       });
     });
   });

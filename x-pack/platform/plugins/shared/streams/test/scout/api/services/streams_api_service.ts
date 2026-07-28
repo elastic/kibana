@@ -50,7 +50,6 @@ export interface StreamsTestApiService {
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
   enableQueryStreams: () => Promise<void>;
   disableQueryStreams: () => Promise<void>;
-
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
   enableDraftStreams: () => Promise<void>;

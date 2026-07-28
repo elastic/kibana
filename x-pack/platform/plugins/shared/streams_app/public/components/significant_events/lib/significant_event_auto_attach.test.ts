@@ -22,17 +22,15 @@ import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 
 const createEvent = (overrides?: Partial<SignificantEvent>): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
-  discovery_slug: 'payment-outage',
+  event_uuid: 'event-1',
+  event_id: 'payment-outage',
+  discovery_id: 'discovery-1',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
-  root_cause: 'Payment gateway timeout.',
-  criticality: 90,
+  severity: '60-high',
   confidence: 0.8,
-  recommendations: ['Restart gateway client'],
-  status: 'promoted',
+  status: 'open',
   ...overrides,
 });
 
@@ -163,9 +161,9 @@ describe('registerSignificantEventAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    focusedSignificantEventService.setFocusedEvent(createEvent({ discovery_slug: 'first-event' }));
+    focusedSignificantEventService.setFocusedEvent(createEvent({ event_id: 'first-event' }));
     jest.runOnlyPendingTimers();
-    focusedSignificantEventService.setFocusedEvent(createEvent({ discovery_slug: 'second-event' }));
+    focusedSignificantEventService.setFocusedEvent(createEvent({ event_id: 'second-event' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);

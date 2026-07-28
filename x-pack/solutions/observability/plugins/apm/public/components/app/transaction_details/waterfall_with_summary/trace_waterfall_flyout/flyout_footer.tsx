@@ -18,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
 import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDiscoverHref } from '../../../../shared/links/discover_links/use_discover_href';
-import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../../shared/trace_waterfall/ebt_constants';
 
 interface Props {
   traceId: string;

@@ -93,6 +93,7 @@
     "@kbn/cps",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/task-manager-plugin",
+    "@kbn/cps-utils",
     "@kbn/core-notifications-browser"
   ],
   "exclude": ["target/**/*"]
