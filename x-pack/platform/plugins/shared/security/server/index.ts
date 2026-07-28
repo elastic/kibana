@@ -75,6 +75,7 @@ export type {
   UserProfileSuggestParams,
   UserProfileRequiredPrivileges,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileServiceStart,
 } from '@kbn/security-plugin-types-server';
 

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import yaml from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
 import { PatchTemplateInputSchema } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -50,7 +50,7 @@ export const patchTemplateRoute = createCasesRoute({
       // Validate YAML definition if provided
       if (input.definition) {
         try {
-          yaml.load(input.definition);
+          yamlParse(input.definition);
         } catch (yamlError) {
           return response.badRequest({
             body: { message: `Invalid YAML definition: ${yamlError}` },
