@@ -133,11 +133,13 @@ export const huntOrchestratorTool: BuiltinToolDefinition<typeof huntOrchestrator
     `Portability wrapper around POST ${HUNT_ORCHESTRATOR_API_PATH}. ` +
     'One-call orchestrator hunt that chains Tier 1 (atomic IOC / technique lookups across ' +
     'the environment) with Tier 2 (LLM-refined behavioral rule proposals against the report ' +
-    'text, informed by the Tier 1 affected-asset and sample-event context). Use when you need ' +
-    'both "what is currently hitting" AND "what durable rule would catch this in the future" ' +
-    'from a single tool call — typical for digest synthesis and per-report deep-dive flows. ' +
-    'When fine-grained control is needed, prefer the granular `hunt_for_threat` + ' +
-    '`hunt_behavior` tools. Agent Builder should call this tool directly; native Workflows ' +
+    'text, informed by the Tier 1 affected-asset and sample-event context). Default choice ' +
+    'for "hunt for this report" / "run a threat hunt" requests — it returns both ' +
+    '"what is currently hitting" AND "what durable rule would catch this in the future" in ' +
+    'one call, which the granular `hunt_for_threat` + `hunt_behavior` pair only achieves via ' +
+    'two round-trips. Only fall back to the granular tools when the caller needs to inspect ' +
+    'or gate on Tier 1 results before deciding whether to run Tier 2 (e.g. a workflow branch). ' +
+    'Agent Builder should call this tool directly; native Workflows ' +
     'and UI surfaces use the matching HTTP route.',
   schema: huntOrchestratorSchema,
   tags: ['threat-intel', 'hunt', 'orchestrator'],

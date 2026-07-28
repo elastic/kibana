@@ -55,8 +55,11 @@ export const huntBehaviorTool: BuiltinSkillBoundedTool<typeof huntBehaviorSchema
     'MITRE ATT&CK technique IDs with evidence quotes; (2) each candidate is validated against ' +
     'the vendored Kibana ATT&CK catalog. Hallucinated or unknown IDs are dropped. Surviving ' +
     'candidates return as behavioral findings with a `proposed_esql_rule` body and a pre-built ' +
-    '`threat-intel-finding-card` attachment hint. Agent Builder should call this tool directly; ' +
-    'native Workflows and UI surfaces use the matching HTTP route.',
+    '`threat-intel-finding-card` attachment hint. For a plain "hunt for this report" request, ' +
+    'prefer `hunt_orchestrator` instead — it runs this same extraction plus a Tier 1 IOC sweep ' +
+    'in one call. Use this tool standalone only when you already have Tier 1 results in hand ' +
+    'or explicitly do not want the environment IOC sweep. Agent Builder should call this tool ' +
+    'directly; native Workflows and UI surfaces use the matching HTTP route.',
   schema: huntBehaviorSchema,
   handler: async (params, { logger, modelProvider }) => {
     try {
