@@ -227,7 +227,7 @@ export const PostHogCreateExternalReferenceInputSchema = lazySchema(() =>
       .optional()
       .describe('URL of the external ticket, e.g. a GitHub issue or Jira ticket link.'),
     config: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe(
         'Additional integration-specific configuration for the reference (e.g. repository or ticket key).'

@@ -87,6 +87,20 @@ describe('PostHog', () => {
       expect(result).toEqual({ results: [{ id: 'i1', status: 'active' }], hasMore: false });
     });
 
+    it('should omit the status filter when "all" is selected, instead of sending it literally', async () => {
+      mockClient.post.mockResolvedValue({ data: { results: [], hasMore: false } });
+
+      await PostHog.actions.listIssues.handler(mockContext, {
+        status: 'all',
+        limit: 20,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${BASE}/error_tracking/query/issues/`,
+        expect.objectContaining({ status: undefined })
+      );
+    });
+
     it('should throw a formatted error on failure', async () => {
       mockClient.post.mockRejectedValue({
         response: { status: 401, data: { detail: 'Invalid API key' } },

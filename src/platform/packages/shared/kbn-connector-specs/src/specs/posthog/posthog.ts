@@ -147,7 +147,7 @@ export const PostHog: ConnectorSpec = {
           const response = await ctx.client.post(
             buildProjectUrl(ctx, '/error_tracking/query/issues/'),
             {
-              status: input.status,
+              status: input.status === 'all' ? undefined : input.status,
               assignee:
                 input.assigneeId && input.assigneeType
                   ? { id: input.assigneeId, type: input.assigneeType }

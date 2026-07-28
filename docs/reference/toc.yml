@@ -49,7 +49,6 @@ toc:
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
-          - file: connectors-kibana/posthog-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
         children:
           - file: connectors-kibana/crowdstrike-action-type.md
@@ -105,6 +104,7 @@ toc:
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
+          - file: connectors-kibana/posthog-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
