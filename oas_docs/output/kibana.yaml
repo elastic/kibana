@@ -54,7 +54,9 @@ tags:
   - name: agent builder
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
+
       **Elastic Agent Builder requires an Enterprise subscription.**
     externalDocs:
       description: Agent Builder docs
@@ -334,6 +336,12 @@ tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
+  - description: |
+      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
+
+      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.
+    name: Security Solution Initialization API
+    x-displayName: Security solution initialization
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -12620,7 +12628,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns the fields a caller may write to the case's `extended_fields`. The owner and any applied template are derived from the case itself, so the response includes the owner's global (library-wide) fields and, when the case has a template applied, that template's fields. Requires the Cases feature to be enabled in the space.
+        Returns the fields you can write to the case's `extended_fields`. The case determines the owner and any applied template. The response includes the owner's global fields (library-wide) and, if the case has a template, that template's fields. Requires the Cases feature to be enabled in the space.
       operationId: getCaseApplicableFieldsDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
@@ -13486,7 +13494,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns the fields a caller may write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.
+        Returns the fields you can write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.
       operationId: getApplicableFieldsDefaultSpace
       parameters:
         - description: The application that owns the cases (for example `cases`, `observability`, or `securitySolution`).
@@ -58030,6 +58038,83 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/security_solution/initialize:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
+      operationId: InitializeSecuritySolution
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
+            schema:
+              type: object
+              properties:
+                flows:
+                  items:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowId'
+                  minItems: 1
+                  type: array
+              required:
+                - flows
+        description: The initialization flows to run.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-ai-prompts:
+                        payload:
+                          install_status: installed
+                          name: security_ai_prompts
+                          version: 8.17.1
+                        status: ready
+                      init-endpoint-protection:
+                        payload:
+                          install_status: already_installed
+                          name: endpoint
+                          version: 8.17.1
+                        status: ready
+                      init-prebuilt-rules:
+                        payload:
+                          install_status: installed
+                          name: security_detection_engine
+                          version: 8.17.1
+                        status: ready
+              schema:
+                type: object
+                properties:
+                  flows:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
+                required:
+                  - flows
+          description: Indicates a successful call. Returns a result for each requested flow.
+      summary: Initialize security solution flows
+      tags:
+        - Security Solution Initialization API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/security/entity_store:
     put:
       description: |-
@@ -71364,6 +71449,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 2048
             type: string
         - description: The page of results to return.
           in: query
@@ -71573,6 +71659,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '204':
@@ -71604,6 +71692,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -71673,6 +71763,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -84858,6 +84950,23 @@ components:
           $ref: '#/components/schemas/Cases_case_severity'
         tags:
           $ref: '#/components/schemas/Cases_case_tags'
+        template:
+          description: |
+            A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
+          nullable: true
+          type: object
+          properties:
+            id:
+              description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+              type: string
+            version:
+              description: |
+                The template version to apply. Omit to use (and pin) the latest version.
+              minimum: 1
+              type: integer
+          required:
+            - id
+          x-state: Technical preview
         title:
           $ref: '#/components/schemas/Cases_case_title'
       required:
@@ -87738,6 +87847,10 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -97853,6 +97966,10 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -100826,6 +100943,10 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
@@ -100834,6 +100955,12 @@ components:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
           minLength: 1
           title: Index pattern
+          type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
@@ -101026,12 +101153,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -101043,12 +101175,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -102586,9 +102723,11 @@ components:
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          maxLength: 100
           type: string
         every:
           description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          maxLength: 100
           type: string
         occurrences:
           description: The total number of recurrences of the schedule.
@@ -102600,6 +102739,7 @@ components:
             maximum: 12
             minimum: 1
             type: number
+          maxItems: 12
           minItems: 1
           type: array
         onMonthDay:
@@ -102608,12 +102748,15 @@ components:
             maximum: 31
             minimum: 1
             type: number
+          maxItems: 31
           minItems: 1
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           minItems: 1
           type: array
       title: maintenance_window_schedule_recurring_request
@@ -102634,16 +102777,20 @@ components:
           description: The specific months for a recurring schedule. Valid values are 1-12.
           items:
             type: number
+          maxItems: 12
           type: array
         onMonthDay:
           description: The specific days of the month for a recurring schedule. Valid values are 1-31.
           items:
             type: number
+          maxItems: 31
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           type: array
       title: maintenance_window_schedule_recurring_response
       type: object
@@ -102652,14 +102799,17 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request'
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -114995,6 +115145,7 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           additionalProperties: false
@@ -115002,9 +115153,11 @@ components:
           properties:
             end:
               description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+              maxLength: 100
               type: string
             every:
               description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+              maxLength: 100
               type: string
             occurrences:
               description: The total number of recurrences of the schedule.
@@ -115016,6 +115169,7 @@ components:
                 maximum: 12
                 minimum: 1
                 type: number
+              maxItems: 12
               minItems: 1
               type: array
             onMonthDay:
@@ -115024,19 +115178,24 @@ components:
                 maximum: 31
                 minimum: 1
                 type: number
+              maxItems: 31
               minItems: 1
               type: array
             onWeekDay:
               description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
               items:
+                maxLength: 10
                 type: string
+              maxItems: 77
               minItems: 1
               type: array
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -123357,9 +123516,20 @@ components:
                       minimum: 1
                       nullable: true
                       type: number
+                    docsCountPercentage:
+                      default: null
+                      maximum: 100
+                      minimum: 1
+                      nullable: true
+                      type: number
                     enabled:
                       default: true
                       type: boolean
+                    thresholdType:
+                      enum:
+                        - count
+                        - percentage
+                      type: string
                     timeInterval:
                       default: null
                       nullable: true
@@ -139297,35 +139467,41 @@ components:
       properties:
         has_all_required:
           type: boolean
+        has_install_permissions:
+          type: boolean
         has_read_permissions:
           type: boolean
         has_write_permissions:
           type: boolean
+        install_privileges:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  additionalProperties:
-                    type: boolean
-                  type: object
-                index:
-                  additionalProperties:
-                    additionalProperties:
-                      type: boolean
-                    type: object
-                  type: object
-            kibana:
-              additionalProperties:
-                type: boolean
-              type: object
-          required:
-            - elasticsearch
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              additionalProperties:
+                type: boolean
+              type: object
+            index:
+              additionalProperties:
+                additionalProperties:
+                  type: boolean
+                type: object
+              type: object
+        kibana:
+          additionalProperties:
+            type: boolean
+          type: object
+      required:
+        - elasticsearch
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -143919,6 +144095,144 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Solution_Initialization_API_CreateListIndicesReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_DataViewPayload:
+      type: object
+      properties:
+        id:
+          type: string
+        patternList:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - patternList
+    Security_Solution_Initialization_API_InitializationFlowErrorResult:
+      type: object
+      properties:
+        error:
+          nullable: true
+          type: string
+        status:
+          enum:
+            - error
+          type: string
+      required:
+        - status
+        - error
+    Security_Solution_Initialization_API_InitializationFlowId:
+      description: Identifier for an initialization flow.
+      enum:
+        - create-list-indices
+        - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
+      type: string
+    Security_Solution_Initialization_API_InitializationFlowsResult:
+      description: Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
+      type: object
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        security-data-views:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+    Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_PackageInstallReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            install_status:
+              description: Fleet package installation status (e.g., installed, already_installed).
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+          required:
+            - name
+            - version
+            - install_status
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
+    Security_Solution_Initialization_API_SecurityDataViewsReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            alertDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            defaultDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            kibanaDataViews:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+              type: array
+            signalIndexName:
+              type: string
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
     Security_Timeline_API_AssociatedFilterType:
       description: |
         How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
@@ -147333,8 +147647,9 @@ components:
       enum:
         - webhook-authentication-basic
         - webhook-authentication-ssl
+        - webhook-oauth2-client-credentials
       description: |
-        The type of authentication to use: basic, SSL, or none.
+        The type of authentication to use: basic, SSL, OAuth2 client credentials, or none.
     ca:
       title: Certificate authority
       type: string
@@ -147368,12 +147683,25 @@ components:
       description: Defines properties for connectors when type is `.webhook`.
       type: object
       properties:
+        accessTokenUrl:
+          type: string
+          description: |
+            The URL used to request an OAuth2 access token. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
+        additionalFields:
+          type: string
+          nullable: true
+          description: |
+            Additional fields, encoded as a JSON object, sent as part of the OAuth2 access token request body.
         authType:
           $ref: '#/components/schemas/auth_type'
         ca:
           $ref: '#/components/schemas/ca'
         certType:
           $ref: '#/components/schemas/cert_type'
+        clientId:
+          type: string
+          description: |
+            The client identifier for OAuth2 authentication. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
         hasAuth:
           $ref: '#/components/schemas/has_auth'
         headers:
@@ -147386,8 +147714,15 @@ components:
           enum:
             - post
             - put
+            - patch
+            - get
+            - delete
           description: |
-            The HTTP request method, either `post` or `put`.
+            The HTTP request method: `post`, `put`, `patch`, `get`, or `delete`.
+        scope:
+          type: string
+          description: |
+            The scope requested when acquiring the OAuth2 access token.
         url:
           type: string
           description: |
@@ -147760,6 +148095,10 @@ components:
       description: Defines secrets for connectors when type is `.webhook`.
       type: object
       properties:
+        clientSecret:
+          type: string
+          description: |
+            The client secret for OAuth2 authentication. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
         crt:
           $ref: '#/components/schemas/crt'
         key:

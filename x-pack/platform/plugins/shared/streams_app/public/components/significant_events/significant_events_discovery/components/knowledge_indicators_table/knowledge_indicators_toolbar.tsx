@@ -59,6 +59,10 @@ interface KnowledgeIndicatorsToolbarProps {
   isSelectionActionsDisabled: boolean;
   selectionContainsNonExcludable: boolean;
   hasPromotableSelected: boolean;
+  /** When true, Promote is disabled (global pause / status loading). */
+  blocksActivity?: boolean;
+  /** Explains why Promote is disabled (loading / error / paused). */
+  activityBlockTooltip?: string;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
@@ -90,6 +94,8 @@ export function KnowledgeIndicatorsToolbar({
   isSelectionActionsDisabled,
   selectionContainsNonExcludable,
   hasPromotableSelected,
+  blocksActivity = false,
+  activityBlockTooltip,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
@@ -214,17 +220,23 @@ export function KnowledgeIndicatorsToolbar({
         )}
         {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              size="xs"
-              isDisabled={
-                isSelectionActionsDisabled || !hasPromotableSelected || isBulkPromoteInProgress
-              }
-              isLoading={isBulkPromoteInProgress}
-              onClick={onBulkPromote}
-            >
-              {PROMOTE_SELECTED_LABEL}
-            </EuiButtonEmpty>
+            <EuiToolTip content={activityBlockTooltip}>
+              <EuiButtonEmpty
+                iconType="plusInCircle"
+                size="xs"
+                isDisabled={
+                  blocksActivity ||
+                  isSelectionActionsDisabled ||
+                  !hasPromotableSelected ||
+                  isBulkPromoteInProgress
+                }
+                hasAriaDisabled={blocksActivity}
+                isLoading={isBulkPromoteInProgress}
+                onClick={onBulkPromote}
+              >
+                {PROMOTE_SELECTED_LABEL}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>

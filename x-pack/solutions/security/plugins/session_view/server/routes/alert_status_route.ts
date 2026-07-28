@@ -18,6 +18,7 @@ import {
   PREVIEW_ALERTS_INDEX,
 } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
+import { alertIdSchema } from './validation';
 
 export const registerAlertStatusRoute = (
   router: IRouter,
@@ -40,7 +41,7 @@ export const registerAlertStatusRoute = (
         validate: {
           request: {
             query: schema.object({
-              alertUuid: schema.string(),
+              alertUuid: alertIdSchema,
             }),
           },
         },

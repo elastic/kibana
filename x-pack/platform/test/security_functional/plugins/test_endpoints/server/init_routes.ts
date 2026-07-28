@@ -459,6 +459,73 @@ export function initRoutes(
     }
   );
 
+  router.get(
+    {
+      path: '/internal/test_endpoints/self_client/fake_request',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Security test endpoint verifies API key authentication.',
+        },
+      },
+      validate: false,
+      options: { access: 'internal' },
+    },
+    async (context, _request, response) => {
+      const { elasticsearch, security } = await context.core;
+      const { has_all_requested: hasManage } =
+        await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
+
+      return response.ok({
+        body: {
+          username: security.authc.getCurrentUser()?.username,
+          hasManage,
+        },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/test_endpoints/self_client/fake_request',
+      security: {
+        authc: {
+          enabled: false,
+          reason: 'Security test endpoint constructs its own fake request credentials.',
+        },
+        authz: { enabled: false, reason: 'Security test endpoint verifies target authorization.' },
+      },
+      validate: { body: schema.object({ apiKey: schema.maybe(schema.string()) }) },
+    },
+    async (_context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      const fakeRequest = kibanaRequestFactory({
+        headers: request.body.apiKey ? { authorization: `ApiKey ${request.body.apiKey}` } : {},
+      });
+
+      try {
+        const body = await coreStart.http.selfClient
+          .asScoped(fakeRequest)
+          .fetch<{ username?: string; hasManage: boolean }>(
+            '/internal/test_endpoints/self_client/fake_request',
+            { access: 'internal' }
+          );
+        return response.ok({ body });
+      } catch (error) {
+        if (error instanceof Error && 'response' in error) {
+          const { response: targetResponse } = error as Error & { response?: Response };
+          if (targetResponse) {
+            return response.custom({
+              statusCode: targetResponse.status,
+              body: targetResponse.statusText,
+            });
+          }
+        }
+        throw error;
+      }
+    }
+  );
+
   router.post(
     {
       path: '/test_endpoints/api_keys/_grant',
