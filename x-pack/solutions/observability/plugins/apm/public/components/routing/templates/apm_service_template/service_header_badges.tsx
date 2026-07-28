@@ -35,7 +35,7 @@ export function ServiceHeaderBadges({
   alertsTabHref,
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
-  const { core, plugins } = useApmPluginContext();
+  const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
@@ -173,12 +173,15 @@ export function ServiceHeaderBadges({
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
             navigationProps={
-              agentName && anomalyData?.anomalyEnvironment
+              agentName && anomalyData?.anomalyEnvironment && share?.url?.locators
                 ? {
                     serviceName,
                     agentName: agentName as AgentName,
                     anomalyEnvironment: anomalyData.anomalyEnvironment,
-                    query,
+                    transactionType: query.transactionType,
+                    rangeFrom: query.rangeFrom,
+                    rangeTo: query.rangeTo,
+                    locators: share.url.locators,
                     comparisonEnabled: isInOverviewTab ? !isShowingExpectedBounds : true,
                     isInServiceOverview: isInOverviewTab,
                   }

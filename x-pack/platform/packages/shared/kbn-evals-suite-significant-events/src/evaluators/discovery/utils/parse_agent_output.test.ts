@@ -9,6 +9,7 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
 import {
   extractDiscoveriesFromToolCall,
+  extractRequestedEventIdsFromToolCall,
   extractSignificantEventsFromToolCall,
 } from './parse_agent_output';
 
@@ -16,66 +17,176 @@ const TOOL_ID_DISCOVERY_WRITE = platformSignificantEventsTools.discoveryWrite;
 const TOOL_ID_EVENTS_WRITE = platformSignificantEventsTools.eventsWrite;
 
 describe('extractDiscoveriesFromToolCall', () => {
-  it('extracts discoveries from discovery_write tool calls', () => {
-    const steps: ConverseStep[] = [
-      {
-        type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
-        tool_call_id: 'dw-1',
-        params: { kind: 'discovery', title: 'DB latency spike', event_id: 'event-from-input' },
-        results: [{ data: { event_id: 'event-resolved' } }],
-      },
-    ];
-    const discoveries = extractDiscoveriesFromToolCall(steps);
-    expect(discoveries).toHaveLength(1);
-    expect(discoveries[0].title).toBe('DB latency spike');
-    expect(discoveries[0].event_id).toBe('event-resolved');
-  });
-
   it('returns [] when no discovery_write steps are present', () => {
     const steps: ConverseStep[] = [{ type: 'reasoning', reasoning: 'thinking' }];
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 
-  it('keeps the input event_id when the result carries no override', () => {
+  it('reports invalid bulk input parameters', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_DISCOVERY_WRITE,
-        tool_call_id: 'dw-2',
-        params: { kind: 'discovery', title: 'CPU spike', event_id: 'original-event-id' },
-        results: [{ data: {} }],
+        tool_call_id: 'dw-invalid-params',
+        params: { items: 'not-an-array' },
       },
     ];
-    const discoveries = extractDiscoveriesFromToolCall(steps);
-    expect(discoveries[0].event_id).toBe('original-event-id');
+
+    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
+      'discovery_write: expected params.items to be an array, got string'
+    );
+  });
+
+  it('extracts aligned bulk results and omits failed items', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-bulk',
+        params: {
+          items: [
+            { kind: 'discovery', title: 'Persisted discovery' },
+            { kind: 'discovery', title: 'Failed discovery' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  discovery_id: 'discovery-1',
+                  written: true,
+                },
+                { index: 1, event_id: 'event-2', written: false, reason: 'bulk_error' },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({
+        title: 'Persisted discovery',
+        event_id: 'event-1',
+        discovery_id: 'discovery-1',
+      }),
+    ]);
+    expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
+  });
+
+  it('rejects misaligned discovery bulk results', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-misaligned',
+        params: { items: [{ title: 'one' }, { title: 'two' }] },
+        results: [{ data: { results: [] } }],
+      },
+    ];
+
+    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
+      'discovery_write input and result arrays are not aligned'
+    );
+  });
+
+  it('rejects reordered discovery bulk results', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-reordered',
+        params: { items: [{ title: 'first' }, { title: 'second' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 1,
+                  event_id: 'event-2',
+                  discovery_id: 'discovery-2',
+                  written: true,
+                },
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  discovery_id: 'discovery-1',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
+      'discovery_write input and result arrays are not aligned'
+    );
+  });
+});
+
+describe('extractRequestedEventIdsFromToolCall', () => {
+  it('returns only event IDs explicitly passed by the agent in items[]', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-new',
+        params: { items: [{ kind: 'discovery', title: 'New event' }] },
+        results: [
+          { data: { results: [{ index: 0, event_id: 'handler-generated', written: true }] } },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-continuation',
+        params: {
+          items: [{ kind: 'discovery', title: 'Continuation', event_id: 'agent-selected' }],
+        },
+        results: [{ data: { results: [{ index: 0, event_id: 'agent-selected', written: true }] } }],
+      },
+    ];
+
+    expect(extractRequestedEventIdsFromToolCall(steps)).toEqual(['agent-selected']);
+  });
+
+  it('returns all agent-supplied event IDs from a multi-item bulk write', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_call_id: 'dw-bulk',
+        params: {
+          items: [
+            { kind: 'discovery', title: 'New event' },
+            { kind: 'discovery', title: 'Continuation A', event_id: 'event-A' },
+            { kind: 'discovery', title: 'Continuation B', event_id: 'event-B' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                { index: 0, event_id: 'handler-generated', written: true },
+                { index: 1, event_id: 'event-A', written: true },
+                { index: 2, event_id: 'event-B', written: true },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractRequestedEventIdsFromToolCall(steps)).toEqual(['event-A', 'event-B']);
   });
 });
 
 describe('extractSignificantEventsFromToolCall', () => {
-  it('extracts significant events from events_write tool calls', () => {
-    const steps: ConverseStep[] = [
-      {
-        type: 'tool_call',
-        tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'ew-1',
-        params: {
-          discovery_id: 'd-1',
-          event_id: 'event-1',
-          status: 'open',
-          severity: '60-high',
-          confidence: 0.9,
-          assessment_note: 'High confidence DB issue',
-          signals: [],
-        },
-      },
-    ];
-    const events = extractSignificantEventsFromToolCall(steps);
-    expect(events).toHaveLength(1);
-    expect(events[0].status).toBe('open');
-    expect(events[0].discovery_id).toBe('d-1');
-  });
-
   it('returns [] when no events_write steps are present', () => {
     const steps: ConverseStep[] = [
       { type: 'reasoning', reasoning: 'thinking' },
@@ -89,24 +200,100 @@ describe('extractSignificantEventsFromToolCall', () => {
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
   });
 
-  it('extracts multiple events from multiple events_write calls', () => {
+  it('extracts successful items from a bulk write and its partial-failure retry', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'ew-1',
-        params: { discovery_id: 'd-1', status: 'open', severity: '80-critical' },
+        tool_call_id: 'ew-bulk',
+        params: {
+          items: [
+            { discovery_id: 'd-1', event_id: 'event-1' },
+            { discovery_id: 'd-2', event_id: 'event-2' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  event_uuid: 'uuid-1',
+                  written: true,
+                },
+                { index: 1, event_id: 'event-2', written: false, reason: 'bulk_error' },
+              ],
+            },
+          },
+        ],
       },
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'ew-2',
-        params: { discovery_id: 'd-2', status: 'dismissed', severity: '20-low' },
+        tool_call_id: 'ew-retry',
+        params: { items: [{ discovery_id: 'd-2', event_id: 'event-2' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-2',
+                  event_uuid: 'uuid-2',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
       },
     ];
-    const events = extractSignificantEventsFromToolCall(steps);
-    expect(events).toHaveLength(2);
-    expect(events[0].discovery_id).toBe('d-1');
-    expect(events[1].discovery_id).toBe('d-2');
+
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([
+      expect.objectContaining({ discovery_id: 'd-1', event_uuid: 'uuid-1' }),
+      expect.objectContaining({ discovery_id: 'd-2', event_uuid: 'uuid-2' }),
+    ]);
+    expect(extractSignificantEventsFromToolCall(steps)[0]).not.toHaveProperty('written');
+  });
+
+  it('rejects reordered event bulk results', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-reordered',
+        params: {
+          items: [
+            { discovery_id: 'd-1', event_id: 'event-1' },
+            { discovery_id: 'd-2', event_id: 'event-2' },
+          ],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 1,
+                  event_id: 'event-2',
+                  event_uuid: 'uuid-2',
+                  written: true,
+                },
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  event_uuid: 'uuid-1',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(() => extractSignificantEventsFromToolCall(steps)).toThrow(
+      'events_write input and result arrays are not aligned'
+    );
   });
 });

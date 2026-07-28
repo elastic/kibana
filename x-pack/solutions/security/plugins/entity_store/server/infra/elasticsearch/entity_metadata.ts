@@ -50,6 +50,13 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
     datasource: params.docs,
     index: params.index,
     refresh: false,
+    // Refuse to auto-create a plain index if the data stream is absent or
+    // mis-configured. Without this, ES silently creates a dynamically-mapped
+    // regular index, turning a recoverable configuration gap into silent
+    // schema corruption. With it, writes are dropped (surfaced via onDrop)
+    // and the next maintainer run / summary regen retries them once the
+    // stream exists.
+    require_data_stream: true,
     onDocument: () => ({ create: {} }),
     onDrop: (dropped) => {
       dropAggregator.record(dropped);

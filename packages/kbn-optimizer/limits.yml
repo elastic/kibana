@@ -10,9 +10,9 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 62370
+  alertingVTwo: 29788
   apm: 53172
-  apmShared: 5985
+  apmShared: 5852
   apmSourcesAccess: 2747
   automaticImport: 18629
   banners: 4006
@@ -33,7 +33,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   contextEngine: 5837
   controls: 10300
-  core: 606422
+  core: 563984
   cps: 9209
   crossClusterReplication: 12662
   customContent: 4765
@@ -66,7 +66,7 @@ pageLoadAssetSize:
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 6117
+  evals: 8650
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -129,7 +129,7 @@ pageLoadAssetSize:
   ml: 99842
   mockIdpPlugin: 7421
   monitoring: 28983
-  navigation: 18600
+  navigation: 18855
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
@@ -143,6 +143,7 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 48128
   painlessLab: 6299
+  pnd: 7674
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860
