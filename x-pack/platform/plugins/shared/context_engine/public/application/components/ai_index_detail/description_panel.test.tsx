@@ -17,6 +17,7 @@ import { DescriptionPanel } from './description_panel';
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
+  managed: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
