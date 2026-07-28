@@ -19,7 +19,10 @@ import {
   isUnifiedReferenceAttachmentRequest,
 } from '../../../../common/utils/attachments';
 import { isSavedObjectAttachment } from '../../attachments/common/saved_object/helpers';
-import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  LENS_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { UNKNOWN } from '../../../common/translations';
@@ -145,6 +148,23 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         // title, so keep them here and let the files API drive the results.
         if (resolveUnifiedAttachmentType(comment, owner) === FILE_ATTACHMENT_TYPE) {
           return comment;
+        }
+        if (comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE && isUnifiedReferenceAttachmentRequest(comment)) {
+          const meta = (comment.metadata ?? {}) as {
+            entityName?: string;
+            entityType?: string;
+            riskLevel?: string;
+          };
+          const term = searchTerm.toLowerCase();
+          const text = [
+            typeof comment.attachmentId === 'string' ? comment.attachmentId : '',
+            meta.entityName ?? '',
+            meta.entityType ?? '',
+            meta.riskLevel ?? '',
+          ]
+            .join(' ')
+            .toLowerCase();
+          return text.includes(term) ? comment : null;
         }
         if (isUnifiedReferenceAttachmentRequest(comment)) {
           return filterUnifiedAttachment(comment, searchTerm);
