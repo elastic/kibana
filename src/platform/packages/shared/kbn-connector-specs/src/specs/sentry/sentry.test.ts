@@ -347,7 +347,16 @@ describe('Sentry', () => {
   });
 
   describe('updateIssueAlertRule action', () => {
-    it('should update only provided fields', async () => {
+    it('should backfill unset required fields from the current rule before PUT', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          name: 'Existing rule',
+          actionMatch: 'any',
+          conditions: [{ id: 'condition-a' }],
+          actions: [{ id: 'action-a' }],
+          frequency: 30,
+        },
+      });
       mockClient.put.mockResolvedValue({ data: { id: 'r1', name: 'Updated' } });
 
       await Sentry.actions.updateIssueAlertRule.handler(mockContext, {
@@ -356,10 +365,33 @@ describe('Sentry', () => {
         name: 'Updated',
       });
 
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/projects/my-org/backend/rules/r1/'
+      );
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://sentry.io/api/0/projects/my-org/backend/rules/r1/',
-        { name: 'Updated' }
+        {
+          name: 'Updated',
+          actionMatch: 'any',
+          conditions: [{ id: 'condition-a' }],
+          actions: [{ id: 'action-a' }],
+          frequency: 30,
+        }
       );
+    });
+
+    it('should throw a formatted error when the current rule cannot be fetched', async () => {
+      mockClient.get.mockRejectedValue({
+        response: { status: 404, data: { detail: 'Rule not found' } },
+      });
+
+      await expect(
+        Sentry.actions.updateIssueAlertRule.handler(mockContext, {
+          project: 'backend',
+          ruleId: 'r1',
+          name: 'Updated',
+        })
+      ).rejects.toThrow('Sentry updateIssueAlertRule failed (status 404): Rule not found');
     });
   });
 

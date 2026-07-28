@@ -452,18 +452,31 @@ export const Sentry: ConnectorSpec = {
       input: SentryUpdateIssueAlertRuleInputSchema,
       handler: async (ctx, input: SentryUpdateIssueAlertRuleInput) => {
         const orgSlug = getOrgSlug(ctx);
-        const body: Record<string, unknown> = {};
-        if (input.name) body.name = input.name;
-        if (input.actionMatch) body.actionMatch = input.actionMatch;
-        if (input.conditions) body.conditions = input.conditions;
-        if (input.actions) body.actions = input.actions;
-        if (input.frequency) body.frequency = input.frequency;
+        const ruleUrl = `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/rules/${
+          input.ruleId
+        }/`;
 
         try {
-          const response = await ctx.client.put(
-            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/rules/${input.ruleId}/`,
-            body
-          );
+          // Sentry's rule-update endpoint replaces the whole rule rather than
+          // patching it, so unset required fields (name/actionMatch/conditions/
+          // actions) must be backfilled from the current rule before the PUT.
+          const current = await ctx.client.get<{
+            name: string;
+            actionMatch: string;
+            conditions: unknown[];
+            actions: unknown[];
+            frequency?: number;
+          }>(ruleUrl);
+
+          const body = {
+            name: input.name ?? current.data.name,
+            actionMatch: input.actionMatch ?? current.data.actionMatch,
+            conditions: input.conditions ?? current.data.conditions,
+            actions: input.actions ?? current.data.actions,
+            frequency: input.frequency ?? current.data.frequency,
+          };
+
+          const response = await ctx.client.put(ruleUrl, body);
           return response.data;
         } catch (error) {
           throw formatSentryError('updateIssueAlertRule', error);
