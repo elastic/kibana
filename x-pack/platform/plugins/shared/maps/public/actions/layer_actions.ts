@@ -122,9 +122,8 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       getLayerListRaw(getState()).forEach(({ id }) => {
         dispatch(removeLayerFromLayerList(id));
       });
+      await waitForMapSync();
     }
-
-    await waitForMapSync();
 
     newLayerList.forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
