@@ -71,8 +71,14 @@ test.describe('Bulk edit — maintenance windows', { tag: tags.stateful.classic 
     await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
     await syntheticsServices.ensurePrivateLocationExists();
-    await syntheticsServices.addMonitor('mw bulk monitor 1', { type: 'http', urls: 'https://elastic.co' });
-    await syntheticsServices.addMonitor('mw bulk monitor 2', { type: 'http', urls: 'https://example.com' });
+    await syntheticsServices.addMonitor('mw bulk monitor 1', {
+      type: 'http',
+      urls: 'https://elastic.co',
+    });
+    await syntheticsServices.addMonitor('mw bulk monitor 2', {
+      type: 'http',
+      urls: 'https://example.com',
+    });
     maintenanceWindow = await createMaintenanceWindow(kbnClient, MW_TITLE);
   });
 
@@ -109,9 +115,7 @@ test.describe('Bulk edit — maintenance windows', { tag: tags.stateful.classic 
 
     await test.step('open the maintenance windows flyout and capture', async () => {
       await page.testSubj.click('syntheticsBulkMaintenanceWindowsItem');
-      await expect(
-        page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')
-      ).toBeVisible();
+      await expect(page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')).toBeVisible();
       await capture(page, testInfo, '03-flyout-empty');
     });
 

@@ -306,9 +306,9 @@ export class SyntheticsAppPage {
   async openBulkMaintenanceWindowsFlyout() {
     await this.openBulkActionsMenu();
     await this.page.testSubj.click('syntheticsBulkMaintenanceWindowsItem');
-    await expect(
-      this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')).toBeVisible({
+      timeout: 30_000,
+    });
   }
 
   async selectMaintenanceWindowInFlyout(title: string) {
