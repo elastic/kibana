@@ -82,5 +82,25 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
       });
     });
+
+    spaceTest('restores a non-default sort after a page reload', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await spaceTest.step('a fresh session defaults to ascending order', async () => {
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+      });
+
+      await spaceTest.step('change the sort to descending', async () => {
+        await metricsExperience.setSortDirection('desc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+
+      await spaceTest.step('the descending sort survives a full page reload', async () => {
+        await page.reload();
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+    });
   }
 );
