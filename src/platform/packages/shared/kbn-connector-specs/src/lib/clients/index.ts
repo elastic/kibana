@@ -16,6 +16,13 @@ export type {
   CredentialAccessor,
 } from './client_type_spec';
 
+export type {
+  FetchLike,
+  ConfiguredFetchResource,
+  ConfiguredFetchOptions,
+  ConfiguredFetchFactory,
+} from './configured_fetch_types';
+
 // No client types are registered yet. `ClientTypeId` resolves to `never`
 // until a client type is added to `ClientRegistry`.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
