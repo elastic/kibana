@@ -40,7 +40,7 @@ export class SearchSessionsExamplesAppLocatorDefinition
 
   constructor(protected readonly getAppBasePath: () => Promise<string>) {}
 
-  public readonly getTimeRange = (parmas: SearchSessionsExamplesAppLocatorParams) => parmas.time;
+  public readonly getTimeRange = (params: SearchSessionsExamplesAppLocatorParams) => params.time;
 
   public readonly setTimeRange = (
     params: SearchSessionsExamplesAppLocatorParams,
