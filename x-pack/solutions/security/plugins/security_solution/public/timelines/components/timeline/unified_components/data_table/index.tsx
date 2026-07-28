@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
@@ -60,9 +60,8 @@ import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/tel
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
-import { PaginatedTimelineDocumentFlyout } from '../../../../../flyout_v2/document/paginated_timeline_document_flyout';
-import { usePaginatedFlyout } from '../../../../../common/utils/flyout_pagination/use_paginated_flyout';
-import type { ScopedPaginationSlice } from '../../../../../common/utils/flyout_pagination/types';
+import { DocumentFlyout } from '../../../../../flyout_v2/document/main';
+import { usePaginatedFlyout } from '../../../../../flyout_v2/document/pagination/use_paginated_flyout';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -198,12 +197,13 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     // Body factory for the V2 paginated timeline flyout.
     const getTimelineBody = useCallback(
       (instanceId: string) => (
-        <PaginatedTimelineDocumentFlyout
+        <DocumentFlyout
           paginationInstanceId={instanceId}
           onAlertUpdated={refetch}
+          renderCellActions={timelineCellActionRenderer}
         />
       ),
-      [refetch]
+      [refetch, timelineCellActionRenderer]
     );
 
     // Resolves the document at an absolute row index (0-based across the full
@@ -211,34 +211,40 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     // not in memory — the parallel cross-page query will resolve it and call
     // openPaginatedFlyout again once the data is available.
     const resolveDocument = useCallback(
-      (alertIndex: number) => {
-        const targetRow = tableRows[alertIndex];
+      (documentIndex: number) => {
+        const targetRow = tableRows[documentIndex];
         if (!targetRow) {
           return null;
         }
-        const docRef = {
-          id: targetRow._id,
-          indexName: targetRow.ecs._index ?? '',
-        };
         return {
-          id: docRef.id,
-          indexName: docRef.indexName,
-          scopeId: timelineId,
-          stateUpdate: {
-            flyoutDocumentRef: docRef,
-            totalAlertCount: tableRows.length,
-          } as Partial<ScopedPaginationSlice>,
+          flyoutDocument: targetRow,
+          totalDocumentCount: tableRows.length,
         };
       },
-      [tableRows, timelineId]
+      [tableRows]
     );
 
-    const { openPaginatedFlyout, closePaginatedFlyout } = usePaginatedFlyout({
-      rightPanelKey: DocumentDetailsRightPanelKey,
+    const {
+      slice: { flyoutDocumentIndex },
+      openPaginatedFlyout,
+      closePaginatedFlyout,
+    } = usePaginatedFlyout({
       resolveDocument,
       renderBody: getTimelineBody,
       historyKey: documentFlyoutHistoryKey,
+      origin: FLYOUT_ORIGIN.TIMELINE,
     });
+
+    // Timeline's row icon is driven by `expandedDoc`, while in-flyout
+    // pagination is driven by the external pagination store. Keep the two in
+    // sync so the icon follows the document currently displayed in the flyout.
+    useEffect(() => {
+      if (!enableNewFlyout || flyoutDocumentIndex == null) return;
+      const paginatedDocument = tableRows[flyoutDocumentIndex];
+      if (paginatedDocument) {
+        setExpandedDoc(paginatedDocument);
+      }
+    }, [enableNewFlyout, flyoutDocumentIndex, tableRows]);
 
     const onCloseExpandableFlyout = useCallback(
       (id: string) => {

@@ -212,6 +212,7 @@ describe('RowAction', () => {
     expect(onExpandFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(mockedTelemetry.reportEvent).not.toHaveBeenCalled();
   });
 
   test('binds the new document flyout cell actions to the table scope and details-flyout trigger', () => {

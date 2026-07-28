@@ -25,7 +25,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
+import { useFlyoutPagination } from '../pagination/use_flyout_pagination';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
@@ -92,7 +92,7 @@ export interface DocumentFlyoutProps {
   /**
    * The document to display
    */
-  hit: DataTableRecord;
+  hit?: DataTableRecord;
   /**
    * Cell action renderer for the analyzer
    */
@@ -106,7 +106,7 @@ export interface DocumentFlyoutProps {
    */
   dataTestSubj?: string;
   /**
-   * Per-source-instance UUID forwarded from the V2 paginated wrapper.
+   * Per-source-instance UUID forwarded from a paginated document source.
    * Passed down to `Header` and used to look up the loading/pagination state
    * from `flyoutPaginationStore`. Absent for non-paginated flyout opens.
    */
@@ -116,14 +116,37 @@ export interface DocumentFlyoutProps {
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
-export const DocumentFlyout = memo(
+export const DocumentFlyout = memo((props: DocumentFlyoutProps) => {
+  const { flyoutDocument, isFlyoutDocumentLoading } = useFlyoutPagination(
+    props.paginationInstanceId
+  );
+  const hit = flyoutDocument ?? props.hit;
+
+  if (!hit) {
+    return null;
+  }
+
+  return (
+    <DocumentFlyoutContent {...props} hit={hit} isPaginationLoading={isFlyoutDocumentLoading} />
+  );
+});
+
+DocumentFlyout.displayName = 'DocumentFlyout';
+
+type DocumentFlyoutContentProps = Omit<DocumentFlyoutProps, 'hit'> & {
+  hit: DataTableRecord;
+  isPaginationLoading: boolean;
+};
+
+const DocumentFlyoutContent = memo(
   ({
     hit,
     onAlertUpdated,
     renderCellActions,
     dataTestSubj,
     paginationInstanceId,
-  }: DocumentFlyoutProps) => {
+    isPaginationLoading,
+  }: DocumentFlyoutContentProps) => {
     const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -133,12 +156,6 @@ export const DocumentFlyout = memo(
     const isSecurityApp = useIsInSecurityApp();
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
-    // While the in-flyout pagination is fetching an alert from a different
-    // page than the alerts table is showing, render a centered spinner in the
-    // body and keep the previous alert's header (with the new pagination
-    // position) visible. Mirrors the V1 `RightPanel` loading branch.
-    const { isFlyoutAlertLoading } = useFlyoutPagination(paginationInstanceId);
-
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
     // The selected tab is persisted to localStorage.
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
@@ -233,21 +250,24 @@ export const DocumentFlyout = memo(
       return <FlyoutMissingAlertsPrivilege />;
     }
 
-    if (isFlyoutAlertLoading) {
-      return (
-        <>
-          <RemoteDocumentCallout hit={hit} />
-          <EuiFlyoutHeader>
-            <Header
-              hit={hit}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-              onShowNotes={onShowNotesFromHeader}
-              isLoading
-              paginationInstanceId={paginationInstanceId}
-            />
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
+    return (
+      <>
+        <RemoteDocumentCallout hit={hit} />
+        <EuiFlyoutHeader
+          css={isPaginationLoading ? undefined : headerStyles}
+          data-test-subj={dataTestSubj}
+        >
+          <Header
+            hit={hit}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+            onShowNotes={onShowNotesFromHeader}
+            isPaginationLoading={isPaginationLoading}
+            paginationInstanceId={paginationInstanceId}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {isPaginationLoading ? (
             <EuiFlexGroup
               alignItems="center"
               justifyContent="center"
@@ -258,69 +278,55 @@ export const DocumentFlyout = memo(
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlyoutBody>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader css={headerStyles} data-test-subj={dataTestSubj}>
-          <Header
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-            onShowNotes={onShowNotesFromHeader}
-            paginationInstanceId={paginationInstanceId}
-          />
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {isSecurityApp && (
+          ) : (
             <>
-              <EuiTabs>
-                <EuiTab
-                  isSelected={selectedTabId === 'overview'}
-                  onClick={() => setSelectedTabId('overview')}
-                  data-test-subj={OVERVIEW_TAB_TEST_ID}
-                >
-                  {OVERVIEW_TAB_LABEL}
-                </EuiTab>
-                <EuiTab
-                  isSelected={selectedTabId === 'table'}
-                  onClick={() => setSelectedTabId('table')}
-                  data-test-subj={TABLE_TAB_TEST_ID}
-                >
-                  {TABLE_TAB_LABEL}
-                </EuiTab>
-                <EuiTab
-                  isSelected={selectedTabId === 'json'}
-                  onClick={() => setSelectedTabId('json')}
-                  data-test-subj={JSON_TAB_TEST_ID}
-                >
-                  {JSON_TAB_LABEL}
-                </EuiTab>
-              </EuiTabs>
-              <EuiSpacer size="m" />
+              {isSecurityApp && (
+                <>
+                  <EuiTabs>
+                    <EuiTab
+                      isSelected={selectedTabId === 'overview'}
+                      onClick={() => setSelectedTabId('overview')}
+                      data-test-subj={OVERVIEW_TAB_TEST_ID}
+                    >
+                      {OVERVIEW_TAB_LABEL}
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={selectedTabId === 'table'}
+                      onClick={() => setSelectedTabId('table')}
+                      data-test-subj={TABLE_TAB_TEST_ID}
+                    >
+                      {TABLE_TAB_LABEL}
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={selectedTabId === 'json'}
+                      onClick={() => setSelectedTabId('json')}
+                      data-test-subj={JSON_TAB_TEST_ID}
+                    >
+                      {JSON_TAB_LABEL}
+                    </EuiTab>
+                  </EuiTabs>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              {isSecurityApp && selectedTabId === 'table' ? (
+                <TableTab
+                  hit={hit}
+                  renderCellActions={renderCellActions}
+                  renderFlyoutLink={renderFlyoutLink}
+                />
+              ) : isSecurityApp && selectedTabId === 'json' ? (
+                <JsonTab hit={hit} isRulePreview={isRulePreview} />
+              ) : (
+                <OverviewTab
+                  hit={hit}
+                  renderCellActions={renderCellActions}
+                  onAlertUpdated={onAlertUpdated}
+                />
+              )}
             </>
           )}
-          {isSecurityApp && selectedTabId === 'table' ? (
-            <TableTab
-              hit={hit}
-              renderCellActions={renderCellActions}
-              renderFlyoutLink={renderFlyoutLink}
-            />
-          ) : isSecurityApp && selectedTabId === 'json' ? (
-            <JsonTab hit={hit} isRulePreview={isRulePreview} />
-          ) : (
-            <OverviewTab
-              hit={hit}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
-          )}
         </EuiFlyoutBody>
-        {!isRulePreview && (
+        {!isRulePreview && !isPaginationLoading && (
           <EuiFlyoutFooter css={footerStyles}>
             <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
           </EuiFlyoutFooter>
@@ -330,4 +336,4 @@ export const DocumentFlyout = memo(
   }
 );
 
-DocumentFlyout.displayName = 'DocumentFlyout';
+DocumentFlyoutContent.displayName = 'DocumentFlyoutContent';
