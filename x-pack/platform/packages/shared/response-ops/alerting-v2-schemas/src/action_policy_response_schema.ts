@@ -44,6 +44,12 @@ export const actionPolicyResponseSchema = z.object({
     .string()
     .nullable()
     .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
+  suppressDependentRules: z
+    .boolean()
+    .nullable()
+    .describe(
+      'Whether notifications are suppressed for episodes whose rule depends on an active rule.'
+    ),
   auth: z
     .object({
       owner: z.string().describe('The owner of the action policy.'),

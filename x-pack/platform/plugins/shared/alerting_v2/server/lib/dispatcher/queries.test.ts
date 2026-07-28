@@ -11,6 +11,7 @@ import {
   getDispatchableAlertEventsQuery,
   getAlertEpisodeSuppressionsQueries,
   getLastNotifiedTimestampsQueries,
+  getRulesWithActiveEpisodesQuery,
 } from './queries';
 import { createAlertEpisode } from './fixtures/test_utils';
 
@@ -353,6 +354,66 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
       expect(request.query).toContain('expiry > "2026-03-01T00:00:00.000Z"::DATETIME');
+    }
+  });
+});
+
+describe('getRulesWithActiveEpisodesQuery', () => {
+  it('returns an empty array for empty input', () => {
+    expect(getRulesWithActiveEpisodesQuery([])).toEqual([]);
+  });
+
+  it('queries the rule events data stream', () => {
+    const requests = getRulesWithActiveEpisodesQuery(['parent-1']);
+
+    expect(requests[0].query).toContain('.rule-events');
+  });
+
+  it('filters by the candidate parent rule ids', () => {
+    const requests = getRulesWithActiveEpisodesQuery(['parent-1', 'parent-2']);
+
+    expect(requests[0].query).toContain('rule.id IN ("parent-1", "parent-2")');
+  });
+
+  it('only considers rows with a non-null episode status', () => {
+    const requests = getRulesWithActiveEpisodesQuery(['parent-1']);
+
+    expect(requests[0].query).toContain('episode.status IS NOT NULL');
+  });
+
+  it('aggregates the latest episode status by rule.id', () => {
+    const requests = getRulesWithActiveEpisodesQuery(['parent-1']);
+
+    expect(requests[0].query).toContain('last_episode_status = LAST(episode.status, @timestamp)');
+    expect(requests[0].query).toContain('BY rule.id');
+  });
+
+  it('keeps only rules whose latest episode status is active', () => {
+    const requests = getRulesWithActiveEpisodesQuery(['parent-1']);
+
+    expect(requests[0].query).toContain('last_episode_status == "active"');
+  });
+
+  it('exposes the flat rule_id column', () => {
+    const requests = getRulesWithActiveEpisodesQuery(['parent-1']);
+
+    expect(requests[0].query).toContain('rule_id = rule.id');
+    expect(requests[0].query).toContain('KEEP rule_id');
+  });
+
+  it('splits into multiple requests when rule ids exceed the size budget', () => {
+    const longSegment = 'p'.repeat(10_000);
+    const ruleIds = Array.from({ length: 200 }, (_, i) => `${longSegment}-${i}`);
+
+    const requests = getRulesWithActiveEpisodesQuery(ruleIds);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(request.query.length).toBeLessThan(1_000_000);
+    }
+    const concatenated = requests.map((r) => r.query).join('\n');
+    for (const id of [ruleIds[0], ruleIds[ruleIds.length - 1]]) {
+      expect(concatenated).toContain(id);
     }
   });
 });

@@ -177,6 +177,12 @@ const createActionPolicyDataBaseSchema = z
       .optional()
       .describe('The grouping mode for alert notifications.'),
     throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
+    // POC (rna-program#753): suppress episodes whose rule depends_on a rule
+    // with a currently active episode.
+    suppressDependentRules: z
+      .boolean()
+      .optional()
+      .describe('Suppress notifications for episodes whose rule depends on an active rule.'),
   })
   .strict();
 
@@ -227,6 +233,11 @@ export const updateActionPolicyDataSchema = z
       .optional()
       .nullable()
       .describe('The throttle configuration for notifications.'),
+    suppressDependentRules: z
+      .boolean()
+      .optional()
+      .nullable()
+      .describe('Suppress notifications for episodes whose rule depends on an active rule.'),
   })
   .strict()
   .check((payload) => {

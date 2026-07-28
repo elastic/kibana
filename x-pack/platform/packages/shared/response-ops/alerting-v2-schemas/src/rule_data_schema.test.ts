@@ -824,6 +824,24 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('artifact relation', () => {
+    it('accepts a rule artifact with a relation', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [{ id: 'dep-1', type: 'rule', value: 'parent-rule-id', relation: 'depends_on' }],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts an artifact without a relation (optional)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [{ id: 'dash-1', type: 'dashboard', value: 'dashboard-id' }],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
   describe('artifacts value length', () => {
     it('accepts a runbook artifact at the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({

@@ -75,6 +75,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   groupingMode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
+  suppressDependentRules: null,
   auth: { owner: 'elastic', createdByUser: true },
   createdBy: ELASTIC_UID,
   createdAt: '2026-03-01T10:00:00.000Z',

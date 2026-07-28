@@ -36,6 +36,12 @@ const OUTCOME_OPTIONS: Array<{ value: PolicyExecutionOutcomeFilter; text: string
       defaultMessage: 'Throttled',
     }),
   },
+  {
+    value: 'suppressed',
+    text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.suppressed', {
+      defaultMessage: 'Suppressed',
+    }),
+  },
 ];
 
 export interface RuleOption {

@@ -82,6 +82,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
         id: schema.string(),
         type: schema.string(),
         value: schema.string(),
+        relation: schema.maybe(schema.string()),
       }),
       { maxSize: 100 }
     )

@@ -11,10 +11,15 @@ import { ID_MAX_LENGTH } from './constants';
 export const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 export const POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;
 
-export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
+export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled', 'suppressed']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
 
-export const policyExecutionOutcomeFilterSchema = z.enum(['dispatched', 'throttled', 'all']);
+export const policyExecutionOutcomeFilterSchema = z.enum([
+  'dispatched',
+  'throttled',
+  'suppressed',
+  'all',
+]);
 export type PolicyExecutionOutcomeFilter = z.infer<typeof policyExecutionOutcomeFilterSchema>;
 
 const sharedFilterFields = {
@@ -39,7 +44,7 @@ const sharedFilterFields = {
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted defaults to "all" (both dispatched and throttled). Pass "dispatched" or "throttled" to narrow.'
+      'Outcome filter. When omitted defaults to "all" (dispatched, throttled, and suppressed). Pass "dispatched", "throttled", or "suppressed" to narrow.'
     ),
 };
 

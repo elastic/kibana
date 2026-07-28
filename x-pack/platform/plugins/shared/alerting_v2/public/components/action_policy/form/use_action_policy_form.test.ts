@@ -34,6 +34,7 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   groupingMode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
+  suppressDependentRules: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
   createdAt: '2026-03-01T10:00:00.000Z',

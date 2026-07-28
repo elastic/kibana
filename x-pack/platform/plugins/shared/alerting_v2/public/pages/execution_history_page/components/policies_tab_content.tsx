@@ -10,7 +10,7 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   type CriteriaWithPagination,
@@ -36,6 +36,12 @@ const DEFAULT_PER_PAGE = 10;
 const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
 const MAX_VISIBLE_RULES = 3;
 
+const OUTCOME_ICONS: Record<PolicyExecutionHistoryItem['outcome'], string> = {
+  dispatched: 'check',
+  throttled: 'clock',
+  suppressed: 'bellSlash',
+};
+
 const buildColumns = (
   onPolicyClick: (policyId: string) => void,
   onRuleClick: (ruleId: string) => void,
@@ -56,9 +62,9 @@ const buildColumns = (
       defaultMessage: 'Policy',
     }),
     render: (item: PolicyExecutionHistoryItem) => (
-      <EuiLink onClick={() => onPolicyClick(item.policy.id)}>
+      <EuiButtonEmpty size="xs" flush="left" onClick={() => onPolicyClick(item.policy.id)}>
         {item.policy.name ?? item.policy.id}
-      </EuiLink>
+      </EuiButtonEmpty>
     ),
   },
   {
@@ -67,7 +73,7 @@ const buildColumns = (
       defaultMessage: 'Outcome',
     }),
     render: (outcome: PolicyExecutionHistoryItem['outcome']) => (
-      <EuiBadge color="hollow" iconType={outcome === 'dispatched' ? 'check' : 'clock'}>
+      <EuiBadge color="hollow" iconType={OUTCOME_ICONS[outcome] ?? 'dot'}>
         {outcome}
       </EuiBadge>
     ),

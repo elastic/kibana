@@ -23,6 +23,7 @@ const validResponse = {
   groupingMode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const, interval: null },
   snoozedUntil: null,
+  suppressDependentRules: null,
   auth: { owner: 'user-1', createdByUser: true },
   createdBy: 'user-1',
   createdAt: '2026-01-01T00:00:00.000Z',

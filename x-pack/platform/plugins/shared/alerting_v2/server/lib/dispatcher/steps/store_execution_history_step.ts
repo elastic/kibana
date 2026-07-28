@@ -15,6 +15,7 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyId,
+  AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -76,6 +77,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       dispatch = [],
       throttled = [],
       dispatchable = [],
+      suppressed = [],
       dispatchedExecutions,
       rules,
       input,
@@ -108,8 +110,18 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
+    for (const summary of aggregateSuppressedByPolicy(suppressed, rules).values()) {
+      this.emitPolicySummary({
+        timestamp,
+        executionUuid,
+        summary,
+        action: ACTION_POLICY_EVENT_ACTIONS.SUPPRESSED,
+        rules,
+      });
+    }
+
     const unmatched = aggregateUnmatchedByRule(
-      getUnmatchedEpisodes(dispatchable, dispatch, throttled)
+      getUnmatchedEpisodes(dispatchable, dispatch, throttled, suppressed)
     );
     for (const [ruleId, episodeIds] of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
@@ -224,6 +236,41 @@ function aggregateByPolicy(
       summary.episodeIds.add(episode.episode_id);
       summary.ruleIds.add(episode.rule_id);
     }
+  }
+  return summaries;
+}
+
+/**
+ * Aggregates `suppressed` entries that carry a `policyId` (post-match
+ * suppression, e.g. rule-dependency) into a per-policy summary. There is no
+ * action group / workflow / dispatch — the episode matched the policy but was
+ * suppressed before grouping — so only episode + rule refs are populated.
+ * Entries without a `policyId` (pre-match suppression: ack/snooze,
+ * maintenance window) are not attributable to a policy and are skipped here.
+ */
+function aggregateSuppressedByPolicy(
+  suppressed: ReadonlyArray<AlertEpisode & { policyId?: ActionPolicyId }>,
+  rules?: Map<RuleId, Rule>
+): Map<ActionPolicyId, PolicySummary> {
+  const summaries = new Map<ActionPolicyId, PolicySummary>();
+  for (const episode of suppressed) {
+    if (!episode.policyId) continue;
+
+    let summary = summaries.get(episode.policyId);
+    if (!summary) {
+      summary = {
+        policyId: episode.policyId,
+        spaceId: rules?.get(episode.rule_id)?.spaceId ?? 'default',
+        episodeIds: new Set(),
+        ruleIds: new Set(),
+        actionGroupIds: new Set(),
+        workflowIds: new Set(),
+        workflowExecutionIds: new Set(),
+      };
+      summaries.set(episode.policyId, summary);
+    }
+    summary.episodeIds.add(episode.episode_id);
+    summary.ruleIds.add(episode.rule_id);
   }
   return summaries;
 }

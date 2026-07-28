@@ -454,6 +454,50 @@ describe('StoreActionsStep', () => {
     });
   });
 
+  it('does not also record a suppressed episode as unmatched (rule-dependency suppression leaves it in dispatchable)', async () => {
+    // ApplyDependencySuppressionStep runs after matching: it moves the episode to
+    // `suppressed` but leaves it in `dispatchable`. It matched a policy, so it must
+    // not be double-counted as "unmatched".
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const episode = createAlertEpisode({
+      rule_id: 'child-rule',
+      group_hash: 'hash-child',
+      episode_id: 'ep-child',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatchable: [episode],
+      suppressed: [{ ...episode, reason: 'rule_dependency:parent-rule' }],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('child-rule'),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+    const docs = mockService.bulkIndexDocs.mock.calls[0][0].docs;
+    // Exactly one action (the suppress), no unmatched.
+    expect(docs).toHaveLength(1);
+    expect(docs[0]).toEqual(
+      expect.objectContaining({
+        action_type: 'suppress',
+        rule_id: 'child-rule',
+        reason: 'rule_dependency:parent-rule',
+      })
+    );
+    expect(
+      docs.some(
+        (d: Record<string, unknown>) =>
+          (d.action_type as AlertAction['action_type']) === 'unmatched'
+      )
+    ).toBe(false);
+  });
+
   it('does not halt when only unmatched episodes exist', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);

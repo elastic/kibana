@@ -170,6 +170,81 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
+  it('emits a suppressed summary per policy from suppressed entries carrying a policyId (no action groups/workflows)', async () => {
+    const rule = createRule({ id: 'rule-1', spaceId: 'default' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+
+    await step.execute(
+      createDispatcherPipelineState({
+        suppressed: [{ ...episode, reason: 'rule_dependency:parent-1', policyId: 'policy-1' }],
+        dispatchable: [episode],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+      })
+    );
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.event?.action).toBe('suppressed');
+    expect(event?.event?.outcome).toBe('success');
+    expect(event?.kibana?.alerting_v2?.dispatcher).toEqual({
+      episode_count: 1,
+      episode_ids: ['ep-1'],
+      rule_count: 1,
+      action_group_count: 0,
+      action_group_ids: [],
+      workflow_ids: [],
+      workflow_execution_ids: [],
+      execution: { uuid: '00000000-0000-4000-8000-000000000000' },
+    });
+    // The suppressed episode must not also be recorded as unmatched.
+    expect(eventLogger.logEvent).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: expect.objectContaining({ action: 'unmatched' }) })
+    );
+  });
+
+  it('emits separate suppressed summaries when two policies both suppress the same episode', async () => {
+    const rule = createRule({ id: 'rule-1', spaceId: 'default' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+
+    await step.execute(
+      createDispatcherPipelineState({
+        suppressed: [
+          { ...episode, reason: 'rule_dependency:parent-1', policyId: 'policy-a' },
+          { ...episode, reason: 'rule_dependency:parent-1', policyId: 'policy-b' },
+        ],
+        dispatchable: [episode],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+      })
+    );
+
+    const suppressedEvents = eventLogger.logEvent.mock.calls
+      .map(([event]) => event)
+      .filter((event) => event?.event?.action === 'suppressed');
+    expect(suppressedEvents).toHaveLength(2);
+    const policyIds = suppressedEvents.map(
+      (event) =>
+        event?.kibana?.saved_objects?.find((so) => so?.type === ACTION_POLICY_SAVED_OBJECT_TYPE)?.id
+    );
+    expect(new Set(policyIds)).toEqual(new Set(['policy-a', 'policy-b']));
+  });
+
+  it('does not emit a suppressed summary for entries without a policyId (pre-match suppression)', async () => {
+    const rule = createRule({ id: 'rule-1', spaceId: 'default' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+
+    await step.execute(
+      createDispatcherPipelineState({
+        suppressed: [{ ...episode, reason: 'maintenance_window:mw-1' }],
+        dispatchable: [episode],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+      })
+    );
+
+    expect(eventLogger.logEvent).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: expect.objectContaining({ action: 'suppressed' }) })
+    );
+  });
+
   it('emits one unmatched summary per rule with episode_ids for that rule', async () => {
     const ruleA = createRule({ id: 'rule-a' });
     const ruleB = createRule({ id: 'rule-b' });

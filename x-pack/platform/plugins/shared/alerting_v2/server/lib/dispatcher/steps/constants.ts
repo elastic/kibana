@@ -11,6 +11,7 @@ export const ACTION_POLICY_EVENT_ACTIONS = {
   DISPATCHED: 'dispatched',
   THROTTLED: 'throttled',
   UNMATCHED: 'unmatched',
+  SUPPRESSED: 'suppressed',
 } as const;
 
 export type ActionPolicyEventAction =

@@ -63,7 +63,7 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('matches both dispatched and throttled when outcome is omitted', () => {
+    it('matches dispatched, throttled, and suppressed when outcome is omitted', () => {
       const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
       expect(filters).toEqual(
         expect.arrayContaining([
@@ -72,6 +72,7 @@ describe('action policy events queries', () => {
               'event.action': [
                 ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
                 ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+                ACTION_POLICY_EVENT_ACTIONS.SUPPRESSED,
               ],
             },
           },
