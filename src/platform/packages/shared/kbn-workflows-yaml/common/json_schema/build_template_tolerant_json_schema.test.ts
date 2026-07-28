@@ -125,7 +125,9 @@ describe('buildTemplateTolerantJsonSchema - extra alternatives', () => {
   });
 
   it('has exactly one more alternative than the default', () => {
-    const withoutExtra = anyOfBranches(templateValueDef(buildTemplateTolerantJsonSchema(numberLeafSchema)));
+    const withoutExtra = anyOfBranches(
+      templateValueDef(buildTemplateTolerantJsonSchema(numberLeafSchema))
+    );
     const withExtra = anyOfBranches(
       templateValueDef(
         buildTemplateTolerantJsonSchema(numberLeafSchema, {
@@ -151,8 +153,7 @@ describe('buildTemplateTolerantJsonSchema - which positions get wrapped', () => 
   const isWrapped = (node: JsonObject): boolean =>
     Array.isArray(node.anyOf) &&
     node.anyOf.some(
-      (branch) =>
-        asObject(branch).$ref === `#/definitions/${TEMPLATE_VALUE_DEF_NAME}`
+      (branch) => asObject(branch).$ref === `#/definitions/${TEMPLATE_VALUE_DEF_NAME}`
     );
 
   it('wraps non-string typed positions', () => {
@@ -200,7 +201,9 @@ describe('buildTemplateTolerantJsonSchema - which positions get wrapped', () => 
     const input: JsonObject = { type: 'object', properties: { count: { type: 'number' } } };
     const snapshot = JSON.stringify(input);
     buildTemplateTolerantJsonSchema(input);
-    buildTemplateTolerantJsonSchema(input, { extraAlternatives: [wholeValueStringAlternative('x')] });
+    buildTemplateTolerantJsonSchema(input, {
+      extraAlternatives: [wholeValueStringAlternative('x')],
+    });
     expect(JSON.stringify(input)).toBe(snapshot);
   });
 });

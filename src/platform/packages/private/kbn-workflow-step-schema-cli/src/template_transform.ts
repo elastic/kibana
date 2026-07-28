@@ -24,7 +24,8 @@ export { TEMPLATE_VALUE_DEF_NAME };
  * regex) so the artifact never drifts from the renderer. Confined to the
  * `template` variant - a separate system from LiquidJS runtime templating.
  */
-const installAlternative = (): JsonObject => wholeValueStringAlternative(INSTALL_PLACEHOLDER.source);
+const installAlternative = (): JsonObject =>
+  wholeValueStringAlternative(INSTALL_PLACEHOLDER.source);
 
 /**
  * `strict` variant: the composed schema with LiquidJS tolerance woven into every

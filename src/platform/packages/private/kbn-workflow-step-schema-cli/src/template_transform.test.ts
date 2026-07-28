@@ -75,6 +75,8 @@ describe('transformToTemplate', () => {
   });
 
   it('adds exactly one alternative beyond strict', () => {
-    expect(templatePatterns(root)).toHaveLength(templatePatterns(transformToStrict(numberLeafSchema)).length + 1);
+    expect(templatePatterns(root)).toHaveLength(
+      templatePatterns(transformToStrict(numberLeafSchema)).length + 1
+    );
   });
 });

@@ -164,7 +164,8 @@ const extractUnionTypes = (schema: JsonObject, propertyName: string): string[] =
 };
 
 /** Sorted, de-duplicated list of step `type` discriminators in the schema. */
-export const extractStepTypes = (schema: JsonObject): string[] => extractUnionTypes(schema, 'steps');
+export const extractStepTypes = (schema: JsonObject): string[] =>
+  extractUnionTypes(schema, 'steps');
 
 /** Sorted, de-duplicated list of trigger `type` discriminators in the schema. */
 export const extractTriggerTypes = (schema: JsonObject): string[] =>

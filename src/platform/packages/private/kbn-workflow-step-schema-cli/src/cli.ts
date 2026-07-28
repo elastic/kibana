@@ -203,7 +203,9 @@ const runCompletenessGate = async ({
   });
 
   log.info('--- Completeness gate (registered definitions ⊆ produced schema) ---');
-  log.info(`  registered: ${endpointStepIds.length} step(s), ${endpointTriggerIds.length} trigger(s)`);
+  log.info(
+    `  registered: ${endpointStepIds.length} step(s), ${endpointTriggerIds.length} trigger(s)`
+  );
 
   if (result.complete) {
     log.info('  all registered step/trigger definitions are present in the schema ✓');
@@ -212,9 +214,9 @@ const runCompletenessGate = async ({
 
   if (result.missingSteps.length > 0) {
     log.warning(
-      `  ${result.missingSteps.length} registered step(s) MISSING from the schema: ${result.missingSteps.join(
-        ', '
-      )}`
+      `  ${
+        result.missingSteps.length
+      } registered step(s) MISSING from the schema: ${result.missingSteps.join(', ')}`
     );
   }
   if (result.missingTriggers.length > 0) {
