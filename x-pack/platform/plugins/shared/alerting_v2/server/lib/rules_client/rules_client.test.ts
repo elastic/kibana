@@ -1870,6 +1870,42 @@ describe('RulesClient', () => {
       });
     });
 
+    describe('updateApiKeyByQuery', () => {
+      it('returns a dry-run preview when force is false without rotating keys', async () => {
+        const client = createClient();
+        rulesSavedObjectService.countByQuery.mockResolvedValueOnce(2);
+        rulesSavedObjectService.getRuleIdsByQuery.mockResolvedValueOnce(['rule-1', 'rule-2']);
+
+        const res = await client.updateApiKeyByQuery({ match_all: true });
+
+        expect(rulesSavedObjectService.bulkGetByIds).not.toHaveBeenCalled();
+        expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+        expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+        expect(res).toEqual({ match_count: 2, sample: ['rule-1', 'rule-2'] });
+      });
+
+      it('rotates the keys for all resolved ids when force is true', async () => {
+        const client = createClient();
+
+        rulesSavedObjectService.countByQuery.mockResolvedValueOnce(1);
+        rulesSavedObjectService.getRuleIdsByQuery.mockResolvedValueOnce(['rule-1']);
+
+        rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+          { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
+        ]);
+        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-1', success: true }]);
+
+        const res = await client.updateApiKeyByQuery({ match_all: true, force: true });
+
+        expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+          [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-1' }) })],
+          expect.objectContaining({ request, cloneApiKey: true })
+        );
+        expect(rulesSavedObjectService.bulkUpdate).toHaveBeenCalled();
+        expect(res).toEqual({ affected_count: 1, errors: [] });
+      });
+    });
+
     describe('over-cap requests (atomicity guarantee)', () => {
       const overCapTotal = BULK_FILTER_MAX_RESOURCES + 42;
 

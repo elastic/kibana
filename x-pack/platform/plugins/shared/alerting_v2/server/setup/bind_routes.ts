@@ -22,6 +22,7 @@ import { BulkUpdateApiKeyRoute } from '../routes/rules/bulk_update_api_key_route
 import { DeleteRulesByQueryRoute } from '../routes/rules/delete_rules_by_query_route';
 import { EnableRulesByQueryRoute } from '../routes/rules/enable_rules_by_query_route';
 import { DisableRulesByQueryRoute } from '../routes/rules/disable_rules_by_query_route';
+import { UpdateApiKeyByQueryRoute } from '../routes/rules/update_api_key_by_query_route';
 import { GetRuleTagsRoute } from '../routes/rules/get_rule_tags_route';
 import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
 import { CreateAckAlertActionRoute } from '../routes/alert_actions/create_ack_alert_action_route';
@@ -77,6 +78,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(DeleteRulesByQueryRoute);
   bind(Route).toConstantValue(EnableRulesByQueryRoute);
   bind(Route).toConstantValue(DisableRulesByQueryRoute);
+  bind(Route).toConstantValue(UpdateApiKeyByQueryRoute);
   bind(Route).toConstantValue(GetRuleTagsRoute);
   bind(Route).toConstantValue(CreateAckAlertActionRoute);
   bind(Route).toConstantValue(CreateAssignAlertActionRoute);

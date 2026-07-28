@@ -926,7 +926,7 @@ export class RulesClient {
   }
 
   /**
-   * By-query dispatcher shared by delete / enable / disable. Always issues a
+   * By-query dispatcher shared by delete / enable / disable / update API key. Always issues a
    * cheap `countByQuery` first (a `perPage: 0` aggregation, no doc streaming)
    * and only opens the PIT-based id stream when it's actually needed:
    *
@@ -1017,6 +1017,11 @@ export class RulesClient {
   @withApm
   public async bulkUpdateApiKey(params: BulkByIdsParams): Promise<BulkResponse> {
     return this.executeBulkUpdateApiKey(params.ids);
+  }
+
+  @withApm
+  public async updateApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult> {
+    return this.runByQuery(params, (ids) => this.executeBulkUpdateApiKey(ids));
   }
 
   @withApm
