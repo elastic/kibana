@@ -144,7 +144,10 @@ function convertFittingToAPIFormat(
   };
 }
 
-export function convertStylingToStateFormat(config: XYStyling): XYLensAppearanceState {
+export function convertStylingToStateFormat(
+  config: XYStyling,
+  layerPresence: LayerPresence
+): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
       config.overlays?.partial_buckets?.visible != null
@@ -161,7 +164,7 @@ export function convertStylingToStateFormat(config: XYStyling): XYLensAppearance
     curveType: curveTypeCompat.toState(config.interpolation),
     minBarHeight: config.bars?.minimum_height,
     fillOpacity: config.areas?.fill_opacity,
-    areaFill: config.areas?.fill,
+    areaFill: layerPresence.hasAreas ? config.areas?.fill ?? DEFAULT_AREAS_FILL : undefined,
     fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
     emphasizeFitting: config.fitting?.emphasize,
     endValue: extendCompat.toState(config.fitting?.extend),

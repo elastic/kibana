@@ -175,11 +175,14 @@ export function buildVisualizationState(
   const layers = config.layers
     .map((layer, index) => buildXYLayer(config, layer, index, annotationGroupReferences))
     .filter(nonNullable);
+  const dataLayers = layers.filter(isLensStateDataLayer);
   return {
-    preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
+    preferredSeriesType: dataLayers[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
+    ...(config.styling
+      ? convertStylingToStateFormat(config.styling, getLayerPresence(dataLayers))
+      : {}),
     layers,
   };
 }

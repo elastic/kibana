@@ -30,8 +30,21 @@ const allLayersPresent: LayerPresence = { hasBars: true, hasLines: true, hasArea
 describe('XY Appearances Transforms', () => {
   it('should return empty state when given empty API config', () => {
     const apiConfig: XYConfig['styling'] = {};
-    const result = convertStylingToStateFormat(apiConfig);
+    const result = convertStylingToStateFormat(apiConfig, {
+      hasBars: true,
+      hasLines: true,
+      hasAreas: false,
+    });
     expect(result).toEqual({});
+  });
+
+  it('should default areaFill to solid when omitted and area layers exist', () => {
+    expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, allLayersPresent)).toEqual(
+      {
+        fillOpacity: 0.5,
+        areaFill: DEFAULT_AREAS_FILL,
+      }
+    );
   });
 
   it('should fill styling defaults when converting empty state to API format', () => {
@@ -128,19 +141,25 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should negate partial_buckets.visible when converting to hideEndzones', () => {
-    const hidden = convertStylingToStateFormat({
-      overlays: { partial_buckets: { visible: false } },
-    });
+    const hidden = convertStylingToStateFormat(
+      {
+        overlays: { partial_buckets: { visible: false } },
+      },
+      allLayersPresent
+    );
     expect(hidden.hideEndzones).toBe(true);
 
-    const shown = convertStylingToStateFormat({
-      overlays: { partial_buckets: { visible: true } },
-    });
+    const shown = convertStylingToStateFormat(
+      {
+        overlays: { partial_buckets: { visible: true } },
+      },
+      allLayersPresent
+    );
     expect(shown.hideEndzones).toBe(false);
   });
 
   it('should omit hideEndzones when partial_buckets is absent', () => {
-    const result = convertStylingToStateFormat({});
+    const result = convertStylingToStateFormat({}, allLayersPresent);
     expect(result.hideEndzones).toBeUndefined();
   });
 
@@ -182,7 +201,7 @@ describe('XY Appearances Transforms', () => {
       areas: { fill_opacity: 0.5, fill: 'gradient' },
       fitting: { type: 'linear', emphasize: true, extend: 'zero' },
     };
-    const state = convertStylingToStateFormat(original);
+    const state = convertStylingToStateFormat(original, allLayersPresent);
     const result = convertStylingToAPIFormat(state, allLayersPresent);
 
     expect(result.overlays?.partial_buckets).toEqual(original.overlays?.partial_buckets);
@@ -212,7 +231,7 @@ describe('XY Appearances Transforms', () => {
     };
 
     const api = convertStylingToAPIFormat(original, allLayersPresent);
-    const result = convertStylingToStateFormat(api);
+    const result = convertStylingToStateFormat(api, allLayersPresent);
 
     expect(result.valueLabels).toBe(original.valueLabels);
     expect(result.curveType).toBe(original.curveType);
