@@ -1,0 +1,90 @@
+version: '1'
+name: Attack Discovery Continuation
+description: >
+  Attack Discovery Continuation Orchestrator (D11). Reactive: triggered from a
+  PERSISTED Attack Discovery 2.0 discovery (not a ported AD schedule). Runs the
+  AD continuation Worker under the demo service identity to produce an
+  attack-assessment proposal, and — when the discovery reveals a detection
+  coverage gap — attaches a Detection Change Signal to the Investigation for the
+  Detection Watch. Never reruns Attack Discovery, drafts rules, or contains.
+enabled: true
+tags:
+  - watch
+  - watch-ad
+settings:
+  timeout: '15m'
+  concurrency:
+    key: 'watch-ad-continuation-orchestrator'
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        mandate: Attack Discovery continuation & assessment
+        autonomyLevel: 3
+        handoff: proposal
+        onDemand: true
+        draft: true
+        cadence: reactive
+        mode: on-discovery
+        runAs: pnd-watch-service
+        ui:
+          color: '#ef4444'
+          icon: warning
+          order: 25
+        scopeSummary: Attack Discovery - alerts - endpoint telemetry
+        scopes:
+          - name: Attack Discovery
+            access: full
+            label: Read
+          - name: Security indices
+            access: full
+            label: Read
+        callables:
+          - id: ad-continuation
+            name: AD continuation
+            kind: worker
+            summary: On persisted discovery - produces an attack-assessment proposal
+            gated: true
+            enabled: true
+  - name: run_ad_continuation_worker
+    type: workflow.execute
+    with:
+      workflow-id: 'system-security-watch-ad-continuation-worker'
+      inputs:
+        discovery: '${{ event.discovery | default: trigger.context }}'
+        investigationId: '{{ event.investigationId }}'
+  - name: emit_proposal
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: '/internal/pnd/investigations/_emit_proposal'
+      headers:
+        kbn-xsrf: 'true'
+        Elastic-Api-Version: '1'
+      body:
+        sourceWatch: watch-ad
+        draft: true
+        hilRequired: true
+        workerRun: '${{ steps.run_ad_continuation_worker.output.workerRun }}'
+  # Route a surfaced detection coverage gap to the Detection Watch (5th tier). Conditional.
+  - name: dispatch_detection_watch
+    if: "{{ steps.run_ad_continuation_worker.output.workerRun.detectionChangeSignalGaps and steps.run_ad_continuation_worker.output.workerRun.detectionChangeSignalGaps != '' and steps.run_ad_continuation_worker.output.workerRun.detectionChangeSignalGaps != '[]' and steps.run_ad_continuation_worker.output.workerRun.detectionChangeSignalGaps != 'null' }}"
+    type: workflow.execute
+    on-failure:
+      continue: true
+    with:
+      workflow-id: 'system-security-watch-detection'
+      inputs:
+        investigationId: '{{ steps.run_ad_continuation_worker.output.workerRun.investigationId }}'
+        detectionChangeSignal:
+          sourceWatch: watch-ad
+          runId: '{{ steps.run_ad_continuation_worker.output.workerRun.runId | default: execution.id }}'
+          investigationId: '{{ steps.run_ad_continuation_worker.output.workerRun.investigationId }}'
+          gaps: '{{ steps.run_ad_continuation_worker.output.workerRun.detectionChangeSignalGaps }}'

@@ -10,7 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { PndConfig } from '../config';
 import type { PndSpaceIdResolver } from '../types';
 import type { WatchWorkflowProjectionService } from '../services/watches/watch_workflow_projection_service';
-import type { InvestigationStore } from '../services/investigations/investigation_store';
+import type { PndStore } from '../services/investigations/pnd_store';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
@@ -18,10 +18,14 @@ import { registerGetInvestigationRoute } from './investigations/get_investigatio
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
 import { registerAcceptProposalRoute } from './investigations/accept_proposal';
 import { registerRejectProposalRoute } from './investigations/reject_proposal';
+import { registerEscalateProposalRoute } from './investigations/escalate_proposal';
+import { registerDeferProposalRoute } from './investigations/defer_proposal';
+import { registerAssignProposalRoute } from './investigations/assign_proposal';
+import { registerEndpointEventsRoute } from './investigations/endpoint_events';
 import { registerModifyProposalRoute } from './investigations/modify_proposal';
 import { registerGenerateProposalRoute } from './investigations/generate_proposal';
 import { registerEmitProposalRoute } from './investigations/emit_proposal';
-import { registerAssignProposalRoute } from './investigations/assign_proposal';
+import { registerGetConversationRoute } from './investigations/get_conversation';
 import { registerEnrichAlertRoute } from './investigations/enrich_alert';
 
 export interface RouteDependencies {
@@ -31,7 +35,7 @@ export interface RouteDependencies {
   getSpaceId: PndSpaceIdResolver;
   getWatchProjection: () => WatchWorkflowProjectionService | undefined;
   getWorkflowsManagement: () => WorkflowsServerPluginSetup['management'] | undefined;
-  getInvestigationStore: () => InvestigationStore | undefined;
+  getInvestigationStore: () => PndStore | undefined;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -42,9 +46,13 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListInvestigationProposalsRoute(deps);
   registerAcceptProposalRoute(deps);
   registerRejectProposalRoute(deps);
+  registerEscalateProposalRoute(deps);
+  registerDeferProposalRoute(deps);
+  registerAssignProposalRoute(deps);
+  registerEndpointEventsRoute(deps);
   registerModifyProposalRoute(deps);
   registerGenerateProposalRoute(deps);
   registerEmitProposalRoute(deps);
-  registerAssignProposalRoute(deps);
+  registerGetConversationRoute(deps);
   registerEnrichAlertRoute(deps);
 };

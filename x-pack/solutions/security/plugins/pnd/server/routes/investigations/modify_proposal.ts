@@ -50,7 +50,7 @@ export const registerModifyProposalRoute = ({
       },
       async (context, request, response) => {
         try {
-          const { proposalId } = request.params;
+          const { id, proposalId } = request.params;
           const { reasoning } = request.body;
 
           // In mock mode there is no ES document to mutate; echo the decision.
@@ -58,15 +58,36 @@ export const registerModifyProposalRoute = ({
             const store = getInvestigationStore();
             if (store != null) {
               const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-              const updated = await store.updateProposalStatus(esClient, proposalId, {
-                status: 'modified',
-                analystReasoning: reasoning,
-              });
+              const updated = await store.updateProposalStatus(
+                esClient,
+                proposalId,
+                {
+                  status: 'modified',
+                  analystReasoning: reasoning,
+                },
+                request
+              );
               if (updated == null) {
                 return response.notFound({
                   body: { message: `Proposal "${proposalId}" not found` },
                 });
               }
+              // Reflect the analyst decision on the investigation timeline.
+              await store.recordDeepWatchOutcome(esClient, {
+                investigationId: id,
+                events: [
+                  {
+                    id: `evt-decision-modify-${proposalId}`,
+                    timestamp: new Date().toISOString(),
+                    type: 'decision',
+                    summary: `Analyst modified proposal ${proposalId}: ${reasoning}`,
+                    actor: 'analyst',
+                  },
+                ],
+              });
+              // Keep the Brief queue card in step with this decision (its CTA is
+              // derived from the parent's pendingProposalCount).
+              await store.reconcileInvestigationAfterDecision(esClient, id);
             }
           }
 

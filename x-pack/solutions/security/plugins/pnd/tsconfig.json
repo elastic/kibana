@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -26,6 +26,7 @@
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/scout-security"
   ]
 }

@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { AskPndFab } from './pnd_chrome';
+import { PndSideNav } from './pnd_side_nav';
 import { getPndDeepLinks } from '../../deep_links';
 import { PND_DEEP_LINK } from './translations';
 
@@ -44,5 +45,21 @@ describe('PND chrome', () => {
 
     renderWithPath('/chats', <AskPndFab />);
     expect(screen.queryByTestId('pndAskFab')).not.toBeInTheDocument();
+  });
+
+  it('renders the in-app side nav so the rail is present in classic Kibana', () => {
+    renderWithPath('/', <PndSideNav />);
+    const nav = screen.getByTestId('pndSideNav');
+    [
+      'Watch Floor',
+      'Chats',
+      'Dashboards',
+      'Alerts',
+      'Attacks',
+      'Records',
+      'Threat hunt',
+      'Streams',
+      'Watches',
+    ].forEach((label) => expect(within(nav).getByText(label)).toBeInTheDocument());
   });
 });

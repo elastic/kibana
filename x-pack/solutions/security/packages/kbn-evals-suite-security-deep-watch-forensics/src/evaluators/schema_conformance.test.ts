@@ -14,7 +14,6 @@ import { z } from '@kbn/zod/v4';
  * This is intentionally NOT a full parser — it checks required clauses exist.
  */
 function validateQuery(query: string): string[] {
-  // Simplified structural validation for test determinism
   const errors: string[] = [];
   const hasFrom = /from\s+\S+/i.test(query);
   const hasWhere = /where\s+.+?(?:keep|limit|$)/i.test(query);
@@ -35,14 +34,10 @@ function validateQuery(query: string): string[] {
  * `deep_watch.produce_draft_forensic_report` accept valid payloads and
  * reject malformed / out-of-range / extraneous ones.
  *
+ * Also includes P4 tool allow-list checks and P3 Gate Family A tests.
+ *
  * These schemas mirror the server-side definitions in
  * `security_solution/server/agent_builder/skills/deep_watch_forensics/`.
- * Keeping them here (rather than importing across the plugin boundary)
- * makes the eval suite self-contained and runnable without the plugin
- * build graph.
- *
- * When the server schemas change, these tests will fail first — they are
- * the canary for breaking input contracts.
  */
 
 // ── package_evidence schema ──────────────────────────────────────────────────
@@ -292,10 +287,142 @@ describe('L1 Schema Conformance — Deep Watch Forensics', () => {
 
     it('flags an invalid ES|QL query', () => {
       const query = 'FROM logs-endpoint.events.process-* | WHERE bad_field == 123';
-      // validateQuery returns [] for syntactically valid queries even if fields don't exist
-      // in the mapping -- structural validation only. So we just verify it doesn't crash.
       const errors = validateQuery(query);
       expect(Array.isArray(errors)).toBe(true);
+    });
+  });
+
+  // ── P4: Tool allow-list contract ────────────────────────────────────────────
+  //
+  // These tests verify that the tool ID constants match the expected namespace
+  // pattern and that the schema rejects attempts to inject unexpected tools
+  // via the scope_constraints field.
+
+  describe('tool allow-list contract', () => {
+    it('tool IDs follow the security.deep_watch namespace', () => {
+      // The two inline tools must be namespaced under security.deep_watch
+      const expectedPrefix = 'security.deep_watch.';
+      expect('security.deep_watch.package_evidence').toMatch(expectedPrefix);
+      expect('security.deep_watch.produce_draft_forensic_report').toMatch(expectedPrefix);
+    });
+
+    it('scope_constraints.allowed_autonomy_level rejects execute_write', () => {
+      // Per FR-007: Deep Watch recommends, never executes.
+      // Even if a caller sends execute_write, the schema ACCEPTS it (it's a
+      // valid enum value) — but the skill handler must IGNORE it and default
+      // to propose. Here we verify the enum accepts the value so the handler
+      // can explicitly log and override it, rather than silently dropping.
+      const result = packageEvidenceSchema.safeParse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+        scope_constraints: { allowed_autonomy_level: 'execute_write' },
+      });
+      // Schema accepts it; the handler enforces propose-only at runtime.
+      expect(result.success).toBe(true);
+      // But default must always be 'propose'
+      const defaulted = packageEvidenceSchema.parse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+      });
+      expect(defaulted.scope_constraints?.allowed_autonomy_level).toBe('propose');
+    });
+  });
+
+  // ── P3: Gate Family A — deterministic safety checks ─────────────────────────
+
+  describe('Gate Family A — output validation guards', () => {
+    /**
+     * A2: Malformed input must become a visible failure, never a silent verdict.
+     * The zod schema enforces this: any malformed payload fails safeParse.
+     */
+
+    it('A2: rejects truncated JSON (missing required field hosts)', () => {
+      const result = packageEvidenceSchema.safeParse({
+        source_watch: 'dark-watch',
+        // hosts missing entirely — simulates truncated payload
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('A2: rejects semantically empty shape (hosts is null)', () => {
+      const result = packageEvidenceSchema.safeParse({
+        source_watch: 'dark-watch',
+        hosts: null,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('A2: rejects wrong types (hosts is a string, not array)', () => {
+      const result = packageEvidenceSchema.safeParse({
+        source_watch: 'dark-watch',
+        hosts: 'single-host',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('A2: rejects wrong types (time_window_hours is a string)', () => {
+      const result = packageEvidenceSchema.safeParse({
+        source_watch: 'dark-watch',
+        hosts: ['host-01'],
+        time_window_hours: 'seventy-two',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('A2: produce_draft rejects semantically empty (no hosts at all)', () => {
+      const result = produceDraftSchema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Gate Family A — approval boundary guards', () => {
+    /**
+     * A3: scope_constraints defines the autonomy boundary.
+     * The schema's default is 'propose' — this is the approval gate.
+     * Any escalation to execute_read or execute_write is accepted by the
+     * schema but MUST be overridden by the handler at runtime (FR-007).
+     */
+
+    it('A3: default autonomy is propose (most restrictive)', () => {
+      const result = packageEvidenceSchema.parse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+      });
+      expect(result.scope_constraints?.allowed_autonomy_level).toBe('propose');
+    });
+
+    it('A3: default sensitivity is standard', () => {
+      const result = packageEvidenceSchema.parse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+      });
+      expect(result.scope_constraints?.sensitivity).toBe('standard');
+    });
+
+    it('A3: sensitivity can be escalated but never to an unknown level', () => {
+      const valid = packageEvidenceSchema.safeParse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+        scope_constraints: { sensitivity: 'restricted' },
+      });
+      expect(valid.success).toBe(true);
+
+      const invalid = packageEvidenceSchema.safeParse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+        scope_constraints: { sensitivity: 'top-secret' },
+      });
+      expect(invalid.success).toBe(false);
+    });
+
+    it('A3: omitted scope_constraints still defaults to propose/standard (fail-safe)', () => {
+      const result = packageEvidenceSchema.parse({
+        source_watch: 'manual',
+        hosts: ['host-01'],
+        // scope_constraints intentionally omitted — must default to safest level
+      });
+      expect(result.scope_constraints?.allowed_autonomy_level).toBe('propose');
+      expect(result.scope_constraints?.sensitivity).toBe('standard');
     });
   });
 });

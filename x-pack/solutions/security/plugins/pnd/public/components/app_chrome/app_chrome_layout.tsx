@@ -10,14 +10,18 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { AskPndFab } from './pnd_chrome';
+import { PndSideNav } from './pnd_side_nav';
 
 interface AppChromeLayoutProps {
   children: React.ReactNode;
 }
 
 /**
- * Content shell only — Kibana / Security solution chrome owns the top header
- * and left rail (including Launchpad, Dev Tools, Settings, collapse).
+ * App shell for PND: an in-app left navigation rail (Watch Floor + Operate +
+ * Autonomous groups, mirroring the Throughline prototype) plus the routed
+ * content. The rail is rendered by the app so it is present in classic Kibana
+ * as well as serverless; Kibana / Security solution chrome still owns the top
+ * header and the outer platform rail.
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
@@ -28,16 +32,27 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
     <div
       css={css`
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         flex: 1;
         min-height: 0;
-        overflow: ${isChats ? 'hidden' : 'auto'};
         background: ${euiTheme.colors.body};
       `}
       data-test-subj="pndAppChromeLayout"
     >
-      {children}
-      <AskPndFab />
+      <PndSideNav />
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-width: 0;
+          min-height: 0;
+          overflow: ${isChats ? 'hidden' : 'auto'};
+        `}
+      >
+        {children}
+        <AskPndFab />
+      </div>
     </div>
   );
 };

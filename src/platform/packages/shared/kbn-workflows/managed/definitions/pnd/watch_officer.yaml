@@ -1,4 +1,4 @@
-version: "1"
+version: '1'
 name: Watch Officer
 description: >
   Tier-2 Security Watch Officer skeleton. Escalates criticals, drafts briefs,
@@ -22,7 +22,7 @@ steps:
         cadence: stream
         mode: always
         ui:
-          color: "#3b82f6"
+          color: '#3b82f6'
           icon: bell
           order: 20
         scopeSummary: Open threads · on-call · deploys
@@ -43,14 +43,14 @@ steps:
     type: data.set
     with:
       reasoning:
-        summary: "Watch Officer skeleton — staged a gated proposal for review."
+        summary: 'Watch Officer skeleton — staged a gated proposal for review.'
         sections:
           - title: NEXT
-            body: "Replace with investigation / proposal skills and real evidence."
+            body: 'Replace with investigation / proposal skills and real evidence.'
   - name: await_approval
     type: waitForInput
     with:
-      message: "Approve the Watch Officer draft proposal?"
+      message: 'Approve the Watch Officer draft proposal?'
       schema:
         type: object
         properties:

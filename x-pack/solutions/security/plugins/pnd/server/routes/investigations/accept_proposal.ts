@@ -100,6 +100,7 @@ export const registerAcceptProposalRoute = ({
   logger,
   getSpaceId,
   getWorkflowsManagement,
+  getInvestigationStore,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -120,15 +121,49 @@ export const registerAcceptProposalRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
           const { id: investigationId, proposalId } = request.params;
           const connectorId = request.body?.connectorId;
 
           const proposal = getRealProposalById(investigationId, proposalId);
 
+          // Reflect the analyst decision on the investigation timeline (both the
+          // non-escalation "approve/isolate" path and escalation share this),
+          // then refresh the parent's pendingProposalCount so the Brief queue
+          // card's CTA doesn't keep advertising the pre-decision action.
+          const recordApprovalOnTimeline = async () => {
+            const store = getInvestigationStore();
+            if (store == null) return;
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            try {
+              await store.recordDeepWatchOutcome(esClient, {
+                investigationId,
+                events: [
+                  {
+                    id: `evt-decision-approve-${proposalId}`,
+                    timestamp: new Date().toISOString(),
+                    type: 'decision',
+                    summary: `Analyst approved ${proposal?.type ?? 'the'} proposal ${proposalId}${
+                      proposal?.type === 'contain' ? ' — endpoint isolation authorized' : ''
+                    }`,
+                    actor: 'analyst',
+                  },
+                ],
+              });
+            } catch (timelineError) {
+              logger.warn(`Failed to record approval on timeline: ${timelineError}`);
+            }
+            try {
+              await store.reconcileInvestigationAfterDecision(esClient, investigationId);
+            } catch (reconcileError) {
+              logger.warn(`Failed to reconcile investigation after approval: ${reconcileError}`);
+            }
+          };
+
           // Non-escalation proposals: approve without triggering a Watch workflow.
           if (proposal?.type !== 'escalate') {
+            await recordApprovalOnTimeline();
             return response.ok({
               body: {
                 proposalId,
@@ -222,6 +257,8 @@ export const registerAcceptProposalRoute = ({
             `Escalation Watch workflow ${executionId} for proposal ${proposalId} ` +
               `ended with status ${status ?? 'unknown'} in ${latencyMs}ms`
           );
+
+          await recordApprovalOnTimeline();
 
           return response.ok({
             body: {

@@ -14,19 +14,29 @@ import type { RouteDependencies } from '../register_routes';
 const ENRICH_ALERT_PATH = `${PND_INVESTIGATIONS_URL}/_enrich_alert` as const;
 
 const DETECTION_ALERTS_INDEX = '.alerts-security.alerts-default';
+// Elastic Defend behavior/malware alerts (e.g. ransomware_detected) land here,
+// NOT in the detection-engine index. The Watch Floor demo starts from a Defend
+// alert, so we search both and normalize the two field conventions.
+const DEFEND_ALERTS_INDEX = 'logs-endpoint.alerts-default';
+const ALERT_INDICES = `${DETECTION_ALERTS_INDEX},${DEFEND_ALERTS_INDEX}`;
+
+interface AlertSource {
+  // Detection-engine convention
+  'kibana.alert.rule.name'?: string;
+  'kibana.alert.severity'?: string;
+  'kibana.alert.reason'?: string;
+  'kibana.alert.rule.threat'?: Array<{ technique?: Array<{ id?: string }> }>;
+  // Elastic Defend behavior-alert convention
+  rule?: { name?: string };
+  event?: { action?: string; severity?: number };
+  host?: { name?: string };
+  message?: string;
+}
 
 const EnrichAlertRequestBody = z.object({
   alertId: z.string().optional(),
   investigationId: z.string().optional(),
 });
-
-interface AlertSource {
-  'kibana.alert.rule.name'?: string;
-  'kibana.alert.severity'?: string;
-  'kibana.alert.reason'?: string;
-  'kibana.alert.rule.threat'?: Array<{ technique?: Array<{ id?: string }> }>;
-  message?: string;
-}
 
 /**
  * Enrich a detection-engine alert into the ground-truth block the Floor Worker's
@@ -64,7 +74,7 @@ export const registerEnrichAlertRoute = ({ router, logger }: RouteDependencies) 
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         try {
           const result = await esClient.search<AlertSource>({
-            index: DETECTION_ALERTS_INDEX,
+            index: ALERT_INDICES,
             size: 1,
             query: { ids: { values: [alertId] } },
             allow_no_indices: true,
@@ -82,14 +92,24 @@ export const registerEnrichAlertRoute = ({ router, logger }: RouteDependencies) 
             .map((tech) => tech.id)
             .filter((id): id is string => id != null);
 
+          // Normalize across detection-engine and Elastic Defend alert shapes.
+          const ruleName = src['kibana.alert.rule.name'] ?? src.rule?.name ?? 'Unknown rule';
+          const summary =
+            src['kibana.alert.reason'] ?? src.message ?? src.event?.action ?? 'Security alert';
+          const severity =
+            src['kibana.alert.severity'] ??
+            (src.event?.severity != null ? String(src.event.severity) : 'medium');
+
           return response.ok({
             body: {
               enriched: true,
               alertId,
               investigationId,
-              ruleName: src['kibana.alert.rule.name'] ?? 'Unknown rule',
-              severity: src['kibana.alert.severity'] ?? 'medium',
-              summary: src['kibana.alert.reason'] ?? src.message ?? 'Security alert',
+              ruleName,
+              severity,
+              summary,
+              host: src.host?.name,
+              action: src.event?.action,
               tactics,
               stanceSignals: [],
             },

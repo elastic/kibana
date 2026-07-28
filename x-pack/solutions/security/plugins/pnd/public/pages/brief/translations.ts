@@ -52,7 +52,7 @@ export const BUCKET_TUNE = i18n.translate('xpack.pnd.brief.bucket.tune', {
 });
 
 export const BUCKET_CREATE = i18n.translate('xpack.pnd.brief.bucket.create', {
-  defaultMessage: 'Create',
+  defaultMessage: 'Create rule',
 });
 
 export const ALL_BUCKET = i18n.translate('xpack.pnd.brief.bucket.all', {
@@ -72,6 +72,18 @@ export const pendingProposalsLabel = (count: number) =>
     defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
     values: { count },
   });
+
+export const DEEP_WATCH_COMPLETE = i18n.translate('xpack.pnd.brief.deepWatchComplete', {
+  defaultMessage: 'Deep Watch complete',
+});
+
+export const REVIEW_FINDINGS = i18n.translate('xpack.pnd.brief.reviewFindings', {
+  defaultMessage: 'Review Deep Watch findings',
+});
+
+export const REVIEW_DECISION = i18n.translate('xpack.pnd.brief.reviewDecision', {
+  defaultMessage: 'Review decision',
+});
 
 export const OPEN_CHAT = i18n.translate('xpack.pnd.brief.openChat', {
   defaultMessage: 'Open in chat',
@@ -143,4 +155,57 @@ export const watchTierLabel = (tier?: string): string => {
     default:
       return WATCH_TIER_FLOOR;
   }
+};
+
+const STATUS_ESCALATED = i18n.translate('xpack.pnd.brief.status.escalated', {
+  defaultMessage: 'Escalated',
+});
+
+const STATUS_CONTAINED = i18n.translate('xpack.pnd.brief.status.contained', {
+  defaultMessage: 'Contained',
+});
+
+const STATUS_DISMISSED = i18n.translate('xpack.pnd.brief.status.dismissed', {
+  defaultMessage: 'Dismissed',
+});
+
+const STATUS_AUTO_RESOLVED = i18n.translate('xpack.pnd.brief.status.autoResolved', {
+  defaultMessage: 'Auto-resolved',
+});
+
+const STATUS_CLOSED = i18n.translate('xpack.pnd.brief.status.closed', {
+  defaultMessage: 'Closed',
+});
+
+const STATUS_DECIDED = i18n.translate('xpack.pnd.brief.status.decided', {
+  defaultMessage: 'Decided',
+});
+
+/**
+ * Analyst-facing label for an investigation that already carries a recorded
+ * decision. Mirrors the proposal-row `statusLabels` vocabulary on the
+ * investigation detail page so the queue card and the Proposals tab describe
+ * the same state with the same word.
+ */
+export const decidedStatusLabel = (status?: string): string => {
+  switch (status) {
+    case 'escalated':
+      return STATUS_ESCALATED;
+    case 'contained':
+      return STATUS_CONTAINED;
+    case 'dismissed':
+      return STATUS_DISMISSED;
+    case 'auto-resolved':
+      return STATUS_AUTO_RESOLVED;
+    case 'closed':
+      return STATUS_CLOSED;
+    default:
+      return STATUS_DECIDED;
+  }
+};
+
+export const DECISION_RADAR = {
+  ARIA: i18n.translate('xpack.pnd.brief.decisionRadar.aria', {
+    defaultMessage: 'Decision radar — investigations grouped by decision state',
+  }),
 };

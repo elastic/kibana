@@ -1,0 +1,91 @@
+version: '1'
+name: Detection Watch Rule Tuning Worker
+description: >
+  Detection Watch domain worker. Consumes a Rule-Tuning trigger (a false-positive
+  disposition surfaced by the Watch Floor) and drafts a rule-tuning proposal that
+  would reduce the false-positive rate without dropping true positives. Output is
+  always a DRAFT proposal for analyst approval — never edits a rule directly.
+enabled: true
+tags:
+  - watch-worker
+  - watch-detection-rule-tuning-worker
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - detection-rule-authoring
+  - name: draft_tuning
+    type: ai.agent
+    timeout: '10m'
+    with:
+      # Option 2 runtime override — LIVE (elastic/kibana#280617, straight-replace semantics
+      # confirmed in review + on this branch: no intersection with the agent's stored
+      # skill_ids, since the type-base merge downstream re-adds those regardless).
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
+      message: >
+        The Watch Floor dispositioned an alert as a FALSE POSITIVE. Draft ONE
+        rule-tuning proposal that would suppress this class of false positive
+        while preserving detection of true positives. Do NOT ask questions. Do
+        NOT edit the rule — produce a DRAFT proposal only.
+
+        Propose the minimal tuning: an added exception/exclusion, a threshold
+        adjustment, or a query refinement. Include the target rule reference, the
+        exact change, and a one-line rationale for why it is safe (why it will not
+        mask true positives). Prefer a scoped, expiring exception over a broad
+        query change when unsure.
+
+        Rule-tuning trigger:
+        {{ inputs.ruleTuningTrigger | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            description: Always 'rule_tuning' for this worker.
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Confidence 0.0-1.0 that the tuning reduces FPs without masking TPs.
+          rationale:
+            type: string
+            description: One-line rationale for why the change is safe.
+          target_rule:
+            type: string
+            description: The target rule reference/name being tuned.
+          tuning_type:
+            type: string
+            enum:
+              - exception
+              - threshold
+              - query_refinement
+            description: The kind of minimal tuning proposed.
+          proposed_change:
+            type: string
+            description: The exact tuning change (the added exception/exclusion, threshold, or query refinement).
+        required:
+          - target_rule
+          - tuning_type
+          - proposed_change
+          - confidence_score
+          - rationale
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-detection
+        classification: "{{ steps.draft_tuning.output.structured_output.classification | default: 'rule_tuning' }}"
+        confidence: '${{ steps.draft_tuning.output.structured_output.confidence_score | default: 0.7 }}'
+        finding: "{{ steps.draft_tuning.output.structured_output.rationale | default: 'Drafted a rule-tuning change to reduce false positives.' }}"
+        recommendedAction: tune
+        investigationId: '{{ inputs.investigationId }}'
+        ruleName: "{{ steps.draft_tuning.output.structured_output.target_rule | default: 'Rule-tuning (draft) for false-positive class' }}"
+        # Concrete tuning body carried through to the proposal (G4).
+        proposedRule:
+          name: '{{ steps.draft_tuning.output.structured_output.target_rule }}'
+          query: '{{ steps.draft_tuning.output.structured_output.proposed_change }}'

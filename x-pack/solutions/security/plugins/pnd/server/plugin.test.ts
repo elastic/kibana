@@ -28,6 +28,7 @@ jest.mock('./routes/register_routes', () => ({
 const createConfig = (overrides: Partial<PndConfig> = {}): PndConfig => ({
   enabled: false,
   ui: { useMockData: true },
+  conversationShadowWrite: false,
   ...overrides,
 });
 

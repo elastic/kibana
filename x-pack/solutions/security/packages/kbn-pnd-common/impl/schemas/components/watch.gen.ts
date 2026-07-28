@@ -135,6 +135,10 @@ export const WatchRecentRun = lazySchema(() =>
      */
     summary: z.string(),
     action: WatchRunAction.optional(),
+    /**
+     * Investigation this run produced or acted on, when the workflow's step output carried one (workerRun.investigationId or a bare investigationId). Absent for runs that never touched an Investigation (e.g. a failed pre-trigger step).
+     */
+    investigationId: z.string().optional(),
   })
 );
 export type WatchRecentRun = z.infer<typeof WatchRecentRun>;

@@ -535,6 +535,38 @@ const SCHEDULED_TASK: LabeledAlert = {
   }),
 };
 
+// ─── Deliberately-broken fixture (E&T brief: fail-closed proof) ──────────────
+// This alert is intentionally missing all observable fields. The workflow's
+// enrichment step cannot extract any context, so the agent should either refuse
+// to classify or produce a verdict with very low confidence. The gate test
+// (gate_family_broken.spec.ts) asserts that ValidVerdict correctly REJECTS
+// the degenerate output from this fixture — proving the gate fails closed.
+const BROKEN_MISSING_OBSERVABLE: LabeledAlert = {
+  id: 'aa-eval-broken-missing-observable',
+  expected: 'false_positive',
+  description:
+    'BROKEN FIXTURE — alert with no observable fields (empty observable). ' +
+    'The workflow cannot extract context; ValidVerdict should reject the output.',
+  doc: buildDoc({
+    id: 'aa-eval-broken-missing-observable',
+    index: 99,
+    ruleName: 'Broken Test Rule',
+    ruleDescription: 'Deliberately broken fixture — no observable context.',
+    severity: 'low',
+    riskScore: 1,
+    tactic: { id: 'TA0001', name: 'Initial Access' },
+    technique: { id: 'T1078', name: 'Valid Accounts' },
+    observable: {
+      'event.kind': 'signal',
+      'event.category': ['process'],
+      'event.type': ['start'],
+      'event.outcome': 'success',
+      // Intentionally NO host.name, process.name, user.name, or command_line.
+      // The agent has nothing to reason over.
+    },
+  }),
+};
+
 export const ALERT_ANALYSIS_EVAL_ALERTS: LabeledAlert[] = [
   RANSOMWARE,
   MALICIOUS_FILE,
@@ -545,3 +577,7 @@ export const ALERT_ANALYSIS_EVAL_ALERTS: LabeledAlert[] = [
   GENERIC_THRESHOLD,
   SCHEDULED_TASK,
 ];
+
+// The broken fixture is exported separately so the gate test can use it
+// without polluting the classification-accuracy suite's example list.
+export const BROKEN_FIXTURES: LabeledAlert[] = [BROKEN_MISSING_OBSERVABLE];

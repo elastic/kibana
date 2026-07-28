@@ -6,17 +6,26 @@
  */
 
 /**
- * L2 Leaf Quality Eval — Deep Watch forensic report quality.
+ * L3 Multi-Turn Agent Quality — Deep Watch forensic report quality.
  *
- * Tests the `deep_watch.produce_draft_forensic_report` tool in isolation:
- *   - Given an evidence package with seeded endpoint telemetry, does the LLM
- *     produce a correct forensic reconstruction?
+ * Per PR #35 pyramid §3: "L3 — Multi-turn agent quality: multi-turn reasoning
+ * quality, evidence handling, trajectory, did each step follow from the last."
+ *
+ * This spec was previously labeled L2 but has been reclassified: it uses
+ * agentBuilderClient.converse() (LLM-invoked), so it belongs at L3, not L2.
+ * The deterministic L2 evaluators live in leaf_quality_deterministic.test.ts.
+ *
+ * Tests the `deep_watch.produce_draft_forensic_report` tool via the full
+ * agent converse path:
+ *   - Does the agent produce a correct forensic reconstruction?
  *   - Does the timeline contain expected event categories (process, network,
  *     file, registry)?
  *   - Are IoCs validated with correct status (confirmed/not_found/unable_to_validate)?
  *   - Does the report include all required guardrails (FR-082 DRAFT label,
  *     FR-007 no-execution, FR-DP-06 no-fabrication, FR-DP-04 named questions)?
  *   - Are confidence levels explicitly separate from severity (FR-141)?
+ *   - Trajectory quality: did each step follow from the last? Were dead ends
+ *     abandoned? Did it stop when it should? (P2 trajectory quality)
  *
  * The dataset (src/dataset.ts) contains 3 labeled forensic scenarios.
  *
@@ -28,8 +37,9 @@
  *   - iocValidation         : IoC statuses match expected (seed-dependent)
  *   - guardrailCompliance   : DRAFT label, no-execution, no-fabrication present
  *   - groundedness          : are findings grounded in actual telemetry (not hallucinated)?
- *   - trajectory            : minimal tool steps — package_evidence → generate_esql
- *     → execute_esql → produce_draft
+ *   - abandonedDeadEnds     : did the agent abandon zero-result ES|QL queries? (P2)
+ *   - stoppedWhenShould     : when telemetry insufficient, did it stop at package_evidence? (P2)
+ *   - evidenceFollowsFromStep : does the draft cite events from execute_esql results? (P2)
  *   - inputTokens / outputTokens / latency : efficiency signals
  */
 

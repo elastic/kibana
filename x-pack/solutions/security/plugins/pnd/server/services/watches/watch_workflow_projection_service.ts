@@ -116,11 +116,29 @@ export class WatchWorkflowProjectionService {
       const enrichedRuns = await Promise.all(
         watch.recentRuns.slice(0, 5).map(async (run) => {
           try {
-            const full = await management.getWorkflowExecution(run.executionId, spaceId);
+            const full = await management.getWorkflowExecution(run.executionId, spaceId, {
+              includeOutput: true,
+            });
             if (!full?.stepExecutions?.length) return run;
+            // Best-effort: the investigation a run produced/acted on is stamped onto one of
+            // its step outputs (workerRun.investigationId, or a bare investigationId for
+            // non-worker steps like emit_proposal). Surfacing it lets Recent Runs deep-link
+            // straight to the resulting Investigation instead of only showing a step name list.
+            let investigationId: string | undefined;
+            for (const step of full.stepExecutions) {
+              const output = step.output as
+                | { workerRun?: { investigationId?: string }; investigationId?: string }
+                | undefined;
+              const candidate = output?.workerRun?.investigationId ?? output?.investigationId;
+              if (typeof candidate === 'string' && candidate.length > 0) {
+                investigationId = candidate;
+                break;
+              }
+            }
             return {
               ...run,
               triggerType: normalizeWorkflowTriggerType(full.triggeredBy),
+              investigationId,
               steps: full.stepExecutions.map((step) => ({
                 name: step.stepId ?? step.id,
                 type: step.stepType,

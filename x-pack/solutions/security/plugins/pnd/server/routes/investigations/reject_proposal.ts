@@ -18,6 +18,17 @@ const RejectProposalRequestParams = z.object({
 
 const RejectProposalRequestBody = z.object({
   reason: z.string().optional(),
+  dismissalReason: z
+    .enum([
+      'wrong',
+      'duplicate',
+      'insufficient_evidence',
+      'low_value',
+      'out_of_scope',
+      'already_handled',
+      'other',
+    ])
+    .optional(),
 });
 
 const REJECT_PROPOSAL_PATH =
@@ -50,23 +61,47 @@ export const registerRejectProposalRoute = ({
       },
       async (context, request, response) => {
         try {
-          const { proposalId } = request.params;
-          const { reason } = request.body;
+          const { id, proposalId } = request.params;
+          const { reason, dismissalReason } = request.body;
 
           // In mock mode there is no ES document to mutate; echo the decision.
           if (!config.ui.useMockData) {
             const store = getInvestigationStore();
             if (store != null) {
               const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-              const updated = await store.updateProposalStatus(esClient, proposalId, {
-                status: 'dismissed',
-                rejectionReason: reason,
-              });
+              const updated = await store.updateProposalStatus(
+                esClient,
+                proposalId,
+                {
+                  status: 'dismissed',
+                  rejectionReason: reason,
+                  dismissalReason,
+                },
+                request
+              );
               if (updated == null) {
                 return response.notFound({
                   body: { message: `Proposal "${proposalId}" not found` },
                 });
               }
+              // Reflect the analyst decision on the investigation timeline.
+              await store.recordDeepWatchOutcome(esClient, {
+                investigationId: id,
+                events: [
+                  {
+                    id: `evt-decision-dismiss-${proposalId}`,
+                    timestamp: new Date().toISOString(),
+                    type: 'decision',
+                    summary: `Analyst dismissed proposal ${proposalId}${
+                      dismissalReason ? ` [${dismissalReason}]` : ''
+                    }${reason ? `: ${reason}` : ''}`,
+                    actor: 'analyst',
+                  },
+                ],
+              });
+              // Keep the Brief queue card in step with this decision (its CTA is
+              // derived from the parent's pendingProposalCount).
+              await store.reconcileInvestigationAfterDecision(esClient, id);
             }
           }
 

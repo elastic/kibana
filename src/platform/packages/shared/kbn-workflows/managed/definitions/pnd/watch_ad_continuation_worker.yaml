@@ -1,0 +1,108 @@
+version: '1'
+name: Attack Discovery Continuation Worker
+description: >
+  AD continuation domain worker (D11). Consumes a persisted Attack Discovery 2.0
+  discovery and produces a DRAFT attack-assessment proposal. When the assessment
+  reveals a detection coverage gap, it surfaces a Detection Change Signal for the
+  Detection Watch. Never reruns Attack Discovery, drafts detection rules, or
+  executes containment — assessment + gap-surfacing only.
+enabled: true
+tags:
+  - watch-worker
+  - watch-ad-continuation-worker
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - attack-discovery
+  - name: assess_discovery
+    type: ai.agent
+    timeout: '10m'
+    with:
+      # Option 2 runtime override — LIVE (elastic/kibana#280617, straight-replace semantics
+      # confirmed in review + on this branch: no intersection with the agent's stored
+      # skill_ids, since the type-base merge downstream re-adds those regardless).
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
+      message: >
+        Assess the persisted Attack Discovery below. Do NOT rerun Attack
+        Discovery. Do NOT draft detection rules. Do NOT execute containment.
+        Produce a single DRAFT attack-assessment: severity, confidence, the
+        assessed attack narrative, and a recommended next action for the analyst.
+
+        Detection Change Signal (CONDITIONAL): if — and ONLY if — the assessment
+        reveals a detection coverage gap (an attack technique in the discovery
+        with no covering detection rule), populate
+        `detection_change_signal.gaps` with one entry per gap (technique,
+        evidence, confidence). If there is NO gap, OMIT `detection_change_signal`.
+        You never create or tune rules; you only surface the gap for Detection Watch.
+
+        Attack Discovery:
+        {{ inputs.discovery | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            description: Always 'attack_assessment' for this worker.
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Confidence 0.0-1.0 in the assessment.
+          rationale:
+            type: string
+            description: The assessed attack narrative + recommended next action for the analyst.
+          severity:
+            type: string
+            enum:
+              - low
+              - medium
+              - high
+              - critical
+            description: Assessed severity.
+          detection_change_signal:
+            type: object
+            description: >
+              CONDITIONAL — include ONLY when the assessment reveals a detection coverage gap.
+              Omit entirely when there is no gap.
+            properties:
+              gaps:
+                type: array
+                description: One entry per uncovered technique.
+                items:
+                  type: object
+                  properties:
+                    technique:
+                      type: string
+                      description: MITRE ATT&CK technique id lacking coverage.
+                    evidence:
+                      type: string
+                      description: Why this technique is uncovered (observed in the discovery).
+                    confidence:
+                      type: number
+                      description: Confidence 0.0-1.0 that this is a real gap.
+        required:
+          - classification
+          - confidence_score
+          - rationale
+          - severity
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-ad
+        classification: "{{ steps.assess_discovery.output.structured_output.classification | default: 'attack_assessment' }}"
+        confidence: '${{ steps.assess_discovery.output.structured_output.confidence_score | default: 0.7 }}'
+        finding: "{{ steps.assess_discovery.output.structured_output.rationale | default: 'Attack Discovery continuation assessment (draft).' }}"
+        recommendedAction: investigate
+        severity: "{{ steps.assess_discovery.output.structured_output.severity | default: 'medium' }}"
+        investigationId: '{{ inputs.investigationId }}'
+        ruleName: 'Attack assessment (draft)'
+        # Conditional Detection Change Signal (delta #1) — the emit route attaches it to the
+        # Investigation only when non-empty. `| json` renders the gaps array to a JSON string.
+        detectionChangeSignalGaps: "{{ steps.assess_discovery.output.structured_output.detection_change_signal.gaps | default: '' | json }}"

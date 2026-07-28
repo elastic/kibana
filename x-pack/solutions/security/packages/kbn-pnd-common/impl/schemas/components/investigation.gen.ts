@@ -63,7 +63,7 @@ export type DismissalReasonEnum = typeof DismissalReason.enum;
 export const DismissalReasonEnum = DismissalReason.enum;
 
 export const WatchTier = lazySchema(() =>
-  z.enum(['floor', 'officer', 'dark', 'deep', 'detection'])
+  z.enum(['floor', 'officer', 'dark', 'deep', 'detection', 'ad'])
 );
 export type WatchTier = z.infer<typeof WatchTier>;
 export type WatchTierEnum = typeof WatchTier.enum;
@@ -146,6 +146,17 @@ export const Investigation = lazySchema(() =>
 );
 export type Investigation = z.infer<typeof Investigation>;
 
+export const RuleTuningTrigger = lazySchema(() =>
+  z.object({
+    reason: z.literal('false_positive'),
+    alertId: z.string(),
+    ruleRef: z.string().optional(),
+    confidence: z.number().min(0).max(1),
+    investigationId: z.string(),
+  })
+);
+export type RuleTuningTrigger = z.infer<typeof RuleTuningTrigger>;
+
 export const Proposal = lazySchema(() =>
   z.object({
     id: z.string(),
@@ -181,6 +192,10 @@ export const Proposal = lazySchema(() =>
      * Contrary evidence — shown alongside supporting evidenceRefs so uncertainty is visible (MVP requirement).
      */
     evidenceAgainst: z.array(EvidenceRef).optional(),
+    /**
+     * Optional — surfaced by Floor Worker when an alert is dispositioned as false positive. Detection Watch subscribes to this.
+     */
+    ruleTuningTrigger: RuleTuningTrigger.optional(),
   })
 );
 export type Proposal = z.infer<typeof Proposal>;

@@ -373,7 +373,14 @@ export const WatchDetailPage: React.FC = () => {
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <AgentCapabilitiesList callables={watch.callables} onToggle={onToggleCallable} />
+        <AgentCapabilitiesList
+          callables={watch.callables}
+          onToggle={onToggleCallable}
+          getWorkflowHref={(workflowId) =>
+            services.application?.getUrlForApp('workflows', { path: `/${workflowId}` }) ??
+            `/app/workflows/${workflowId}`
+          }
+        />
 
         <EuiSpacer size="l" />
 
@@ -408,7 +415,15 @@ export const WatchDetailPage: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiPanel hasBorder paddingSize="m">
-          <RecentRunsTable runs={watch.recentRuns} />
+          <RecentRunsTable
+            runs={watch.recentRuns}
+            getInvestigationHref={(investigationId) =>
+              history.createHref({ pathname: `/investigations/${investigationId}` })
+            }
+            onNavigateToInvestigation={(investigationId) =>
+              history.push(`/investigations/${investigationId}`)
+            }
+          />
         </EuiPanel>
       </PndPageSection>
     </WatchesSectionLayout>

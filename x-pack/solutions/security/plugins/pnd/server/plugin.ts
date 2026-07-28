@@ -30,6 +30,9 @@ import type { WatchWorkflowProjectionService } from './services/watches/watch_wo
 import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { InvestigationStore } from './services/investigations/investigation_store';
+import { PndConversationStore } from './services/investigations/pnd_conversation_store';
+import { DualWriteStore } from './services/investigations/dual_write_store';
+import type { PndStore } from './services/investigations/pnd_store';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -39,7 +42,7 @@ export class PndPlugin
   private spaces?: PndStartDependencies['spaces'];
   private watchProjection?: WatchWorkflowProjectionService;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  private investigationStore?: InvestigationStore;
+  private investigationStore?: PndStore;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -139,7 +142,33 @@ export class PndPlugin
     // (see InvestigationStore.ensureReady), because the internal user cannot
     // create arbitrary data indices — the request-scoped user can.
     if (!this.config.ui.useMockData) {
-      this.investigationStore = new InvestigationStore(this.logger);
+      const legacyStore = new InvestigationStore(this.logger);
+
+      // When conversation shadow-write is enabled (and the Agent Builder
+      // conversations plugin is available), wrap the legacy store in a
+      // DualWriteStore that shadows every write to the platform Conversation
+      // store. Shadow failures are logged and non-blocking.
+      if (
+        this.config.conversationShadowWrite &&
+        plugins.agentBuilder &&
+        typeof plugins.agentBuilder.getScopedWriterClient === 'function'
+      ) {
+        const conversationStore = new PndConversationStore(
+          this.logger.get('conversation-shadow'),
+          legacyStore,
+          // Resolver: obtain a scoped writer client using the request context.
+          // The DualWriteStore passes the route's KibanaRequest through.
+          (request) => plugins.agentBuilder!.getScopedWriterClient({ request })
+        );
+        this.investigationStore = new DualWriteStore(
+          this.logger.get('dual-write'),
+          legacyStore,
+          conversationStore
+        );
+        this.logger.info('PND conversation shadow-write enabled (DualWriteStore active)');
+      } else {
+        this.investigationStore = legacyStore;
+      }
     }
 
     return {};

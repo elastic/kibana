@@ -35,7 +35,7 @@ components:
 
     WatchTier:
       type: string
-      enum: [floor, officer, dark, deep, detection]
+      enum: [floor, officer, dark, deep, detection, ad]
 
     EvidenceRef:
       type: object
@@ -214,6 +214,31 @@ components:
           description: Contrary evidence — shown alongside supporting evidenceRefs so uncertainty is visible (MVP requirement).
           items:
             $ref: '#/components/schemas/EvidenceRef'
+        ruleTuningTrigger:
+          $ref: '#/components/schemas/RuleTuningTrigger'
+          description: Optional — surfaced by Floor Worker when an alert is dispositioned as false positive. Detection Watch subscribes to this.
+
+    RuleTuningTrigger:
+      type: object
+      required:
+        - reason
+        - alertId
+        - confidence
+        - investigationId
+      properties:
+        reason:
+          type: string
+          enum: [false_positive]
+        alertId:
+          type: string
+        ruleRef:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        investigationId:
+          type: string
 
     Incident:
       type: object

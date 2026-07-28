@@ -41,7 +41,8 @@ export interface WatchWorkflowsManagementClient {
 
   getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    options?: { includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null>;
 
   createWorkflow(
@@ -97,9 +98,10 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
 
   getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    options?: { includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
-    return this.management.getWorkflowExecution(workflowExecutionId, spaceId);
+    return this.management.getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
 
   createWorkflow(

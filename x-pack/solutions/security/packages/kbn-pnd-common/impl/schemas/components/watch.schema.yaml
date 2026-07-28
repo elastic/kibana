@@ -158,6 +158,12 @@ components:
           description: Best-effort headline for cards/tables
         action:
           $ref: '#/components/schemas/WatchRunAction'
+        investigationId:
+          type: string
+          description: >-
+            Investigation this run produced or acted on, when the workflow's step output
+            carried one (workerRun.investigationId or a bare investigationId). Absent for
+            runs that never touched an Investigation (e.g. a failed pre-trigger step).
 
     WatchMetrics:
       type: object

@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Comprehensive demo seed data for Dark Watch + Deep Watch + Response Actions
  * three-Watch end-to-end demonstration.
@@ -41,6 +48,14 @@ const NOW = new Date('2026-07-21T14:00:00.000Z');
 const ONE_HOUR = 60 * 60 * 1000;
 const ONE_DAY = 24 * ONE_HOUR;
 
+function destructureDoc(doc) {
+  const { _id, _index, ...rest } = doc;
+  if (!rest['@timestamp']) {
+    rest['@timestamp'] = rest.published_at || rest.ingestion_timestamp || new Date().toISOString();
+  }
+  return rest;
+}
+
 const CHRYSALIS_HASH_SHA256 = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
 const CHRYSALIS_HASH_MD5 = '5fd0c0c013c1f6441f512a678ece59e1';
 const CHRYSALIS_C2_IP = '185.220.101.47';
@@ -51,7 +66,7 @@ const APT29_HASH_SHA256 = 'b8c3c2c8a42b9c6c5a2e1f4d3b8a6c7e9f2d4b5a6c8e1f3d5b7a9
 const APT29_C2_IP = '192.168.178.91';
 const APT29_C2_DOMAIN = 'office365-update[.]com';
 
-const NOISY_IP = '10.0.1.50';  // internal maintenance host
+const NOISY_IP = '10.0.1.50'; // internal maintenance host
 
 const HOSTS = [
   { id: 'srv-win-defend-01', os: 'Windows 11 23H2', role: 'Domain Controller', user: 'SYSTEM' },
@@ -82,14 +97,24 @@ async function seedThreatReports() {
       _id: 'report-chrysalis-001',
       content_fingerprint: 'chrysalis-backdoor-jun-2026-v1',
       title: 'Chrysalis Backdoor: BluetoothService Loader Targeting Windows Environments',
-      source: { name: 'Elastic Security Labs', type: 'RSS', url: 'https://elastic.co/security-labs/chrysalis-backdoor' },
+      source: {
+        name: 'Elastic Security Labs',
+        type: 'RSS',
+        url: 'https://elastic.co/security-labs/chrysalis-backdoor',
+      },
       published_at: ts(48),
       ingestion_timestamp: ts(47.5),
       severity: 'critical',
       tags: ['apt', 'backdoor', 'windows', 'bluetooth', 'persistence'],
       diamond: {
-        adversary: { name: 'Unknown — likely APT29 affiliate', description: 'TTP overlap with APT29 but distinct infrastructure' },
-        capability: { name: 'Chrysalis backdoor loader', description: 'Bluetooth-themed loader, DLL sideloading, registry persistence' },
+        adversary: {
+          name: 'Unknown — likely APT29 affiliate',
+          description: 'TTP overlap with APT29 but distinct infrastructure',
+        },
+        capability: {
+          name: 'Chrysalis backdoor loader',
+          description: 'Bluetooth-themed loader, DLL sideloading, registry persistence',
+        },
         infrastructure: [
           { type: 'domain', value: CHRYSALIS_C2_DOMAIN, role: 'C2' },
           { type: 'ip', value: CHRYSALIS_C2_IP, role: 'C2' },
@@ -97,12 +122,31 @@ async function seedThreatReports() {
         victim: { sector: 'Technology', geographic_region: 'North America' },
       },
       iocs_extracted: [
-        { type: 'file_hash', value: CHRYSALIS_HASH_SHA256, confidence: 0.95, context: 'Loader binary' },
+        {
+          type: 'file_hash',
+          value: CHRYSALIS_HASH_SHA256,
+          confidence: 0.95,
+          context: 'Loader binary',
+        },
         { type: 'ip_address', value: CHRYSALIS_C2_IP, confidence: 0.92, context: 'C2 endpoint' },
-        { type: 'domain', value: CHRYSALIS_C2_DOMAIN, confidence: 0.88, context: 'Domain fronting' },
-        { type: 'file_path', value: CHRYSALIS_LOADER_PATH, confidence: 0.85, context: 'Drop location' },
+        {
+          type: 'domain',
+          value: CHRYSALIS_C2_DOMAIN,
+          confidence: 0.88,
+          context: 'Domain fronting',
+        },
+        {
+          type: 'file_path',
+          value: CHRYSALIS_LOADER_PATH,
+          confidence: 0.85,
+          context: 'Drop location',
+        },
       ],
-      taxonomy: { threat_category: 'Backdoor', geographic_region: 'North America', actor_motivation: 'Espionage' },
+      taxonomy: {
+        threat_category: 'Backdoor',
+        geographic_region: 'North America',
+        actor_motivation: 'Espionage',
+      },
       enrichment_status: 'complete',
       extraction_method: 'diamond_model',
       _index: '.kibana-threat-reports',
@@ -111,14 +155,21 @@ async function seedThreatReports() {
       _id: 'report-apt29-001',
       content_fingerprint: 'apt29-tools-may-2026-v1',
       title: 'APT29 Tool Drop: Cobalt Strike Beacon Variant Observed in Enterprise Environments',
-      source: { name: 'Mandiant Threat Intel', type: 'STIX', url: 'https://mandiant.com/reports/apt29-tools-2026' },
+      source: {
+        name: 'Mandiant Threat Intel',
+        type: 'STIX',
+        url: 'https://mandiant.com/reports/apt29-tools-2026',
+      },
       published_at: ts(72),
       ingestion_timestamp: ts(71.5),
       severity: 'high',
       tags: ['apt29', 'cobalt-strike', 'beacon', 'lateral-movement', 'russia'],
       diamond: {
         adversary: { name: 'APT29 (Cozy Bear)', description: 'Russian SVR-affiliated APT' },
-        capability: { name: 'Cobalt Strike Beacon variant', description: 'Modified beacon with custom Malleable C2 profile' },
+        capability: {
+          name: 'Cobalt Strike Beacon variant',
+          description: 'Modified beacon with custom Malleable C2 profile',
+        },
         infrastructure: [
           { type: 'domain', value: APT29_C2_DOMAIN, role: 'C2' },
           { type: 'ip', value: APT29_C2_IP, role: 'Redirector' },
@@ -126,11 +177,20 @@ async function seedThreatReports() {
         victim: { sector: 'Government', geographic_region: 'Europe' },
       },
       iocs_extracted: [
-        { type: 'file_hash', value: APT29_HASH_SHA256, confidence: 0.91, context: 'Modified beacon' },
+        {
+          type: 'file_hash',
+          value: APT29_HASH_SHA256,
+          confidence: 0.91,
+          context: 'Modified beacon',
+        },
         { type: 'ip_address', value: APT29_C2_IP, confidence: 0.89, context: 'Redirector' },
         { type: 'domain', value: APT29_C2_DOMAIN, confidence: 0.87, context: 'C2 domain' },
       ],
-      taxonomy: { threat_category: 'Espionage', geographic_region: 'Europe', actor_motivation: 'Intelligence Collection' },
+      taxonomy: {
+        threat_category: 'Espionage',
+        geographic_region: 'Europe',
+        actor_motivation: 'Intelligence Collection',
+      },
       enrichment_status: 'complete',
       extraction_method: 'diamond_model',
       _index: '.kibana-threat-reports',
@@ -154,7 +214,12 @@ async function seedThreatReports() {
   ];
 
   for (const report of reports) {
-    await client.index({ index: report._index, id: report._id, body: report, refresh: true });
+    await client.index({
+      index: report._index,
+      document: destructureDoc(report),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${reports.length} threat reports`);
 }
@@ -190,7 +255,12 @@ async function seedSources() {
   ];
 
   for (const source of sources) {
-    await client.index({ index: source._index, id: source._id, body: source, refresh: true });
+    await client.index({
+      index: source._index,
+      document: destructureDoc(source),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${sources.length} sources`);
 }
@@ -222,7 +292,12 @@ async function seedSubscriptions() {
   ];
 
   for (const sub of subs) {
-    await client.index({ index: sub._index, id: sub._id, body: sub, refresh: true });
+    await client.index({
+      index: sub._index,
+      document: destructureDoc(sub),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${subs.length} subscriptions`);
 }
@@ -250,7 +325,7 @@ async function seedIndicators() {
       report_ids: ['report-chrysalis-001'],
       first_seen: ts(48),
       last_seen: ts(24),
-      confidence: 0.90,
+      confidence: 0.9,
       _index: '.kibana-threat-intel-indicators',
     },
     {
@@ -286,7 +361,12 @@ async function seedIndicators() {
   ];
 
   for (const ioc of indicators) {
-    await client.index({ index: ioc._index, id: ioc._id, body: ioc, refresh: true });
+    await client.index({
+      index: ioc._index,
+      document: destructureDoc(ioc),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${indicators.length} indicators`);
 }
@@ -307,7 +387,11 @@ async function seedHuntFindings() {
         {
           host: HOSTS[0].id,
           hit_type: 'process_creation',
-          evidence: { process_name: 'BluetoothService.exe', hash_sha256: CHRYSALIS_HASH_SHA256, path: CHRYSALIS_LOADER_PATH },
+          evidence: {
+            process_name: 'BluetoothService.exe',
+            hash_sha256: CHRYSALIS_HASH_SHA256,
+            path: CHRYSALIS_LOADER_PATH,
+          },
           timestamp: ts(24),
           confidence: 'high',
         },
@@ -320,8 +404,17 @@ async function seedHuntFindings() {
         },
       ],
       behavioral_gaps: [
-        { technique: 'T1055', description: 'Process Injection — no detection rule for dllhost.exe injection by BluetoothService.exe', coverage: 'gap' },
-        { technique: 'T1547.001', description: 'Registry Run Keys — detection exists but disabled on srv-win-defend-01', coverage: 'partial' },
+        {
+          technique: 'T1055',
+          description:
+            'Process Injection — no detection rule for dllhost.exe injection by BluetoothService.exe',
+          coverage: 'gap',
+        },
+        {
+          technique: 'T1547.001',
+          description: 'Registry Run Keys — detection exists but disabled on srv-win-defend-01',
+          coverage: 'partial',
+        },
       ],
       created_at: ts(23),
       _index: '.kibana-threat-intel-hunt-findings',
@@ -336,13 +429,21 @@ async function seedHuntFindings() {
         {
           host: HOSTS[1].id,
           hit_type: 'process_creation',
-          evidence: { process_name: 'rundll32.exe', command_line: 'rundll32.exe C:\\Users\\svc_backup\\AppData\\Local\\Temp\\update.dll', hash_sha256: APT29_HASH_SHA256 },
+          evidence: {
+            process_name: 'rundll32.exe',
+            command_line: 'rundll32.exe C:\\Users\\svc_backup\\AppData\\Local\\Temp\\update.dll',
+            hash_sha256: APT29_HASH_SHA256,
+          },
           timestamp: ts(36),
           confidence: 'medium',
         },
       ],
       behavioral_gaps: [
-        { technique: 'T1059.003', description: 'Windows Command Shell — living-off-the-land binary abuse', coverage: 'partial' },
+        {
+          technique: 'T1059.003',
+          description: 'Windows Command Shell — living-off-the-land binary abuse',
+          coverage: 'partial',
+        },
       ],
       created_at: ts(36),
       _index: '.kibana-threat-intel-hunt-findings',
@@ -350,7 +451,12 @@ async function seedHuntFindings() {
   ];
 
   for (const finding of findings) {
-    await client.index({ index: finding._index, id: finding._id, body: finding, refresh: true });
+    await client.index({
+      index: finding._index,
+      document: destructureDoc(finding),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${findings.length} hunt findings`);
 }
@@ -381,7 +487,12 @@ async function seedAdvisories() {
   ];
 
   for (const advisory of advisories) {
-    await client.index({ index: advisory._index, id: advisory._id, body: advisory, refresh: true });
+    await client.index({
+      index: advisory._index,
+      document: destructureDoc(advisory),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${advisories.length} advisories`);
 }
@@ -437,7 +548,8 @@ async function seedProcessEvents() {
         executable: 'C:\\Windows\\System32\\reg.exe',
         pid: 4830,
         parent: { name: 'BluetoothService.exe', pid: 4824 },
-        command_line: 'reg.exe add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /v BluetoothHelper /t REG_SZ /d "C:\\Windows\\Temp\\BluetoothService.exe" /f',
+        command_line:
+          'reg.exe add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /v BluetoothHelper /t REG_SZ /d "C:\\Windows\\Temp\\BluetoothService.exe" /f',
       },
       event: { category: 'process', type: 'start', action: 'Process Create', outcome: 'success' },
       _index: 'metrics-endpoint.events.process-default',
@@ -454,7 +566,8 @@ async function seedProcessEvents() {
         executable: 'C:\\Windows\\System32\\rundll32.exe',
         pid: 2156,
         parent: { name: 'explorer.exe', pid: 1124 },
-        command_line: 'rundll32.exe C:\\Users\\svc_backup\\AppData\\Local\\Temp\\update.dll,EntryPoint',
+        command_line:
+          'rundll32.exe C:\\Users\\svc_backup\\AppData\\Local\\Temp\\update.dll,EntryPoint',
         hash: { sha256: APT29_HASH_SHA256 },
       },
       event: { category: 'process', type: 'start', action: 'Process Create', outcome: 'success' },
@@ -489,7 +602,8 @@ async function seedProcessEvents() {
         executable: 'C:\\Windows\\System32\\wbem\\WMIC.exe',
         pid: 5100,
         parent: { name: 'cmd.exe', pid: 4900 },
-        command_line: 'wmic /node:srv-win-defend-04 process call create "cmd.exe /c C:\\Windows\\Temp\\update.exe"',
+        command_line:
+          'wmic /node:srv-win-defend-04 process call create "cmd.exe /c C:\\Windows\\Temp\\update.exe"',
       },
       event: { category: 'process', type: 'start', action: 'Process Create', outcome: 'success' },
       _index: 'metrics-endpoint.events.process-default',
@@ -514,7 +628,12 @@ async function seedProcessEvents() {
   ];
 
   for (const event of events) {
-    await client.index({ index: event._index, id: event._id, body: event, refresh: true });
+    await client.index({
+      index: event._index,
+      document: destructureDoc(event),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${events.length} process events`);
 }
@@ -533,7 +652,12 @@ async function seedNetworkEvents() {
       source: { ip: '10.0.0.10', port: 51234 },
       destination: { ip: CHRYSALIS_C2_IP, port: 443 },
       network: { protocol: 'https', transport: 'tcp' },
-      event: { category: 'network', type: 'connection', action: 'Network Connection Detected', outcome: 'success' },
+      event: {
+        category: 'network',
+        type: 'connection',
+        action: 'Network Connection Detected',
+        outcome: 'success',
+      },
       process: { name: 'BluetoothService.exe', pid: 4824, hash: { sha256: CHRYSALIS_HASH_SHA256 } },
       dns: { question: { name: CHRYSALIS_C2_DOMAIN }, resolved_ip: [CHRYSALIS_C2_IP] },
       _index: 'metrics-endpoint.events.network-default',
@@ -546,7 +670,12 @@ async function seedNetworkEvents() {
       source: { ip: '10.0.0.20', port: 42344 },
       destination: { ip: APT29_C2_IP, port: 443 },
       network: { protocol: 'https', transport: 'tcp' },
-      event: { category: 'network', type: 'connection', action: 'Network Connection Detected', outcome: 'success' },
+      event: {
+        category: 'network',
+        type: 'connection',
+        action: 'Network Connection Detected',
+        outcome: 'success',
+      },
       process: { name: 'rundll32.exe', pid: 2156, hash: { sha256: APT29_HASH_SHA256 } },
       dns: { question: { name: APT29_C2_DOMAIN }, resolved_ip: [APT29_C2_IP] },
       _index: 'metrics-endpoint.events.network-default',
@@ -559,14 +688,24 @@ async function seedNetworkEvents() {
       source: { ip: '10.0.0.10', port: 49200 },
       destination: { ip: '10.0.0.40', port: 445 },
       network: { protocol: 'smb', transport: 'tcp' },
-      event: { category: 'network', type: 'connection', action: 'Network Connection Detected', outcome: 'success' },
+      event: {
+        category: 'network',
+        type: 'connection',
+        action: 'Network Connection Detected',
+        outcome: 'success',
+      },
       process: { name: 'wmic.exe', pid: 5100 },
       _index: 'metrics-endpoint.events.network-default',
     },
   ];
 
   for (const event of events) {
-    await client.index({ index: event._index, id: event._id, body: event, refresh: true });
+    await client.index({
+      index: event._index,
+      document: destructureDoc(event),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${events.length} network events`);
 }
@@ -612,7 +751,12 @@ async function seedFileEvents() {
   ];
 
   for (const event of events) {
-    await client.index({ index: event._index, id: event._id, body: event, refresh: true });
+    await client.index({
+      index: event._index,
+      document: destructureDoc(event),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${events.length} file events`);
 }
@@ -637,13 +781,28 @@ async function seedAlerts() {
       },
       event: { category: 'process', type: 'start' },
       process: {
-        name: 'BluetoothService.exe', pid: 4824, hash: { sha256: CHRYSALIS_HASH_SHA256 }, executable: CHRYSALIS_LOADER_PATH,
+        name: 'BluetoothService.exe',
+        pid: 4824,
+        hash: { sha256: CHRYSALIS_HASH_SHA256 },
+        executable: CHRYSALIS_LOADER_PATH,
       },
       threat: {
-        technique: [{ id: 'T1547', name: 'Boot or Logon Autostart Execution', reference: 'https://attack.mitre.org/techniques/T1547' }],
-        tactic: [{ id: 'TA0003', name: 'Persistence', reference: 'https://attack.mitre.org/tactics/TA0003' }],
+        technique: [
+          {
+            id: 'T1547',
+            name: 'Boot or Logon Autostart Execution',
+            reference: 'https://attack.mitre.org/techniques/T1547',
+          },
+        ],
+        tactic: [
+          {
+            id: 'TA0003',
+            name: 'Persistence',
+            reference: 'https://attack.mitre.org/tactics/TA0003',
+          },
+        ],
       },
-      signal: { rule: { id: 'rule-001' } },
+
       _index: '.alerts-security.alerts-default',
     },
     {
@@ -661,10 +820,18 @@ async function seedAlerts() {
       event: { category: 'malware', type: 'info' },
       file: { hash: { sha256: CHRYSALIS_HASH_SHA256 }, path: CHRYSALIS_LOADER_PATH },
       threat: {
-        technique: [{ id: 'T1204', name: 'User Execution', reference: 'https://attack.mitre.org/techniques/T1204' }],
-        tactic: [{ id: 'TA0002', name: 'Execution', reference: 'https://attack.mitre.org/tactics/TA0002' }],
+        technique: [
+          {
+            id: 'T1204',
+            name: 'User Execution',
+            reference: 'https://attack.mitre.org/techniques/T1204',
+          },
+        ],
+        tactic: [
+          { id: 'TA0002', name: 'Execution', reference: 'https://attack.mitre.org/tactics/TA0002' },
+        ],
       },
-      signal: { rule: { id: 'rule-002' } },
+
       _index: '.alerts-security.alerts-default',
     },
     {
@@ -682,10 +849,22 @@ async function seedAlerts() {
       event: { category: 'process', type: 'start' },
       process: { name: 'rundll32.exe', executable: 'C:\\Windows\\System32\\rundll32.exe' },
       threat: {
-        technique: [{ id: 'T1218', name: 'System Binary Proxy Execution', reference: 'https://attack.mitre.org/techniques/T1218' }],
-        tactic: [{ id: 'TA0005', name: 'Defense Evasion', reference: 'https://attack.mitre.org/tactics/TA0005' }],
+        technique: [
+          {
+            id: 'T1218',
+            name: 'System Binary Proxy Execution',
+            reference: 'https://attack.mitre.org/techniques/T1218',
+          },
+        ],
+        tactic: [
+          {
+            id: 'TA0005',
+            name: 'Defense Evasion',
+            reference: 'https://attack.mitre.org/tactics/TA0005',
+          },
+        ],
       },
-      signal: { rule: { id: 'rule-003' } },
+
       _index: '.alerts-security.alerts-default',
     },
     {
@@ -703,13 +882,18 @@ async function seedAlerts() {
       event: { category: 'process', type: 'start' },
       process: { name: 'ElasticEndpoint.exe' },
       threat: {},
-      signal: { rule: { id: 'rule-004' } },
+
       _index: '.alerts-security.alerts-default',
     },
   ];
 
   for (const alert of alerts) {
-    await client.index({ index: alert._index, id: alert._id, body: alert, refresh: true });
+    await client.index({
+      index: alert._index,
+      document: destructureDoc(alert),
+      op_type: 'create',
+      refresh: true,
+    });
   }
   console.log(`✅ Seeded ${alerts.length} detection engine alerts`);
 }

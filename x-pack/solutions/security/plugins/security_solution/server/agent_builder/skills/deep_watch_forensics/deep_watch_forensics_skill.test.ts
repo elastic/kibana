@@ -10,6 +10,8 @@ import {
   DEEP_WATCH_FORENSICS_SKILL_ID,
   DEEP_WATCH_PACKAGE_EVIDENCE_TOOL_ID,
   DEEP_WATCH_PRODUCE_DRAFT_TOOL_ID,
+  DEEP_WATCH_FORENSICS_REPORTS_INDEX,
+  DEEP_WATCH_OSQUERY_TOOL_IDS,
 } from './deep_watch_forensics_skill';
 
 describe('deep_watch_forensics_skill', () => {
@@ -23,6 +25,16 @@ describe('deep_watch_forensics_skill', () => {
       expect(DEEP_WATCH_PRODUCE_DRAFT_TOOL_ID).toBe(
         'security.deep_watch.produce_draft_forensic_report'
       );
+    });
+
+    it('exports the reports index constant', () => {
+      expect(DEEP_WATCH_FORENSICS_REPORTS_INDEX).toBe('.kibana-deep-watch-forensics-reports');
+    });
+
+    it('binds the osquery live-state tools, including resolve_agent_ids', () => {
+      expect(DEEP_WATCH_OSQUERY_TOOL_IDS).toContain('osquery.check_integration');
+      expect(DEEP_WATCH_OSQUERY_TOOL_IDS).toContain('osquery.run_live_query');
+      expect(DEEP_WATCH_OSQUERY_TOOL_IDS).toContain('osquery.resolve_agent_ids');
     });
 
     it('defines the skill with correct id and name', () => {
@@ -69,10 +81,24 @@ describe('deep_watch_forensics_skill', () => {
   });
 
   describe('registry tools', () => {
-    it('registers platform core ES|QL tools', async () => {
+    it('registers the platform ES|QL tools plus the osquery live-state toolset', async () => {
       const tools = (await deepWatchForensicsSkill.getRegistryTools?.()) ?? [];
-      expect(tools.length).toBeGreaterThan(0);
-      // Should include generate_esql and execute_esql for forensic queries
+      // Registry tools are string IDs, not objects
+      const toolIds = tools as unknown as string[];
+      expect(toolIds).toHaveLength(3 + DEEP_WATCH_OSQUERY_TOOL_IDS.length);
+      expect(toolIds).toContain('platform.core.generate_esql');
+      expect(toolIds).toContain('platform.core.execute_esql');
+      expect(toolIds).toContain('platform.core.get_index_mapping');
+      for (const osqueryToolId of DEEP_WATCH_OSQUERY_TOOL_IDS) {
+        expect(toolIds).toContain(osqueryToolId);
+      }
+    });
+
+    it('does not register search or relevance_search (skill guardrail)', async () => {
+      const tools = (await deepWatchForensicsSkill.getRegistryTools?.()) ?? [];
+      const toolIds = tools as unknown as string[];
+      expect(toolIds).not.toContain('platform.core.search');
+      expect(toolIds).not.toContain('relevance_search');
     });
   });
 

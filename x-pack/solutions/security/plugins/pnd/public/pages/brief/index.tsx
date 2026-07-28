@@ -30,10 +30,63 @@ import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
+import { DecisionRadar, decisionStateForStatus } from './components/decision_radar';
+import type { DecisionState } from '../../theme';
 import * as i18n from './translations';
 
-const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
+const QUEUE_STATUSES = new Set([
+  'open',
+  'investigating',
+  'in-progress',
+  'escalated',
+  // Deep Watch finished its forensic analysis and handed a recommendation back
+  // to the analyst. The investigation stays on the queue because the human
+  // still owns the containment decision (pending proposal awaiting approval).
+  'deep-watch-complete',
+]);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
+
+/**
+ * Statuses that mean "an agent or analyst already recorded a decision here".
+ *
+ * Note `escalated` is deliberately *not* treated as pre-decision on the card
+ * CTA: an investigation reaches `escalated` because a Watch tier handed it up,
+ * and its proposals may already carry a terminal status (`approved`,
+ * `escalated`, `executed`, `dismissed`). See `briefActionLabel`.
+ */
+const DECIDED_STATUSES = new Set([
+  'escalated',
+  'contained',
+  'dismissed',
+  ...AUTO_RESOLVED_STATUSES,
+]);
+
+export const isDecidedInvestigation = (investigation: Investigation): boolean =>
+  (investigation.pendingProposalCount ?? 0) === 0 &&
+  DECIDED_STATUSES.has(investigation.status ?? '');
+
+/**
+ * Single source of truth for the Brief card's primary button label.
+ *
+ * `primaryActionLabel` / `recommendedAction` are *pre-decision* fields — the
+ * action a Watch tier recommends while the proposal is still `pending`. They
+ * are not cleared when a decision lands (the proposal-decision routes update
+ * the proposal document only), so rendering them unconditionally makes the
+ * queue card contradict the investigation's own Proposals tab: the card said
+ * "Isolate endpoint" while the only proposal on it already read "Escalated".
+ *
+ * When nothing is pending, the card offers to *review* the recorded decision
+ * instead of re-offering an action the analyst already took.
+ */
+export const briefActionLabel = (investigation: Investigation): string => {
+  if (investigation.status === 'deep-watch-complete') {
+    return i18n.REVIEW_FINDINGS;
+  }
+  if (isDecidedInvestigation(investigation)) {
+    return i18n.REVIEW_DECISION;
+  }
+  return investigation.primaryActionLabel ?? i18n.DEFAULT_ACTION;
+};
 
 const BUCKET_COLORS: Record<Exclude<i18n.BriefBucket, 'all'>, string> = {
   contain: 'danger',
@@ -61,6 +114,7 @@ const BriefCard: React.FC<{
   onOpenChat: () => void;
 }> = ({ investigation, accent, onOpen, onOpenChat }) => {
   const inMotion = investigation.status === 'in-progress';
+  const isDecided = isDecidedInvestigation(investigation);
 
   return (
     <EuiPanel
@@ -115,6 +169,23 @@ const BriefCard: React.FC<{
                 </EuiBadge>
               </EuiFlexItem>
             ) : null}
+            {investigation.status === 'deep-watch-complete' ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="success" iconType="check">
+                  {i18n.DEEP_WATCH_COMPLETE}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {isDecided ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color={investigation.status === 'escalated' ? 'warning' : 'default'}
+                  data-test-subj="pndBriefCardDecidedBadge"
+                >
+                  {i18n.decidedStatusLabel(investigation.status)}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow />
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
@@ -147,7 +218,7 @@ const BriefCard: React.FC<{
                   onOpen();
                 }}
               >
-                {investigation.primaryActionLabel ?? i18n.DEFAULT_ACTION}
+                {briefActionLabel(investigation)}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -174,6 +245,7 @@ export const BriefPage: React.FC = () => {
   const { data, isLoading, error } = useInvestigations();
   const [selectedBucket, setSelectedBucket] = useState<i18n.BriefBucket>('all');
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
+  const [decisionFilter, setDecisionFilter] = useState<DecisionState | null>(null);
   usePndDocTitle(i18n.PAGE_TITLE);
 
   const investigations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
@@ -226,9 +298,11 @@ export const BriefPage: React.FC = () => {
       queueRows.filter((investigation) => {
         if (!matchesBucket(investigation, selectedBucket)) return false;
         if (surfaceFilter && investigation.affectedSurface !== surfaceFilter) return false;
+        if (decisionFilter && decisionStateForStatus(investigation.status) !== decisionFilter)
+          return false;
         return true;
       }),
-    [queueRows, selectedBucket, surfaceFilter]
+    [queueRows, selectedBucket, surfaceFilter, decisionFilter]
   );
 
   const grouped = useMemo(() => {
@@ -283,6 +357,13 @@ export const BriefPage: React.FC = () => {
         }
       />
 
+      <DecisionRadar
+        investigations={queueRows}
+        selected={decisionFilter}
+        onSelect={setDecisionFilter}
+      />
+      <EuiSpacer size="m" />
+
       <EuiFlexGroup gutterSize="s" wrap responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -298,7 +379,9 @@ export const BriefPage: React.FC = () => {
           <EuiFlexItem key={bucket.id} grow={false}>
             <EuiButton
               size="s"
-              color={BUCKET_COLORS[bucket.id] as 'danger' | 'warning' | 'primary' | 'accent'}
+              color={
+                BUCKET_COLORS[bucket.id] as 'danger' | 'warning' | 'primary' | 'accent' | 'success'
+              }
               fill={selectedBucket === bucket.id}
               onClick={() =>
                 setSelectedBucket((current) => (current === bucket.id ? 'all' : bucket.id))
@@ -359,7 +442,14 @@ export const BriefPage: React.FC = () => {
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiBadge
-                    color={BUCKET_COLORS[group.id] as 'danger' | 'warning' | 'primary' | 'accent'}
+                    color={
+                      BUCKET_COLORS[group.id] as
+                        | 'danger'
+                        | 'warning'
+                        | 'primary'
+                        | 'accent'
+                        | 'success'
+                    }
                   >
                     {group.label}
                   </EuiBadge>

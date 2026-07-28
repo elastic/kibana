@@ -8,20 +8,53 @@
 import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { securityTool } from '../../tools/constants';
 
 export const DEEP_WATCH_FORENSICS_SKILL_ID = 'deep-watch-forensics';
 
-export const DEEP_WATCH_PACKAGE_EVIDENCE_TOOL_ID = securityTool('deep_watch.package_evidence');
+/**
+ * Osquery registry tools bound when this skill loads (must match osquery plugin
+ * registrations). Mirrors ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS in
+ * endpoint_forensic_analysis_skill.ts — Deep Watch additionally binds
+ * resolve_agent_ids directly (rather than relying on prose-only guidance) since
+ * live-state confirmation during specialist reconstruction routinely needs to
+ * resolve a hostname to an Elastic Agent ID before dispatching a query.
+ */
+export const DEEP_WATCH_OSQUERY_TOOL_IDS = [
+  `${internalNamespaces.osquery}.check_integration`,
+  `${internalNamespaces.osquery}.list_saved_queries`,
+  `${internalNamespaces.osquery}.get_table_schema`,
+  `${internalNamespaces.osquery}.run_live_query`,
+  `${internalNamespaces.osquery}.get_live_query_results`,
+  `${internalNamespaces.osquery}.list_packs`,
+  `${internalNamespaces.osquery}.resolve_agent_ids`,
+] as const;
 
 /**
- * Durable outcome index for produce_draft_forensic_report (PR #35 pyramid §3:
- * "L4 requires a durable outcome to score"). Temporary: a custom `.kibana-*`
- * index until the platform Investigation (Agent Builder templated
- * conversation) object model is ready — see durable_outcome.spec.ts.
+ * Custom index for persisting draft forensic reports.
+ *
+ * Temporary until the platform Investigation (Agent Builder templated
+ * conversation) object model is ready; at that point Deep Watch will write
+ * its drafts as Investigation artifacts and this index will be deprecated.
+ *
+ * Uses the `.kibana` prefix to avoid requiring a separate migration and to
+ * keep it within the Kibana system-index access pattern that Agent Builder
+ * tool handlers already have via `context.esClient.asCurrentUser`.
+ *
+ * NOTE: this is the interactive-chat write path only (produce_draft_forensic_report
+ * called directly, e.g. by the L4 durable-outcome eval spec
+ * kbn-evals-suite-security-deep-watch-forensics/evals/durable_outcome.spec.ts).
+ * The workflow-driven path (watch_deep_worker.yaml -> _emit_proposal) does NOT
+ * go through this tool or this index — it writes straight to PND's
+ * InvestigationStore via the emit_proposal route. Both paths are real; they
+ * serve different callers (ad-hoc specialist chat vs. the automated Watch
+ * pipeline) and are not currently reconciled into one write path.
  */
 export const DEEP_WATCH_FORENSICS_REPORTS_INDEX = '.kibana-deep-watch-forensics-reports';
+
+export const DEEP_WATCH_PACKAGE_EVIDENCE_TOOL_ID = securityTool('deep_watch.package_evidence');
 
 let reportsIndexEnsuredPromise: Promise<void> | undefined;
 
@@ -256,6 +289,20 @@ Use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` against D
 
 Cross-reference MITRE techniques from Dark Watch against the timeline events.
 
+**Osquery live-state augmentation (REQUIRED, not optional).** Defend telemetry (\`logs-endpoint.events.*\`) is historical — it only has what was previously collected. Some forensic questions need the endpoint's **live, current state**, which Defend telemetry cannot answer:
+
+1. Call \`osquery.check_integration\` first. If Osquery is unavailable/no agents enrolled, note the gap explicitly in the draft's unresolved questions (FR-DP-06) rather than skipping live-state findings silently.
+2. If available, resolve each host to its Elastic Agent ID via \`osquery.resolve_agent_ids\` (do **not** query \`.fleet-agents\` directly via ES|QL — it requires ES-level privileges most roles lack and fails with \`security_exception\`).
+3. Dispatch read-only \`SELECT\` queries with \`osquery.run_live_query\` (inline ~30s wait) for live-state gaps Defend telemetry cannot fill:
+   - **Mutex enumeration** (\`winbaseobj\` table, \`object_type = 'Mutant'\`) — mutexes have zero Defend-telemetry source and are a common malware-family IoC.
+   - **Current process tree / open handles** — confirms whether an implant is still resident, not just historically observed.
+   - **Persistence verification** — cross-check a registry run-key or scheduled task found in telemetry against its live current state, since telemetry only proves it existed at ingest time, not that it's still active.
+   - **Startup items / autoruns** on Windows hosts when Defend telemetry's registry coverage is incomplete for the finding.
+4. Use \`osquery.list_saved_queries\` / \`osquery.list_packs\` first when the analyst references a named query or pack, and \`osquery.get_table_schema\` to verify column names before authoring a custom query.
+5. If \`run_live_query\` returns \`status: dispatched\` (agent didn't respond inline), poll with \`osquery.get_live_query_results\` using the returned \`action_id\` (up to ~60s) before reporting the finding as unresolved.
+
+Label every osquery-sourced finding as **live state as of {query time}**, distinct from telemetry-sourced findings that carry a historical event timestamp — these are different evidence classes and must not be conflated in the draft (FR-143).
+
 ### Phase 2: Produce Draft Specialist Report
 
 Call \`${DEEP_WATCH_PRODUCE_DRAFT_TOOL_ID}\` with the hosts, time window, source IoCs, and MITRE techniques. This produces the structured draft with:
@@ -282,14 +329,16 @@ If approved: defer to **endpoint-response-actions** for execution. Do not execut
 - **Separate fact from inference from recommendation** in every finding (FR-143)
 - **Confidence is not severity** — a high-severity finding can have low confidence (FR-141)
 - **Name unresolved questions** — every draft must include open questions and confidence limits (FR-DP-04)
-- Use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for all telemetry queries
+- Use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for all historical telemetry queries
+- Use \`osquery.*\` tools **only** for live-state augmentation (Phase 1) — never as a substitute for telemetry-based reconstruction, and never for anything beyond read-only \`SELECT\` queries
 - Do **not** use \`platform.core.search\` or \`relevance_search\` for forensic reconstruction
-- Always cite source event index and query in findings
+- Always cite source event index and query in findings, and label osquery-sourced findings as live state (not historical telemetry)
 `,
   getRegistryTools: () => [
     platformCoreTools.getIndexMapping,
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
+    ...DEEP_WATCH_OSQUERY_TOOL_IDS,
   ],
   getInlineTools: () => [
     {
@@ -551,7 +600,17 @@ If approved: defer to **endpoint-response-actions** for execution. Do not execut
           }
         }
 
-        const report = {
+        // ── Persist the draft report to a durable index ───────────────────────
+        //
+        // This is the L4 precondition (PR #35 pyramid §3): a worker whose
+        // findings exist only in ephemeral tool output has no Evaluation Record
+        // to attach labels to. Writing here makes the draft replayable and
+        // scoreable offline.
+        //
+        // Temporary: uses a custom .kibana index until the platform
+        // Investigation (Agent Builder templated conversation) object model
+        // is ready.
+        const reportData = {
           report_status: 'DRAFT — Pending Specialist Review (FR-082)',
           scope: {
             hosts,
@@ -588,17 +647,21 @@ If approved: defer to **endpoint-response-actions** for execution. Do not execut
         // Persist the draft so it has a durable outcome beyond this ephemeral
         // tool response (PR #35 pyramid §3 — L4 scoring requires a durable
         // record; see durable_outcome.spec.ts and DEEP_WATCH_FORENSICS_REPORTS_INDEX).
+        let persistedId: string | null = null;
         try {
           await ensureReportsIndex(context.esClient.asInternalUser);
-          await context.esClient.asInternalUser.index({
+          const persistResp = await context.esClient.asCurrentUser.index({
             index: DEEP_WATCH_FORENSICS_REPORTS_INDEX,
             document: {
               '@timestamp': new Date().toISOString(),
-              ...report,
+              ...reportData,
             },
-            refresh: 'wait_for',
+            refresh: true,
           });
+          persistedId = persistResp._id ?? null;
         } catch (e) {
+          // Non-fatal: the report is still returned inline. Persistence
+          // failure is surfaced in the response so the caller knows.
           context.logger?.warn(
             `deep_watch_forensics: failed to persist draft report to ${DEEP_WATCH_FORENSICS_REPORTS_INDEX}: ${
               (e as Error).message
@@ -610,7 +673,12 @@ If approved: defer to **endpoint-response-actions** for execution. Do not execut
           results: [
             {
               type: ToolResultType.other,
-              data: report,
+              data: {
+                ...reportData,
+                persisted: persistedId !== null,
+                persisted_id: persistedId,
+                persisted_index: persistedId ? DEEP_WATCH_FORENSICS_REPORTS_INDEX : null,
+              },
             },
           ],
         };

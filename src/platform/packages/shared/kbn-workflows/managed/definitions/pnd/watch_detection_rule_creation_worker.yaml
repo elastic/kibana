@@ -1,0 +1,104 @@
+version: '1'
+name: Detection Watch Rule Creation Worker
+description: >
+  Detection Watch domain worker. Consumes a Detection Change Signal (coverage
+  gap surfaced by Dark/Deep/AD) and drafts a NEW detection rule proposal. Output
+  is always a DRAFT proposal for analyst approval — the worker never creates or
+  enables a rule directly (RBAC, dedup, and full-context concerns per #watch-floor).
+enabled: true
+tags:
+  - watch-worker
+  - watch-detection-rule-creation-worker
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    # CWL policy bag. Detection Watch rule-creation runs detection-authoring only.
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - detection-rule-authoring
+  - name: draft_rule
+    type: ai.agent
+    timeout: '10m'
+    with:
+      # Option 2 runtime override — LIVE (elastic/kibana#280617, straight-replace semantics
+      # confirmed in review + on this branch: no intersection with the agent's stored
+      # skill_ids, since the type-base merge downstream re-adds those regardless).
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
+      message: >
+        A producing Watch surfaced a detection coverage gap. Draft ONE new
+        detection rule proposal that would cover the gap. Do NOT ask questions.
+        Do NOT create or enable the rule — produce a DRAFT proposal only.
+
+        For each gap in the signal below, propose a rule with: a concise name,
+        the MITRE technique it covers, a concrete detection query (KQL/EQL/ES|QL
+        as appropriate — write the actual query, not a description), the
+        index/data source it runs against, severity (low|medium|high|critical),
+        and a one-line rationale tying it to the observed evidence. If multiple
+        gaps share a technique, dedup into one rule.
+
+        Coverage gap signal:
+        {{ inputs.detectionChangeSignal | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            description: Always 'rule_creation' for this worker.
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Confidence 0.0-1.0 that the drafted rule covers the gap safely.
+          rationale:
+            type: string
+            description: One-line rationale tying the rule to the observed evidence.
+          rule_name:
+            type: string
+            description: Concise detection rule name.
+          mitre_technique:
+            type: string
+            description: The MITRE ATT&CK technique id the rule covers (e.g. T1071.001).
+          detection_query:
+            type: string
+            description: The actual detection query (KQL/EQL/ES|QL) — a real query, not a description.
+          index_pattern:
+            type: string
+            description: The index/data source the rule runs against (e.g. logs-endpoint.events.network-*).
+          severity:
+            type: string
+            enum:
+              - low
+              - medium
+              - high
+              - critical
+            description: Rule severity.
+        required:
+          - rule_name
+          - mitre_technique
+          - detection_query
+          - severity
+          - confidence_score
+          - rationale
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-detection
+        classification: "{{ steps.draft_rule.output.structured_output.classification | default: 'rule_creation' }}"
+        confidence: '${{ steps.draft_rule.output.structured_output.confidence_score | default: 0.7 }}'
+        finding: "{{ steps.draft_rule.output.structured_output.rationale | default: 'Drafted a detection rule to cover the surfaced gap.' }}"
+        recommendedAction: create
+        severity: "{{ steps.draft_rule.output.structured_output.severity | default: 'medium' }}"
+        investigationId: '{{ inputs.investigationId }}'
+        ruleName: "{{ steps.draft_rule.output.structured_output.rule_name | default: 'Detection rule (draft) for surfaced coverage gap' }}"
+        # Concrete rule body carried through to the proposal (G4 — no longer discarded).
+        proposedRule:
+          name: '{{ steps.draft_rule.output.structured_output.rule_name }}'
+          mitreTechnique: '{{ steps.draft_rule.output.structured_output.mitre_technique }}'
+          query: '{{ steps.draft_rule.output.structured_output.detection_query }}'
+          indexPattern: '{{ steps.draft_rule.output.structured_output.index_pattern }}'
+          severity: '{{ steps.draft_rule.output.structured_output.severity }}'

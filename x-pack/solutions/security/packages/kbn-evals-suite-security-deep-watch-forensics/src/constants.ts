@@ -34,7 +34,15 @@ export const DEEP_WATCH_FORENSICS_SKILL_ID = 'deep-watch-forensics';
  */
 export const DEEP_WATCH_TOOL_NAMESPACE = 'security.deep_watch';
 
-/** Index where the produce_draft_forensic_report tool persists its reports. */
+/**
+ * Index where the produce_draft_forensic_report tool persists its reports.
+ *
+ * Mirrors the server-side constant in deep_watch_forensics_skill.ts.
+ * Used by L4 durable-outcome specs to read back persisted reports.
+ *
+ * Temporary: will be replaced by Investigation (Agent Builder templated
+ * conversation) once the platform object model is ready.
+ */
 export const DEEP_WATCH_FORENSICS_REPORTS_INDEX = '.kibana-deep-watch-forensics-reports';
 
 /** Default escalation context used in Deep Watch flow and composite pipeline tests. */
