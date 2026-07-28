@@ -27,6 +27,8 @@ import {
 import type { SetOptional } from 'type-fest';
 import { isEmpty, noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
   AlertsTable as ResponseOpsAlertsTable,
   alertsTableQueryClient,
@@ -35,13 +37,13 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { QueryClientProvider } from '@kbn/react-query';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
-import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
-import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/paginated_document_flyout';
-import type { ScopedPaginationSlice } from '../../../common/utils/flyout_pagination/types';
-import { usePaginatedFlyout } from '../../../common/utils/flyout_pagination/use_paginated_flyout';
+import { DocumentFlyout } from '../../../flyout_v2/document/main';
+import { usePaginatedFlyout } from '../../../flyout_v2/document/pagination/use_paginated_flyout';
+import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { alertsTableRef } from './alerts_table_ref';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import type {
@@ -322,11 +324,26 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     () => tablePropsOverrides.sort ?? sort
   );
 
-  const getAlertBody = useCallback(
-    (instanceId: string) => (
-      <PaginatedDocumentFlyout scopeId={tableType} paginationInstanceId={instanceId} />
-    ),
+  const renderFlyoutCellActions = useMemo(
+    () =>
+      ((props) =>
+        cellActionRenderer({ ...props, scopeId: tableType })) as typeof cellActionRenderer,
     [tableType]
+  );
+
+  const handleFlyoutAlertUpdated = useCallback(() => {
+    alertsTableRef.current?.refresh();
+  }, []);
+
+  const getDocumentFlyoutBody = useCallback(
+    (instanceId: string) => (
+      <DocumentFlyout
+        renderCellActions={renderFlyoutCellActions}
+        onAlertUpdated={handleFlyoutAlertUpdated}
+        paginationInstanceId={instanceId}
+      />
+    ),
+    [handleFlyoutAlertUpdated, renderFlyoutCellActions]
   );
 
   // Resolves the document at an absolute alert index (0-based across the full
@@ -342,23 +359,20 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       const alert = isInPage ? (tableContext.alerts?.[offset] as Alert | undefined) : undefined;
       if (!alert) return null;
       return {
-        id: alert._id,
-        indexName: alert._index,
-        scopeId: tableType,
-        stateUpdate: { flyoutAlert: alert } as Partial<ScopedPaginationSlice>,
+        flyoutDocument: buildDocumentFromAlert(alert),
       };
     },
-    [reduxItemsPerPage, tableContext, tablePageIndex, tableType]
+    [reduxItemsPerPage, tableContext, tablePageIndex]
   );
 
   const { paginationInstanceId, slice, setState, openPaginatedFlyout } = usePaginatedFlyout({
-    rightPanelKey: DocumentDetailsRightPanelKey,
     resolveDocument,
-    renderBody: getAlertBody,
+    renderBody: getDocumentFlyoutBody,
     historyKey: documentFlyoutHistoryKey,
+    origin: FLYOUT_ORIGIN.ALERTS_TABLE,
   });
 
-  const { flyoutAlertIndex, pageSize } = slice;
+  const { flyoutDocumentIndex, pageSize } = slice;
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
@@ -375,7 +389,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
           totalCount: context.alertsCount ?? -1,
         })
       );
-      setState({ totalAlertCount: context.alertsCount ?? 0 });
+      setState({ totalDocumentCount: context.alertsCount ?? 0 });
       setQuery({
         id: tableType,
         loading: context.isLoading ?? true,
@@ -422,10 +436,10 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // be loaded without moving the table.
   const flyoutPageIndex = useMemo(
     () =>
-      flyoutAlertIndex != null && reduxItemsPerPage > 0
-        ? Math.floor(flyoutAlertIndex / reduxItemsPerPage)
+      flyoutDocumentIndex != null && reduxItemsPerPage > 0
+        ? Math.floor(flyoutDocumentIndex / reduxItemsPerPage)
         : tablePageIndex,
-    [flyoutAlertIndex, reduxItemsPerPage, tablePageIndex]
+    [flyoutDocumentIndex, reduxItemsPerPage, tablePageIndex]
   );
 
   // Parallel query for the flyout. When `flyoutPageIndex === tablePageIndex`
@@ -450,17 +464,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // the user has navigated the flyout to a page that isn't the table's page
   // and the parallel query hasn't resolved that alert yet.
   useEffect(() => {
-    if (flyoutAlertIndex == null || flyoutPageIndex === tablePageIndex) {
-      setState({ isFlyoutAlertLoading: false });
+    if (flyoutDocumentIndex == null || flyoutPageIndex === tablePageIndex) {
+      setState({ isFlyoutDocumentLoading: false });
       return;
     }
-    const offset = flyoutAlertIndex - flyoutPageIndex * reduxItemsPerPage;
+    const offset = flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage;
     const alertOnRequestedPage = flyoutAlertsData?.alerts?.[offset];
     setState({
-      isFlyoutAlertLoading: !alertOnRequestedPage || isFetchingFlyoutAlerts,
+      isFlyoutDocumentLoading: !alertOnRequestedPage || isFetchingFlyoutAlerts,
     });
   }, [
-    flyoutAlertIndex,
+    flyoutDocumentIndex,
     flyoutAlertsData?.alerts,
     flyoutPageIndex,
     isFetchingFlyoutAlerts,
@@ -474,42 +488,38 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // handled by `usePaginatedFlyout` / `onOpen` so that re-clicking the same
   // row after closing the flyout reliably re-opens it.
   useEffect(() => {
-    if (flyoutAlertIndex == null || reduxItemsPerPage <= 0) return;
+    if (flyoutDocumentIndex == null || reduxItemsPerPage <= 0) return;
     if (flyoutPageIndex === tablePageIndex) return;
-    const offset = flyoutAlertIndex - flyoutPageIndex * reduxItemsPerPage;
+    const offset = flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage;
     const alert = flyoutAlertsData?.alerts?.[offset] as Alert | undefined;
     if (!alert) return;
-    openPaginatedFlyout(flyoutAlertIndex, {
-      id: alert._id,
-      indexName: alert._index,
-      scopeId: tableType,
-      stateUpdate: { flyoutAlert: alert },
+    openPaginatedFlyout(flyoutDocumentIndex, {
+      flyoutDocument: buildDocumentFromAlert(alert),
     });
   }, [
-    flyoutAlertIndex,
+    flyoutDocumentIndex,
     flyoutAlertsData?.alerts,
     flyoutPageIndex,
     openPaginatedFlyout,
     reduxItemsPerPage,
     tablePageIndex,
-    tableType,
   ]);
 
-  // Keep the store's `flyoutAlert` in sync with the table's own page when
+  // Keep the store's `flyoutDocument` in sync with the table's own page when
   // that page refetches (e.g. `alertsTableRef.current?.refresh()` after an
   // assignee/status mutation from the flyout's `Take action` menu). Without
-  // this, `flyoutAlert` is only ever written on open or on cross-page
+  // this, `flyoutDocument` is only ever written on open or on cross-page
   // navigation (the effect above), so the flyout kept rendering pre-mutation
   // data for same-page alerts.
   useEffect(() => {
-    if (flyoutAlertIndex == null || reduxItemsPerPage <= 0) return;
+    if (flyoutDocumentIndex == null || reduxItemsPerPage <= 0) return;
     if (flyoutPageIndex !== tablePageIndex) return;
-    const offset = flyoutAlertIndex - tablePageIndex * reduxItemsPerPage;
+    const offset = flyoutDocumentIndex - tablePageIndex * reduxItemsPerPage;
     const alert = tableContext?.alerts?.[offset] as Alert | undefined;
     if (!alert) return;
-    setState({ flyoutAlert: alert });
+    setState({ flyoutDocument: buildDocumentFromAlert(alert) });
   }, [
-    flyoutAlertIndex,
+    flyoutDocumentIndex,
     flyoutPageIndex,
     reduxItemsPerPage,
     setState,
@@ -728,6 +738,13 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 };
 
 const MemoizedAlertsTable = memo(AlertsTableComponent);
+
+const buildDocumentFromAlert = (alert: Alert): DataTableRecord =>
+  buildDataTableRecord({
+    _id: alert._id,
+    _index: alert._index,
+    _source: alert as Record<string, unknown>,
+  } as EsHitRecord);
 
 // Wrapping the table in a `QueryClientProvider` here (rather than relying on
 // the provider rendered inside `<ResponseOpsAlertsTable>`) is what lets the
