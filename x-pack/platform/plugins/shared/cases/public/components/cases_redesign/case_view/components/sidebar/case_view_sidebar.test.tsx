@@ -417,11 +417,14 @@ describe('CaseViewSidebar (redesign)', () => {
     // Accordion is closed by default; open it to reveal the callout.
     await userEvent.click(screen.getByTestId('case-view-sidebar-legacy-custom-fields-toggle'));
 
-    // announceOnMount duplicates callout content into a live region with the same test subjects.
-    const content = await screen.findByTestId('legacy-custom-fields-deprecation-callout__content');
-    expect(within(content).getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
+    const callout = await screen.findByTestId('legacy-custom-fields-deprecation-callout');
+    // announceOnMount can duplicate content into a live region with the same test subjects,
+    // so take the first (visible) match.
     expect(
-      within(content).getByTestId('legacy-custom-fields-view-settings-link')
+      within(callout).getAllByTestId('legacy-custom-fields-view-new-link')[0]
+    ).toBeInTheDocument();
+    expect(
+      within(callout).getAllByTestId('legacy-custom-fields-view-settings-link')[0]
     ).toBeInTheDocument();
   });
 
@@ -448,17 +451,19 @@ describe('CaseViewSidebar (redesign)', () => {
 
     await userEvent.click(screen.getByTestId('case-view-sidebar-legacy-custom-fields-toggle'));
 
-    const content = await screen.findByTestId('legacy-custom-fields-deprecation-callout__content');
+    const callout = await screen.findByTestId('legacy-custom-fields-deprecation-callout');
     expect(
-      within(content).queryByTestId('legacy-custom-fields-view-new-link')
+      within(callout).queryByTestId('legacy-custom-fields-view-new-link')
     ).not.toBeInTheDocument();
     expect(
-      within(content).queryByTestId('legacy-custom-fields-view-settings-link')
+      within(callout).queryByTestId('legacy-custom-fields-view-settings-link')
     ).not.toBeInTheDocument();
+    // announceOnMount can duplicate content into a live region with the same text,
+    // so take the first (visible) match.
     expect(
-      within(content).getByText(
+      within(callout).getAllByText(
         /Contact your administrator to confirm the fields have been migrated/i
-      )
+      )[0]
     ).toBeInTheDocument();
   });
 

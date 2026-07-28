@@ -429,14 +429,15 @@ describe('CaseFormFields', () => {
       expect(
         await screen.findByTestId('legacy-custom-fields-deprecated-badge')
       ).toBeInTheDocument();
+      const callout = await screen.findByTestId('legacy-custom-fields-deprecation-callout');
+      expect(callout).toBeInTheDocument();
+      // announceOnMount can duplicate content into a live region with the same test subjects,
+      // so take the first (visible) match.
       expect(
-        await screen.findByTestId('legacy-custom-fields-deprecation-callout')
+        within(callout).getAllByTestId('legacy-custom-fields-view-new-link')[0]
       ).toBeInTheDocument();
-      // announceOnMount duplicates content into a live region with the same test subjects.
-      const content = screen.getByTestId('legacy-custom-fields-deprecation-callout__content');
-      expect(within(content).getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
       expect(
-        within(content).getByTestId('legacy-custom-fields-view-settings-link')
+        within(callout).getAllByTestId('legacy-custom-fields-view-settings-link')[0]
       ).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-divider')).toBeInTheDocument();
     });
@@ -461,20 +462,20 @@ describe('CaseFormFields', () => {
         }
       );
 
+      const callout = await screen.findByTestId('legacy-custom-fields-deprecation-callout');
+      expect(callout).toBeInTheDocument();
       expect(
-        await screen.findByTestId('legacy-custom-fields-deprecation-callout')
-      ).toBeInTheDocument();
-      const content = screen.getByTestId('legacy-custom-fields-deprecation-callout__content');
-      expect(
-        within(content).queryByTestId('legacy-custom-fields-view-new-link')
+        within(callout).queryByTestId('legacy-custom-fields-view-new-link')
       ).not.toBeInTheDocument();
       expect(
-        within(content).queryByTestId('legacy-custom-fields-view-settings-link')
+        within(callout).queryByTestId('legacy-custom-fields-view-settings-link')
       ).not.toBeInTheDocument();
+      // announceOnMount can duplicate content into a live region with the same text,
+      // so take the first (visible) match.
       expect(
-        within(content).getByText(
+        within(callout).getAllByText(
           /Contact your administrator to confirm the fields have been migrated/i
-        )
+        )[0]
       ).toBeInTheDocument();
     });
 
