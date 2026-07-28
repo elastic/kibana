@@ -120,7 +120,7 @@ describe('LeasePool', () => {
       });
       const firstLease = pool.lease('conn:mcp:shared', async () => firstBuild, noopTerminate);
 
-      pool.evict('conn');
+      const evictionPromise = pool.evict('conn');
 
       const replacementTerminate = jest.fn().mockResolvedValue(undefined);
       const replacementBuild = jest.fn().mockResolvedValue('replacement-client');
@@ -130,7 +130,7 @@ describe('LeasePool', () => {
 
       rejectFirstBuild(new Error('stale build failed'));
       await expect(firstLease).rejects.toThrow('stale build failed');
-      await Promise.resolve();
+      await evictionPromise;
 
       const unexpectedBuild = jest.fn().mockResolvedValue('unexpected-client');
       await expect(pool.lease('conn:mcp:shared', unexpectedBuild, noopTerminate)).resolves.toBe(
@@ -207,9 +207,7 @@ describe('LeasePool', () => {
       await pool.lease('conn-a:mcp:shared', async () => 'client-a', terminateA);
       await pool.lease('conn-b:mcp:shared', async () => 'client-b', terminateB);
 
-      pool.evict('conn-a');
-
-      await Promise.resolve();
+      await pool.evict('conn-a');
 
       expect(terminateA).toHaveBeenCalledWith('client-a');
       expect(terminateB).not.toHaveBeenCalled();
@@ -221,8 +219,7 @@ describe('LeasePool', () => {
 
       await pool.lease('conn-x:mcp:shared', async () => 'client-x', terminateFailing);
 
-      pool.evict('conn-x');
-      await Promise.resolve();
+      await pool.evict('conn-x');
 
       let buildCount = 0;
       await pool.lease(
@@ -237,6 +234,33 @@ describe('LeasePool', () => {
       expect(buildCount).toBe(1);
     });
 
+    it('waits for termination to finish', async () => {
+      const pool = new LeasePool<string>();
+      let resolveTermination!: () => void;
+      const terminationPromise = new Promise<void>((resolve) => {
+        resolveTermination = resolve;
+      });
+
+      await pool.lease(
+        'conn-w:mcp:shared',
+        async () => 'client-w',
+        async () => terminationPromise
+      );
+
+      let evictionFinished = false;
+      const evictionPromise = pool.evict('conn-w').then(() => {
+        evictionFinished = true;
+      });
+      await Promise.resolve();
+
+      expect(evictionFinished).toBe(false);
+
+      resolveTermination();
+      await evictionPromise;
+
+      expect(evictionFinished).toBe(true);
+    });
+
     it('terminates after resolve when evicting an in-progress entry', async () => {
       const pool = new LeasePool<string>();
       let resolveClient!: (v: string) => void;
@@ -247,14 +271,14 @@ describe('LeasePool', () => {
 
       const leasePromise = pool.lease('conn-y:mcp:shared', async () => inFlight, terminateSpy);
 
-      pool.evict('conn-y');
+      const evictionPromise = pool.evict('conn-y');
       await Promise.resolve();
 
       expect(terminateSpy).not.toHaveBeenCalled();
 
       resolveClient('client-y');
       await leasePromise;
-      await Promise.resolve();
+      await evictionPromise;
 
       expect(terminateSpy).toHaveBeenCalledTimes(1);
       expect(terminateSpy).toHaveBeenCalledWith('client-y');
@@ -270,12 +294,12 @@ describe('LeasePool', () => {
 
       const leasePromise = pool.lease('conn-z:mcp:shared', async () => inFlight, terminateSpy);
 
-      pool.evict('conn-z');
+      const evictionPromise = pool.evict('conn-z');
       await Promise.resolve();
 
       rejectClient(new Error('build failed'));
       await expect(leasePromise).rejects.toThrow('build failed');
-      await Promise.resolve();
+      await evictionPromise;
 
       expect(terminateSpy).not.toHaveBeenCalled();
     });
@@ -286,8 +310,7 @@ describe('LeasePool', () => {
 
       await pool.lease('other-conn:mcp:shared', async () => 'other-client', terminateOther);
 
-      pool.evict('my-conn');
-      await Promise.resolve();
+      await pool.evict('my-conn');
 
       expect(terminateOther).not.toHaveBeenCalled();
     });

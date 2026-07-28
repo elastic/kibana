@@ -22,6 +22,8 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -342,6 +344,7 @@ export class ActionExecutor {
         secrets: inMemoryAction.secrets,
         actionId,
         isInMemory: true,
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
         rawAction: { ...inMemoryAction, isMissingSecrets: false },
       };
     }
@@ -373,6 +376,7 @@ export class ActionExecutor {
         config,
         secrets,
         actionId,
+        connectorVersion: rawAction.version,
         rawAction: rawAction.attributes,
       };
     } catch (e) {
@@ -423,7 +427,8 @@ export class ActionExecutor {
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
-        const { actionTypeId, name, config, secrets, rawAction } = actionInfo;
+        const { actionTypeId, name, config, secrets, rawAction, connectorVersion, isInMemory } =
+          actionInfo;
         const authMode = rawAction.authMode;
         const profileUid = providedProfileUid || currentUser?.profile_uid;
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
@@ -582,6 +587,12 @@ export class ActionExecutor {
             signal,
             authMode,
             profileUid,
+            ...(actionType.source === ACTION_TYPE_SOURCES.spec
+              ? {
+                  connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
+                  spaceId: spaceId ?? 'default',
+                }
+              : {}),
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -741,6 +752,7 @@ export interface ActionInfo {
   secrets: ActionTypeSecrets;
   actionId: string;
   isInMemory?: boolean;
+  connectorVersion?: string;
   rawAction: RawAction;
 }
 

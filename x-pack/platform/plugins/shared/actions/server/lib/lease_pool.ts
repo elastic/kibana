@@ -14,6 +14,7 @@ const MAX_ENTRIES = 1000;
 interface PoolEntry<TClient> {
   promise: Promise<TClient>;
   terminate: (client: TClient) => Promise<void>;
+  terminationPromise?: Promise<void>;
 }
 
 export class LeasePool<TClient> {
@@ -29,13 +30,7 @@ export class LeasePool<TClient> {
       updateAgeOnGet: true,
       max: MAX_ENTRIES,
       dispose: (value, key) => {
-        void value.promise.then(
-          (client) =>
-            value.terminate(client).catch((err) => {
-              this.logger?.warn(`Failed to terminate client for key "${key}": ${err.message}`);
-            }),
-          () => {}
-        );
+        void this.terminateEntry(value, key);
       },
     });
   }
@@ -62,15 +57,37 @@ export class LeasePool<TClient> {
     return promise;
   }
 
-  evict(connectorId: string): void {
-    const prefix = `${connectorId}:`;
+  async evict(connectorId: string): Promise<void> {
+    const prefix = `${encodeURIComponent(connectorId)}:`;
     const keysToEvict = [...this.cache.keys()].filter((key) => key.startsWith(prefix));
+    const entriesToTerminate = keysToEvict.flatMap((key) => {
+      const entry = this.cache.peek(key);
+      return entry === undefined ? [] : [{ entry, key }];
+    });
+
     for (const key of keysToEvict) {
       this.cache.delete(key);
     }
+
+    await Promise.all(entriesToTerminate.map(({ entry, key }) => this.terminateEntry(entry, key)));
   }
 
   stop(): void {
     this.cache.clear();
+  }
+
+  private terminateEntry(entry: PoolEntry<TClient>, key: string): Promise<void> {
+    entry.terminationPromise ??= entry.promise.then(
+      async (client) => {
+        try {
+          await entry.terminate(client);
+        } catch (err) {
+          this.logger?.warn(`Failed to terminate client for key "${key}": ${err.message}`);
+        }
+      },
+      () => {}
+    );
+
+    return entry.terminationPromise;
   }
 }

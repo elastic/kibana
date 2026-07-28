@@ -100,6 +100,10 @@ export interface ActionTypeExecutorOptions<
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  /** Present only for spec connector executors, where it scopes pooled client leases. */
+  connectorVersion?: string;
+  /** Present only for spec connector executors, where it scopes pooled client leases. */
+  spaceId?: string;
 }
 
 export type ActionResult = Connector;

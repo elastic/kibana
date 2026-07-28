@@ -1978,8 +1978,16 @@ describe('delete()', () => {
       );
     });
 
-    test('calls evictClientPool with the connector id when provided', async () => {
-      const evictClientPool = jest.fn();
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
       const client = new ActionsClient({
         logger,
         actionTypeRegistry,
@@ -2005,6 +2013,11 @@ describe('delete()', () => {
       await client.delete({ id: '1' });
 
       expect(evictClientPool).toHaveBeenCalledWith('1');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
     });
   });
 

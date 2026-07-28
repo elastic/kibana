@@ -5,14 +5,38 @@
  * 2.0.
  */
 
-/**
- * Pool key = one shared client instance per (connector instance, client type).
- *
- * - connectorId: execOptions.actionId (two saved connectors must not share a session).
- * - clientTypeId: registry slot ('mcp').
- * - ':shared': one pool entry per connector+type (not per sub-action). Per-user OAuth pool
- *   key isolation via profileUid is the deferred next term.
- */
-export function buildClientLeaseKey(connectorId: string, clientTypeId: string): string {
-  return `${connectorId}:${clientTypeId}:shared`;
+export const IN_MEMORY_CONNECTOR_REVISION = 'in-memory';
+
+interface ClientLeaseIdentity {
+  connectorId: string;
+  spaceId: string;
+  clientTypeId: string;
+  authMode?: string;
+  profileUid?: string;
+  connectorVersion: string;
 }
+
+const encodeComponent = (component: string): string => encodeURIComponent(component);
+
+/**
+ * Pool key identity is connector, space, client type, authentication identity, and connector
+ * revision. The connector remains the first encoded component so LeasePool can evict every
+ * client for a connector efficiently.
+ */
+export const buildClientLeaseKey = ({
+  connectorId,
+  spaceId,
+  clientTypeId,
+  authMode,
+  profileUid,
+  connectorVersion,
+}: ClientLeaseIdentity): string => {
+  if (authMode === 'per-user' && !profileUid) {
+    throw new Error('A profile UID is required to lease a per-user connector client.');
+  }
+
+  const authIdentity = authMode === 'per-user' ? profileUid! : 'shared';
+  return [connectorId, spaceId, clientTypeId, authIdentity, connectorVersion]
+    .map(encodeComponent)
+    .join(':');
+};
