@@ -32,11 +32,13 @@ export interface ChatCallbackAcceptedResponse {
 export interface ChatCallbackEventResponse {
   execution_id: string;
   event: ChatEvent;
+  idempotency_key?: string;
 }
 
 export interface ChatCallbackFailureResponse {
   execution_id: string;
   error: SerializedExecutionError;
+  idempotency_key: string;
 }
 
 export type ChatCallbackResponse = ChatCallbackEventResponse | ChatCallbackFailureResponse;

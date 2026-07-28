@@ -132,8 +132,9 @@ export class CallbackDeliveryService {
  * Delivery is best-effort: per-event failures are logged and the stream continues.
  * When the stream errors, a failure payload is delivered instead.
  *
- * Only `round_complete` events are retried (at-least-once); progress events and the
- * failure payload are delivered at-most-once.
+ * Terminal payloads — `round_complete` events and the failure payload — are retried
+ * (at-least-once) and carry an `idempotency_key` so the receiver can dedupe redeliveries.
+ * Progress events are delivered at-most-once.
  *
  * Resolves once all deliveries have drained; never rejects. No-op (without subscribing)
  * when the execution has no callback configured — callback delivery is only supported
@@ -172,13 +173,15 @@ export const deliverStream = ({
     events$
       .pipe(
         concatMap((event) => {
+          const isTerminal = isRoundCompleteEvent(event);
           const delivery = callbackDeliveryService.makeCallbackRequest({
             payload: {
               execution_id: execution.executionId,
               event,
+              ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
             },
             makeRequest,
-            retry: isRoundCompleteEvent(event),
+            retry: isTerminal,
           });
 
           return from(delivery).pipe(
@@ -196,9 +199,10 @@ export const deliverStream = ({
             payload: {
               execution_id: execution.executionId,
               error: serializeExecutionError(error),
+              idempotency_key: execution.executionId,
             },
             makeRequest,
-            retry: false,
+            retry: true,
           });
 
           return from(failureDelivery).pipe(

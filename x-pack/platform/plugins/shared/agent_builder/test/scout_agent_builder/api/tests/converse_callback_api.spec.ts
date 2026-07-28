@@ -201,6 +201,12 @@ apiTest.describe(
         const payload = callbackRequest.body as ChatCallbackEventResponse;
         expect(payload.execution_id).toBe(accepted.execution_id);
         expect(payload.event).toBeDefined();
+
+        // Only the retried round_complete event carries an idempotency key.
+        const expectedIdempotencyKey = isRoundCompleteEvent(payload.event)
+          ? accepted.execution_id
+          : undefined;
+        expect(payload.idempotency_key).toBe(expectedIdempotencyKey);
       }
 
       const roundComplete = getRoundCompleteEvent(callbackRequests);
@@ -336,6 +342,7 @@ apiTest.describe(
 
       const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
+      expect(callbackPayload.idempotency_key).toBe(accepted.execution_id);
       expect(callbackPayload.error.code).toBe(AgentBuilderErrorCode.agentExecutionError);
       expect(typeof callbackPayload.error.message).toBe('string');
       expect(callbackPayload.error.message.length).toBeGreaterThan(0);
@@ -384,6 +391,7 @@ apiTest.describe(
 
       const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
+      expect(callbackPayload.idempotency_key).toBe(accepted.execution_id);
       expect(callbackPayload.error.code).toBe(AgentBuilderErrorCode.requestAborted);
       expect(typeof callbackPayload.error.message).toBe('string');
       expect(callbackPayload.error.message.length).toBeGreaterThan(0);

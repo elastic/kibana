@@ -55,6 +55,7 @@ const failurePayload: ChatCallbackFailureResponse = {
     code: AgentBuilderErrorCode.internalError,
     message: 'boom',
   },
+  idempotency_key: 'execution-1',
 };
 
 const responseTimeout = 60000;
@@ -412,7 +413,11 @@ describe('deliverStream', () => {
     expect(service.makeCallbackRequest).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        payload: { execution_id: 'execution-1', event: roundCompleteEvent },
+        payload: {
+          execution_id: 'execution-1',
+          event: roundCompleteEvent,
+          idempotency_key: 'execution-1',
+        },
         retry: true,
       })
     );
@@ -481,9 +486,10 @@ describe('deliverStream', () => {
           code: AgentBuilderErrorCode.internalError,
           message: 'agent boom',
         },
+        idempotency_key: 'execution-1',
       },
       makeRequest,
-      retry: false,
+      retry: true,
     });
   });
 
@@ -505,9 +511,10 @@ describe('deliverStream', () => {
           message: 'request aborted',
           meta: {},
         },
+        idempotency_key: 'execution-1',
       },
       makeRequest,
-      retry: false,
+      retry: true,
     });
   });
 
