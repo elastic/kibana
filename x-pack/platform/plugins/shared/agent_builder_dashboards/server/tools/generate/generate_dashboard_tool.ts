@@ -193,8 +193,8 @@ Use operations[] to:
             ? createCustomContentTemplateResolver({ logger, modelProvider, esClient })
             : undefined,
         });
-        let dashboardData = operationResult.dashboardData;
         const { failures, panelAuthoringNotes, contentResolvedPanelIds } = operationResult;
+        let dashboardData = operationResult.dashboardData;
 
         if (prettify) {
           const prettifyResult = await prettifyPanelConfigs({
