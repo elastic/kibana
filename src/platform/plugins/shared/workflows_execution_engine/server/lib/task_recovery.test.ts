@@ -69,8 +69,8 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    repository = new WorkflowExecutionRepository(esClient, logger);
+    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
   });
 
@@ -232,8 +232,8 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    repository = new WorkflowExecutionRepository(esClient, logger);
+    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
   });
 
@@ -390,8 +390,8 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    repository = new WorkflowExecutionRepository(esClient, logger);
+    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     jest.spyOn(logger, 'error').mockImplementation(() => {});
   });

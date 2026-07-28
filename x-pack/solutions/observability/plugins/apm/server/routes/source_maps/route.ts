@@ -12,7 +12,7 @@ import {
 } from '@kbn/apm-api-shared';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -68,26 +68,29 @@ const listSourceMapRoute = createApmServerRoute({
 });
 
 const MAX_LENGTH_1024 = 1024;
-export const uploadSourceMapParams = z.object({
-  body: z.object({
-    service_name: z.string().max(MAX_LENGTH_1024),
-    service_version: z.string().max(MAX_LENGTH_1024),
-    bundle_filepath: z.string().max(MAX_LENGTH_1024),
-    sourcemap: z
-      .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
-      .pipe(
-        z.string().transform((value, ctx): unknown => {
-          try {
-            return JSON.parse(value);
-          } catch (err) {
-            ctx.addIssue({ code: 'custom', message: err.message });
-            return z.NEVER;
-          }
-        })
-      )
-      .pipe(sourceMapSchema),
-  }),
-});
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const uploadSourceMapParams = lazySchema(() =>
+  z.object({
+    body: z.object({
+      service_name: z.string().max(MAX_LENGTH_1024),
+      service_version: z.string().max(MAX_LENGTH_1024),
+      bundle_filepath: z.string().max(MAX_LENGTH_1024),
+      sourcemap: z
+        .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
+        .pipe(
+          z.string().transform((value, ctx): unknown => {
+            try {
+              return JSON.parse(value);
+            } catch (err) {
+              ctx.addIssue({ code: 'custom', message: err.message });
+              return z.NEVER;
+            }
+          })
+        )
+        .pipe(sourceMapSchema),
+    }),
+  })
+);
 // Can not migrate to apm-api-shared, it depends on Fleet
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
