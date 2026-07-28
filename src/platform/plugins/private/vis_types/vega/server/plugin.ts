@@ -13,11 +13,20 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
+import { registerSandboxCspSpikeRoutes } from './sandbox_csp_spike';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly isDevMode: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isDevMode = initializerContext.env.mode.dev;
+  }
 
   public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+    if (this.isDevMode) {
+      registerSandboxCspSpikeRoutes(core);
+    }
+
     return {};
   }
 
