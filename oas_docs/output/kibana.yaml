@@ -13891,7 +13891,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: |
-            The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 fields per template, max 100 versions per template).
+            The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 fields per template).
         '401':
           content:
             application/json:
@@ -85782,7 +85782,7 @@ components:
       description: |
         The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.
 
-        Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, a definition may declare at most 200 fields, and a template may be updated at most 100 times (version history is capped). A single stored extended-field value may not exceed 30000 characters.
+        Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 characters.
       properties:
         definition:
           description: |

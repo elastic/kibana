@@ -5,9 +5,8 @@ description: >
 
 
   Resource limits (enforced on write; a violation returns `400`): an owner may have at most
-  200 templates per space, a definition may declare at most 200 fields, and a template may be
-  updated at most 100 times (version history is capped). A single stored extended-field value
-  may not exceed 30000 characters.
+  200 templates per space, and a definition may declare at most 200 fields. Version history is
+  intentionally uncapped. A single stored extended-field value may not exceed 30000 characters.
 type: object
 required:
   - owner

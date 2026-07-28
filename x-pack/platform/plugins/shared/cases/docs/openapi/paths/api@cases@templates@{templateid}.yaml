@@ -77,7 +77,7 @@ put:
     '400':
       description: >
         The request body, YAML definition, or template name is invalid, or a resource limit was
-        exceeded (max 200 fields per template, max 100 versions per template).
+        exceeded (max 200 fields per template).
       content:
         application/json:
           schema:
