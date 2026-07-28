@@ -100,6 +100,7 @@ export interface RulesListTableProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkDelete: () => void;
+  onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -141,6 +142,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -181,6 +183,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   const handleBulkDelete = () => {
     setIsBulkActionsOpen(false);
     onBulkDelete();
+  };
+
+  const handleBulkUpdateApiKey = () => {
+    setIsBulkActionsOpen(false);
+    onBulkUpdateApiKey();
   };
 
   const pagination = {
@@ -543,6 +550,16 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                     >
                       {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
                         defaultMessage: 'Disable',
+                      })}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="updateApiKey"
+                      icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+                      onClick={handleBulkUpdateApiKey}
+                      data-test-subj="bulkUpdateRuleApiKey"
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.updateApiKey', {
+                        defaultMessage: 'Update API key',
                       })}
                     </EuiContextMenuItem>,
                     <EuiContextMenuItem

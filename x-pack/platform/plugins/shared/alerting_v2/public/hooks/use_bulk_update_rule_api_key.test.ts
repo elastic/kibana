@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkUpdateRuleApiKey } from './use_bulk_update_rule_api_key';
 
 const mockBulkUpdateRuleApiKey = jest.fn();
+const mockUpdateRuleApiKeyByQuery = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddWarning = jest.fn();
 const mockAddDanger = jest.fn();
@@ -29,6 +30,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     // RulesApi
     return {
       bulkUpdateRuleApiKey: mockBulkUpdateRuleApiKey,
+      updateRuleApiKeyByQuery: mockUpdateRuleApiKeyByQuery,
     };
   },
   CoreStart: (key: string) => key,
@@ -55,7 +57,7 @@ describe('useBulkUpdateRuleApiKey', () => {
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockBulkUpdateRuleApiKey).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
@@ -68,7 +70,7 @@ describe('useBulkUpdateRuleApiKey', () => {
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
     });
 
     expect(mockAddSuccess).toHaveBeenCalledWith('API key updated for 3 rules');
@@ -84,7 +86,7 @@ describe('useBulkUpdateRuleApiKey', () => {
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('1 error'));
@@ -99,7 +101,7 @@ describe('useBulkUpdateRuleApiKey', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -118,7 +120,7 @@ describe('useBulkUpdateRuleApiKey', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -138,11 +140,43 @@ describe('useBulkUpdateRuleApiKey', () => {
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'details', 'rule-1']);
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'details', 'rule-2']);
+  });
+
+  it('dispatches to the by-query endpoint with force=true for a by_query selection', async () => {
+    mockUpdateRuleApiKeyByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_query', filter: 'enabled: true' });
+    });
+
+    expect(mockUpdateRuleApiKeyByQuery).toHaveBeenCalledWith({
+      filter: 'enabled: true',
+      force: true,
+    });
+    expect(mockBulkUpdateRuleApiKey).not.toHaveBeenCalled();
+  });
+
+  it('does not invalidate detail queries for a by_query selection (ids are unknown)', async () => {
+    mockUpdateRuleApiKeyByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_query', match_all: true });
+    });
+
+    expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);
+    expect(invalidateSpy).not.toHaveBeenCalledWith(expect.arrayContaining(['rule', 'details']));
   });
 });

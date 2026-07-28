@@ -154,4 +154,17 @@ export class RulesApi {
       body: JSON.stringify(params),
     });
   }
+
+  public async updateRuleApiKeyByQuery(
+    params: BulkByQueryParams & { force: true }
+  ): Promise<BulkResponse>;
+  public async updateRuleApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult>;
+  public async updateRuleApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult> {
+    return this.http.post<BulkByQueryResult>(
+      `${ALERTING_V2_RULE_API_PATH}/_update_api_key_by_query`,
+      {
+        body: JSON.stringify(params),
+      }
+    );
+  }
 }

@@ -63,6 +63,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const [ruleToUpdateApiKey, setRuleToUpdateApiKey] = useState<RuleApiResponse | null>(null);
   const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showBulkUpdateApiKeyConfirm, setShowBulkUpdateApiKeyConfirm] = useState(false);
 
   const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
 
@@ -106,6 +107,22 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     });
   };
 
+  const handleBulkUpdateApiKey = () => {
+    setShowBulkUpdateApiKeyConfirm(true);
+  };
+
+  const onBulkUpdateApiKeyConfirm = () => {
+    updateApiKeyMutation.mutate(getBulkParams(), {
+      onSuccess: () => {
+        onClearSelection();
+        setShowBulkUpdateApiKeyConfirm(false);
+      },
+      onError: () => {
+        setShowBulkUpdateApiKeyConfirm(false);
+      },
+    });
+  };
+
   const handleBulkEnable = () => {
     bulkEnableMutation.mutate(getBulkParams(), { onSuccess: onClearSelection });
   };
@@ -134,7 +151,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
       return;
     }
     updateApiKeyMutation.mutate(
-      { ids: [ruleToUpdateApiKey.id] },
+      { mode: 'by_ids', ids: [ruleToUpdateApiKey.id] },
       { onSettled: () => setRuleToUpdateApiKey(null) }
     );
   };
@@ -163,6 +180,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkEnable={handleBulkEnable}
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
+        onBulkUpdateApiKey={handleBulkUpdateApiKey}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
         onExpand={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
@@ -220,6 +238,14 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onCancel={() => setShowBulkDeleteConfirm(false)}
           onConfirm={onBulkDeleteConfirm}
           isLoading={bulkDeleteMutation.isLoading}
+        />
+      ) : null}
+      {showBulkUpdateApiKeyConfirm ? (
+        <UpdateApiKeyConfirmationModal
+          ruleCount={selectedCount}
+          onCancel={() => setShowBulkUpdateApiKeyConfirm(false)}
+          onConfirm={onBulkUpdateApiKeyConfirm}
+          isLoading={updateApiKeyMutation.isLoading}
         />
       ) : null}
     </>

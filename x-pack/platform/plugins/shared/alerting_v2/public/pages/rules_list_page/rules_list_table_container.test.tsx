@@ -260,7 +260,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({ onSettled: expect.any(Function) })
       );
     });
@@ -442,6 +442,56 @@ describe('RulesListTableContainer', () => {
         expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
       });
     });
+
+    it('shows the bulk update API key confirmation modal', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toHaveTextContent(/1 rule/);
+      });
+
+      expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
+    });
+
+    it('calls the update API key mutation with the by-ids selection when confirmed', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
+        { mode: 'by_ids', ids: ['rule-1'] },
+        expect.objectContaining({
+          onSuccess: expect.any(Function),
+          onError: expect.any(Function),
+        })
+      );
+    });
+
+    it('dismisses the bulk update API key modal on cancel', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument();
+      });
+      expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
+    });
   });
 
   describe('select all', () => {
@@ -548,6 +598,42 @@ describe('RulesListTableContainer', () => {
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
         { mode: 'by_query', filter: '(kind: alert)' },
         expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+
+    it('rotates API keys by query (force) when confirmed in select-all mode', async () => {
+      renderContainer();
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkUpdateRuleApiKey')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
+        { mode: 'by_query', match_all: true },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
       );
     });
   });

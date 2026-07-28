@@ -81,6 +81,7 @@ const defaultProps: RulesListTableProps = {
   onBulkEnable: jest.fn(),
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
+  onBulkUpdateApiKey: jest.fn(),
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
   onQuickEdit: jest.fn(),
@@ -88,6 +89,7 @@ const defaultProps: RulesListTableProps = {
   onClone: jest.fn(),
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
+  onUpdateApiKey: jest.fn(),
   onTableChange: jest.fn(),
 };
 
@@ -400,6 +402,21 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('bulkDeleteRules'));
 
       expect(onBulkDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens bulk actions popover and calls onBulkUpdateApiKey', async () => {
+      const onBulkUpdateApiKey = jest.fn();
+      renderTable({ selectedCount: 1, onBulkUpdateApiKey });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkUpdateRuleApiKey')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      expect(onBulkUpdateApiKey).toHaveBeenCalledTimes(1);
     });
 
     it('closes the popover after clicking a bulk action', async () => {

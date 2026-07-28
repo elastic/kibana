@@ -182,7 +182,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const handleUpdateApiKey = () => {
     updateRuleApiKey(
-      { ids: [rule.id] },
+      { mode: 'by_ids', ids: [rule.id] },
       { onSettled: () => setShowUpdateApiKeyConfirmation(false) }
     );
   };

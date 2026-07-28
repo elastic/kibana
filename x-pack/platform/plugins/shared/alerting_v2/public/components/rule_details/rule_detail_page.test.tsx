@@ -337,7 +337,7 @@ describe('RuleDetailPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockUpdateRuleApiKey).toHaveBeenCalledWith(
-      { ids: ['rule-1'] },
+      { mode: 'by_ids', ids: ['rule-1'] },
       expect.objectContaining({ onSettled: expect.any(Function) })
     );
 
