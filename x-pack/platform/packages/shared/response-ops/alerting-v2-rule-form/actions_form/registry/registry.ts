@@ -10,7 +10,8 @@ import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
 
-const EMAIL_PARAMS_TEMPLATE = `to: ""
+const EMAIL_PARAMS_TEMPLATE = `to: 
+  - ""
 subject: ""
 message: ""
 `;

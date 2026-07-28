@@ -64,7 +64,7 @@ export const registerUpsertRoute = (
         },
       },
       async (context, request, response) =>
-        telemetryHandler(request, usageCounter, async () => {
+        telemetryHandler(request, { usageCounter }, async () => {
           try {
             const { body, operation } = await upsertDiscoverSession(
               context,
