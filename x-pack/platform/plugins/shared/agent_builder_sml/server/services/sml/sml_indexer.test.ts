@@ -192,7 +192,11 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         permissions: {
           kibana: {
-            privileges: { name: ['default|perm1', 'space-2|perm1'], count: 1 },
+            privileges: {
+              name: ['default|login:', 'default|perm1', 'space-2|login:', 'space-2|perm1'],
+              raw: ['login:', 'perm1'],
+              count: 2,
+            },
           },
         },
         ingestion_method: 'crawled',
@@ -271,7 +275,13 @@ describe('createSmlIndexer', () => {
         created_at: expect.any(String),
         updated_at: expect.any(String),
         permissions: {
-          kibana: { privileges: { name: ['default|saved_object:dashboard/get'], count: 1 } },
+          kibana: {
+            privileges: {
+              name: ['default|login:', 'default|saved_object:dashboard/get'],
+              raw: ['login:', 'saved_object:dashboard/get'],
+              count: 2,
+            },
+          },
         },
         ingestion_method: 'crawled',
       });
@@ -691,7 +701,7 @@ describe('createSmlIndexer', () => {
 
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: { name: [], count: 0 } },
+          kibana: { privileges: { name: ['default|login:'], raw: ['login:'], count: 1 } },
         });
       });
 
@@ -734,7 +744,13 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: { name: ['default|saved_object:lens/get'], count: 1 } },
+          kibana: {
+            privileges: {
+              name: ['default|login:', 'default|saved_object:lens/get'],
+              raw: ['login:', 'saved_object:lens/get'],
+              count: 2,
+            },
+          },
         });
       });
 
@@ -769,7 +785,13 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: { name: ['default|p1'], count: 1 } },
+          kibana: {
+            privileges: {
+              name: ['default|login:', 'default|p1'],
+              raw: ['login:', 'p1'],
+              count: 2,
+            },
+          },
         });
       });
 
@@ -847,8 +869,123 @@ describe('createSmlIndexer', () => {
         expect(ops).toHaveLength(1);
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(ops[0].index.document.permissions).toEqual({
-          kibana: { privileges: { name: ['default|p1'], count: 1 } },
+          kibana: {
+            privileges: {
+              name: ['default|login:', 'default|p1'],
+              raw: ['login:', 'p1'],
+              count: 2,
+            },
+          },
         });
+      });
+
+      it('normalizes a spaces list containing "*" to exactly ["*"]', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlEntry = { type: 'dashboard', title: 'T', content: 'c' };
+        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: { name: 'saved_object:dashboard/get' } },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'dash-wildcard',
+            attachmentType: 'dashboard',
+            action: 'create',
+            spaces: ['*'],
+            esClient,
+          })
+        );
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        expect(bulkCall.operations[0].index.document.permissions).toEqual({
+          kibana: {
+            privileges: {
+              name: ['*|login:', '*|saved_object:dashboard/get'],
+              raw: ['login:', 'saved_object:dashboard/get'],
+              count: 2,
+            },
+          },
+        });
+      });
+
+      it('dedupes duplicate raw privilege names before computing count', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlEntry = { type: 'lens', title: 'T', content: 'c' };
+        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: { name: ['p1', 'p1'] } },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-dedupe',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['default'],
+            esClient,
+          })
+        );
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        expect(bulkCall.operations[0].index.document.permissions).toEqual({
+          kibana: {
+            privileges: {
+              name: ['default|login:', 'default|p1'],
+              raw: ['login:', 'p1'],
+              count: 2,
+            },
+          },
+        });
+      });
+
+      it('skips indexing and warns when an item resolves to zero spaces', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlEntry = { type: 'lens', title: 'T', content: 'c' };
+        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-no-spaces',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: [],
+            esClient,
+            logger,
+          })
+        );
+
+        expect(bulkMock).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('has no spaces — skipping (fail closed)')
+        );
       });
     });
   });

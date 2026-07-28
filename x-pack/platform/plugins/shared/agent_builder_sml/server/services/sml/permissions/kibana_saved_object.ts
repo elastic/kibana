@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SmlPermissions } from '../types';
+import type { SmlPermissionsInput } from '../types';
 
 /**
- * Returns the `SmlPermissions` for a saved-object-backed SML type.
+ * Returns the `SmlPermissionsInput` for a saved-object-backed SML type.
  * Centralised so all SO types use the same `saved_object:<type>/get` privilege
  * string and a future SO permission-model change only needs one update.
  */
@@ -16,7 +16,7 @@ export const kibanaSavedObjectPermissions = ({
   savedObjectType,
 }: {
   savedObjectType: string;
-}): SmlPermissions => {
+}): SmlPermissionsInput => {
   if (!savedObjectType) {
     throw new Error('kibanaSavedObjectPermissions: savedObjectType is required');
   }

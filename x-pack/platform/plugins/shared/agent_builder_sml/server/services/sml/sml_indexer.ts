@@ -19,8 +19,11 @@ import type {
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlPermissions,
+  SmlPermissionsInput,
   SmlTypeDefinition,
 } from './types';
+
+export const SPACE_MEMBERSHIP_ACTION = 'login:';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
@@ -186,7 +189,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // leave the origin in a wiped state. `getPermissions(originId, ctx)`
     // is a per-origin computation (it doesn't take an entry), so one call
     // is correct.
-    let resolvedPermissions: SmlPermissions;
+    let resolvedPermissions: SmlPermissionsInput;
     try {
       resolvedPermissions = await this.resolvePermissionsForOrigin({
         definition,
@@ -217,6 +220,10 @@ class SmlIndexerImpl implements SmlIndexer {
       ingestionMethod: 'crawled',
       resolvedPermissions,
     });
+
+    if (!indexOp) {
+      return;
+    }
 
     await this.executeIndexOp({ indexOp, esClient, originId });
   }
@@ -251,7 +258,7 @@ class SmlIndexerImpl implements SmlIndexer {
     definition: SmlTypeDefinition;
     originId: string;
     context: SmlContext;
-  }): Promise<SmlPermissions> {
+  }): Promise<SmlPermissionsInput> {
     if (definition.getPermissions) {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job.
@@ -280,15 +287,24 @@ class SmlIndexerImpl implements SmlIndexer {
     originId: string;
     spaces: string[];
     ingestionMethod: SmlIngestionMethod;
-    resolvedPermissions: SmlPermissions;
+    resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
   }) {
-    const now = new Date().toISOString();
     const rawNames = resolvedPermissions.kibana?.privileges?.name ?? [];
-    const rawNamesArray = Array.isArray(rawNames) ? rawNames : [rawNames];
-    const compositeNames = spaces.flatMap((space) =>
-      rawNamesArray.map((name) => `${space}|${name}`)
-    );
+    const rawSet = new Set(Array.isArray(rawNames) ? rawNames : [rawNames]);
+    rawSet.add(SPACE_MEMBERSHIP_ACTION);
+    const rawActions = [...rawSet].sort();
+
+    const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
+    if (normalizedSpaces.length === 0) {
+      this.logger.warn(`SML indexer: entry '${entryId}' has no spaces — skipping (fail closed)`);
+      return undefined;
+    }
+    const compositeNames = normalizedSpaces
+      .flatMap((space) => rawActions.map((name) => `${space}|${name}`))
+      .sort();
+
+    const now = new Date().toISOString();
     const document: SmlDocument = {
       id: entryId,
       type: entry.type,
@@ -298,7 +314,7 @@ class SmlIndexerImpl implements SmlIndexer {
       created_at: createdAt || now,
       updated_at: now,
       permissions: {
-        kibana: { privileges: { name: compositeNames, count: rawNamesArray.length } },
+        kibana: { privileges: { name: compositeNames, raw: rawActions, count: rawActions.length } },
       },
       ingestion_method: ingestionMethod,
     };
@@ -335,7 +351,7 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     originId,
   }: {
-    indexOp: ReturnType<SmlIndexerImpl['buildIndexOp']>;
+    indexOp: NonNullable<ReturnType<SmlIndexerImpl['buildIndexOp']>>;
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {

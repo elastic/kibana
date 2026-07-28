@@ -75,6 +75,7 @@ const smlStorageSchemaProperties = {
           privileges: types.object({
             properties: {
               name: types.keyword({}),
+              raw: types.keyword({}),
               count: types.long({}),
             },
           }),

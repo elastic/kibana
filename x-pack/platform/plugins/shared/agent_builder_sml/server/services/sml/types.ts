@@ -30,8 +30,13 @@ interface DiscoveryLabel {
   kind: string;
 }
 
+/** Returned by SmlTypeDefinition.getPermissions hooks: RAW Kibana action strings. */
+export interface SmlPermissionsInput {
+  kibana: { privileges: { name: string | string[] } };
+}
+
 /**
- * Permissions required to access an entry.
+ * Stored on SML documents: composite space|action tokens + raw actions + count.
  *
  * `privileges.name` is a multi-value keyword field of composite `space|action`
  * tokens, e.g. `"default|saved_object:dashboard/get"`. The space prefix
@@ -45,22 +50,21 @@ interface DiscoveryLabel {
  * `minimum_should_match_field` to express AND-semantics: the caller must hold
  * all N required privileges in the current space.
  *
- * `count` is **derived by the indexer** and must not be set by `getPermissions`
- * hooks; any value supplied there is ignored. It is optional here so that hook
- * return values and intermediate shapes are not required to include it.
- *
- * The `kibana` sub-object is always present on stored documents. An empty
- * `privileges.name` array (and `count: 0`) means the entry is public within
- * any space it belongs to.
- *
  * This shape mirrors the Elasticsearch index template mappings at
- * `permissions.kibana.privileges.{name, count}`.
+ * `permissions.kibana.privileges.{name, raw, count}`.
  */
 export interface SmlPermissions {
   kibana: {
     privileges: {
-      name: string | string[];
-      count?: number;
+      /** Composite `space|action` tokens, e.g. `"default|saved_object:dashboard/get"`. */
+      name: string[];
+      /** Distinct raw action strings before the space cross-product. */
+      raw: string[];
+      /**
+       * Number of distinct raw actions required (= raw.length = per-space token count).
+       * Used by Elasticsearch's terms_set query with minimum_should_match_field.
+       */
+      count: number;
     };
   };
 }
@@ -183,7 +187,7 @@ export interface SmlTypeDefinition {
   getPermissions?: (
     originId: string,
     context: SmlContext
-  ) => Promise<SmlPermissions> | SmlPermissions;
+  ) => Promise<SmlPermissionsInput> | SmlPermissionsInput;
 
   /**
    * Optional: custom crawl interval for the crawler.
@@ -240,8 +244,7 @@ export interface SmlDocument {
   /** Timestamp when last updated */
   updated_at: string;
   /**
-   * Permissions required to access this entry. See {@link SmlPermissions} and
-   * {@link SmlKibanaPrivilege} for the composite token format.
+   * Permissions required to access this entry. See {@link SmlPermissions} for the composite token format.
    */
   permissions: SmlPermissions;
   /** How this entry was produced. */
