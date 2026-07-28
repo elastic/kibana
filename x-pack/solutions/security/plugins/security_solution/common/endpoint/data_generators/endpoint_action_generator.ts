@@ -221,6 +221,50 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       } as typeof output;
     }
 
+    if (command === 'kill-process' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: overrides.error
+            ? 'ra_kill-process_error_not-found'
+            : 'ra_kill-process_success_done',
+          ...(!overrides.error
+            ? {
+                command: 'some_command.exe',
+                pid: 234,
+                descendants: [
+                  {
+                    pid: 456,
+                    parent_pid: 234,
+                    entity_id: 'ksuqwn8364fnbks.456',
+                    parent_entity_id: 'ksuqwn8364fnbks.234',
+                    command: '456_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 567,
+                    parent_pid: 456,
+                    entity_id: 'ksuqwn8364fnbks.567',
+                    parent_entity_id: 'ksuqwn8364fnbks.456',
+                    command: '567_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 654,
+                    parent_pid: 234,
+                    entity_id: 'ksuqwn8364fnbks.654',
+                    parent_entity_id: 'ksuqwn8364fnbks.234',
+                    command: '654_command.exe',
+                    was_killed: false,
+                    error: 'process is protected',
+                  },
+                ],
+              }
+            : {}),
+        },
+      } as typeof output;
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
