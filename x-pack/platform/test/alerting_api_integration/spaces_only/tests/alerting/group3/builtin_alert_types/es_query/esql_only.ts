@@ -244,7 +244,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const docs = await waitForDocs(3);
       const titlePattern = /rule 'always fire' matched query for group group-\d/;
       const messagePattern =
-        /Document count is 1 in the last 1h for group-\d. Alert when greater than 0./;
+        /Document count is 5 in the last 1h for group-\d. Alert when greater than 0./;
       const conditionPattern = /Query matched documents for group "group-\d"/;
       const groupPattern = /{"group":"group-\d"}/;
 
@@ -270,7 +270,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
         expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).to.be(1);
+        expect(value).to.be(5);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
       }
     });
