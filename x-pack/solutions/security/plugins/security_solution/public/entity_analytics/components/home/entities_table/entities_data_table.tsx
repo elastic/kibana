@@ -644,7 +644,9 @@ export const EntitiesDataTable = ({
             columns={currentColumns}
             dataView={dataView}
             loadingState={loadingState}
-            onFilter={config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined}
+            onFilter={
+              config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined
+            }
             onResize={onResize}
             onSetColumns={onSetColumns}
             onSort={onSort}
