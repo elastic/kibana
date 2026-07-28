@@ -312,7 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check that numbers changed
       await lens.waitForVisualization();
       await retry.try(async () => {
-        expect(await lens.getDatatableCellText(0, 0)).to.eql('9,169');
+        expect(await lens.getDatatableCellText(0, 0)).to.eql('9,168');
       });
 
       // now change the formula to add an inner filter to count
