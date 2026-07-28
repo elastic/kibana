@@ -23,7 +23,7 @@ import { DiffView } from './json_diff/diff_view';
 import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
-const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
+export const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   /*
     By default, prebuilt rules don't have any actions or exception lists. So if a user has defined actions or exception lists for a rule, it'll show up as diff. This looks confusing as the user might think that their actions and exceptions lists will get removed after the upgrade, which is not the case - they will be preserved.
   */
@@ -70,7 +70,7 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
  * @param {RuleResponse} originalRule - Rule of a RuleResponse type.
  * @returns {RuleResponse} - The updated normalized rule object.
  */
-const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
+export const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   const rule = { ...originalRule };
 
   /*

@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { omit, pick } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
@@ -48,8 +49,12 @@ import {
   DIFF_SAVED_DESCRIPTION,
   DIFF_AI_DESCRIPTION,
 } from './translations';
-import { RuleDiffTab } from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
-import { stripServerFields } from '../../../detection_engine/common/ai_rule_creation_handler';
+import {
+  RuleDiffTab,
+  normalizeRule,
+  HIDDEN_PROPERTIES,
+} from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
+import { stringifyWithExpandedEmpties } from '../../../detection_engine/rule_management/components/rule_details/three_way_diff/comparison_side/utils';
 import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -125,10 +130,19 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   const { data: savedRule } = useRule(attachment.origin ?? '', false, {
     enabled: Boolean(attachment.origin),
   });
-  const originalRule = useMemo(
-    () => (savedRule ? (stripServerFields(savedRule) as RuleResponse) : null),
-    [savedRule]
-  );
+  const originalRule = savedRule ?? null;
+
+  const hasDiff = useMemo(() => {
+    if (!originalRule || !rule) return false;
+    const normalizedNew = omit(
+      normalizeRule({ ...rule, threat: rule.threat ?? [] }),
+      ...HIDDEN_PROPERTIES
+    );
+    const normalizedOld = omit(pick(normalizeRule(originalRule), Object.keys(normalizedNew)));
+    return (
+      stringifyWithExpandedEmpties(normalizedOld) !== stringifyWithExpandedEmpties(normalizedNew)
+    );
+  }, [originalRule, rule]);
 
   if (!rule) {
     return null;
@@ -244,7 +258,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      {originalRule != null && (
+      {hasDiff && originalRule && (
         <>
           <EuiSpacer size="s" />
           <EuiAccordion
@@ -254,7 +268,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           >
             <RuleDiffTab
               oldRule={originalRule}
-              newRule={rule}
+              newRule={{ ...rule, threat: rule.threat ?? [] }}
               leftDiffSideLabel={DIFF_SAVED_LABEL}
               rightDiffSideLabel={DIFF_AI_LABEL}
               leftDiffSideDescription={DIFF_SAVED_DESCRIPTION}
