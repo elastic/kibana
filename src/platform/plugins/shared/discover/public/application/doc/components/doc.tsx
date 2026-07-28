@@ -29,8 +29,6 @@ export interface DocProps extends EsDocSearchProps {
   referrer?: string;
 }
 
-const DOC_VIEWER_BOTTOM_RESERVE_PX = 56;
-
 export function Doc(props: DocProps) {
   const { dataView } = props;
   const { scopedProfilesManager } = useScopedServices();
@@ -69,12 +67,15 @@ export function Doc(props: DocProps) {
     });
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services, title]);
 
-  const back: AppHeaderBack = { href: props.referrer ?? '#/' };
+  const back: AppHeaderBack = {
+    href: props.referrer ?? '#/',
+    label: i18n.translate('discover.doc.backButtonLabel', { defaultMessage: 'Discover' }),
+  };
 
   return (
     <>
       <AppHeader title={title} back={back} spacing="compact" />
-      <EuiPage>
+      <EuiPage css={{ flex: '1 1 0', minHeight: 0 }}>
         <h1
           id="singleDocTitle"
           className="euiScreenReaderOnly"
@@ -85,7 +86,7 @@ export function Doc(props: DocProps) {
             values: { id: props.id },
           })}
         </h1>
-        <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
+        <EuiPageBody panelled paddingSize="s" panelProps={{ role: 'main', hasShadow: false }}>
           {reqState === ElasticRequestState.NotFoundDataView && (
             <EuiCallOut
               announceOnMount
@@ -157,11 +158,7 @@ export function Doc(props: DocProps) {
 
           {reqState === ElasticRequestState.Found && record !== null && dataView && (
             <div data-test-subj="doc-hit">
-              <SingleDocViewer
-                record={record}
-                dataView={dataView}
-                decreaseAvailableHeightBy={DOC_VIEWER_BOTTOM_RESERVE_PX}
-              />
+              <SingleDocViewer record={record} dataView={dataView} />
             </div>
           )}
         </EuiPageBody>

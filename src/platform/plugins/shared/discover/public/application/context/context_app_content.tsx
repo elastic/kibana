@@ -105,8 +105,8 @@ export function ContextAppContent({
   docViewerRef,
   setExpandedDoc,
 }: ContextAppContentProps) {
-  const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
+  const { uiSettings: config, uiActions } = services;
 
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
@@ -116,6 +116,7 @@ export function ContextAppContent({
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
+  const showInterceptedWarning = Boolean(interceptedWarnings.length);
   const showPredecessorsWarning =
     !isAnchorLoading && !arePredecessorsLoading && predecessors.length < predecessorCount;
   const showSuccessorsWarning =
@@ -206,17 +207,19 @@ export function ContextAppContent({
 
   return (
     <Fragment>
-      <WrapperWithPadding>
-        {Boolean(interceptedWarnings.length) && (
-          <>
-            <SearchResponseWarningsCallout warnings={interceptedWarnings} />
-            <EuiSpacer size="s" />
-          </>
-        )}
-        {showPredecessorsWarning && (
-          <ActionBarWarning docCount={predecessors.length} type={SurrDocType.PREDECESSORS} />
-        )}
-      </WrapperWithPadding>
+      {(showInterceptedWarning || showPredecessorsWarning) && (
+        <WrapperWithPadding direction="horizontal">
+          {showInterceptedWarning && (
+            <>
+              <SearchResponseWarningsCallout warnings={interceptedWarnings} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {showPredecessorsWarning && (
+            <ActionBarWarning docCount={predecessors.length} type={SurrDocType.PREDECESSORS} />
+          )}
+        </WrapperWithPadding>
+      )}
       <div css={dscDocsGridCss}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGrid
@@ -262,7 +265,7 @@ export function ContextAppContent({
           />
         </CellActionsProvider>
       </div>
-      <WrapperWithPadding>
+      <WrapperWithPadding direction="all">
         {showSuccessorsWarning && (
           <>
             <ActionBarWarning docCount={successors.length} type={SurrDocType.SUCCESSORS} />
@@ -282,13 +285,16 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC<React.PropsWithChildren<{}>> = ({ children }) => {
+const WrapperWithPadding: FC<React.PropsWithChildren<{ direction: 'horizontal' | 'all' }>> = ({
+  children,
+  direction,
+}) => {
   const padding = useEuiPaddingSize('s');
 
   return (
     <div
       css={css`
-        padding: 0 ${padding};
+        padding: ${direction === 'horizontal' ? `0 ${padding}` : padding};
       `}
     >
       {children}

@@ -79,20 +79,21 @@ export const TabsView = (props: SingleTabViewProps) => {
     if (isChromeNextProjectHeader) {
       return (tabsBar) => {
         // Vertical rule separator.
-        const tabsBarWithDelimiter = tabsBar ? (
+        const tabsBarWithDelimiter = (
           <>
             {tabsBar}
-            <span
-              aria-hidden="true"
-              css={css`
-                width: ${euiTheme.border.width.thin};
-                height: 28px;
-                background-color: ${euiTheme.colors.borderBasePlain};
-              `}
-            />
+            {tabsBar && (
+              <span
+                aria-hidden="true"
+                css={css`
+                  width: ${euiTheme.border.width.thin};
+                  height: ${euiTheme.size.base};
+                  background-color: ${euiTheme.colors.borderBasePlain};
+                  margin-left: ${euiTheme.size.xs};
+                `}
+              />
+            )}
           </>
-        ) : (
-          tabsBar
         );
         return <ChromeAppHeader menu={topNavMenuItems} tabsBar={tabsBarWithDelimiter} />;
       };

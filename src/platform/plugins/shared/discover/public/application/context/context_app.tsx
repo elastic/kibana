@@ -232,7 +232,10 @@ export const ContextApp = ({
     defaultMessage: 'Documents surrounding #{anchorId}',
     values: { anchorId },
   });
-  const back: AppHeaderBack = { href: referrer ?? '#/' };
+  const back: AppHeaderBack = {
+    href: referrer ?? '#/',
+    label: i18n.translate('discover.context.backButtonLabel', { defaultMessage: 'Discover' }),
+  };
 
   return (
     <Fragment>

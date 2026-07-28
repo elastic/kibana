@@ -96,7 +96,8 @@ export function ActionBar({
                 onChangeCount(type, value);
               }
             }}
-            flush="right"
+            size="s"
+            flush="both"
           >
             <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
           </EuiButtonEmpty>
