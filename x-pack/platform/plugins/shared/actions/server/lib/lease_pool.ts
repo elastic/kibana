@@ -47,8 +47,11 @@ export class LeasePool<TClient> {
   ): Promise<TClient> {
     const existing = this.cache.get(key);
     if (existing !== undefined) {
+      this.logger?.debug(`Reusing pooled client for key "${key}"`);
       return existing.promise;
     }
+
+    this.logger?.debug(`Building new pooled client for key "${key}"`);
 
     const promise = Promise.resolve().then(buildFn);
     promise.catch(() => {
