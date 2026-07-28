@@ -1,0 +1,229 @@
+# GitHub-driven KI (Knowledge Indicator) extraction proof of concept.
+#
+# A first agent pass discovers deployable services in the repositories returned
+# by `github.list_repos`. A second, service-scoped pass finds production logging
+# call sites. The workflow then sends the verified source analysis to the
+# Significant Events KI endpoint. It stays in Kibana because the
+# `github.code_researcher` agent, GitHub tools and skills, and the endpoint it
+# drives are plugin-owned; no SCS coupling remains. It runs manually and on a
+# schedule, while the fingerprint noop guard keeps unchanged runs cheap.
+
+version: '1'
+name: 'Code KI Extraction'
+enabled: true
+description: 'This workflow is used by the system and should not be modified.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - knowledge-indicators
+  - code-extraction
+settings:
+  timeout: '60m'
+  concurrency:
+    key: significant-events-code-ki-extraction
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '1h'
+  - type: manual
+    inputs:
+      - name: agentConnectorId
+        type: string
+        default: '.openai-gpt-5.2-chat_completion'
+        required: false
+        description: 'Connector ID for the GitHub Code Researcher agent.'
+steps:
+  - name: identify_services
+    type: ai.agent
+    agent-id: github.code_researcher
+    connector-id: '${{ inputs.agentConnectorId }}'
+    plugin-id: 'significant_events'
+    aggregate-by: 'significant_events'
+    with:
+      message: |
+        Load the github-ki-discovery skill before doing any work.
+        Task: SERVICE_DISCOVERY
+
+        Discover every independently deployable service in every repository returned by github.list_repos.
+
+        Resolve each configured ref with github.get_commit first. Pass the ref exactly as returned by
+        github.list_repos in the sha argument; never prepend refs/tags/ or refs/heads/. Use the resulting
+        full commit SHA for every tree and file read. Prefer github.get_repository_tree and targeted file reads. Use
+        github.search_code only when the repository tree cannot locate the relevant configuration; pass
+        phase="service-discovery" and always scope the query with repo:owner/repo.
+
+        A service has its own entrypoint, build target, deployment manifest, or container. Exclude libraries,
+        shared packages, tests, examples, generated code, and config-only directories.
+
+        For every service return the repository and immutable gitSha, its repository-relative serviceRoot,
+        emitted service.name, primary language, deployment evidence, and any version or telemetry metadata
+        verified in source. Also report repository language weights and IaC file signals. Repeat repository
+        metadata for each service so every item is self-contained. Never guess.
+      schema:
+        type: object
+        properties:
+          services:
+            type: array
+            items:
+              type: object
+              properties:
+                repository:
+                  type: string
+                gitSha:
+                  type: string
+                  description: 'Full immutable Git commit SHA used for all evidence.'
+                serviceRoot:
+                  type: string
+                  description: 'Repository-relative root directory for this deployable service.'
+                name:
+                  type: string
+                  description: 'The service.name emitted by this service.'
+                language:
+                  type: string
+                repositoryLanguages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      language:
+                        type: string
+                      count:
+                        type: number
+                        description: 'Non-negative relative weight used to rank repository languages.'
+                    required: [language, count]
+                iacSignals:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      kind:
+                        type: string
+                        enum: [kubernetes, helm, compose, terraform, pulumi, cloudformation]
+                      path:
+                        type: string
+                    required: [kind, path]
+                version:
+                  type: string
+                environmentVariables:
+                  type: array
+                  items:
+                    type: string
+                configPaths:
+                  type: array
+                  items:
+                    type: string
+                loggingPattern:
+                  type: string
+                tracing:
+                  type: boolean
+                evidence:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      line:
+                        type: integer
+                      snippet:
+                        type: string
+                    required: [path]
+              required: [repository, gitSha, serviceRoot, name]
+        required: [services]
+    timeout: 900s
+    on-failure:
+      continue: false
+
+  - name: has_services
+    type: if
+    condition: '${{ steps.identify_services.error == null and steps.identify_services.output.structured_output.services != null }}'
+    steps:
+      # Intentionally serial for the POC so observed search_code timestamps expose
+      # the natural workload without concurrency-induced bursts.
+      - name: process_services
+        type: foreach
+        foreach: '${{ steps.identify_services.output.structured_output.services }}'
+        max-concurrency: 1
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: identify_logging_sites
+            type: ai.agent
+            agent-id: github.code_researcher
+            connector-id: '${{ inputs.agentConnectorId }}'
+            plugin-id: 'significant_events'
+            aggregate-by: 'significant_events'
+            with:
+              message: |
+                Load the github-ki-discovery skill before doing any work.
+                Task: LOGGING_SITES
+
+                Find production logging call sites for this deployable service:
+                - repository: {{ foreach.item.repository }}
+                - immutable commit SHA: {{ foreach.item.gitSha }}
+                - service name: {{ foreach.item.name }}
+                - service root: {{ foreach.item.serviceRoot }}
+                - language: {{ foreach.item.language }}
+
+                Stay inside the service root. Use github.get_repository_tree and pinned file reads first.
+                Use github.search_code only when needed; every search must include
+                repo:{{ foreach.item.repository }} path:{{ foreach.item.serviceRoot }}, phase="logging-sites",
+                and serviceName="{{ foreach.item.name }}". Verify every candidate with
+                github.get_file_contents at the supplied SHA. Exclude tests, examples, and generated code.
+
+                Return bounded source excerpts containing actual logger calls and their static message
+                templates. Prefer completeness for production call sites but deduplicate repeated messages.
+              schema:
+                type: object
+                properties:
+                  loggingChunks:
+                    type: array
+                    maxItems: 200
+                    items:
+                      type: object
+                      properties:
+                        content:
+                          type: string
+                          description: 'Concise source excerpt containing one or more logger calls.'
+                        language:
+                          type: string
+                        location:
+                          type: string
+                          description: 'Repository-relative path and optional line number.'
+                      required: [content, location]
+                required: [loggingChunks]
+            timeout: 600s
+            on-failure:
+              continue: false
+
+          - name: identify_service
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/code_intelligence/_identify_service'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                repository: '{{ foreach.item.repository }}'
+                gitSha: '{{ foreach.item.gitSha }}'
+                repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
+                iacSignals: '${{ foreach.item.iacSignals }}'
+                loggingChunks: '${{ steps.identify_logging_sites.output.structured_output.loggingChunks }}'
+                service:
+                  name: '{{ foreach.item.name }}'
+                  serviceRoot: '{{ foreach.item.serviceRoot }}'
+                  language: '{{ foreach.item.language }}'
+                  version: '{{ foreach.item.version }}'
+                  environmentVariables: '${{ foreach.item.environmentVariables }}'
+                  configPaths: '${{ foreach.item.configPaths }}'
+                  loggingPattern: '{{ foreach.item.loggingPattern }}'
+                  tracing: '${{ foreach.item.tracing }}'
+                  evidence: '${{ foreach.item.evidence }}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential

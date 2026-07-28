@@ -13,6 +13,7 @@ import { internalDiscoveriesRoutes } from './internal/discoveries/route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
 import { internalEventsRoutes } from './internal/events/route';
 import { internalIdentifyKIFeaturesRoutes } from './internal/knowledge_indicators/features/identify_route';
+import { internalKICodeFeaturesRoutes } from './internal/knowledge_indicators/code_features/route';
 import { internalKIContinuousKIExtractionRoutes } from './internal/knowledge_indicators/continuous_ki_extraction/route';
 import { internalKIEligibleStreamsRoutes } from './internal/knowledge_indicators/extraction/eligible_streams_route';
 import { internalKIFeatureRoutes } from './internal/knowledge_indicators/features/route';
@@ -40,6 +41,7 @@ export const significantEventsRouteRepository = {
   ...internalDiscoveryRoutes,
   ...internalEventsRoutes,
   ...internalIdentifyKIFeaturesRoutes,
+  ...internalKICodeFeaturesRoutes,
   ...internalKIContinuousKIExtractionRoutes,
   ...internalKIEligibleStreamsRoutes,
   ...internalKIFeatureRoutes,

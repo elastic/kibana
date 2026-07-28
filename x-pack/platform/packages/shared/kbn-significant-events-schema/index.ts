@@ -72,6 +72,14 @@ export {
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 
+export {
+  type KnowledgeIndicatorSource,
+  knowledgeIndicatorSourceSchema,
+  knowledgeIndicatorSourceArraySchema,
+  deriveKnowledgeIndicatorSource,
+  CODE_EVIDENCE_PREFIX,
+} from './src/source';
+
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';

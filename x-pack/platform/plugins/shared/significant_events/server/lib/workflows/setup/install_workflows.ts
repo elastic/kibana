@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
 } from '@kbn/workflows/managed';
@@ -39,6 +40,12 @@ const WORKFLOWS_TO_INSTALL: Array<{
   {
     workflowId: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
+  },
+  // Code Intelligence (Stage 1) extraction. Installed globally like the other
+  // core KI workflows; runs manually and on its scheduled trigger.
+  {
+    workflowId: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   },
 ];
 

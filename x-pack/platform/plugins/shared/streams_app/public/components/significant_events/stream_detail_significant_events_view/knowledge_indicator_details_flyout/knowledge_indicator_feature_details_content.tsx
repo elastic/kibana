@@ -29,6 +29,34 @@ interface Props {
 export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
   const listItems = useMemo(() => {
     const tags = feature.tags?.length ? feature.tags : [];
+    const servicePropertyItems = SERVICE_STRING_PROPERTIES.flatMap(({ key, label }) => {
+      const value = feature.properties[key];
+      return typeof value === 'string'
+        ? [
+            {
+              title: label,
+              description: <EuiText size="s">{value}</EuiText>,
+            },
+          ]
+        : [];
+    });
+    const tracing = feature.properties.tracing;
+    if (typeof tracing === 'boolean') {
+      servicePropertyItems.push({
+        title: SERVICE_TRACING_LABEL,
+        description: <EuiText size="s">{String(tracing)}</EuiText>,
+      });
+    }
+    for (const { key, label } of SERVICE_ARRAY_PROPERTIES) {
+      const value = feature.properties[key];
+      if (!Array.isArray(value) || value.length === 0) {
+        continue;
+      }
+      servicePropertyItems.push({
+        title: label,
+        description: <EuiText size="s">{value.map(formatServiceArrayValue).join(', ')}</EuiText>,
+      });
+    }
 
     return [
       {
@@ -61,6 +89,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
           </EuiText>
         ),
       },
+      ...servicePropertyItems,
       {
         title: DETAILS_CONFIDENCE_LABEL,
         description: (
@@ -238,3 +267,69 @@ const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.ra
 const EMPTY_VALUE = i18n.translate('xpack.streams.featureDetailsFlyout.emptyValue', {
   defaultMessage: '-',
 });
+
+const SERVICE_STRING_PROPERTIES = [
+  {
+    key: 'version',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.serviceVersionLabel', {
+      defaultMessage: 'Version',
+    }),
+  },
+  {
+    key: 'logging_pattern',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.loggingPatternLabel', {
+      defaultMessage: 'Logging pattern',
+    }),
+  },
+  {
+    key: 'git_sha',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.gitShaLabel', {
+      defaultMessage: 'Git SHA',
+    }),
+  },
+  {
+    key: 'service_root',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.serviceRootLabel', {
+      defaultMessage: 'Service root',
+    }),
+  },
+] as const;
+
+const SERVICE_TRACING_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.tracingLabel', {
+  defaultMessage: 'Tracing',
+});
+
+const SERVICE_ARRAY_PROPERTIES = [
+  {
+    key: 'environment_variables',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.environmentVariablesLabel', {
+      defaultMessage: 'Environment variables',
+    }),
+  },
+  {
+    key: 'config_paths',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.configPathsLabel', {
+      defaultMessage: 'Configuration paths',
+    }),
+  },
+  {
+    key: 'iac_signals',
+    label: i18n.translate('xpack.streams.featureDetailsFlyout.iacSignalsLabel', {
+      defaultMessage: 'IaC signals',
+    }),
+  },
+] as const;
+
+const formatServiceArrayValue = (value: unknown): string => {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'kind' in value &&
+    'path' in value &&
+    typeof value.kind === 'string' &&
+    typeof value.path === 'string'
+  ) {
+    return `${value.kind}: ${value.path}`;
+  }
+  return typeof value === 'string' ? value : JSON.stringify(value);
+};

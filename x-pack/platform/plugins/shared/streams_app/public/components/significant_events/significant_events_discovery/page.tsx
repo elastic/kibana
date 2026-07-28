@@ -32,11 +32,13 @@ import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SigEventsTab } from './components/significant_events_tab';
+import { CodeIntelligenceTab } from './components/code_intelligence_tab';
 
 const discoveryTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
+  'code_intelligence',
   'detections',
   'significant_events',
   'memory',
@@ -183,6 +185,14 @@ export function SignificantEventsDiscoveryPage() {
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
         isSelected: tab === 'queries',
+      },
+      {
+        id: 'code_intelligence',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.codeIntelligenceTab', {
+          defaultMessage: 'Code Intelligence',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'code_intelligence' } }),
+        isSelected: tab === 'code_intelligence',
       },
 
       {
@@ -375,6 +385,7 @@ export function SignificantEventsDiscoveryPage() {
             {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}
+            {tab === 'code_intelligence' && <CodeIntelligenceTab />}
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'significant_events' && <SigEventsTab />}
             {tab === 'memory' && <MemoryTab />}

@@ -24,6 +24,16 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
+  'github.list_repos',
+  'github.search_code',
+  'github.get_commit',
+  'github.get_repository_tree',
+  'github.get_file_contents',
+  'github.search_repositories',
+  'github.search_issues',
+  'github.search_pull_requests',
+  'github.issue_read',
+  'github.pull_request_read',
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -104,6 +114,7 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'github.code_researcher',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -172,6 +183,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-conversation-scraper',
   'significant-events-onboarding',
   'streams-gap-detection',
+  'github-code-search',
+  'github-issue-pr-research',
+  'github-ki-discovery',
 
   // Platform – Context Engine
   'ki-automation-generation',

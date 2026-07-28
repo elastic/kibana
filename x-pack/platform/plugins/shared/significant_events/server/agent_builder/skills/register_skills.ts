@@ -20,6 +20,11 @@ import {
   createGapDetectionSkill,
 } from '../../memory_and_investigation/skills/memory';
 import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
+import {
+  githubCodeSearchSkill,
+  githubIssuePrResearchSkill,
+  githubKiDiscoverySkill,
+} from './github_research';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
@@ -76,6 +81,10 @@ export const registerSignificantEventsSkills = async ({
     createSignificantEventsOnboardingSkill(memoryToolsOptions),
     createGapDetectionSkill(memoryToolsOptions),
     streamsInvestigationManagementSkill,
+    // GitHub research skills backing the Code Intelligence agent.
+    githubCodeSearchSkill,
+    githubIssuePrResearchSkill,
+    githubKiDiscoverySkill,
   ];
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second

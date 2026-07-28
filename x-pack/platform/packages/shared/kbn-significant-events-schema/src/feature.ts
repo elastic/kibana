@@ -10,6 +10,7 @@ import { isEqual, uniq } from 'lodash';
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { knowledgeIndicatorSourceArraySchema } from './source';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from './significant_events/constants';
 
 export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
@@ -91,10 +92,12 @@ export const featureUpsertSchema = baseFeatureSchema.and(
 export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 
 // Canonical persisted feature. Once a feature has been stored and read back it
-// always carries its derived `uuid`.
+// always carries its derived `uuid`. `source` is a derived, read-only field
+// (computed from evidence at the storage boundary) and is never persisted.
 export const featureSchema = featureUpsertSchema.and(
   z.object({
     uuid: z.string().max(MAX_ID_LENGTH),
+    source: knowledgeIndicatorSourceArraySchema.optional(),
   })
 );
 

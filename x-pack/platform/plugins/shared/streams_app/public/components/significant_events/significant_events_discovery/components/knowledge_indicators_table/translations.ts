@@ -37,6 +37,11 @@ export const STREAM_COLUMN_LABEL = i18n.translate(
   { defaultMessage: 'Stream' }
 );
 
+export const SOURCE_COLUMN_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.sourceLabel',
+  { defaultMessage: 'Source' }
+);
+
 export const ACTIONS_COLUMN_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicators.columns.actionsLabel',
   { defaultMessage: 'Actions' }
