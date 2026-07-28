@@ -1,5 +1,5 @@
 {
-  "sha1": "fa129f1bd02dcb9d8c984ba3ec123e07ef123404",
+  "sha1": "19041512e25fa807b70c885cef51786949e5d494",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -4003,6 +4003,54 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/quick_actions_privileged.spec.ts",
         "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "74589c7598fcdbc-f5166729a5e8ca8",
+      "title": "Metrics in Discover - Recently explored moves an interacted metric to the front",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/recently_explored.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "74589c7598fcdbc-5c33ee6fcbb7238",
+      "title": "Metrics in Discover - Recently explored disables the direction toggle when sorting by recency",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/recently_explored.spec.ts",
+        "line": 63,
         "column": 14
       }
     },
