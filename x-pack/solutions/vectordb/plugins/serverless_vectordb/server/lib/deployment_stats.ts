@@ -6,11 +6,12 @@
  */
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsFieldCapability, Indices } from '@elastic/elasticsearch/lib/api/types';
 
-// The `inference` flag isn't yet in the Elasticsearch package types.
+// The inference flags aren't yet in the Elasticsearch package types.
 type FieldCapability = FieldCapsFieldCapability & {
   inference?: boolean;
+  non_inference_indices?: Indices;
 };
 
 interface MeteringIndexStat {
@@ -42,6 +43,11 @@ const VECTOR_FIELD_TYPES = new Set(['dense_vector', 'sparse_vector', 'semantic_t
 // must be requested alongside the vector types.
 const FIELD_CAPS_TYPES = [...VECTOR_FIELD_TYPES, 'text'];
 
+const toIndexArray = (indices: Indices | undefined): string[] | undefined => {
+  if (indices === undefined) return undefined;
+  return Array.isArray(indices) ? indices : [indices];
+};
+
 /**
  * Returns which of the given indices contain a vector field. Uses `_field_caps` rather than full
  * mappings as it's far lighter and flattens nested/multi-fields for free.
@@ -67,17 +73,26 @@ const getVectorIndexNames = async (
       // `include_unmapped: true` adds pseudo-entries listing indices where the field is absent.
       if (capability.type === 'unmapped') continue;
 
+      // A field mapped as `semantic_text` in some indices and plain `text` in others collapses into
+      // a single `text` capability with `inference: false`, because both share the `text` type
+      // family and `inference` only reports `true` when it holds for every index. The indices where
+      // the field is *not* an inference field are listed in `non_inference_indices`, so its mere
+      // presence means the field is a vector field in the remaining indices.
+      const nonInferenceIndices = toIndexArray(capability.non_inference_indices);
+
       const isVectorField =
-        VECTOR_FIELD_TYPES.has(capability.type) || capability.inference === true;
+        VECTOR_FIELD_TYPES.has(capability.type) ||
+        capability.inference === true ||
+        nonInferenceIndices !== undefined;
       if (!isVectorField) continue;
 
       // Absent `indices` means the field is mapped in every requested index.
-      if (capability.indices === undefined) return indexNames;
+      const capabilityIndices = toIndexArray(capability.indices) ?? indexNames;
 
-      const capabilityIndices = Array.isArray(capability.indices)
-        ? capability.indices
-        : [capability.indices];
-      capabilityIndices.forEach((name) => vectorIndexNames.add(name));
+      for (const name of capabilityIndices) {
+        if (nonInferenceIndices?.includes(name)) continue;
+        vectorIndexNames.add(name);
+      }
 
       if (vectorIndexNames.size === indexNames.length) return indexNames;
     }

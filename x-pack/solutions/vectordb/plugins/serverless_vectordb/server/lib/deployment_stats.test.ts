@@ -41,11 +41,29 @@ describe('fetchIndexStats', () => {
     client.asCurrentUser.fieldCaps.mockResolvedValue({ indices: [], fields } as any);
   };
 
-  const mockEsqlCount = (count: number) => {
-    client.asCurrentUser.esql.query.mockResolvedValue({
-      columns: [{ name: 'doc_count', type: 'long' }],
-      values: [[count]],
-    } as any);
+  /**
+   * Derives the ES|QL count from the indices named in the `FROM` clause so that `vectorDocsCount`
+   * assertions fail when the wrong indices are selected. A fixed count would pass no matter which
+   * indices were queried, leaving misclassification detectable only via the query string.
+   */
+  const mockEsqlDocCounts = (docCountsByIndex: Record<string, number>) => {
+    client.asCurrentUser.esql.query.mockImplementation((async (request: { query: string }) => {
+      const [, fromClause] = /^FROM (.+) \| STATS/.exec(request.query) ?? [];
+      if (!fromClause) throw new Error(`Unparseable ES|QL query: ${request.query}`);
+
+      const totalDocCount = fromClause
+        .split(',')
+        .map((name) => name.replace(/^"|"$/g, ''))
+        .reduce((sum, name) => {
+          const indexDocCount = docCountsByIndex[name];
+          if (indexDocCount === undefined) {
+            throw new Error(`ES|QL queried an index that is not a vector index: ${name}`);
+          }
+          return sum + indexDocCount;
+        }, 0);
+
+      return { columns: [{ name: 'doc_count', type: 'long' }], values: [[totalDocCount]] };
+    }) as any);
   };
 
   it('excludes dot-prefixed indices and aggregates count/size', async () => {
@@ -90,7 +108,7 @@ describe('fetchIndexStats', () => {
         text: { type: 'text', searchable: true, aggregatable: false, inference: true },
       },
     });
-    mockEsqlCount(10);
+    mockEsqlDocCounts({ vectordb: 10 });
 
     const result = await fetchIndexStats(client, logger);
 
@@ -98,6 +116,116 @@ describe('fetchIndexStats', () => {
       expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
     );
     expect(result.vectorDocsCount).toBe(10);
+  });
+
+  it('counts docs from every vector index when only one of them uses semantic_text', async () => {
+    // Three indices holding 5 docs each. `content` is `semantic_text` in `semantic-index` and plain
+    // `text` in the other two, so field caps merges all three into one `text` capability with
+    // `inference: false` and no `indices` list. Reading only `inference` dropped `semantic-index`
+    // and under-reported the 15 docs as 10.
+    mockMetering([
+      // metering num_docs is inflated for semantic_text indices by the nested chunk documents.
+      { name: 'semantic-index', num_docs: 10, size_in_bytes: 500 },
+      { name: 'dense-index', num_docs: 5, size_in_bytes: 500 },
+      { name: 'byoe-index', num_docs: 5, size_in_bytes: 500 },
+    ]);
+    mockFieldCaps({
+      content: {
+        text: {
+          type: 'text',
+          searchable: true,
+          aggregatable: false,
+          inference: false,
+          non_inference_indices: ['dense-index', 'byoe-index'],
+        },
+      },
+      embedding: {
+        unmapped: {
+          type: 'unmapped',
+          searchable: false,
+          aggregatable: false,
+          indices: ['semantic-index'],
+        },
+        dense_vector: {
+          type: 'dense_vector',
+          searchable: true,
+          aggregatable: false,
+          indices: ['dense-index', 'byoe-index'],
+        },
+      },
+    });
+    mockEsqlDocCounts({ 'semantic-index': 5, 'dense-index': 5, 'byoe-index': 5 });
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(result.vectorDocsCount).toBe(15);
+  });
+
+  it('detects semantic_text when the same field is plain text in other indices', async () => {
+    // A field that is `semantic_text` in one index and `text` in others is merged by field caps into
+    // a single `text` capability with `inference: false` and no `indices` list (the `text` type
+    // family is uniform). Only `non_inference_indices` reveals which indices are not inference.
+    mockMetering([
+      { name: 'semantic-only', num_docs: 10, size_in_bytes: 500 },
+      { name: 'plain-a', num_docs: 5, size_in_bytes: 50 },
+      { name: 'plain-b', num_docs: 5, size_in_bytes: 50 },
+    ]);
+    mockFieldCaps({
+      content: {
+        text: {
+          type: 'text',
+          searchable: true,
+          aggregatable: false,
+          inference: false,
+          non_inference_indices: ['plain-a', 'plain-b'],
+        },
+      },
+    });
+    mockEsqlDocCounts({ 'semantic-only': 5, 'plain-a': 5, 'plain-b': 5 });
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM "semantic-only" | STATS doc_count = COUNT(*)' })
+    );
+    expect(result.vectorDocsCount).toBe(5);
+  });
+
+  it('excludes non-inference indices from a partially mapped mixed inference field', async () => {
+    // When the field is absent from some indices the `text` capability carries both an explicit
+    // `indices` list and `non_inference_indices`; the vector indices are the difference.
+    mockMetering([
+      { name: 'semantic-only', num_docs: 10, size_in_bytes: 500 },
+      { name: 'plain-a', num_docs: 5, size_in_bytes: 50 },
+      { name: 'no-content', num_docs: 5, size_in_bytes: 50 },
+    ]);
+    mockFieldCaps({
+      content: {
+        unmapped: {
+          type: 'unmapped',
+          searchable: false,
+          aggregatable: false,
+          inference: false,
+          indices: ['no-content'],
+        },
+        text: {
+          type: 'text',
+          searchable: true,
+          aggregatable: false,
+          inference: false,
+          indices: ['semantic-only', 'plain-a'],
+          non_inference_indices: ['plain-a'],
+        },
+      },
+    });
+    mockEsqlDocCounts({ 'semantic-only': 5, 'plain-a': 5, 'no-content': 5 });
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM "semantic-only" | STATS doc_count = COUNT(*)' })
+    );
+    expect(result.vectorDocsCount).toBe(5);
   });
 
   it('detects an inference field reported by its own `type` (no inference flag)', async () => {
@@ -109,7 +237,7 @@ describe('fetchIndexStats', () => {
         semantic_text: { type: 'semantic_text', searchable: true, aggregatable: false },
       },
     });
-    mockEsqlCount(10);
+    mockEsqlDocCounts({ vectordb: 10 });
 
     const result = await fetchIndexStats(client, logger);
 
@@ -126,7 +254,7 @@ describe('fetchIndexStats', () => {
         semantic: { type: 'semantic', searchable: true, aggregatable: false },
       },
     });
-    mockEsqlCount(10);
+    mockEsqlDocCounts({ vectordb: 10 });
 
     const result = await fetchIndexStats(client, logger);
 
@@ -154,13 +282,15 @@ describe('fetchIndexStats', () => {
       },
       title: { text: { type: 'text', searchable: true, aggregatable: false, inference: false } },
     });
-    mockEsqlCount(10);
+    mockEsqlDocCounts({ vectordb: 10, 'plain-text': 5 });
 
-    await fetchIndexStats(client, logger);
+    const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM "vectordb" | STATS doc_count = COUNT(*)' })
     );
+    // 10 rather than 15 proves `plain-text` docs are excluded.
+    expect(result.vectorDocsCount).toBe(10);
   });
 
   it('does not classify indices where the vector field is unmapped', async () => {
@@ -186,7 +316,7 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlCount(10);
+    mockEsqlDocCounts({ 'test-vector': 10, 'test-plain': 5000 });
 
     const result = await fetchIndexStats(client, logger);
 
@@ -212,15 +342,16 @@ describe('fetchIndexStats', () => {
         },
       },
     });
-    mockEsqlCount(20);
+    mockEsqlDocCounts({ 'vectordb-a': 10, 'vectordb-b': 10 });
 
-    await fetchIndexStats(client, logger);
+    const result = await fetchIndexStats(client, logger);
 
     expect(client.asCurrentUser.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'FROM "vectordb-a","vectordb-b" | STATS doc_count = COUNT(*)',
       })
     );
+    expect(result.vectorDocsCount).toBe(20);
   });
 
   it('batches the ES|QL count when there are more than 500 vector indices', async () => {
@@ -236,15 +367,7 @@ describe('fetchIndexStats', () => {
         dense_vector: { type: 'dense_vector', searchable: true, aggregatable: false },
       },
     });
-    client.asCurrentUser.esql.query
-      .mockResolvedValueOnce({
-        columns: [{ name: 'doc_count', type: 'long' }],
-        values: [[500]],
-      } as any)
-      .mockResolvedValueOnce({
-        columns: [{ name: 'doc_count', type: 'long' }],
-        values: [[1]],
-      } as any);
+    mockEsqlDocCounts(Object.fromEntries(indices.map(({ name }) => [name, 1])));
 
     const result = await fetchIndexStats(client, logger);
 
