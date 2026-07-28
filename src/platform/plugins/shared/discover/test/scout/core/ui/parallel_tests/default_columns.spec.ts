@@ -31,6 +31,21 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
+  // TEMPORARY (revert before merge): attach the page URL and selected data view on failure to
+  // diagnose the CI-only failure on serverless observability — the URL's _a state distinguishes
+  // a fresh-initialized session (no _a / default columns) from a bad data view switch.
+  spaceTest.afterEach(async ({ page, pageObjects }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+      const dataViewName = await pageObjects.discover
+        .getSelectedDataViewName()
+        .catch(() => 'unavailable');
+      await testInfo.attach('debug-state', {
+        body: `url: ${page.url()}\ndataView: ${dataViewName}`,
+        contentType: 'text/plain',
+      });
+    }
+  });
+
   spaceTest.afterAll(async ({ discoverScoutSpace, scoutSpace }) => {
     await scoutSpace.uiSettings.unset('defaultColumns', 'discover:modifyColumnsOnSwitch');
     await discoverScoutSpace.teardownDiscoverDefaults();

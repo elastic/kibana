@@ -9,8 +9,15 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-export default createPlaywrightConfig({
+const config = createPlaywrightConfig({
   testDir: './parallel_tests',
   workers: 2,
   runGlobalSetup: true,
 });
+
+// TEMPORARY (revert before merge): capture Playwright traces on failure to diagnose the
+// default_columns CI-only failure on serverless observability. Traces land in
+// .scout/test-artifacts and include DOM snapshots, network, console, and URL per action.
+config.use = { ...config.use, trace: 'retain-on-failure' };
+
+export default config;
