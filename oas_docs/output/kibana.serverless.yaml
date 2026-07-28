@@ -6461,11 +6461,6 @@ paths:
                         properties:
                           custom:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_schedule_request'
-                          id:
-                            description: Identifier of the snooze schedule.
-                            type: string
-                        required:
-                          - id
                     required:
                       - schedule
                 required:
