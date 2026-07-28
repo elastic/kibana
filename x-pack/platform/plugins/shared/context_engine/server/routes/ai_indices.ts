@@ -34,6 +34,7 @@ import { validateAiIndexId } from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
+  AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
@@ -130,7 +131,11 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (error instanceof AiIndexNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexConflictError || error instanceof AiIndexAlreadyExistsError) {
+  if (
+    error instanceof AiIndexManagedError ||
+    error instanceof AiIndexConflictError ||
+    error instanceof AiIndexAlreadyExistsError
+  ) {
     return response.conflict({ body: { message: error.message } });
   }
   throw error;
