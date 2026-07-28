@@ -51,7 +51,7 @@ import {
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENTS_PREFIX,
+  AGENTS_INDEX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -128,7 +128,6 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
-  buildPolicyIdOrVariantsKuery,
   buildPolicyIdOrVariantsEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
@@ -147,7 +146,8 @@ import {
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
-import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
+import { unenrollForAgentPolicyId } from './agents';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import {
   buildCurrentRevisionFilter,
   getCompiledVersionsForAgentPolicy,
@@ -970,16 +970,11 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            const policyKuery = buildPolicyIdOrVariantsKuery(
-              agentPolicy.id,
-              `${AGENTS_PREFIX}.policy_id`
+            const counts = await getAgentCountForAgentPolicies(
+              appContextService.getInternalUserESClient(),
+              [agentPolicy.id]
             );
-            await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
-              showInactive: true,
-              perPage: 0,
-              page: 1,
-              kuery: policyKuery,
-            }).then(({ total }) => (agentPolicy.agents = total));
+            agentPolicy.agents = counts[agentPolicy.id] ?? 0;
           } else {
             agentPolicy.agents = 0;
           }
@@ -1646,14 +1641,16 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    // Prevent deleting policy when assigned agents are inactive. Also matches agents on
-    // version-specific variants of this policy (e.g. `id#9.2`), which would otherwise be
-    // missed since their policy_id is not an exact match.
-    const { total } = await getAgentsByKuery(esClient, soClient, {
-      showInactive: true,
-      perPage: 0,
-      page: 1,
-      kuery: buildPolicyIdOrVariantsKuery(id, `${AGENTS_PREFIX}.policy_id`),
+    // Prevent deleting policy when assigned agents are inactive. active:true covers
+    // online, offline, and inactive agents; active:false is unenrolled.
+    const { count: total } = await esClient.count({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { active: 'true' } }, buildPolicyIdOrVariantsEsFilter(id)],
+        },
+      },
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -1883,6 +1880,7 @@ class AgentPolicyService {
             namespaces: fullPolicy.namespaces,
             data: fullPolicy as unknown as FleetServerPolicy['data'],
             policy_id: fullPolicy.id,
+            policy_base_id: fullPolicy.id,
             default_fleet_server: policy.is_default_fleet_server === true,
           };
 
