@@ -33,6 +33,7 @@
  *   project (per model), so swapping the connector changes the scored model.
  */
 
+import expect from '@kbn/expect';
 import {
   tags,
   selectEvaluators,
@@ -136,8 +137,13 @@ base.describe(
           const behaviorStep = toolCalls.find(
             (s) => s.tool_id === THREAT_INTEL_TOOL_IDS.hunt_behavior
           );
-          const args = behaviorStep?.results as unknown as { behaviors?: unknown[] } | undefined;
-          const behaviorCount = args?.behaviors?.length ?? 0;
+          // `results` is an array of tool-result items (`{ type, data }`), not the
+          // payload itself — `hunt_behavior`'s handler returns
+          // `{ results: [{ type: ToolResultType.other, data }] }` where `data` is
+          // the service's `{ status, behaviors, indexed_behaviors }` response.
+          const behaviorResultData = (behaviorStep?.results?.[0] as { data?: unknown } | undefined)
+            ?.data as { behaviors?: unknown[] } | undefined;
+          const behaviorCount = behaviorResultData?.behaviors?.length ?? 0;
 
           // ── Skill-invocation gate ───────────────────────────────────────────
           const skillInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior);
@@ -162,8 +168,21 @@ base.describe(
               `coverage=${(techniqueCoverage * 100).toFixed(0)}%`
           );
 
+          const success = skillInvoked && argsValid && techniqueCoverage >= 0.5;
+
+          // Hard gate: the returned scorecard object is telemetry, not a
+          // Playwright assertion — without an explicit expect(), a failing
+          // `success` here would silently report as a passing test.
+          expect(success).to.eql(
+            true,
+            `[L2] ${example.id} failed quality gate — skillInvoked=${skillInvoked}, ` +
+              `argsValid=${argsValid} (${behaviorCount} behaviors, ` +
+              `min=${example.output.minBehaviors}), ` +
+              `techniqueCoverage=${(techniqueCoverage * 100).toFixed(0)}%`
+          );
+
           return {
-            success: skillInvoked && argsValid && techniqueCoverage >= 0.5,
+            success,
             explanation:
               `Skill invoked: ${skillInvoked}. ` +
               `Args valid: ${argsValid} (${behaviorCount} behaviors). ` +

@@ -31,6 +31,7 @@
  *   - log                : ToolingLog
  */
 
+import expect from '@kbn/expect';
 import { tags, selectEvaluators, getToolCallSteps } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
@@ -146,6 +147,16 @@ base.describe(
         const success =
           orchestratorInvoked && hasFindings && (!behaviorInvoked || persistedCount >= 0);
 
+        // Hard gate: the returned scorecard object is telemetry, not a
+        // Playwright assertion — without an explicit expect(), a failing
+        // `success` here would silently report as a passing test.
+        expect(success).to.eql(
+          true,
+          `[L3] golden-path failed quality gate — orchestratorInvoked=${orchestratorInvoked}, ` +
+            `behaviorInvoked=${behaviorInvoked}, hasFindings=${hasFindings}, ` +
+            `persisted=${persistedCount}`
+        );
+
         return {
           success,
           explanation:
@@ -227,6 +238,16 @@ base.describe(
         );
 
         const success = orchestratorInvoked && behaviorSkipped && hasFindings;
+
+        // Hard gate: the returned scorecard object is telemetry, not a
+        // Playwright assertion — without an explicit expect(), a failing
+        // `success` here would silently report as a passing test.
+        expect(success).to.eql(
+          true,
+          `[L3] tier1-only failed quality gate — orchestratorInvoked=${orchestratorInvoked}, ` +
+            `behaviorSkipped=${behaviorSkipped}, hasFindings=${hasFindings}, ` +
+            `persisted=${persistedCount}`
+        );
 
         return {
           success,
