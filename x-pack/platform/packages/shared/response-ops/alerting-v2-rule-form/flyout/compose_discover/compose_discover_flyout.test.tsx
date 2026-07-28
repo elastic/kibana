@@ -247,6 +247,21 @@ const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
 const getLatestFormProps = (): FormProps =>
   mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
+const openQuerySandbox = (isAlert = true) => {
+  act(() => {
+    getLatestFormProps().dispatch({ type: 'OPEN_CHILD', isAlert });
+  });
+};
+
+const openSandboxSettingsMenu = () => {
+  fireEvent.click(screen.getByTestId('querySandboxSettingsButton'));
+};
+
+const clickDefineConditionManually = () => {
+  openSandboxSettingsMenu();
+  fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+};
+
 const clickComposeDiscoverNext = async () => {
   await act(async () => {
     fireEvent.click(screen.getByTestId('composeDiscoverNext'));
@@ -254,6 +269,9 @@ const clickComposeDiscoverNext = async () => {
 };
 
 const commitValidAlertQuery = () => {
+  if (!sandboxFlyoutProps) {
+    openQuerySandbox();
+  }
   act(() => {
     sandboxFlyoutProps?.onQueryChange?.({
       format: 'standalone',
@@ -288,7 +306,7 @@ describe('ComposeDiscoverFlyout', () => {
     it('renders the stepper with the correct aria-label for step 1 of 4', () => {
       renderFlyout();
 
-      const stepper = screen.getByRole('group', { name: /Step 1 of 4: Alert Condition/ });
+      const stepper = screen.getByRole('group', { name: /Step 1 of 4: Condition/ });
       expect(stepper).toBeInTheDocument();
     });
 
@@ -296,13 +314,12 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout();
 
       expect(screen.getByText('1 / 4')).toBeInTheDocument();
-      expect(screen.getByText('Alert Condition')).toBeInTheDocument();
+      expect(screen.getByText('Condition')).toBeInTheDocument();
     });
 
     it('does not render the stepper in YAML mode', () => {
       renderFlyout();
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
@@ -314,7 +331,6 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverYamlQuerySandbox')).toBeInTheDocument();
@@ -329,8 +345,9 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('disables Form/YAML toggle while sandbox is open in form mode', () => {
       renderFlyout();
+      openQuerySandbox();
 
-      // Sandbox is open in create mode — toggle must be disabled
+      // Sandbox is open — toggle must be disabled
       const buttons = screen
         .getByTestId('composeDiscoverEditModeToggle')
         .querySelectorAll('button');
@@ -348,8 +365,7 @@ describe('ComposeDiscoverFlyout', () => {
     it('keeps Form/YAML toggle enabled while sandbox is open in YAML mode', () => {
       renderFlyout();
 
-      // Close sandbox, switch to YAML (SET_YAML_MODE reopens sandbox)
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+      // Switch to YAML (SET_YAML_MODE opens sandbox)
       clickEditMode('yaml');
 
       // Sandbox is now open in YAML mode — toggle must stay enabled
@@ -363,7 +379,6 @@ describe('ComposeDiscoverFlyout', () => {
     it('reopens Query sandbox after manual close in YAML mode', () => {
       renderFlyout();
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
@@ -382,6 +397,11 @@ describe('ComposeDiscoverFlyout', () => {
     it('shows "Create alert rule" in create mode', () => {
       renderFlyout({ mode: 'create' });
       expect(screen.getByText('Create alert rule')).toBeInTheDocument();
+    });
+
+    it('keeps the query sandbox closed by default in create mode', () => {
+      renderFlyout({ mode: 'create' });
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
     });
 
     it('shows "Edit alert rule" in edit mode', () => {
@@ -526,7 +546,6 @@ describe('ComposeDiscoverFlyout', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
@@ -565,7 +584,6 @@ describe('ComposeDiscoverFlyout', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
@@ -581,7 +599,6 @@ describe('ComposeDiscoverFlyout', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
       clickEditMode('form');
@@ -608,7 +625,6 @@ describe('ComposeDiscoverFlyout', () => {
       expect(callout).toHaveTextContent('?window');
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverYamlSubmit')).toBeDisabled();
@@ -787,7 +803,6 @@ describe('ComposeDiscoverFlyout', () => {
         initialQuery: 'FROM logs-* | WHERE count > 100',
       });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       mockParseYamlToFormValues = () => ({
         values: standaloneAlertYamlValues,
@@ -814,7 +829,6 @@ describe('ComposeDiscoverFlyout', () => {
         initialQuery: 'FROM logs-* | WHERE count > 100',
       });
 
-      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       await act(async () => {
@@ -830,6 +844,7 @@ describe('ComposeDiscoverFlyout', () => {
   describe('handleSandboxApply', () => {
     it('runs heuristic split and commits the result in create + alert unified editor', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       expect(sandboxFlyoutProps).toBeDefined();
       act(() => {
@@ -967,6 +982,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('commits manual split base/alert verbatim without running the heuristic', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       expect(sandboxFlyoutProps).toBeDefined();
       act(() => {
@@ -975,7 +991,7 @@ describe('ComposeDiscoverFlyout', () => {
           breach: { query: 'FROM logs-* | WHERE count > 100' },
         });
       });
-      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      clickDefineConditionManually();
 
       expect(sandboxFlyoutProps?.query).toMatchObject({
         format: 'composed',
@@ -1038,7 +1054,7 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.(queryWithRecovery);
       });
-      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      clickDefineConditionManually();
 
       expect(sandboxFlyoutProps?.query).toMatchObject({
         format: 'composed',
@@ -1069,6 +1085,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('commits subsequent recovery edits when manualSplitEnabled is stale from alert condition', async () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1076,7 +1093,7 @@ describe('ComposeDiscoverFlyout', () => {
           breach: { query: 'FROM logs-* | WHERE count > 100' },
         });
       });
-      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      clickDefineConditionManually();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1161,6 +1178,8 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('shows the split button before any query is typed', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
+      openSandboxSettingsMenu();
 
       expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
     });
@@ -1190,6 +1209,7 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
       });
+      openSandboxSettingsMenu();
 
       expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
       expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
@@ -1197,6 +1217,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('resets manual split when the sandbox is closed without Apply', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1204,7 +1225,7 @@ describe('ComposeDiscoverFlyout', () => {
           breach: { query: 'FROM logs-* | WHERE count > 100' },
         });
       });
-      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      clickDefineConditionManually();
       expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
 
       fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
@@ -1214,6 +1235,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('keeps manual split enabled after Apply in manual split mode', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1221,7 +1243,7 @@ describe('ComposeDiscoverFlyout', () => {
           breach: { query: 'FROM logs-* | WHERE count > 100' },
         });
       });
-      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      clickDefineConditionManually();
 
       const manualSplitQuery: RuleQuery = {
         format: 'composed',
@@ -1240,6 +1262,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('resets manual split when switching to YAML mode', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1247,7 +1270,7 @@ describe('ComposeDiscoverFlyout', () => {
           breach: { query: 'FROM logs-* | WHERE count > 100' },
         });
       });
-      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      clickDefineConditionManually();
       expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
 
       const manualSplitQuery: RuleQuery = {
@@ -1272,6 +1295,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('shows split controls and unified helper on the alert condition step only', () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1279,6 +1303,7 @@ describe('ComposeDiscoverFlyout', () => {
           breach: { query: 'FROM logs-* | WHERE count > 100' },
         });
       });
+      openSandboxSettingsMenu();
 
       expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
       expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
@@ -1286,6 +1311,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('hides split controls and unified helper on the custom recovery step', async () => {
       renderFlyout({ mode: 'create' });
+      openQuerySandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
@@ -1304,6 +1330,7 @@ describe('ComposeDiscoverFlyout', () => {
       });
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxSettingsButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('querySandboxSplitBaseAndAlert')).not.toBeInTheDocument();
       expect(screen.queryByTestId('querySandboxUseSingleEditor')).not.toBeInTheDocument();
       expect(screen.queryByTestId('querySandboxUnifiedHelper')).not.toBeInTheDocument();

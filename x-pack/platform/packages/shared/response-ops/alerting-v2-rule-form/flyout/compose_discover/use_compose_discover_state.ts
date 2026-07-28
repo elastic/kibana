@@ -56,7 +56,9 @@ export const createInitialState = ({
         manualSplitEnabled: false,
       })
     ),
-    childOpen: forceYamlMode || mode === 'create',
+    // Sandbox stays closed by default; users open it via Edit query / Open query editor.
+    // forceYamlMode still opens the sandbox (YAML editing requires it).
+    childOpen: forceYamlMode,
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
     manualSplitEnabled: false,
