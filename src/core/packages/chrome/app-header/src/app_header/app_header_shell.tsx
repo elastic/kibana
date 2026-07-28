@@ -197,6 +197,7 @@ const useHeaderStyles = (
       column-gap: ${euiTheme.size.m};
       row-gap: ${euiTheme.size.xs};
       min-width: 0;
+      padding-inline-start: ${euiTheme.size.xs};
       padding-block-end: ${bottomPad(hasTabs)};
     `;
 
