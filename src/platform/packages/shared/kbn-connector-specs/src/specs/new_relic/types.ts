@@ -218,7 +218,12 @@ export type NewRelicRunNrqlQueryInput = z.infer<typeof NewRelicRunNrqlQueryInput
 
 export const NewRelicCreateDeploymentMarkerInputSchema = lazySchema(() =>
   z.object({
-    entityGuid: z.string().max(200).describe('GUID of the entity the deployment applies to.'),
+    entityGuid: z
+      .string()
+      .min(1)
+      .max(200)
+      .regex(/^[A-Za-z0-9+/=_-]+$/, 'Must be a New Relic entity GUID (base64url characters only).')
+      .describe('GUID of the entity the deployment applies to.'),
     version: z.string().max(200).optional().describe('Deployed version identifier, e.g. "1.4.2".'),
     description: z
       .string()

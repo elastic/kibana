@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { NewRelic } from './new_relic';
+import { NewRelicCreateDeploymentMarkerInputSchema } from './types';
 
 describe('NewRelic', () => {
   const mockClient = {
@@ -200,6 +201,9 @@ describe('NewRelic', () => {
         },
       });
 
+      const now = Date.parse('2024-01-02T00:00:00Z');
+      jest.useFakeTimers().setSystemTime(now);
+
       const result = await NewRelic.actions.listIssues.handler(mockContext, {
         accountId: 123,
         states: ['ACTIVATED'],
@@ -213,7 +217,7 @@ describe('NewRelic', () => {
           variables: expect.objectContaining({
             accountId: 123,
             filter: { states: ['ACTIVATED'], priority: ['CRITICAL'] },
-            timeWindow: { startTime: Date.parse('2024-01-01T00:00:00Z'), endTime: undefined },
+            timeWindow: { startTime: Date.parse('2024-01-01T00:00:00Z'), endTime: now },
           }),
         }),
         { headers: AI_ISSUES_HEADERS }
@@ -222,6 +226,32 @@ describe('NewRelic', () => {
         issues: [{ issueId: 'i1', priority: 'CRITICAL' }],
         nextCursor: null,
       });
+
+      jest.useRealTimers();
+    });
+
+    it('should default a missing since to 24h before a provided until', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          data: { actor: { account: { aiIssues: { issues: { issues: [], nextCursor: null } } } } },
+        },
+      });
+
+      const until = '2024-01-02T00:00:00Z';
+      await NewRelic.actions.listIssues.handler(mockContext, { accountId: 123, until });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        US_ENDPOINT,
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            timeWindow: {
+              startTime: Date.parse(until) - 24 * 60 * 60 * 1000,
+              endTime: Date.parse(until),
+            },
+          }),
+        }),
+        expect.any(Object)
+      );
     });
 
     it('should list issues with no filters', async () => {
@@ -403,6 +433,14 @@ describe('NewRelic', () => {
         expect.any(Object)
       );
       expect(result).toEqual({ changeTrackingEvent: { changeTrackingId: 'ct1' }, messages: [] });
+    });
+
+    it('should reject an entityGuid containing a quote (query injection attempt)', () => {
+      const result = NewRelicCreateDeploymentMarkerInputSchema.safeParse({
+        entityGuid: "guid1' OR name LIKE '%",
+        version: '1.4.2',
+      });
+      expect(result.success).toBe(false);
     });
   });
 

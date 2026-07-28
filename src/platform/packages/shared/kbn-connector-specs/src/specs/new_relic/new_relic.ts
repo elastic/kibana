@@ -108,6 +108,23 @@ const toEpochMs = (value?: string): number | undefined => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+// AiIssuesTimeWindowInput requires both startTime and endTime, so a since-only
+// or until-only value must be completed with a default bound rather than sent
+// partially (which NerdGraph would reject as a required-field error).
+const buildTimeWindow = (
+  since?: string,
+  until?: string
+): { startTime: number; endTime: number } | undefined => {
+  const sinceMs = toEpochMs(since);
+  const untilMs = toEpochMs(until);
+  if (sinceMs === undefined && untilMs === undefined) return undefined;
+  const endTime = untilMs ?? Date.now();
+  const startTime = sinceMs ?? endTime - ONE_DAY_MS;
+  return { startTime, endTime };
+};
+
 export const NewRelic: ConnectorSpec = {
   metadata: {
     id: '.new_relic',
@@ -255,12 +272,7 @@ export const NewRelic: ConnectorSpec = {
         if (input.states) filter.states = input.states;
         if (input.priority) filter.priority = input.priority;
         if (input.entityGuids) filter.entityGuids = input.entityGuids;
-        const sinceMs = toEpochMs(input.since);
-        const untilMs = toEpochMs(input.until);
-        const timeWindow =
-          sinceMs !== undefined || untilMs !== undefined
-            ? { startTime: sinceMs, endTime: untilMs }
-            : undefined;
+        const timeWindow = buildTimeWindow(input.since, input.until);
         const data = await graphqlRequest<{
           actor: {
             account: {
@@ -329,12 +341,7 @@ export const NewRelic: ConnectorSpec = {
         if (input.states) filter.states = input.states;
         if (input.priority) filter.priority = input.priority;
         if (input.entityGuids) filter.entityGuids = input.entityGuids;
-        const sinceMs = toEpochMs(input.since);
-        const untilMs = toEpochMs(input.until);
-        const timeWindow =
-          sinceMs !== undefined || untilMs !== undefined
-            ? { startTime: sinceMs, endTime: untilMs }
-            : undefined;
+        const timeWindow = buildTimeWindow(input.since, input.until);
         const data = await graphqlRequest<{
           actor: {
             account: {
