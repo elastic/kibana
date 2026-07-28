@@ -86,6 +86,10 @@ export class DeleteMonitorAPI {
     const { response, server } = this.routeContext;
 
     const monitors = await this.getMonitorsToDelete(monitorIds);
+    // Dedup the per-space privilege check across monitors that share the same
+    // saved-object type and space set, so a bulk delete issues one privilege
+    // round-trip per distinct (type, spaces) combination instead of one per monitor.
+    const checkedSpaceKeys = new Set<string>();
     for (const monitor of monitors) {
       const err = await validatePermissions(this.routeContext, monitor.attributes.locations);
       if (err) {
@@ -98,15 +102,22 @@ export class DeleteMonitorAPI {
         };
       }
 
-      const monitorSpaces = monitor.attributes[ConfigKey.KIBANA_SPACES] ?? [];
+      // Use the saved object's authoritative `namespaces` rather than the
+      // denormalized `spaces` attribute, which can drift (e.g. when a monitor
+      // is shared via the generic saved-objects share API).
+      const monitorSpaces = monitor.namespaces ?? [];
       if (monitorSpaces.length > 0) {
-        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
-          this.routeContext,
-          monitorSpaces,
-          monitor.type
-        );
-        if (spaceAuthError) {
-          return { res: spaceAuthError };
+        const spaceKey = `${monitor.type}::${[...new Set(monitorSpaces)].sort().join(',')}`;
+        if (!checkedSpaceKeys.has(spaceKey)) {
+          checkedSpaceKeys.add(spaceKey);
+          const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
+            this.routeContext,
+            monitorSpaces,
+            monitor.type
+          );
+          if (spaceAuthError) {
+            return { res: spaceAuthError };
+          }
         }
       }
     }
