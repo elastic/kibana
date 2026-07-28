@@ -48,6 +48,7 @@ import {
   esqlQueryDiffAlgorithm,
   ruleTypeDiffAlgorithm,
   forceTargetVersionDiffAlgorithm,
+  machineLearningJobIdDiffAlgorithm,
 } from './three_way_diff_algorithms';
 import {
   ScalarArrayDiffMissingBaseVersionStrategy,
@@ -349,7 +350,7 @@ const calculateMachineLearningFieldsDiff = (
 const machineLearningFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableMachineLearningFields> =
   {
     type: ruleTypeDiffAlgorithm,
-    machine_learning_job_id: simpleDiffAlgorithm,
+    machine_learning_job_id: machineLearningJobIdDiffAlgorithm,
     anomaly_threshold: numberDiffAlgorithm,
     alert_suppression: simpleDiffAlgorithm,
   };
