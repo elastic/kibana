@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { Redirect } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
@@ -97,6 +98,14 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
                     component={InvestigationDetailPage}
                   />
                   <Route path="/investigations/:id" component={InvestigationDetailPage} />
+                  {/*
+                    No dedicated investigations-list page exists — Brief (`/`) is the
+                    investigation queue/list experience. Without this exact-match redirect,
+                    `/app/pnd/investigations` (no `:id`) matched no route above and
+                    `<Routes>` rendered an empty shell with no 404/redirect, which looked
+                    like a blank-list bug rather than an unmatched route.
+                  */}
+                  <Route path="/investigations" exact render={() => <Redirect to="/" />} />
                 </Routes>
               </AppChromeLayout>
             </Router>

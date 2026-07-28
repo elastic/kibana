@@ -61,3 +61,13 @@ export const KNOWN_ALERT_ID = 'alert-apt29-lateral';
 
 /** Default Elastic AI Agent ID used for Agent Builder evals. */
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
+
+/**
+ * PND (Project Not-Daybreak) Investigation object-model surface exercised by
+ * Family D orchestrator-identity gates D3/D6. These MUST stay in sync with
+ * `x-pack/solutions/security/plugins/pnd/server/routes/investigations/`.
+ */
+export const PND_EMIT_PROPOSAL_PATH = '/internal/pnd/investigations/_emit_proposal';
+export const PND_API_VERSION = '1';
+export const PND_INVESTIGATIONS_INDEX = 'pnd-investigations';
+export const PND_CANONICAL_PROPOSALS_INDEX = 'pnd-canonical-proposals';

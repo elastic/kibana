@@ -72,6 +72,7 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 | `/app/pnd/watches/workflows` … `/guardrails` | Watches section stubs |
 | `/app/pnd/investigations/:id` | Investigation inspector shell |
 | `/app/pnd/investigations/:id/proposals/:proposalId` | Proposal detail shell |
+| `/app/pnd/investigations` | Redirects to `/app/pnd` — no dedicated list page, Brief *is* the queue |
 | `/app/pnd/settings` | Settings stub (no dedicated nav item) |
 
 ### Security left-rail order (when PND enabled)
