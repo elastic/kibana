@@ -26,6 +26,8 @@ import {
   getDefaultPresetForEsOutput,
   outputTypeSupportPresets,
   outputYmlIncludesReservedPerformanceKey,
+  isBeatsOutput,
+  isOtlpOutput,
 } from '../../common/services/output_helpers';
 
 import type {
@@ -38,6 +40,7 @@ import type {
   SecretReference,
   BeatsSoBaseAttributes,
 } from '../types';
+import type { NewBeatsOutput, UpdateOutput } from '../../common/types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -117,6 +120,13 @@ export function outputIdToUuid(id: string) {
 
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
+
+  if (so.attributes.type === outputType.Otlp) {
+    const { output_id: outputId, ...attributes } = so.attributes;
+    return { id: outputId ?? so.id, ...attributes };
+  }
+
+  // After the OTLP check, TypeScript narrows so.attributes to BeatsOutputSOAttributes
   const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
 
   let parsedSsl;
@@ -474,13 +484,19 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
-            // Allow ssl to differ if set to default empty values
-            if (
-              key === 'ssl' &&
-              originalOutput[key] === undefined &&
-              deepEqual(data[key], { certificate: '', certificate_authorities: [] })
-            ) {
-              continue;
+            // Allow ssl to differ if set to default empty values (beats outputs only)
+            if (isBeatsOutput(originalOutput)) {
+              const beatsKey = key as keyof typeof originalOutput;
+              if (
+                beatsKey === 'ssl' &&
+                originalOutput.ssl === undefined &&
+                deepEqual((data as Partial<NewBeatsOutput>).ssl, {
+                  certificate: '',
+                  certificate_authorities: [],
+                })
+              ) {
+                continue;
+              }
             }
             throw new OutputUnauthorizedError(
               `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
@@ -570,11 +586,18 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
+    if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().managedOtlpOutput) {
+      throw new OutputInvalidError('OTLP output type is not enabled');
+    }
 
-    if (outputTypeSupportPresets(data.type)) {
+    const data: OutputSOAttributes = {
+      ...omit(output, ['ssl', 'secrets']),
+      ...(options?.id ? { output_id: options.id } : {}),
+    } as OutputSOAttributes;
+
+    if (outputTypeSupportPresets(output)) {
       if (
-        data.preset === 'balanced' &&
+        output.preset === 'balanced' &&
         outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
@@ -642,25 +665,29 @@ class OutputService {
       data.output_id = options?.id;
     }
 
-    if (output.ssl) {
-      data.ssl = JSON.stringify(output.ssl);
-    }
+    if (isBeatsOutput(output)) {
+      const beatsData = data as BeatsSoBaseAttributes;
 
-    // Remove the shipper data if the shipper is not enabled from the yaml config
-    if (!output.config_yaml && output.shipper) {
-      data.shipper = null;
-    }
+      if (output.ssl) {
+        beatsData.ssl = JSON.stringify(output.ssl);
+      }
 
-    if (!data.preset && outputTypeSupportPresets(data.type)) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
-    }
+      // Remove the shipper data if the shipper is not enabled from the yaml config
+      if (!output.config_yaml && output.shipper) {
+        beatsData.shipper = null;
+      }
 
-    if (output.config_yaml) {
-      const configJs = parse(output.config_yaml);
-      const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+      if (!output.preset && outputTypeSupportPresets(output)) {
+        beatsData.preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
+      }
 
-      if (isShipperDisabled && output.shipper) {
-        data.shipper = null;
+      if (output.config_yaml) {
+        const configJs = parse(output.config_yaml);
+        const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+
+        if (isShipperDisabled && output.shipper) {
+          beatsData.shipper = null;
+        }
       }
     }
 
@@ -734,20 +761,21 @@ class OutputService {
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
     } else {
-      if (!output.ssl?.key && output.secrets?.ssl?.key) {
-        data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+      if (isBeatsOutput(output) && !output.ssl?.key && output.secrets?.ssl?.key) {
+        (data as BeatsSoBaseAttributes).ssl = JSON.stringify({
+          ...output.ssl,
+          ...output.secrets.ssl,
+        });
       }
 
-      if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+      if (output.type === outputType.Kafka) {
         if (!output.password && output.secrets?.password) {
-          data.password = output.secrets?.password as string;
+          (data as OutputSoKafkaAttributes).password = output.secrets.password as string;
         }
-      } else if (
-        output.type === outputType.RemoteElasticsearch &&
-        data.type === outputType.RemoteElasticsearch
-      ) {
+      } else if (output.type === outputType.RemoteElasticsearch) {
         if (!output.service_token && output.secrets?.service_token) {
-          data.service_token = output.secrets?.service_token as string;
+          (data as OutputSoRemoteElasticsearchAttributes).service_token = output.secrets
+            .service_token as string;
         }
       }
     }
@@ -980,7 +1008,7 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    data: Partial<Output>,
+    data: UpdateOutput,
     {
       fromPreconfiguration = false,
       secretHashes,
@@ -1004,9 +1032,16 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    const mergedType = data.type ?? originalOutput.type;
+    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+    const hasTypeChanged = mergedType !== originalOutput.type;
 
-    if (updateData.type && outputTypeSupportPresets(updateData.type)) {
+    const updateData = {
+      ...omit(data, ['ssl', 'secrets']),
+      type: mergedType,
+    } as Nullable<Partial<OutputSOAttributes>> & { type: ValueOf<OutputType> };
+
+    if (outputTypeSupportPresets(updateData)) {
       if (
         updateData.preset === 'balanced' &&
         outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', parse)
@@ -1019,10 +1054,8 @@ class OutputService {
       }
     }
 
-    const mergedType = data.type ?? originalOutput.type;
-    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const defaultDataOutputId = await this.getDefaultDataOutputId();
-    if (mergedType !== originalOutput.type || originalOutput.is_default !== mergedIsDefault) {
+    if (hasTypeChanged || originalOutput.is_default !== mergedIsDefault) {
       await validateTypeChanges(
         esClient,
         id,
@@ -1056,13 +1089,12 @@ class OutputService {
       target.ssl = null;
     };
 
-    // If the output type changed
-    if (data.type && data.type !== originalOutput.type) {
-      if (data.type === outputType.Elasticsearch && updateData.type === outputType.Elasticsearch) {
+    if (hasTypeChanged) {
+      if (updateData.type === outputType.Elasticsearch) {
         updateData.preset = null;
       }
 
-      if (data.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
+      if (updateData.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
@@ -1080,94 +1112,114 @@ class OutputService {
         (updateData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
-      if (data.type === outputType.Logstash) {
+      if (updateData.type === outputType.Logstash) {
         // remove ES specific field
-        updateData.ca_trusted_fingerprint = null;
-        updateData.ca_sha256 = null;
+        (updateData as BeatsSoBaseAttributes).ca_trusted_fingerprint = null;
+        (updateData as BeatsSoBaseAttributes).ca_sha256 = null;
       }
 
-      if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
-        updateData.ca_trusted_fingerprint = null;
-        updateData.ca_sha256 = null;
+      if (updateData.type === outputType.Kafka) {
+        const kafkaUpdateData = updateData as Nullable<Partial<OutputSoKafkaAttributes>>;
+        kafkaUpdateData.ca_trusted_fingerprint = null;
+        kafkaUpdateData.ca_sha256 = null;
 
-        if (!data.version) {
-          updateData.version = '1.0.0';
+        if (!kafkaUpdateData.version) {
+          kafkaUpdateData.version = '1.0.0';
         }
-        if (!data.compression) {
-          updateData.compression = kafkaCompressionType.Gzip;
+        if (!kafkaUpdateData.compression) {
+          kafkaUpdateData.compression = kafkaCompressionType.Gzip;
         }
         if (
-          !data.compression ||
-          (data.compression === kafkaCompressionType.Gzip && !data.compression_level)
+          !kafkaUpdateData.compression ||
+          (kafkaUpdateData.compression === kafkaCompressionType.Gzip &&
+            !kafkaUpdateData.compression_level)
         ) {
-          updateData.compression_level = 4;
+          kafkaUpdateData.compression_level = 4;
         }
-        if (data.compression && data.compression !== kafkaCompressionType.Gzip) {
+        if (
+          kafkaUpdateData.compression &&
+          kafkaUpdateData.compression !== kafkaCompressionType.Gzip
+        ) {
           // Clear compression level if compression is not gzip
-          updateData.compression_level = null;
+          kafkaUpdateData.compression_level = null;
         }
 
-        if (!data.client_id) {
-          updateData.client_id = 'Elastic';
+        if (!kafkaUpdateData.client_id) {
+          kafkaUpdateData.client_id = 'Elastic';
         }
-        if (data.username && data.password && !data.sasl?.mechanism) {
-          updateData.sasl = {
+        if (
+          kafkaUpdateData.username &&
+          kafkaUpdateData.password &&
+          !kafkaUpdateData.sasl?.mechanism
+        ) {
+          kafkaUpdateData.sasl = {
             mechanism: kafkaSaslMechanism.Plain,
           };
         }
-        if (!data.partition) {
-          updateData.partition = kafkaPartitionType.Hash;
+        if (!kafkaUpdateData.partition) {
+          kafkaUpdateData.partition = kafkaPartitionType.Hash;
         }
-        if (data.partition === kafkaPartitionType.Random && !data.random?.group_events) {
-          updateData.random = {
+        if (
+          kafkaUpdateData.partition === kafkaPartitionType.Random &&
+          !kafkaUpdateData.random?.group_events
+        ) {
+          kafkaUpdateData.random = {
             group_events: 1,
           };
         }
-        if (data.partition === kafkaPartitionType.RoundRobin && !data.round_robin?.group_events) {
-          updateData.round_robin = {
+        if (
+          kafkaUpdateData.partition === kafkaPartitionType.RoundRobin &&
+          !kafkaUpdateData.round_robin?.group_events
+        ) {
+          kafkaUpdateData.round_robin = {
             group_events: 1,
           };
         }
-        if (!data.timeout) {
-          updateData.timeout = 30;
+        if (!kafkaUpdateData.timeout) {
+          kafkaUpdateData.timeout = 30;
         }
-        if (!data.broker_timeout) {
-          updateData.broker_timeout = 10;
+        if (!kafkaUpdateData.broker_timeout) {
+          kafkaUpdateData.broker_timeout = 10;
         }
-        if (updateData.required_acks === null || updateData.required_acks === undefined) {
+        if (kafkaUpdateData.required_acks === null || kafkaUpdateData.required_acks === undefined) {
           // required_acks can be 0
-          updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
+          kafkaUpdateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
         // Clear fields that are only valid for specific auth_type values
-        if (data.auth_type && data.auth_type !== kafkaAuthType.None) {
-          updateData.connection_type = null;
+        if (kafkaUpdateData.auth_type && kafkaUpdateData.auth_type !== kafkaAuthType.None) {
+          kafkaUpdateData.connection_type = null;
         }
-        if (data.auth_type && data.auth_type !== kafkaAuthType.Userpass) {
-          updateData.username = null;
-          updateData.password = null;
+        if (kafkaUpdateData.auth_type && kafkaUpdateData.auth_type !== kafkaAuthType.Userpass) {
+          kafkaUpdateData.username = null;
+          kafkaUpdateData.password = null;
         }
       }
     }
 
-    if (data.ssl) {
-      updateData.ssl = JSON.stringify(data.ssl);
-    } else if (data.ssl === null) {
-      // Explicitly set to null to allow to delete the field
-      updateData.ssl = null;
+    if (isBeatsOutput(updateData)) {
+      // ssl is omitted from updateData so must be read from the incoming domain payload
+      const ssl = (data as Partial<NewBeatsOutput>).ssl;
+      if (ssl) {
+        (updateData as BeatsSoBaseAttributes).ssl = JSON.stringify(ssl);
+      } else if (ssl === null) {
+        // Explicitly set to null to allow to delete the field
+        (updateData as BeatsSoBaseAttributes).ssl = null;
+      }
     }
 
-    if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+    if (data.type === outputType.Kafka) {
+      const kafkaUpdateData = updateData as Nullable<Partial<OutputSoKafkaAttributes>>;
       if (!data.password) {
-        updateData.password = null;
+        kafkaUpdateData.password = null;
       }
       if (!data.username) {
-        updateData.username = null;
+        kafkaUpdateData.username = null;
       }
       if (!data.sasl) {
-        updateData.sasl = null;
+        kafkaUpdateData.sasl = null;
       }
       if (!data.ssl) {
-        updateData.ssl = null;
+        kafkaUpdateData.ssl = null;
       }
     }
 
@@ -1193,10 +1245,7 @@ class OutputService {
       }
     }
 
-    if (
-      (mergedType === outputType.Elasticsearch || mergedType === outputType.RemoteElasticsearch) &&
-      updateData.hosts
-    ) {
+    if (outputTypeSupportPresets(updateData) && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
@@ -1205,32 +1254,37 @@ class OutputService {
       updateData.proxy_id = null;
     }
 
-    if (
-      data.type === outputType.RemoteElasticsearch &&
-      updateData.type === outputType.RemoteElasticsearch
-    ) {
+    if (data.type === outputType.RemoteElasticsearch) {
+      const remoteUpdateData = updateData as Nullable<OutputSoRemoteElasticsearchAttributes>;
       if (!data.service_token) {
-        updateData.service_token = null;
+        remoteUpdateData.service_token = null;
       }
       if (!data.kibana_api_key) {
-        updateData.kibana_api_key = null;
+        remoteUpdateData.kibana_api_key = null;
       }
     }
 
-    if (!data.preset && data.type && outputTypeSupportPresets(data.type)) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
+    if (hasTypeChanged && outputTypeSupportPresets(updateData)) {
+      if (!updateData.preset) {
+        (updateData as BeatsSoBaseAttributes).preset = getDefaultPresetForEsOutput(
+          updateData.config_yaml ?? '',
+          parse
+        );
+      }
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
-    if (!data.config_yaml && data.shipper) {
-      updateData.shipper = null;
-    }
-    if (data.config_yaml) {
-      const configJs = parse(data.config_yaml);
-      const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+    if (isBeatsOutput(updateData)) {
+      if (!updateData.config_yaml && updateData.shipper) {
+        (updateData as BeatsSoBaseAttributes).shipper = null;
+      }
+      if (updateData.config_yaml) {
+        const configJs = parse(updateData.config_yaml);
+        const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
-      if (isShipperDisabled && data.shipper) {
-        updateData.shipper = null;
+        if (isShipperDisabled && updateData.shipper) {
+          (updateData as BeatsSoBaseAttributes).shipper = null;
+        }
       }
     }
     await remoteSyncIntegrationsCheck(esClient, data);
@@ -1247,19 +1301,23 @@ class OutputService {
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
-      if (!data.ssl?.key && data.secrets?.ssl?.key) {
-        updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
-      }
-      if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
-        if (!data.password && data.secrets?.password) {
-          updateData.password = data.secrets?.password as string;
+      if (isBeatsOutput(updateData)) {
+        const beatsDomainData = data as Partial<NewBeatsOutput>;
+        if (!beatsDomainData.ssl?.key && beatsDomainData.secrets?.ssl?.key) {
+          (updateData as BeatsSoBaseAttributes).ssl = JSON.stringify({
+            ...beatsDomainData.ssl,
+            ...beatsDomainData.secrets.ssl,
+          });
         }
-      } else if (
-        data.type === outputType.RemoteElasticsearch &&
-        updateData.type === outputType.RemoteElasticsearch
-      ) {
+      }
+      if (data.type === outputType.Kafka) {
+        if (!data.password && data.secrets?.password) {
+          (updateData as OutputSoKafkaAttributes).password = data.secrets.password as string;
+        }
+      } else if (data.type === outputType.RemoteElasticsearch) {
         if (!data.service_token && data.secrets?.service_token) {
-          updateData.service_token = data.secrets?.service_token as string;
+          (updateData as OutputSoRemoteElasticsearchAttributes).service_token = data.secrets
+            .service_token as string;
         }
       }
     }
@@ -1320,6 +1378,7 @@ class OutputService {
     await pMap(
       outputsWithoutPreset.saved_objects.map<Output>(outputSavedObjectToOutput),
       async (output) => {
+        if (!isBeatsOutput(output)) return;
         const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
         await outputService.update(

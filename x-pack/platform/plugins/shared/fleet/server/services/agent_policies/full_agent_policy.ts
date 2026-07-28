@@ -775,7 +775,7 @@ export function transformOutputToFullPolicyOutput(
     newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
-  if (outputTypeSupportPresets(output.type)) {
+  if (outputTypeSupportPresets(output)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 

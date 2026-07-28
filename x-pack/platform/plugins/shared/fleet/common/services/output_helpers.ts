@@ -17,6 +17,9 @@ import type {
   ValueOf,
   Output,
   OtelExporterOutput,
+  NewBeatsOutput,
+  NewOtlpOutput,
+  PresetCapableOutput,
 } from '../types';
 import {
   FLEET_APM_PACKAGE,
@@ -156,8 +159,10 @@ export function getDefaultPresetForEsOutput(
   return 'balanced';
 }
 
-export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
-  return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
+export function outputTypeSupportPresets<T extends { type: ValueOf<OutputType> }>(
+  output: T
+): output is T & PresetCapableOutput {
+  return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(output.type);
 }
 
 export function outputTypeSupportsOtelExporter(type: ValueOf<OutputType> | undefined): boolean {
@@ -169,6 +174,27 @@ export function isOtelExporterOutput<T extends { type?: ValueOf<OutputType> }>(
   output: T
 ): output is T & OtelExporterOutput {
   return outputTypeSupportsOtelExporter(output.type);
+}
+
+const BEATS_OUTPUT_TYPES: ReadonlyArray<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+  outputType.Logstash,
+  outputType.Kafka,
+];
+
+/** Narrows any output to beats-style types (ES, RemoteES, Logstash, Kafka). */
+export function isBeatsOutput<T extends { type: ValueOf<OutputType> }>(
+  output: T
+): output is T & NewBeatsOutput {
+  return BEATS_OUTPUT_TYPES.includes(output.type);
+}
+
+/** Narrows any output to the OTLP type. */
+export function isOtlpOutput<T extends { type: ValueOf<OutputType> }>(
+  output: T
+): output is T & NewOtlpOutput {
+  return output.type === outputType.Otlp;
 }
 
 /**

@@ -2501,7 +2501,6 @@ describe('Output Service', () => {
         type: 'remote_elasticsearch',
         kibana_api_key: null,
         service_token: null,
-        preset: 'balanced',
       });
     });
 
