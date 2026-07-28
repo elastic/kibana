@@ -8,11 +8,15 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { ProjectPickerFilterForm } from './filter_form';
 import { ProjectPickerFilterDisplay, type EditingFilter } from './filter_display/filter_display';
 import { bodyStyles } from './body.styles';
+import { useProjectPickerState } from '../../../../state';
+import { getIncludedVisibleProjectIds } from '../../../../state/derivatives';
 
 interface ProjectPickerFrameBodyProps {
   children: React.ReactNode;
@@ -31,6 +35,12 @@ export function ProjectPickerFrameBody({
   const [filterViewMode, setFilterViewMode] = useState<FilterViewMode>(FilterViewMode.VIEW);
   const [editingFilter, setEditingFilter] = useState<Pick<EditingFilter, 'id'> | null>(null);
 
+  const state = useProjectPickerState();
+
+  const showNoMatchingProjectsWarningCallout = useMemo(() => {
+    return getIncludedVisibleProjectIds(state).length === 0 && state.filterExpressions.size > 0;
+  }, [state]);
+
   const handleEditFilterRequest = useCallback((filter: Pick<EditingFilter, 'id'> | null) => {
     setFilterViewMode(FilterViewMode.EDIT);
     setEditingFilter(filter);
@@ -41,18 +51,61 @@ export function ProjectPickerFrameBody({
     setEditingFilter(null);
   }, []);
 
+  const handleFilterCreateClick = useCallback(() => {
+    setFilterViewMode(FilterViewMode.EDIT);
+  }, []);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={styles.bodyContainer}>
+      {showNoMatchingProjectsWarningCallout && (
+        <EuiFlexItem>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
+              defaultMessage: 'No projects are currently being searched',
+            })}
+            data-test-subj="projectPickerFilterDisplayNoMatchCallout"
+          >
+            <p>
+              {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
+                defaultMessage:
+                  'Adjust your project filters and toggles to ensure at least one project is included in your search.',
+              })}
+            </p>
+          </KbnWarningCallout>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={styles.filterBoxWrapper}>
-        {filterViewMode === FilterViewMode.VIEW ? (
-          <ProjectPickerFilterDisplay onEditFilter={handleEditFilterRequest} />
-        ) : null}
-        {filterViewMode === FilterViewMode.EDIT ? (
-          <ProjectPickerFilterForm
-            filterId={editingFilter?.id}
-            onCloseFilterFormRequested={handleCloseFilterFormRequested}
-          />
-        ) : null}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <ProjectPickerFilterDisplay onEditFilter={handleEditFilterRequest} />
+          </EuiFlexItem>
+          {filterViewMode === FilterViewMode.VIEW ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                css={styles.filterCreateButton}
+                data-test-subj="projectPickerFilterDisplayAddFilterBtn"
+                flush="both"
+                onClick={handleFilterCreateClick}
+              >
+                <EuiText size="xs">
+                  {i18n.translate('cpsUtils.projectPicker.filterDisplay.addFilterBtnText', {
+                    defaultMessage: 'Add project tag filter',
+                  })}
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
+          {filterViewMode === FilterViewMode.EDIT ? (
+            <EuiFlexItem>
+              <ProjectPickerFilterForm
+                filterId={editingFilter?.id}
+                onCloseFilterFormRequested={handleCloseFilterFormRequested}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>

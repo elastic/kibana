@@ -16,12 +16,13 @@ import {
   EuiToolTip,
   EuiFormRow,
   EuiForm,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../../state';
-import { previewFilterMatchingIds } from '../../../../../state/derivatives';
-import { filterFormStyles } from './filter_form.styles';
+import {
+  previewFilterMatchingIds,
+  isDuplicateFilterExpressionDraft,
+} from '../../../../../state/derivatives';
 import { FilterSelectionInput, type FilterInput } from './filter_input';
 import { isValidFilterExpression } from '../../../../../utils/filter_input_codec';
 
@@ -40,8 +41,6 @@ export function ProjectPickerFilterForm({
   filterId,
   onCloseFilterFormRequested,
 }: ProjectPickerFilterFormProps) {
-  const { euiTheme } = useEuiTheme();
-  const styles = filterFormStyles({ euiTheme });
   const actions = useProjectPickerActions();
   const state = useProjectPickerState();
   const [filterInput, setFilterInput] = useState<FilterInput | null>(null);
@@ -96,42 +95,57 @@ export function ProjectPickerFilterForm({
     [filterInput]
   );
 
-  const shouldDisableCreateFilter = !completeFilterExpression || hasZeroMatchPreview;
+  const isDuplicateFilterPreview =
+    completeFilterExpression !== null &&
+    isDuplicateFilterExpressionDraft(state.filterExpressions, completeFilterExpression, filterId);
+
+  const shouldDisableCreateFilter =
+    !completeFilterExpression || hasZeroMatchPreview || isDuplicateFilterPreview;
 
   const handleOnCreateFilter = useCallback(async () => {
-    try {
-      if (!completeFilterExpression) {
-        return;
-      }
-
-      if (filterId) {
-        actions.updateFilterExpression({ id: filterId, expression: completeFilterExpression });
-      } else {
-        actions.addFilterExpression({ expression: completeFilterExpression });
-      }
-      onCloseFilterFormRequested?.();
-    } catch (error) {
-      // TODO: handle error
+    if (!completeFilterExpression) {
+      return;
     }
+
+    if (filterId) {
+      actions.updateFilterExpression({ id: filterId, expression: completeFilterExpression });
+    } else {
+      actions.addFilterExpression({ expression: completeFilterExpression });
+    }
+    onCloseFilterFormRequested?.();
   }, [actions, completeFilterExpression, filterId, onCloseFilterFormRequested]);
+
+  const filterFormHelpText = useMemo(() => {
+    return hasZeroMatchPreview || isDuplicateFilterPreview ? (
+      <>
+        {hasZeroMatchPreview ? (
+          <EuiText color="danger" size="xs">
+            {i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
+              defaultMessage:
+                'No projects match this filter. Adjust so at least one project is included in your search.',
+            })}
+          </EuiText>
+        ) : null}
+        {isDuplicateFilterPreview ? (
+          <EuiText color="danger" size="xs">
+            {i18n.translate('cpsUtils.projectPicker.filterBox.duplicateFilterHelpText', {
+              defaultMessage:
+                'This filter already exists. Change the filter or edit the existing one.',
+            })}
+          </EuiText>
+        ) : null}
+      </>
+    ) : null;
+  }, [hasZeroMatchPreview, isDuplicateFilterPreview]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem css={styles.filterFormWrapper}>
+      <EuiFlexItem>
         <EuiForm>
           <EuiFormRow
             label={null}
-            isInvalid={hasZeroMatchPreview}
-            helpText={
-              hasZeroMatchPreview ? (
-                <EuiText color="danger" size="xs">
-                  {i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
-                    defaultMessage:
-                      'No projects match this filter. Adjust so at least one project is included in your search.',
-                  })}
-                </EuiText>
-              ) : undefined
-            }
+            isInvalid={hasZeroMatchPreview || isDuplicateFilterPreview}
+            helpText={filterFormHelpText}
             fullWidth
           >
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
@@ -148,7 +162,7 @@ export function ProjectPickerFilterForm({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       id="createFilterTooltip"
-                      content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
+                      content={i18n.translate('cpsUtils.projectPicker.filterBox.createFilter', {
                         defaultMessage: 'Create filter',
                       })}
                       position="top"

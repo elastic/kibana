@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiText, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiFlexItem, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { useProjectPickerActions, useProjectPickerState } from '../../../state';
@@ -29,6 +29,10 @@ export function ProjectPickerFrameFooter() {
     actions.includeAllVisibleProjects();
   }, [actions]);
 
+  const isActionBtnDisabled = useMemo(() => {
+    return state.visibleProjectIds.length === 0 || includedCount === state.visibleProjectIds.length;
+  }, [state.visibleProjectIds.length, includedCount]);
+
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow>
@@ -42,18 +46,30 @@ export function ProjectPickerFrameFooter() {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          disabled={
-            state.visibleProjectIds.length === 0 || includedCount === state.visibleProjectIds.length
-          }
-          onClick={includeAllVisibleProjects}
-          flush="right"
-          size="xs"
-        >
-          {i18n.translate('cpsUtils.projectPicker.frameFooter.addProject', {
-            defaultMessage: 'Include all visible',
-          })}
-        </EuiButtonEmpty>
+        {React.createElement(isActionBtnDisabled ? EuiToolTip : React.Fragment, {
+          ...(isActionBtnDisabled
+            ? {
+                content: i18n.translate(
+                  'cpsUtils.projectPicker.frameFooter.includeAllVisibleProjectTooltip',
+                  {
+                    defaultMessage: 'All listed projects are included.',
+                  }
+                ),
+              }
+            : {}),
+          children: (
+            <EuiButtonEmpty
+              disabled={isActionBtnDisabled}
+              onClick={includeAllVisibleProjects}
+              flush="right"
+              size="xs"
+            >
+              {i18n.translate('cpsUtils.projectPicker.frameFooter.addProject', {
+                defaultMessage: 'Include all visible',
+              })}
+            </EuiButtonEmpty>
+          ),
+        })}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

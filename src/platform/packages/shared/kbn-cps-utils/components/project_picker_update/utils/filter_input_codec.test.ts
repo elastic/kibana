@@ -10,6 +10,7 @@
 import {
   FilterOperator,
   filterExpressionCodec,
+  getFilterExpressionLookupKey,
   isValidFilterExpression,
 } from './filter_input_codec';
 
@@ -157,6 +158,33 @@ describe('filterExpressionCodec', () => {
         expression
       );
     });
+  });
+});
+
+describe('getFilterExpressionLookupKey', () => {
+  it('returns the encoded filter string', () => {
+    const expression = {
+      operator: FilterOperator.EQUALS,
+      tagName: 'env',
+      tagValue: 'prod',
+    } as const;
+
+    expect(getFilterExpressionLookupKey(expression)).toBe(filterExpressionCodec.encode(expression));
+  });
+
+  it('returns different keys for different expressions', () => {
+    const a = {
+      operator: FilterOperator.EQUALS,
+      tagName: 'env',
+      tagValue: 'prod',
+    } as const;
+    const b = {
+      operator: FilterOperator.NOT_EQUALS,
+      tagName: 'env',
+      tagValue: 'prod',
+    } as const;
+
+    expect(getFilterExpressionLookupKey(a)).not.toBe(getFilterExpressionLookupKey(b));
   });
 });
 

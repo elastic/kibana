@@ -12,7 +12,9 @@ import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
 import {
   type FilterExpressionDraft,
+  type FilterExpressionValue,
   type FilterOperatorLiteral,
+  getFilterExpressionLookupKey,
   getOperatorKind,
   isNegatedOperator,
   isValidFilterExpression,
@@ -105,6 +107,19 @@ export const previewFilterMatchingIds = (
 
   return applyFilterExpressions(availableProjects, previewFilters);
 };
+
+export function isDuplicateFilterExpressionDraft(
+  filterExpressions: Map<string, FilterEntry>,
+  draft: FilterExpressionValue,
+  editingFilterId?: string
+): boolean {
+  const draftKey = getFilterExpressionLookupKey(draft);
+  if (!filterExpressions.has(draftKey)) {
+    return false;
+  }
+
+  return draftKey !== editingFilterId;
+}
 
 export const hasActiveFilterExpressions = (
   filterExpressions: Map<string, FilterEntry>

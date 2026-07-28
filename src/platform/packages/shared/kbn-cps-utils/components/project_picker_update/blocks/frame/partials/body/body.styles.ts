@@ -17,6 +17,10 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
     zIndex: euiTheme.levels.header,
     borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     backgroundColor: euiTheme.components.headerBackground,
+    padding: euiTheme.size.base,
+  }),
+  filterCreateButton: css({
+    width: 'fit-content',
   }),
   bodyContainer: css({
     maxHeight: '500px',

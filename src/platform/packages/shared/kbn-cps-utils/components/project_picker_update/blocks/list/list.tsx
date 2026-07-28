@@ -16,17 +16,18 @@ import {
   EuiFlexItem,
   EuiWrappingPopover,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_item';
 import { useProjectPickerActions, useProjectPickerState } from '../../state';
-import { getIncludedVisibleProjectIds } from '../../state/derivatives';
+import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
 import { getProjectTags } from '../../../utils';
 import { FilterBadge } from '../filter_badge/filter_badge';
 import type { FilterExpressionValue } from '../../utils/filter_input_codec';
-import { FilterOperator } from '../../utils/filter_input_codec';
+import { FilterOperator, getFilterExpressionLookupKey } from '../../utils/filter_input_codec';
 
 interface ProjectPickerListClickActionContext {
   activeProject: CPSProject;
@@ -50,31 +51,40 @@ export const getProjectPickerListContextMenuConfig = (
 ): Array<ProjectPickerListContextMenuItemProps> => {
   return [
     {
-      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.includeAllVisibleProjects', {
-        defaultMessage: 'Include all other visible projects',
+      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.excludeAllVisibleProjects', {
+        defaultMessage: 'Include only this project',
       }),
       onClick: (props) => {
-        actions.includeAllOtherVisibleProjects({ anchorProjectId: props.activeProject._id });
+        actions.includeOnlyProvidedProjectId({ anchorProjectId: props.activeProject._id });
       },
       isDisabled: (props) => {
+        const anchorProjectId = props.activeProject._id;
+        const otherVisibleIds = computeVisibleProjectIds(props.state).filter(
+          (id) => id !== anchorProjectId
+        );
+
         return (
-          props.state.excludedOverrides.length === 0 ||
-          (props.state.excludedOverrides.length === 1 &&
-            props.state.excludedOverrides.includes(props.activeProject._id))
+          !props.state.excludedOverrides.includes(anchorProjectId) &&
+          otherVisibleIds.every((id) => props.state.excludedOverrides.includes(id))
         );
       },
     },
     {
-      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.excludeAllVisibleProjects', {
-        defaultMessage: 'Exclude all other visible projects',
+      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.includeAllVisibleProjects', {
+        defaultMessage: 'Exclude only this project',
       }),
       onClick: (props) => {
-        actions.excludeAllOtherVisibleProjects({ anchorProjectId: props.activeProject._id });
+        actions.excludeOnlyProvidedProjectId({ anchorProjectId: props.activeProject._id });
       },
       isDisabled: (props) => {
+        const anchorProjectId = props.activeProject._id;
+        const otherVisibleIds = computeVisibleProjectIds(props.state).filter(
+          (id) => id !== anchorProjectId
+        );
+
         return (
-          props.state.excludedOverrides.includes(props.activeProject._id) ||
-          getIncludedVisibleProjectIds(props.state).length === 1
+          props.state.excludedOverrides.includes(anchorProjectId) &&
+          otherVisibleIds.every((id) => !props.state.excludedOverrides.includes(id))
         );
       },
     },
@@ -215,25 +225,40 @@ export function ProjectPickerList() {
                 tagValue: tag.tagValue,
               };
 
+              const isAlreadyAdded = state.filterExpressions.has(
+                getFilterExpressionLookupKey(filter)
+              );
+
               return (
                 <EuiFlexItem key={`${tag.tagName}.${tag.tagValue}`} grow={false}>
-                  <FilterBadge
-                    css={styles.projectTagsBadge}
-                    iconType="plusCircle"
-                    iconSide="right"
-                    onClick={() => {
-                      actions.addFilterExpression({
-                        expression: filter,
-                      });
-                    }}
-                    onClickAriaLabel={i18n.translate(
-                      'cpsUtils.projectPicker.list.projectTags.addFilterAriaLabel',
+                  {React.createElement(isAlreadyAdded ? EuiToolTip : React.Fragment, {
+                    content: i18n.translate(
+                      'cpsUtils.projectPicker.list.projectTags.filterAlreadyAdded',
                       {
-                        defaultMessage: 'Add filter to project',
+                        defaultMessage: 'Filter already added',
                       }
-                    )}
-                    filter={filter}
-                  />
+                    ),
+                    children: (
+                      <FilterBadge
+                        css={styles.projectTagsBadge}
+                        iconType="plusCircle"
+                        iconSide="right"
+                        onClick={() => {
+                          actions.addFilterExpression({
+                            expression: filter,
+                          });
+                        }}
+                        isDisabled={isAlreadyAdded}
+                        onClickAriaLabel={i18n.translate(
+                          'cpsUtils.projectPicker.list.projectTags.addFilterAriaLabel',
+                          {
+                            defaultMessage: 'Add filter to project',
+                          }
+                        )}
+                        filter={filter}
+                      />
+                    ),
+                  })}
                 </EuiFlexItem>
               );
             })}

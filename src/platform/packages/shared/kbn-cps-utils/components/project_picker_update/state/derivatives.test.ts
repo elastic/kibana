@@ -13,10 +13,23 @@ import {
   applyFilterExpressions,
   computeSelectedProjects,
   computeVisibleProjectIds,
+  isDuplicateFilterExpressionDraft,
   previewFilterMatchingIds,
   projectPickerDerivatives,
 } from './derivatives';
-import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
+import {
+  FilterOperator,
+  getFilterExpressionLookupKey,
+  type FilterExpressionValue,
+} from '../utils/filter_input_codec';
+
+const typeSecurityExpression = {
+  operator: FilterOperator.EQUALS,
+  tagName: '_type',
+  tagValue: 'security',
+} as const;
+
+const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 
 const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>): CPSProject => ({
   _alias: 'alias',
@@ -27,9 +40,14 @@ const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>)
 });
 
 const createFilterExpressions = (
-  entries: Array<[string, FilterExpressionValue, boolean?]>
+  entries: Array<[FilterExpressionValue, boolean?]>
 ): Map<string, FilterEntry> =>
-  new Map(entries.map(([id, expression, enabled = true]) => [id, { expression, enabled }]));
+  new Map(
+    entries.map(([expression, enabled = true]) => [
+      getFilterExpressionLookupKey(expression),
+      { expression, enabled },
+    ])
+  );
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
@@ -63,12 +81,7 @@ describe('applyFilterExpressions', () => {
     ]);
 
     expect(
-      applyFilterExpressions(
-        availableProjects,
-        createFilterExpressions([
-          ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-        ])
-      )
+      applyFilterExpressions(availableProjects, createFilterExpressions([[typeSecurityExpression]]))
     ).toEqual(['p1']);
   });
 
@@ -82,7 +95,13 @@ describe('applyFilterExpressions', () => {
       applyFilterExpressions(
         availableProjects,
         createFilterExpressions([
-          ['f1', { operator: FilterOperator.NOT_EQUALS, tagName: '_type', tagValue: 'security' }],
+          [
+            {
+              operator: FilterOperator.NOT_EQUALS,
+              tagName: '_type',
+              tagValue: 'security',
+            },
+          ],
         ])
       )
     ).toEqual(['p2']);
@@ -97,13 +116,7 @@ describe('applyFilterExpressions', () => {
     expect(
       applyFilterExpressions(
         availableProjects,
-        createFilterExpressions([
-          [
-            'f1',
-            { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' },
-            false,
-          ],
-        ])
+        createFilterExpressions([[typeSecurityExpression, false]])
       )
     ).toEqual(['p1', 'p2']);
   });
@@ -118,7 +131,7 @@ describe('applyFilterExpressions', () => {
       applyFilterExpressions(
         availableProjects,
         createFilterExpressions([
-          ['f1', { operator: FilterOperator.EXISTS, tagName: 'env', tagValue: undefined }],
+          [{ operator: FilterOperator.EXISTS, tagName: 'env', tagValue: undefined }],
         ])
       )
     ).toEqual(['p1']);
@@ -134,7 +147,7 @@ describe('applyFilterExpressions', () => {
       applyFilterExpressions(
         availableProjects,
         createFilterExpressions([
-          ['f1', { operator: FilterOperator.NOT_EXISTS, tagName: 'env', tagValue: undefined }],
+          [{ operator: FilterOperator.NOT_EXISTS, tagName: 'env', tagValue: undefined }],
         ])
       )
     ).toEqual(['p2']);
@@ -180,9 +193,7 @@ describe('previewFilterMatchingIds', () => {
     expect(
       previewFilterMatchingIds(
         availableProjects,
-        createFilterExpressions([
-          ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-        ]),
+        createFilterExpressions([[typeSecurityExpression]]),
         {
           operator: FilterOperator.EQUALS,
           tagName: '_organisation',
@@ -196,17 +207,51 @@ describe('previewFilterMatchingIds', () => {
     expect(
       previewFilterMatchingIds(
         availableProjects,
-        createFilterExpressions([
-          ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-        ]),
+        createFilterExpressions([[typeSecurityExpression]]),
         {
           operator: FilterOperator.EQUALS,
           tagName: '_type',
           tagValue: 'observability',
         },
-        'f1'
+        typeSecurityKey
       )
     ).toEqual(['p2']);
+  });
+});
+
+describe('isDuplicateFilterExpressionDraft', () => {
+  it('returns true when creating a filter that already exists', () => {
+    const filters = createFilterExpressions([[typeSecurityExpression]]);
+
+    expect(isDuplicateFilterExpressionDraft(filters, typeSecurityExpression)).toBe(true);
+  });
+
+  it('returns true when creating a filter that exists but is disabled', () => {
+    const filters = createFilterExpressions([[typeSecurityExpression, false]]);
+
+    expect(isDuplicateFilterExpressionDraft(filters, typeSecurityExpression)).toBe(true);
+  });
+
+  it('returns false when editing the same filter expression', () => {
+    const filters = createFilterExpressions([[typeSecurityExpression]]);
+
+    expect(isDuplicateFilterExpressionDraft(filters, typeSecurityExpression, typeSecurityKey)).toBe(
+      false
+    );
+  });
+
+  it('returns true when editing to match another existing filter', () => {
+    const observabilityExpression = {
+      operator: FilterOperator.EQUALS,
+      tagName: '_type',
+      tagValue: 'observability',
+    } as const;
+
+    const filters = createFilterExpressions([[typeSecurityExpression], [observabilityExpression]]);
+
+    expect(
+      isDuplicateFilterExpressionDraft(filters, observabilityExpression, typeSecurityKey)
+    ).toBe(true);
   });
 });
 
@@ -237,9 +282,7 @@ describe('computeSelectedProjects', () => {
       computeSelectedProjects(
         createState({
           availableProjects,
-          filterExpressions: createFilterExpressions([
-            ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-          ]),
+          filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
           filteredProjectIds: ['p2'],
         })
       )
@@ -257,9 +300,7 @@ describe('computeSelectedProjects', () => {
       computeSelectedProjects(
         createState({
           availableProjects,
-          filterExpressions: createFilterExpressions([
-            ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-          ]),
+          filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
           filteredProjectIds: ['p1', 'p2'],
           excludedOverrides: ['p2'],
         })
@@ -278,9 +319,7 @@ describe('computeSelectedProjects', () => {
       computeSelectedProjects(
         createState({
           availableProjects,
-          filterExpressions: createFilterExpressions([
-            ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-          ]),
+          filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
           filteredProjectIds: ['p1'],
           excludedOverrides: [],
         })
@@ -299,7 +338,7 @@ describe('computeSelectedProjects', () => {
         createState({
           availableProjects,
           filterExpressions: createFilterExpressions([
-            ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'missing' }],
+            [{ operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'missing' }],
           ]),
           filteredProjectIds: [],
         })
@@ -336,9 +375,7 @@ describe('computeVisibleProjectIds', () => {
       computeVisibleProjectIds(
         createState({
           availableProjects,
-          filterExpressions: createFilterExpressions([
-            ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-          ]),
+          filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
           filteredProjectIds: ['p1'],
         })
       )
@@ -356,7 +393,7 @@ describe('computeVisibleProjectIds', () => {
         createState({
           availableProjects,
           filterExpressions: createFilterExpressions([
-            ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'missing' }],
+            [{ operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'missing' }],
           ]),
           filteredProjectIds: [],
         })
@@ -374,13 +411,7 @@ describe('computeVisibleProjectIds', () => {
       computeVisibleProjectIds(
         createState({
           availableProjects,
-          filterExpressions: createFilterExpressions([
-            [
-              'f1',
-              { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' },
-              false,
-            ],
-          ]),
+          filterExpressions: createFilterExpressions([[typeSecurityExpression, false]]),
           filteredProjectIds: ['p1', 'p2'],
         })
       )
@@ -397,9 +428,7 @@ describe('projectPickerDerivatives', () => {
 
     const state = createState({
       availableProjects,
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
     });
 
     const afterFiltered = {
@@ -419,9 +448,7 @@ describe('projectPickerDerivatives', () => {
 
     const state = createState({
       availableProjects,
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
     });
 
     const afterFiltered = {

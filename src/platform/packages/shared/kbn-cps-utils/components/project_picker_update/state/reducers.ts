@@ -12,6 +12,7 @@ import type { CPSProject } from '../../../types';
 import {
   FilterOperator,
   invertOperator,
+  getFilterExpressionLookupKey,
   type FilterExpressionValue,
 } from '../utils/filter_input_codec';
 import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
@@ -61,7 +62,11 @@ export function createStoreReducers() {
       state: ProjectPickerState,
       payload: { expression: FilterExpressionValue }
     ) => {
-      const id = window.crypto.randomUUID();
+      const id = getFilterExpressionLookupKey(payload.expression);
+      if (state.filterExpressions.has(id)) {
+        return state;
+      }
+
       const filterExpressions = new Map(state.filterExpressions);
       filterExpressions.set(id, { expression: payload.expression, enabled: true });
 
@@ -82,8 +87,18 @@ export function createStoreReducers() {
         return state;
       }
 
+      const nextKey = getFilterExpressionLookupKey(payload.expression);
+      if (nextKey !== payload.id && state.filterExpressions.has(nextKey)) {
+        return state;
+      }
+
       const filterExpressions = new Map(state.filterExpressions);
-      filterExpressions.set(payload.id, { ...existing, expression: payload.expression });
+
+      if (nextKey !== payload.id) {
+        filterExpressions.delete(payload.id);
+      }
+
+      filterExpressions.set(nextKey, { ...existing, expression: payload.expression });
 
       return {
         ...state,
@@ -160,7 +175,15 @@ export function createStoreReducers() {
           return state;
       }
 
-      filterExpressions.set(payload.filterId, {
+      const nextKey = getFilterExpressionLookupKey(inverted);
+      if (nextKey !== payload.filterId && filterExpressions.has(nextKey)) {
+        return state;
+      }
+
+      if (nextKey !== payload.filterId) {
+        filterExpressions.delete(payload.filterId);
+      }
+      filterExpressions.set(nextKey, {
         ...existing,
         expression: inverted,
       });

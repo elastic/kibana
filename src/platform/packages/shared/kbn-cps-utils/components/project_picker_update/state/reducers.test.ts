@@ -9,7 +9,27 @@
 
 import type { CPSProject } from '../../../types';
 import { createStoreReducers, type FilterEntry, type ProjectPickerState } from './reducers';
-import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
+import {
+  FilterOperator,
+  getFilterExpressionLookupKey,
+  type FilterExpressionValue,
+} from '../utils/filter_input_codec';
+
+const typeSecurityExpression = {
+  operator: FilterOperator.EQUALS,
+  tagName: '_type',
+  tagValue: 'security',
+} as const;
+
+const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
+
+const regionUsEastExpression = {
+  operator: FilterOperator.EQUALS,
+  tagName: '_region',
+  tagValue: 'us-east-1',
+} as const;
+
+const regionUsEastKey = getFilterExpressionLookupKey(regionUsEastExpression);
 
 const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>): CPSProject => ({
   _alias: 'alias',
@@ -19,9 +39,14 @@ const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>)
 });
 
 const createFilterExpressions = (
-  entries: Array<[string, FilterExpressionValue, boolean?]>
+  entries: Array<[FilterExpressionValue, boolean?]>
 ): Map<string, FilterEntry> =>
-  new Map(entries.map(([id, expression, enabled = true]) => [id, { expression, enabled }]));
+  new Map(
+    entries.map(([expression, enabled = true]) => [
+      getFilterExpressionLookupKey(expression),
+      { expression, enabled },
+    ])
+  );
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
@@ -41,15 +66,6 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
 describe('createStoreReducers', () => {
   const reducers = createStoreReducers();
 
-  beforeAll(() => {
-    if (!window.crypto.randomUUID) {
-      Object.defineProperty(window.crypto, 'randomUUID', {
-        value: () => 'generated-filter-id',
-        configurable: true,
-      });
-    }
-  });
-
   it('updates override fields instead of selectedProjects', () => {
     const state = createState({
       availableProjects: new Map([['p1', createProject({ _id: 'p1' })]]),
@@ -63,9 +79,7 @@ describe('createStoreReducers', () => {
 
   it('clears stored filters and overrides when clearing project filters', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       excludedOverrides: ['p2'],
     });
 
@@ -77,9 +91,7 @@ describe('createStoreReducers', () => {
 
   it('resets filters and overrides when reverting to space defaults', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       excludedOverrides: ['p2'],
     });
 
@@ -91,9 +103,7 @@ describe('createStoreReducers', () => {
 
   it('adds filter expressions without touching overrides', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       excludedOverrides: ['p1'],
     });
 
@@ -102,8 +112,8 @@ describe('createStoreReducers', () => {
     });
 
     expect(nextState.filterExpressions.size).toBe(2);
-    expect(nextState.filterExpressions.get('f1')).toEqual({
-      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' },
+    expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
+      expression: typeSecurityExpression,
       enabled: true,
     });
     expect(
@@ -116,31 +126,108 @@ describe('createStoreReducers', () => {
     expect(nextState.excludedOverrides).toEqual(['p1']);
   });
 
-  it('updates an existing filter expression in place', () => {
+  it('does not add a duplicate filter expression', () => {
+    const state = createState({
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+    });
+
+    const nextState = reducers.addFilterExpression(state, {
+      expression: typeSecurityExpression,
+    });
+
+    expect(nextState).toBe(state);
+    expect(nextState.filterExpressions.size).toBe(1);
+  });
+
+  it('does not update when the new expression collides with another filter key', () => {
+    const observabilityExpression = {
+      operator: FilterOperator.EQUALS,
+      tagName: '_type',
+      tagValue: 'observability',
+    } as const;
+
     const state = createState({
       filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
+        [typeSecurityExpression],
+        [observabilityExpression],
       ]),
     });
 
     const nextState = reducers.updateFilterExpression(state, {
-      id: 'f1',
-      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' },
+      id: typeSecurityKey,
+      expression: observabilityExpression,
+    });
+
+    expect(nextState).toBe(state);
+  });
+
+  it('re-keys when inverting a filter operator', () => {
+    const state = createState({
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+    });
+
+    const nextState = reducers.invertFilterExpressionOperator(state, {
+      filterId: typeSecurityKey,
+    });
+
+    const invertedExpression = {
+      operator: FilterOperator.NOT_EQUALS,
+      tagName: '_type',
+      tagValue: 'security',
+    } as const;
+    const invertedKey = getFilterExpressionLookupKey(invertedExpression);
+
+    expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
+    expect(nextState.filterExpressions.get(invertedKey)).toEqual({
+      expression: invertedExpression,
+      enabled: true,
+    });
+  });
+
+  it('does not invert when the inverted filter key already exists', () => {
+    const invertedExpression = {
+      operator: FilterOperator.NOT_EQUALS,
+      tagName: '_type',
+      tagValue: 'security',
+    } as const;
+
+    const state = createState({
+      filterExpressions: createFilterExpressions([[typeSecurityExpression], [invertedExpression]]),
+    });
+
+    const nextState = reducers.invertFilterExpressionOperator(state, {
+      filterId: typeSecurityKey,
+    });
+
+    expect(nextState).toBe(state);
+  });
+
+  it('updates an existing filter expression and re-keys when the expression changes', () => {
+    const observabilityExpression = {
+      operator: FilterOperator.EQUALS,
+      tagName: '_type',
+      tagValue: 'observability',
+    } as const;
+
+    const state = createState({
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+    });
+
+    const nextState = reducers.updateFilterExpression(state, {
+      id: typeSecurityKey,
+      expression: observabilityExpression,
     });
 
     expect(nextState.filterExpressions).toEqual(
-      createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' }],
-      ])
+      createFilterExpressions([[observabilityExpression]])
     );
+    expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
     expect(nextState.filterExpressions.size).toBe(1);
   });
 
   it('does not change state when updating a missing filter id', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
     });
 
     const nextState = reducers.updateFilterExpression(state, {
@@ -154,17 +241,15 @@ describe('createStoreReducers', () => {
   it('removes a filter expression by id', () => {
     const state = createState({
       filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-        ['f2', { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' }],
+        [typeSecurityExpression],
+        [regionUsEastExpression],
       ]),
     });
 
-    const nextState = reducers.removeFilterExpression(state, { filterId: 'f1' });
+    const nextState = reducers.removeFilterExpression(state, { filterId: typeSecurityKey });
 
     expect(nextState.filterExpressions).toEqual(
-      createFilterExpressions([
-        ['f2', { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' }],
-      ])
+      createFilterExpressions([[regionUsEastExpression]])
     );
   });
 
@@ -174,9 +259,7 @@ describe('createStoreReducers', () => {
         ['p1', createProject({ _id: 'p1', _type: 'security' })],
         ['p2', createProject({ _id: 'p2', _type: 'observability' })],
       ]),
-      filterExpressions: createFilterExpressions([
-        ['f1', { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'security' }],
-      ]),
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       filteredProjectIds: ['p1'],
       visibleProjectIds: ['p1'],
       excludedOverrides: ['p1'],

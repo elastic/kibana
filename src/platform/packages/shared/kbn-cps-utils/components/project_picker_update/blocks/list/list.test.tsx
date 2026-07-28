@@ -123,6 +123,23 @@ describe('ProjectPickerList', () => {
       expect(screen.queryByText('env:prod-b')).not.toBeInTheDocument();
     });
 
+    it('disables the add-filter badge when that tag filter is already applied', async () => {
+      const user = userEvent.setup();
+      renderTaggedList();
+
+      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
+
+      const popover = await screen.findByLabelText('Project tags');
+      const addFilterButton = within(popover).getByRole('button', {
+        name: 'Add filter to project',
+      });
+
+      expect(addFilterButton).not.toBeDisabled();
+      await user.click(addFilterButton);
+      expect(addFilterButton).toBeDisabled();
+    });
+
     it('replaces an open context menu with tags from a different project', async () => {
       const user = userEvent.setup();
       renderTaggedList();

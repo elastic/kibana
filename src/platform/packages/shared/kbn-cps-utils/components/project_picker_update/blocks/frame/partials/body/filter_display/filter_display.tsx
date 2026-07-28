@@ -9,20 +9,16 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiWrappingPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   type EuiContextMenuItemProps,
   useEuiTheme,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ProjectPickerState } from '../../../../../state/reducers';
-import { getIncludedVisibleProjectIds } from '../../../../../state/derivatives';
 import { useProjectPickerState, useProjectPickerActions } from '../../../../../state';
 import { filterDisplayStyles } from './filter_display.styles';
 import type { FilterExpressionValue } from '../../../../../utils/filter_input_codec';
@@ -187,8 +183,6 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
     [state.filterExpressions]
   );
 
-  const hasNoIncludedProjects = getIncludedVisibleProjectIds(state).length === 0;
-
   const selectedFilter = useMemo(() => {
     if (!selectedFilterId) {
       return null;
@@ -266,83 +260,46 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
     [actions]
   );
 
-  const handleFilterCreateClick = useCallback(() => {
-    onEditFilter(null);
-  }, [onEditFilter]);
+  if (filterEntries.length === 0) {
+    return null;
+  }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {hasNoIncludedProjects && Boolean(filterEntries.length) && (
-        <EuiFlexItem>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
-              defaultMessage: 'No projects are currently being searched',
-            })}
-            color="warning"
-            data-test-subj="projectPickerFilterDisplayNoMatchCallout"
-          >
-            <p>
-              {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
-                defaultMessage:
-                  'Adjust your project filters and toggles to ensure at least one project is included in your search.',
-              })}
-            </p>
-          </EuiCallOut>
+    <div data-test-subj="projectPickerFilterDisplayContainer">
+      {renderFilterBadgeContextMenu()}
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem css={styles.filterBadgesContainer}>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {filterEntries.map(([id, entry]) => (
+              <EuiFlexItem key={id} grow={false}>
+                <FilterBadge
+                  filter={entry.expression}
+                  onClick={handleFilterBadgeClick.bind(null, id)}
+                  style={{
+                    width: 'fit-content',
+                    opacity: entry.enabled ? 1 : 0.5,
+                  }}
+                  onClickAriaLabel={i18n.translate(
+                    'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
+                    {
+                      defaultMessage: 'Click to view filter actions',
+                    }
+                  )}
+                  iconOnClick={handleFilterBadgeIconClick.bind(null, id)}
+                  iconOnClickAriaLabel={i18n.translate(
+                    'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
+                    {
+                      defaultMessage: 'Click to remove filter',
+                    }
+                  )}
+                  iconSide="right"
+                  iconType="cross"
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
-      )}
-      <EuiFlexItem data-test-subj="projectPickerFilterDisplayContainer">
-        {renderFilterBadgeContextMenu()}
-        <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
-          {filterEntries.length > 0 ? (
-            <EuiFlexItem css={styles.filterBadgesContainer}>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                {filterEntries.map(([id, entry]) => (
-                  <EuiFlexItem key={id} grow={false}>
-                    <FilterBadge
-                      filter={entry.expression}
-                      onClick={handleFilterBadgeClick.bind(null, id)}
-                      style={{
-                        width: 'fit-content',
-                        opacity: entry.enabled ? 1 : 0.5,
-                      }}
-                      onClickAriaLabel={i18n.translate(
-                        'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
-                        {
-                          defaultMessage: 'Click to view filter actions',
-                        }
-                      )}
-                      iconOnClick={handleFilterBadgeIconClick.bind(null, id)}
-                      iconOnClickAriaLabel={i18n.translate(
-                        'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
-                        {
-                          defaultMessage: 'Click to remove filter',
-                        }
-                      )}
-                      iconSide="right"
-                      iconType="cross"
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              css={styles.filterCreateButton}
-              data-test-subj="projectPickerFilterDisplayAddFilterBtn"
-              flush="both"
-              onClick={handleFilterCreateClick}
-            >
-              <EuiText size="xs">
-                {i18n.translate('cpsUtils.projectPicker.filterDisplay.addFilterBtnText', {
-                  defaultMessage: 'Add project tag filter',
-                })}
-              </EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </div>
   );
 }

@@ -22,7 +22,7 @@ interface ProjectPickerContext {
 
 export interface ProjectPickerStateProviderProps {
   children: React.ReactNode;
-  availableProjects: Array<CPSProject>;
+  availableProjects: CPSProject[];
 }
 
 export const createProjectPickerContext = once(() =>

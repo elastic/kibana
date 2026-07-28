@@ -11,14 +11,8 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const filterDisplayStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
-  container: css({
-    padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-  }),
   filterBadgesContainer: css({
     width: '100%',
     overflowX: 'hidden',
-  }),
-  filterCreateButton: css({
-    width: 'fit-content',
   }),
 });

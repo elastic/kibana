@@ -12,12 +12,12 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSwitch,
   EuiText,
   EuiToolTip,
   EuiBadge,
   useGeneratedHtmlId,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../../types';
@@ -61,9 +61,10 @@ export function ProjectPickerListItem({
   return (
     <EuiFlexGroup data-test-subj="projectPickerListItem" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon
+        <EuiIconTip
+          position="top"
+          content={project._type}
           type={getSolutionIcon(project._type)}
-          aria-hidden={true}
           data-test-subj="projectPickerListItemIcon"
         />
       </EuiFlexItem>
