@@ -39,7 +39,7 @@ describe('validators', () => {
 
     it('should block unsupported protocols', () => {
       expect(() => validateUrl('ftp://example.com')).toThrow('Unsupported protocol: ftp:');
-      // eslint-disable-next-line no-script-url
+
       expect(() => validateUrl('javascript:alert(1)')).toThrow('Unsupported protocol: javascript:');
       expect(() => validateUrl('data:text/plain,hello')).toThrow('Unsupported protocol: data:');
     });

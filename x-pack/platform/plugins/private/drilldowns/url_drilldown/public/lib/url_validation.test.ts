@@ -20,7 +20,7 @@ describe('validateUrlTemplate', () => {
       (
         await validateUrlTemplate(
           '{{kibanaUrl}}/test',
-          // eslint-disable-next-line no-script-url
+
           { kibanaUrl: 'javascript:evil()' }
         )
       ).isValid

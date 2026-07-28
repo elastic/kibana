@@ -14,7 +14,7 @@ describe('shortUrlAssertValid()', () => {
     ['protocol', 'http://localhost:5601/app/kibana'],
     ['protocol', 'https://localhost:5601/app/kibana'],
     ['protocol', 'mailto:foo@bar.net'],
-    ['protocol', 'javascript:alert("hi")'], // eslint-disable-line no-script-url
+    ['protocol', 'javascript:alert("hi")'],
     ['hostname', 'localhost/app/kibana'], // according to spec, this is not a valid URL -- you cannot specify a hostname without a protocol
     ['hostname and port', 'local.host:5601/app/kibana'], // parser detects 'local.host' as the protocol
     ['hostname and auth', 'user:pass@localhost.net/app/kibana'], // parser detects 'user' as the protocol

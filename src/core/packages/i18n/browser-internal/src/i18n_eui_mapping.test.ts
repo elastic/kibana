@@ -101,7 +101,7 @@ describe('@elastic/eui i18n tokens', () => {
           // pluralization). To check EUI's pluralization against Kibana's pluralization, we
           // need to eval the defString and then actually i18n.translate & compare the 2 outputs.
           const defStringWithoutTypeAnnotations = defString.replace(TYPE_ANNOTATIONS_REGEX, '');
-          const defFunction = eval(defStringWithoutTypeAnnotations); // eslint-disable-line no-eval
+          const defFunction = eval(defStringWithoutTypeAnnotations);
           const defFunctionArg = normalizedDefString.split('({ ')[1].split('})')[0]; // TODO: All EUI pluralization fns currently only pass 1 arg. If this changes in the future and 2 args are passed, we'll need to do some extra splitting by ','
 
           if (isPluralizationDefFunction) {

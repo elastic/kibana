@@ -369,7 +369,7 @@ describe('unauthenticatedApp', () => {
 
     it('prevents redirect via javascript: protocol', async () => {
       const basePath = '/mock-base-path';
-      // eslint-disable-next-line no-script-url
+
       const maliciousUrl = 'javascript:alert(1)';
       window.location.href = `https://host.com${basePath}/security/unauthenticated?next=${encodeURIComponent(
         maliciousUrl
