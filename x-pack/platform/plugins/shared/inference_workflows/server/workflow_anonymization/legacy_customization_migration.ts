@@ -6,11 +6,9 @@
  */
 
 import { createHash } from 'node:crypto';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ISavedObjectsRepository, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { AnonymizationPolicyService } from '@kbn/anonymization-plugin/server';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import { INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { parse, stringify } from 'yaml';
@@ -24,23 +22,73 @@ import { legacyMigrationRunsCounter } from './anonymization_metrics';
 
 type MigrationManagement = Pick<WorkflowsManagementApi, 'createWorkflow' | 'getWorkflow'>;
 
-const getEnabledRules = (profile: AnonymizationProfile) => ({
-  regexRules: profile.rules.regexRules
-    .filter(({ enabled }) => enabled)
-    .map(({ entityClass, pattern }) => ({ entityClass, pattern }))
-    .sort((left, right) =>
-      `${left.entityClass}:${left.pattern}`.localeCompare(`${right.entityClass}:${right.pattern}`)
-    ),
-  nerRules: profile.rules.nerRules
-    .filter(({ enabled }) => enabled)
-    .map(({ modelId, allowedEntityClasses }) => ({
-      modelId: modelId ?? '',
-      allowedEntityClasses: [...allowedEntityClasses].sort(),
-    }))
-    .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))),
-});
+interface ParsedRegexRule {
+  readonly entityClass: string;
+  readonly pattern: string;
+}
 
-const createSourceHash = (rules: ReturnType<typeof getEnabledRules>): string =>
+interface ParsedNerRule {
+  readonly modelId: string;
+  readonly allowedEntityClasses: readonly string[];
+}
+
+interface ParsedSettings {
+  readonly regexRules: readonly ParsedRegexRule[];
+  readonly nerRules: readonly ParsedNerRule[];
+}
+
+// Parses the `ai:anonymizationSettings` Kibana advanced setting JSON.
+// Format: { rules: [{ type: 'RegExp'|'NER', enabled: boolean, ... }] }
+const parseAnonymizationSettings = (settingsString: string): ParsedSettings => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(settingsString);
+  } catch {
+    return { regexRules: [], nerRules: [] };
+  }
+
+  if (typeof parsed !== 'object' || parsed === null) {
+    return { regexRules: [], nerRules: [] };
+  }
+
+  const raw = parsed as Record<string, unknown>;
+  if (!Array.isArray(raw.rules)) {
+    return { regexRules: [], nerRules: [] };
+  }
+
+  const regexRules: ParsedRegexRule[] = [];
+  const nerRules: ParsedNerRule[] = [];
+
+  for (const item of raw.rules) {
+    if (typeof item !== 'object' || item === null) continue;
+    const rule = item as Record<string, unknown>;
+
+    if (
+      rule.type === 'RegExp' &&
+      rule.enabled === true &&
+      typeof rule.entityClass === 'string' &&
+      typeof rule.pattern === 'string'
+    ) {
+      regexRules.push({ entityClass: rule.entityClass, pattern: rule.pattern });
+    } else if (rule.type === 'NER' && rule.enabled === true) {
+      const modelId = typeof rule.modelId === 'string' ? rule.modelId : '';
+      const allowedEntityClasses = Array.isArray(rule.allowedEntityClasses)
+        ? rule.allowedEntityClasses.filter((c): c is string => typeof c === 'string').sort()
+        : [];
+      nerRules.push({ modelId, allowedEntityClasses });
+    }
+  }
+
+  // Sort for deterministic hash — same rules in different order must produce the same hash.
+  regexRules.sort((a, b) =>
+    `${a.entityClass}:${a.pattern}`.localeCompare(`${b.entityClass}:${b.pattern}`)
+  );
+  nerRules.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+
+  return { regexRules, nerRules };
+};
+
+const createSourceHash = (rules: ParsedSettings): string =>
   createHash('sha256').update(JSON.stringify(rules)).digest('hex');
 
 const managedWorkflowYamlSchema = z
@@ -69,7 +117,7 @@ const createMigratedYaml = ({
 }: {
   sourceYaml: string;
   sourceHash: string;
-  regexRules: ReturnType<typeof getEnabledRules>['regexRules'];
+  regexRules: readonly ParsedRegexRule[];
 }): string => {
   const workflow = managedWorkflowYamlSchema.parse(parse(sourceYaml));
   const anonymizationStep = workflow.steps.find(({ type }) => type === 'ai.pii');
@@ -102,12 +150,12 @@ export interface LegacyCustomizationMigration {
 }
 
 export const createLegacyCustomizationMigration = ({
-  policyService,
+  getLegacySettings,
   management,
   repository,
   logger,
 }: {
-  policyService: AnonymizationPolicyService;
+  getLegacySettings: () => Promise<string | undefined>;
   management: MigrationManagement;
   repository: ISavedObjectsRepository;
   logger: Logger;
@@ -115,13 +163,12 @@ export const createLegacyCustomizationMigration = ({
   let activeMigration: Promise<void> | undefined;
 
   const migrate = async (request: KibanaRequest): Promise<void> => {
-    await policyService.ensureGlobalProfile(DEFAULT_SPACE_ID);
-    const profile = await policyService.getGlobalProfile(DEFAULT_SPACE_ID);
-    if (!profile) {
+    const settingsString = await getLegacySettings();
+    if (!settingsString) {
       legacyMigrationRunsCounter.add(1, { outcome: 'skipped' });
       return;
     }
-    const rules = getEnabledRules(profile);
+    const rules = parseAnonymizationSettings(settingsString);
     if (rules.regexRules.length === 0 && rules.nerRules.length === 0) {
       legacyMigrationRunsCounter.add(1, { outcome: 'skipped' });
       return;

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
-import type { AnonymizationPolicyService } from '@kbn/anonymization-plugin/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -17,47 +15,18 @@ import { createLegacyCustomizationMigration } from './legacy_customization_migra
 
 type Management = Pick<WorkflowsManagementApi, 'createWorkflow' | 'getWorkflow'>;
 
-const createProfile = ({ ner = false }: { ner?: boolean } = {}): AnonymizationProfile => ({
-  id: 'global-profile',
-  name: 'global',
-  targetType: 'index',
-  targetId: '*',
-  rules: {
-    fieldRules: [],
-    regexRules: ner
-      ? []
-      : [
-          {
-            id: 'custom-email',
-            type: 'regex',
-            pattern: 'custom@example\\.com',
-            entityClass: 'EMAIL',
-            enabled: true,
-          },
-        ],
-    nerRules: ner
-      ? [
-          {
-            id: 'custom-ner',
-            type: 'ner',
-            enabled: true,
-            allowedEntityClasses: ['PER'],
-          },
-        ]
-      : [],
-  },
-  saltId: 'salt-default',
-  namespace: 'default',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  createdBy: 'system',
-  updatedBy: 'system',
+const REGEX_SETTINGS = JSON.stringify({
+  rules: [{ type: 'RegExp', enabled: true, pattern: 'custom@example\\.com', entityClass: 'EMAIL' }],
+});
+
+const NER_SETTINGS = JSON.stringify({
+  rules: [{ type: 'NER', enabled: true, allowedEntityClasses: ['PER'] }],
 });
 
 const managedWorkflow: WorkflowDetailDto = {
   id: 'system-inference_pii_anonymization-default',
   name: 'Protect sensitive inference data',
-  enabled: true,
+  enabled: false,
   createdAt: '2026-01-01T00:00:00.000Z',
   createdBy: 'system',
   lastUpdatedAt: '2026-01-01T00:00:00.000Z',
@@ -69,17 +38,6 @@ const managedWorkflow: WorkflowDetailDto = {
   managedBy: 'inferenceWorkflows',
   originManagedWorkflowId: INFERENCE_PII_ANONYMIZATION_WORKFLOW.id,
 };
-
-const createPolicyService = (
-  profile: AnonymizationProfile
-): jest.Mocked<AnonymizationPolicyService> => ({
-  ensureGlobalProfile: jest.fn().mockResolvedValue(undefined),
-  getGlobalProfile: jest.fn().mockResolvedValue(profile),
-  getProfile: jest.fn(),
-  getSalt: jest.fn(),
-  getReplacementsEncryptionKey: jest.fn(),
-  resolveEffectivePolicy: jest.fn(),
-});
 
 describe('legacy customization migration', () => {
   it('creates one disabled provenance-preserving clone and a completed marker', async () => {
@@ -94,7 +52,7 @@ describe('legacy customization migration', () => {
       createWorkflow: jest.fn().mockResolvedValue(managedWorkflow),
     };
     const migration = createLegacyCustomizationMigration({
-      policyService: createPolicyService(createProfile()),
+      getLegacySettings: jest.fn().mockResolvedValue(REGEX_SETTINGS),
       management,
       repository,
       logger: loggingSystemMock.createLogger(),
@@ -132,7 +90,7 @@ describe('legacy customization migration', () => {
       createWorkflow: jest.fn(),
     };
     const restartedMigration = createLegacyCustomizationMigration({
-      policyService: createPolicyService(createProfile()),
+      getLegacySettings: jest.fn().mockResolvedValue(REGEX_SETTINGS),
       management: restartedManagement,
       repository,
       logger: loggingSystemMock.createLogger(),
@@ -156,7 +114,7 @@ describe('legacy customization migration', () => {
     };
     const logger = loggingSystemMock.createLogger();
     const migration = createLegacyCustomizationMigration({
-      policyService: createPolicyService(createProfile({ ner: true })),
+      getLegacySettings: jest.fn().mockResolvedValue(NER_SETTINGS),
       management,
       repository,
       logger,
