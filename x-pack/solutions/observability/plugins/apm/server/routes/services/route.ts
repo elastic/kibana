@@ -37,7 +37,7 @@ import {
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { mergeWith, uniq } from 'lodash';
 import { environmentSchema } from '@kbn/apm-types';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
@@ -390,30 +390,33 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  params: z.object({
-    path: z.object({
-      serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH),
-    }),
-    body: z
-      .object({
-        '@timestamp': z.string().max(1024).transform(isoToEpoch),
-        service: z
-          .object({
-            version: z.string().max(1024),
-          })
-          .merge(
-            z.object({
-              environment: z.string().max(1024).optional(),
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH),
+      }),
+      body: z
+        .object({
+          '@timestamp': z.string().max(1024).transform(isoToEpoch),
+          service: z
+            .object({
+              version: z.string().max(1024),
             })
-          ),
-      })
-      .merge(
-        z.object({
-          message: z.string().max(10_000).optional(),
-          tags: z.array(z.string().max(1024)).optional(),
+            .merge(
+              z.object({
+                environment: z.string().max(1024).optional(),
+              })
+            ),
         })
-      ),
-  }),
+        .merge(
+          z.object({
+            message: z.string().max(10_000).optional(),
+            tags: z.array(z.string().max(1024)).optional(),
+          })
+        ),
+    })
+  ),
   handler: async (
     resources
   ): Promise<{
@@ -848,10 +851,13 @@ const serviceSlosRoute = createApmServerRoute({
 
 const serviceHasSystemMetricsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
-  params: z.object({
-    path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-    query: environmentSchema.merge(rangeSchema),
-  }),
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
+      query: environmentSchema.merge(rangeSchema),
+    })
+  ),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ hasSystemMetrics: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
