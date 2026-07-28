@@ -92,10 +92,8 @@ const useHeaderStyles = (
     // flush with the header's bottom border); otherwise it uses the symmetric vertical padding.
     const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
 
-    // The min-height floor keeps a short single-row header from getting too thin. Multi-row headers
-    // already gain height from their extra rows and shrink the primary row's bottom padding, so the
-    // floor there would only add dead space.
     const isMultiRow = hasTabs || hasSecondaryContent;
+    const primaryRowBottomPadding = bottomPad(hasTabs || hasSecondaryContent);
 
     const root = css`
       ${sticky &&
@@ -132,6 +130,8 @@ const useHeaderStyles = (
       }
     `;
 
+    // Preserve the single-row content floor in multi-row headers while replacing its symmetric
+    // bottom padding with the smaller gap to the following row.
     const primaryRow = css`
       display: flex;
       align-items: center;
@@ -142,10 +142,15 @@ const useHeaderStyles = (
       css`
         min-height: ${minHeight}px;
       `}
+      ${isMultiRow &&
+      !hasTitleAppend &&
+      css`
+        min-height: calc(${minHeight}px - ${paddingBlock} + ${primaryRowBottomPadding});
+      `}
       ${!hasTitleAppend &&
       css`
         padding-block-start: ${paddingBlock};
-        padding-block-end: ${bottomPad(hasTabs || hasSecondaryContent)};
+        padding-block-end: ${primaryRowBottomPadding};
       `}
     `;
 
