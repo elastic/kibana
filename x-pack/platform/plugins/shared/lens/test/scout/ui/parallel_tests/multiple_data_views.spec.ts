@@ -8,8 +8,12 @@
 import type { DebugState } from '@elastic/charts';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
-import { addDataLayer, switchDataPanelIndexPattern, testData } from '../fixtures';
+import {
+  addDataLayer,
+  enableElasticChartDebug,
+  switchDataPanelIndexPattern,
+  testData,
+} from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
@@ -74,7 +78,9 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
         await lens.waitForVisualization('xyVisChart');
         // Two non-empty series (logstash + flights). Exact bucket values belong at the API layer.
         await expect
-          .poll(async () => getNonEmptyLineSeriesCount(await getChartDebugData(page, 'xyVisChart')))
+          .poll(async () =>
+            getNonEmptyLineSeriesCount(await lens.getCurrentChartDebugState('xyVisChart'))
+          )
           .toBe(2);
       });
 
@@ -87,7 +93,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           await lens.waitForVisualization('xyVisChart');
           await expect
             .poll(async () =>
-              getNonEmptyLineSeriesCount(await getChartDebugData(page, 'xyVisChart'))
+              getNonEmptyLineSeriesCount(await lens.getCurrentChartDebugState('xyVisChart'))
             )
             .toBe(2);
 
@@ -113,7 +119,7 @@ spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic
           // Only the flights series remains non-empty.
           await expect
             .poll(async () =>
-              getNonEmptyLineSeriesCount(await getChartDebugData(page, 'xyVisChart'))
+              getNonEmptyLineSeriesCount(await lens.getCurrentChartDebugState('xyVisChart'))
             )
             .toBe(1);
         }

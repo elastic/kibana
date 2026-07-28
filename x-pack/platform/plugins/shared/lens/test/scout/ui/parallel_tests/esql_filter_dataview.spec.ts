@@ -172,7 +172,7 @@ spaceTest.describe.skip(
 
           const fieldOptions = await page.components
             .comboBox('filterFieldSuggestionList')
-            .getAllVisibleOptions();
+            .getAvailableOptions();
           expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }

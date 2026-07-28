@@ -7,11 +7,11 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
 import {
   completeLensCsvExport,
   createAdHocDataViewFromLens,
   createRuntimeFieldFromEditor,
+  enableElasticChartDebug,
   switchDataPanelIndexPattern,
   testData,
 } from '../fixtures';
@@ -90,7 +90,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () =
       // Default terms size is Top 9 (+ Other). Exact bucket values belong at the API layer.
       await expect
         .poll(async () => {
-          const bars = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+          const bars = (await lens.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ?? [];
           return {
             length: bars.length,
             hasOther: bars.some((bar) => bar.x === 'Other'),
