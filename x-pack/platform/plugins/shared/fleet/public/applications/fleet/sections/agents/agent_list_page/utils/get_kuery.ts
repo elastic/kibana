@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import { buildPolicyIdsOrVariantsKuery } from '../../../../../../../common/services/version_specific_policies_utils';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
@@ -34,9 +35,10 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
-      .map((agentPolicy) => `"${agentPolicy}"`)
-      .join(' or ')})`;
+    kueryBuilder = `${kueryBuilder} ${buildPolicyIdsOrVariantsKuery(
+      selectedAgentPolicies,
+      `${AGENTS_PREFIX}.policy_id`
+    )}`;
   }
 
   if (selectedTags?.length) {
