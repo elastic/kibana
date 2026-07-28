@@ -38,10 +38,10 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/share-plugin'
   - '@kbn/console-plugin'
+  - '@kbn/core-security-server'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-management'
-  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
