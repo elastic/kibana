@@ -169,4 +169,23 @@ describe('createKnowledgeBaseEntry', () => {
       })
     ).rejects.toThrowError('Test error');
   });
+
+  test('it rejects a private entry when the user has no profile UID', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+
+    await expect(
+      createKnowledgeBaseEntry({
+        esClient,
+        knowledgeBaseIndex: 'index-1',
+        spaceId: 'test',
+        user: { ...authenticatedUser, profile_uid: undefined },
+        knowledgeBaseEntry: getCreateKnowledgeBaseEntrySchemaMock(),
+        logger,
+        telemetry,
+      })
+    ).rejects.toThrowError(
+      'Cannot persist a private knowledge base entry without a user profile UID'
+    );
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
 });
