@@ -9,11 +9,18 @@ import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server'
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { ITagsClient } from '../common/types';
 import type { ITagsRequestHandlerContext } from './types';
-import { TagsClient, type IAssignmentService, AssignmentService } from './services';
+import {
+  TagsClient,
+  type IAssignmentService,
+  AssignmentService,
+  type IMergeService,
+  MergeService,
+} from './services';
 
 export class TagsRequestHandlerContext implements ITagsRequestHandlerContext {
   #client?: ITagsClient;
   #assignmentService?: IAssignmentService;
+  #mergeService?: IMergeService;
 
   constructor(
     private readonly request: KibanaRequest,
@@ -38,5 +45,18 @@ export class TagsRequestHandlerContext implements ITagsRequestHandlerContext {
       });
     }
     return this.#assignmentService;
+  }
+
+  public get mergeService() {
+    if (this.#mergeService == null) {
+      this.#mergeService = new MergeService({
+        request: this.request,
+        client: this.coreContext.savedObjects.client,
+        typeRegistry: this.coreContext.savedObjects.typeRegistry,
+        tagsClient: this.tagsClient,
+        authorization: this.security?.authz,
+      });
+    }
+    return this.#mergeService;
   }
 }

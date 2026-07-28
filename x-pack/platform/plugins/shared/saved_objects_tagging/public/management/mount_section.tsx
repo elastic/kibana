@@ -12,13 +12,19 @@ import type { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
 import type { SavedObjectTaggingPluginStart } from '../types';
-import type { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
+import type {
+  ITagInternalClient,
+  ITagAssignmentService,
+  ITagsCache,
+  IMergeClient,
+} from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {
   tagClient: ITagInternalClient;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
+  mergeClient: IMergeClient;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
   title: string;
@@ -41,6 +47,7 @@ export const mountSection = async ({
   tagClient,
   tagCache,
   assignmentService,
+  mergeClient,
   core,
   mountParams,
   title,
@@ -60,6 +67,7 @@ export const mountSection = async ({
           tagClient={tagClient}
           tagCache={tagCache}
           assignmentService={assignmentService}
+          mergeClient={mergeClient}
           capabilities={capabilities}
           assignableTypes={assignableTypes}
         />

@@ -24,14 +24,24 @@ import {
   registerInternalBulkDeleteRoute,
   registerInternalGetAllTagsRoute,
 } from './internal';
+import {
+  registerMergePreviewRoute,
+  registerMergePreviewObjectsRoute,
+  registerMergeStartRoute,
+  registerMergeStatusRoute,
+  registerMergeCancelRoute,
+  type MergeRouteDeps,
+} from './merge';
 import type { TagsPluginRouter } from '../types';
 
 export const registerRoutes = ({
   router,
   usageCounter,
+  mergeRouteDeps,
 }: {
   router: TagsPluginRouter;
   usageCounter?: UsageCounter;
+  mergeRouteDeps: MergeRouteDeps;
 }) => {
   // public API
   registerApiRoutes(router, usageCounter);
@@ -50,4 +60,10 @@ export const registerRoutes = ({
   registerInternalFindTagsRoute(router);
   registerInternalBulkDeleteRoute(router);
   registerInternalGetAllTagsRoute(router);
+  // merge duplicate tags API
+  registerMergePreviewRoute(router, mergeRouteDeps);
+  registerMergePreviewObjectsRoute(router);
+  registerMergeStartRoute(router, mergeRouteDeps);
+  registerMergeStatusRoute(router, mergeRouteDeps);
+  registerMergeCancelRoute(router, mergeRouteDeps);
 };

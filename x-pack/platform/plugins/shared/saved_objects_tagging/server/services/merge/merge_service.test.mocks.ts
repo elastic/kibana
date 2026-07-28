@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getTagConnectionsUrl } from './get_tag_connections_url';
-export type { DuplicateTagGroup } from './group_duplicate_tags';
-export { groupDuplicateTagsByName } from './group_duplicate_tags';
-export { buildTagNameLookup } from './tag_name_lookup';
+export const getUpdatableSavedObjectTypesMock = jest.fn();
+jest.doMock('../assignments/get_updatable_types', () => ({
+  getUpdatableSavedObjectTypes: getUpdatableSavedObjectTypesMock,
+}));

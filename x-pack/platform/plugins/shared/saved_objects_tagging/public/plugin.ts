@@ -12,7 +12,7 @@ import type { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-taggin
 import { tagManagementSectionId } from '../common/constants';
 import { getTagsCapabilities } from '../common/capabilities';
 import type { SavedObjectTaggingPluginStart } from './types';
-import { TagsClient, TagsCache, TagAssignmentService } from './services';
+import { TagsClient, TagsCache, TagAssignmentService, MergeClient } from './services';
 import { getUiApi } from './ui_api';
 import type { SavedObjectsTaggingClientConfigRawType } from './config';
 import { SavedObjectsTaggingClientConfig } from './config';
@@ -28,6 +28,7 @@ export class SavedObjectTaggingPlugin
   private tagClient?: TagsClient;
   private tagCache?: TagsCache;
   private assignmentService?: TagAssignmentService;
+  private mergeClient?: MergeClient;
   private readonly config: SavedObjectsTaggingClientConfig;
 
   constructor(context: PluginInitializerContext) {
@@ -54,6 +55,7 @@ export class SavedObjectTaggingPlugin
           tagClient: this.tagClient!,
           tagCache: this.tagCache!,
           assignmentService: this.assignmentService!,
+          mergeClient: this.mergeClient!,
           core,
           mountParams,
           title,
@@ -81,6 +83,7 @@ export class SavedObjectTaggingPlugin
     });
 
     this.assignmentService = new TagAssignmentService({ http });
+    this.mergeClient = new MergeClient(http);
 
     // do not fetch tags on anonymous page
     if (!http.anonymousPaths.isAnonymous(window.location.pathname)) {

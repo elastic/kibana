@@ -67,6 +67,13 @@ const trapErrors = (fn: () => void) => {
 export interface ITagInternalClient extends ITagsClient {
   find(options: FindTagsOptions): Promise<FindTagsResponse>;
   bulkDelete(ids: string[]): Promise<void>;
+  /**
+   * Refreshes the shared `TagsCache` (if one is configured) from the server, so other consumers
+   * of that cache (tag pickers elsewhere in the app) see changes made outside this client — e.g.
+   * a tag deleted by an async, server-side job — without waiting for the cache's own periodic
+   * refresh or a full page reload.
+   */
+  invalidateCache(): Promise<void>;
 }
 
 export class TagsClient implements ITagInternalClient {
@@ -171,6 +178,11 @@ export class TagsClient implements ITagInternalClient {
     });
 
     return tags;
+  }
+
+  /** See {@link ITagInternalClient.invalidateCache}. */
+  public async invalidateCache() {
+    await this.fetchAllFromNetwork();
   }
 
   public async getAll(options: GetAllTagsOptions = {}) {

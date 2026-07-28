@@ -12,11 +12,12 @@ import type {
   SavedObjectReference,
 } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '../common/types';
-import type { IAssignmentService } from './services';
+import type { IAssignmentService, IMergeService } from './services';
 
 export interface ITagsRequestHandlerContext {
   tagsClient: ITagsClient;
   assignmentService: IAssignmentService;
+  mergeService: IMergeService;
 }
 
 /** @public */

@@ -8,3 +8,6 @@
 export { Header } from './header';
 export { TagTable } from './table';
 export { ActionBar } from './action_bar';
+export { DuplicateTagsCallout } from './duplicate_tags_callout';
+export { MergeInProgressCallout } from './merge_in_progress_callout';
+export { MergeDuplicateTagsFlyout } from './merge_duplicate_tags_flyout';

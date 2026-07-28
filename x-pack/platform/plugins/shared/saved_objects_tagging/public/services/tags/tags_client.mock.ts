@@ -17,6 +17,7 @@ const createInternalClientMock = () => {
     find: jest.fn(),
     findByName: jest.fn(),
     bulkDelete: jest.fn(),
+    invalidateCache: jest.fn(),
   };
 
   return mock;

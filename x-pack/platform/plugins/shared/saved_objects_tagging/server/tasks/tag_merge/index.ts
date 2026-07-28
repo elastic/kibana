@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getTagConnectionsUrl } from './get_tag_connections_url';
-export type { DuplicateTagGroup } from './group_duplicate_tags';
-export { groupDuplicateTagsByName } from './group_duplicate_tags';
-export { buildTagNameLookup } from './tag_name_lookup';
+export { registerTagMergeTaskType } from './register';
+export { getTagMergeTaskId, TAG_MERGE_TASK_TYPE } from './constants';
+export { initialTagMergeTaskState } from './schemas';
+export type { TagMergeTaskParams, TagMergeTaskState } from './schemas';
