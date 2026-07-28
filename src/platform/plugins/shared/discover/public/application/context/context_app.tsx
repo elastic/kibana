@@ -21,7 +21,6 @@ import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
-import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextErrorMessage } from './components/context_error_message';
@@ -252,7 +251,7 @@ export const ContextApp = ({
             {title}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage css={styles.docsPage}>
+          <EuiPage>
             <EuiPageBody
               panelled
               paddingSize="none"
@@ -296,5 +295,4 @@ const componentStyles = {
     flexDirection: 'column',
     height: '100%',
   }),
-  docsPage: kbnFullBodyHeightCss('102px'), // 48px app header + 54px action bar height
 };
