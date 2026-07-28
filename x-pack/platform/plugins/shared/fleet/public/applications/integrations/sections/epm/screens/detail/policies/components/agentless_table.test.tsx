@@ -212,6 +212,8 @@ describe('AgentlessPackagePoliciesTable', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
+      // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
+      disableAgentlessLegacyAPI: false,
     });
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);

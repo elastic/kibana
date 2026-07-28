@@ -50,6 +50,7 @@ describe('buildLensConfig', () => {
   } as unknown as ModelProvider;
 
   const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
+  const AUTHORING_NOTE = 'Created a titleless metric showing the total log count.';
 
   let logger: Logger;
   let invoke: jest.Mock;
@@ -61,6 +62,7 @@ describe('buildLensConfig', () => {
     logger = createMockLogger();
     invoke = jest.fn().mockResolvedValue({
       validatedConfig: { type: 'metric' },
+      authoringNote: AUTHORING_NOTE,
       error: null,
       currentAttempt: 1,
       esqlQuery: PROVIDED_ESQL,
@@ -123,13 +125,30 @@ describe('buildLensConfig', () => {
   });
 
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
-    await run(PROVIDED_ESQL);
+    const result = await run(PROVIDED_ESQL);
 
     expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke).toHaveBeenCalledTimes(1);
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
+    expect(result.authoringNote).toBe(AUTHORING_NOTE);
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns a valid config when the graph omits the authoring note', async () => {
+    invoke.mockResolvedValue({
+      validatedConfig: { type: 'metric' },
+      error: null,
+      currentAttempt: 1,
+      esqlQuery: PROVIDED_ESQL,
+      timeRange: null,
+    });
+
+    await expect(run(PROVIDED_ESQL)).resolves.toEqual({
+      selectedChartType: SupportedChartType.Metric,
+      validatedConfig: { type: 'metric' },
+      esqlQuery: PROVIDED_ESQL,
+    });
   });
 
   it('drops an invalid provided ES|QL and warns, so the graph regenerates', async () => {
