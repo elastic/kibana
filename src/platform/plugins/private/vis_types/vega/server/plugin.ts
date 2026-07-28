@@ -14,6 +14,7 @@ import type {
   VisTypeVegaPluginStart,
 } from './types';
 import { registerSandboxCspSpikeRoutes } from './sandbox_csp_spike';
+import { registerSandboxRoute } from './sandbox_route';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly isDevMode: boolean;
@@ -23,6 +24,8 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
   }
 
   public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+    registerSandboxRoute(core);
+
     if (this.isDevMode) {
       registerSandboxCspSpikeRoutes(core);
     }
