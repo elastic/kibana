@@ -84,7 +84,7 @@ const configSchema = schema.object({
      * `xpack.inference.anonymization.workflow_driven: true` to enable workflow-driven
      * PII anonymization. Defaults to false so the path is inert until explicitly activated.
      */
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     /**
      * Maximum wall-clock time allowed for a single synchronous workflow execution.
      * When the deadline is reached the internal AbortController is aborted, which
