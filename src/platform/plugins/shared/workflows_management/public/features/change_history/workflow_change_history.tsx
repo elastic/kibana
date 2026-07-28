@@ -22,6 +22,7 @@ import {
 } from './use_workflow_change_history';
 import { renderWorkflowChangeHistoryBadge } from './workflow_change_history_badge';
 import { renderWorkflowChangeHistoryChangesSummary } from './workflow_change_history_changes_summary';
+import { WorkflowChangeHistoryPendingChangeSync } from './workflow_change_history_pending_change_sync';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 import {
   WORKFLOW_CHANGE_HISTORY_DATASET,
@@ -43,7 +44,7 @@ export const WorkflowChangeHistoryProvider = ({
 }: WorkflowChangeHistoryProviderProps): JSX.Element => {
   const { analytics: coreAnalytics } = useKibana().services;
   const isEnabled = useWorkflowChangeHistoryEnabled();
-  const adapter = useWorkflowChangeHistoryAdapter(workflowId);
+  const { adapter, pendingChangeRef } = useWorkflowChangeHistoryAdapter(workflowId);
   const canRestore = useWorkflowChangeHistoryRestoreEligibility();
   const scope = useMemo(
     () => ({
@@ -69,11 +70,12 @@ export const WorkflowChangeHistoryProvider = ({
         previewBackLabel: BACK_TO_WORKFLOW,
         previewTitle: workflowName ?? workflowId,
       }}
-      features={{ restore: true }}
+      features={{ restore: true, unsavedChanges: true }}
       permissions={{ canRestore }}
       scope={scope}
       analytics={coreAnalytics}
     >
+      <WorkflowChangeHistoryPendingChangeSync pendingChangeRef={pendingChangeRef} />
       {children}
       <ChangeHistoryModal />
     </ChangeHistoryProvider>

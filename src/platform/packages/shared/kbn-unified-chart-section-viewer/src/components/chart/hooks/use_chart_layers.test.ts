@@ -10,6 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import type { MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
+import { createMetricAggregation } from '../../../common/utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/utils', () => ({
@@ -157,5 +158,23 @@ describe('useChartLayers', () => {
       );
       expect(result.current).toEqual([]);
     });
+  });
+
+  it('forwards gridSettings to createMetricAggregation', () => {
+    const gridSettings = {
+      counterAggregation: 'max' as const,
+      gaugeAggregation: 'avg' as const,
+      histogramPercentile: 'p95' as const,
+    };
+
+    renderHook(() =>
+      useChartLayers({
+        metricItem: mockMetric,
+        dimensions: [],
+        gridSettings,
+      })
+    );
+
+    expect(createMetricAggregation).toHaveBeenCalledWith(expect.objectContaining({ gridSettings }));
   });
 });

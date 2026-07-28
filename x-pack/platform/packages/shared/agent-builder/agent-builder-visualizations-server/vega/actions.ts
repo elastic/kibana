@@ -21,6 +21,10 @@ export interface AuthorSpecAction {
   success: boolean;
   /** Raw spec object parsed from the model response; shape is validated later. */
   spec?: Record<string, unknown>;
+  /** Panel / visualization title from the authoring response schema. */
+  title?: string;
+  /** One-sentence factual description of the authored chart and presentation choices. */
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -31,6 +35,10 @@ export interface ValidateSpecAction {
   success: boolean;
   /** The finalized, render-ready spec serialized as the string the embeddable expects. */
   spec?: string;
+  /** Panel / visualization title carried through from the matching authoring attempt. */
+  title?: string;
+  /** Authoring note carried through from the matching authoring attempt. */
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -48,6 +56,7 @@ export const isValidateSpecAction = (action: VegaAction): action is ValidateSpec
 
 // Node name constants
 export const GENERATE_ESQL_NODE = 'generate_esql_query';
+export const SELECT_EXAMPLES_NODE = 'select_reference_examples';
 export const AUTHOR_SPEC_NODE = 'author_spec';
 export const VALIDATE_SPEC_NODE = 'validate_spec';
 export const FINALIZE_NODE = 'finalize';

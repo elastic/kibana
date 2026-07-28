@@ -112,6 +112,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
       let parsedValue: FieldDefaultValue;
       if (control === FieldType.INPUT_NUMBER) {
         parsedValue = Number(trimmedValue);
+      } else if (control === FieldType.TOGGLE) {
+        parsedValue = value === 'true';
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];
@@ -139,7 +141,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   return (
     <EuiFlyout onClose={onClose} size="m" data-test-subj="fieldDefinitionFlyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>
             {isEditing
               ? i18n.FIELD_DEFINITION_FORM_TITLE_EDIT

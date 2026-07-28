@@ -261,6 +261,7 @@ export const ConverseActionParamsSchema = lazySchema(() =>
       // Kibana related properties
       signal: z.any().optional(),
       timeout: z.coerce.number().optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
       connectorUsageCollector: z.any().optional(),
     })

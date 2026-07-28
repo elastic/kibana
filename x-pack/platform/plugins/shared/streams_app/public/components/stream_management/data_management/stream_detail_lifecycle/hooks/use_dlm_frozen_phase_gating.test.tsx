@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { act, render, renderHook } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Streams } from '@kbn/streams-schema';
 import { useDlmFrozenPhaseGating } from './use_dlm_frozen_phase_gating';
+
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 // Controlled mocks shared with the jest.mock factories below (must be `mock`-prefixed).
 let mockLicense: { hasAtLeast: (level: string) => boolean } | undefined;
@@ -53,10 +56,10 @@ const createDefinition = (canCreateSnapshotRepository: boolean): Streams.ingest.
     privileges: { create_snapshot_repository: canCreateSnapshotRepository },
   } as unknown as Streams.ingest.all.GetResponse);
 
-const setSnapshotRepositories = (defaultRepository?: string) => {
+const setSnapshotRepositories = (defaultRepository?: string, repositories?: string[]) => {
   mockUseSnapshotRepositories.mockReturnValue({
     defaultRepository,
-    repositories: defaultRepository ? [defaultRepository] : [],
+    repositories: repositories ?? (defaultRepository ? [defaultRepository] : []),
     isLoading: false,
     hasFetched: true,
     error: null,
@@ -130,7 +133,7 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       expect(
         document.querySelector('[data-test-subj="streamsDlmFrozenEnterpriseGatingModal"]')
       ).toBeTruthy();
@@ -154,12 +157,46 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       expect(
         document.querySelector(
           '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalTitle"]'
         )
       ).toBeTruthy();
+      // With no existing repositories the modal directs the user to create a default one.
+      expect(
+        document.querySelector(
+          '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalCreateDefaultRepositoryButton"]'
+        )
+      ).toBeTruthy();
+      expect(
+        document.querySelector(
+          '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalManageRepositoriesButton"]'
+        )
+      ).toBeNull();
+    });
+
+    it('directs the user to the repositories list when other repositories already exist', () => {
+      // A repository exists but none is configured as the default.
+      setSnapshotRepositories(undefined, ['existing-repo']);
+      const { result } = renderGating(true);
+
+      act(() => {
+        expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
+      });
+
+      renderWithI18n(<>{result.current.modals}</>);
+      const manageButton = document.querySelector(
+        '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalManageRepositoriesButton"]'
+      );
+      expect(manageButton).toBeTruthy();
+      expect(manageButton?.getAttribute('href')).toContain('snapshot_restore/repositories');
+      expect(
+        document.querySelector(
+          '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalCreateDefaultRepositoryButton"]'
+        )
+      ).toBeNull();
+      expect(result.current.flyoutProps.hasExistingRepositories).toBe(true);
     });
   });
 
@@ -179,7 +216,7 @@ describe('useDlmFrozenPhaseGating', () => {
         expect(result.current.handleAddPhaseGating('frozen')).toBe(true);
       });
 
-      render(<>{result.current.modals}</>);
+      renderWithI18n(<>{result.current.modals}</>);
       expect(
         document.querySelector(
           '[data-test-subj="streamsDlmFrozenDefaultRepositoryRequiredModalTitle"]'

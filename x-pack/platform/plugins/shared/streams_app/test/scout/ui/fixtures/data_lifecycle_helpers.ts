@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ApiServicesFixture, type Locator, type ScoutPage } from '@kbn/scout';
+import { type ApiServicesFixture, type EsClient, type Locator, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
 
@@ -69,8 +69,13 @@ export const RETENTION_TEST_IDS = {
 
   // ILM policy selector (inside the lifecycle method flyout when ILM is selected)
   ilmSearchInput: 'retentionSelectorSearchInput',
+  ilmManagedFilterToggle: 'retentionSelectorIncludeManagedFilter',
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
+
+  // Readiness signal: `-loading` while a stats (re)fetch is inflight, `-loaded` once it settles.
+  summaryStatsLoading: 'dataLifecycleSummary-stats-loading',
+  summaryStatsLoaded: 'dataLifecycleSummary-stats-loaded',
 
   // Display elements
   retentionMetric: 'retention-metric',
@@ -120,6 +125,61 @@ export async function setStreamDslLifecycle(
 }
 
 /**
+ * The managed snapshot repository every Elastic Cloud (ECH) deployment ships with. Cloud has no
+ * node-local filesystem path (`path.repo` is empty), so a default repository must reuse this one
+ * instead of registering an `fs` repository the way the local Scout cluster can.
+ */
+export const CLOUD_DEFAULT_SNAPSHOT_REPOSITORY = 'found-snapshots';
+const LOCAL_FS_SNAPSHOT_REPOSITORY_LOCATION = '/tmp/repo';
+
+export interface ManagedDefaultSnapshotRepository {
+  /** Name of the repository set as the cluster's default. */
+  name: string;
+  /** Restores "no default repository" and removes anything this helper created. */
+  cleanup: () => Promise<void>;
+}
+
+/**
+ * Registers a default snapshot repository so the frozen-phase gate is satisfied, branching on the
+ * deployment (pass `config.isCloud`):
+ *
+ * - Local Scout stateful cluster: registers an `fs` repository at `path.repo` (`/tmp/repo`).
+ * - Elastic Cloud (ECH): has no node-local `path.repo`, so reuses the managed `found-snapshots`
+ *   repository that every deployment ships with (never creates or deletes it).
+ */
+export async function setDefaultSnapshotRepository(
+  esClient: EsClient,
+  isCloud: boolean,
+  fsRepositoryName: string
+): Promise<ManagedDefaultSnapshotRepository> {
+  const name = isCloud ? CLOUD_DEFAULT_SNAPSHOT_REPOSITORY : fsRepositoryName;
+
+  if (!isCloud) {
+    await esClient.snapshot.createRepository({
+      name: fsRepositoryName,
+      repository: { type: 'fs', settings: { location: LOCAL_FS_SNAPSHOT_REPOSITORY_LOCATION } },
+    });
+  }
+
+  await esClient.cluster.putSettings({
+    persistent: { 'repositories.default_repository': name },
+  });
+
+  return {
+    name,
+    cleanup: async () => {
+      await esClient.cluster.putSettings({
+        persistent: { 'repositories.default_repository': null },
+      });
+      // Only remove what we created; never delete the managed Cloud repository.
+      if (!isCloud) {
+        await esClient.snapshot.deleteRepository({ name: fsRepositoryName }).catch(() => {});
+      }
+    },
+  };
+}
+
+/**
  * Confirms the "This will override index template settings" modal.
  */
 async function confirmOverride(page: ScoutPage): Promise<void> {
@@ -139,17 +199,33 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 }
 
 /**
+ * Waits for the summary's stats (re)fetch to settle so a following popover click isn't dismissed by
+ * the re-render. Waits for `-loading` first to avoid matching the stale `-loaded` state on screen.
+ */
+export async function waitForLifecycleSummaryStatsSettled(page: ScoutPage): Promise<void> {
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoading)).toBeVisible();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoaded)).toBeVisible();
+}
+
+/**
  * Saves the lifecycle method flyout changes (Apply) and waits for it to close.
  */
 export async function saveRetentionChanges(
   page: ScoutPage,
-  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+  {
+    expectOverrideConfirmation = false,
+    waitForIlmStats = false,
+  }: { expectOverrideConfirmation?: boolean; waitForIlmStats?: boolean } = {}
 ): Promise<void> {
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
   await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
+
+  if (waitForIlmStats) {
+    await waitForLifecycleSummaryStatsSettled(page);
+  }
 }
 
 /**
@@ -187,13 +263,26 @@ async function selectIlmMethod(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Selects an ILM policy by name in the ILM retention selector
- * (the lifecycle method flyout must already have ILM selected).
+ * Selects an ILM policy by name in the ILM retention selector.
+ * Pass `{ managed: true }` for managed/system policies — they are
+ * hidden behind a filter toggle by default. The helper then waits for the toggle to appear before
+ * clicking it, so the caller's intent is explicit and the wait is reliable.
  */
-export async function selectIlmPolicy(page: ScoutPage, policyName: string): Promise<void> {
+export async function selectIlmPolicy(
+  page: ScoutPage,
+  policyName: string,
+  { managed = false }: { managed?: boolean } = {}
+): Promise<void> {
   await selectIlmMethod(page);
   const search = page.getByTestId(RETENTION_TEST_IDS.ilmSearchInput);
   await search.waitFor({ state: 'visible' });
+
+  if (managed) {
+    const toggle = page.getByTestId(RETENTION_TEST_IDS.ilmManagedFilterToggle);
+    await toggle.waitFor({ state: 'visible' });
+    await toggle.click();
+  }
+
   await search.fill(policyName);
   await page.getByTestId(RETENTION_TEST_IDS.ilmPolicyRow(policyName)).click();
 }

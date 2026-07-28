@@ -1,0 +1,32 @@
+name: OpenAPI publish (serverless)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'oas_docs/output/kibana.serverless.yaml'
+
+concurrency:
+  group: openapi-publish-serverless-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if: github.repository == 'elastic/kibana'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: elastic/docs-actions/openapi/lint@v1
+        with:
+          spec-path: oas_docs/output/kibana.serverless.yaml
+
+      - uses: elastic/docs-actions/openapi/upload@v1
+        with:
+          spec-path: oas_docs/output/kibana.serverless.yaml
+          spec-name: kibana-serverless

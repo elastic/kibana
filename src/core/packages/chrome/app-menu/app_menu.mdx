@@ -19,7 +19,7 @@ It offers a structured and organized way to present navigation options and actio
 
 The `AppMenuConfig` object accepts:
 
-- **`items`** — menu items displayed in the app menu bar. Items beyond the limit overflow into a "More" popover.
+- **`items`** — menu items displayed in ascending `order`. The optional `order` defaults to `0`, and items with the same order retain their array order. Items beyond the limit overflow into a "More" popover.
 - **`primaryActionItem`** — a primary action button placed as the rightmost item. Can be a simple button (with `run`), a button with a popover (with `items`), or a split button (with `run` and `splitButtonProps`).
 - **`switch`** — an optional `AppMenuSwitch` rendered to the left of the menu items. Only one switch is available per app menu.
 

@@ -120,3 +120,26 @@ export const guardedExpandStep = <K extends OptionalStateKey>(
     }
     yield* handler(result.state);
   });
+
+/**
+ * Wraps an async iterable so consumers observe at least one element.
+ *
+ * Yields every element from `source`. If `source` completes without yielding,
+ * emits `fallback` exactly once. Any thrown error from `source` propagates
+ * unchanged.
+ *
+ * Used by streaming steps that must produce at least one `continue`
+ * emission per input state to keep downstream steps running — e.g. an ES|QL
+ * query that returns zero rows still needs the pipeline to progress with an
+ * empty batch so recovery / no-data logic can react.
+ */
+export async function* withAtLeastOne<T>(source: AsyncIterable<T>, fallback: T): AsyncIterable<T> {
+  let yielded = false;
+  for await (const item of source) {
+    yielded = true;
+    yield item;
+  }
+  if (!yielded) {
+    yield fallback;
+  }
+}

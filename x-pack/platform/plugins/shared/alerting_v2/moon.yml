@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
@@ -110,7 +111,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-user-profile-browser'
@@ -129,6 +130,9 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
 tags:
   - plugin
   - prod
@@ -142,6 +146,7 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - public/**/*
+    - test/scout/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'

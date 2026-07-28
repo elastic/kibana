@@ -32,13 +32,12 @@ jest.mock('../hooks/use_alert_snoozed_state');
 const mockSnoozeAlert = jest.fn().mockResolvedValue(true);
 const mockUnsnoozeAlert = jest.fn().mockResolvedValue(true);
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
+  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+}));
+
 jest.mock('@kbn/response-ops-alert-snooze', () => ({
   useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
-  AlertSnoozePopover: ({ onApply }: { onApply: (payload: unknown) => void }) => (
-    <button data-test-subj="alertSnoozePopover" onClick={() => onApply({ expiresAt: null })}>
-      Snooze
-    </button>
-  ),
   AlertSnoozePanelInline: ({
     onApply,
     onBack,
@@ -166,7 +165,7 @@ describe('SnoozeAlertAction', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
-    it('shows the Snooze popover trigger for an active, non-muted, non-snoozed alert', () => {
+    it('shows the inline Snooze menu item for an active, non-muted, non-snoozed alert', () => {
       mockUseAlertMutedState.mockReturnValue({
         isMuted: false,
         ruleId: RULE_ID,
@@ -181,9 +180,29 @@ describe('SnoozeAlertAction', () => {
         alertInstanceId: INSTANCE_ID,
       });
 
-      render(<TestComponent {...baseProps} />);
+      render(<InlineTestComponent {...baseProps} />);
 
-      expect(screen.getByTestId('alertSnoozePopover')).toBeInTheDocument();
+      expect(screen.getByTestId('snooze-alert-action-snooze')).toBeInTheDocument();
+    });
+
+    it('renders nothing to snooze when no expandable panel context is available', () => {
+      mockUseAlertMutedState.mockReturnValue({
+        isMuted: false,
+        ruleId: RULE_ID,
+        alertInstanceId: INSTANCE_ID,
+        rule: [],
+      });
+      mockUseAlertSnoozedState.mockReturnValue({
+        isSnoozed: false,
+        snoozedInstance: undefined,
+        expiresAt: undefined,
+        ruleId: RULE_ID,
+        alertInstanceId: INSTANCE_ID,
+      });
+
+      const { container } = render(<TestComponent {...baseProps} />);
+
+      expect(container).toBeEmptyDOMElement();
     });
 
     it('shows the Unsnooze button when alert is muted', () => {
@@ -279,57 +298,6 @@ describe('SnoozeAlertAction', () => {
 
       await waitFor(() => {
         expect(mockUnsnoozeAlert).toHaveBeenCalledTimes(1);
-      });
-    });
-  });
-
-  describe('snooze actions', () => {
-    beforeEach(() => {
-      mockUseAlertMutedState.mockReturnValue({
-        isMuted: false,
-        ruleId: RULE_ID,
-        alertInstanceId: INSTANCE_ID,
-        rule: [],
-      });
-      mockUseAlertSnoozedState.mockReturnValue({
-        isSnoozed: false,
-        snoozedInstance: undefined,
-        expiresAt: undefined,
-        ruleId: RULE_ID,
-        alertInstanceId: INSTANCE_ID,
-      });
-    });
-
-    it('applies the snooze payload from the popover (indefinite, no conditions)', async () => {
-      // The mock AlertSnoozePopover calls onApply({ expiresAt: null }) when clicked
-      render(<TestComponent {...baseProps} />);
-      fireEvent.click(screen.getByTestId('alertSnoozePopover'));
-
-      await waitFor(() => {
-        expect(mockSnoozeAlert).toHaveBeenCalledWith({ expiresAt: null });
-      });
-    });
-
-    it('applies the snooze payload from the popover with an expiresAt date', async () => {
-      // Override mock to call onApply with a time-based payload
-      (jest.requireMock('@kbn/response-ops-alert-snooze') as any).AlertSnoozePopover = ({
-        onApply,
-      }: {
-        onApply: (payload: unknown) => void;
-      }) => (
-        <button
-          data-test-subj="alertSnoozePopover"
-          onClick={() => onApply({ expiresAt: '2026-06-01T00:00:00.000Z' })}
-        >
-          Snooze
-        </button>
-      );
-
-      render(<TestComponent {...baseProps} />);
-      fireEvent.click(screen.getByTestId('alertSnoozePopover'));
-
-      await waitFor(() => {
-        expect(mockSnoozeAlert).toHaveBeenCalledWith({ expiresAt: '2026-06-01T00:00:00.000Z' });
       });
     });
   });

@@ -245,6 +245,33 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.schedule).not.toHaveBeenCalled();
     });
 
+    it('skips remove and schedule when the global-timeout task is currently running', async () => {
+      const workflowExecution = createMockWorkflowExecution();
+      const resumeAt = new Date('2025-11-17T12:00:00.000Z');
+      const stableId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+
+      mockTaskManager.get.mockResolvedValue({
+        id: stableId,
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        status: TaskStatus.Running,
+        runAt: new Date('2020-01-01T00:00:00.000Z'),
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        },
+      } as any);
+
+      const result = await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+        workflowExecution,
+        resumeAt,
+        fakeRequest,
+      });
+
+      expect(result).toEqual({ taskId: stableId });
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
     it('removes and reschedules when existing task has a different runAt', async () => {
       const workflowExecution = createMockWorkflowExecution();
       const resumeAt = new Date('2025-11-17T12:00:00.000Z');

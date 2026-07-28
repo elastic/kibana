@@ -273,6 +273,7 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
+        userProfileService: this.coreStart.userProfile,
         getWorkflowSource: (workflowId, sid) =>
           this.crudService.getWorkflowDocumentSource(workflowId, sid, {
             includeGlobal: true,
@@ -290,6 +291,11 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsByIds(ids, spaceId, options);
+  }
+
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    await this.ensureInitialized();
+    return this.crudService.findExistingWorkflowIds(ids);
   }
 
   public async getWorkflowsSourceByIds(
@@ -480,6 +486,19 @@ export class WorkflowsService {
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel },
+      spaceId
+    );
+  }
+
+  public async claimHitlStepForExternalResume(
+    stepExecutionId: string,
+    respondedBy: string,
+    spaceId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.executionQueryService.markStepAsResponded(
+      stepExecutionId,
+      { respondedBy, respondedAt: new Date().toISOString(), channel: 'external' },
       spaceId
     );
   }

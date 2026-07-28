@@ -7,8 +7,14 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ServiceNodeData } from '../../../../common/service_map';
+import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
+
+jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
+  TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -47,57 +53,66 @@ jest.mock('./header', () => ({
   ),
 }));
 
-jest.mock('./overview', () => ({
-  ServiceFlyoutOverview: ({
-    environment,
-    transactionType,
-    onEnvironmentChange,
-    onTransactionTypeChange,
-  }: {
-    environment: string;
-    transactionType: string;
-    onEnvironmentChange: (environment: string) => void;
-    onTransactionTypeChange: (transactionType: string) => void;
-  }) => (
-    <div data-test-subj="serviceFlyoutOverviewMock">
-      <button
-        data-test-subj="mockEnvironmentChange"
-        onClick={() => onEnvironmentChange('production')}
-      >
-        change environment
-      </button>
-      <button
-        data-test-subj="mockTransactionTypeChange"
-        onClick={() => onTransactionTypeChange('page-load')}
-      >
-        change transaction type
-      </button>
-      <span data-test-subj="serviceFlyoutOverviewReadout">
-        {environment}:{transactionType}
-      </span>
-    </div>
-  ),
-}));
+// The overview reads environment/transactionType from context and calls the context setters.
+jest.mock('./overview', () => {
+  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+  return {
+    ServiceFlyoutOverview: () => {
+      const {
+        filters: { environment, transactionType, setEnvironment, setTransactionType },
+      } = useServiceFlyoutContext();
+      return (
+        <div data-test-subj="serviceFlyoutOverviewMock">
+          <button
+            data-test-subj="mockEnvironmentChange"
+            onClick={() => setEnvironment('production')}
+          >
+            change environment
+          </button>
+          <button
+            data-test-subj="mockTransactionTypeChange"
+            onClick={() => setTransactionType?.('page-load')}
+          >
+            change transaction type
+          </button>
+          <span data-test-subj="serviceFlyoutOverviewReadout">
+            {environment}:{transactionType}
+          </span>
+        </div>
+      );
+    },
+  };
+});
 
-jest.mock('./footer', () => ({
-  ServiceFlyoutFooter: ({
-    environment,
-    transactionType,
-  }: {
-    environment: string;
-    transactionType: string;
-  }) => (
-    <div data-test-subj="serviceFlyoutFooterMock">
-      {environment}:{transactionType}
-    </div>
-  ),
-}));
+// The footer reads environment/transactionType from context to display them.
+jest.mock('./footer', () => {
+  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+  return {
+    ServiceFlyoutFooter: () => {
+      const {
+        filters: { environment, transactionType },
+      } = useServiceFlyoutContext();
+      return (
+        <div data-test-subj="serviceFlyoutFooterMock">
+          {environment}:{transactionType}
+        </div>
+      );
+    },
+  };
+});
 
-const service: ServiceNodeData = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
-  isService: true,
+const service: ServiceFlyoutService = {
+  name: 'opbeans-java',
   agentName: 'java',
+};
+
+const contextProps = {
+  deps: {
+    core: {} as any,
+    share: {} as any,
+    lens: {} as any,
+    dataViews: {} as any,
+  },
 };
 
 beforeEach(() => {
@@ -110,11 +125,9 @@ describe('ServiceFlyout onView', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onView={onView}
         onClose={jest.fn()}
       />
@@ -129,11 +142,9 @@ describe('ServiceFlyout onView', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onView={onView}
         onClose={jest.fn()}
       />
@@ -149,11 +160,9 @@ describe('ServiceFlyout initial state', () => {
   it('does not seed transactionType from a hardcoded default before the fetch resolves', () => {
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -168,11 +177,9 @@ describe('ServiceFlyout local filter state', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={onClose}
       />
     );
@@ -192,11 +199,9 @@ describe('ServiceFlyout local filter state', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={onClose}
       />
     );
@@ -209,11 +214,9 @@ describe('ServiceFlyout local filter state', () => {
   it('does not reset local filter edits when host props change without a remount', () => {
     const { rerender } = render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -224,11 +227,9 @@ describe('ServiceFlyout local filter state', () => {
     // Same key (same service): a host environment change must not clobber the local edit.
     rerender(
       <ServiceFlyout
+        {...contextProps}
         service={service}
-        environment="staging"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -239,12 +240,10 @@ describe('ServiceFlyout local filter state', () => {
   it('re-seeds local state from props when remounted for a different service', () => {
     const { rerender } = render(
       <ServiceFlyout
-        key={service.id}
+        {...contextProps}
+        key={service.name}
         service={service}
-        environment="ENVIRONMENT_ALL"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );
@@ -253,15 +252,16 @@ describe('ServiceFlyout local filter state', () => {
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent('production:');
 
     // A different `key` (different service) remounts the flyout, re-seeding from the new props.
-    const otherService: ServiceNodeData = { ...service, id: 'opbeans-go', label: 'opbeans-go' };
+    const otherService: ServiceFlyoutService = {
+      ...service,
+      name: 'opbeans-go',
+    };
     rerender(
       <ServiceFlyout
-        key={otherService.id}
+        {...contextProps}
+        key={otherService.name}
         service={otherService}
-        environment="staging"
-        kuery=""
-        initialRangeFrom="now-15m"
-        initialRangeTo="now"
+        filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
         onClose={jest.fn()}
       />
     );

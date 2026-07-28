@@ -60,7 +60,7 @@ apiTest.describe(
       readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
       readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
 
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -73,7 +73,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -106,11 +106,11 @@ apiTest.describe(
           buildSeedEvent(RULE_ID_DELETED),
         ]);
 
-        await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+        await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: RULE_ID_KEPT,
           actionTypes: ['fire'],
         });
-        await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+        await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: RULE_ID_DELETED,
           actionTypes: ['fire'],
         });

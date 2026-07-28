@@ -21,6 +21,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   get: jest.fn(),
   updateStatus: jest.fn(),
   appendEvents: jest.fn(),
+  updateHeartbeat: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
@@ -29,6 +30,11 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
 jest.mock('./persistence', () => ({
   createAgentExecutionClient: () => mockExecutionClient,
 }));
+
+const conflictError = () =>
+  Object.assign(new Error('version conflict'), {
+    meta: { statusCode: 409 },
+  });
 
 // Mock execution_runner module
 const mockHandleAgentExecution = jest.fn();
@@ -48,7 +54,16 @@ jest.mock('./task/abort_monitor', () => ({
   })),
 }));
 
+// Mock heartbeat reporter
+jest.mock('./task/heartbeat_reporter', () => ({
+  HeartbeatReporter: jest.fn().mockImplementation(() => ({
+    start: jest.fn(),
+    stop: jest.fn(),
+  })),
+}));
+
 const mockTaskManagerSchedule = jest.fn();
+const mockTaskManagerEnsureScheduled = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 
@@ -57,6 +72,7 @@ describe('AgentExecutionService', () => {
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
+    ensureScheduled: mockTaskManagerEnsureScheduled,
   } as any;
 
   const uiSettings = {
@@ -135,7 +151,7 @@ describe('AgentExecutionService', () => {
         })
       );
 
-      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'agent-builder:run-agent',
           params: { executionId: result.executionId },
@@ -143,6 +159,27 @@ describe('AgentExecutionService', () => {
         }),
         { request }
       );
+    });
+  });
+
+  describe('executeAgent with a caller-provided executionId', () => {
+    it('throws when an execution with the same id already exists, regardless of its status', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          executionId: 'exec-1',
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toThrow('Execution with id exec-1 already exists');
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
   });
 
@@ -178,7 +215,7 @@ describe('AgentExecutionService', () => {
       );
 
       // Should NOT have scheduled a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
 
       // Should have updated status to running
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
@@ -276,7 +313,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should NOT schedule a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
       // Should have updated status to running (local path)
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         result.executionId,
@@ -296,7 +333,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should have scheduled a TM task
-      expect(mockTaskManagerSchedule).toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalled();
       // Should NOT have called handleAgentExecution (remote path)
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
     });
@@ -314,7 +351,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should have scheduled a TM task despite fakeRequest
-      expect(mockTaskManagerSchedule).toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalled();
     });
 
     it('should honour explicit useTaskManager=false for a regular request', async () => {
@@ -332,7 +369,7 @@ describe('AgentExecutionService', () => {
 
       expect(result.executionId).toBeDefined();
       // Should NOT schedule a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
       // Should have run locally
       expect(mockHandleAgentExecution).toHaveBeenCalled();
     });
@@ -455,6 +492,59 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: undefined })
       );
+    });
+  });
+
+  describe('executeAgent with an idempotency key', () => {
+    const executeWithKey = (executionIdempotencyKey: string) =>
+      service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'exec-1',
+        metadata: { execution_idempotency_key: executionIdempotencyKey },
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+    it('returns the existing execution without scheduling a new task on replay', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 3,
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(result.events$).toBeDefined();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('re-issues the schedule on replay when the existing execution never got a task', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.executionId).toBe('exec-1');
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'agent-exec-1',
+          taskType: 'agent-builder:run-agent',
+          params: { executionId: 'exec-1' },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('rethrows create errors that are not duplicate-execution errors', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(executeWithKey('Ev123')).rejects.toThrow('boom');
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
   });
 

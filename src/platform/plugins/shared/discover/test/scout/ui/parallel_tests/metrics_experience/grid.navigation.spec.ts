@@ -11,8 +11,8 @@
  * Grid Navigation tests: pagination, search, and breakdown.
  *
  * These tests use a dynamically created TSDB index (test-metrics-experience)
- * with 45 metric fields (23 gauge + 22 counter) and 30 dimensions to exercise
- * pagination, search, and breakdown scenarios.
+ * with 50 metric fields (23 gauge + 22 counter + 5 histogram) and 30 dimensions
+ * to exercise pagination, search, and breakdown scenarios.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -126,7 +126,8 @@ spaceTest.describe(
       await spaceTest.step('wildcard search matches metric name pattern', async () => {
         await metricsExperience.clearSearch();
         await metricsExperience.searchMetric('*_0');
-        await expect(metricsExperience.cards).toHaveCount(2);
+        // Matches counter_0, gauge_0, and histogram_0.
+        await expect(metricsExperience.cards).toHaveCount(3);
       });
 
       await spaceTest.step('typo-tolerant search finds metric', async () => {

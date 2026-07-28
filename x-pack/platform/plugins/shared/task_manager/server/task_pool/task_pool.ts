@@ -14,6 +14,7 @@ import { Subject } from 'rxjs';
 import type { Duration } from 'moment';
 import moment from 'moment';
 import { padStart } from 'lodash';
+import { safeJsonStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
 import type { TaskRunner } from '../task_running';
 import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
@@ -23,6 +24,26 @@ import { CLAIM_STRATEGY_MGET } from '../config';
 import { WorkerCapacity } from './worker_capacity';
 import { CostCapacity } from './cost_capacity';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
+
+// Tasks can reject with non-`Error` values (plain objects, ES responses,
+// `undefined`); serialize them so we never log `[object Object]` or `undefined`.
+const getErrorMessage = (error: unknown): string => {
+  if (typeof error === 'object' && error !== null) {
+    // Errors put it on `message`; ES/wrapped errors nest it under `error.message`.
+    const { message, error: nested } = error as {
+      message?: unknown;
+      error?: { message?: unknown };
+    };
+    if (typeof message === 'string') {
+      return message;
+    }
+    if (typeof nested?.message === 'string') {
+      return nested.message;
+    }
+    return safeJsonStringify(error) ?? String(error);
+  }
+  return String(error);
+};
 
 interface TaskPoolOpts {
   capacity$: Observable<number>;
@@ -206,9 +227,9 @@ export class TaskPool {
         // If a task Saved Object can't be found by an in flight task runner
         // we asssume the underlying task has been deleted while it was running
         // so we will log this as a debug, rather than a warn
-        const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${
-          err.message || err.error.message
-        }`;
+        const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${getErrorMessage(
+          err
+        )}`;
         if (isTaskSavedObjectNotFoundError(err, taskRunner.id)) {
           this.logger.debug(errorLogLine);
         } else {
@@ -221,9 +242,9 @@ export class TaskPool {
       .catch(() => {});
   }
 
-  private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
+  private handleFailureOfMarkAsRunning(task: TaskRunner, err: unknown) {
     this.tasksInPool.delete(task.taskExecutionId);
-    this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
+    this.logger.error(`Failed to mark Task ${task.toString()} as running: ${getErrorMessage(err)}`);
   }
 
   private cancelExpiredTasks() {

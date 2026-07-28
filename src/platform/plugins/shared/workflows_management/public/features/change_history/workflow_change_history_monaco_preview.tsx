@@ -14,7 +14,16 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import type { ChangeHistoryDiffTelemetry } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useDefineWorkflowsMonacoTheme } from '@kbn/workflows-ui';
+import {
+  getWorkflowValidationDisplayOptions,
+  useDefineWorkflowsMonacoTheme,
+  WORKFLOW_CHANGE_HISTORY_DIFF_GLOBAL_EDITOR_OPTIONS,
+  WORKFLOW_CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS,
+  WORKFLOW_CHANGE_HISTORY_PREVIEW_MONACO_OPTIONS,
+  WORKFLOW_CHANGE_HISTORY_SPLIT_DIFF_EDITOR_OPTIONS,
+  WORKFLOW_CHANGE_HISTORY_UNIFIED_DIFF_EDITOR_OPTIONS,
+  WORKFLOW_CHANGE_HISTORY_UNIFIED_DIFF_MODIFIED_EDITOR_OPTIONS,
+} from '@kbn/workflows-ui';
 import type { WorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
 import { useWorkflowChangeHistoryPreviewValidation } from './use_workflow_change_history_preview_validation';
 import {
@@ -32,15 +41,6 @@ import {
 import type { WorkflowChangeHistoryCompareMode } from './workflow_change_history_preview_settings_popover';
 import { WorkflowChangeHistoryPreviewSettingsPopover } from './workflow_change_history_preview_settings_popover';
 import { buildWorkflowChangeHistoryUnifiedDiffLayoutStyles } from './workflow_change_history_unified_diff_layout';
-import {
-  getWorkflowValidationDisplayOptions,
-  WORKFLOW_CHANGE_HISTORY_DIFF_GLOBAL_EDITOR_OPTIONS,
-  WORKFLOW_CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS,
-  WORKFLOW_CHANGE_HISTORY_PREVIEW_MONACO_OPTIONS,
-  WORKFLOW_CHANGE_HISTORY_SPLIT_DIFF_EDITOR_OPTIONS,
-  WORKFLOW_CHANGE_HISTORY_UNIFIED_DIFF_EDITOR_OPTIONS,
-  WORKFLOW_CHANGE_HISTORY_UNIFIED_DIFF_MODIFIED_EDITOR_OPTIONS,
-} from '../../widgets/workflow_yaml_editor/lib/workflow_monaco_layout_options';
 import { clearWorkflowYamlComputationCache } from '../validate_workflow_yaml/lib/workflow_yaml_computation_cache';
 
 const FLOATING_NAVIGATOR_BOTTOM = `calc(${WORKFLOW_CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT} - ${WORKFLOW_CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT} / 2)`;

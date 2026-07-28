@@ -18,19 +18,29 @@ import {
   GROUPED_ITEM_SKELETON_TEST_ID,
   GROUPED_ITEM_GEO_TEST_ID,
 } from '../../test_ids';
-import { GroupedItem } from './grouped_item';
+import { GroupedItem as BaseGroupedItem, type GroupedItemProps } from './grouped_item';
 import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 import type { EntityOrEventItem } from './types';
 
-const mockOpenPreviewPanel = jest.fn();
+const mockOnShowDocument = jest.fn();
+const mockOnShowEntity = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  }),
-}));
+// Distributes `Omit` across the discriminated union so the `isLoading` discriminant is preserved.
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+// Test wrapper supplying default preview handlers (previews are not exercised here),
+// so individual cases stay terse.
+const GroupedItem = (
+  props: DistributiveOmit<GroupedItemProps, 'onShowDocument' | 'onShowEntity'>
+) => (
+  <BaseGroupedItem
+    {...(props as GroupedItemProps)}
+    onShowDocument={mockOnShowDocument}
+    onShowEntity={mockOnShowEntity}
+  />
+);
 
 // Use unique scopeId per test run to prevent cross-test pollution
 let TEST_SCOPE_ID: string;
@@ -762,7 +772,7 @@ describe('<GroupedItem />', () => {
 
   describe('memo behavior and component optimization', () => {
     it('should have displayName set correctly', () => {
-      expect(GroupedItem.displayName).toBe('GroupedItem');
+      expect(BaseGroupedItem.displayName).toBe('GroupedItem');
     });
   });
 });

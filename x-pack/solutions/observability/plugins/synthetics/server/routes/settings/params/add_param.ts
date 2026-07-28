@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SyntheticsParamRequest,
@@ -73,11 +74,21 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       });
 
       if (savedObjectsData.length > 1) {
+        const failedResult = result.saved_objects.find((savedObject) =>
+          isSavedObjectErrorResult(savedObject)
+        );
+        if (failedResult?.error) {
+          throw Object.assign(new Error(failedResult.error.message), failedResult.error);
+        }
         return result.saved_objects.map((savedObject) => {
           return toClientResponse(savedObject);
         });
       } else {
-        return toClientResponse(result.saved_objects[0]);
+        const [savedObject] = result.saved_objects;
+        if (isSavedObjectErrorResult(savedObject)) {
+          throw Object.assign(new Error(savedObject.error.message), savedObject.error);
+        }
+        return toClientResponse(savedObject);
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {

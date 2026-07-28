@@ -15,11 +15,14 @@ import {
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
+import type { AttackDiscoveryScheduleSource } from '../../../../common/lib/telemetry';
 import { EmptyPage } from '../schedule/empty_page';
 import { CreateButton } from '../schedule/create_button';
 import { SchedulesTable } from '../schedule/schedules_table';
 import { CreateFlyout } from '../schedule/create_flyout';
+import { useScheduleApi } from '../schedule/logic/use_schedule_api';
 
 export interface UseScheduleView {
   scheduleView: React.ReactNode;
@@ -27,14 +30,36 @@ export interface UseScheduleView {
 }
 
 export const useScheduleView = (): UseScheduleView => {
+  const { telemetry } = useKibana().services;
+
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const openFlyout = useCallback(() => setShowFlyout(true), []);
-  const onClose = useCallback(() => setShowFlyout(false), []);
+  const openFlyout = useCallback(
+    (source: AttackDiscoveryScheduleSource) => {
+      telemetry.reportEvent(AttackDiscoveryEventTypes.ScheduleCreateFlyoutOpened, { source });
+      setShowFlyout(true);
+    },
+    [telemetry]
+  );
 
-  // TODO: add separate hook to fetch schedules stats/count
-  const { data: { total } = { total: 0 }, isLoading: isDataLoading } =
-    useFindAttackDiscoverySchedules({ disableToast: false });
+  const openFlyoutFromEmptyState = useCallback(() => openFlyout('empty_state'), [openFlyout]);
+
+  const openFlyoutFromScheduleTab = useCallback(() => openFlyout('schedule_tab'), [openFlyout]);
+
+  const { useFindSchedules } = useScheduleApi();
+
+  const {
+    data: { total } = { total: 0 },
+    isLoading: isDataLoading,
+    refetch,
+  } = useFindSchedules({
+    disableToast: false,
+  });
+
+  const onClose = useCallback(() => {
+    setShowFlyout(false);
+    refetch();
+  }, [refetch]);
 
   const scheduleView = useMemo(() => {
     return (
@@ -47,22 +72,24 @@ export const useScheduleView = (): UseScheduleView => {
               <EuiSkeletonText />
             </>
           }
-          loadedContent={!total ? <EmptyPage /> : <SchedulesTable />}
+          loadedContent={
+            !total ? <EmptyPage onCreateClick={openFlyoutFromEmptyState} /> : <SchedulesTable />
+          }
         />
         {showFlyout && <CreateFlyout onClose={onClose} />}
       </>
     );
-  }, [isDataLoading, onClose, showFlyout, total]);
+  }, [isDataLoading, onClose, openFlyoutFromEmptyState, showFlyout, total]);
 
   const actionButtons = useMemo(() => {
     return total ? (
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <CreateButton onClick={openFlyout} />
+          <CreateButton onClick={openFlyoutFromScheduleTab} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : null;
-  }, [openFlyout, total]);
+  }, [openFlyoutFromScheduleTab, total]);
 
   return { scheduleView, actionButtons };
 };

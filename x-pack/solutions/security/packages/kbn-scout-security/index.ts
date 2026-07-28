@@ -13,6 +13,9 @@ export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
 export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
 export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
 
+// Security-specific test enums
+export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
+
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
 

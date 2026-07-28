@@ -67,6 +67,7 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
                   createWorkflow: true,
                   updateWorkflow: true,
                   executeWorkflow: true,
+                  readWorkflowExecution: true,
                 },
               },
               getUrlForApp: (

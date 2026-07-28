@@ -24,7 +24,7 @@ describe('resolveExtendedFieldFilters', () => {
     {
       templateId: 'tmpl-a',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'effort', label: 'Effort Level', type: 'integer', control: 'INPUT_NUMBER' },
@@ -39,7 +39,7 @@ describe('resolveExtendedFieldFilters', () => {
     {
       templateId: 'tmpl-b',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'due_date', label: 'Due Date', type: 'date', control: 'DATE_PICKER' },
         { name: 'score', label: 'Score', type: 'double', control: 'INPUT_NUMBER' },
       ],
@@ -128,7 +128,10 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
-  it('drops unresolved labels silently', () => {
+  it('returns an empty group for an unresolved label instead of dropping it', () => {
+    // The empty group is preserved (rather than omitted) so buildExtendedFieldFilterClauses can
+    // turn it into a match_none clause — filtering by an unknown label should yield zero results,
+    // not silently be ignored.
     const result = resolveExtendedFieldFilters(
       [
         { label: 'Priority', value: 'high' },
@@ -147,16 +150,17 @@ describe('resolveExtendedFieldFilters', () => {
           templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
+      [],
     ]);
   });
 
-  it('returns empty for no matches', () => {
+  it('returns a single empty group when no filters match', () => {
     const result = resolveExtendedFieldFilters(
       [{ label: 'nonexistent', value: 'test' }],
       templates
     );
 
-    expect(result).toEqual([]);
+    expect(result).toEqual([[]]);
   });
 
   it('resolves USER_PICKER fields and carries control through', () => {
@@ -166,7 +170,7 @@ describe('resolveExtendedFieldFilters', () => {
         {
           templateId: 'tmpl-c',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'reviewers', label: 'Reviewers', type: 'keyword', control: 'USER_PICKER' },
           ],
         },
@@ -186,13 +190,13 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
-  it('handles templates with no fieldNames', () => {
+  it('handles templates with no fieldDefinitions', () => {
     const result = resolveExtendedFieldFilters(
       [{ label: 'Priority', value: 'high' }],
-      [{ templateId: 'tmpl-x', templateVersion: 1, fieldNames: undefined }]
+      [{ templateId: 'tmpl-x', templateVersion: 1, fieldDefinitions: undefined }]
     );
 
-    expect(result).toEqual([]);
+    expect(result).toEqual([[]]);
   });
 
   it('groups multiple storage keys under one label when different templates share the same label but different names', () => {
@@ -204,21 +208,21 @@ describe('resolveExtendedFieldFilters', () => {
         {
           templateId: 'tmpl-x',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
         {
           templateId: 'tmpl-y',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'story_points', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
         {
           templateId: 'tmpl-z',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
@@ -254,14 +258,14 @@ describe('resolveExtendedFieldFilters', () => {
         {
           templateId: 'tmpl-1',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
           ],
         },
         {
           templateId: 'tmpl-2',
           templateVersion: 1,
-          fieldNames: [
+          fieldDefinitions: [
             { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
           ],
         },
@@ -281,12 +285,62 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
+  it('resolves a label that only exists on a global field', () => {
+    const result = resolveExtendedFieldFilters(
+      [{ label: 'Team', value: 'soc' }],
+      [],
+      [
+        {
+          name: 'team',
+          label: 'Team',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+        },
+      ]
+    );
+
+    expect(result).toEqual([
+      [
+        expect.objectContaining({
+          storageKey: 'team_as_keyword',
+          value: 'soc',
+          control: 'INPUT_TEXT',
+          isGlobal: true,
+          templateVersions: [],
+        }),
+      ],
+    ]);
+  });
+
+  it('ORs template and global storage keys when the same label exists on both', () => {
+    const result = resolveExtendedFieldFilters([{ label: 'Priority', value: 'high' }], templates, [
+      {
+        name: 'global_priority',
+        label: 'Priority',
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+      },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ storageKey: 'priority_as_keyword', isGlobal: undefined }),
+        expect.objectContaining({
+          storageKey: 'global_priority_as_keyword',
+          isGlobal: true,
+          templateVersions: [],
+        }),
+      ])
+    );
+  });
+
   it('filters by specific template versions when same template ID has different field definitions', () => {
     const templatesWithVersionedFields = [
       {
         templateId: 'incident-template',
         templateVersion: 1,
-        fieldNames: [
+        fieldDefinitions: [
           {
             name: 'effort_estimate',
             label: 'Effort Estimate',
@@ -298,7 +352,7 @@ describe('resolveExtendedFieldFilters', () => {
       {
         templateId: 'incident-template',
         templateVersion: 2,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'some_estimate', label: 'Some Estimate', type: 'long', control: 'INPUT_NUMBER' },
         ],
       },
@@ -327,17 +381,23 @@ describe('resolveExtendedFieldFilters', () => {
       {
         templateId: 'incident-template',
         templateVersion: 1,
-        fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' }],
+        fieldDefinitions: [
+          { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' },
+        ],
       },
       {
         templateId: 'incident-template',
         templateVersion: 2,
-        fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' }],
+        fieldDefinitions: [
+          { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' },
+        ],
       },
       {
         templateId: 'incident-template',
         templateVersion: 3,
-        fieldNames: [{ name: 'severity', label: 'Severity', type: 'keyword', control: 'SELECT' }],
+        fieldDefinitions: [
+          { name: 'severity', label: 'Severity', type: 'keyword', control: 'SELECT' },
+        ],
       },
     ];
 
@@ -364,18 +424,29 @@ describe('resolveExtendedFieldFilters', () => {
 });
 
 describe('parseDateFilterToRange', () => {
-  it('parses YYYY-MM-DD to a full-day UTC range', () => {
+  it('parses YYYY-MM-DD to a full-day range with bare-date bounds', () => {
     expect(parseDateFilterToRange('2024-01-01')).toEqual({
-      gte: '2024-01-01T00:00:00.000Z',
-      lt: '2024-01-02T00:00:00.000Z',
+      gte: '2024-01-01',
+      lt: '2024-01-02',
     });
   });
 
   it('parses ISO 8601 string by truncating to the day', () => {
     expect(parseDateFilterToRange('2024-01-01T00:00:00.000Z')).toEqual({
-      gte: '2024-01-01T00:00:00.000Z',
-      lt: '2024-01-02T00:00:00.000Z',
+      gte: '2024-01-01',
+      lt: '2024-01-02',
     });
+  });
+
+  it('returns bare-date bounds that lexicographically bracket a full ISO timestamp stored for the same day', () => {
+    // The flattened/keyword field can hold either a bare date or a full ISO timestamp
+    // depending on how the value was stored, and range queries on it compare lexicographically.
+    // A full-ISO `gte` bound (e.g. "2024-01-01T00:00:00.000Z") would sort *after* a bare-date
+    // stored value ("2024-01-01") and never match it. Bare-date bounds match both.
+    const { gte, lt } = parseDateFilterToRange('2024-01-01')!;
+    expect('2024-01-01' >= gte && '2024-01-01' < lt).toBe(true);
+    expect('2024-01-01T13:45:00.000Z' >= gte && '2024-01-01T13:45:00.000Z' < lt).toBe(true);
+    expect('2024-01-02T00:00:00.000Z' >= gte && '2024-01-02T00:00:00.000Z' < lt).toBe(false);
   });
 
   it('returns undefined for unrecognised formats', () => {
@@ -405,8 +476,8 @@ describe('parseDateFilterToRange', () => {
 
   it('accepts valid leap day in February (leap year)', () => {
     expect(parseDateFilterToRange('2024-02-29')).toEqual({
-      gte: '2024-02-29T00:00:00.000Z',
-      lt: '2024-03-01T00:00:00.000Z',
+      gte: '2024-02-29',
+      lt: '2024-03-01',
     });
   });
 
@@ -419,23 +490,23 @@ describe('parseDateFilterToRange', () => {
 
   it('accepts valid last day of 30-day months', () => {
     expect(parseDateFilterToRange('2024-04-30')).toEqual({
-      gte: '2024-04-30T00:00:00.000Z',
-      lt: '2024-05-01T00:00:00.000Z',
+      gte: '2024-04-30',
+      lt: '2024-05-01',
     });
     expect(parseDateFilterToRange('2024-11-30')).toEqual({
-      gte: '2024-11-30T00:00:00.000Z',
-      lt: '2024-12-01T00:00:00.000Z',
+      gte: '2024-11-30',
+      lt: '2024-12-01',
     });
   });
 
   it('accepts valid day 31 in 31-day months', () => {
     expect(parseDateFilterToRange('2024-01-31')).toEqual({
-      gte: '2024-01-31T00:00:00.000Z',
-      lt: '2024-02-01T00:00:00.000Z',
+      gte: '2024-01-31',
+      lt: '2024-02-01',
     });
     expect(parseDateFilterToRange('2024-12-31')).toEqual({
-      gte: '2024-12-31T00:00:00.000Z',
-      lt: '2025-01-01T00:00:00.000Z',
+      gte: '2024-12-31',
+      lt: '2025-01-01',
     });
   });
 });
@@ -604,6 +675,13 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_summary_as_keyword');
     expect(mappings.ef_summary_as_keyword.type).toBe('keyword');
+    const summaryScript = mappings.ef_summary_as_keyword.script;
+    const summarySource =
+      typeof summaryScript === 'object' && summaryScript != null && 'source' in summaryScript
+        ? String(summaryScript.source)
+        : String(summaryScript ?? '');
+    expect(summarySource).toContain('emit(raw);');
+    expect(summarySource).not.toContain("raw.startsWith('[')");
   });
 
   it('builds runtime mapping for TEXTAREA (needs substring matching)', () => {
@@ -621,6 +699,13 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_notes_as_keyword');
     expect(mappings.ef_notes_as_keyword.type).toBe('keyword');
+    const notesScript = mappings.ef_notes_as_keyword.script;
+    const notesSource =
+      typeof notesScript === 'object' && notesScript != null && 'source' in notesScript
+        ? String(notesScript.source)
+        : String(notesScript ?? '');
+    expect(notesSource).toContain('emit(raw);');
+    expect(notesSource).not.toContain("raw.startsWith('[')");
   });
 });
 
@@ -670,6 +755,23 @@ describe('buildExtendedFieldFilterClauses', () => {
         },
       },
     ]);
+  });
+
+  it('omits the template version filter for global fields', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'team_as_keyword',
+          value: 'soc',
+          esType: 'keyword',
+          control: 'SELECT_BASIC',
+          templateVersions: [],
+          isGlobal: true,
+        },
+      ],
+    ]);
+
+    expect(clauses).toEqual([{ term: { 'cases.extended_fields.team_as_keyword': 'soc' } }]);
   });
 
   it('builds wildcard query for INPUT_TEXT control via runtime field', () => {
@@ -887,7 +989,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     ]);
   });
 
-  it('drops DATE_PICKER filter when value is MM/DD/YYYY (non-ISO)', () => {
+  it('returns match_none for DATE_PICKER filter when value is MM/DD/YYYY (non-ISO)', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -900,7 +1002,7 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
   it('builds range query for DATE_PICKER using YYYY-MM-DD input on flattened path', () => {
@@ -923,8 +1025,8 @@ describe('buildExtendedFieldFilterClauses', () => {
             {
               range: {
                 'cases.extended_fields.start_date_as_date': {
-                  gte: '2024-01-01T00:00:00.000Z',
-                  lt: '2024-01-02T00:00:00.000Z',
+                  gte: '2024-01-01',
+                  lt: '2024-01-02',
                 },
               },
             },
@@ -957,7 +1059,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     ]);
   });
 
-  it('drops DATE_PICKER filter when the date value cannot be parsed', () => {
+  it('returns match_none for DATE_PICKER filter when the date value cannot be parsed', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -970,10 +1072,10 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
-  it('drops numeric filter when value is not a valid number', () => {
+  it('returns match_none for numeric filter when value is not a valid number', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -986,10 +1088,10 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
-  it('drops double filter when value is not a valid number', () => {
+  it('returns match_none for double filter when value is not a valid number', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -1002,7 +1104,13 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toHaveLength(0);
+    expect(clauses).toEqual([{ match_none: {} }]);
+  });
+
+  it('returns match_none for an empty group (unresolved label)', () => {
+    const clauses = buildExtendedFieldFilterClauses([[]]);
+
+    expect(clauses).toEqual([{ match_none: {} }]);
   });
 
   it('builds term query for USER_PICKER (runtime field emits name values from {uid,name} objects)', () => {
@@ -1450,7 +1558,7 @@ describe('resolveFieldLabelSearch', () => {
     {
       templateId: 'tmpl-a',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
         {
@@ -1470,7 +1578,7 @@ describe('resolveFieldLabelSearch', () => {
     {
       templateId: 'tmpl-b',
       templateVersion: 1,
-      fieldNames: [
+      fieldDefinitions: [
         {
           name: 'start_security',
           label: 'Start date security',
@@ -1723,6 +1831,23 @@ describe('buildFieldLabelExistsClauses', () => {
 
   it('returns empty array for empty input', () => {
     expect(buildFieldLabelExistsClauses([])).toEqual([]);
+  });
+
+  it('omits the template version filter for global fields', () => {
+    const clauses = buildFieldLabelExistsClauses([
+      {
+        storageKey: 'team_as_keyword',
+        esType: 'keyword',
+        control: 'INPUT_TEXT',
+        templateVersions: [],
+        isGlobal: true,
+      },
+    ]);
+
+    // Must be a bare exists clause — ANDing an empty template-version filter
+    // (`{ bool: { should: [], minimum_should_match: 1 } }`) would be unsatisfiable
+    // and silently match zero cases.
+    expect(clauses).toEqual([{ exists: { field: 'ef_team_as_keyword' } }]);
   });
 });
 

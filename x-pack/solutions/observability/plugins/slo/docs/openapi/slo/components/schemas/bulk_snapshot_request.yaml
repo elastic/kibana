@@ -1,0 +1,34 @@
+title: Bulk snapshot SLO request
+description: >
+  The bulk snapshot SLO request takes a point in time and a list of SLO instances
+  to compute summaries for. The list is limited to 100 entries.
+type: object
+required:
+  - at
+  - requests
+properties:
+  at:
+    type: string
+    format: date-time
+    description: The point in time at which to compute the SLO instance summaries
+    example: '2025-01-12T10:00:00.000Z'
+  requests:
+    type: array
+    description: The list of SLO instances to compute. Limited to 100 entries.
+    maxItems: 100
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: The SLO definition id
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        instanceId:
+          type: string
+          description: >
+            The SLO instance ID.
+            Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000).
+            Set a specific value to return that instance only.
+          example: '*'

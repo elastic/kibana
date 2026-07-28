@@ -29,6 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  /**
+   * Purpose: Verify filters from one controls are passed to another control
+   *
+   * Migration: Ingestigate if this can be moved to control group RTL test - otherwise, move to scout and use pre-built dashboard
+   */
   describe('Dashboard controls hierarchical chaining', () => {
     let controlIds: string[];
 

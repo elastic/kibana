@@ -31,7 +31,9 @@ interface StreamMock {
   write: (data: string) => void;
   fail: () => void;
   end: () => void;
+  destroy: jest.Mock;
   transform: Transform;
+  on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   removeListener: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
 }
@@ -78,11 +80,14 @@ const headers = {
   authorization: 'Basic ZWxhc3RpYzpTaUtXTlFWekhpRUoybmZ6SkpGMDlLT3c=',
 };
 
-function createStreamMock(): StreamMock {
+function createStreamMock({
+  seqNo = 10,
+  primaryTerm = 20,
+}: Partial<Record<'seqNo' | 'primaryTerm', number>> = {}): StreamMock {
   const transform: Transform = new Transform({});
   const mock = {
-    getSeqNo: () => 10,
-    getPrimaryTerm: () => 20,
+    getSeqNo: () => seqNo,
+    getPrimaryTerm: () => primaryTerm,
     write: (data: string) => {
       transform.push(`${data}\n`);
     },
@@ -93,6 +98,11 @@ function createStreamMock(): StreamMock {
     transform,
     end: () => {
       transform.end();
+    },
+    destroy: jest.fn(),
+    on: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.on(event, listener);
+      return mock;
     },
     once: (event: string, listener: (...args: unknown[]) => void) => {
       transform.once(event, listener);
@@ -107,10 +117,11 @@ function createStreamMock(): StreamMock {
 }
 
 const mockStream = createStreamMock();
+const mockGetContentStream = jest.fn();
 const mockEventTracker = eventTrackerMock.create();
 
 jest.mock('../content_stream', () => ({
-  getContentStream: () => mockStream,
+  getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
   finishedWithNoPendingCallbacks: () => Promise.resolve(),
 }));
 
@@ -126,6 +137,7 @@ describe('Run Single Report Task', () => {
   let configType: ReportingConfigType;
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockGetContentStream.mockImplementation(() => mockStream);
     configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
   });
@@ -792,6 +804,104 @@ describe('Run Single Report Task', () => {
         completed_at: expect.any(String),
         error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
       }
+    );
+  });
+
+  // Regression test for https://github.com/elastic/kibana/issues/255230 and
+  // https://github.com/elastic/kibana/issues/234877: when the job fails after the stream advances
+  // the doc's seq_no, the failure-status write must refresh the OCC values, else setReportFailed
+  // hits a version conflict and the report stays "processing".
+  it('updates the failure status with fresh seq_no/primary_term when the job fails after the stream has flushed', async () => {
+    const claimSeqNo = 10;
+    const claimPrimaryTerm = 20;
+    // the doc's actual seq_no/primary_term after the stream's writeHead advanced it
+    const freshSeqNo = 42;
+    const freshPrimaryTerm = 21;
+
+    const runTaskFn = jest.fn().mockImplementation(() => {
+      throw new Error('failure generating report');
+    });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test1',
+      name: 'Test1',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test1',
+      validLicenses: [],
+    } as unknown as ExportType);
+
+    const stream = createStreamMock({ seqNo: freshSeqNo, primaryTerm: freshPrimaryTerm });
+    mockGetContentStream.mockImplementation(() => stream);
+
+    // refreshReportSeqNo re-fetches the doc; return the advanced values
+    const { asInternalUser: esClient } = await mockReporting.getEsClient();
+    (esClient.get as unknown as jest.Mock).mockResolvedValue({
+      _id: 'test1',
+      _index: 'cool-reporting-index',
+      _seq_no: freshSeqNo,
+      _primary_term: freshPrimaryTerm,
+      found: true,
+      _source: { jobtype: 'test1', status: 'processing' },
+    });
+
+    const store = await mockReporting.getStore();
+    store.setReportFailed = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test1',
+        jobtype: 'test1',
+        status: 'failed',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+    store.setReportError = jest.fn();
+
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({
+        _id: 'test1',
+        _index: 'cool-reporting-index',
+        _seq_no: claimSeqNo,
+        _primary_term: claimPrimaryTerm,
+        jobtype: 'test1',
+        status: 'processing',
+      } as never);
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+      .spyOn(task, 'getEventTracker')
+      // @ts-ignore
+      .mockReturnValue(new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId'));
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        attempts: 3, // last attempt, so the failure status is written via setReportFailed
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+
+    // the status update must target the doc's current (refreshed) values, not the claim-time ones
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: 'test1',
+        _seq_no: freshSeqNo,
+        _primary_term: freshPrimaryTerm,
+      }),
+      expect.objectContaining({
+        error: expect.objectContaining({ message: 'failure generating report' }),
+      })
     );
   });
 });

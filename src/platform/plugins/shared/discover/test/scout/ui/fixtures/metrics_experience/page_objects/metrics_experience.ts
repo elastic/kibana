@@ -20,6 +20,8 @@ import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
 import type { ShareHelper } from './share_helper';
 import { createShareHelper } from './share_helper';
+import type { GridSettings } from './grid_settings';
+import { createGridSettings } from './grid_settings';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
@@ -31,9 +33,13 @@ export class MetricsExperiencePage {
   public readonly searchButton: Locator;
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
+  public readonly sortSelectorButton: Locator;
+  public readonly sortDirectionAsc: Locator;
+  public readonly sortDirectionDesc: Locator;
   public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
+  public readonly gridSettings: GridSettings;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
 
@@ -53,7 +59,11 @@ export class MetricsExperiencePage {
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
+    this.sortSelectorButton = page.testSubj.locator('metricsExperienceSortSelectorButton');
+    this.sortDirectionAsc = page.testSubj.locator('metricsExperienceSortDirectionAsc');
+    this.sortDirectionDesc = page.testSubj.locator('metricsExperienceSortDirectionDesc');
     this.share = createShareHelper(page);
+    this.gridSettings = createGridSettings(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
   }
@@ -98,6 +108,15 @@ export class MetricsExperiencePage {
 
   public getVisibleCardCount(): Promise<number> {
     return this.cards.count();
+  }
+
+  public async setSortDirection(direction: 'asc' | 'desc'): Promise<void> {
+    await (direction === 'asc' ? this.sortDirectionAsc : this.sortDirectionDesc).click();
+  }
+
+  public async selectSortBy(sortBy: 'alphabetically' | 'recency'): Promise<void> {
+    await this.sortSelectorButton.click();
+    await this.page.testSubj.locator(`metricsExperienceSortOption-${sortBy}`).click();
   }
 
   public async toggleFullscreen(): Promise<void> {
@@ -151,5 +170,12 @@ export class MetricsExperiencePage {
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
     await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).inspect);
+  }
+
+  /**
+   * Returns the title element of the card at `index`
+   */
+  public getCardTitle(index: number): Locator {
+    return this.getCardByIndex(index).locator('[data-test-subj="embeddablePanelTitle"]');
   }
 }

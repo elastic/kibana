@@ -10,14 +10,14 @@ import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/eval
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import type { DiscoveryJudgeEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
-import { createToolUsageEvaluator } from './tool_usage/tool_usage';
+import { createJudgeToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
-  createCriticalityCalibrationEvaluator,
+  createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
-import { schemaValidityJudgeEvaluator } from './schema/schema_validity';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
+import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
@@ -27,10 +27,10 @@ export const createJudgeEvaluators = (
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
 ): DiscoveryJudgeEvaluator[] => {
   const codeEvaluators: DiscoveryJudgeEvaluator[] = [
-    schemaValidityJudgeEvaluator,
-    createToolUsageEvaluator(),
+    createJudgeToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
+    confirmationAlignmentEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -46,7 +46,7 @@ export const createJudgeEvaluators = (
     createStatusCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
-    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };

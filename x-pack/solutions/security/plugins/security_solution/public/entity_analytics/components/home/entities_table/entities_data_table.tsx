@@ -46,7 +46,6 @@ import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
-import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -55,6 +54,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
   EntitySourceValue,
   toEntitySourceArray,
@@ -195,8 +197,9 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
-  const { investigateInTimeline } = useInvestigateInTimeline();
+  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openEntityFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canUseTimeline },
     alertsPrivileges: {
@@ -214,25 +217,30 @@ export const EntitiesDataTable = ({
       }
 
       const { entityType, entityName, entityId } = getEntityFields(doc);
-      if (!entityType || !entityName) return;
+      if (!entityType || !entityName || !entityId) return;
 
+      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
+
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: entityType,
+          entityName,
+          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+          ...sharedParams,
+        });
+        return;
+      }
+
+      // Generic entities have no dedicated panel in the legacy flyout.
       const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-      if (!panelKey || !panelParam) return;
-
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: entityName,
-            entityId,
-            contextID: tableId,
-            scopeId: tableId,
-          },
-        },
-      });
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: entityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, closeFlyout, tableId]
+    [enableNewFlyout, openFlyout, openEntityFlyout, closeFlyout, tableId]
   );
 
   const {
@@ -515,7 +523,6 @@ export const EntitiesDataTable = ({
 
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
-    investigateInTimeline,
     tableId,
   });
 

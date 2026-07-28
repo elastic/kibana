@@ -28,12 +28,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest(
@@ -57,9 +57,9 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 1, total: 1 });
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['ack'],
       });
@@ -110,9 +110,9 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 3, total: 3 });
+      expect(response.body).toStrictEqual({ affected_count: 3, errors: [] });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['tag', 'snooze', 'ack'],
       });
@@ -135,7 +135,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'partial success: returns processed < total when some group_hashes are unknown',
+    'partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-partial-rule';
       const knownGroup = 'bulk-partial-known-group';
@@ -162,9 +162,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 1, total: 2 });
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe('bulk-partial-unknown-group');
+      expect(response.body.errors[0].error.code).toBe('ALERT_GROUP_NOT_FOUND');
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['ack'],
       });
@@ -178,7 +181,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'partial success: returns processed=0 when every group_hash is unknown',
+    'partial success: reports a per-item error for every action when every group_hash is unknown',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-allinvalid-rule';
 
@@ -195,9 +198,13 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 0, total: 2 });
+      expect(response.body.affected_count).toBe(0);
+      expect(response.body.errors).toHaveLength(2);
+      expect(
+        response.body.errors.map((e: { error: { code: string } }) => e.error.code)
+      ).toStrictEqual(['ALERT_GROUP_NOT_FOUND', 'ALERT_GROUP_NOT_FOUND']);
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['ack', 'snooze'],
       });
@@ -229,9 +236,9 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 1, total: 1 });
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['deactivate'],
       });
@@ -285,9 +292,9 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 1, total: 1 });
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -315,7 +322,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'lifecycle: silently skips a bulk deactivate item whose episode is already inactive',
+    'lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-skip-deactivate-rule';
       const groupHashOk = 'bulk-skip-deactivate-ok-group';
@@ -353,9 +360,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 1, total: 2 });
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(groupHashAlreadyInactive);
+      expect(response.body.errors[0].error.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['deactivate'],
       });
@@ -369,7 +379,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'lifecycle: silently skips a bulk activate item whose episode is still active',
+    'lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk activate item whose episode is still active',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-skip-activate-rule';
       const groupHash = 'bulk-skip-activate-group';
@@ -393,9 +403,12 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ processed: 0, total: 1 });
+      expect(response.body.affected_count).toBe(0);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(groupHash);
+      expect(response.body.errors[0].error.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -494,6 +507,25 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
     expect(response).toHaveStatusCode(400);
   });
+
+  apiTest(
+    'schema: rejects an item with unknown body fields (strict mode) with 400',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [
+          {
+            group_hash: 'any-group',
+            action_type: 'ack',
+            episode_id: 'some-episode',
+            unknownField: 'x',
+          },
+        ],
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',

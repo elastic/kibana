@@ -70,10 +70,13 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
       summary: 'Unlink entities',
       description:
         'Remove one or more entities from their resolution group. Changes become ' +
-        'visible on subsequent reads after the next index refresh (typically <1s). ' +
-        'Requires an enterprise license.',
+        'visible on subsequent reads after the next index refresh (typically <1s).',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,

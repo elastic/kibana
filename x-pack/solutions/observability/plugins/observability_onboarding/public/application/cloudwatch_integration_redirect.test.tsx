@@ -61,6 +61,7 @@ describe('CloudwatchIntegrationRedirect', () => {
         state: {
           onCancelNavigateTo: ['observabilityOnboarding', { path: '?category=cloud' }],
           onCancelUrl: '/app/observabilityOnboarding?category=cloud',
+          telemetrySource: 'aws_quickstart',
         },
         replace: true,
       })

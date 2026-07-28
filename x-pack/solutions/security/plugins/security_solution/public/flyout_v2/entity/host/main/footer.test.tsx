@@ -45,7 +45,9 @@ jest.mock('../../../../flyout/entity_details/shared/components/take_action', () 
 jest.mock(
   '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button',
   () => ({
-    AiAssistantButton: () => <div data-test-subj="mockAiAssistantButton" />,
+    AiAssistantButton: ({ entityName }: { entityName: string }) => (
+      <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+    ),
   })
 );
 
@@ -70,7 +72,8 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = HOST_IDENTITY_FIELDS
+  identityFields: Record<string, string> = HOST_IDENTITY_FIELDS,
+  hostName = 'host-alice'
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
   mockUseKibana.mockReturnValue({
@@ -86,7 +89,7 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <Footer identityFields={identityFields} entity={entity} />
+      <Footer hostName={hostName} identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };
@@ -127,5 +130,25 @@ describe('Footer – entity attachment actions', () => {
 
     expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+  });
+});
+
+describe('Footer – AiAssistantButton entity name', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('passes the raw hostName prop, not a value derived from identityFields', () => {
+    // Regression for security-team/kibana#277619: when identityFields resolves to a
+    // higher-ranked EUID field (e.g. host.id) with no host.name key at all, the footer must
+    // still send the flyout's display name to "Add to chat" — the same value the risk-score
+    // tab's AiAssistantButton sends for this entity — not the id.
+    renderFooter(
+      true,
+      true,
+      ENTITY_STORE_RECORD,
+      { 'host.id': 'f47ac10b-58cc-4372-a567-0e02b2c3d479' },
+      'host-alice'
+    );
+
+    expect(screen.getByTestId('mockAiAssistantButton')).toHaveTextContent('host-alice');
   });
 });

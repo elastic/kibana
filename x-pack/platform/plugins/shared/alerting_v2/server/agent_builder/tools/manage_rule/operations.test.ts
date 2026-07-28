@@ -14,7 +14,14 @@ import {
 } from './operations';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
-const createMockEsClient = () => elasticsearchServiceMock.createScopedClusterClient();
+const createMockEsClient = () => {
+  const esClient = elasticsearchServiceMock.createScopedClusterClient();
+  // Default index exposes `@timestamp`; resolution/validation tests override this.
+  esClient.asCurrentUser.fieldCaps.mockResolvedValue({
+    fields: { '@timestamp': { date: {} } },
+  } as never);
+  return esClient;
+};
 
 describe('executeRuleOperations', () => {
   describe('set_query with ES|QL validation', () => {
@@ -52,6 +59,125 @@ describe('executeRuleOperations', () => {
         { name: 'host.name', type: 'keyword' },
         { name: 'cpu', type: 'double' },
       ]);
+    });
+
+    it('resolves the time field from the source index instead of defaulting to @timestamp', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'timestamp', type: 'date' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { timestamp: { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('timestamp');
+    });
+
+    it('re-resolves a stale stored time field to an available one on the edit path', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'timestamp', type: 'date' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { timestamp: { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      // Stored rule points at `@timestamp`, but the newly-targeted index only has
+      // `timestamp` — resolution should pick it instead of throwing.
+      const result = await executeRuleOperations({ time_field: '@timestamp' }, ops, esClient);
+
+      expect(result.data.time_field).toBe('timestamp');
+    });
+
+    it('throws a validation error when the index has no usable date field', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValue({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValue({ fields: {} } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+        /Could not determine a time field/
+      );
+    });
+
+    it('throws when the time field cannot be looked up and none is set', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValue({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      // fieldCaps failing yields an unresolved (`undefined`) time field.
+      esClient.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+        /Could not determine a time field for the query and none is set/
+      );
+    });
+
+    it('keeps the existing time field when it cannot be looked up but one is already set', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValue({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+        },
+      ];
+
+      const result = await executeRuleOperations({ time_field: 'event.ingested' }, ops, esClient);
+
+      expect(result.data.time_field).toBe('event.ingested');
     });
 
     it('throws with the ES error message when the query is invalid', async () => {
@@ -130,7 +256,7 @@ describe('executeRuleOperations', () => {
       });
     });
 
-    it('stores no_data_strategy: "emit" and no_data block on the rule data', async () => {
+    it('stores no_data_strategy and no_data block on the rule data', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
@@ -139,13 +265,13 @@ describe('executeRuleOperations', () => {
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
             no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
           },
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.no_data_strategy).toBe('emit');
+      expect(result.data.no_data_strategy).toBe('last_known_status');
       expect((result.data.query as { no_data?: { query: string } }).no_data).toEqual({
         query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
       });
@@ -679,13 +805,13 @@ describe('executeRuleOperations', () => {
       expect(result.data.recovery_strategy).toBe('query');
     });
 
-    it('passes validation for a rule with no_data_strategy: "emit"', async () => {
+    it('passes validation for a rule with a no_data_strategy', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       const result = await executeRuleOperations(
         {
           ...validRule,
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
@@ -695,7 +821,7 @@ describe('executeRuleOperations', () => {
         ops
       );
 
-      expect(result.data.no_data_strategy).toBe('emit');
+      expect(result.data.no_data_strategy).toBe('last_known_status');
     });
   });
 

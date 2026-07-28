@@ -12,7 +12,7 @@ import type {
   QueryWithOccurrences,
   StreamQuery,
 } from '@kbn/significant-events-schema';
-import type { QueryStatus } from '@kbn/streams-plugin/common';
+import type { QueryStatus } from '@kbn/significant-events-plugin/common';
 import moment from 'moment';
 import { useKibana } from '../use_kibana';
 import { useTimefilter } from '../use_timefilter';

@@ -19,6 +19,7 @@ import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
+import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
 const ASSET_CRITICALITY_LIST_KEY = 'ASSET_CRITICALITY_LIST';
@@ -115,6 +116,11 @@ export const useAssetCriticalityData = ({
     onSuccess: (data) => {
       const queryData = 'deleted' in data ? null : data;
       QC.setQueryData(QUERY_KEY, queryData);
+      // The updated criticality can change the entity's calculated risk score
+      // (e.g. via the risk score maintainer), so any UI reading live risk from
+      // the Entity Store — such as the threat hunting leads cards — needs a
+      // refetch rather than relying on its own cache TTL.
+      QC.invalidateQueries({ queryKey: [ENTITY_STORE_ENTITIES_LIST] });
       onChange?.();
     },
   });

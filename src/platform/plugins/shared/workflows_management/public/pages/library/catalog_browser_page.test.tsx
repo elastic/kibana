@@ -12,7 +12,7 @@ import React from 'react';
 import { of } from 'rxjs';
 import type { Template } from '@kbn/workflows-library';
 import { LibraryCatalogBrowserPage } from './catalog_browser_page';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
@@ -57,7 +57,7 @@ describe('LibraryCatalogBrowserPage', () => {
     fireEvent.click(screen.getByTestId('mockCatalogBrowserSelectButton'));
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      deepLinkId: WorkflowsDeepLinks.library,
+      deepLinkId: WorkflowsPageName.library,
       path: 'ip-reputation-check',
     });
   });

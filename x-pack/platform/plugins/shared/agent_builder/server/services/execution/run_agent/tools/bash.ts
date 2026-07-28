@@ -11,6 +11,7 @@ import { internalTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { IBashService } from '@kbn/agent-builder-server/runner';
+import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
 
 const schema = z.object({
   command: z
@@ -122,6 +123,8 @@ export const createBashTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['bash'],
+    // SAFEGUARD_TOKEN_COUNT max for each of stdout and stderr
+    maxResultTokens: SAFEGUARD_TOKEN_COUNT * 2,
     handler: async ({ command }) => {
       const result = await bashService.exec(command);
       return { results: [createOtherResult(result)] };

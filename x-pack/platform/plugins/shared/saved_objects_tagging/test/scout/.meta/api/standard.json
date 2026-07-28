@@ -1,5 +1,5 @@
 {
-  "sha1": "ecf384d5082e850e40f90433d8127031549451a6",
+  "sha1": "522db71fc1487d20f60e9bde9c72869bd294645d",
   "tests": [
     {
       "id": "ee269d746d5108c-1f60021f34227ea",
@@ -925,7 +925,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_usage_collector.spec.ts",
-        "line": 33,
+        "line": 55,
         "column": 12
       }
     },

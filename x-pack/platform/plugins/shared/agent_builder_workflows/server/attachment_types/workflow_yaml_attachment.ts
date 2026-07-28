@@ -131,50 +131,10 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     platformCoreTools.executeWorkflow,
   ],
   getAgentDescription: () =>
-    `${WORKFLOW_YAML_ATTACHMENT_TYPE} attachments represent the current state of an Elastic Workflow YAML document.\n` +
-    `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +
-    `## Editing Rules\n\n` +
-    `- To create or modify a workflow, call \`${platformCoreTools.generateWorkflow}\` — it handles both creation and edits, knows all step types and the configured connectors, emits a diff card in chat, and returns \`diffAttachmentId\`, \`attachmentId\`, and \`attachmentVersion\`. Do NOT use attachments.add or attachment_add directly. Do NOT pre-fetch step definitions, examples, or connectors before calling it.\n` +
-    `- NEVER paste full YAML into your response text.\n` +
-    `- Render the diff with <render_attachment id="{diffAttachmentId}"/>\n` +
-    `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
-    `- If a legacy/deprecated step type appears in the existing YAML and you need its schema to fix an error, call \`${workflowTools.getStepDefinitions}\` with the exact \`stepType\` ID or \`includeDeprecated: true\`.\n` +
-    `- \`${platformCoreTools.generateWorkflow}\` does not know the user's index schemas. If the user wants to run/save the workflow and it contains an ES query step against a real index, you may call \`${workflowTools.executeStep}\` on that step after generation to verify it returns rows. Do NOT pre-discover index fields before generation.\n` +
-    `- The \`if\` step's \`condition\` uses KQL, not Liquid. To check computed values (e.g. array size), use a \`data.set\` step to compute a number, then a KQL comparison like \`steps.set_count.output.count > 0\`.\n\n` +
-    `## Rendering\n\n` +
-    `- The ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is rendered in chat as a YAML code preview with a Save button.\n` +
-    `- You can render it with <render_attachment id="{attachmentId}"/> where {attachmentId} is the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment ID.\n` +
-    `- After making edits, render the updated ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment with the version from the tool result: <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. The version attribute ensures the UI displays the latest content.\n\n` +
-    `## Workflow YAML Structure\n\n` +
-    `\`\`\`yaml\nversion: '1'\nname: Workflow Name\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: step_name\n    type: step_type\n    with:\n      param1: value1\n\`\`\`\n\n` +
-    `## Common Step Properties\n\n` +
-    `Every step supports these properties regardless of type:\n\n` +
-    `\`\`\`yaml\n` +
-    `- name: unique_step_name       # required, unique within the workflow\n` +
-    `  type: step_type              # required\n` +
-    `  with:                        # input parameters (specific to step type)\n` +
-    `    param1: value1\n` +
-    `  connector-id: my-connector   # only for connector-based steps\n` +
-    `  if: "steps.prev.output.ok"   # optional, skip step when condition is falsy\n` +
-    `  timeout: "30s"               # optional, step-level timeout\n` +
-    `  on-failure:                  # optional, error handling\n` +
-    `    retry:\n` +
-    `      max-attempts: 3\n` +
-    `\`\`\`\n\n` +
-    `**IMPORTANT**: The step-level conditional property is \`if\`, NOT \`condition\`.\n` +
-    `\`condition\` is a config param specific to the \`if\` step type (alongside \`steps\`/\`else\`).\n\n` +
-    `## Common Fixes\n\n` +
-    `- Liquid expressions must be quoted in YAML: \`"{{ steps.name.output.field }}"\`\n` +
-    `- Step outputs are accessed via \`steps.<name>.output\` — NEVER \`steps.<name>.with.*\` or \`steps.<name>.<input_param>\`. A step's input parameters (\`with\` block) are NOT accessible as variables; only \`output\` is. Use \`${workflowTools.getStepDefinitions}\` with \`includeOutputSummary\` to learn what a step's output contains.\n` +
-    `- NEVER reference \`triggers.event\`, \`trigger.event\`, or \`triggers.event.*\` — use \`event\` directly (e.g. \`{{ event.alerts }}\`, \`{{ event.rule.name }}\`). The \`triggers\` block configures trigger types, not runtime data.\n` +
-    `- For alert triggers: \`event.alerts\` is an array, \`event.rule\` has \`id\`/\`name\`/\`tags\`, \`event.spaceId\` is the space\n` +
-    `- ES|QL params must be an array of positional values (\`?\` placeholder), not a named map\n` +
-    `- All workflows need \`version: '1'\` at the root\n` +
-    `- Each step needs a unique \`name\` and valid \`type\`\n` +
-    `- Step input parameters go in the \`with\` block\n` +
-    `- Config params are step-level fields outside \`with\` (e.g. \`condition\`/\`steps\`/\`else\` for the \`if\` step type, \`foreach\`/\`steps\` for \`foreach\`)\n` +
-    `- Connector-based steps require a \`connector-id\` field\n` +
-    `- When fixing an error, scan the entire YAML for other occurrences of the same mistake and fix them all`,
+    `${WORKFLOW_YAML_ATTACHMENT_TYPE} attachments hold the current Elastic Workflow YAML plus any validation diagnostics — both are inlined in the attachment content, do NOT call attachment_read to re-read them.\n\n` +
+    `Editing: call \`${platformCoreTools.generateWorkflow}\` for any create/modify — it knows step types, connector types, and (via \`attachmentId\`) the current YAML, and returns \`diffAttachmentId\`, \`attachmentId\`, \`attachmentVersion\`. Never paste YAML in chat, never call attachments.add directly, never pre-fetch step definitions or connectors first. Load the \`workflow-authoring\` skill for YAML/Liquid/trigger reference or when debugging validation errors.\n\n` +
+    `Rendering: emit <render_attachment id="{diffAttachmentId}"/> for the diff, and <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> for the updated workflow (the version attribute is required so the UI shows the latest content).\n\n` +
+    `For legacy/deprecated step types that appear in the existing YAML, call \`${workflowTools.getStepDefinitions}\` with the exact \`stepType\` or \`includeDeprecated: true\`. \`${platformCoreTools.generateWorkflow}\` does not know user index schemas — if the workflow contains an ES query step against a real index and the user wants to run or save it, call \`${workflowTools.executeStep}\` on that step after generation to verify it returns rows (do NOT pre-discover index fields).`,
 });
 
 export function registerWorkflowYamlAttachment(

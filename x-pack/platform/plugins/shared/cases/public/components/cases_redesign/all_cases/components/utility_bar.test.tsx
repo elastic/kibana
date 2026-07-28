@@ -19,6 +19,7 @@ import {
 import { basicCase } from '../../../../containers/mock';
 import { CasesTableUtilityBar } from './utility_bar';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
+import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID } from '../constants';
 
 jest.mock('../../../../common/use_cases_local_storage');
 
@@ -37,6 +38,9 @@ describe('Severity form field', () => {
     },
     onClearFilters: jest.fn(),
     showClearFiltersButton: false,
+    viewMode: VIEW_TOGGLE_TABLE_ID,
+    onSelectAll: jest.fn(),
+    totalOnPage: 5,
   };
 
   beforeAll(() => {
@@ -176,6 +180,63 @@ describe('Severity form field', () => {
     await waitFor(() => {
       expect(props.onClearFilters).toHaveBeenCalled();
     });
+  });
+
+  it('shows select all and clear selection links in list view when cases are selected', async () => {
+    renderWithTestingProviders(
+      <CasesTableUtilityBar {...props} viewMode={VIEW_TOGGLE_LIST_ID} totalOnPage={5} />
+    );
+
+    expect(await screen.findByTestId('all-cases-select-all-link')).toBeInTheDocument();
+    expect(await screen.findByTestId('all-cases-clear-selection-link')).toBeInTheDocument();
+  });
+
+  it('does not show select all and clear selection links in table view', async () => {
+    renderWithTestingProviders(<CasesTableUtilityBar {...props} viewMode={VIEW_TOGGLE_TABLE_ID} />);
+
+    expect(screen.queryByTestId('all-cases-select-all-link')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('all-cases-clear-selection-link')).not.toBeInTheDocument();
+  });
+
+  it('does not show select all when all cases on the page are selected', async () => {
+    renderWithTestingProviders(
+      <CasesTableUtilityBar
+        {...props}
+        viewMode={VIEW_TOGGLE_LIST_ID}
+        selectedCases={[basicCase]}
+        totalOnPage={1}
+      />
+    );
+
+    expect(screen.queryByTestId('all-cases-select-all-link')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('all-cases-clear-selection-link')).toBeInTheDocument();
+  });
+
+  it('calls onSelectAll when select all link is clicked', async () => {
+    const onSelectAll = jest.fn();
+
+    renderWithTestingProviders(
+      <CasesTableUtilityBar
+        {...props}
+        viewMode={VIEW_TOGGLE_LIST_ID}
+        onSelectAll={onSelectAll}
+        totalOnPage={5}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('all-cases-select-all-link'));
+
+    expect(onSelectAll).toHaveBeenCalled();
+  });
+
+  it('calls deselectCases when clear selection link is clicked', async () => {
+    renderWithTestingProviders(
+      <CasesTableUtilityBar {...props} viewMode={VIEW_TOGGLE_LIST_ID} totalOnPage={5} />
+    );
+
+    await userEvent.click(await screen.findByTestId('all-cases-clear-selection-link'));
+
+    expect(deselectCases).toHaveBeenCalled();
   });
 
   it('does show the bulk actions with only assign permissions', async () => {

@@ -33,7 +33,10 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
-import type { EntityMaintainersClient } from './domain/entity_maintainers';
+import type {
+  EntityMaintainersClient,
+  EntityMaintainerStatusEntry,
+} from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction';
 import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote';
@@ -41,6 +44,8 @@ import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
 import type { ResolutionClient } from './domain/resolution';
+import type { ResolutionRulesClient } from './domain/resolution/rules';
+import type { EntityStorePreferencesClient } from './domain/saved_objects';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { TelemetryReporter } from './telemetry/events';
 
@@ -66,9 +71,11 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
+  preferencesClient: EntityStorePreferencesClient;
   crudClient: CRUDClient;
   entityMetadataClient: EntityMetadataClient;
   resolutionClient: ResolutionClient;
+  entityResolutionRuleClient: ResolutionRulesClient;
   remoteLogsExtractionClient: RemoteLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
@@ -102,6 +109,10 @@ export interface EntityStoreStartContract {
     namespace: string
   ) => EntityMetadataClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
+  getMaintainerStatus: (
+    namespace: string,
+    ids?: string[]
+  ) => Promise<EntityMaintainerStatusEntry[]>;
 }
 
 export interface EntityStoreSetupContract {

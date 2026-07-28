@@ -136,6 +136,12 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
+    /*
+     * NOTE: the AI summary is not an entity field. It persists to the entity metadata
+     * datastream (.entities.v2.metadata.security_{namespace}) via EntityMetadataClient
+     * as an immutable `ai_summary_generated` document, and is read back from there — it
+     * is never stored on the latest-index entity document.
+     */
 
     // LIFECYCLE ------------------------------------------------------------
     oldestValue({

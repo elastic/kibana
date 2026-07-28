@@ -1,5 +1,9 @@
 {
-  "sha1": "7997c446b196a31d69fc2241a5d508b361ceef09",
+  "sha1": "b4b22713b3ee11950119cc52b4f793fd324e766f",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -285,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 48,
+        "line": 57,
         "column": 10
       }
     },
@@ -301,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 65,
+        "line": 74,
         "column": 10
       }
     },
@@ -317,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 93,
+        "line": 103,
         "column": 10
       }
     },
@@ -333,7 +337,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 124,
+        "line": 135,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-04a7168fd3eea1d",
+      "title": "Entity Store check privileges API Should report has_read_permissions: true but has_all_required: false when metadata read is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 175,
+        "column": 10
+      }
+    },
+    {
+      "id": "d9737789d696c32-dc06de8b6f27199",
+      "title": "Entity Store check privileges API Should report has_write_permissions: true but has_all_required: false when only metadata read is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
+        "line": 210,
         "column": 10
       }
     },
@@ -1453,7 +1489,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 95,
+        "line": 108,
         "column": 10
       }
     },
@@ -1469,7 +1505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 121,
+        "line": 134,
         "column": 10
       }
     },
@@ -1485,7 +1521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 149,
+        "line": 164,
         "column": 10
       }
     },
@@ -1501,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 171,
+        "line": 186,
         "column": 10
       }
     },
@@ -1517,7 +1553,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 197,
+        "line": 212,
         "column": 10
       }
     },
@@ -1533,7 +1569,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 225,
+        "line": 242,
         "column": 10
       }
     },
@@ -2994,6 +3030,86 @@
       }
     },
     {
+      "id": "cc9a34904e9a16a-83bc236f03503c6",
+      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate by priority target, then preserves link when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 108,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc9a34904e9a16a-5b9bf4cbeeb86ac",
+      "title": "Related user alias resolution integration tests does not link when related user value has no candidate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 204,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc9a34904e9a16a-138d45ef641d800",
+      "title": "Related user alias resolution integration tests cascades candidate aliases to the priority target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 237,
+        "column": 12
+      }
+    },
+    {
+      "id": "f2f47c41c1d7903-c83e24790d7389e",
+      "title": "Entity Store remove_v1 SO cleanup install removes legacy entity-definition SO documents from .kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/remove_v1.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "f2f47c41c1d7903-434909608e0054f",
+      "title": "Entity Store remove_v1 SO cleanup install succeeds with no legacy entity-definition SOs present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/remove_v1.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
       "id": "d70526b3c43ca29-ac5435a64b2e2ab",
       "title": "Entity Store Resolution API tests Link: should link entities to a target",
       "expectedStatus": "passed",
@@ -3421,7 +3537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 66,
+        "line": 74,
         "column": 10
       }
     },
@@ -3437,7 +3553,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 80,
+        "line": 88,
         "column": 10
       }
     },
@@ -3453,7 +3569,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 94,
+        "line": 102,
         "column": 10
       }
     },
@@ -3469,7 +3585,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 111,
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-f1853024c4df85a",
+      "title": "Entity Store uninstall keeps shared assets when only one of several engines is uninstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 136,
         "column": 10
       }
     },
@@ -3485,7 +3617,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 123,
+        "line": 172,
         "column": 10
       }
     }

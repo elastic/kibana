@@ -56,6 +56,12 @@ export class WorkflowTaskManager {
 
     try {
       const existing = await this.taskManager.get(taskId);
+      if (existing.status === TaskStatus.Running || existing.status === TaskStatus.Claiming) {
+        // External resume runs inside this task; rescheduling while it is active would
+        // remove the in-flight task. The resume loop re-schedules after the run completes.
+        return { taskId: existing.id };
+      }
+
       if (existing.runAt != null) {
         const existingRunAtMs = new Date(existing.runAt).getTime();
         const params = existing.params as ResumeWorkflowExecutionParams | undefined;

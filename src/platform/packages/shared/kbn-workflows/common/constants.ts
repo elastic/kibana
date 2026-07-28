@@ -37,6 +37,17 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
 export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
 
 /**
+ * Global Advanced Setting gating the global Workflow Executions view
+ * (`/app/workflows/executions`).
+ *
+ * Registered as a global uiSetting (not per-space) so the same toggle is
+ * readable from any browser plugin that consumes the workflows UI without
+ * taking a runtime dep on `workflows_management`.
+ */
+export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
+  'workflowsManagement:globalExecutionsView:enabled';
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:

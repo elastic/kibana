@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import {
@@ -117,7 +118,7 @@ spaceTest.describe(
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.dataGrid.waitForDocTableRendered();
-        const savedSearchName = 'my search';
+        const savedSearchName = `my search ${randomUUID().replace(/-/g, '')}`;
         await pageObjects.discover.saveSearch(savedSearchName);
 
         await pageObjects.dashboard.openNewDashboard();

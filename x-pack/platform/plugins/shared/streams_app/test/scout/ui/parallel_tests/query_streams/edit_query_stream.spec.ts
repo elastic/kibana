@@ -17,7 +17,7 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
-const QUERY_STREAM_NAME = 'logs.ecs.test';
+const QUERY_STREAM_NAME = 'logs.ecs.edit-test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 

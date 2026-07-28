@@ -10,8 +10,10 @@ import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,23 +22,28 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { getSeverityLabel, type SignificantEvent } from '@kbn/significant-events-schema';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
+import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
 import { EventInvestigations } from './event_investigations';
-import { hasPendingInvestigation } from '../shared/investigation_status';
+import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 
 const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleTitle', {
@@ -45,8 +52,25 @@ const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecy
 const LIFECYCLE_ERROR = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleError', {
   defaultMessage: 'Failed to load lifecycle data',
 });
-const CLOSE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
   defaultMessage: 'Close',
+});
+const CLOSE_EVENT_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.closeEvent', {
+  defaultMessage: 'Close significant event',
+});
+const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.flyout.actionsMenuButtonAriaLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+const COPY_LINK_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.copyLink', {
+  defaultMessage: 'Copy link to this event',
+});
+
+const COPY_LINK_SUCCESS = i18n.translate('xpack.streams.sigEventsTab.flyout.copyLinkSuccess', {
+  defaultMessage: 'Copied link to event',
 });
 
 const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
@@ -64,8 +88,8 @@ const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
     defaultMessage: 'This will cancel the running investigation and start a new one.',
   }
 );
-const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
-  defaultMessage: 'Criticality',
+const SEVERITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.severityLabel', {
+  defaultMessage: 'Severity',
 });
 const CONFIDENCE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.confidenceLabel', {
   defaultMessage: 'Confidence',
@@ -79,20 +103,24 @@ interface SignificantEventFlyoutProps {
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
     services: { focusedSignificantEventService },
+    core: { notifications },
   } = useKibana();
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
     refetch: refetchLifecycle,
-  } = useFetchSignificantEventLifecycle(event.event_id);
+  } = useFetchSignificantEventLifecycle(event.event_uuid);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
-  // versions via findByDiscoverySlug (no time filter), so it captures newly-written
+  // versions via findByEventId (no time filter), so it captures newly-written
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
+
+  const isInvestigationRunning = hasRunningInvestigation(latestEvent);
 
   // Poll lifecycle while a pending investigation is in progress, or briefly after the
   // footer button triggers one (the async workflow step may not have written back yet).
@@ -100,11 +128,11 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   const triggerPollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (hasPendingInvestigation(latestEvent) && isPollingAfterTrigger) {
+    if (isInvestigationRunning && isPollingAfterTrigger) {
       setIsPollingAfterTrigger(false);
       clearTimeout(triggerPollTimeoutRef.current);
     }
-  }, [latestEvent, isPollingAfterTrigger]);
+  }, [isInvestigationRunning, isPollingAfterTrigger]);
 
   useEffect(() => () => clearTimeout(triggerPollTimeoutRef.current), []);
 
@@ -115,24 +143,99 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
+  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
+    onUpdateSuccess: onClose,
+  });
 
-  const isInvestigationRunning = hasPendingInvestigation(latestEvent);
+  const isClosed = latestEvent.status === 'closed';
 
   useInterval(
     refetchLifecycle,
-    isPollingAfterTrigger || hasPendingInvestigation(latestEvent) ? RUNNING_POLL_INTERVAL_MS : null
+    isPollingAfterTrigger || isInvestigationRunning ? RUNNING_POLL_INTERVAL_MS : null
   );
 
   useEffect(() => {
     focusedSignificantEventService.setFocusedEvent(latestEvent);
 
     return () => {
-      focusedSignificantEventService.clearFocusedEvent(latestEvent.discovery_slug);
+      focusedSignificantEventService.clearFocusedEvent(latestEvent.event_id);
     };
   }, [latestEvent, focusedSignificantEventService]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
+    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId} hideCloseButton>
+      <FlyoutToolbarHeader>
+        {!isClosed && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+              button={
+                <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="sigEventFlyoutActionsButton"
+                    iconType="boxesVertical"
+                    aria-label={ACTIONS_BUTTON_ARIA_LABEL}
+                    isLoading={isUpdating}
+                    isDisabled={isUpdating}
+                    onClick={() => setIsActionsMenuOpen((open) => !open)}
+                  />
+                </EuiToolTip>
+              }
+              isOpen={isActionsMenuOpen}
+              closePopover={() => setIsActionsMenuOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel
+                items={[
+                  <EuiContextMenuItem
+                    key="close-event"
+                    icon="cross"
+                    color="danger"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      if (!isUpdating) {
+                        setIsActionsMenuOpen(false);
+                        updateEventStatus({ eventUuid: latestEvent.event_uuid, status: 'closed' });
+                      }
+                    }}
+                    data-test-subj="sigEventCloseButton"
+                  >
+                    {CLOSE_EVENT_LABEL}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={COPY_LINK_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="sigEventFlyoutCopyLinkButton"
+              iconType="link"
+              aria-label={COPY_LINK_ARIA_LABEL}
+              onClick={() => {
+                const ok = copyToClipboard(window.location.href);
+                if (ok) {
+                  notifications.toasts.addSuccess({ title: COPY_LINK_SUCCESS });
+                }
+              }}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="sigEventFlyoutCloseButton"
+              iconType="cross"
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
+              onClick={onClose}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </FlyoutToolbarHeader>
+
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -147,8 +250,9 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {formatTimestamp(event['@timestamp'])}
-            {event.criticality != null && ` · ${CRITICALITY_LABEL}: ${event.criticality}`}
-            {event.confidence != null && ` · ${CONFIDENCE_LABEL}: ${event.confidence}%`}
+            {` · ${SEVERITY_LABEL}: ${getSeverityLabel(event.severity)}`}
+            {event.confidence != null &&
+              ` · ${CONFIDENCE_LABEL}: ${Math.round(event.confidence * 100)}%`}
           </EuiText>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -185,20 +289,21 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>{CLOSE_LABEL}</EuiButtonEmpty>
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              content={isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined}
+              content={
+                activityBlockTooltip ??
+                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
+              }
             >
               <EuiButton
                 iconType="inspect"
                 onClick={() => {
-                  if (!isTriggering) triggerInvestigation(latestEvent.event_id);
+                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
                 }}
-                isDisabled={isTriggering}
+                isDisabled={isTriggering || blocksActivity}
+                hasAriaDisabled={blocksActivity}
                 isLoading={isTriggering}
                 fill
                 size="s"

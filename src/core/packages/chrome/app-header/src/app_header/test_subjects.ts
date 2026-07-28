@@ -23,6 +23,7 @@ export const APP_HEADER_TEST_SUBJECTS = {
   favorite: 'appHeaderFavorite',
   metadata: 'appHeaderMetadata',
   tabs: 'appHeaderTabs',
+  badgesOverflow: 'appHeaderBadgesOverflow',
   back: 'appHeaderBack',
   menuDocumentation: 'appHeaderMenuDocumentation',
   menuFeedback: 'appHeaderMenuFeedback',

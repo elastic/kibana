@@ -6,8 +6,14 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { InferenceConnector, EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import type {
+  InferenceConnector,
+  EisInferenceEndpointMetadata,
+  CspRegion,
+} from '@kbn/inference-common';
 import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
+
+export type { CspRegion };
 
 /** Route path constants (const object so imported paths stay type-narrowed as `string`). */
 export const APIRoutes = {
@@ -101,11 +107,6 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
     };
   };
 };
-
-export interface CspRegion {
-  csp: string;
-  region: string;
-}
 
 export interface RegionPolicyBody {
   allowed_regions?: CspRegion[];

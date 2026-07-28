@@ -21,6 +21,7 @@ import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Document } from 'yaml';
 import { monaco } from '@kbn/code-editor';
+import { getWorkflowValidationDisplayOptions } from '@kbn/workflows-ui';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationToEditor,
@@ -41,7 +42,6 @@ import { getWorkflowZodSchema } from '../../../common/schema';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
 import { triggerSchemas } from '../../trigger_schemas';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
-import { getWorkflowValidationDisplayOptions } from '../../widgets/workflow_yaml_editor/lib/workflow_monaco_layout_options';
 import { useWorkflowYamlValidationContextRef } from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
 import {
   validationResultsFingerprint,

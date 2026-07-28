@@ -9,6 +9,12 @@ import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
+  buildVersionVariantsKueryFragment,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+  buildVersionVariantsEsFilter,
+  buildPolicyIdOrVariantsEsFilter,
+  buildPolicyIdsOrVariantsEsFilter,
 } from './version_specific_policies_utils';
 
 describe('removeVersionSuffixFromPolicyId', () => {
@@ -101,5 +107,145 @@ describe('hasVersionSuffix', () => {
     const policyIdWithHashButNoVersion = 'policy#123';
     const result = hasVersionSuffix(policyIdWithHashButNoVersion);
     expect(result).toBe(false);
+  });
+});
+
+describe('buildVersionVariantsKueryFragment', () => {
+  it('should build a kuery fragment matching only version-suffixed variants', () => {
+    expect(buildVersionVariantsKueryFragment('my-policy')).toBe('policy_id:my-policy#*');
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildVersionVariantsKueryFragment('my-policy', 'fleet-agents.policy_id')).toBe(
+      'fleet-agents.policy_id:my-policy#*'
+    );
+  });
+
+  it('should escape special KQL characters in the base id', () => {
+    expect(buildVersionVariantsKueryFragment('my policy:1')).toBe('policy_id:my policy\\:1#*');
+  });
+});
+
+describe('buildPolicyIdOrVariantsKuery', () => {
+  it('should build a kuery matching the base id or any version-suffixed variant', () => {
+    expect(buildPolicyIdOrVariantsKuery('my-policy')).toBe(
+      '(policy_id:"my-policy" or policy_id:my-policy#*)'
+    );
+  });
+
+  it('should use the provided field name for both clauses', () => {
+    expect(buildPolicyIdOrVariantsKuery('my-policy', 'fleet-agents.policy_id')).toBe(
+      '(fleet-agents.policy_id:"my-policy" or fleet-agents.policy_id:my-policy#*)'
+    );
+  });
+
+  it('should escape quotes in both the exact-match and variant clauses', () => {
+    expect(buildPolicyIdOrVariantsKuery('my"policy')).toBe(
+      '(policy_id:"my\\"policy" or policy_id:my\\"policy#*)'
+    );
+  });
+});
+
+describe('buildPolicyIdsOrVariantsKuery', () => {
+  it('should build a kuery matching any of the exact ids or their version-suffixed variants', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1', 'policy-2'])).toBe(
+      '(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)'
+    );
+  });
+
+  it('should work with a single id', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1'])).toBe(
+      '(policy_id:(policy-1) or policy_id:policy-1#*)'
+    );
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1'], 'fleet-agents.policy_id')).toBe(
+      '(fleet-agents.policy_id:(policy-1) or fleet-agents.policy_id:policy-1#*)'
+    );
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1', 'policy-1', 'policy-2'])).toBe(
+      '(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)'
+    );
+  });
+
+  it('should return a valid, never-matching kuery for an empty array instead of invalid syntax', () => {
+    expect(buildPolicyIdsOrVariantsKuery([])).toBe('policy_id:""');
+  });
+});
+
+describe('buildVersionVariantsEsFilter', () => {
+  it('should build a prefix filter matching only version-suffixed variants', () => {
+    expect(buildVersionVariantsEsFilter('my-policy')).toEqual({
+      prefix: { policy_id: 'my-policy#' },
+    });
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildVersionVariantsEsFilter('my-policy', 'other_field')).toEqual({
+      prefix: { other_field: 'my-policy#' },
+    });
+  });
+});
+
+describe('buildPolicyIdOrVariantsEsFilter', () => {
+  it('should build a bool.should filter matching the exact id or any variant', () => {
+    expect(buildPolicyIdOrVariantsEsFilter('my-policy')).toEqual({
+      bool: {
+        should: [{ term: { policy_id: 'my-policy' } }, { prefix: { policy_id: 'my-policy#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdOrVariantsEsFilter('my-policy', 'other_field')).toEqual({
+      bool: {
+        should: [{ term: { other_field: 'my-policy' } }, { prefix: { other_field: 'my-policy#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('buildPolicyIdsOrVariantsEsFilter', () => {
+  it('should build a bool.should filter matching any of the exact ids or their variants', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a', 'policy-b'])).toEqual({
+      bool: {
+        should: [
+          { terms: { policy_id: ['policy-a', 'policy-b'] } },
+          { prefix: { policy_id: 'policy-a#' } },
+          { prefix: { policy_id: 'policy-b#' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a'], 'other_field')).toEqual({
+      bool: {
+        should: [
+          { terms: { other_field: ['policy-a'] } },
+          { prefix: { other_field: 'policy-a#' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a', 'policy-a'])).toEqual({
+      bool: {
+        should: [{ terms: { policy_id: ['policy-a'] } }, { prefix: { policy_id: 'policy-a#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should return match_none for an empty array instead of an empty terms clause', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter([])).toEqual({ match_none: {} });
   });
 });

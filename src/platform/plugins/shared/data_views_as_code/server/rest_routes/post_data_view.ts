@@ -22,8 +22,14 @@ export const registerPostDataViewAsCodeRoute = (
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Create a data view',
+      options: {
+        availability: {
+          stability: 'tech_preview',
+          since: '9.5.0',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -46,6 +52,9 @@ export const registerPostDataViewAsCodeRoute = (
             },
             403: {
               description: 'forbidden',
+            },
+            404: {
+              description: 'not found',
             },
             409: {
               description: 'conflict',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { splitSizeAndUnits } from '../../../../../../common';
 import { extraTimeUnits, timeUnits } from '../../../../constants/time_units';
 import type {
   DlmPhaseDuration,
@@ -49,6 +50,15 @@ const getDurationInSeconds = ({ value, unit }: DlmPhaseDuration): number | undef
   return Number(value) * unitMultiplier;
 };
 
+const getRetentionPeriodInSeconds = (period: string): number | undefined => {
+  const { size, unit } = splitSizeAndUnits(period);
+  if (!size || !unit) {
+    return undefined;
+  }
+
+  return getDurationInSeconds({ enabled: true, value: size, unit });
+};
+
 export const getDurationUnitSelectOptions = (currentUnit: string) => {
   if (timeUnits.some((unit) => unit.value === currentUnit)) {
     return timeUnits;
@@ -72,10 +82,10 @@ export const serializeDlmPhases = ({
   data_retention: deletePhase.enabled ? getDurationLabel(deletePhase) : undefined,
 });
 
-export const validateDurations = ({
-  frozen,
-  delete: deletePhase,
-}: DlmPhasesSelectorValue): DurationValidation => {
+export const validateDurations = (
+  { frozen, delete: deletePhase }: DlmPhasesSelectorValue,
+  maximumRetentionPeriod?: string
+): DurationValidation => {
   let frozenError: string | undefined;
   let deleteError: string | undefined;
 
@@ -101,6 +111,15 @@ export const validateDurations = ({
     ) {
       frozenError = strings.frozenMustOccurBeforeDeleteError(getDurationLabel(deletePhase));
       deleteError = strings.deleteMustOccurAfterFrozenError(getDurationLabel(frozen));
+    }
+  }
+
+  if (maximumRetentionPeriod && deletePhase.enabled && isDeleteDurationValid) {
+    const deleteDuration = getDurationInSeconds(deletePhase);
+    const maxDuration = getRetentionPeriodInSeconds(maximumRetentionPeriod);
+
+    if (deleteDuration !== undefined && maxDuration !== undefined && deleteDuration > maxDuration) {
+      deleteError = strings.deleteMaximumRetentionText(maximumRetentionPeriod);
     }
   }
 
