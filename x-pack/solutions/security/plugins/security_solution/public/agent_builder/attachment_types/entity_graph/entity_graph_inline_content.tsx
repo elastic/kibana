@@ -31,7 +31,10 @@ import {
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 export const EntityGraphInlineContent: React.FC<
-  AttachmentRenderProps<EntityGraphAttachment> & EntityGraphServices
+  AttachmentRenderProps<EntityGraphAttachment> &
+    Omit<EntityGraphServices, 'experimentalFeatures' | 'uiSettings'> & {
+      isNewFlyoutEnabled: boolean;
+    }
 > = ({
   attachment,
   openSidebarConversation,
@@ -40,6 +43,7 @@ export const EntityGraphInlineContent: React.FC<
   agentBuilder,
   chrome,
   searchSession,
+  isNewFlyoutEnabled,
 }) => {
   const flyout = buildEntityGraphFlyout(attachment.data);
 
@@ -53,9 +57,18 @@ export const EntityGraphInlineContent: React.FC<
         openSidebarConversation,
         searchSession,
         flyout,
+        isNewFlyoutEnabled,
       });
     }
-  }, [flyout, application, agentBuilder, chrome, openSidebarConversation, searchSession]);
+  }, [
+    flyout,
+    application,
+    agentBuilder,
+    chrome,
+    openSidebarConversation,
+    searchSession,
+    isNewFlyoutEnabled,
+  ]);
 
   return (
     <KibanaContextProvider services={{ http }}>

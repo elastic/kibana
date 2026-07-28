@@ -43,7 +43,7 @@ const dataFor = (
   entityStoreId: string
 ): EntityGraphAttachmentData => ({ identifierType, identifier, entityStoreId, timeRange });
 
-const renderInline = (data: EntityGraphAttachmentData) => {
+const renderInline = (data: EntityGraphAttachmentData, isNewFlyoutEnabled = false) => {
   const props = {
     attachment: {
       id: 'a',
@@ -57,6 +57,7 @@ const renderInline = (data: EntityGraphAttachmentData) => {
       {...props}
       application={{} as ApplicationStart}
       http={{} as HttpStart}
+      isNewFlyoutEnabled={isNewFlyoutEnabled}
     />
   );
 };
@@ -89,6 +90,20 @@ describe('EntityGraphInlineContent', () => {
       })
     );
   });
+
+  it.each([true, false])(
+    'forwards isNewFlyoutEnabled=%s to navigateToEntityAnalyticsWithFlyoutInApp',
+    (isNewFlyoutEnabled) => {
+      renderInline(dataFor('host', 'server1', 'host:server1'), isNewFlyoutEnabled);
+      fireEvent.click(screen.getByTestId(OPEN_FULL_GRAPH_BUTTON_TEST_ID));
+
+      expect(mockNavigateWithFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isNewFlyoutEnabled,
+        })
+      );
+    }
+  );
 
   it('opens the user details flyout with identity fields', () => {
     renderInline(dataFor('user', 'jdoe', 'user:jdoe'));

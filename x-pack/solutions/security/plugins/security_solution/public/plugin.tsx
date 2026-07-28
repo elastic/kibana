@@ -376,6 +376,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         searchSession: plugins.data.search.session,
+        experimentalFeatures: this.experimentalFeatures,
+        uiSettings: core.uiSettings,
       });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,

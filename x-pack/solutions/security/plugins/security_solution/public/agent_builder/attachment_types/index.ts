@@ -265,6 +265,8 @@ export const registerEntityGraphAttachment = ({
   agentBuilder,
   chrome,
   searchSession,
+  experimentalFeatures,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -272,6 +274,8 @@ export const registerEntityGraphAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
+  experimentalFeatures: ExperimentalFeatures;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_graph_attachment" */
@@ -285,6 +289,8 @@ export const registerEntityGraphAttachment = ({
         agentBuilder,
         chrome,
         searchSession,
+        experimentalFeatures,
+        uiSettings,
       })
     );
   });

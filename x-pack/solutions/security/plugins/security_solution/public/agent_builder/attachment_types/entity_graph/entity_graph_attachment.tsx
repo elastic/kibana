@@ -12,7 +12,10 @@ import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachme
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
 import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
 import type { EntityGraphAttachment } from './types';
 
@@ -22,6 +25,8 @@ export interface EntityGraphServices {
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
+  experimentalFeatures: ExperimentalFeatures;
+  uiSettings: IUiSettingsClient;
 }
 
 const LazyEntityGraphInlineContent = React.lazy(() =>
@@ -36,6 +41,8 @@ export const createEntityGraphAttachmentDefinition = ({
   agentBuilder,
   chrome,
   searchSession,
+  experimentalFeatures,
+  uiSettings,
 }: EntityGraphServices): AttachmentUIDefinition<EntityGraphAttachment> => {
   return {
     getLabel: (attachment) =>
@@ -44,17 +51,24 @@ export const createEntityGraphAttachmentDefinition = ({
         defaultMessage: 'Entity graph',
       }),
     getIcon: () => 'graphApp',
-    renderInlineContent: (props) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
-        <LazyEntityGraphInlineContent
-          {...props}
-          application={application}
-          http={http}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
-          searchSession={searchSession}
-        />
-      </React.Suspense>
-    ),
+    renderInlineContent: (props) => {
+      const isNewFlyoutEnabled =
+        !experimentalFeatures.newFlyoutSystemDisabled &&
+        uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true);
+
+      return (
+        <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+          <LazyEntityGraphInlineContent
+            {...props}
+            application={application}
+            http={http}
+            agentBuilder={agentBuilder}
+            chrome={chrome}
+            searchSession={searchSession}
+            isNewFlyoutEnabled={isNewFlyoutEnabled}
+          />
+        </React.Suspense>
+      );
+    },
   };
 };
