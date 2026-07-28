@@ -33,10 +33,7 @@ const TIME_RANGE = {
   to: 'now',
 };
 
-const ORIGIN_ENTITY_IDS = [
-  { id: 'dev-origin-alice', isOrigin: true },
-  { id: 'metadata-preview-target', isOrigin: true },
-];
+const ORIGIN_ENTITY_IDS = [{ id: 'john.doe', isOrigin: true }];
 
 const ORIGIN_EVENT_IDS = [
   { id: 'dev-event-1', isAlert: true },

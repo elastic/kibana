@@ -49,10 +49,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls, CONTROL_PANEL_MARGIN_LEFT } from '../controls/controls';
-import {
-  GraphInteractionToolContext,
-  type GraphInteractionTool,
-} from '../controls/graph_interaction_tool_context';
+import { GraphInteractionToolContext } from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
 import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
 import { withZoomInvariant } from '../zoom/with_zoom_invariant';
@@ -185,7 +182,6 @@ export const Graph = memo<GraphProps>(
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
     const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
-    const [interactionTool, setInteractionTool] = useState<GraphInteractionTool>('select');
     const applyFiltersToggleRef = useRef<(() => void) | null>(null);
     const searchPanelToggleRef = useRef<(() => void) | null>(null);
     const focusSearchInputRef = useRef<(() => void) | null>(null);
@@ -514,15 +510,12 @@ export const Graph = memo<GraphProps>(
 
     const interactionToolContextValue = useMemo(
       () => ({
-        interactionTool,
-        setInteractionTool,
         registerApplyFiltersToggle,
         registerSearchPanelToggle,
         registerFocusSearchInput,
         openInGraphSearch,
       }),
       [
-        interactionTool,
         registerApplyFiltersToggle,
         registerSearchPanelToggle,
         registerFocusSearchInput,

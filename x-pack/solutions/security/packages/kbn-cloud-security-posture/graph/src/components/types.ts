@@ -25,7 +25,7 @@ export interface Size {
 
 interface BaseNodeDataViewModel {
   interactive?: boolean;
-  /** When true, render a dashed outline around the node. Entity origins use primary color. */
+  /** When true, render a dashed outline around the node. */
   highlightAsOrigin?: boolean;
 }
 

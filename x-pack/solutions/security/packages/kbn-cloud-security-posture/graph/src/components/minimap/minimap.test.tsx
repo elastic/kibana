@@ -90,6 +90,18 @@ describe('Minimap', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle).toHaveAttribute('aria-label', 'Collapse minimap');
   });
+
+  it('should start collapsed when defaultExpanded is false', () => {
+    render(
+      <ReactFlow>
+        <Minimap defaultExpanded={false} />
+      </ReactFlow>
+    );
+
+    const toggle = screen.getByTestId(GRAPH_MINIMAP_TOGGLE_ID);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeNull();
+  });
 });
 
 describe('Minimap integrated with Graph', () => {

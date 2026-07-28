@@ -45,9 +45,11 @@ const PillShell = styled.div`
 
 const RelationshipPill = styled.div<{
   backgroundColor: string;
-  emphasizedBackgroundColor: string;
+  selectedBackgroundColor: string;
   borderColor: string;
-  interactiveShadow?: string;
+  activeBorderColor: string;
+  hoverShadow?: string;
+  dragShadow?: string;
 }>`
   display: inline-flex;
   align-items: center;
@@ -59,17 +61,30 @@ const RelationshipPill = styled.div<{
   border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ backgroundColor }) => backgroundColor};
   max-width: 100%;
-  transition: background-color 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: none;
+  transition: background-color 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    border-width 0.2s ease;
 
-  .react-flow__node:not(.non-interactive):hover &,
-  .react-flow__node:not(.non-interactive).selected & {
-    background: ${({ emphasizedBackgroundColor }) => emphasizedBackgroundColor};
-    box-shadow: ${({ interactiveShadow }) => interactiveShadow ?? 'none'};
+  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+    ${({ hoverShadow }) => hoverShadow ?? ''}
+  }
+
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
+    background: ${({ selectedBackgroundColor }) => selectedBackgroundColor};
+    border-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-width: 2px;
+  }
+
+  .react-flow__node:not(.non-interactive).dragging & {
+    background: ${({ selectedBackgroundColor }) => selectedBackgroundColor};
+    border-color: ${({ activeBorderColor }) => activeBorderColor};
+    border-width: 2px;
+    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
 export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, selected } = props;
+  const { id } = props;
   const { label, interactive, expandButtonClick } = props.data as RelationshipNodeViewModel;
 
   const isMultipleNodesSelected = useMultipleNodesSelected();
@@ -77,15 +92,16 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const hoverShadow = useEuiShadow('xs');
-  const activeShadow = useEuiShadow('s');
+  const dragShadow = useEuiShadow('xs');
 
   const text = label ?? id;
-  const isActive = Boolean(selected);
 
-  const { backgroundColor, emphasizedBackgroundColor, borderColor, textColor } = useMemo(
+  const { backgroundColor, borderColor, textColor } = useMemo(
     () => getRelationshipColors(euiTheme),
     [euiTheme]
   );
+  const selectedBackgroundColor = euiTheme.colors.backgroundBasePrimary;
+  const activeBorderColor = euiTheme.colors.borderBasePrimary;
 
   const labelTextCss = css`
     flex: 1;
@@ -132,9 +148,11 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
         <RelationshipPill
           data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}
           backgroundColor={backgroundColor}
-          emphasizedBackgroundColor={emphasizedBackgroundColor}
+          selectedBackgroundColor={selectedBackgroundColor}
           borderColor={borderColor}
-          interactiveShadow={isActive ? activeShadow : hoverShadow}
+          activeBorderColor={activeBorderColor}
+          hoverShadow={hoverShadow}
+          dragShadow={dragShadow}
         >
           {renderLabelText()}
         </RelationshipPill>

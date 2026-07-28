@@ -11,9 +11,6 @@ import type { NodeViewModel } from '../types';
 /** CSS class applied to origin entity and event/alert nodes when origin highlighting is active. */
 export const GRAPH_ORIGIN_NODE_CLASS = 'graph-origin-node';
 
-/** Opacity for non-origin nodes while origin highlighting is enabled. */
-export const GRAPH_NON_ORIGIN_NODE_OPACITY = 0.6;
-
 /**
  * Origin nodes are the starting entities, events, or alerts rendered when the graph
  * investigation opens — not relationship connectors or expanded graph additions.

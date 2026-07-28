@@ -35,6 +35,18 @@ export const GlobalGraphStyles = () => {
           cursor: grabbing;
         }
 
+        .react-flow__node:not(.non-interactive) {
+          cursor: pointer;
+        }
+
+        .react-flow__node:not(.non-interactive).dragging {
+          cursor: grabbing;
+        }
+
+        .react-flow__nodesselection {
+          display: none;
+        }
+
         .react-flow.graph-highlight-origins-only .react-flow__node:not(.graph-origin-node) {
           transition: opacity 0.2s ease;
         }

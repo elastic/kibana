@@ -218,7 +218,7 @@ export const getRelationshipColors = (
   return {
     backgroundColor: euiTheme.colors.backgroundLightText,
     emphasizedBackgroundColor: euiTheme.colors.backgroundBaseFormsControlDisabled,
-    borderColor: euiTheme.colors.borderBasePlain,
+    borderColor: euiTheme.colors.borderBaseProminent,
     textColor: euiTheme.colors.textParagraph,
   };
 };

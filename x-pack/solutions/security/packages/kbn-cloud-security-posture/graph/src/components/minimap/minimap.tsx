@@ -27,7 +27,6 @@ import minimapMapIcon from '../../assets/icons/minimap_map.svg';
 /** Folded-map glyph from Figma MiniMap Type=closed — not the EUI `map` (pin) icon. */
 const MinimapExpandIcon = () => <EuiIcon type={minimapMapIcon} size="m" color="text" />;
 
-
 /** Expanded minimap content size from Figma (node 13994:673). */
 const MINIMAP_CONTENT_WIDTH = 151;
 const MINIMAP_CONTENT_HEIGHT = 96;
@@ -153,6 +152,10 @@ export interface MinimapProps {
    * Nodes state from ReactFlow
    */
   nodesState?: Node<NodeViewModel>[];
+  /**
+   * Whether the minimap starts expanded. Defaults to true.
+   */
+  defaultExpanded?: boolean;
 }
 
 const collapseLabel = i18n.translate(
@@ -180,10 +183,11 @@ export const Minimap = ({
   zoomStep = 2,
   style,
   nodesState,
+  defaultExpanded = true,
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
   const minimapShadow = useEuiShadow('s');
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   // Create a mapping of node ids to their data for easy lookup
   const nodeDataMap = React.useMemo(() => {

@@ -7,14 +7,10 @@
 
 import { createContext, useContext } from 'react';
 
-export type GraphInteractionTool = 'select' | 'pan';
-
 export type PanelToggleHandler = () => void;
 export type FocusSearchInputHandler = () => void;
 
 export interface GraphInteractionToolContextValue {
-  interactionTool: GraphInteractionTool;
-  setInteractionTool: (tool: GraphInteractionTool) => void;
   registerApplyFiltersToggle: (toggle: PanelToggleHandler | null) => void;
   registerSearchPanelToggle: (toggle: PanelToggleHandler | null) => void;
   registerFocusSearchInput: (focus: FocusSearchInputHandler | null) => void;
