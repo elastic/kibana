@@ -66,7 +66,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
         </EuiFlexItem>
         {!isEditing && (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               size="s"
               iconType="pencil"
               onClick={startEditing}
@@ -77,7 +77,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
                 id="xpack.contextEngine.aiIndexDetail.description.editButton"
                 defaultMessage="Edit"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

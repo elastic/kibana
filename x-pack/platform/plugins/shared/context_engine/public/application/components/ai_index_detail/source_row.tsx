@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiCode, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { toSourceType } from '../../utils/sources';
-import { SourceTypeBadge } from '../source_picker';
+import { getSourceTypeLabel, SourceTypeBadge } from '../source_picker';
 
 interface SourceRowProps {
   source: AiIndexSource;
@@ -19,29 +19,38 @@ interface SourceRowProps {
 
 export const SourceRow = ({ source, connectorName }: SourceRowProps) => {
   const isConnector = source.type === 'connector';
+  const sourceType = toSourceType(source.type);
+
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="contextAiIndexSourceRow">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={isConnector ? 'plugs' : 'editorCodeBlock'} size="l" aria-hidden={true} />
+          <EuiAvatar
+            type="space"
+            size="m"
+            color="subdued"
+            name={getSourceTypeLabel(sourceType)}
+            iconType={isConnector ? 'plugs' : 'editorCodeBlock'}
+            iconColor="primary"
+            iconSize="m"
+          />
         </EuiFlexItem>
         {/* minWidth: 0 lets the flex item shrink so long queries truncate instead of overflowing the panel */}
         <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiText size="s" color="subdued" className="eui-textTruncate">
-            {isConnector ? (
-              connectorName ?? source.value
-            ) : (
-              <EuiCode language="sql" transparentBackground>
-                {source.value}
-              </EuiCode>
-            )}
+          <EuiText size="s" className="eui-textTruncate">
+            <strong>
+              {isConnector ? (
+                connectorName ?? source.value
+              ) : (
+                <EuiCode language="sql" transparentBackground>
+                  {source.value}
+                </EuiCode>
+              )}
+            </strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SourceTypeBadge
-            type={toSourceType(source.type)}
-            data-test-subj="contextAiIndexSourceType"
-          />
+          <SourceTypeBadge type={sourceType} data-test-subj="contextAiIndexSourceType" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

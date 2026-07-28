@@ -6,8 +6,7 @@
  */
 
 import {
-  EuiButton,
-  EuiEmptyPrompt,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -34,8 +33,9 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
+        {/* minWidth: 0 keeps the description from running underneath the actions column */}
+        <EuiFlexItem css={{ minWidth: 0 }}>
+          <EuiTitle size="xs">
             <h2>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.title"
@@ -43,9 +43,18 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.description"
+                defaultMessage="Data feeding this AI index. Add a source to refresh context and suggestions."
+              />
+            </p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             size="s"
             iconType="pencil"
             onClick={onEditSources}
@@ -56,55 +65,34 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
               id="xpack.contextEngine.aiIndexDetail.sources.editButton"
               defaultMessage="Edit"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.sources.description"
-            defaultMessage="Sources that provide data for this AI index automations."
-          />
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
       ) : sources.length === 0 ? (
-        <EuiEmptyPrompt
-          iconType="editorCodeBlock"
-          titleSize="xs"
-          data-test-subj="contextAiIndexSourcesEmpty"
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.emptyTitle"
-                defaultMessage="No sources yet"
-              />
-            </h3>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.emptyBody"
-                defaultMessage="Add a source to start building context for this AI index."
-              />
-            </p>
-          }
-        />
-      ) : (
-        sources.map((source, index) => (
-          <React.Fragment key={`${source.type}-${index}`}>
-            <SourceRow
-              source={source}
-              connectorName={
-                source.type === 'connector' ? connectorNameById.get(source.value) : undefined
-              }
+        <EuiText size="s" color="subdued" data-test-subj="contextAiIndexSourcesEmpty">
+          <p>
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.empty"
+              defaultMessage="No sources yet. Add a source to start building context for this AI index."
             />
-            {index < sources.length - 1 && <EuiSpacer size="s" />}
-          </React.Fragment>
-        ))
+          </p>
+        </EuiText>
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {sources.map((source, index) => (
+            <EuiFlexItem key={`${source.type}-${index}`}>
+              <SourceRow
+                source={source}
+                connectorName={
+                  source.type === 'connector' ? connectorNameById.get(source.value) : undefined
+                }
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       )}
     </EuiPanel>
   );

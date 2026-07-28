@@ -91,14 +91,14 @@ export const AiIndexDetailPage = () => {
       />
       <KibanaPageTemplate.Section>
         <DescriptionPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <SourcesPanel
           isLoading={isLoading}
           sources={aiIndex?.sources ?? []}
           canEdit={aiIndex !== undefined}
           onEditSources={() => setIsEditingSources(true)}
         />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <AutomationsPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (

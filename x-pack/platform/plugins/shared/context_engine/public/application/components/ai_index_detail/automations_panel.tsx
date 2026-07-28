@@ -107,7 +107,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
-            <EuiButton
+            <EuiButtonEmpty
               size="s"
               iconType="pencil"
               onClick={startEditing}
@@ -117,7 +117,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editButton', {
                 defaultMessage: 'Edit',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

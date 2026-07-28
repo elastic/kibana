@@ -19,12 +19,21 @@ const renderWithProviders = (ui: React.ReactElement) =>
   );
 
 describe('SourceRow', () => {
-  it('renders the ES|QL query value and the source type badge', () => {
+  it('renders the ES|QL query value and its source type', () => {
     renderWithProviders(<SourceRow source={{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }} />);
 
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent(
       'FROM logs-* | LIMIT 10'
     );
     expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
+  });
+
+  it('renders the resolved connector name for connector sources', () => {
+    renderWithProviders(
+      <SourceRow source={{ type: 'connector', value: 'connector-gdrive' }} connectorName="Drive" />
+    );
+
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('Drive');
+    expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('Connector');
   });
 });

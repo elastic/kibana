@@ -44,7 +44,7 @@ describe('SourcesPanel', () => {
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
   });
 
-  it('shows the empty prompt when not loading and there are no sources', () => {
+  it('shows the empty message when not loading and there are no sources', () => {
     renderWithProviders(
       <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={jest.fn()} />
     );
