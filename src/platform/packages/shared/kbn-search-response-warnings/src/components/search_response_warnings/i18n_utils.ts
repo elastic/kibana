@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getParsedReasonFromShardFailure } from '@kbn/search-errors';
 import type { SearchResponseWarning } from '../../types';
 
 export const viewDetailsLabel = i18n.translate('searchResponseWarnings.viewDetailsButtonLabel', {
@@ -55,4 +56,28 @@ export function getWarningsDescription(warnings: SearchResponseWarning[]) {
     : i18n.translate('searchResponseWarnings.description.multipleClusters', {
         defaultMessage: 'These clusters had issues returning data and results might be incomplete.',
       });
+}
+
+export function getWarningsParsedReasons(warnings: SearchResponseWarning[]) {
+  const reasons = new Set<string>();
+
+  warnings.forEach((warning) => {
+    Object.keys(warning.clusters).forEach((clusterName) => {
+      if (warning.clusters[clusterName].status === 'successful') {
+        return;
+      }
+
+      const failures = warning.clusters[clusterName].failures;
+
+      failures?.forEach((failure) => {
+        const reason = getParsedReasonFromShardFailure(failure?.reason);
+
+        if (reason) {
+          reasons.add(reason);
+        }
+      });
+    });
+  });
+
+  return reasons;
 }

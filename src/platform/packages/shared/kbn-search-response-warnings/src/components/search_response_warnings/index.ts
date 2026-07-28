@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getWarningsDescription, getWarningsTitle } from './i18n_utils';
+export { getWarningsDescription, getWarningsTitle, getWarningsParsedReasons } from './i18n_utils';
 export { SearchResponseWarningsBadge } from './badge';
 export { SearchResponseWarningsBadgePopoverContent } from './badge_popover_content';
 export { SearchResponseWarningsCallout } from './callout';

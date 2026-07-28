@@ -9,6 +9,7 @@
     "@kbn/inspector-plugin",
     "@kbn/core",
     "@kbn/es-types",
+    "@kbn/search-errors",
   ],
   "exclude": ["target/**/*"]
 }
