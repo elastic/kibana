@@ -307,10 +307,6 @@ const RESTRICTED_IMPORTS = [
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
   {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
-  },
-  {
     name: '@elastic/ecs',
     importNames: ['EcsFlat'],
     message:
