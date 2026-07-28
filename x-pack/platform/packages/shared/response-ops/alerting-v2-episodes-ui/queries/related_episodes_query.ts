@@ -5,45 +5,20 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import type { ComposerQuery } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-import { addEpisodeAggregation } from './episodes_query';
+import {
+  buildRelatedBaseQuery as buildRelatedBaseQueryCommon,
+  finishRelatedEpisodesQuery as finishRelatedEpisodesQueryCommon,
+  RELATED_EPISODE_FIELDS as RELATED_EPISODE_FIELDS_COMMON,
+} from '@kbn/alerting-v2-common-queries';
 
-// Subset of `ALERT_EPISODE_FIELDS` actually populated by this query. The action
-// `last_*` columns are excluded because we only read from `.rule-events` here
-// and don't run the action INLINE STATS — keeping them caused a runtime error.
-export const RELATED_EPISODE_FIELDS = [
-  '@timestamp',
-  'episode.id',
-  'episode.status',
-  'rule.id',
-  'group_hash',
-  'first_timestamp',
-  'last_timestamp',
-  'duration',
-  'episode_data',
-  'severity',
-] as const;
+export const RELATED_EPISODE_FIELDS = RELATED_EPISODE_FIELDS_COMMON;
 
-const RELATED_EPISODE_LIMIT = 5;
-
-export const finishRelatedEpisodesQuery = (query: ComposerQuery) => {
-  addEpisodeAggregation(query);
-
-  return query
-    .sort([TIME_FIELD, 'DESC'])
-    .limit(RELATED_EPISODE_LIMIT)
-    .keep(...RELATED_EPISODE_FIELDS);
-};
+export const finishRelatedEpisodesQuery = (query: ComposerQuery) =>
+  finishRelatedEpisodesQueryCommon(query);
 
 export const buildRelatedBaseQuery = (
   spaceId: string,
   ruleId: string,
   excludeEpisodeId: string
-) => {
-  // Because addEpisodeAggregation uses JSON_EXTRACT(_source, "data"),
-  // _source must be included here.
-  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`space_id == ${spaceId}`
-    .where`type == "alert"`.where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
-};
+) => buildRelatedBaseQueryCommon(spaceId, ruleId, excludeEpisodeId);

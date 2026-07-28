@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { buildTagSuggestionsQuery } from '@kbn/alerting-v2-common-queries';
+import { createToken } from '@kbn/core-di';
+import type { EpisodesClientContract } from './types';
 
-export const ALERT_ACTION_TAG_SUGGESTIONS_LIMIT = 20;
-
-export const buildAlertActionTagSuggestionsQuery = (spaceId: string): string =>
-  buildTagSuggestionsQuery(spaceId);
+export const EpisodesClientToken = createToken<EpisodesClientContract>(
+  'alerting_v2.EpisodesClient'
+);

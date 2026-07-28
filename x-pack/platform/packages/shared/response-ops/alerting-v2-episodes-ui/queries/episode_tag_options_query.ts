@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
+import { buildEpisodeTagOptionsQuery as buildEpisodeTagOptionsQueryCommon } from '@kbn/alerting-v2-common-queries';
 
 export interface EpisodeTagOptionRow {
   tags: string;
@@ -15,12 +14,5 @@ export interface EpisodeTagOptionRow {
 /**
  * Distinct tag values from tag actions in the selected time range (via kibana_context).
  */
-export const buildEpisodeTagOptionsQuery = (spaceId: string) => {
-  // prettier-ignore
-  return esql.from(ALERT_ACTIONS_DATA_STREAM).where`space_id == ${spaceId}`.where`action_type == "tag"`
-    .where`tags IS NOT NULL`
-    .pipe`MV_EXPAND tags`
-    .pipe`STATS BY tags`
-    .sort(['tags', 'ASC'])
-    .pipe`LIMIT 500`;
-};
+export const buildEpisodeTagOptionsQuery = (spaceId: string) =>
+  buildEpisodeTagOptionsQueryCommon(spaceId);

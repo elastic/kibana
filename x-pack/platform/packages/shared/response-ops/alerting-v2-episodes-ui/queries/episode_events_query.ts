@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
+import { buildEpisodeEventsQuery as buildEpisodeEventsQueryCommon } from '@kbn/alerting-v2-common-queries';
 
 export interface EpisodeEventRow {
   '@timestamp': string;
@@ -19,26 +18,8 @@ export interface EpisodeEventRow {
   data?: string | Record<string, unknown> | null;
 }
 
-const ALERT_EPISODE_EVENT_FIELDS = [
-  '@timestamp',
-  'episode.id',
-  'episode.status',
-  'rule.id',
-  'group_hash',
-  'severity',
-  'data',
-] as const;
-
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
-export const buildEpisodeEventsEsqlQuery = (spaceId: string, episodeId: string) => {
-  // prettier-ignore
-  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
-    .where`space_id == ${spaceId}`
-    .where`type == "alert"`
-    .where`episode.id == ${episodeId}`
-    .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
-    .sort([TIME_FIELD, 'ASC'])
-    .keep(...ALERT_EPISODE_EVENT_FIELDS);
-};
+export const buildEpisodeEventsEsqlQuery = (spaceId: string, episodeId: string) =>
+  buildEpisodeEventsQueryCommon(spaceId, episodeId);

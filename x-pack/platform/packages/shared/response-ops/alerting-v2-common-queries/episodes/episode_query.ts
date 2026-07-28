@@ -6,11 +6,9 @@
  */
 
 import type { ComposerQuery } from '@elastic/esql';
-import { buildEpisodeQuery as buildEpisodeQueryCommon } from '@kbn/alerting-v2-common-queries';
+import { ALERT_EPISODE_FIELDS, buildEpisodesBaseQuery } from './episodes_query';
 
-/**
- * Builds an ES|QL query that returns the single aggregated row for one episode,
- * reusing the same aggregation pipeline as the list query.
- */
 export const buildEpisodeQuery = (spaceId: string, episodeId: string): ComposerQuery =>
-  buildEpisodeQueryCommon(spaceId, episodeId);
+  buildEpisodesBaseQuery(spaceId).where`episode.id == ${episodeId}`.pipe`LIMIT 1`.keep(
+    ...ALERT_EPISODE_FIELDS
+  );

@@ -7,10 +7,13 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+export {
+  ALERT_EVENTS_DATA_STREAM,
+  ALERT_ACTIONS_DATA_STREAM,
+  HISTOGRAM_EPISODE_LIMIT,
+} from '@kbn/alerting-v2-common-queries';
 
 export const EMPTY_VALUE = '—';
-export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
@@ -51,7 +54,6 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
     meta: { type: 'string' },
   },
 ];
-export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export const FLYOUT_FOOTER_OFFSET = 80;
 

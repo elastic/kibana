@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { buildTagSuggestionsQuery } from '@kbn/alerting-v2-common-queries';
-
-export const ALERT_ACTION_TAG_SUGGESTIONS_LIMIT = 20;
-
-export const buildAlertActionTagSuggestionsQuery = (spaceId: string): string =>
-  buildTagSuggestionsQuery(spaceId);
+export * from './episodes';

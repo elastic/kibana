@@ -8,6 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-common-queries",
     "@kbn/datemath",
     "@kbn/core",
     "@kbn/core-application-browser",
