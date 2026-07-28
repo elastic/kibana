@@ -160,6 +160,22 @@ describe('useUserStorage', () => {
     expect(result.current[0]).toBe('hydrated');
   });
 
+  it('does not re-subscribe when re-rendered with a fresh-but-equal defaultValue literal', () => {
+    const client = buildClient();
+    const getState$ = jest.spyOn(client, 'getState$');
+
+    const { rerender } = renderHook(
+      // A new object literal each render — reference changes, value does not.
+      () => useUserStorage<{ hidden: string[] }>('nav', { hidden: [] }),
+      { wrapper: wrapper(client) }
+    );
+
+    rerender();
+    rerender();
+
+    expect(getState$).toHaveBeenCalledTimes(1);
+  });
+
   it('reports an error status (without discarding the fallback value) when the lazy fetch fails', () => {
     const client = buildClient();
     const state$ = new Subject<UserStorageValue<string>>();

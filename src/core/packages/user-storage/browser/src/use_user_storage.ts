@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import deepEqual from 'fast-deep-equal';
 import type { Observable } from 'rxjs';
 import type { IUserStorageClient, UserStorageValue } from './types';
 import { UserStorageContext } from './user_storage_context';
@@ -85,17 +86,24 @@ export function useUserStorage<T = unknown>(
 ): [T | undefined, UserStorageSetter<T>, UserStorageHookState] {
   const client = useUserStorageClient();
 
+  // Stabilize by structural identity so an inline default literal doesn't re-subscribe each render.
+  const defaultValueRef = useRef(defaultValue);
+  if (!deepEqual(defaultValueRef.current, defaultValue)) {
+    defaultValueRef.current = defaultValue;
+  }
+  const stableDefault = defaultValueRef.current;
+
   const state$: Observable<UserStorageValue<T | undefined>> = useMemo(
     () =>
-      defaultValue !== undefined
-        ? client.getState$<T>(key, defaultValue)
+      stableDefault !== undefined
+        ? client.getState$<T>(key, stableDefault)
         : client.getState$<T>(key),
-    [client, key, defaultValue]
+    [client, key, stableDefault]
   );
 
   // peek() is side-effect-free, so it's safe as the initial render value under concurrent mode.
   const initialValue =
-    defaultValue !== undefined ? client.peek<T>(key, defaultValue) : client.peek<T>(key);
+    stableDefault !== undefined ? client.peek<T>(key, stableDefault) : client.peek<T>(key);
   const state = useObservable<UserStorageValue<T | undefined>>(state$, {
     status: 'loading',
     value: initialValue,
