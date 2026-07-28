@@ -343,10 +343,9 @@ export class MyPlugin implements Plugin {
       },
       async (context, request, response) => {
         const coreStart = await context.core;
-        const status = await coreStart.http.selfClient.asScoped(request).fetch<{ status: string }>(
-          '/api/status',
-          { access: 'public' }
-        );
+        const status = await coreStart.http.selfClient.asScoped(request).fetch('/api/status', {
+          access: 'public',
+        });
 
         return response.ok({ body: status });
       }
