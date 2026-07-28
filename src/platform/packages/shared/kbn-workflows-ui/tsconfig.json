@@ -30,5 +30,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-workflows",
+    "@kbn/shared-ux-ai-components",
   ]
 }

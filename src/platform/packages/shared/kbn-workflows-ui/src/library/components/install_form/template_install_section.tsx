@@ -23,6 +23,7 @@ import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { validateInstallFormValues } from '@kbn/workflows-library';
 import type { InstallFormField, TemplateBody } from '@kbn/workflows-library';
 import { InstallForm } from './install_form';
@@ -221,6 +222,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
           {installError ? (
             <>
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 iconType="warning"
                 size="s"
@@ -235,8 +237,21 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
             </>
           ) : null}
 
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem>
+              <AiButton
+                variant="base"
+                fullWidth
+                iconType="productAgent"
+                onClick={handleRemix}
+                data-test-subj="workflowLibraryTemplateRemixButton"
+              >
+                {i18n.translate('workflows.library.install.remixButton', {
+                  defaultMessage: 'Remix with AI',
+                })}
+              </AiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
               {installDisabled ? (
                 <EuiToolTip
                   display="block"
@@ -255,18 +270,6 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
               ) : (
                 installButton
               )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fullWidth
-                iconType="productAgent"
-                onClick={handleRemix}
-                data-test-subj="workflowLibraryTemplateRemixButton"
-              >
-                {i18n.translate('workflows.library.install.remixButton', {
-                  defaultMessage: 'Remix with AI',
-                })}
-              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
