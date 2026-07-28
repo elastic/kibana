@@ -290,7 +290,7 @@ describe('SmlService', () => {
         (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
 
-      const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
+      const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as {
         query: string;
         params?: unknown[];
       };
@@ -299,8 +299,6 @@ describe('SmlService', () => {
       expect(esql).toContain('| FUSE');
       // METADATA required for FUSE (_id, _index, _score columns)
       expect(esql).toContain('METADATA _id, _index, _score');
-      // No separate space filter — space scoping is implicit in composite privilege tokens.
-      expect(esql).not.toContain('| WHERE MV_CONTAINS(spaces, ?)');
       // Two FORK branches: BM25 (OR across text fields) + semantic (OR across semantic multi-fields).
       // Per-branch candidate depth is size(10) × MAX_SCAN_MULTIPLIER(10) for RRF recall.
       // SORT _score DESC inside each branch is required so LIMIT selects the top-scoring
@@ -316,10 +314,6 @@ describe('SmlService', () => {
       expect(esql).toContain('| LIMIT 10');
       // Sorted by relevance score after FUSE
       expect(esql).toContain('| SORT _score DESC');
-      // No spaceId positional param (space scoping is now handled by composite tokens in the authz filter).
-      if (params) {
-        expect(params).not.toContain('default');
-      }
     });
 
     it('uses plain sorted scan for query "*" (no FORK/FUSE)', async () => {
@@ -402,7 +396,6 @@ describe('SmlService', () => {
       expect(esql).toContain('| WHERE MV_CONTAINS(tags, ?)');
 
       // Positional params: [scopeTypeId, scopeUri, filterType1, filterType2, filterTag, ...queryX6]
-      // (No spaceId param — space scoping is handled by composite privilege tokens in the authz filter.)
       expect(params![0]).toBe('connector'); // constraints typeId
       expect(params![1]).toBe('connector://gh-1'); // constraints origin URI
       expect(params![2]).toBe('connector'); // filter type 1
@@ -441,7 +434,7 @@ describe('SmlService', () => {
       expect(esql).toContain('MATCH(title.semantic, ?)');
       expect(esql).toContain('MATCH(description.semantic, ?)');
       expect(esql).toContain('MATCH(content.semantic, ?)');
-      // Query repeated six times (once per MATCH branch); no spaceId param prefix.
+      // Query repeated six times (once per MATCH branch)
       const queryString = 'how is the fleet performing this quarter';
       expect(params).toEqual(Array(6).fill(queryString));
     });
@@ -834,7 +827,7 @@ describe('SmlService', () => {
   });
 
   describe('autocomplete', () => {
-    it('builds a single nested discovery_labels query (with inner_hits) and a space filter', async () => {
+    it('builds a single nested discovery_labels query (with inner_hits) and no filter when securityAuthz is absent', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -888,14 +881,7 @@ describe('SmlService', () => {
               },
             },
           ],
-          filter: [
-            {
-              bool: {
-                should: [{ term: { spaces: 'default' } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [],
         },
       });
       expect(call._source).toEqual(['id', 'type', 'title', 'origin', 'permissions']);
@@ -1061,9 +1047,9 @@ describe('SmlService', () => {
 
       const call = esClient.search.mock.calls[0]![0]!;
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
-      // First clause is the space filter; second is the constraints filter.
-      expect(filterClauses).toHaveLength(2);
-      expect(filterClauses[1]).toEqual({
+      // With no securityAuthz, only the constraints filter is present.
+      expect(filterClauses).toHaveLength(1);
+      expect(filterClauses[0]).toEqual({
         bool: {
           should: [
             {
@@ -1091,7 +1077,6 @@ describe('SmlService', () => {
                 type: 'connector',
                 title: 'GitHub Connector',
                 origin: { uri: 'gh-1' },
-                spaces: ['default'],
                 permissions: makePermissions(),
               },
               _score: 5.4,
@@ -1139,7 +1124,6 @@ describe('SmlService', () => {
         type: 'connector',
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
-        spaces: ['default'],
         permissions: makePermissions(),
         matched_discovery_labels: [
           {
@@ -1167,7 +1151,6 @@ describe('SmlService', () => {
                 type: 'dashboard',
                 title: 'Sales Q3',
                 origin: { uri: 'dash-1' },
-                spaces: ['default'],
                 permissions: makePermissions(),
               },
               _score: 2.0,
@@ -1189,7 +1172,6 @@ describe('SmlService', () => {
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
-        spaces: ['default'],
         permissions: makePermissions(),
       });
     });
@@ -1212,10 +1194,10 @@ describe('SmlService', () => {
       expect(result).toEqual({ results: [] });
     });
 
-    it('returns all ES results without post-filtering (DLS handles permission enforcement)', async () => {
-      // Authorization for autocomplete is enforced by Document Level Security on the SML
-      // index at the Lucene level — there is no JS post-filter. The autocomplete function
-      // returns whatever ES returns after DLS has already filtered the candidate set.
+    it('returns all ES results without post-filtering when corpus has no permissions (open access)', async () => {
+      // When the corpus uses no Kibana-privilege dimensions (empty universe), no
+      // terms_set filter is emitted and all documents are returned. Authorization
+      // is self-contained — there is no JS post-filter.
       const securityAuthz = createMockSecurityAuthzPartial(
         ['saved_object:dashboard/get'],
         ['saved_object:connector/get']
@@ -1224,8 +1206,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      // In production, DLS would filter the second entry before ES returns results.
-      // In tests, both entries are returned by the mock to confirm no JS post-filtering occurs.
+      // termsEnumMock returns empty universe by default → no filter emitted.
       esClient.search.mockResolvedValue({
         hits: {
           total: 2,
@@ -1236,7 +1217,6 @@ describe('SmlService', () => {
                 type: 'dashboard',
                 title: 'Allowed',
                 origin: { uri: 'd1' },
-                spaces: ['default'],
                 permissions: makePermissions(['default|saved_object:dashboard/get']),
               },
               _score: 3,
@@ -1247,7 +1227,6 @@ describe('SmlService', () => {
                 type: 'connector',
                 title: 'Connector',
                 origin: { uri: 'c1' },
-                spaces: ['default'],
                 permissions: makePermissions(['default|saved_object:connector/get']),
               },
               _score: 2,
@@ -1264,10 +1243,75 @@ describe('SmlService', () => {
         request,
       });
 
-      // Both results are returned — DLS (not JS) enforces permissions.
+      // Both results are returned — open access when corpus has no privilege dimensions.
       expect(result.results).toHaveLength(2);
       expect(result.results[0].id).toBe('entry-allowed');
       expect(result.results[1].id).toBe('entry-with-perms');
+    });
+
+    it('emits a terms_set authz filter when securityAuthz is present and corpus has permissions', async () => {
+      // Corpus uses two Kibana privileges; caller holds one.
+      // The pre-aggregation pass emits a terms_set filter so only authorized
+      // docs are returned — space scoping is implicit in the composite tokens.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      termsEnumMock.mockImplementation(
+        buildTermsEnumMock({
+          kibana: ['default|saved_object:dashboard/get', 'default|saved_object:lens/get'],
+        })
+      );
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
+      expect(filterClauses).toHaveLength(1);
+      expect(filterClauses[0]).toEqual({
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: 'permissions.kibana.privileges.name' } } } },
+            {
+              terms_set: {
+                'permissions.kibana.privileges.name': {
+                  terms: ['default|saved_object:dashboard/get'],
+                  minimum_should_match_field: 'permissions.kibana.count',
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('emits no authz filter when securityAuthz is absent (autocomplete open access)', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      // No termsEnum call — security plugin absent.
+      expect(termsEnumMock).not.toHaveBeenCalled();
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect((call.query!.bool!.filter as unknown[]).length).toBe(0);
     });
 
     describe('pre-aggregation authz filter (MV_CONTAINS subset)', () => {
@@ -1518,15 +1562,7 @@ describe('SmlService', () => {
           ignore_unavailable: true,
           query: {
             bool: {
-              filter: [
-                { terms: { id: ['id-1'] } },
-                {
-                  bool: {
-                    should: [{ term: { spaces: 'my-space' } }, { term: { spaces: '*' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+              filter: [{ terms: { id: ['id-1'] } }],
             },
           },
           _source: ['id', 'permissions'],
@@ -1600,7 +1636,6 @@ describe('SmlService', () => {
                 content: 'content 1',
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
-                spaces: ['default'],
                 permissions: makePermissions(),
               },
             },
@@ -1616,7 +1651,6 @@ describe('SmlService', () => {
                 references: [{ uri: 'lens:x:y' }],
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
-                spaces: ['default'],
                 permissions: makePermissions(),
               },
             },
@@ -1640,7 +1674,6 @@ describe('SmlService', () => {
         content: 'content 1',
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
-        spaces: ['default'],
         permissions: makePermissions(),
         ingestion_method: 'crawled',
       });
@@ -1656,7 +1689,6 @@ describe('SmlService', () => {
         references: [{ uri: 'lens:x:y' }],
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
-        spaces: ['default'],
         permissions: makePermissions(),
         ingestion_method: 'crawled',
       });
@@ -1686,7 +1718,6 @@ describe('SmlService', () => {
                 references: [{ uri: 'category://sales' }],
                 created_at: '2026-04-01T00:00:00.000Z',
                 updated_at: '2026-04-02T00:00:00.000Z',
-                spaces: ['default'],
                 permissions: makePermissions(['saved_object:dashboard/get']),
               },
             },
@@ -1715,7 +1746,6 @@ describe('SmlService', () => {
         references: [{ uri: 'category://sales' }],
         created_at: '2026-04-01T00:00:00.000Z',
         updated_at: '2026-04-02T00:00:00.000Z',
-        spaces: ['default'],
         permissions: makePermissions(['saved_object:dashboard/get']),
         ingestion_method: 'crawled',
       });
@@ -1792,15 +1822,7 @@ describe('SmlService', () => {
           ignore_unavailable: true,
           query: {
             bool: {
-              filter: [
-                { terms: { id: ['id-1', 'id-2'] } },
-                {
-                  bool: {
-                    should: [{ term: { spaces: 'my-space' } }, { term: { spaces: '*' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
+              filter: [{ terms: { id: ['id-1', 'id-2'] } }],
             },
           },
         })

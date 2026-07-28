@@ -10,7 +10,7 @@ import { kibanaSavedObjectPermissions } from './kibana_saved_object';
 describe('kibanaSavedObjectPermissions', () => {
   it('returns the standard `saved_object:<type>/get` privilege', () => {
     expect(kibanaSavedObjectPermissions({ savedObjectType: 'lens' })).toEqual({
-      kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+      kibana: { privileges: [{ name: 'saved_object:lens/get' }], count: 1 },
     });
   });
 

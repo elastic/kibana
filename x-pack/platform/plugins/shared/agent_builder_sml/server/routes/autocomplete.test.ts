@@ -85,8 +85,7 @@ describe('registerAutocompleteRoute', () => {
         type: 'connector',
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
-        spaces: ['test-space'],
-        permissions: { kibana: { privileges: [] } },
+        permissions: { kibana: { privileges: [], count: 0 } },
         matched_discovery_labels: [
           { value: 'GitHub Connector', kind: 'title' },
           { value: 'github', kind: 'tagline' },
@@ -121,8 +120,7 @@ describe('registerAutocompleteRoute', () => {
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
-        spaces: ['test-space'],
-        permissions: { kibana: { privileges: [] } },
+        permissions: { kibana: { privileges: [], count: 0 } },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
@@ -133,16 +131,15 @@ describe('registerAutocompleteRoute', () => {
     expect(results[0].matched_discovery_labels).toEqual([]);
   });
 
-  it('does not leak server-only fields (permissions, spaces) into the HTTP response', async () => {
+  it('does not leak server-only fields (permissions) into the HTTP response', async () => {
     const mockResults: SmlAutocompleteResult[] = [
       {
         id: 'entry-3',
         type: 'visualization',
         title: 'V',
         origin: { uri: 'v-1' },
-        spaces: ['test-space'],
         permissions: {
-          kibana: { privileges: [{ name: 'saved_object:visualization/get' }] },
+          kibana: { privileges: [{ name: 'saved_object:visualization/get' }], count: 1 },
         },
       },
     ];
@@ -152,7 +149,6 @@ describe('registerAutocompleteRoute', () => {
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     const results = (body as any).results;
     expect(results[0]).not.toHaveProperty('permissions');
-    expect(results[0]).not.toHaveProperty('spaces');
   });
 
   it('passes spaceId from spaces plugin to sml.autocomplete', async () => {

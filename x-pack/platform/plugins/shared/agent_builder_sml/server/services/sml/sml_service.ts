@@ -121,7 +121,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         size = 10,
         spaceId,
         esClient,
-        request: _request,
+        request,
         constraints,
         filters,
       }) => {
@@ -130,6 +130,8 @@ class SmlServiceImpl implements SmlServiceInstance {
           size,
           spaceId,
           esClient,
+          request,
+          securityAuthz: this.securityAuthz,
           logger,
           constraints,
           filters,
@@ -180,7 +182,7 @@ export const isNotFoundError = (error: unknown): boolean => {
  * `_source.permissions` is somehow missing (legacy / test docs).
  */
 const emptyPermissions = (): SmlDocument['permissions'] => ({
-  kibana: { privileges: [] },
+  kibana: { privileges: [], count: 0 },
 });
 
 /**
@@ -378,11 +380,9 @@ const resolveAuthorizedUniverse = async ({
     logger,
   });
 
-  // Map back to composite tokens: keep the composite token if its raw action is authorized.
-  const authorizedTokens = kibanaUniverse.filter((token) => {
-    const rawAction = token.substring(token.indexOf(separator) + 1);
-    return authorizedPerms.has(rawAction);
-  });
+  // Reconstruct composite tokens directly from authorized actions.
+  // Each authorized raw action maps to exactly one composite token for the current space.
+  const authorizedTokens = [...authorizedPerms].map((action) => `${spaceId}|${action}`);
 
   return {
     authorizedActions: authorizedTokens,
@@ -433,15 +433,7 @@ const checkItemsAccess = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [
-            { terms: { id: ids } },
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [{ terms: { id: ids } }],
         },
       },
       _source: ['id', 'permissions'],
@@ -659,7 +651,7 @@ const buildSmlEsqlQuery = ({
   lines.push(`| LIMIT ${size}`);
 
   // description is included in the baseline (short summary, useful for triage).
-  // content, tags, references, spaces, permissions are opt-in via the fields param.
+  // content, tags, references, and permissions are opt-in via the fields param.
   const DEFAULT_FIELDS = new Set(['description']);
   const shouldKeep = (f: string) =>
     fields !== undefined ? fields.includes(f) : DEFAULT_FIELDS.has(f);
@@ -676,7 +668,6 @@ const buildSmlEsqlQuery = ({
   // server-side RBAC filtering; only surfaced in the result when requested.
   lines.push('| EVAL perm_kibana = permissions.kibana.privileges.name');
 
-  // spaces is purely opt-in.
   const keepCols = [
     'id',
     'type',
@@ -685,7 +676,6 @@ const buildSmlEsqlQuery = ({
     ...(shouldKeep('description') ? ['description'] : []),
     ...(shouldKeep('tags') ? ['tags'] : []),
     ...(shouldKeep('references') ? ['ref_uris'] : []),
-    ...(shouldKeep('spaces') ? ['spaces'] : []),
     'perm_kibana',
     ...(shouldKeep('content') ? ['content'] : []),
   ];
@@ -890,9 +880,8 @@ const searchSml = async ({
     return Array.isArray(v) ? (v as unknown[]).filter((s) => s != null).map(String) : [String(v)];
   };
 
-  // permissions columns are kept for optional surfacing (fields includes
-  // 'permissions'); authorization itself is enforced in-query. spaces is
-  // surfaced only when requested.
+  // permissions column is kept for optional surfacing (fields includes 'permissions');
+  // authorization itself is enforced in-query.
   type SmlSearchResultInternal = SmlSearchResult & { permissions: SmlPermissions };
 
   const allResults: SmlSearchResultInternal[] = response.values.map((row) => {
@@ -901,14 +890,11 @@ const searchSml = async ({
       type: String(row[colIndex.get('type')!] ?? ''),
       title: String(row[colIndex.get('title')!] ?? ''),
       origin: { uri: String(row[colIndex.get('origin_uri')!] ?? '') },
-      permissions: {
-        kibana: {
-          privileges: toStringArray(row[colIndex.get('perm_kibana')!]).map((name) => ({ name })),
-        },
-      },
+      permissions: (() => {
+        const privs = toStringArray(row[colIndex.get('perm_kibana')!]).map((name) => ({ name }));
+        return { kibana: { privileges: privs, count: privs.length } };
+      })(),
     };
-    const spacesIdx = colIndex.get('spaces');
-    if (spacesIdx !== undefined) result.spaces = toStringArray(row[spacesIdx]);
 
     const contentIdx = colIndex.get('content');
     if (contentIdx !== undefined) {
@@ -1057,12 +1043,19 @@ const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
 
 /**
  * Autocomplete the SML index. Prefix-only, with per-row provenance for the @ menu.
+ *
+ * Authorization is enforced in-query via a `terms_set` filter — the same
+ * composite `space|action` token semantics used by the search path. When the
+ * security plugin is absent (dev / test), the filter is skipped and all docs
+ * are returned.
  */
 const autocompleteSml = async ({
   query,
   size,
   spaceId,
   esClient,
+  request,
+  securityAuthz,
   logger,
   constraints,
   filters,
@@ -1071,6 +1064,8 @@ const autocompleteSml = async ({
   size: number;
   spaceId: string;
   esClient: IScopedClusterClient;
+  request: KibanaRequest;
+  securityAuthz?: AuthorizationServiceSetup;
   logger: Logger;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
@@ -1081,17 +1076,41 @@ const autocompleteSml = async ({
     )}, size=${size}, spaceId='${spaceId}', index='${smlIndexName}'`
   );
 
+  // Pre-aggregation: resolve the caller's authorized permission universe so
+  // the query can filter to authorized docs in-query. Skipped when the
+  // security plugin is absent (dev / test) — open-access parity.
+  let authz: AuthorizedUniverse | undefined;
+  if (securityAuthz) {
+    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger, spaceId });
+    logger.debug(`SML autocomplete authz: actions=${authz.authorizedActions.length}`);
+  }
+
   try {
     const smlQuery = buildSmlAutocompleteQuery(query);
 
-    const filterClauses: Array<Record<string, unknown>> = [
-      {
+    const filterClauses: Array<Record<string, unknown>> = [];
+
+    // Authorization filter: terms_set with minimum_should_match_field enforces
+    // AND semantics (all required composite tokens must be held). The bool/should
+    // arm passes documents with no required permissions (public items).
+    if (authz && authz.kibanaUniverseNonEmpty) {
+      filterClauses.push({
         bool: {
-          should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-          minimum_should_match: 1,
+          should: [
+            { bool: { must_not: { exists: { field: PERM_KIBANA_FIELD } } } },
+            {
+              terms_set: {
+                [PERM_KIBANA_FIELD]: {
+                  terms: authz.authorizedActions,
+                  minimum_should_match_field: 'permissions.kibana.count',
+                },
+              },
+            },
+          ],
         },
-      },
-    ];
+      });
+    }
+
     const constraintsFilter = buildConstraintsFilter(constraints);
     if (constraintsFilter) {
       filterClauses.push(constraintsFilter);
@@ -1123,7 +1142,6 @@ const autocompleteSml = async ({
           type: source.type ?? '',
           title: source.title ?? '',
           origin: { uri: source.origin?.uri ?? '' },
-          spaces: source.spaces ?? [],
           permissions: source.permissions ?? emptyPermissions(),
         };
         // Inner hits from the nested discovery_labels query: the specific entries
@@ -1204,15 +1222,7 @@ const getDocumentsByIds = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [
-            { terms: { id: ids } },
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [{ terms: { id: ids } }],
         },
       },
     });
@@ -1248,7 +1258,6 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
     content: source.content ?? '',
     created_at: source.created_at ?? '',
     updated_at: source.updated_at ?? '',
-    spaces: source.spaces ?? [],
     permissions: source.permissions ?? emptyPermissions(),
     ingestion_method: source.ingestion_method ?? 'crawled',
   };

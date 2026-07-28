@@ -233,13 +233,9 @@ export interface SmlDocument {
   /** Timestamp when last updated */
   updated_at: string;
   /**
-   * Space IDs this item belongs to. Authoritative source of space membership
-   * — composite privilege tokens in `permissions` are derived from this list.
-   * Also used by callers to determine which spaces a document belongs to for
-   * display purposes.
+   * Permissions required to access this entry. See {@link SmlPermissions} and
+   * {@link SmlKibanaPrivilege} for the composite token format.
    */
-  spaces: string[];
-  /** Permissions required to access the underlying element. See {@link SmlPermissions}. */
   permissions: SmlPermissions;
   /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
@@ -255,8 +251,8 @@ export interface SmlDocument {
  * in their response shape.
  *
  * Optional fields (`content`, `description`, `tags`, `references`) are omitted
- * when the caller passes a `fields` array that excludes them. `spaces` and
- * `permissions` are internal pipeline details — not present in results.
+ * when the caller passes a `fields` array that excludes them. `permissions` is
+ * an internal pipeline detail — not present in results.
  */
 export interface SmlSearchResult {
   id: string;
@@ -267,7 +263,6 @@ export interface SmlSearchResult {
   description?: string;
   references?: Array<{ uri: string }>;
   tags?: string[];
-  spaces?: string[];
   permissions?: SmlPermissions;
 }
 
@@ -298,8 +293,6 @@ export interface SmlAutocompleteResult {
   origin: { uri: string };
   /** Stored permissions for the entry; not exposed in the HTTP response. */
   permissions: SmlPermissions;
-  /** Space IDs this item belongs to; not exposed in the HTTP response. */
-  spaces: string[];
   /**
    * The specific `discovery_labels` entries that matched the typed prefix.
    * `kind` lets the UI render each label appropriately — e.g. for a hit on the

@@ -262,12 +262,13 @@ class SmlIndexerImpl implements SmlIndexer {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job.
       const result = await definition.getPermissions(originId, context);
+      const privs = result.kibana?.privileges ?? [];
       return {
-        kibana: { privileges: result.kibana?.privileges ?? [] },
+        kibana: { privileges: privs, count: privs.length },
       };
     }
 
-    return { kibana: { privileges: [] } };
+    return { kibana: { privileges: [], count: 0 } };
   }
 
   private buildIndexOp({
@@ -300,7 +301,6 @@ class SmlIndexerImpl implements SmlIndexer {
       content: entry.content,
       created_at: createdAt || now,
       updated_at: now,
-      spaces,
       permissions: {
         kibana: { privileges: compositePrivileges, count: compositePrivileges.length },
       },

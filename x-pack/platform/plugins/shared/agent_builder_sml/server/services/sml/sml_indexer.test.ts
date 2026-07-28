@@ -190,7 +190,6 @@ describe('createSmlIndexer', () => {
         content: 'content',
         created_at: expect.any(String),
         updated_at: expect.any(String),
-        spaces: ['default', 'space-2'],
         permissions: {
           kibana: {
             privileges: [{ name: 'default|perm1' }, { name: 'space-2|perm1' }],
@@ -272,7 +271,6 @@ describe('createSmlIndexer', () => {
         references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
         created_at: expect.any(String),
         updated_at: expect.any(String),
-        spaces: ['default'],
         permissions: {
           kibana: { privileges: [{ name: 'default|saved_object:dashboard/get' }], count: 1 },
         },

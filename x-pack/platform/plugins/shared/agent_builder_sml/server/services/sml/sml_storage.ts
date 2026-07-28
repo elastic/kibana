@@ -68,7 +68,6 @@ const smlStorageSchemaProperties = {
   user_id: types.keyword({}),
   created_at: types.date({}),
   updated_at: types.date({}),
-  spaces: types.keyword({}),
   permissions: types.object({
     properties: {
       kibana: types.object({
