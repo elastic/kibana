@@ -2718,13 +2718,11 @@ exports[`XYChart component it renders bar 1`] = `
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
-                "minLength": 80,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -4197,12 +4195,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -8629,13 +8626,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
-                "minLength": 80,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -10108,12 +10103,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -11605,13 +11599,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
-                "minLength": 80,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -13174,13 +13166,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
-                "minLength": 80,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }
@@ -14736,13 +14726,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "padding": undefined,
                 "visible": true,
               },
-              "maxExtent": "50%",
               "tickLabel": Object {
                 "fill": undefined,
-                "minLength": 80,
                 "padding": undefined,
                 "rotation": 0,
-                "truncate": "middle",
+                "truncate": undefined,
                 "visible": true,
               },
             }

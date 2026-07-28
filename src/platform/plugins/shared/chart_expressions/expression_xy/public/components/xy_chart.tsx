@@ -737,6 +737,11 @@ export function XYChart({
       },
     };
 
+    const isCategoricalXAxis = dataLayers.every(
+      ({ xAccessor, xScaleType }) =>
+        !xAccessor || (xScaleType ?? defaultXScaleType) === XScaleTypes.ORDINAL
+    );
+
     if (isHorizontalTimeAxis) {
       style.tickLine = {
         visible: Boolean(xAxisConfig?.showLabels),
@@ -760,7 +765,7 @@ export function XYChart({
           : undefined,
     };
 
-    if (hasBars) {
+    if (isCategoricalXAxis) {
       style.maxExtent = style.maxExtent ?? '50%';
       style.tickLabel = {
         ...style.tickLabel,
