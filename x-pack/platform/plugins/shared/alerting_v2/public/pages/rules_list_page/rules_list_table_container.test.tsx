@@ -52,6 +52,11 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
 
+const mockUpdateApiKeyMutate = jest.fn();
+jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
+  useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
+}));
+
 const mockRules = [
   {
     id: 'rule-1',
@@ -216,6 +221,71 @@ describe('RulesListTableContainer', () => {
       await waitFor(() => {
         expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('single rule update API key', () => {
+    it('shows the update API key confirmation modal when the row action is clicked', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toHaveTextContent(/Rule One/);
+      });
+    });
+
+    it('calls the update API key mutation with the rule id when confirmed', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
+        { ids: ['rule-1'] },
+        expect.objectContaining({ onSettled: expect.any(Function) })
+      );
+    });
+
+    it('dismisses the modal on cancel without calling the mutation', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument();
+      });
+      expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
     });
   });
 

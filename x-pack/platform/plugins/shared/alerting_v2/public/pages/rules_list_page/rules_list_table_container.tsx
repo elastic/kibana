@@ -14,7 +14,9 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
+import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/update_api_key_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
@@ -58,6 +60,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const { basePath } = useService(CoreStart('http'));
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
+  const [ruleToUpdateApiKey, setRuleToUpdateApiKey] = useState<RuleApiResponse | null>(null);
   const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
@@ -68,6 +71,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const bulkEnableMutation = useBulkEnableRules();
   const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
+  const updateApiKeyMutation = useBulkUpdateRuleApiKey();
 
   const {
     isAllSelected,
@@ -125,6 +129,16 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     );
   };
 
+  const onUpdateApiKeyConfirm = () => {
+    if (!ruleToUpdateApiKey) {
+      return;
+    }
+    updateApiKeyMutation.mutate(
+      { ids: [ruleToUpdateApiKey.id] },
+      { onSettled: () => setRuleToUpdateApiKey(null) }
+    );
+  };
+
   return (
     <>
       <RulesListTable
@@ -156,6 +170,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -189,6 +204,14 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onCancel={() => setRuleToDelete(null)}
           onConfirm={onDeleteConfirm}
           isLoading={deleteRuleMutation.isLoading}
+        />
+      ) : null}
+      {ruleToUpdateApiKey ? (
+        <UpdateApiKeyConfirmationModal
+          ruleName={ruleToUpdateApiKey.metadata?.name ?? ruleToUpdateApiKey.id}
+          onCancel={() => setRuleToUpdateApiKey(null)}
+          onConfirm={onUpdateApiKeyConfirm}
+          isLoading={updateApiKeyMutation.isLoading}
         />
       ) : null}
       {showBulkDeleteConfirm ? (
