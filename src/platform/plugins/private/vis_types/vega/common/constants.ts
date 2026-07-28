@@ -13,8 +13,8 @@ export const VEGA_EMBEDDABLE_TYPE = 'vega';
 /** Event name emitted by Vega specs when a filter should be applied to the host application. */
 export const VEGA_EVENT_APPLY_FILTER = 'applyFilter';
 
-/** Browser feature flag gating the Dashboard "Add Vega panel" creation action. Off by default. */
-export const VEGA_DASHBOARD_EMBEDDABLE_FLAG = 'vega.dashboardEmbeddable';
+/** Browser feature flag gating the standalone Vega embeddable creation action. Off by default. */
+export const VEGA_STANDALONE_EMBEDDABLE_FLAG = 'vega.standaloneEmbeddable';
 
 export const ADD_VEGA_EMBEDDABLE_ACTION_ID = 'addVegaEmbeddableAction';
 

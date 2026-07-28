@@ -47,8 +47,8 @@ import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settin
 import {
   ADD_VEGA_EMBEDDABLE_ACTION_ID,
   ADD_VEGA_PANEL_ACTION_ID,
-  VEGA_DASHBOARD_EMBEDDABLE_FLAG,
   VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
 } from '../common/constants';
 
 /** @internal */
@@ -84,7 +84,7 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
-  private dashboardEmbeddableFlagSubscription?: Subscription;
+  private standaloneEmbeddableFlagSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -155,8 +155,6 @@ export class VegaPlugin implements Plugin<void, void> {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
       return getAddVegaPanelAction(deps);
     });
-    // Canvas keeps the legacy Visualize-navigation action regardless of the flag.
-    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, ADD_VEGA_PANEL_ACTION_ID);
 
     // The embeddable definition is always registered (see setup) so existing Vega panels keep
     // rendering even after a flag rollback.
@@ -167,27 +165,25 @@ export class VegaPlugin implements Plugin<void, void> {
       return getAddVegaEmbeddableAction();
     });
 
-    // The flag swaps which Vega action is on the Dashboard Add-panel menu: the new by-value flyout
-    // action when enabled, the legacy Visualize-navigation action when disabled (pre-embeddable
-    // behavior). Attach the wanted action before detaching the other so ADD_PANEL_TRIGGER always
-    // has an action list, otherwise detachAction dereferences an undefined list. attachAction is
-    // idempotent and detaching a not-attached action is a no-op, so no attach-state tracking is needed.
-    this.dashboardEmbeddableFlagSubscription = core.featureFlags
-      .getBooleanValue$(VEGA_DASHBOARD_EMBEDDABLE_FLAG, false)
+    // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the
+    // standalone embeddable action.
+    this.standaloneEmbeddableFlagSubscription = core.featureFlags
+      .getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
       .pipe(distinctUntilChanged())
-      .subscribe((enabled) => {
-        if (enabled) {
-          deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
-          deps.uiActions.detachAction(ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID);
-        } else {
-          deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_PANEL_ACTION_ID);
-          deps.uiActions.detachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
+      .subscribe((useEmbeddableAction) => {
+        const [actionToAttach, actionToDetach] = useEmbeddableAction
+          ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
+          : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
+
+        for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
+          deps.uiActions.attachAction(trigger, actionToAttach);
+          deps.uiActions.detachAction(trigger, actionToDetach);
         }
       });
   }
 
   public stop() {
-    this.dashboardEmbeddableFlagSubscription?.unsubscribe();
-    this.dashboardEmbeddableFlagSubscription = undefined;
+    this.standaloneEmbeddableFlagSubscription?.unsubscribe();
+    this.standaloneEmbeddableFlagSubscription = undefined;
   }
 }

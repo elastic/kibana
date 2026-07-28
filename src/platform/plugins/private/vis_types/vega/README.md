@@ -11,9 +11,9 @@ Esc, or click-away — reverts, removing a new panel or restoring an existing pa
 is no library item or by-reference Vega panel. Existing `legacy_vis` Vega panels and Canvas creation
 remain legacy behavior.
 
-The Dashboard **Add panel** action is gated by the `vega.dashboardEmbeddable` browser feature flag
-(off by default). The public embeddable definition is always registered so existing Vega panels keep
-rendering after a flag rollback; only the creation action attaches/detaches as the flag changes.
+The standalone Vega embeddable creation action is gated by the `vega.standaloneEmbeddable` browser
+feature flag (off by default). The public embeddable definition is always registered so existing Vega
+panels keep rendering after a flag rollback; only creation actions attach/detach as the flag changes.
 
 The `vega` panel type is **UI-only**: it registers no server embeddable definition and therefore has
 no runtime config schema. Dashboard's public REST API treats it as an unmapped panel — it is absent
