@@ -10,7 +10,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   anonymization: schema.object({
-    workflow_driven: schema.boolean({ defaultValue: false }),
+    workflow_driven: schema.boolean({ defaultValue: true }),
     encryptionKey: schema.maybe(schema.string()),
     failureMode: schema.oneOf([schema.literal('block'), schema.literal('allow_unsafe')], {
       defaultValue: 'block',
