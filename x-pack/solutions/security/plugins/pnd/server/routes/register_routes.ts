@@ -21,6 +21,7 @@ import { registerRejectProposalRoute } from './investigations/reject_proposal';
 import { registerModifyProposalRoute } from './investigations/modify_proposal';
 import { registerGenerateProposalRoute } from './investigations/generate_proposal';
 import { registerEmitProposalRoute } from './investigations/emit_proposal';
+import { registerAssignProposalRoute } from './investigations/assign_proposal';
 import { registerEnrichAlertRoute } from './investigations/enrich_alert';
 
 export interface RouteDependencies {
@@ -44,5 +45,6 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerModifyProposalRoute(deps);
   registerGenerateProposalRoute(deps);
   registerEmitProposalRoute(deps);
+  registerAssignProposalRoute(deps);
   registerEnrichAlertRoute(deps);
 };
