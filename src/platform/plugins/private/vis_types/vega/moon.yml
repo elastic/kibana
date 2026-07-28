@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/monaco'
+  - '@kbn/vega-sandbox'
   - '@kbn/utility-types'
   - '@kbn/ui-theme'
   - '@kbn/std'
