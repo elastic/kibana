@@ -37,6 +37,7 @@ import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
+import { diag } from '../../../../../utils/diag_trace';
 
 export interface InitializeSingleTabsParams {
   customizationService: ConnectedCustomizationService;
@@ -65,6 +66,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
   ) {
+    diag('singleTab:start', {
+      tabId,
+      hasDataViewSpec: Boolean(dataViewSpec),
+      specId: dataViewSpec?.id,
+    });
     const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
       selectTabRuntimeState(runtimeStateManager, tabId);
 
@@ -167,6 +173,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       locationStateHasDataViewSpec;
 
     if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+      diag('singleTab:noDataPage', { tabId });
       return { showNoDataPage: true };
     }
 
@@ -177,6 +184,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
+      diag('singleTab:resolveDataView', { tabId, mode: 'esql' });
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
@@ -184,6 +192,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         services
       );
     } else {
+      diag('singleTab:resolveDataView', { tabId, mode: 'loadAndResolve', dataViewId });
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
         dataViewId,
@@ -339,6 +348,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     discoverTabLoadTracker.reportEvent();
 
+    diag('singleTab:end', { tabId, dataViewId: dataView.id, active: isCurrentTabActive() });
     return { showNoDataPage: false };
   }
 );

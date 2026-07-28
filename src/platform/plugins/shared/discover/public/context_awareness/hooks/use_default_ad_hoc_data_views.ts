@@ -17,6 +17,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../application/main/state_management/redux';
+import { diag } from '../../utils/diag_trace';
 
 /**
  * Hook to retrieve and initialize the default profile ad hoc data views
@@ -32,17 +33,21 @@ export const useDefaultAdHocDataViews = () => {
 
   const initializeDataViews = useLatest(
     async (rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>) => {
+      diag('profile:init:start', { prevIds: [...defaultProfileAdHocDataViewIds] });
       // Clear the cache of old data views before creating
       // the new ones to avoid cache hits on duplicate IDs
       for (const prevId of defaultProfileAdHocDataViewIds) {
+        diag('profile:clearInstanceCache', { id: prevId });
         dataViews.clearInstanceCache(prevId);
       }
 
       const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
+      diag('profile:create:start', { ids: profileDataViewSpecs.map((s) => s.id) });
       const profileDataViews = await Promise.all(
         profileDataViewSpecs.map((spec) => dataViews.create({ ...spec, managed: true }, true))
       );
 
+      diag('profile:create:end', { ids: profileDataViews.map((dv) => dv.id) });
       dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
     }
   );

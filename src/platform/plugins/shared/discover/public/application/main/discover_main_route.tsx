@@ -47,6 +47,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import { diag } from '../../utils/diag_trace';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -118,6 +119,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
+      diag('mainRoute:start');
       const [hasESData, hasUserDataView, defaultDataViewExists, hasESQLDatasets] =
         await Promise.all([
           dataViews.hasData.hasESData().catch(() => false),
@@ -139,6 +141,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
       dispatch(internalStateActions.setInitializationState(initializationState));
 
+      diag('mainRoute:end', initializationState);
       return initializationState;
     }
   );
@@ -170,11 +173,13 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       );
 
       if (!persistedDiscoverSessionId || isSwitchingSession) {
+        diag('initSession:branch', { branch: 'initializeTabs', isSwitchingSession });
         initializeTabs({
           discoverSessionId: nextDiscoverSessionId,
           shouldClearAllTabs: isSwitchingSession,
         });
       } else {
+        diag('initSession:branch', { branch: 'pushCurrentTabStateToUrl' });
         dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId: currentTabId }));
       }
     }
@@ -182,11 +187,13 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
   useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {
+      diag('effectA:initMainRoute');
       initializeMainRoute(rootProfileState);
     }
   }, [initializeMainRoute, rootProfileState]);
 
   useEffect(() => {
+    diag('effectB:initSession', { currentDiscoverSessionId });
     initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
   }, [currentDiscoverSessionId, initializeDiscoverSession]);
 

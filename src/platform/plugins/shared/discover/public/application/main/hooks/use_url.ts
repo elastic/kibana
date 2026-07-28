@@ -10,6 +10,7 @@
 import { useEffect } from 'react';
 import type { History } from 'history';
 import useLatest from 'react-use/lib/useLatest';
+import { diag } from '../../../utils/diag_trace';
 
 export function useUrl({
   history,
@@ -30,7 +31,13 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
+      diag('useUrl:historyChange', {
+        pathname,
+        hasSearch: Boolean(search),
+        hasHash: Boolean(hash),
+      });
       if (pathname === '/' && !search && !hash && !savedSearchId) {
+        diag('useUrl:onNewUrl', { pathname });
         onNewUrl.current();
       }
     });
