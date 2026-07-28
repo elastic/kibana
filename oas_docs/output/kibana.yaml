@@ -13710,6 +13710,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createCaseTemplateRequest:
+                $ref: '#/components/examples/Cases_template_write_request'
             schema:
               $ref: '#/components/schemas/Cases_template_write_request'
         required: true
@@ -13717,6 +13720,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+                dryRunResponse:
+                  $ref: '#/components/examples/Cases_template_dry_run_response'
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Cases_template_v2_response'
@@ -13725,6 +13733,9 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_template_limit'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: |
@@ -13741,12 +13752,18 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The user does not have the manage templates privilege for the owner.
         '409':
           content:
             application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: A template with the same name already exists for the owner.
@@ -13785,6 +13802,9 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The user does not have the manage templates privilege for the owner.
@@ -13873,6 +13893,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateCaseTemplateRequest:
+                $ref: '#/components/examples/Cases_template_write_request'
             schema:
               $ref: '#/components/schemas/Cases_template_write_request'
         required: true
@@ -13880,6 +13903,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                updateCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+                dryRunResponse:
+                  $ref: '#/components/examples/Cases_template_dry_run_response'
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Cases_template_v2_response'
@@ -13888,6 +13916,9 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_template_limit'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: |
@@ -13904,6 +13935,9 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The user does not have the manage templates privilege for the owner.
@@ -13919,6 +13953,9 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409'
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: A template with the same name already exists for the owner.
@@ -78779,6 +78816,43 @@ components:
         error: Not Found
         message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
         statusCode: 404
+    Cases_response_409:
+      summary: A resource conflict occurred.
+      value:
+        error: Conflict
+        message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
+    Cases_response_400_template_limit:
+      summary: A template resource limit was exceeded.
+      value:
+        error: Bad Request
+        message: A template cannot define more than 200 fields.
+        statusCode: 400
+    Cases_template_dry_run_response:
+      summary: Dry-run validation succeeded without writing.
+      value:
+        valid: true
+    Cases_template_write_request:
+      summary: Create or fully replace a case template.
+      value:
+        name: Security incident
+        owner: cases
+        definition: |
+          name: Security incident
+          severity: high
+          tags: [security]
+          fields:
+            - name: priority
+              label: Priority
+              type: keyword
+              control: SELECT_BASIC
+              metadata:
+                options: [low, medium, high]
+                default: medium
+        description: Default template for security incidents.
+        tags:
+          - security
+        isEnabled: true
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:

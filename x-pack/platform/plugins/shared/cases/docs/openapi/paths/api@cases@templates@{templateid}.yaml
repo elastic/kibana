@@ -65,6 +65,9 @@ put:
       application/json:
         schema:
           $ref: '../components/schemas/template_write_request.yaml'
+        examples:
+          updateCaseTemplateRequest:
+            $ref: '../components/examples/template_write_request.yaml'
   responses:
     '200':
       description: 'Indicates a successful call. Returns the new template version, or `{"valid": true}` for a dry run.'
@@ -74,6 +77,11 @@ put:
             oneOf:
               - $ref: '../components/schemas/template_v2_response.yaml'
               - $ref: '../components/schemas/template_dry_run_response.yaml'
+          examples:
+            updateCaseTemplateResponse:
+              $ref: '../components/examples/get_case_template_response.yaml'
+            dryRunResponse:
+              $ref: '../components/examples/template_dry_run_response.yaml'
     '400':
       description: >
         The request body, YAML definition, or template name is invalid, or a resource limit was
@@ -82,6 +90,9 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_template_limit.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
@@ -97,6 +108,9 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
     '404':
       description: The template was not found.
       content:
@@ -112,6 +126,9 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409.yaml'
 delete:
   summary: Delete a case template
   operationId: deleteCaseTemplateDefaultSpace
@@ -143,6 +160,9 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
     '404':
       description: The template was not found.
       content:

@@ -926,6 +926,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/template_write_request'
+            examples:
+              createCaseTemplateRequest:
+                $ref: '#/components/examples/template_write_request'
       responses:
         '200':
           description: 'Indicates a successful call. Returns the created template, or `{"valid": true}` for a dry run.'
@@ -935,6 +938,11 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/template_v2_response'
                   - $ref: '#/components/schemas/template_dry_run_response'
+              examples:
+                createCaseTemplateResponse:
+                  $ref: '#/components/examples/get_case_template_response'
+                dryRunResponse:
+                  $ref: '#/components/examples/template_dry_run_response'
         '400':
           description: |
             The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 templates per owner, max 200 fields per template).
@@ -942,6 +950,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_template_limit'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -957,12 +968,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
         '409':
           description: A template with the same name already exists for the owner.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response409:
+                  $ref: '#/components/examples/response_409'
   /api/cases/templates/{template_id}:
     get:
       summary: Get a case template by ID
@@ -1025,6 +1042,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/template_write_request'
+            examples:
+              updateCaseTemplateRequest:
+                $ref: '#/components/examples/template_write_request'
       responses:
         '200':
           description: 'Indicates a successful call. Returns the new template version, or `{"valid": true}` for a dry run.'
@@ -1034,6 +1054,11 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/template_v2_response'
                   - $ref: '#/components/schemas/template_dry_run_response'
+              examples:
+                updateCaseTemplateResponse:
+                  $ref: '#/components/examples/get_case_template_response'
+                dryRunResponse:
+                  $ref: '#/components/examples/template_dry_run_response'
         '400':
           description: |
             The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 fields per template).
@@ -1041,6 +1066,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_template_limit'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -1056,6 +1084,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
         '404':
           description: The template was not found.
           content:
@@ -1071,6 +1102,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response409:
+                  $ref: '#/components/examples/response_409'
     delete:
       summary: Delete a case template
       operationId: deleteCaseTemplateDefaultSpace
@@ -1099,6 +1133,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
         '404':
           description: The template was not found.
           content:
@@ -4916,6 +4953,27 @@ components:
             isLatest: true
             latestVersion: 1
             fieldSearchMatches: false
+    template_write_request:
+      summary: Create or fully replace a case template.
+      value:
+        name: Security incident
+        owner: cases
+        definition: |
+          name: Security incident
+          severity: high
+          tags: [security]
+          fields:
+            - name: priority
+              label: Priority
+              type: keyword
+              control: SELECT_BASIC
+              metadata:
+                options: [low, medium, high]
+                default: medium
+        description: Default template for security incidents.
+        tags:
+          - security
+        isEnabled: true
     get_case_template_response:
       summary: A case template.
       value:
@@ -4928,6 +4986,28 @@ components:
         deletedAt: null
         isLatest: true
         latestVersion: 1
+    template_dry_run_response:
+      summary: Dry-run validation succeeded without writing.
+      value:
+        valid: true
+    response_400_template_limit:
+      summary: A template resource limit was exceeded.
+      value:
+        error: Bad Request
+        message: A template cannot define more than 200 fields.
+        statusCode: 400
+    response_403:
+      summary: The user does not have access to the requested resource.
+      value:
+        error: Forbidden
+        message: Unauthorized to access cases
+        statusCode: 403
+    response_409:
+      summary: A resource conflict occurred.
+      value:
+        error: Conflict
+        message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
     response_404:
       summary: The requested resource was not found.
       value:
@@ -4979,12 +5059,6 @@ components:
         error: Bad Request
         message: Template [invalid-template-id] not found for owner [cases]
         statusCode: 400
-    response_403:
-      summary: The user does not have access to the requested resource.
-      value:
-        error: Forbidden
-        message: Unauthorized to access cases
-        statusCode: 403
     get_case_response:
       summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
