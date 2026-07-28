@@ -490,8 +490,12 @@ export class DiscoverApp {
   }
 
   async getCurrentQueryName(): Promise<string> {
-    const breadcrumb = this.page.testSubj.locator('breadcrumb last');
-    return await breadcrumb.innerText();
+    // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
+    // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.
+    const title = this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
+    return await title.innerText();
   }
 
   async loadSavedSearch(searchName: string) {
