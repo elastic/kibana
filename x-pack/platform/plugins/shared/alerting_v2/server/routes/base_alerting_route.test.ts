@@ -467,11 +467,11 @@ describe('BaseAlertingRoute', () => {
       TestRoute.schemas = {};
     });
 
-    it('maps a request validation failure to the flat { code, error, message, details } ErrorResponse shape', () => {
+    it('maps a request validation failure to the flat { code, error, message, details } ErrorResponse shape', async () => {
       TestRoute.schemas = { request: { body: z.object({ name: z.string() }) } };
       const validate = TestRoute.validate as ComputedValidate;
 
-      validate.onRequestValidationError?.(
+      await validate.onRequestValidationError?.(
         {
           message: '[request body.name]: expected value of type [string] but got [undefined]',
           source: 'body',
