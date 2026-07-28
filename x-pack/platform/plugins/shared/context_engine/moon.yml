@@ -35,9 +35,10 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/esql'
   - '@kbn/es-query'
-  - '@kbn/try-in-console'
   - '@kbn/share-plugin'
   - '@kbn/console-plugin'
+  - '@kbn/workflows-ui'
+  - '@kbn/deeplinks-workflows'
 tags:
   - plugin
   - prod
