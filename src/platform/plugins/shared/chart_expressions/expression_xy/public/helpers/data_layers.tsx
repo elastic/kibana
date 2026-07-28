@@ -530,11 +530,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   const areaStyle: Partial<AreaSeriesStyle['area']> | undefined = (() => {
     const style: Partial<AreaSeriesStyle['area']> = {};
 
-    if (fillOpacity) {
+    if (fillOpacity !== undefined) {
       style.opacity = fillOpacity;
     }
 
-    if (areaFill === AreaFillOptions.GRADIENT) {
+    if (
+      areaFill === AreaFillOptions.GRADIENT &&
+      (style.opacity === undefined || style.opacity > 0)
+    ) {
       const gradient: LinearGradient = {
         type: 'linear',
         stops: [

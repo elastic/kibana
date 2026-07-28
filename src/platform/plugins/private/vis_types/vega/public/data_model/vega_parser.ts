@@ -714,29 +714,42 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     const defaultColor = getVegaThemeColors(this.theme, 'default');
     const defaultAreaFill = getDefaultAreaGradientFill(defaultColor);
 
-    const hasCustomMarkColor =
-      !!this.spec?.config.mark &&
-      (this.spec.config.mark.color !== undefined || this.spec.config.mark.fill !== undefined);
+    const setMarkDefaultColor = (
+      markType: string,
+      colorProperty: 'fill' | 'stroke',
+      color: unknown
+    ) => {
+      const hasCustomColor = [this.spec?.config?.mark, this.spec?.config?.[markType]].some(
+        (markConfig) => markConfig?.color !== undefined || markConfig?.[colorProperty] !== undefined
+      );
+
+      if (!hasCustomColor) {
+        this._setDefaultValue(color, 'config', markType, colorProperty);
+      }
+    };
 
     if (this.isVegaLite) {
+      setMarkDefaultColor('area', 'fill', defaultAreaFill);
       // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: 'euiColorVis0' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
-      if (!hasCustomMarkColor) {
-        this._setDefaultValue(defaultAreaFill, 'config', 'area', 'fill');
-      }
-    } else if (!hasCustomMarkColor) {
+    } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
       // https://github.com/vega/vega/issues/1083
-      // Don't set defaults if spec.config.mark.color or fill are set
-      this._setDefaultValue(defaultColor, 'config', 'arc', 'fill');
-      this._setDefaultValue(defaultAreaFill, 'config', 'area', 'fill');
-      this._setDefaultValue(defaultColor, 'config', 'line', 'stroke');
-      this._setDefaultValue(defaultColor, 'config', 'path', 'stroke');
-      this._setDefaultValue(defaultColor, 'config', 'rect', 'fill');
-      this._setDefaultValue(defaultColor, 'config', 'rule', 'stroke');
-      this._setDefaultValue(defaultColor, 'config', 'shape', 'stroke');
-      this._setDefaultValue(defaultColor, 'config', 'symbol', 'fill');
-      this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
+      const markDefaults = [
+        ['arc', 'fill', defaultColor],
+        ['area', 'fill', defaultAreaFill],
+        ['line', 'stroke', defaultColor],
+        ['path', 'stroke', defaultColor],
+        ['rect', 'fill', defaultColor],
+        ['rule', 'stroke', defaultColor],
+        ['shape', 'stroke', defaultColor],
+        ['symbol', 'fill', defaultColor],
+        ['trail', 'fill', defaultColor],
+      ] as const;
+
+      for (const [markType, colorProperty, color] of markDefaults) {
+        setMarkDefaultColor(markType, colorProperty, color);
+      }
     }
 
     const titleColor = getVegaThemeColors(this.theme, 'title');
