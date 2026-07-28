@@ -101,12 +101,12 @@ export function useUserStorage<T = unknown>(
     [client, key, stableDefault]
   );
 
-  // peek() is side-effect-free, so it's safe as the initial render value under concurrent mode.
-  const initialValue =
-    stableDefault !== undefined ? client.peek<T>(key, stableDefault) : client.peek<T>(key);
+  // peek() is side-effect-free, so it's safe to read during render under concurrent mode.
+  // A cached (e.g. preloaded) key is resolved on the first render; a missing one starts loading.
+  const cached = client.peek<T>(key);
   const state = useObservable<UserStorageValue<T | undefined>>(state$, {
-    status: 'loading',
-    value: initialValue,
+    status: cached !== undefined ? 'resolved' : 'loading',
+    value: cached !== undefined ? cached : stableDefault,
   });
 
   const set = useCallback<UserStorageSetter<T>>(

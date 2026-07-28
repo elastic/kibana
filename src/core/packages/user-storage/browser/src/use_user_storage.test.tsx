@@ -115,6 +115,21 @@ describe('useUserStorage', () => {
     expect(state).toEqual({ status: 'resolved' });
   });
 
+  it('is resolved on the initial render for a preloaded key, without awaiting a subscription emit', () => {
+    const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
+    // A getState$ that never emits isolates the pre-subscription initial status.
+    client.getState$ = jest
+      .fn()
+      .mockReturnValue(new Subject()) as unknown as IUserStorageClient['getState$'];
+
+    const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
+      wrapper: wrapper(client),
+    });
+
+    expect(result.current[2]).toEqual({ status: 'resolved' });
+    expect(result.current[0]).toEqual({ hidden: ['discover'] });
+  });
+
   it('falls back to defaultValue when the key is missing', () => {
     const client = buildClient();
 
