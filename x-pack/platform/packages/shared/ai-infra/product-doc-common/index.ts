@@ -12,6 +12,7 @@ export {
   parseSecurityLabsArtifactName,
   getResourceTypeFromArtifactName,
   getSecurityLabsUtcTimestampVersion,
+  getSecurityLabsLegacyDateVersion,
   isValidSecurityLabsVersion,
 } from './src/artifact';
 export { LATEST_MANIFEST_FORMAT_VERSION, type ArtifactManifest } from './src/manifest';

@@ -39,6 +39,19 @@ export const getSecurityLabsUtcTimestampVersion = (date: Date = new Date()): str
   );
 };
 
+/**
+ * Derives the legacy `YYYY.MM.DD` version from a timestamp version.
+ *
+ * Used to publish a second ELSER CDN object for Kibana 9.3/9.4 BWC — those
+ * releases only parse date-only names from
+ * https://github.com/elastic/kibana/pull/246099. Returns undefined when
+ * `version` is already date-only or not a timestamp version.
+ */
+export const getSecurityLabsLegacyDateVersion = (version: string): string | undefined => {
+  const match = version.match(/^(\d{4}\.\d{2}\.\d{2})-\d{6}$/);
+  return match?.[1];
+};
+
 export const getArtifactName = ({
   productName,
   productVersion,

@@ -19,7 +19,10 @@ This uses sensible defaults:
 - **Version**: Current UTC timestamp in `YYYY.MM.DD-HHMMSS` format (unique per build)
 - **Inference**: ELSER (`.elser-2-elasticsearch`)
 - **Elasticsearch**: `http://localhost:9200` with `elastic/changeme` credentials
-- **Output**: `{REPO_ROOT}/build/kb-artifacts/`
+- **Output**: `{REPO_ROOT}/build/kb-artifacts/` — for ELSER timestamped builds this writes both
+  `security-labs-{YYYY.MM.DD-HHMMSS}.zip` and a legacy `security-labs-{YYYY.MM.DD}.zip` alias
+  (same bytes) for Kibana **9.3 / 9.4** BWC (date-only parsers from
+  [#246099](https://github.com/elastic/kibana/pull/246099))
 
 To fetch content directly from the (internal) `elastic/security-labs-elastic-co` repository instead of a local checkout, omit `--localContentPath` and provide a token:
 
@@ -175,7 +178,17 @@ curl -u elastic:changeme http://localhost:9200/_inference/.elser-2-elasticsearch
 
 ## Artifact Structure
 
-The generated artifact (`security-labs-{version}.zip`) contains:
+Each publish typically produces three CDN objects (when both ELSER and Jina are built):
+
+| Object | Purpose |
+|--------|---------|
+| `security-labs-{YYYY.MM.DD-HHMMSS}.zip` | ELSER artifact (same-day updates) |
+| `security-labs-{YYYY.MM.DD}.zip` | ELSER alias (same bytes) for Kibana **9.3 / 9.4** BWC — those releases only parse date-only names from [#246099](https://github.com/elastic/kibana/pull/246099) |
+| `security-labs-{YYYY.MM.DD-HHMMSS}--.jina-embeddings-v5-text-small.zip` | Jina variant |
+
+> **Why the alias exists:** Security Labs CDN install shipped in 9.3 ([#246099](https://github.com/elastic/kibana/pull/246099)) with `YYYY.MM.DD` filenames. Timestamp versions (`YYYY.MM.DD-HHMMSS`) are invisible to that parser, so each ELSER publish also writes a date-only twin. New Kibana prefers the timestamped object via lexicographic sort; 9.3/9.4 still get content via the alias. Jina needs no alias (9.3/9.4 never looked for `--jina...` names). The alias can be dropped once 9.3/9.4 are out of support.
+
+The generated zip contains:
 
 ```
 security-labs-2026.07.10-152831.zip

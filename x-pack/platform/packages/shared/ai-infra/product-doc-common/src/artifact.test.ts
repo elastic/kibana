@@ -11,6 +11,7 @@ import {
   getSecurityLabsArtifactName,
   parseSecurityLabsArtifactName,
   getSecurityLabsUtcTimestampVersion,
+  getSecurityLabsLegacyDateVersion,
   isValidSecurityLabsVersion,
   DEFAULT_ELSER,
 } from './artifact';
@@ -147,6 +148,18 @@ describe('getSecurityLabsUtcTimestampVersion', () => {
     expect(getSecurityLabsUtcTimestampVersion(new Date('2026-07-10T15:28:31.000Z'))).toBe(
       '2026.07.10-152831'
     );
+  });
+});
+
+describe('getSecurityLabsLegacyDateVersion', () => {
+  it('strips the HHMMSS suffix from a timestamp version', () => {
+    expect(getSecurityLabsLegacyDateVersion('2026.07.10-152831')).toBe('2026.07.10');
+  });
+
+  it('returns undefined for date-only or invalid versions', () => {
+    expect(getSecurityLabsLegacyDateVersion('2026.07.10')).toBeUndefined();
+    expect(getSecurityLabsLegacyDateVersion('2026.07.10-1528')).toBeUndefined();
+    expect(getSecurityLabsLegacyDateVersion('not-a-version')).toBeUndefined();
   });
 });
 
