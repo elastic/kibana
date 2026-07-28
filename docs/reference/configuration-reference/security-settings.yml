@@ -387,6 +387,11 @@ groups:
 
   - group: Session and cookie security settings
     id: security-session-and-cookie-settings
+    note: |
+      These settings configure {{kib}}'s **session** cookie. The `KBN_LOCALE`
+      cookie is a separate preference cookie used for interface language
+      resolution. It is not affected by these settings. For details, refer to
+      [Internationalization settings](internationalization-settings.md).
     settings:
 
       - setting: xpack.security.cookieName

@@ -224,15 +224,18 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
   ],
 };
 
-/** Benign authentication activity spike — must stay a SEPARATE discovery from the failure cascade. */
-const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
+const LEDGER_DB_CASCADE_RULE_UUIDS = (LEDGER_DB_CASCADE_DISCOVERY.signals ?? [])
+  .map((signal) => signal.metadata?.rule_uuid)
+  .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid));
+
+/** Benign login spike — must stay a SEPARATE discovery from the failure cascade and from signup. */
+const BENIGN_LOGIN_DISCOVERY: Partial<Discovery> = {
   kind: 'discovery',
   event_id: 'userservice__successful-user-login',
-  title: 'Authentication activity — successful completion volume increase',
-  symptom_hypothesis:
-    'Successful login and account-creation activity increased without an observed failure.',
+  title: 'Authentication — successful login volume increase',
+  symptom_hypothesis: 'Successful login activity increased without an observed failure.',
   summary:
-    'Successful login and account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
+    'Successful login events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
   severity: '20-low',
   confidence: 0.35,
   signals: [
@@ -255,6 +258,21 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
         p_value: 0.0001,
       },
     },
+  ],
+  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
+};
+
+/** Benign signup spike — must stay a SEPARATE discovery from the failure cascade and from login. */
+const BENIGN_SIGNUP_DISCOVERY: Partial<Discovery> = {
+  kind: 'discovery',
+  event_id: 'userservice__new-account-created',
+  title: 'Authentication — new account creation volume increase',
+  symptom_hypothesis: 'New account creation activity increased without an observed failure.',
+  summary:
+    'New account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
+  severity: '20-low',
+  confidence: 0.35,
+  signals: [
     {
       type: 'detection',
       stream_name: 'logs',
@@ -278,12 +296,26 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
+const MISGROUPED_LEDGER_DISCOVERY: Partial<Discovery> = {
+  ...LEDGER_DB_CASCADE_DISCOVERY,
+  event_id: 'ledger-db-disconnect__misgrouped-auth',
+  signals: [
+    ...(LEDGER_DB_CASCADE_DISCOVERY.signals ?? []),
+    ...(BENIGN_LOGIN_DISCOVERY.signals ?? []),
+    ...(BENIGN_SIGNUP_DISCOVERY.signals ?? []),
+  ],
+};
+
 export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
       scenario_id: 'ledger-db-disconnect',
       stream_name: 'logs',
-      detections: toInputDetections([LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY]),
+      detections: toInputDetections([
+        LEDGER_DB_CASCADE_DISCOVERY,
+        BENIGN_LOGIN_DISCOVERY,
+        BENIGN_SIGNUP_DISCOVERY,
+      ]),
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
@@ -297,17 +329,20 @@ export const discovery: DatasetConfig['discovery'] = [
       cascade: [
         'Transaction History Database SQL Connection Error',
         'Frontend → Transaction History Connection Failures',
-        'Ledger Writer Failed to Retrieve Account Balance',
       ],
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures), benign-auth (successful login/signup spike, no failures)]',
-      expected_discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY],
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures), benign-login (successful login spike, no failures), benign-signup (new account creation spike, no failures)]',
+      expected_discoveries: [
+        LEDGER_DB_CASCADE_DISCOVERY,
+        BENIGN_LOGIN_DISCOVERY,
+        BENIGN_SIGNUP_DISCOVERY,
+      ],
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States one evidence-grounded sentence connecting every grouped detection through the literal transactionhistory↔postgresql SQL connection failure (SQLState 08001 / failed JDBC connections). Uses only signals confirmed for their own operation/path; a found-but-inconclusive row does not establish correlation. Does not introduce another endpoint or claim a final root cause.',
+          text: 'States one sentence connecting every grouped detection through the transactionhistory↔postgresql SQL connection failure (SQLState 08001 / failed JDBC connections). Uses confirming rows where available and compatible exact-query KI context for sparse rows, without presenting KI context as proof of current activity. Does not introduce another endpoint or claim a final root cause.',
           score: 3,
         },
         {
@@ -322,7 +357,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'separate-benign-auth',
-          text: 'Keeps the benign authentication activity (successful logins, new account creation) grouped together in a single discovery, separate from the failure cascade — does not lump them into the database incident, and does not emit login and account creation as two separate discoveries.',
+          text: 'Emits the benign login spike and the benign account-creation spike as two separate standalone discoveries, each distinct from the failure cascade — does not merge them with the database incident, and does not group them with each other.',
           score: 2,
         },
         {
@@ -351,13 +386,20 @@ export const discoveryJudge: DatasetConfig['discoveryJudge'] = [
     id: 'ledger-db-disconnect',
     input: {
       scenario_id: 'ledger-db-disconnect',
-      discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY],
+      discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_LOGIN_DISCOVERY, BENIGN_SIGNUP_DISCOVERY],
     },
     output: {
       expected_ground_truth:
         'cascade discovery (transactionhistory/balancereader/ledgerwriter → postgresql SQLState 08001, ' +
         'user-blocking connection-refused failures)=open/80-critical; ' +
-        'benign authentication spike (successful logins/signups only, no failures)=dismissed',
+        'benign login spike (successful logins only, no failures)=dismissed; ' +
+        'benign signup spike (successful account creations only, no failures)=dismissed',
+      expected_confirmed_rule_uuids: {
+        'transactionhistory__frontend-transactionhistory-read-timeout':
+          LEDGER_DB_CASCADE_RULE_UUIDS,
+        'userservice__successful-user-login': [],
+        'userservice__new-account-created': [],
+      },
       criteria: [
         {
           id: 'open-active-cascade',
@@ -371,16 +413,53 @@ export const discoveryJudge: DatasetConfig['discoveryJudge'] = [
         },
         {
           id: 'dismiss-benign-auth',
-          text: 'Sets status=dismissed for the benign authentication spike: successful login and account-creation volume without failure symptoms, blocked user tasks, or sensitive-data exposure is not an actionable incident.',
+          text: 'Sets status=dismissed for both the benign login spike and the benign signup spike: successful authentication volume without failure symptoms, blocked user tasks, or sensitive-data exposure is not an actionable incident.',
           score: 3,
         },
         {
           id: 'do-not-escalate-benign-auth',
-          text: 'Does not set status=open for the benign authentication spike as if it were part of the ledger-db outage; it stays separate non-incident noise.',
+          text: 'Does not set status=open for either benign authentication discovery as if it were part of the ledger-db outage; both stay separate non-incident noise.',
           score: 2,
         },
       ],
     },
     metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
+  },
+  {
+    id: 'ledger-db-disconnect-misgrouped-auth',
+    input: {
+      scenario_id: 'ledger-db-disconnect-misgrouped-auth',
+      discoveries: [MISGROUPED_LEDGER_DISCOVERY],
+    },
+    output: {
+      expected_ground_truth:
+        'misgrouped ledger discovery remains open/80-critical for the database cascade; successful authentication signals remain unconfirmed and do not shape the event narrative',
+      expected_confirmed_rule_uuids: {
+        'ledger-db-disconnect__misgrouped-auth': LEDGER_DB_CASCADE_RULE_UUIDS,
+      },
+      criteria: [
+        {
+          id: 'reject-unrelated-auth-membership',
+          text: 'Sets confirmed:false on Successful User Login and New User Account Created because their healthy rows do not support the ledger database event, and identifies them as unrelated in assessment_note.',
+          score: 3,
+        },
+        {
+          id: 'aligned-ledger-narrative',
+          text: 'Keeps title, symptom_hypothesis, and summary scoped to the confirmed ledger database connectivity cascade without incorporating authentication activity.',
+          score: 3,
+        },
+        {
+          id: 'open-confirmed-cascade',
+          text: 'Keeps the event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          score: 2,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'ledger-db',
+      failure_mode: 'misgrouped-signal',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },
 ];

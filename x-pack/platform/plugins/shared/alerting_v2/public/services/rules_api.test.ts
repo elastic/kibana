@@ -79,4 +79,24 @@ describe('RulesApi', () => {
       expect(http.delete).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1`);
     });
   });
+
+  describe('enableRule', () => {
+    it('sends a POST request to the _enable path with the rule id', async () => {
+      http.post.mockResolvedValue({ id: 'rule-1', enabled: true });
+
+      await api.enableRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_enable`);
+    });
+  });
+
+  describe('disableRule', () => {
+    it('sends a POST request to the _disable path with the rule id', async () => {
+      http.post.mockResolvedValue({ id: 'rule-1', enabled: false });
+
+      await api.disableRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_disable`);
+    });
+  });
 });

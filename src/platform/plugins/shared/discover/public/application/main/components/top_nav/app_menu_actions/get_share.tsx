@@ -68,13 +68,21 @@ export const buildShareOptions = async ({
     services,
   });
 
-  const searchSourceSharingData = await getSharingData(searchSource, currentTab.appState, services);
-
   const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
   const timeRange = timefilter.getTime();
-  const absoluteTimeRange = timefilter.getAbsoluteTime();
+  // Use the absolute time range captured at the most recent on-screen fetch so the export
+  // covers the exact window the user saw, rather than re-resolving "now" at click time.
+  const absoluteTimeRange =
+    currentTab.dataRequestParams.timeRangeAbsolute ?? timefilter.getAbsoluteTime();
   const refreshInterval = timefilter.getRefreshInterval();
+
+  const searchSourceSharingData = await getSharingData(
+    searchSource,
+    currentTab.appState,
+    services,
+    absoluteTimeRange
+  );
   const filters = services.filterManager.getFilters();
 
   // Share -> Get links -> Snapshot
@@ -183,7 +191,7 @@ export const buildShareOptions = async ({
           defaultMessage: 'Untitled Discover session',
         }),
       totalHits: totalHitsState.result || 0,
-      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
+      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined, // used by ES|QL immediate export via toAbsoluteTimeRange
     },
     isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
   };
