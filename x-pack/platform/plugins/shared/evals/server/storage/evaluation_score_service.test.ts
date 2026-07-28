@@ -105,7 +105,7 @@ describe('EvaluationScoreService', () => {
     });
 
     const service = new EvaluationScoreService(logger, coreDataStreams);
-    const result = await service.write(request);
+    const result = await service.write(request, ['default']);
 
     expect(result).toEqual<WriteResult>({ ingested: 1, conflicted: 0, failed: [] });
     expect(initializeClient).toHaveBeenCalledWith(EvaluationIndices.SCORES);
@@ -122,6 +122,7 @@ describe('EvaluationScoreService', () => {
       '@timestamp': expect.any(String),
       _id: expect.any(String),
       experiment_id: request.experiment_id,
+      space_ids: ['default'],
       metadata: {
         execution_id: request.metadata.execution_id,
         suite_id: request.metadata.suite_id,
@@ -149,9 +150,29 @@ describe('EvaluationScoreService', () => {
     });
 
     const service = new EvaluationScoreService(logger, coreDataStreams);
-    const result = await service.write(request);
+    const result = await service.write(request, ['default']);
 
     expect(result).toEqual({ ingested: 0, conflicted: 1, failed: [] });
+  });
+
+  it('stamps every document with the provided space ids', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const request = getBaseRequest();
+    const capturedDocuments: Array<{ _id: string } & EvaluationScoreDocument> = [];
+    const { coreDataStreams, create } = createDataStreamsMock();
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      capturedDocuments.push(...(documents as Array<{ _id: string } & EvaluationScoreDocument>));
+      return {
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      };
+    });
+
+    const service = new EvaluationScoreService(logger, coreDataStreams);
+    await service.write(request, ['marketing', 'sales']);
+
+    expect(capturedDocuments[0].space_ids).toEqual(['marketing', 'sales']);
   });
 
   it('returns per-document failures when non-409 bulk drops occur', async () => {
@@ -190,7 +211,7 @@ describe('EvaluationScoreService', () => {
 
     const service = new EvaluationScoreService(logger, coreDataStreams);
 
-    await expect(service.write(request)).resolves.toEqual({
+    await expect(service.write(request, ['default'])).resolves.toEqual({
       ingested: 0,
       conflicted: 1,
       failed: [{ index: 1, status: 400, reason: 'bad field' }],

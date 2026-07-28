@@ -33,7 +33,7 @@ export const investigationAgentType = {
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: ['significant-events-memory', 'observability.investigation'],
+    skill_ids: ['significant-events-memory', 'observability.investigation', 'streams-management'],
     tools: [
       {
         tool_ids: [

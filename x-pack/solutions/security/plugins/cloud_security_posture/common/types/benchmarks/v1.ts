@@ -29,6 +29,10 @@ export interface Benchmark {
 }
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
+
+// Package policy names are user-defined strings displayed in the UI.
+// 256 is a generous ceiling that blocks abusive inputs.
+const PACKAGE_POLICY_NAME_MAX_LENGTH = 256;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
 export const benchmarksQueryParamsSchema = schema.object({
   /**
@@ -78,7 +82,7 @@ export const benchmarksQueryParamsSchema = schema.object({
   /**
    * Benchmark filter
    */
-  package_policy_name: schema.maybe(schema.string()),
+  package_policy_name: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH })),
 });
 
 export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;

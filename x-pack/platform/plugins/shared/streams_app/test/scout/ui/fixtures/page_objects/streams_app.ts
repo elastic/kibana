@@ -230,11 +230,18 @@ export class StreamsApp {
     await this.page.getByTestId('breadcrumb first').click();
   }
 
-  async clickStreamsBreadcrumb() {
-    await this.page
-      .locator('a[data-test-subj^="breadcrumb"]')
-      .filter({ hasText: /^Streams$/ })
-      .click();
+  async backToStreamsMainPage() {
+    const backButton = this.page.testSubj.locator('appHeaderBack');
+    // Both the breadcrumb trail and the app header back button can be present at once, and each
+    // navigates to the Streams main page. Prefer the back button when it is rendered.
+    if (await backButton.isVisible()) {
+      await backButton.click();
+    } else {
+      await this.page
+        .locator('a[data-test-subj^="breadcrumb"]')
+        .filter({ hasText: /^Streams$/ })
+        .click();
+    }
     await this.expectStreamsTableVisible();
   }
 
