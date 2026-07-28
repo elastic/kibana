@@ -26,6 +26,9 @@
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/logging-mocks"
   ]
 }

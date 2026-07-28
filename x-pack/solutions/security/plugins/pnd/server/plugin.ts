@@ -14,6 +14,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { PND_API_PRIVILEGE_READ, PND_FEATURE_ID, PND_PLUGIN_NAME } from '../common/constants';
 import type { PndConfig } from './config';
@@ -26,6 +27,7 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { installStatic } from './managed_workflows/install_static';
+import { ensureAgentSafe, registerAgentType } from './agent_builder';
 import type { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
@@ -38,6 +40,7 @@ export class PndPlugin
   private spaces?: PndStartDependencies['spaces'];
   private watchProjection?: WatchWorkflowProjectionService;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
+  private agentBuilder?: PndStartDependencies['agentBuilder'];
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -46,7 +49,7 @@ export class PndPlugin
 
   setup(
     coreSetup: CoreSetup<PndStartDependencies, PndPluginStart>,
-    { features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
+    { features, workflowsExtensions, workflowsManagement, agentBuilder }: PndSetupDependencies
   ): PndPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('PND plugin is disabled');
@@ -58,6 +61,10 @@ export class PndPlugin
     this.workflowsManagementApi = workflowsManagement?.management;
 
     registerOwner({ workflowsExtensions });
+
+    if (agentBuilder) {
+      registerAgentType(agentBuilder);
+    }
 
     features.registerKibanaFeature({
       id: PND_FEATURE_ID,
@@ -96,6 +103,7 @@ export class PndPlugin
 
   start(_core: CoreStart, plugins: PndStartDependencies): PndPluginStart {
     this.spaces = plugins.spaces;
+    this.agentBuilder = plugins.agentBuilder;
 
     if (!this.config.enabled) {
       return {};
@@ -113,16 +121,38 @@ export class PndPlugin
       );
     });
 
+    if (plugins.agentBuilder) {
+      void ensureAgentSafe({
+        agentBuilder: plugins.agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        logger: this.logger,
+      });
+    }
+
     if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
       const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);
       this.watchProjection = new WatchWorkflowProjectionServiceImpl(
         managementClient,
         this.logger,
-        installationReady
+        installationReady,
+        {
+          ensureAgentForSpace: this.ensureAgentsForSpace.bind(this),
+        }
       );
     }
 
     return {};
+  }
+
+  private async ensureAgentsForSpace(spaceId: string): Promise<void> {
+    if (!this.agentBuilder) {
+      return;
+    }
+    await ensureAgentSafe({
+      agentBuilder: this.agentBuilder,
+      spaceId,
+      logger: this.logger,
+    });
   }
 
   private getSpaceId(request: KibanaRequest): string {

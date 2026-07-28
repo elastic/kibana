@@ -125,6 +125,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
+  `${internalNamespaces.security}.pnd-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];

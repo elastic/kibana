@@ -28,7 +28,11 @@ export class WatchWorkflowProjectionService {
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
     private readonly logger: Logger,
-    private readonly installationReady: Promise<void> = Promise.resolve()
+    private readonly installationReady: Promise<void> = Promise.resolve(),
+    private readonly options: {
+      /** Lazy ensure of the shared thin agent for the caller's space. */
+      ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+    } = {}
   ) {}
 
   private requireManagement(): WatchWorkflowsManagementClient {
@@ -38,8 +42,13 @@ export class WatchWorkflowProjectionService {
     return this.management;
   }
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
+  private async prepareSpace(spaceId: string): Promise<void> {
     await this.installationReady;
+    await this.options.ensureAgentForSpace?.(spaceId);
+  }
+
+  async list(spaceId: string): Promise<ListWatchesResponse> {
+    await this.prepareSpace(spaceId);
     const management = this.requireManagement();
     // Managed catalog watches opt into `selector:watch` visibility; custom
     // unmanaged watches still match via tag `watch` under managedFilter `all`.
@@ -69,7 +78,7 @@ export class WatchWorkflowProjectionService {
   }
 
   async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
-    await this.installationReady;
+    await this.prepareSpace(spaceId);
     const management = this.requireManagement();
     const detail = await management.getWorkflow(watchId, spaceId);
     if (!detail) {
@@ -156,6 +165,7 @@ export class WatchWorkflowProjectionService {
     spaceId: string,
     body: CreateWatchRequest
   ): Promise<GetWatchResponse> {
+    await this.prepareSpace(spaceId);
     const management = this.requireManagement();
     const name = body.name.trim() || 'Custom watch';
     const description =
