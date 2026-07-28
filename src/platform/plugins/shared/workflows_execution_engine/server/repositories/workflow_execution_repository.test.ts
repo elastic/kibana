@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -40,7 +41,7 @@ describe('WorkflowExecutionRepository', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    repository = new WorkflowExecutionRepository(esClient as any);
+    repository = new WorkflowExecutionRepository(esClient as any, loggerMock.create());
   });
 
   describe('createWorkflowExecution', () => {

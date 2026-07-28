@@ -173,7 +173,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     transformConfigQuery,
     requestPayload,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
+    isDatePickerApplyEnabled ? timeRangeMs : undefined,
+    props.overrides?.projectRouting
   );
 
   const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
@@ -193,7 +194,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       validationStatus,
       requestPayload,
       runtimeMappings,
-      timeRangeMs
+      timeRangeMs,
+      props.overrides?.projectRouting
     ),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,

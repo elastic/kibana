@@ -9,6 +9,7 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Suite, Test } from './fake_mocha_types';
@@ -206,7 +207,13 @@ export class FunctionalTestRunner {
       if (ftrTimingEnabled) {
         activateTiming();
       }
-      return await runTests(lifecycle, mocha, abortSignal);
+      return await runTests(
+        lifecycle,
+        mocha,
+        this.log,
+        { abortOnTimeout: this.config.get('mochaOpts.abortOnTimeout') },
+        abortSignal
+      );
     });
   }
 
@@ -382,7 +389,7 @@ export class FunctionalTestRunner {
       throw runError;
     } finally {
       try {
-        await lifecycle.cleanup.trigger();
+        await this.triggerCleanup(lifecycle);
       } catch (closeError) {
         if (runErrorOccurred) {
           this.log.error('failed to close functional_test_runner');
@@ -392,6 +399,42 @@ export class FunctionalTestRunner {
           throw closeError;
         }
       }
+    }
+  }
+
+  private async triggerCleanup(lifecycle: Lifecycle) {
+    if (!lifecycle.isAborting) {
+      return await lifecycle.cleanup.trigger();
+    }
+
+    const timeoutMs = this.config.get('mochaOpts.abortCleanupTimeout');
+    let timedOut = false;
+    const cleanup = lifecycle.cleanup.trigger();
+    // The timer stays ref'd (default) so it can hold the event loop open long enough to
+    // bound a hung cleanup handler. If `cleanup` wins the race we abort the timer in the
+    // `finally` so it doesn't keep the loop alive for the remaining `timeoutMs` — otherwise
+    // an embedder that awaits `run()` without a hard `process.exit()` would have its exit
+    // delayed by up to `timeoutMs`.
+    const cancelTimeout = new AbortController();
+    try {
+      await Promise.race([
+        cleanup,
+        setTimeoutAsync(timeoutMs, undefined, { signal: cancelTimeout.signal }).then(
+          () => {
+            timedOut = true;
+          },
+          () => {
+            // timer was cancelled because cleanup finished first; ignore the AbortError
+          }
+        ),
+      ]);
+    } finally {
+      cancelTimeout.abort();
+    }
+
+    if (timedOut) {
+      this.log.warning(`cleanup did not finish within ${timeoutMs}ms of aborting, moving on`);
+      void cleanup.catch(() => {});
     }
   }
 
