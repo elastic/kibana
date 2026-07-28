@@ -53,8 +53,11 @@ export const addSectionOperation = defineOperation({
 
         const panelId = uuidv4();
         sectionPanels.push({ id: panelId, ...materializedPanel.panelContent, grid: item.grid });
-        if (materializedPanel.summary) {
-          context.panelSummaries.push({ panelId, summary: materializedPanel.summary });
+        if (materializedPanel.authoringNote) {
+          context.panelAuthoringNotes.push({
+            panelId,
+            authoringNote: materializedPanel.authoringNote,
+          });
         }
       }
 

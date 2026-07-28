@@ -76,8 +76,15 @@ const summarizePanel = (panel: AttachmentPanel) => ({
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
+ *
+ * `authoringNotesByPanelId` holds the one-sentence note describing every chart
+ * authored in this run, keyed by panel id. Panels that were not authored now
+ * (or whose engine returned no note) simply have no `authoring_note`.
  */
-export const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
+const summarizeDashboard = (
+  dashboardData: DashboardAttachmentData,
+  authoringNotesByPanelId: Map<string, string>
+) => ({
   title: dashboardData.title,
   description: dashboardData.description,
   panels: dashboardData.panels.map((widget) => {
@@ -87,10 +94,20 @@ export const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
         title: widget.title,
         collapsed: widget.collapsed,
         grid: widget.grid,
-        panels: widget.panels.map(summarizePanel),
+        panels: widget.panels.map((panel) => ({
+          type: panel.type,
+          id: panel.id,
+          grid: panel.grid,
+          authoring_note: authoringNotesByPanelId.get(panel.id),
+        })),
       };
     }
-    return summarizePanel(widget);
+    return {
+      type: widget.type,
+      id: widget.id,
+      grid: widget.grid,
+      authoring_note: authoringNotesByPanelId.get(widget.id),
+    };
   }),
   controls: (dashboardData.pinned_panels ?? []).map((control) => {
     const c = control as { id?: string; type?: string; config?: { title?: string } };
@@ -105,7 +122,7 @@ export const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and compact dashboard/panel summaries.
+ * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -153,7 +170,7 @@ Use operations[] to:
           esClient,
         });
 
-        const operationResult = await executeDashboardOperations({
+        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -208,14 +225,15 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(finalDashboardData),
-                panel_summaries:
-                  panelSummaries.length > 0
-                    ? panelSummaries.map(({ panelId, summary }) => ({
-                        panel_id: panelId,
-                        summary,
-                      }))
-                    : undefined,
+                dashboard: summarizeDashboard(
+                  finalDashboardData,
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
+                ),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

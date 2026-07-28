@@ -103,11 +103,11 @@ describe('createVegaGraph', () => {
   };
 
   it('generates ES|QL then authors and normalizes a spec', async () => {
-    const summary = 'Created a bar chart of counts by status with a concise title.';
+    const authoringNote = 'Created a bar chart of counts by status with a concise title.';
     invoke.mockResolvedValue(
       asCodeBlock({
         title: 'Counts by status',
-        summary,
+        authoring_note: authoringNote,
         spec: { mark: 'bar', encoding: { x: { field: 'status' } } },
       })
     );
@@ -117,7 +117,7 @@ describe('createVegaGraph', () => {
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
     expect(state.title).toBe('Counts by status');
-    expect(state.summary).toBe(summary);
+    expect(state.authoringNote).toBe(authoringNote);
     const spec = JSON.parse(state.spec!);
     expect(spec.$schema).toBe(VEGA_LITE_SCHEMA);
     expect(spec.data).toEqual({
@@ -127,14 +127,14 @@ describe('createVegaGraph', () => {
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
   });
 
-  it('accepts a valid spec when the authoring summary is missing', async () => {
-    invoke.mockResolvedValue('```json\n' + JSON.stringify({ spec: { mark: 'bar' } }) + '\n```');
+  it('accepts a valid spec when the authoring note is missing', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ spec: { mark: 'bar' } }));
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).mark).toBe('bar');
-    expect(state.summary).toBeNull();
+    expect(state.authoringNote).toBeNull();
   });
 
   it('keeps panel title out of a faceted Vega-Lite nested spec', async () => {

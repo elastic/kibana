@@ -174,10 +174,10 @@ export const editPanelsOperation = defineOperation({
 
       context.contentResolvedPanelIds.add(panelInput.panelId);
       nextDashboardData = updateResult.dashboardData;
-      if (attempt.summary) {
-        context.panelSummaries.push({
+      if (attempt.authoringNote) {
+        context.panelAuthoringNotes.push({
           panelId: panelInput.panelId,
-          summary: attempt.summary,
+          authoringNote: attempt.authoringNote,
         });
       }
     }

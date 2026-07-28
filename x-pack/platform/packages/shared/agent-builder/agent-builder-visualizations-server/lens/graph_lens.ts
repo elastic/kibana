@@ -36,7 +36,7 @@ const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
 const parseConfigAuthoringResponse = (
   responseText: string
-): { config: Record<string, unknown>; summary?: string } => {
+): { config: Record<string, unknown>; authoringNote?: string } => {
   const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
   const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
   const parsed = JSON.parse(jsonText);
@@ -45,14 +45,17 @@ const parseConfigAuthoringResponse = (
     throw new Error('Response is not a valid JSON object');
   }
 
-  const { config, summary } = parsed as { config?: unknown; summary?: unknown };
+  const { config, authoring_note: authoringNote } = parsed as {
+    config?: unknown;
+    authoring_note?: unknown;
+  };
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     throw new Error('Response must include a valid "config" object');
   }
-  const normalizedSummary = typeof summary === 'string' ? summary.trim() : '';
+  const normalizedNote = typeof authoringNote === 'string' ? authoringNote.trim() : '';
   return {
     config: config as Record<string, unknown>,
-    ...(normalizedSummary ? { summary: normalizedSummary } : {}),
+    ...(normalizedNote ? { authoringNote: normalizedNote } : {}),
   };
 };
 
@@ -115,7 +118,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   }),
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
-  summary: Annotation<string | null>(),
+  authoringNote: Annotation<string | null>(),
   timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
@@ -232,7 +235,7 @@ export const createVisualizationGraph = async (
       // Invoke model without schema validation
       const response = await defaultModel.chatModel.invoke(prompt);
       const responseText = extractTextFromMessage(response);
-      const { config: configResponse, summary } = parseConfigAuthoringResponse(responseText);
+      const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
       // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
       // config generation only binds columns from it.
@@ -246,7 +249,7 @@ export const createVisualizationGraph = async (
         type: 'generate_config',
         success: true,
         config: configResponse,
-        summary,
+        authoringNote,
         attempt,
       };
     } catch (error) {
@@ -312,7 +315,7 @@ export const createVisualizationGraph = async (
           type: 'validate_config',
           success: true,
           config: validatedConfig,
-          summary: lastGenerateAction.summary,
+          authoringNote: lastGenerateAction.authoringNote,
           attempt,
         };
       }
@@ -427,7 +430,7 @@ What is the most appropriate time range for this visualization?`,
 
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      summary: lastValidateAction?.success ? lastValidateAction.summary ?? null : null,
+      authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,

@@ -41,7 +41,7 @@ describe('createVisPanelResolver', () => {
     ({
       validatedConfig,
       selectedChartType: 'metric',
-      summary: 'Created a titleless metric showing total requests.',
+      authoringNote: 'Created a titleless metric showing total requests.',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof buildLensConfig>>);
 
@@ -75,7 +75,7 @@ describe('createVisPanelResolver', () => {
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       },
-      summary: 'Created a titleless metric showing total requests.',
+      authoringNote: 'Created a titleless metric showing total requests.',
     });
     expect(mockedBuildLensConfig).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -84,7 +84,7 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('creates panel content when the authoring summary is missing', async () => {
+  it('creates panel content when the authoring note is missing', async () => {
     mockedBuildLensConfig.mockResolvedValue({
       validatedConfig: { type: 'metric' },
       selectedChartType: SupportedChartType.Metric,
@@ -200,7 +200,7 @@ describe('createVisPanelResolver', () => {
     mockedBuildVegaConfig.mockResolvedValue({
       spec,
       title: 'Requests by host',
-      summary: 'Created a bar chart of requests by host with a concise title.',
+      authoringNote: 'Created a bar chart of requests by host with a concise title.',
       esqlQuery: 'FROM logs-*',
     });
 
@@ -221,7 +221,7 @@ describe('createVisPanelResolver', () => {
         type: VEGA_VIS_TYPE,
         config: { spec, title: 'Requests by host' },
       },
-      summary: 'Created a bar chart of requests by host with a concise title.',
+      authoringNote: 'Created a bar chart of requests by host with a concise title.',
     });
     expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
       expect.objectContaining({ nlQuery: 'a small multiples chart', existingSpec: undefined })
@@ -252,7 +252,7 @@ describe('createVisPanelResolver', () => {
     const nextSpec = '{"$schema":"vega-lite","mark":"line"}';
     mockedBuildVegaConfig.mockResolvedValue({
       spec: nextSpec,
-      summary: 'Changed the panel to a line chart.',
+      authoringNote: 'Changed the panel to a line chart.',
       esqlQuery: 'FROM logs-*',
     });
 
@@ -279,7 +279,7 @@ describe('createVisPanelResolver', () => {
         type: VEGA_VIS_TYPE,
         config: { spec: nextSpec },
       },
-      summary: 'Changed the panel to a line chart.',
+      authoringNote: 'Changed the panel to a line chart.',
     });
     expect(mockedBuildVegaConfig).toHaveBeenCalledWith(expect.objectContaining({ existingSpec }));
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();

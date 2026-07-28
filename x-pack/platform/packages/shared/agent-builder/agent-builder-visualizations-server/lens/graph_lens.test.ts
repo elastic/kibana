@@ -48,8 +48,8 @@ const createMockLogger = (): Logger =>
 
 const asAuthoringResponse = (
   config: Record<string, unknown>,
-  summary = 'Created a visualization using the requested data.'
-): string => `\`\`\`json\n${JSON.stringify({ summary, config })}\n\`\`\``;
+  authoringNote = 'Created a visualization using the requested data.'
+): string => `\`\`\`json\n${JSON.stringify({ authoring_note: authoringNote, config })}\n\`\`\``;
 
 describe('createVisualizationGraph', () => {
   const logger = createMockLogger();
@@ -108,12 +108,12 @@ describe('createVisualizationGraph', () => {
     expect(finalState.esqlQuery).toBe(esqlQuery);
   });
 
-  it('returns the authoring summary without storing it in the validated config', async () => {
-    const summary = 'Created a titleless metric showing the total log count.';
+  it('returns the authoring note without storing it in the validated config', async () => {
+    const authoringNote = 'Created a titleless metric showing the total log count.';
     const graph = await createVisualizationGraph(
       createMockModel(
         `\`\`\`json\n${JSON.stringify({
-          summary,
+          authoring_note: authoringNote,
           config: { type: 'metric' },
         })}\n\`\`\``
       ) as never,
@@ -138,14 +138,14 @@ describe('createVisualizationGraph', () => {
       error: null,
     });
 
-    expect(finalState.summary).toBe(summary);
+    expect(finalState.authoringNote).toBe(authoringNote);
     expect(finalState.validatedConfig).toEqual({
       type: 'metric',
       data_source: { type: 'esql', query: esqlQuery },
     });
   });
 
-  it('accepts a valid config when the authoring summary is missing', async () => {
+  it('accepts a valid config when the authoring note is missing', async () => {
     const graph = await createVisualizationGraph(
       createMockModel(
         `\`\`\`json\n${JSON.stringify({ config: { type: 'metric' } })}\n\`\`\``
@@ -175,7 +175,7 @@ describe('createVisualizationGraph', () => {
       type: 'metric',
       data_source: { type: 'esql', query: esqlQuery },
     });
-    expect(finalState.summary).toBeNull();
+    expect(finalState.authoringNote).toBeNull();
   });
 
   it('regenerates esql for edits and includes the existing query as context', async () => {

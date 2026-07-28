@@ -19,7 +19,7 @@ export type PanelContentAttempt =
   | {
       type: 'success';
       panelContent: Pick<AttachmentPanel, 'type' | 'config'>;
-      summary?: string;
+      authoringNote?: string;
     }
   | {
       type: 'failure';
@@ -36,6 +36,12 @@ export type InlinePanelOperationType =
 export interface PanelSummary {
   panelId: string;
   summary: string;
+}
+
+/** One-sentence note describing a chart authored during the current turn. */
+export interface PanelAuthoringNote {
+  panelId: string;
+  authoringNote: string;
 }
 
 /**

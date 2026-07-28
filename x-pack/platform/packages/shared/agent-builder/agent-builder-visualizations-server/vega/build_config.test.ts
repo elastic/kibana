@@ -34,7 +34,7 @@ const createMockLogger = (): Logger =>
 
 const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
 const SPEC = '{"$schema":"vega-lite","mark":"bar"}';
-const SUMMARY = 'Created a bar chart using the requested data.';
+const AUTHORING_NOTE = 'Created a bar chart using the requested data.';
 
 describe('buildVegaConfig', () => {
   const events = {} as ToolEventEmitter;
@@ -49,9 +49,12 @@ describe('buildVegaConfig', () => {
     mockedValidateEsqlQuery.mockReset();
     mockedValidateEsqlQuery.mockResolvedValue(undefined); // default: query is valid
     logger = createMockLogger();
-    invoke = jest
-      .fn()
-      .mockResolvedValue({ spec: SPEC, summary: SUMMARY, error: null, esqlQuery: PROVIDED_ESQL });
+    invoke = jest.fn().mockResolvedValue({
+      spec: SPEC,
+      authoringNote: AUTHORING_NOTE,
+      error: null,
+      esqlQuery: PROVIDED_ESQL,
+    });
     mockedCreateGraph.mockResolvedValue({ invoke } as unknown as Awaited<
       ReturnType<typeof createVegaGraph>
     >);
@@ -73,11 +76,15 @@ describe('buildVegaConfig', () => {
     expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
-    expect(result).toEqual({ spec: SPEC, summary: SUMMARY, esqlQuery: PROVIDED_ESQL });
+    expect(result).toEqual({
+      spec: SPEC,
+      authoringNote: AUTHORING_NOTE,
+      esqlQuery: PROVIDED_ESQL,
+    });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns a valid spec when the graph omits the summary', async () => {
+  it('returns a valid spec when the graph omits the authoring note', async () => {
     invoke.mockResolvedValue({ spec: SPEC, error: null, esqlQuery: PROVIDED_ESQL });
 
     await expect(run(PROVIDED_ESQL)).resolves.toEqual({
@@ -90,7 +97,7 @@ describe('buildVegaConfig', () => {
     invoke.mockResolvedValue({
       spec: SPEC,
       title: 'Requests by host',
-      summary: SUMMARY,
+      authoringNote: AUTHORING_NOTE,
       error: null,
       esqlQuery: PROVIDED_ESQL,
     });
@@ -100,7 +107,7 @@ describe('buildVegaConfig', () => {
     expect(result).toEqual({
       spec: SPEC,
       title: 'Requests by host',
-      summary: SUMMARY,
+      authoringNote: AUTHORING_NOTE,
       esqlQuery: PROVIDED_ESQL,
     });
   });

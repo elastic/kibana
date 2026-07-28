@@ -84,10 +84,10 @@ ${nlQuery}
 
 Generate the ${chartType} visualization configuration.
 
-IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. The "summary" must be one factual sentence describing the final chart and notable presentation choices, such as omitted titles or hidden legends. Do not include reasoning. The "config" must contain only the Lens configuration:
+IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. The "authoring_note" must be one factual sentence describing the final chart and notable presentation choices, such as omitted titles or hidden legends. Do not include reasoning. The "config" must contain only the Lens configuration:
 \`\`\`json
 {
-  "summary": "One-sentence description of the authored chart",
+  "authoring_note": "One-sentence description of the authored chart",
   "config": {
     // your configuration here
   }

@@ -10,13 +10,13 @@ import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-comm
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
-import type { PanelSummary } from '../resolve_panel';
+import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 
 export interface OperationExecutionContext {
   logger: Logger;
   failures: PanelFailure[];
-  panelSummaries: PanelSummary[];
+  panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   contentResolvedPanelIds: Set<string>;
   resolvePanelContent?: ResolvePanelContent;

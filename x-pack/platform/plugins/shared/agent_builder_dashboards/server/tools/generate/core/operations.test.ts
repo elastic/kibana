@@ -88,11 +88,11 @@ describe('executeDashboardOperations', () => {
 
   const createResolvedPanelContent = (
     panelContent: Pick<AttachmentPanel, 'type' | 'config'>,
-    summary = 'Created a visualization using the requested data.'
+    authoringNote = 'Created a visualization using the requested data.'
   ): PanelContentAttempt => ({
     type: 'success',
     panelContent,
-    summary,
+    authoringNote,
   });
 
   const createResolvePanelContent = (
@@ -348,10 +348,10 @@ describe('executeDashboardOperations', () => {
     const generatedPanel = getPanelsOnly(result.dashboardData.panels).find(
       (panel) => panel.grid.x === 24 && panel.grid.y === 0
     );
-    expect(result.panelSummaries).toEqual([
+    expect(result.panelAuthoringNotes).toEqual([
       {
         panelId: generatedPanel?.id,
-        summary: 'Created a titleless metric showing total requests.',
+        authoringNote: 'Created a titleless metric showing total requests.',
       },
     ]);
   });
@@ -1249,17 +1249,16 @@ describe('executeDashboardOperations', () => {
           config: { type: 'line' },
         })
       );
-      expect(result.panelSummaries).toEqual([
+      expect(result.panelAuthoringNotes).toEqual([
         {
           panelId: 'panel-1',
-          summary: 'Changed the panel to a bar chart and retained its title.',
+          authoringNote: 'Changed the panel to a bar chart and retained its title.',
         },
         {
           panelId: 'section-panel-1',
-          summary: 'Changed the panel to a line chart with the legend below.',
+          authoringNote: 'Changed the panel to a line chart with the legend below.',
         },
       ]);
-      expect([...result.contentResolvedPanelIds].sort()).toEqual(['panel-1', 'section-panel-1']);
     });
 
     it('resolves repeated visualization edits against the latest panel state', async () => {

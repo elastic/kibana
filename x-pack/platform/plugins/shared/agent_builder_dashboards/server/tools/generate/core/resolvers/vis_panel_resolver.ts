@@ -103,7 +103,7 @@ export const createVisPanelResolver = ({
       }
 
       if (renderer === 'vega') {
-        const { spec, title, summary } = await buildVegaConfig({
+        const { spec, title, authoringNote } = await buildVegaConfig({
           nlQuery,
           index,
           esql,
@@ -125,7 +125,7 @@ export const createVisPanelResolver = ({
             type: VEGA_VIS_TYPE,
             config: { spec, ...(title ? { title } : {}) },
           },
-          ...(summary ? { summary } : {}),
+          ...(authoringNote ? { authoringNote } : {}),
         };
       }
 
@@ -155,7 +155,7 @@ export const createVisPanelResolver = ({
           type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
-        ...(result.summary ? { summary: result.summary } : {}),
+        ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };
     } catch (error) {
       return createPanelFailureResult(operationType, identifier, getErrorMessage(error));

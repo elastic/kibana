@@ -18,7 +18,7 @@ export interface GenerateConfigAction {
   type: 'generate_config';
   success: boolean;
   config?: any; // Can be any shape - gets validated in ValidateConfigAction
-  summary?: string;
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -27,7 +27,7 @@ export interface ValidateConfigAction {
   type: 'validate_config';
   success: boolean;
   config?: VisualizationConfig;
-  summary?: string;
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }

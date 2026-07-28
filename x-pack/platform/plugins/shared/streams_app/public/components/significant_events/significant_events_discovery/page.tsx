@@ -31,7 +31,6 @@ import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
-import { DiscoveriesTab } from './components/discoveries_tab';
 import { SigEventsTab } from './components/significant_events_tab';
 
 const discoveryTabs = [
@@ -39,7 +38,6 @@ const discoveryTabs = [
   'knowledge_indicators',
   'queries',
   'detections',
-  'discoveries',
   'significant_events',
   'memory',
   'settings',
@@ -196,14 +194,6 @@ export function SignificantEventsDiscoveryPage() {
         isSelected: tab === 'detections',
       },
       {
-        id: 'discoveries',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.discoveriesTab', {
-          defaultMessage: 'Discoveries',
-        }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'discoveries' } }),
-        isSelected: tab === 'discoveries',
-      },
-      {
         id: 'significant_events',
         label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
           defaultMessage: 'Significant Events',
@@ -246,6 +236,10 @@ export function SignificantEventsDiscoveryPage() {
         <SignificantEventsNotEnabledPrompt reason={availability.reason} />
       </StreamsAppPageTemplate.Body>
     );
+  }
+
+  if (tab === 'discoveries') {
+    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'significant_events' } }} />;
   }
 
   if (!isValidDiscoveryTab(tab)) {
@@ -382,7 +376,6 @@ export function SignificantEventsDiscoveryPage() {
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}
             {tab === 'detections' && <DetectionsTab />}
-            {tab === 'discoveries' && <DiscoveriesTab />}
             {tab === 'significant_events' && <SigEventsTab />}
             {tab === 'memory' && <MemoryTab />}
             {tab === 'settings' && <SettingsTab />}

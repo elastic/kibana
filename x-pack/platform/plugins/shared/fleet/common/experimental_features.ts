@@ -21,7 +21,7 @@ const _allowedExperimentalValues = {
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
-  disableAgentlessLegacyAPI: false, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
+  disableAgentlessLegacyAPI: true, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
   enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
