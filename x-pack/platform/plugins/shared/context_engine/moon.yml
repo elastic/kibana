@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/share-plugin'
   - '@kbn/console-plugin'
+  - '@kbn/workflows-ui'
+  - '@kbn/deeplinks-workflows'
 tags:
   - plugin
   - prod
