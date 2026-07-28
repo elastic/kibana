@@ -225,23 +225,17 @@ export interface SmlDocument {
   /** Space IDs this item belongs to */
   spaces: string[];
   /**
-   * Permissions required to access the underlying element. Always present
-   * on stored documents; the inner privileges array may be empty.
+   * Permissions required to access the underlying element. The `name` of each
+   * privilege is a composite `space|action` token (e.g. `"default|saved_object:dashboard/get"`).
+   * Always present on stored documents; the inner privileges array may be empty.
    */
   permissions: SmlPermissions;
   /**
-   * Composite `space|privilege` tokens for DLS filtering. Contains the
-   * cross-product of `spaces` × `permissions.kibana.privileges[*].name`.
-   * Empty when either dimension is absent (e.g. global `'*'` space entries
-   * or privilege-free public entries).
+   * Number of composite tokens in `permissions.kibana.privileges`. Stored so
+   * that Elasticsearch's `terms_set` query can use `minimum_should_match_field`
+   * for AND-semantics enforcement via the ImplicitPrivilegesProvider.
    */
-  dls_tokens: string[];
-  /**
-   * Number of entries in `dls_tokens`. Stored alongside `dls_tokens` so that
-   * Elasticsearch's `terms_set` query can use `minimum_should_match_field`
-   * for AND-semantics DLS enforcement via the ImplicitPrivilegesProvider.
-   */
-  dls_tokens_count: number;
+  permissions_count: number;
   /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
 }

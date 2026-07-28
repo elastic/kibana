@@ -136,6 +136,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
         return filterResultsByPermissions({
           searchResult: rawResults,
+          spaceId,
           request,
           securityAuthz: this.securityAuthz,
           logger,
@@ -256,12 +257,14 @@ const enumerateDistinctValues = async ({
   field,
   esClient,
   logger,
+  prefix,
   pageSize = 1000,
   maxPages = 100,
 }: {
   field: string;
   esClient: IScopedClusterClient;
   logger: Logger;
+  prefix?: string;
   pageSize?: number;
   maxPages?: number;
 }): Promise<string[]> => {
@@ -274,6 +277,7 @@ const enumerateDistinctValues = async ({
         index: smlIndexName,
         field,
         size: pageSize,
+        ...(prefix !== undefined ? { string: prefix } : {}),
         ...(searchAfter !== undefined ? { search_after: searchAfter } : {}),
       });
 
@@ -324,29 +328,39 @@ interface AuthorizedUniverse {
 }
 
 /**
- * Pre-aggregation pass: discover the corpus's Kibana-privilege universe and
- * resolve, in a single `_has_privileges` call, which values the caller is
- * authorized for. The resulting set is pushed into the ES|QL search as an
+ * Pre-aggregation pass: discover the corpus's Kibana-privilege universe for the
+ * current space and resolve, in a single `_has_privileges` call, which values the
+ * caller is authorized for. The resulting set is pushed into the ES|QL search as an
  * in-query authorization filter.
  *
- * If the corpus uses no Kibana privileges, the privilege check is skipped
- * entirely.
+ * Tokens in the index are composite `space|action` strings. The `_terms_enum` call
+ * is prefix-filtered to `spaceId|` so only tokens relevant to the current space are
+ * returned. Raw action strings (with the prefix stripped) are then checked against
+ * `_has_privileges`, and the authorized subset is returned as composite tokens so the
+ * in-query `MV_CONTAINS` filter matches the stored document field correctly.
+ *
+ * If the corpus uses no Kibana privileges for the current space, the privilege check
+ * is skipped entirely.
  */
 const resolveAuthorizedUniverse = async ({
   esClient,
   request,
   securityAuthz,
   logger,
+  spaceId,
 }: {
   esClient: IScopedClusterClient;
   request: KibanaRequest;
   securityAuthz: AuthorizationServiceSetup;
   logger: Logger;
+  spaceId: string;
 }): Promise<AuthorizedUniverse> => {
+  const spacePrefix = `${spaceId}|`;
   const kibanaUniverse = await enumerateDistinctValues({
     field: PERM_KIBANA_FIELD,
     esClient,
     logger,
+    prefix: spacePrefix,
   });
 
   const kibanaUniverseNonEmpty = kibanaUniverse.length > 0;
@@ -358,23 +372,39 @@ const resolveAuthorizedUniverse = async ({
     };
   }
 
+  // Parse raw action strings by stripping the `spaceId|` prefix.
+  const separator = '|';
+  const rawActions = kibanaUniverse.map((token) => token.substring(token.indexOf(separator) + 1));
+  const uniqueRawActions = [...new Set(rawActions)];
+
+  // Check which raw actions the user holds in the current space.
   const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: kibanaUniverse,
+    permissions: uniqueRawActions,
     request,
     securityAuthz,
     logger,
   });
 
+  // Map back to composite tokens: keep the composite token if its raw action is authorized.
+  const authorizedTokens = kibanaUniverse.filter((token) => {
+    const rawAction = token.substring(token.indexOf(separator) + 1);
+    return authorizedPerms.has(rawAction);
+  });
+
   return {
-    authorizedActions: [...authorizedPerms],
+    authorizedActions: authorizedTokens,
     kibanaUniverseNonEmpty,
   };
 };
 
 /**
  * Filter a single page of results by the current user's Kibana privileges.
- * Every action string an entry lists must be authorized for the user;
+ * Every action an entry requires must be authorized for the user;
  * entries with no `kibana.privileges` pass trivially.
+ *
+ * Privileges are stored as composite `space|action` tokens. Only tokens for the
+ * current space are considered; raw action strings are parsed by stripping the
+ * `spaceId|` prefix before the `_has_privileges` call.
  *
  * Used by the search loop (per page) and directly by autocomplete (single
  * pass). When the security plugin is absent (dev / test), the function is
@@ -383,10 +413,12 @@ const resolveAuthorizedUniverse = async ({
 const filterPageByPermissions = async <T extends { permissions: SmlPermissions }>(
   items: T[],
   {
+    spaceId,
     request,
     securityAuthz,
     logger,
   }: {
+    spaceId: string;
     request: KibanaRequest;
     securityAuthz?: AuthorizationServiceSetup;
     logger: Logger;
@@ -394,24 +426,51 @@ const filterPageByPermissions = async <T extends { permissions: SmlPermissions }
 ): Promise<T[]> => {
   if (!securityAuthz || items.length === 0) return items;
 
-  const allPermissions = [
-    ...new Set(items.flatMap((hit) => hit.permissions.kibana.privileges.map((p) => p.name))),
+  const spacePrefix = `${spaceId}|`;
+  const separator = '|';
+
+  // Collect all composite tokens for the current space across all items.
+  const allTokensForSpace = [
+    ...new Set(
+      items.flatMap((hit) =>
+        hit.permissions.kibana.privileges
+          .map((p) => p.name)
+          .filter((name) => name.startsWith(spacePrefix))
+      )
+    ),
   ];
 
-  if (allPermissions.length === 0) {
+  if (allTokensForSpace.length === 0) {
+    // No space-specific tokens: items are either public (no perms) or from another space.
+    // Public items pass; items whose only perms are for other spaces also pass (space filter
+    // upstream should have already scoped the result set).
     return items;
   }
 
+  // Strip prefix to get unique raw action strings for the _has_privileges call.
+  const uniqueRawActions = [
+    ...new Set(allTokensForSpace.map((token) => token.substring(token.indexOf(separator) + 1))),
+  ];
+
   const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: allPermissions,
+    permissions: uniqueRawActions,
     request,
     securityAuthz,
     logger,
   });
 
   return items.filter((hit) => {
-    const kbnPrivs = hit.permissions.kibana.privileges.map((p) => p.name);
-    return kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p));
+    const spaceTokens = hit.permissions.kibana.privileges
+      .map((p) => p.name)
+      .filter((name) => name.startsWith(spacePrefix));
+    if (spaceTokens.length === 0) {
+      // No tokens for this space → public item.
+      return true;
+    }
+    return spaceTokens.every((token) => {
+      const rawAction = token.substring(token.indexOf(separator) + 1);
+      return authorizedPerms.has(rawAction);
+    });
   });
 };
 
@@ -421,16 +480,19 @@ const filterPageByPermissions = async <T extends { permissions: SmlPermissions }
  */
 const filterResultsByPermissions = async <T extends { permissions: SmlPermissions }>({
   searchResult,
+  spaceId,
   request,
   securityAuthz,
   logger,
 }: {
   searchResult: { results: T[] };
+  spaceId: string;
   request: KibanaRequest;
   securityAuthz?: AuthorizationServiceSetup;
   logger: Logger;
 }): Promise<{ results: T[] }> => {
   const filtered = await filterPageByPermissions(searchResult.results, {
+    spaceId,
     request,
     securityAuthz,
     logger,
@@ -520,10 +582,27 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const allPermissions = [...new Set([...docAuthz.values()].flat())];
+  // Composite tokens are `space|action`. Filter to the current space and parse
+  // raw action strings for the _has_privileges call.
+  const spacePrefix = `${spaceId}|`;
+  const separator = '|';
+
+  const allTokensForSpace = [
+    ...new Set(
+      [...docAuthz.values()]
+        .flat()
+        .filter((token) => token.startsWith(spacePrefix))
+    ),
+  ];
+
+  const uniqueRawActions = [
+    ...new Set(
+      allTokensForSpace.map((token) => token.substring(token.indexOf(separator) + 1))
+    ),
+  ];
 
   const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: allPermissions,
+    permissions: uniqueRawActions,
     request,
     securityAuthz,
     logger,
@@ -535,7 +614,19 @@ const checkItemsAccess = async ({
       accessMap.set(id, false);
       continue;
     }
-    accessMap.set(id, kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p)));
+    const spaceTokens = kbnPrivs.filter((token) => token.startsWith(spacePrefix));
+    if (spaceTokens.length === 0) {
+      // No tokens for this space → public item.
+      accessMap.set(id, true);
+      continue;
+    }
+    accessMap.set(
+      id,
+      spaceTokens.every((token) => {
+        const rawAction = token.substring(token.indexOf(separator) + 1);
+        return authorizedPerms.has(rawAction);
+      })
+    );
   }
 
   return accessMap;
@@ -875,7 +966,7 @@ const searchSml = async ({
   // security plugin is absent (dev / test) — open-access parity.
   let authz: AuthorizedUniverse | undefined;
   if (securityAuthz) {
-    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger });
+    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger, spaceId });
     logger.debug(`SML search authz: actions=${authz.authorizedActions.length}`);
   }
 

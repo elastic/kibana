@@ -667,13 +667,14 @@ describe('SmlService', () => {
     });
 
     it('pushes an MV_CONTAINS authz filter into the query when securityAuthz is present', async () => {
-      // Corpus uses two Kibana privileges; caller is authorized for one. The
-      // pre-aggregation pass resolves the authorized subset and pushes it into
-      // the ES|QL query so ES does the filtering.
+      // Corpus uses two Kibana privileges for the current space; caller is authorized for one.
+      // Tokens are composite `space|action` strings. The pre-aggregation pass enumerates
+      // tokens for the current space, strips the prefix for the _has_privileges call, and
+      // returns the authorized composite tokens for the in-query filter.
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       termsEnumMock.mockImplementation(
         buildTermsEnumMock({
-          kibana: ['saved_object:lens/get', 'saved_object:dashboard/get'],
+          kibana: ['default|saved_object:lens/get', 'default|saved_object:dashboard/get'],
         })
       );
       const service = createSmlService();
@@ -693,9 +694,12 @@ describe('SmlService', () => {
         request,
       });
 
-      // The Kibana permission field is enumerated up front.
+      // The Kibana permission field is enumerated up front, prefix-filtered to the current space.
       expect(termsEnumMock).toHaveBeenCalledWith(
-        expect.objectContaining({ field: 'permissions.kibana.privileges.name' })
+        expect.objectContaining({
+          field: 'permissions.kibana.privileges.name',
+          string: 'default|',
+        })
       );
 
       const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
@@ -706,8 +710,8 @@ describe('SmlService', () => {
       // authorized set is bound as a single multivalue param (array), not an
       // inline `[?, ?]` list (which ES|QL rejects).
       expect(esql).toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
-      // The authorized set is a single array-valued positional param.
-      expect(params).toContainEqual(['saved_object:lens/get']);
+      // The authorized set contains the composite token (not the raw action).
+      expect(params).toContainEqual(['default|saved_object:lens/get']);
     });
 
     it('restricts to public KIs when the caller holds nothing in a used dimension', async () => {
@@ -716,7 +720,7 @@ describe('SmlService', () => {
       // set is a subset of {} (i.e. public KIs with no required privilege).
       const securityAuthz = createMockSecurityAuthz([]);
       termsEnumMock.mockImplementation(
-        buildTermsEnumMock({ kibana: ['saved_object:dashboard/get'] })
+        buildTermsEnumMock({ kibana: ['default|saved_object:dashboard/get'] })
       );
       const service = createSmlService();
       service.setup({ logger });
@@ -1215,6 +1219,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
+      // Documents store composite `space|action` tokens.
       esClient.search.mockResolvedValue({
         hits: {
           total: 2,
@@ -1226,7 +1231,7 @@ describe('SmlService', () => {
                 title: 'Allowed',
                 origin: { uri: 'd1' },
                 spaces: ['default'],
-                permissions: makePermissions(['saved_object:dashboard/get']),
+                permissions: makePermissions(['default|saved_object:dashboard/get']),
               },
               _score: 3,
             },
@@ -1237,7 +1242,7 @@ describe('SmlService', () => {
                 title: 'Denied',
                 origin: { uri: 'c1' },
                 spaces: ['default'],
-                permissions: makePermissions(['saved_object:connector/get']),
+                permissions: makePermissions(['default|saved_object:connector/get']),
               },
               _score: 2,
             },
@@ -1375,6 +1380,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
+      // Documents store composite `space|action` tokens.
       esClient.search.mockResolvedValue({
         hits: {
           total: 1,
@@ -1382,7 +1388,7 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'item-1',
-                permissions: makePermissions(['saved_object:lens/get']),
+                permissions: makePermissions(['default|saved_object:lens/get']),
               },
             },
           ],
@@ -1405,6 +1411,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
+      // Documents store composite `space|action` tokens.
       esClient.search.mockResolvedValue({
         hits: {
           total: 1,
@@ -1412,7 +1419,7 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'item-1',
-                permissions: makePermissions(['saved_object:dashboard/get']),
+                permissions: makePermissions(['default|saved_object:dashboard/get']),
               },
             },
           ],
@@ -1528,6 +1535,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
+      // Documents store composite `space|action` tokens.
       esClient.search.mockResolvedValueOnce({
         hits: {
           total: 2,
@@ -1542,7 +1550,7 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'with-deps',
-                permissions: makePermissions(['saved_object:lens/get']),
+                permissions: makePermissions(['default|saved_object:lens/get']),
               },
             },
           ],

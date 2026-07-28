@@ -192,10 +192,11 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
         permissions: {
-          kibana: { privileges: [{ name: 'perm1' }] },
+          kibana: {
+            privileges: [{ name: 'default|perm1' }, { name: 'space-2|perm1' }],
+          },
         },
-        dls_tokens: ['default|perm1', 'space-2|perm1'],
-        dls_tokens_count: 2,
+        permissions_count: 2,
         ingestion_method: 'crawled',
         discovery_labels: [
           { value: 'My Viz', kind: 'title' },
@@ -273,10 +274,9 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default'],
         permissions: {
-          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          kibana: { privileges: [{ name: 'default|saved_object:dashboard/get' }] },
         },
-        dls_tokens: ['default|saved_object:dashboard/get'],
-        dls_tokens_count: 1,
+        permissions_count: 1,
         ingestion_method: 'crawled',
       });
     });
@@ -736,8 +736,9 @@ describe('createSmlIndexer', () => {
 
         expect(getPermissions).toHaveBeenCalledTimes(1);
         const bulkCall = bulkMock.mock.calls[0][0];
+        // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          kibana: { privileges: [{ name: 'default|saved_object:lens/get' }] },
         });
       });
 
@@ -770,8 +771,9 @@ describe('createSmlIndexer', () => {
         );
 
         const bulkCall = bulkMock.mock.calls[0][0];
+        // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'p1' }] },
+          kibana: { privileges: [{ name: 'default|p1' }] },
         });
       });
 
@@ -847,8 +849,9 @@ describe('createSmlIndexer', () => {
         expect(getPermissions).toHaveBeenCalledTimes(1);
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops).toHaveLength(1);
+        // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(ops[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'p1' }] },
+          kibana: { privileges: [{ name: 'default|p1' }] },
         });
       });
     });

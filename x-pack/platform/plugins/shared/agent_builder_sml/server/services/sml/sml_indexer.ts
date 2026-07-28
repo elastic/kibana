@@ -289,7 +289,9 @@ class SmlIndexerImpl implements SmlIndexer {
   }) {
     const now = new Date().toISOString();
     const privileges = resolvedPermissions.kibana?.privileges ?? [];
-    const dlsTokens = spaces.flatMap((space) => privileges.map((priv) => `${space}|${priv.name}`));
+    const compositePrivileges = spaces.flatMap((space) =>
+      privileges.map((priv) => ({ name: `${space}|${priv.name}` }))
+    );
     const document: SmlDocument = {
       id: entryId,
       type: entry.type,
@@ -300,10 +302,9 @@ class SmlIndexerImpl implements SmlIndexer {
       updated_at: now,
       spaces,
       permissions: {
-        kibana: { privileges: resolvedPermissions.kibana?.privileges ?? [] },
+        kibana: { privileges: compositePrivileges },
       },
-      dls_tokens: dlsTokens,
-      dls_tokens_count: dlsTokens.length,
+      permissions_count: compositePrivileges.length,
       ingestion_method: ingestionMethod,
     };
     if (entry.description !== undefined) {
