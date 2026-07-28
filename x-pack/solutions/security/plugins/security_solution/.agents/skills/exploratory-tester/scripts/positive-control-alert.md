@@ -79,9 +79,11 @@ print(
 )
 PY
 )
+# -I, not -X HEAD: the latter makes curl wait for a response body that a HEAD
+# never sends, stalling for the whole --max-time against keep-alive servers.
 SOURCE_HEAD_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
   -H "Authorization: ApiKey $DATA_API_KEY" \
-  -X HEAD "$DATA_ES_URL/$SOURCE_INDEX")
+  -I "$DATA_ES_URL/$SOURCE_INDEX")
 case "$SOURCE_HEAD_STATUS" in
   200)
     if [[ "$SOURCE_RESOURCE_STATE" == "owned" || "$SOURCE_RESOURCE_STATE" == "pending" ]]; then

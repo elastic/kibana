@@ -30,6 +30,7 @@ OWNED_REUSED_FIXTURE = FIXTURES_DIR / "session-resources-owned-reused.json"
 EARLY_EXIT_FIXTURE = FIXTURES_DIR / "session-resources-early-exit.json"
 PHASES_DIR = SCRIPT_DIR.parent / "phases"
 TEMPLATE_DIR = SCRIPT_DIR.parent / "templates"
+SKILL_FILE = SCRIPT_DIR.parent / "SKILL.md"
 EMPTY_CCS_SETTINGS = {"persistent": {}, "transient": {}}
 PERSISTENT_CCS_SETTINGS = {
     "persistent": {
@@ -3664,6 +3665,130 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
                 "owned",
             )
 
+    def test_skill_markdown_code_fences_are_balanced(self):
+        # A missing closing fence swallows the prose and headings that follow
+        # it into one block, and the agent executes these files verbatim. A
+        # closing fence may not carry an info string, so a ```lang line while
+        # already inside a block is content, not a delimiter — that is the
+        # signal that the preceding block was never closed.
+        problems = []
+        for path in sorted(
+            [*PHASES_DIR.glob("*.md"), *SCRIPT_DIR.glob("*.md"), SKILL_FILE]
+        ):
+            open_line = None
+            for number, line in enumerate(
+                path.read_text(encoding="utf-8").split("\n"), 1
+            ):
+                if not line.startswith("```"):
+                    continue
+                info = line[3:].strip()
+                if open_line is None:
+                    open_line = number
+                elif info == "":
+                    open_line = None
+                else:
+                    problems.append(
+                        f"{path.name}:{number} opens '{line}' inside the block "
+                        f"opened at line {open_line}"
+                    )
+                    open_line = number
+            if open_line is not None:
+                problems.append(f"{path.name}:{open_line} is never closed")
+
+        self.assertEqual(problems, [], "\n".join(["", *problems]))
+
+    def test_head_probes_do_not_wait_for_a_response_body(self):
+        # curl -X HEAD keeps waiting for a body that a HEAD response never
+        # sends, so it stalls for the whole --max-time on keep-alive servers.
+        for path in [*PHASES_DIR.glob("*.md"), *SCRIPT_DIR.glob("*.md")]:
+            commands = [
+                line
+                for line in path.read_text(encoding="utf-8").split("\n")
+                # Skip comments and headings so the explanation of this very
+                # rule does not trip it.
+                if not line.lstrip().startswith("#")
+            ]
+            self.assertNotIn(
+                "-X HEAD",
+                "\n".join(commands),
+                f"{path.name} must probe with -I instead of an -X override",
+            )
+
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            session_dir = root / "session"
+            session_dir.mkdir()
+            (session_dir / "config.json").write_text(
+                json.dumps(
+                    {
+                        "session_id": "abc12345",
+                        "environment": {
+                            "type": "user-provided",
+                            "url": "https://kibana.example.test",
+                            "es_url": "https://es.example.test",
+                        },
+                        "credentials": {"api_key": "encoded-key"},
+                        "session_resources": [
+                            {
+                                "kind": "es_index",
+                                "id": "probe-index",
+                                "endpoint": "/probe-index",
+                                "base_url": "es_url",
+                                "state": "pending",
+                                "owned": False,
+                                "marker": "exploratory-tester:abc12345",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+with open(os.environ["FAKE_CURL_LOG"], "w", encoding="utf-8") as log:
+    log.write(" ".join(sys.argv[1:]))
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            log_path = root / "curl.log"
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+            environment["FAKE_CURL_LOG"] = str(log_path)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RECONCILE_SCRIPT),
+                    "--session-dir",
+                    str(session_dir),
+                    "--kind",
+                    "es_index",
+                    "--id",
+                    "probe-index",
+                    "--endpoint",
+                    "/probe-index",
+                    "--base-url",
+                    "es_url",
+                    "--probe-method",
+                    "HEAD",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            invocation = log_path.read_text(encoding="utf-8")
+            self.assertIn("-I", invocation.split())
+            self.assertNotIn("-X HEAD", invocation)
+
     def test_base_space_validation_is_read_only_and_records_reuse(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
@@ -3813,7 +3938,7 @@ print("200" if method == "PUT" else "500")
                 """#!/usr/bin/env python3
 import sys
 
-method = sys.argv[sys.argv.index("-X") + 1]
+method = "HEAD" if "-I" in sys.argv else sys.argv[sys.argv.index("-X") + 1]
 if method == "POST":
     print('{"errors": false, "items": []}')
     print("200")

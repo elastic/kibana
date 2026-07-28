@@ -83,6 +83,7 @@ with edit_session_config(session_dir / "config.json") as config:
         skipped_setup.append(entry)
 PY
 }
+```
 
 After every successful setup mutation, immediately register the resource with
 `register-session-resource.py`. A 200/201 response is owned; a 409 response

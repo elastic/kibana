@@ -46,6 +46,14 @@ def main() -> int:
             auth_args = build_auth_args(config, base_url_key=args.base_url)
             base_url = resolve_resource_base_url(config, args.base_url)
 
+        # -I, not -X HEAD: the latter makes curl wait for a response body that
+        # a HEAD never sends, stalling for the whole timeout against
+        # keep-alive servers such as Elasticsearch and Kibana.
+        probe_args = (
+            ["-I"]
+            if args.probe_method == "HEAD"
+            else ["-X", args.probe_method]
+        )
         try:
             status, _ = run_curl(
                 [
@@ -56,8 +64,7 @@ def main() -> int:
                     "-w",
                     "\n%{http_code}",
                     *auth_args,
-                    "-X",
-                    args.probe_method,
+                    *probe_args,
                     f"{base_url}{endpoint}",
                 ]
             )
