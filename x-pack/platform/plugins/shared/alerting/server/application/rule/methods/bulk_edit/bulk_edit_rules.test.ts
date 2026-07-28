@@ -3421,10 +3421,7 @@ describe('bulkEdit()', () => {
 
       expect(result.errors).toHaveLength(1);
 
-      expect(result.errors[0]).toHaveProperty(
-        'message',
-        'Not authorized to modify params'
-      );
+      expect(result.errors[0]).toHaveProperty('message', 'Not authorized to modify params');
       expect(result.errors[0]).toHaveProperty('rule.id', '1');
       expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
     });
