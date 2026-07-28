@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { ScriptUpdateRequest, ScriptUpdateResponse, ScriptUpdateResult } from '../types';
+import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 
 export interface ExecuteScriptUpdateParams {
   esClient: ElasticsearchClient;
   indexName: string;
   request: ScriptUpdateRequest;
+  logger: Logger;
 }
 
 const isScriptUpdateNotFoundError = (error: unknown): boolean => {
@@ -48,21 +50,26 @@ export const executeScriptUpdate = async ({
   esClient,
   indexName,
   request,
+  logger,
 }: ExecuteScriptUpdateParams): Promise<ScriptUpdateResponse> => {
   try {
-    const response = await esClient.update({
-      index: indexName,
-      id: request.id,
-      script: {
-        source: request.script,
-        lang: 'painless',
-        params: request.params,
-      },
-      ...(request.retryOnConflict !== undefined
-        ? { retry_on_conflict: request.retryOnConflict }
-        : {}),
-      ...(request.refresh !== undefined ? { refresh: request.refresh } : {}),
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        esClient.update({
+          index: indexName,
+          id: request.id,
+          script: {
+            source: request.script,
+            lang: 'painless',
+            params: request.params,
+          },
+          ...(request.retryOnConflict !== undefined
+            ? { retry_on_conflict: request.retryOnConflict }
+            : {}),
+          ...(request.refresh !== undefined ? { refresh: request.refresh } : {}),
+        }),
+      { logger }
+    );
 
     return {
       result: mapScriptUpdateResult(response.result),

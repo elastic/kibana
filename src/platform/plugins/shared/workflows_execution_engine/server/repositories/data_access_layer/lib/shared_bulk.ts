@@ -8,8 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BulkItem, BulkItemResponse, BulkRequestOptions, BulkResponse } from '..';
+import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 
 export interface SharedBulkItem<TExecution extends { id: string }> extends BulkItem<TExecution> {
   operation: 'create' | 'update' | 'upsert';
@@ -27,7 +28,8 @@ export interface SharedBulkRequestOptions<TExecution extends { id: string }>
 
 export async function sharedBulk<TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
-  request: SharedBulkRequestOptions<TExecution>
+  request: SharedBulkRequestOptions<TExecution>,
+  logger: Logger
 ): Promise<BulkResponse> {
   if (request.items.length === 0) {
     return {
@@ -83,10 +85,14 @@ export async function sharedBulk<TExecution extends { id: string }>(
     }
   });
 
-  const response = await esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
-    refresh: request.refresh,
-    operations,
-  });
+  const response = await retryTransientEsErrors(
+    () =>
+      esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
+        refresh: request.refresh,
+        operations,
+      }),
+    { logger }
+  );
 
   const items: BulkItemResponse[] = [];
 

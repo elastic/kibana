@@ -8,18 +8,21 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { PlainIndexDataClient } from './plain_index_data_client';
 
 describe('PlainIndexDataClient', () => {
   const createDataAccess = () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const logger = loggerMock.create();
     const dataAccess = new PlainIndexDataClient<{ id: string }>({
       esClient,
       indexName: '.workflows-executions',
       mappings: { properties: {} },
+      logger,
     });
-    return { esClient, dataAccess };
+    return { esClient, logger, dataAccess };
   };
 
   it('deleteByQuery targets the configured index', async () => {

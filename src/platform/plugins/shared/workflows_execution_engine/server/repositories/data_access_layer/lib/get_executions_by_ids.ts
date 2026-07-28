@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type {
   GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
 } from '../types';
+import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 
 export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
@@ -24,13 +25,15 @@ export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
     execution: TExecution,
     options?: GetExecutionsByIdsOptions<TExecution>
   ) => TExecution;
+  logger: Logger;
 }
-
+  
 export const getExecutionsByIds = async <TExecution extends { id: string }>({
   esClient,
   ids,
   defaultIndex,
   options,
+  logger,
 }: GetExecutionsByIdsParams<TExecution>): Promise<GetExecutionsByIdsResponse<TExecution>> => {
   if (ids.length === 0) {
     return {
@@ -57,7 +60,9 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
     }
     return item.index.map((index) => ({ _index: index, _id: item.id, ...sourceFilter }));
   });
-  const response = await esClient.mget<TExecution>({ docs });
+  const response = await retryTransientEsErrors(() => esClient.mget<TExecution>({ docs }), {
+    logger,
+  });
 
   const items: GetExecutionByIdsItem<TExecution>[] = [];
 

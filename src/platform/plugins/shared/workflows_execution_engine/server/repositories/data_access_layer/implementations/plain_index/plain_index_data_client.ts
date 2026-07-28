@@ -26,12 +26,13 @@ import type {
   ScriptUpdateRequest,
   ScriptUpdateResponse,
 } from '../../types';
+import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 
 export interface PlainIndexDataClientDeps {
   esClient: ElasticsearchClient;
   indexName: string;
   mappings: MappingTypeMapping;
-  logger?: Logger;
+  logger: Logger;
 }
 
 export class PlainIndexDataClient<TExecution extends { id: string }>
@@ -42,17 +43,21 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    return this.deps.esClient.search<TExecution>({
+    return retryTransientEsErrors(() => this.deps.esClient.search<TExecution>({
       index: this.deps.indexName,
       ...request,
-    });
+    }), { logger: this.deps.logger });
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
-    return this.deps.esClient.count({
-      index: this.deps.indexName,
-      ...request,
-    });
+    return retryTransientEsErrors(
+      () =>
+        this.deps.esClient.count({
+          index: this.deps.indexName,
+          ...request,
+        }),
+      { logger: this.deps.logger }
+    );
   }
 
   public async getByIds(
@@ -66,18 +71,26 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       ) as (string | { id: string; index: string[] })[],
       defaultIndex: this.deps.indexName,
       options,
+      logger: this.deps.logger,
     });
   }
 
-  public bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
+  public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
     const itemsWithIndex = request.items.map((item) => ({
       ...item,
       index: this.deps.indexName,
     }));
-    return sharedBulk(this.deps.esClient, {
+    const response = await sharedBulk(this.deps.esClient, {
       ...request,
       items: itemsWithIndex,
-    });
+    }, this.deps.logger);
+    if (response.errors) {
+      const errorCount = response.items.filter((item) => item.error).length;
+      this.deps.logger.debug(
+        `Bulk operation on ${this.deps.indexName} completed with ${errorCount} error(s)`
+      );
+    }
+    return response;
   }
 
   public async scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
@@ -85,15 +98,20 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       esClient: this.deps.esClient,
       indexName: this.deps.indexName,
       request,
+      logger: this.deps.logger,
     });
   }
 
   public async deleteByQuery(
     request: ExecutionsDeleteByQueryRequest
   ): Promise<estypes.DeleteByQueryResponse> {
-    return this.deps.esClient.deleteByQuery({
-      index: this.deps.indexName,
-      ...request,
-    });
+    return retryTransientEsErrors(
+      () =>
+        this.deps.esClient.deleteByQuery({
+          index: this.deps.indexName,
+          ...request,
+        }),
+      { logger: this.deps.logger }
+    );
   }
 }
