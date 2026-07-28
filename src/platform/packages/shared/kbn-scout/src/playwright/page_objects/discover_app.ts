@@ -1168,6 +1168,20 @@ export class DiscoverApp {
   }
 
   /**
+   * Clicks the expand/collapse toggle for the cascade row with the given id,
+   * without waiting for the resulting state change. Scoped to the row: while
+   * scrolled, the sticky pinned group header renders a `createPortal`
+   * duplicate of this same button elsewhere in the DOM (outside the row), so
+   * an unscoped page-wide testSubj locator can match two elements.
+   */
+  async clickCascadeRowToggle(rowId: string): Promise<void> {
+    await this.page
+      .locator(`[id="${rowId}"]`)
+      .locator(`[data-test-subj="toggle-row-${rowId}-button"]`)
+      .click();
+  }
+
+  /**
    * Toggles (expands/collapses) the cascade row with the given id and waits
    * for the `aria-expanded` state to flip before returning. Waits for the doc
    * table to finish rendering after an expand, since that triggers a fetch.
@@ -1176,10 +1190,7 @@ export class DiscoverApp {
     const row = this.page.locator(`[id="${rowId}"]`);
     const wasExpanded = (await row.getAttribute('aria-expanded')) === 'true';
 
-    // Scoped to `row`: while scrolled, the sticky pinned group header renders a
-    // `createPortal` duplicate of this same button elsewhere in the DOM (outside
-    // `row`), so an unscoped page-wide testSubj locator can match two elements.
-    await row.locator(`[data-test-subj="toggle-row-${rowId}-button"]`).click();
+    await this.clickCascadeRowToggle(rowId);
     await row
       .and(this.page.locator(`[aria-expanded="${!wasExpanded}"]`))
       .waitFor({ state: 'attached' });
@@ -1213,5 +1224,17 @@ export class DiscoverApp {
     await this.getCascadeScrollContainer().evaluate((container, scrollDelta) => {
       container.scrollTop += scrollDelta;
     }, delta);
+  }
+
+  /**
+   * Waits for a just-performed scroll/expand of the cascade layout to be
+   * persisted for state restoration. Persistence is debounced/throttled
+   * internally with no externally observable signal, so callers must pause
+   * here before triggering a remount (e.g. switching tabs) or the
+   * just-performed change can be dropped and restored from stale state.
+   */
+  async waitForCascadeStatePersisted(): Promise<void> {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(500);
   }
 }

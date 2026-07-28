@@ -14,12 +14,16 @@
  * to classic mode) doesn't error.
  */
 
+import { EuiDataGridWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
 import { runCascadeQuery } from '../../../fixtures/common/helpers';
 
 const STATS_QUERY =
   'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY clientip';
+// Groups by two fields, which exceeds the configured suggested-group limit.
+const OVER_GROUP_LIMIT_STATS_QUERY =
+  'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY clientip, extension';
 
 spaceTest.describe(
   'Discover cascade layout - row actions, fullscreen, and mode switches',
@@ -45,6 +49,13 @@ spaceTest.describe(
         const { discover } = pageObjects;
 
         await spaceTest.step(
+          'a grouping query that exceeds the suggested group limit does not show the cascade layout',
+          async () => {
+            expect(await runCascadeQuery(pageObjects, OVER_GROUP_LIMIT_STATS_QUERY)).toBe(false);
+          }
+        );
+
+        await spaceTest.step(
           'an ES|QL grouping query shows the cascade layout with a group count',
           async () => {
             expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
@@ -67,11 +78,22 @@ spaceTest.describe(
         await spaceTest.step('expanding a row and entering/exiting fullscreen works', async () => {
           await discover.toggleCascadeLayoutRow(firstRowId);
 
-          await page.testSubj.click('dataGridFullScreenButton');
-          await expect(page.locator('.euiDataGrid--fullScreen')).toBeVisible();
+          // Scoped to the expanded row: while scrolled, the sticky pinned group header
+          // renders a `createPortal` duplicate of row content elsewhere in the DOM, so an
+          // unscoped page-wide `discoverDocTable` locator can match the wrong copy. The
+          // locator must resolve to `.euiDataGrid` itself (not its `discoverDocTable`
+          // container) since that's the element EUI toggles the fullscreen class on.
+          const expandedRowGrid = new EuiDataGridWrapper(page, {
+            locator: `[id="${firstRowId}"] [data-test-subj="discoverDocTable"] .euiDataGrid`,
+          });
+          expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
 
-          await page.testSubj.click('dataGridFullScreenButton');
-          await expect(page.locator('.euiDataGrid--fullScreen')).toBeHidden();
+          await expandedRowGrid.openFullScreenMode();
+          expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
+
+          await expandedRowGrid.closeFullScreenMode();
+          // Rows are still rendered (the grid didn't unmount/lose its data) after exiting fullscreen.
+          expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
         });
 
         await spaceTest.step(

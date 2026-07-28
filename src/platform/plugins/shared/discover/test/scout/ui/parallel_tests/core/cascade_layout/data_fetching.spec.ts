@@ -145,7 +145,7 @@ spaceTest.describe(
 
     spaceTest(
       'keeps the fetch active when switching tabs quickly',
-      async ({ page, pageObjects, network }) => {
+      async ({ pageObjects, network }) => {
         const { discover, unifiedTabs } = pageObjects;
 
         expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
@@ -158,13 +158,8 @@ spaceTest.describe(
 
         const requestCount = await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, async () => {
           // Click without waiting for the row to finish expanding so the fetch
-          // is still in flight when tabs are switched away and back. Scoped to
-          // the row itself since a sticky pinned header can portal-duplicate
-          // this same button elsewhere in the DOM while scrolled.
-          await page
-            .locator(`[id="${firstRowId}"]`)
-            .locator(`[data-test-subj="toggle-row-${firstRowId}-button"]`)
-            .click();
+          // is still in flight when tabs are switched away and back.
+          await discover.clickCascadeRowToggle(firstRowId);
           await unifiedTabs.selectTab(1);
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
