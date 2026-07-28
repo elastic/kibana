@@ -44,11 +44,17 @@ SERVERLESS_EXIT=0
 wait $STACK_PID || STACK_EXIT=$?
 wait $SERVERLESS_PID || SERVERLESS_EXIT=$?
 
-if [ $STACK_EXIT -ne 0 ] || [ $SERVERLESS_EXIT -ne 0 ]; then
+# Post the PR comment whenever there is a pull request, regardless of exit code.
+# The notifier no-ops when a report has no caught changes, so posting is always
+# safe here and is decoupled from whether the check failed.
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
   echo --- Notify API owners
-  if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-    ts-node .buildkite/scripts/steps/checks/notify_api_contract_owners.ts \
-      "$STACK_REPORT" "$SERVERLESS_REPORT" || echo "Warning: failed to post PR notification"
-  fi
+  ts-node .buildkite/scripts/steps/checks/notify_api_contract_owners.ts \
+    "$STACK_REPORT" "$SERVERLESS_REPORT" || echo "Warning: failed to post PR notification"
+fi
+
+# Fail the step if either distribution's check failed. Kept separate from the
+# comment step above so a genuine failure no longer gates whether the comment runs.
+if [ $STACK_EXIT -ne 0 ] || [ $SERVERLESS_EXIT -ne 0 ]; then
   exit 1
 fi
