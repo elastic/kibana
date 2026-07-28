@@ -116,7 +116,7 @@ export const Sentry: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.sentry.auth.bearer.token.helpText',
                 {
                   defaultMessage:
-                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes. Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
+                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add event:admin too if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
                 }
               ),
             },
@@ -277,7 +277,7 @@ export const Sentry: ConnectorSpec = {
     assignIssue: {
       isTool: true,
       description:
-        'Assign a Sentry issue to a user (by email/username, or "me") or a team (using "team:<team-slug>"), so automated routing puts the error group in front of the right owner.',
+        'Assign a Sentry issue to a user (by primary email or "user:<user-id>") or a team (using "team:<team-slug>"), so automated routing puts the error group in front of the right owner.',
       input: SentryAssignIssueInputSchema,
       handler: async (ctx, input: SentryAssignIssueInput) => {
         try {
@@ -346,7 +346,12 @@ export const Sentry: ConnectorSpec = {
           const response = await ctx.client.put(
             `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/issues/`,
             body,
-            { params: { id: input.issueIds } }
+            {
+              params: { id: input.issueIds },
+              // Sentry expects the repeated "?id=1&id=2" form; axios's default
+              // array serialization ("id[]=1&id[]=2") is rejected upstream.
+              paramsSerializer: { indexes: null },
+            }
           );
           return { updated: response.data };
         } catch (error) {

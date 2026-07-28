@@ -116,7 +116,7 @@ export const SentryAssignIssueInputSchema = z.object({
     .min(1)
     .max(320)
     .describe(
-      'Who to assign the issue to: a user email/username, or "team:<team-slug>" to assign to a team. Use "me" to self-assign.'
+      'Who to assign the issue to. Accepts a user\'s primary email, "user:<user-id>", or "team:<team-slug>" to assign to a team. Sentry rejects other formats (e.g. "me" or a bare username) with a 400.'
     ),
 });
 export type SentryAssignIssueInput = z.infer<typeof SentryAssignIssueInputSchema>;
@@ -181,7 +181,9 @@ export const SentryBulkUpdateIssuesInputSchema = z.object({
     .string()
     .max(320)
     .optional()
-    .describe('Reassign all named issues to this user email/username or "team:<team-slug>".'),
+    .describe(
+      'Reassign all named issues to this user\'s primary email, "user:<user-id>", or "team:<team-slug>".'
+    ),
 });
 export type SentryBulkUpdateIssuesInput = z.infer<typeof SentryBulkUpdateIssuesInputSchema>;
 

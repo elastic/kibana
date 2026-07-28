@@ -249,7 +249,7 @@ describe('Sentry', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://sentry.io/api/0/projects/my-org/backend/issues/',
         { status: 'resolved' },
-        { params: { id: ['1', '2', '3'] } }
+        { params: { id: ['1', '2', '3'] }, paramsSerializer: { indexes: null } }
       );
     });
 
@@ -265,7 +265,7 @@ describe('Sentry', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://sentry.io/api/0/projects/my-org/backend/issues/',
         { assignedTo: 'me' },
-        { params: { id: ['1'] } }
+        { params: { id: ['1'] }, paramsSerializer: { indexes: null } }
       );
     });
   });
