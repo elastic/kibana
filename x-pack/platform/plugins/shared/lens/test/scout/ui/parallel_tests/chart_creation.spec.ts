@@ -83,7 +83,9 @@ spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => 
 
       // The previous split (`terms of ip`) should be preserved as the first auto-generated
       // filter, alongside the newly added one.
-      await expect.poll(() => lens.getFiltersAggLabels()).toStrictEqual([`"ip" : *`, `geo.src : CN`]);
+      await expect
+        .poll(() => lens.getFiltersAggLabels())
+        .toStrictEqual([`"ip" : *`, `geo.src : CN`]);
       await expect(lens.xyLegendItems).toHaveCount(2);
     }
   );
