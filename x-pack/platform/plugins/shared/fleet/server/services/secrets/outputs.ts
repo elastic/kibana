@@ -11,9 +11,11 @@ import type {
   SOSecretPath,
   KafkaOutput,
   NewRemoteElasticsearchOutput,
+  NewOtlpOutput,
   Output,
 } from '../../../common/types';
 import type { NewOutput } from '../../../common';
+import { isOtlpOutput } from '../../../common/services/output_helpers';
 import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 
@@ -119,6 +121,16 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
     }
   }
 
+  if (isOtlpOutput(output)) {
+    const otlpSecrets = output.secrets?.otlp_exporter;
+    if (typeof otlpSecrets?.api_key === 'object') {
+      outputSecretPaths.push({ id: otlpSecrets.api_key.id });
+    }
+    if (typeof otlpSecrets?.tls?.key_pem === 'object') {
+      outputSecretPaths.push({ id: otlpSecrets.tls.key_pem.id });
+    }
+  }
+
   return outputSecretPaths;
 }
 
@@ -144,6 +156,22 @@ function getOutputSecretPaths(
       outputSecretPaths.push({
         path: 'secrets.service_token',
         value: remoteESOutput.secrets.service_token,
+      });
+    }
+  }
+
+  if (isOtlpOutput({ type: outputType })) {
+    const otlpOutput = output as NewOtlpOutput;
+    if (otlpOutput.secrets?.otlp_exporter?.api_key) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.api_key',
+        value: otlpOutput.secrets.otlp_exporter.api_key,
+      });
+    }
+    if (otlpOutput.secrets?.otlp_exporter?.tls?.key_pem) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.key_pem',
+        value: otlpOutput.secrets.otlp_exporter.tls.key_pem,
       });
     }
   }

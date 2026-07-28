@@ -190,6 +190,19 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-otlp-output'): {
+        return mockOutputSO('existing-otlp-output', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+            compression: 'gzip',
+            timeout: '30s',
+          },
+        });
+      }
+
       default:
         return mockOutputSO(id, {
           type: 'remote_elasticsearch',
@@ -347,6 +360,23 @@ function getMockedEncryptedSoClient() {
           type: 'remote_elasticsearch',
           is_default: false,
           service_token: 'plain',
+        });
+      }
+      case outputIdToUuid('existing-otlp-output'): {
+        return mockOutputSO('existing-otlp-output', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+            compression: 'gzip',
+            timeout: '30s',
+          },
+          secrets: {
+            otlp_exporter: {
+              api_key: { id: 'otlp-api-key-secret-id' },
+            },
+          },
         });
       }
       default:
@@ -1339,6 +1369,82 @@ describe('Output Service', () => {
             { id: 'output-1' }
           )
         ).resolves.not.toThrow();
+      });
+    });
+
+    describe('otlp output', () => {
+      beforeEach(() => {
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: true,
+        } as any);
+        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+          managedOtlpOutput: true,
+        } as any);
+      });
+
+      afterEach(() => {
+        mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+      });
+
+      it('should throw if OTLP output type is not enabled', async () => {
+        const soClient = getMockedSoClient();
+        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+          managedOtlpOutput: false,
+        } as any);
+
+        await expect(
+          outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Test OTLP',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: 'https://otel.example.com:4317',
+                protocol: 'grpc',
+              },
+            },
+            { id: 'output-test' }
+          )
+        ).rejects.toThrow('OTLP output type is not enabled');
+      });
+
+      it('should create an otlp output and persist otlp_exporter config', async () => {
+        const soClient = getMockedSoClient();
+        mockedAgentPolicyService.list.mockResolvedValue({
+          items: [],
+        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test OTLP',
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+            },
+          },
+          { id: 'output-test' }
+        );
+
+        expect(soClient.create).toBeCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+            },
+          }),
+          expect.anything()
+        );
       });
     });
 
@@ -2601,6 +2707,114 @@ describe('Output Service', () => {
         hosts: ['0.0.0.0'],
         ssl: null,
       });
+    });
+
+    it('Should throw if OTLP output type is not enabled on update', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: false,
+      } as any);
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          name: 'Updated OTLP',
+        })
+      ).rejects.toThrow('OTLP output type is not enabled');
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
+    it('Should clear beats fields when changing an ES output to OTLP', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        type: 'otlp',
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc',
+        },
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+        hosts: null,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        config_yaml: null,
+        ssl: null,
+        shipper: null,
+        preset: null,
+        proxy_id: null,
+        write_to_logs_streams: null,
+        otel_exporter_config_yaml: null,
+        otel_disable_beatsauth: null,
+      });
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
+    it('Should clear otlp_exporter when changing an OTLP output to ES', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+        type: 'elasticsearch',
+        hosts: ['http://test:9200'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'elasticsearch',
+        hosts: ['http://test:9200'],
+        otlp_exporter: null,
+        preset: 'balanced',
+      });
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
+    it('Should preserve otlp_exporter on a same-type OTLP update', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+      } as any);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+        otlp_exporter: {
+          endpoint: 'https://new.example.com:4317',
+          protocol: 'grpc',
+        },
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'otlp',
+        otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
+      });
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     });
   });
 
