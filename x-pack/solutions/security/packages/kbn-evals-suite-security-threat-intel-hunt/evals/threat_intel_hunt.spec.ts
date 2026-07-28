@@ -70,19 +70,27 @@ const toQuestion = (report: (typeof REPORTS)[number]): string =>
   `Report title: ${report.input?.title}\n${report.input?.body_text}`;
 
 const buildExamples = (): HuntEvalExample[] =>
-  REPORTS.map((report) => ({
-    id: `hunt-${report.input?.report_id}`,
-    input: { question: toQuestion(report) },
-    output: {
-      expectedTechniques: report.output?.techniques ?? [],
-      minBehaviors: 1,
-      maxBehaviors: (report.output?.techniques.length ?? 0) + 2, // allow some leniency
-    },
-    metadata: {
-      report_id: report.input?.report_id ?? 'unknown',
-      category: 'threat-report',
-    },
-  }));
+  REPORTS.map((report) => {
+    const expectedTechniques = report.output?.techniques ?? [];
+    const isBenign = expectedTechniques.length === 0;
+    return {
+      id: `hunt-${report.input?.report_id}`,
+      input: { question: toQuestion(report) },
+      output: {
+        expectedTechniques,
+        // Benign reports (no adversary activity) correctly yield zero
+        // extracted behaviors — requiring minBehaviors=1 there would
+        // penalize the model for correctly declining to hallucinate a
+        // technique that isn't present in the report.
+        minBehaviors: isBenign ? 0 : 1,
+        maxBehaviors: expectedTechniques.length + 2, // allow some leniency
+      },
+      metadata: {
+        report_id: report.input?.report_id ?? 'unknown',
+        category: 'threat-report',
+      },
+    };
+  });
 
 // ── Evaluator selection ──────────────────────────────────────────────────────
 
@@ -145,8 +153,14 @@ base.describe(
             ?.data as { behaviors?: unknown[] } | undefined;
           const behaviorCount = behaviorResultData?.behaviors?.length ?? 0;
 
+          const isBenign = example.output.expectedTechniques.length === 0;
+
           // ── Skill-invocation gate ───────────────────────────────────────────
+          // For benign reports (no adversary activity expected), correctly
+          // declining to invoke hunt_behavior at all is a valid outcome —
+          // don't require invocation just to prove it returns zero behaviors.
           const skillInvoked = toolIds.has(THREAT_INTEL_TOOL_IDS.hunt_behavior);
+          const skillInvocationOk = isBenign || skillInvoked;
 
           // ── Schema-valid gate ───────────────────────────────────────────────
           const argsValid = behaviorCount >= example.output.minBehaviors;
@@ -156,11 +170,16 @@ base.describe(
           // sub-techniques (T1566.001 vs T1566) or group techniques. We
           // therefore check that *at least one* expected technique appears
           // in the output text, rather than requiring exact parity.
+          // Benign reports have an empty expectedTechniques list — there is
+          // nothing to cover, so treat that as full (1.0) coverage rather
+          // than 0/0 = NaN, which would otherwise always fail the >= 0.5 gate.
           const messageLower = response.message.toLowerCase();
           const techniqueCoverage =
-            example.output.expectedTechniques.filter((tid) =>
-              messageLower.includes(tid.toLowerCase())
-            ).length / example.output.expectedTechniques.length;
+            example.output.expectedTechniques.length === 0
+              ? 1
+              : example.output.expectedTechniques.filter((tid) =>
+                  messageLower.includes(tid.toLowerCase())
+                ).length / example.output.expectedTechniques.length;
 
           log.info(
             `[L2] ${example.id} → skillInvoked=${skillInvoked}, ` +
@@ -168,14 +187,15 @@ base.describe(
               `coverage=${(techniqueCoverage * 100).toFixed(0)}%`
           );
 
-          const success = skillInvoked && argsValid && techniqueCoverage >= 0.5;
+          const success = skillInvocationOk && argsValid && techniqueCoverage >= 0.5;
 
           // Hard gate: the returned scorecard object is telemetry, not a
           // Playwright assertion — without an explicit expect(), a failing
           // `success` here would silently report as a passing test.
           expect(success).to.eql(
             true,
-            `[L2] ${example.id} failed quality gate — skillInvoked=${skillInvoked}, ` +
+            `[L2] ${example.id} failed quality gate — skillInvoked=${skillInvoked} ` +
+              `(benign=${isBenign}), ` +
               `argsValid=${argsValid} (${behaviorCount} behaviors, ` +
               `min=${example.output.minBehaviors}), ` +
               `techniqueCoverage=${(techniqueCoverage * 100).toFixed(0)}%`
@@ -184,7 +204,9 @@ base.describe(
           return {
             success,
             explanation:
-              `Skill invoked: ${skillInvoked}. ` +
+              `Skill invoked: ${skillInvoked}${
+                isBenign ? ' (benign — invocation optional)' : ''
+              }. ` +
               `Args valid: ${argsValid} (${behaviorCount} behaviors). ` +
               `Technique coverage: ${(techniqueCoverage * 100).toFixed(0)}%.`,
             scorecard: {
