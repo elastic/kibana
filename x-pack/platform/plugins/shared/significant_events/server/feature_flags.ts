@@ -165,7 +165,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesDescription',
                 {
                   defaultMessage:
-                    'Date-histogram bucket width used by the scheduled Significant Events change-point detection in this Kibana space. Wider buckets smooth out short-term burst noise.',
+                    'Outer date-histogram bucket width for the critical analysis profile in scheduled Significant Events change-point detection. Must be at least 1 minute (MATCH rules emit closed-minute points). Default-severity rules keep a fixed 5-minute profile.',
                 }
               ),
               type: 'number',
@@ -192,7 +192,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesDescription',
                 {
                   defaultMessage:
-                    'Time window analysed by the scheduled Significant Events change-point detection in this Kibana space. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets.',
+                    'Critical analysis lookback (minutes) for scheduled Significant Events change-point detection. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets. Default-severity rules keep a fixed 125-minute profile.',
                 }
               ),
               type: 'number',
