@@ -299,8 +299,8 @@ describe('SmlService', () => {
       expect(esql).toContain('| FUSE');
       // METADATA required for FUSE (_id, _index, _score columns)
       expect(esql).toContain('METADATA _id, _index, _score');
-      // Space filter uses MV_CONTAINS (not `==`) for multi-value safety
-      expect(esql).toContain('| WHERE MV_CONTAINS(spaces, ?)');
+      // No separate space filter — space scoping is implicit in composite privilege tokens.
+      expect(esql).not.toContain('| WHERE MV_CONTAINS(spaces, ?)');
       // Two FORK branches: BM25 (OR across text fields) + semantic (OR across semantic multi-fields).
       // Per-branch candidate depth is size(10) × MAX_SCAN_MULTIPLIER(10) for RRF recall.
       // SORT _score DESC inside each branch is required so LIMIT selects the top-scoring
@@ -316,8 +316,10 @@ describe('SmlService', () => {
       expect(esql).toContain('| LIMIT 10');
       // Sorted by relevance score after FUSE
       expect(esql).toContain('| SORT _score DESC');
-      // spaceId is first positional param
-      expect(params![0]).toBe('default');
+      // No spaceId positional param (space scoping is now handled by composite tokens in the authz filter).
+      if (params) {
+        expect(params).not.toContain('default');
+      }
     });
 
     it('uses plain sorted scan for query "*" (no FORK/FUSE)', async () => {
@@ -399,15 +401,15 @@ describe('SmlService', () => {
       // Agent tag filter with MV_CONTAINS
       expect(esql).toContain('| WHERE MV_CONTAINS(tags, ?)');
 
-      // Positional params: [spaceId, scopeTypeId, scopeUri, filterType1, filterType2, filterTag, ...queryX6]
-      expect(params![0]).toBe('default'); // spaceId
-      expect(params![1]).toBe('connector'); // constraints typeId
-      expect(params![2]).toBe('connector://gh-1'); // constraints origin URI
-      expect(params![3]).toBe('connector'); // filter type 1
-      expect(params![4]).toBe('dashboard'); // filter type 2
-      expect(params![5]).toBe('production'); // filter tag
+      // Positional params: [scopeTypeId, scopeUri, filterType1, filterType2, filterTag, ...queryX6]
+      // (No spaceId param — space scoping is handled by composite privilege tokens in the authz filter.)
+      expect(params![0]).toBe('connector'); // constraints typeId
+      expect(params![1]).toBe('connector://gh-1'); // constraints origin URI
+      expect(params![2]).toBe('connector'); // filter type 1
+      expect(params![3]).toBe('dashboard'); // filter type 2
+      expect(params![4]).toBe('production'); // filter tag
       // query string repeated for each of the 6 MATCH branches
-      expect(params!.slice(6)).toEqual(Array(6).fill('github'));
+      expect(params!.slice(5)).toEqual(Array(6).fill('github'));
     });
 
     it('passes query to MATCH branches for all BM25 and semantic fields', async () => {
@@ -439,9 +441,9 @@ describe('SmlService', () => {
       expect(esql).toContain('MATCH(title.semantic, ?)');
       expect(esql).toContain('MATCH(description.semantic, ?)');
       expect(esql).toContain('MATCH(content.semantic, ?)');
-      // Query repeated six times (once per MATCH branch), after the spaceId param
+      // Query repeated six times (once per MATCH branch); no spaceId param prefix.
       const queryString = 'how is the fleet performing this quarter';
-      expect(params!.slice(1)).toEqual(Array(6).fill(queryString));
+      expect(params).toEqual(Array(6).fill(queryString));
     });
 
     it('returns baseline fields only when no fields param is provided', async () => {
@@ -1210,7 +1212,10 @@ describe('SmlService', () => {
       expect(result).toEqual({ results: [] });
     });
 
-    it('applies permission filtering when securityAuthz is present', async () => {
+    it('returns all ES results without post-filtering (DLS handles permission enforcement)', async () => {
+      // Authorization for autocomplete is enforced by Document Level Security on the SML
+      // index at the Lucene level — there is no JS post-filter. The autocomplete function
+      // returns whatever ES returns after DLS has already filtered the candidate set.
       const securityAuthz = createMockSecurityAuthzPartial(
         ['saved_object:dashboard/get'],
         ['saved_object:connector/get']
@@ -1219,7 +1224,8 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      // Documents store composite `space|action` tokens.
+      // In production, DLS would filter the second entry before ES returns results.
+      // In tests, both entries are returned by the mock to confirm no JS post-filtering occurs.
       esClient.search.mockResolvedValue({
         hits: {
           total: 2,
@@ -1237,9 +1243,9 @@ describe('SmlService', () => {
             },
             {
               _source: {
-                id: 'entry-denied',
+                id: 'entry-with-perms',
                 type: 'connector',
-                title: 'Denied',
+                title: 'Connector',
                 origin: { uri: 'c1' },
                 spaces: ['default'],
                 permissions: makePermissions(['default|saved_object:connector/get']),
@@ -1258,8 +1264,10 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(result.results).toHaveLength(1);
+      // Both results are returned — DLS (not JS) enforces permissions.
+      expect(result.results).toHaveLength(2);
       expect(result.results[0].id).toBe('entry-allowed');
+      expect(result.results[1].id).toBe('entry-with-perms');
     });
 
     describe('pre-aggregation authz filter (MV_CONTAINS subset)', () => {

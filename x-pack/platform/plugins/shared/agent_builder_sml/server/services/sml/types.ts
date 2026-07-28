@@ -31,8 +31,12 @@ interface DiscoveryLabel {
 }
 
 /**
- * A single Kibana feature privilege required to access an entry
- * (e.g., `saved_object:lens/get`, `action:execute`).
+ * A single Kibana feature privilege required to access an entry.
+ *
+ * `name` is a composite `space|action` token, e.g.
+ * `"default|saved_object:dashboard/get"`. The space prefix ensures tokens for
+ * different spaces are distinct, so a single `MV_CONTAINS` subset query can
+ * enforce both space scoping and action authorization in one pass.
  */
 interface SmlKibanaPrivilege {
   name: string;
@@ -41,8 +45,14 @@ interface SmlKibanaPrivilege {
 /**
  * Permissions required to access an entry.
  *
+ * `privileges` is an array of composite `space|action` tokens (see
+ * {@link SmlKibanaPrivilege}). `count` stores the number of tokens and is used
+ * by Elasticsearch's `terms_set` query with `minimum_should_match_field` to
+ * express AND-semantics (all required privileges must be held).
+ *
  * The `kibana` sub-object is always present (with a possibly-empty array)
- * on stored documents to keep the schema rigid and predictable.
+ * on stored documents to keep the schema rigid and predictable. An empty
+ * `privileges` array means the entry is public within any space it belongs to.
  */
 export interface SmlPermissions {
   kibana: { privileges: SmlKibanaPrivilege[]; count: number };
@@ -222,16 +232,14 @@ export interface SmlDocument {
   created_at: string;
   /** Timestamp when last updated */
   updated_at: string;
-  /** Space IDs this item belongs to */
-  spaces: string[];
   /**
-   * Permissions required to access the underlying element. The `name` of each
-   * privilege is a composite `space|action` token (e.g. `"default|saved_object:dashboard/get"`).
-   * Always present on stored documents; the inner privileges array may be empty.
-   * The `count` field stores the number of composite tokens in `privileges`,
-   * used by Elasticsearch's `terms_set` query with `minimum_should_match_field`
-   * for AND-semantics enforcement via the ImplicitPrivilegesProvider.
+   * Space IDs this item belongs to. Authoritative source of space membership
+   * — composite privilege tokens in `permissions` are derived from this list.
+   * Also used by callers to determine which spaces a document belongs to for
+   * display purposes.
    */
+  spaces: string[];
+  /** Permissions required to access the underlying element. See {@link SmlPermissions}. */
   permissions: SmlPermissions;
   /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
@@ -288,9 +296,9 @@ export interface SmlAutocompleteResult {
   type: string;
   title: string;
   origin: { uri: string };
-  /** Used server-side for permission filtering; not exposed in the HTTP response. */
+  /** Stored permissions for the entry; not exposed in the HTTP response. */
   permissions: SmlPermissions;
-  /** Used server-side for space filtering; not exposed in the HTTP response. */
+  /** Space IDs this item belongs to; not exposed in the HTTP response. */
   spaces: string[];
   /**
    * The specific `discovery_labels` entries that matched the typed prefix.

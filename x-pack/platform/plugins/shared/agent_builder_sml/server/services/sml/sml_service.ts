@@ -121,11 +121,11 @@ class SmlServiceImpl implements SmlServiceInstance {
         size = 10,
         spaceId,
         esClient,
-        request,
+        request: _request,
         constraints,
         filters,
       }) => {
-        const rawResults = await autocompleteSml({
+        return autocompleteSml({
           query,
           size,
           spaceId,
@@ -133,13 +133,6 @@ class SmlServiceImpl implements SmlServiceInstance {
           logger,
           constraints,
           filters,
-        });
-        return filterResultsByPermissions({
-          searchResult: rawResults,
-          spaceId,
-          request,
-          securityAuthz: this.securityAuthz,
-          logger,
         });
       },
       checkItemsAccess: async ({ ids, spaceId, esClient, request }) => {
@@ -264,7 +257,7 @@ const enumerateDistinctValues = async ({
   field: string;
   esClient: IScopedClusterClient;
   logger: Logger;
-  prefix?: string;
+  prefix: string;
   pageSize?: number;
   maxPages?: number;
 }): Promise<string[]> => {
@@ -277,7 +270,7 @@ const enumerateDistinctValues = async ({
         index: smlIndexName,
         field,
         size: pageSize,
-        ...(prefix !== undefined ? { string: prefix } : {}),
+        string: prefix,
         ...(searchAfter !== undefined ? { search_after: searchAfter } : {}),
       });
 
@@ -395,109 +388,6 @@ const resolveAuthorizedUniverse = async ({
     authorizedActions: authorizedTokens,
     kibanaUniverseNonEmpty,
   };
-};
-
-/**
- * Filter a single page of results by the current user's Kibana privileges.
- * Every action an entry requires must be authorized for the user;
- * entries with no `kibana.privileges` pass trivially.
- *
- * Privileges are stored as composite `space|action` tokens. Only tokens for the
- * current space are considered; raw action strings are parsed by stripping the
- * `spaceId|` prefix before the `_has_privileges` call.
- *
- * Used by the search loop (per page) and directly by autocomplete (single
- * pass). When the security plugin is absent (dev / test), the function is
- * a no-op to preserve open-access semantics.
- */
-const filterPageByPermissions = async <T extends { permissions: SmlPermissions }>(
-  items: T[],
-  {
-    spaceId,
-    request,
-    securityAuthz,
-    logger,
-  }: {
-    spaceId: string;
-    request: KibanaRequest;
-    securityAuthz?: AuthorizationServiceSetup;
-    logger: Logger;
-  }
-): Promise<T[]> => {
-  if (!securityAuthz || items.length === 0) return items;
-
-  const spacePrefix = `${spaceId}|`;
-  const separator = '|';
-
-  // Collect all composite tokens for the current space across all items.
-  const allTokensForSpace = [
-    ...new Set(
-      items.flatMap((hit) =>
-        hit.permissions.kibana.privileges
-          .map((p) => p.name)
-          .filter((name) => name.startsWith(spacePrefix))
-      )
-    ),
-  ];
-
-  if (allTokensForSpace.length === 0) {
-    // No space-specific tokens: items are either public (no perms) or from another space.
-    // Public items pass; items whose only perms are for other spaces also pass (space filter
-    // upstream should have already scoped the result set).
-    return items;
-  }
-
-  // Strip prefix to get unique raw action strings for the _has_privileges call.
-  const uniqueRawActions = [
-    ...new Set(allTokensForSpace.map((token) => token.substring(token.indexOf(separator) + 1))),
-  ];
-
-  const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: uniqueRawActions,
-    request,
-    securityAuthz,
-    logger,
-  });
-
-  return items.filter((hit) => {
-    const spaceTokens = hit.permissions.kibana.privileges
-      .map((p) => p.name)
-      .filter((name) => name.startsWith(spacePrefix));
-    if (spaceTokens.length === 0) {
-      // No tokens for this space → public item.
-      return true;
-    }
-    return spaceTokens.every((token) => {
-      const rawAction = token.substring(token.indexOf(separator) + 1);
-      return authorizedPerms.has(rawAction);
-    });
-  });
-};
-
-/**
- * Wrap filterPageByPermissions for callers that hold a `{ results }` object.
- * Used by the autocomplete path.
- */
-const filterResultsByPermissions = async <T extends { permissions: SmlPermissions }>({
-  searchResult,
-  spaceId,
-  request,
-  securityAuthz,
-  logger,
-}: {
-  searchResult: { results: T[] };
-  spaceId: string;
-  request: KibanaRequest;
-  securityAuthz?: AuthorizationServiceSetup;
-  logger: Logger;
-}): Promise<{ results: T[] }> => {
-  const filtered = await filterPageByPermissions(searchResult.results, {
-    spaceId,
-    request,
-    securityAuthz,
-    logger,
-  });
-  return { results: filtered };
 };
 
 /**
@@ -660,17 +550,20 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  *
  * Empty string or `*`: plain sorted scan — no FORK/FUSE, no relevance signal.
  *
- * Spaces and tag filters use MV_CONTAINS rather than `==` because `==` returns
- * null (not false) on multi-value fields — an ES|QL semantic that would
- * silently drop multi-space / multi-tag documents.
+ * Tag filters use MV_CONTAINS rather than `==` because `==` returns null (not
+ * false) on multi-value fields — an ES|QL semantic that would silently drop
+ * multi-tag documents.
  *
  * Authorization is enforced in-query via the `authz` param (pre-aggregation):
- * a doc is authorized iff its required permissions are a subset of what the
- * caller holds. `MV_CONTAINS(?authorized, permissions...name)` expresses
- * exactly that (the authorized set is bound as a single multivalue param) —
- * and because a null/empty permission field is treated as the empty set,
- * public KIs (no required perms) pass automatically. This replaces the former
- * overfetch + JS post-filter, so the outer LIMIT is just `size`.
+ * a doc is authorized iff its required composite privileges (`space|action`
+ * tokens) are a subset of what the caller holds. `MV_CONTAINS(?authorized,
+ * permissions...name)` expresses exactly that (the authorized set is bound as
+ * a single multivalue param) — and because a null/empty permission field is
+ * treated as the empty set, public KIs (no required perms) pass automatically.
+ * Space scoping is implicit in the tokens: each token encodes both the space
+ * and the action, so a separate `WHERE MV_CONTAINS(spaces, ?)` clause is
+ * unnecessary. This replaces the former overfetch + JS post-filter, so the
+ * outer LIMIT is just `size`.
  *
  * `references.uri` is extracted via EVAL before KEEP so the result column is
  * a flat keyword array that can be reconstructed into Array<{uri}> client-side.
@@ -679,7 +572,6 @@ const buildSmlEsqlQuery = ({
   query,
   size,
   fields,
-  spaceId,
   constraints,
   filters,
   authz,
@@ -687,7 +579,6 @@ const buildSmlEsqlQuery = ({
   query: string;
   size: number;
   fields?: string[];
-  spaceId: string;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
   authz?: AuthorizedUniverse;
@@ -695,10 +586,6 @@ const buildSmlEsqlQuery = ({
   const params: unknown[] = [];
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
-
-  // spaces filter (see docblock for the MV_CONTAINS rationale)
-  params.push(spaceId);
-  lines.push('| WHERE MV_CONTAINS(spaces, ?)');
 
   // Authorization pre-filter. The authorized set is bound as a single
   // multivalue param (ES|QL rejects an inline `[?, ?]` list). A clause is
@@ -931,10 +818,12 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * `retriever.rrf fields` two-retriever structure. Empty string or `*`: plain
  * sorted scan, no relevance signal.
  *
- * Filter composition: spaces (MV_CONTAINS) + authz (MV_CONTAINS) + constraints
- * (runtime-imposed per-type id-allowlist) + agent filters — each component is a
- * separate WHERE clause (ANDed across dimensions); within types and tags,
- * matching is OR (any listed value matches).
+ * Filter composition: authz (MV_CONTAINS subset of composite `space|action`
+ * tokens) + constraints (runtime-imposed per-type id-allowlist) + agent filters
+ * — each component is a separate WHERE clause (ANDed across dimensions); within
+ * types and tags, matching is OR (any listed value matches). Space scoping is
+ * implicit: composite tokens encode both the space and the action, so no
+ * separate space WHERE clause is needed.
  */
 const searchSml = async ({
   query,
@@ -974,7 +863,6 @@ const searchSml = async ({
     query,
     size,
     fields,
-    spaceId,
     constraints,
     filters,
     authz,
