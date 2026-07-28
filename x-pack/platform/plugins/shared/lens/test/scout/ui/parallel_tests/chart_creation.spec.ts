@@ -7,26 +7,16 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
-import type { ImportedSavedObject } from '../fixtures/open_in_lens_helpers';
+import { testData, getImportedSavedObjectId } from '../fixtures';
 
 const NEW_CHART_TITLE = 'A fancy lens test';
-
-/** Resolves the new ID of an imported Lens visualization by its fixture title. */
-const getImportedLensId = (imported: ImportedSavedObject[], title: string): string => {
-  const so = imported.find((s) => s.type === 'lens' && s.title === title);
-  if (!so?.id) {
-    throw new Error(`Lens visualization "${title}" was not imported`);
-  }
-  return so.id;
-};
 
 spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => {
   let xyVisId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);
-    xyVisId = getImportedLensId(imported, testData.LENS_BASIC_TITLES.XY_VIS);
+    xyVisId = getImportedSavedObjectId(imported, 'lens', testData.LENS_BASIC_TITLES.XY_VIS);
 
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
     await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
@@ -44,7 +34,7 @@ spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => 
 
   spaceTest(
     'creates and saves an XY area chart, then reopens it with the same configuration',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       const { lens, visualize } = pageObjects;
 
       await spaceTest.step('open a new Lens editor', async () => {
@@ -69,17 +59,16 @@ spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => 
         await visualize.goto();
         await visualize.clickSavedVisualization(NEW_CHART_TITLE);
         await lens.waitForVisualization('xyVisChart');
-        expect(await lens.getChartTitle()).toBe(NEW_CHART_TITLE);
-        // `.echLegendItem` is the only stable selector for xy legend items — elastic-charts
-        // does not expose a `data-test-subj`. Terms uses DEFAULT_SIZE=9, plus "Other" = 10.
-        await expect(page.locator('.echLegendItem')).toHaveCount(10);
+        await expect.poll(() => lens.getChartTitle()).toBe(NEW_CHART_TITLE);
+        // Terms uses DEFAULT_SIZE=9, plus "Other" = 10.
+        await expect(lens.xyLegendItems).toHaveCount(10);
       });
     }
   );
 
   spaceTest(
     'preserves the split field when switching a saved XY chart to filters aggregation',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       const { lens } = pageObjects;
 
       await lens.openEditor(xyVisId, 'xyVisChart');
@@ -94,8 +83,8 @@ spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => 
 
       // The previous split (`terms of ip`) should be preserved as the first auto-generated
       // filter, alongside the newly added one.
-      expect(await lens.getFiltersAggLabels()).toStrictEqual([`"ip" : *`, `geo.src : CN`]);
-      await expect(page.locator('.echLegendItem')).toHaveCount(2);
+      await expect.poll(() => lens.getFiltersAggLabels()).toStrictEqual([`"ip" : *`, `geo.src : CN`]);
+      await expect(lens.xyLegendItems).toHaveCount(2);
     }
   );
 
@@ -106,6 +95,8 @@ spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => 
 
     await lens.switchLayerIndexPattern(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
 
-    expect(await lens.getSelectedLayerIndexPattern()).toBe(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
+    await expect
+      .poll(() => lens.getSelectedLayerIndexPattern())
+      .toBe(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
   });
 });

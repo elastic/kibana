@@ -119,18 +119,27 @@ export function createOpenInLensSuiteSetup({
   return { getDashboardId, beforeAll, beforeEach, afterAll };
 }
 
+/** Resolves a saved-object id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
+export function getImportedSavedObjectId(
+  imported: ImportedSavedObject[],
+  type: string,
+  title: string
+): string {
+  const so = imported.find(
+    (savedObject) => savedObject.type === type && savedObject.title === title
+  );
+  if (!so?.id) {
+    throw new Error(`${type} "${title}" was not imported`);
+  }
+  return so.id;
+}
+
 /** Resolves a dashboard id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
 export function getImportedDashboardId(
   imported: ImportedSavedObject[],
   dashboardTitle: string
 ): string {
-  const dashboard = imported.find(
-    (savedObject) => savedObject.type === 'dashboard' && savedObject.title === dashboardTitle
-  );
-  if (!dashboard?.id) {
-    throw new Error(`Dashboard "${dashboardTitle}" was not imported`);
-  }
-  return dashboard.id;
+  return getImportedSavedObjectId(imported, 'dashboard', dashboardTitle);
 }
 
 /** Clicks the "Open in Lens" panel action for the panel with the given title. */
