@@ -182,7 +182,7 @@ export const isNotFoundError = (error: unknown): boolean => {
  * `_source.permissions` is somehow missing (legacy / test docs).
  */
 const emptyPermissions = (): SmlDocument['permissions'] => ({
-  kibana: { privileges: [], count: 0 },
+  kibana: { privileges: { name: [], count: 0 } },
 });
 
 /**
@@ -444,9 +444,10 @@ const checkItemsAccess = async ({
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
+          const names = source.permissions?.kibana?.privileges?.name ?? [];
           return [
             source.id ?? '',
-            source.permissions?.kibana?.privileges?.map((p) => p.name) ?? [],
+            Array.isArray(names) ? names : [names],
           ] as [string, string[]];
         })
     );
@@ -891,8 +892,8 @@ const searchSml = async ({
       title: String(row[colIndex.get('title')!] ?? ''),
       origin: { uri: String(row[colIndex.get('origin_uri')!] ?? '') },
       permissions: (() => {
-        const privs = toStringArray(row[colIndex.get('perm_kibana')!]).map((name) => ({ name }));
-        return { kibana: { privileges: privs, count: privs.length } };
+        const names = toStringArray(row[colIndex.get('perm_kibana')!]);
+        return { kibana: { privileges: { name: names, count: names.length } } };
       })(),
     };
 
@@ -1102,7 +1103,7 @@ const autocompleteSml = async ({
               terms_set: {
                 [PERM_KIBANA_FIELD]: {
                   terms: authz.authorizedActions,
-                  minimum_should_match_field: 'permissions.kibana.count',
+                  minimum_should_match_field: 'permissions.kibana.privileges.count',
                 },
               },
             },

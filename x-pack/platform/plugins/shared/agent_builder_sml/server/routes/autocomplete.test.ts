@@ -85,7 +85,7 @@ describe('registerAutocompleteRoute', () => {
         type: 'connector',
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
-        permissions: { kibana: { privileges: [], count: 0 } },
+        permissions: { kibana: { privileges: { name: [], count: 0 } } },
         matched_discovery_labels: [
           { value: 'GitHub Connector', kind: 'title' },
           { value: 'github', kind: 'tagline' },
@@ -120,7 +120,7 @@ describe('registerAutocompleteRoute', () => {
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
-        permissions: { kibana: { privileges: [], count: 0 } },
+        permissions: { kibana: { privileges: { name: [], count: 0 } } },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
@@ -139,7 +139,7 @@ describe('registerAutocompleteRoute', () => {
         title: 'V',
         origin: { uri: 'v-1' },
         permissions: {
-          kibana: { privileges: [{ name: 'saved_object:visualization/get' }], count: 1 },
+          kibana: { privileges: { name: 'saved_object:visualization/get', count: 1 } },
         },
       },
     ];

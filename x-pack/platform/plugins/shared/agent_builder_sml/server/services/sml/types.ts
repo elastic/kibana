@@ -31,24 +31,17 @@ interface DiscoveryLabel {
 }
 
 /**
- * A single Kibana feature privilege required to access an entry.
- *
- * `name` is a composite `space|action` token, e.g.
- * `"default|saved_object:dashboard/get"`. The space prefix ensures tokens for
- * different spaces are distinct, so a single `MV_CONTAINS` subset query can
- * enforce both space scoping and action authorization in one pass.
- */
-interface SmlKibanaPrivilege {
-  name: string;
-}
-
-/**
  * Permissions required to access an entry.
  *
- * `privileges` is an array of composite `space|action` tokens (see
- * {@link SmlKibanaPrivilege}). `count` stores the number of *raw* privileges
- * required (i.e. `privileges.length` before the space × action cross-product)
- * and is used by Elasticsearch's `terms_set` query with
+ * `privileges.name` is a multi-value keyword field of composite `space|action`
+ * tokens, e.g. `"default|saved_object:dashboard/get"`. The space prefix
+ * ensures tokens for different spaces are distinct, so a single
+ * `MV_CONTAINS` or `terms_set` query can enforce both space scoping and
+ * action authorization in one pass.
+ *
+ * `privileges.count` stores the number of *raw* privileges required (i.e.
+ * the number of distinct actions, before the space × action cross-product).
+ * It is used by Elasticsearch's `terms_set` query with
  * `minimum_should_match_field` to express AND-semantics: the caller must hold
  * all N required privileges in the current space.
  *
@@ -56,12 +49,20 @@ interface SmlKibanaPrivilege {
  * hooks; any value supplied there is ignored. It is optional here so that hook
  * return values and intermediate shapes are not required to include it.
  *
- * The `kibana` sub-object is always present (with a possibly-empty array)
- * on stored documents to keep the schema rigid and predictable. An empty
- * `privileges` array means the entry is public within any space it belongs to.
+ * The `kibana` sub-object is always present on stored documents. An empty
+ * `privileges.name` array (and `count: 0`) means the entry is public within
+ * any space it belongs to.
+ *
+ * This shape mirrors the Elasticsearch index template mappings at
+ * `permissions.kibana.privileges.{name, count}`.
  */
 export interface SmlPermissions {
-  kibana: { privileges: SmlKibanaPrivilege[]; count?: number };
+  kibana: {
+    privileges: {
+      name: string | string[];
+      count?: number;
+    };
+  };
 }
 
 /**

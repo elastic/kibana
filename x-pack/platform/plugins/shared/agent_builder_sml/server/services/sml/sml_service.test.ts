@@ -173,7 +173,7 @@ const createNotFoundError = () =>
  * Build a fully-shaped `permissions` object for fixtures and assertions.
  */
 const makePermissions = (kibanaPrivs: string[] = []) => ({
-  kibana: { privileges: kibanaPrivs.map((name) => ({ name })) },
+  kibana: { privileges: { name: kibanaPrivs, count: kibanaPrivs.length } },
 });
 
 describe('createSmlService', () => {
@@ -1284,7 +1284,7 @@ describe('SmlService', () => {
               terms_set: {
                 'permissions.kibana.privileges.name': {
                   terms: ['default|saved_object:dashboard/get'],
-                  minimum_should_match_field: 'permissions.kibana.count',
+                  minimum_should_match_field: 'permissions.kibana.privileges.count',
                 },
               },
             },

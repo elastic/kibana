@@ -256,13 +256,14 @@ class SmlIndexerImpl implements SmlIndexer {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
       // the JSDoc. Logging here is the caller's job.
       const result = await definition.getPermissions(originId, context);
-      const privs = result.kibana?.privileges ?? [];
+      const names = result.kibana?.privileges?.name ?? [];
+      const nameArray = Array.isArray(names) ? names : [names];
       return {
-        kibana: { privileges: privs, count: privs.length },
+        kibana: { privileges: { name: nameArray } },
       };
     }
 
-    return { kibana: { privileges: [], count: 0 } };
+    return { kibana: { privileges: { name: [] } } };
   }
 
   private buildIndexOp({
@@ -283,9 +284,10 @@ class SmlIndexerImpl implements SmlIndexer {
     createdAt?: string;
   }) {
     const now = new Date().toISOString();
-    const privileges = resolvedPermissions.kibana?.privileges ?? [];
-    const compositePrivileges = spaces.flatMap((space) =>
-      privileges.map((priv) => ({ name: `${space}|${priv.name}` }))
+    const rawNames = resolvedPermissions.kibana?.privileges?.name ?? [];
+    const rawNamesArray = Array.isArray(rawNames) ? rawNames : [rawNames];
+    const compositeNames = spaces.flatMap((space) =>
+      rawNamesArray.map((name) => `${space}|${name}`)
     );
     const document: SmlDocument = {
       id: entryId,
@@ -296,7 +298,7 @@ class SmlIndexerImpl implements SmlIndexer {
       created_at: createdAt || now,
       updated_at: now,
       permissions: {
-        kibana: { privileges: compositePrivileges, count: privileges.length },
+        kibana: { privileges: { name: compositeNames, count: rawNamesArray.length } },
       },
       ingestion_method: ingestionMethod,
     };

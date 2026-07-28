@@ -21,6 +21,6 @@ export const kibanaSavedObjectPermissions = ({
     throw new Error('kibanaSavedObjectPermissions: savedObjectType is required');
   }
   return {
-    kibana: { privileges: [{ name: `saved_object:${savedObjectType}/get` }] },
+    kibana: { privileges: { name: `saved_object:${savedObjectType}/get` } },
   };
 };

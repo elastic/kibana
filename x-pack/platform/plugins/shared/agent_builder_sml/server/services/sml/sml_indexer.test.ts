@@ -134,7 +134,7 @@ describe('createSmlIndexer', () => {
       };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
-        kibana: { privileges: [{ name: 'perm1' }] },
+        kibana: { privileges: { name: 'perm1' } },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -192,8 +192,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         permissions: {
           kibana: {
-            privileges: [{ name: 'default|perm1' }, { name: 'space-2|perm1' }],
-            count: 1,
+            privileges: { name: ['default|perm1', 'space-2|perm1'], count: 1 },
           },
         },
         ingestion_method: 'crawled',
@@ -228,7 +227,7 @@ describe('createSmlIndexer', () => {
       };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
-        kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        kibana: { privileges: { name: 'saved_object:dashboard/get' } },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })
@@ -272,7 +271,7 @@ describe('createSmlIndexer', () => {
         created_at: expect.any(String),
         updated_at: expect.any(String),
         permissions: {
-          kibana: { privileges: [{ name: 'default|saved_object:dashboard/get' }], count: 1 },
+          kibana: { privileges: { name: ['default|saved_object:dashboard/get'], count: 1 } },
         },
         ingestion_method: 'crawled',
       });
@@ -692,7 +691,7 @@ describe('createSmlIndexer', () => {
 
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [], count: 0 },
+          kibana: { privileges: { name: [], count: 0 } },
         });
       });
 
@@ -706,11 +705,11 @@ describe('createSmlIndexer', () => {
         const getPermissions = jest.fn().mockImplementation(
           async () =>
             new Promise<{
-              kibana: { privileges: Array<{ name: string }> };
+              kibana: { privileges: { name: string } };
             }>((resolve) =>
               setImmediate(() =>
                 resolve({
-                  kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+                  kibana: { privileges: { name: 'saved_object:lens/get' } },
                 })
               )
             )
@@ -735,7 +734,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'default|saved_object:lens/get' }], count: 1 },
+          kibana: { privileges: { name: ['default|saved_object:lens/get'], count: 1 } },
         });
       });
 
@@ -749,7 +748,7 @@ describe('createSmlIndexer', () => {
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockReturnValue({
-          kibana: { privileges: [{ name: 'p1' }] },
+          kibana: { privileges: { name: 'p1' } },
         } as unknown);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -770,7 +769,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'default|p1' }], count: 1 },
+          kibana: { privileges: { name: ['default|p1'], count: 1 } },
         });
       });
 
@@ -825,7 +824,7 @@ describe('createSmlIndexer', () => {
         const smlEntry = { type: 'lens', title: 'A', content: 'a' };
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockResolvedValue({
-          kibana: { privileges: [{ name: 'p1' }] },
+          kibana: { privileges: { name: 'p1' } },
         });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -848,7 +847,7 @@ describe('createSmlIndexer', () => {
         expect(ops).toHaveLength(1);
         // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(ops[0].index.document.permissions).toEqual({
-          kibana: { privileges: [{ name: 'default|p1' }], count: 1 },
+          kibana: { privileges: { name: ['default|p1'], count: 1 } },
         });
       });
     });
