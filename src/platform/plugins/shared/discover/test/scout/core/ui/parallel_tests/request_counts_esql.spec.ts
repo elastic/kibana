@@ -31,6 +31,10 @@ spaceTest.describe('Discover request counts - ES|QL mode', { tag: tags.deploymen
   });
 
   spaceTest('ES|QL mode request counts', async ({ page, pageObjects }) => {
+    // This test collapses the 7 scenarios of the original FTR suite (which shared one browser
+    // session) into a single test, so it needs more than the default 60s budget — CI serverless
+    // runs exceed it on esql_async searches alone.
+    spaceTest.setTimeout(120_000);
     // setCodeEditorValue fires onDidChangeContent which Discover auto-submits after a debounce.
     // Waiting for the search to finish ensures that debounced request completes and is visible
     // in the resource timing buffer BEFORE measureSearchRequests clears it.

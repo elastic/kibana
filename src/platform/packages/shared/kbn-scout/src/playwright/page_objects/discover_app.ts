@@ -107,12 +107,22 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    try {
+      // The picker's list loads and filters asynchronously, and while it's still empty the
+      // "Explore matching indices" button can be briefly visible even though the saved data
+      // view exists. A non-waiting visibility check can therefore pick the wrong path on slow
+      // environments and silently create an ad hoc data view. Give the exact match time to
+      // render before falling back.
+      await matchingDataViewLocator.waitFor({ state: 'visible', timeout: 5_000 });
       await matchingDataViewLocator.click();
-    } else {
+    } catch {
+      // No saved data view with this name — create an ad hoc data view for matching indices
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await switcher.waitFor({ state: 'hidden' });
+    // Confirm the switch landed on the requested data view (ad hoc creation also uses the
+    // typed name as the title, so this holds for both paths)
+    await expect(this.getSelectedDataView()).toHaveText(name);
     await this.waitUntilFieldListHasCountOfFields();
   }
 
