@@ -18,7 +18,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
