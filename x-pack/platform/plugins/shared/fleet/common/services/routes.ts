@@ -458,6 +458,8 @@ export const uninstallTokensRouteService = {
   getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
   getInfoPath: (uninstallTokenId: string) =>
     UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
+  getRotatePath: (agentPolicyId: string) =>
+    UNINSTALL_TOKEN_ROUTES.ROTATE_PATTERN.replace('{agentPolicyId}', agentPolicyId),
 };
 
 export const setupRouteService = {

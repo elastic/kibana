@@ -14,7 +14,12 @@ import type {
   NotificationCenterStartDependencies,
 } from './types';
 
-export type { NotificationCenterPluginSetup, NotificationCenterPluginStart } from './types';
+export type {
+  NotificationCenterPluginSetup,
+  NotificationCenterPluginStart,
+  NotificationSubmitter,
+  SubmitNotificationResult,
+} from './types';
 
 export const config: PluginConfigDescriptor<NotificationCenterConfig> = {
   schema: configSchema,

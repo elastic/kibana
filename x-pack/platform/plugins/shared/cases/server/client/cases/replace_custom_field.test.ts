@@ -31,6 +31,9 @@ describe('Replace custom field', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // These tests assert the exact custom-field patch payload; the extended_fields
+    // mirroring (templates flag ON) is covered by dedicated tests below.
+    clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
     clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
     clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
       [mockCases[0].id]: 1,
@@ -432,7 +435,7 @@ describe('Replace custom field', () => {
     it('does not mirror into extended_fields when templates flag is disabled', async () => {
       // FAILURE SCENARIO: adapter runs unconditionally — extended_fields is written when flag is off.
       const clientArgsNoFlag = createCasesClientMockArgs();
-      // config.templates.enabled defaults to false
+      clientArgsNoFlag.config = { ...clientArgsNoFlag.config, templates: { enabled: false } };
       clientArgsNoFlag.services.caseService.getCase.mockResolvedValue(theCase);
       clientArgsNoFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
         { [mockCases[0].id]: 1 }

@@ -33,6 +33,12 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/esql'
+  - '@kbn/es-query'
+  - '@kbn/share-plugin'
+  - '@kbn/console-plugin'
+  - '@kbn/workflows-ui'
+  - '@kbn/deeplinks-workflows'
 tags:
   - plugin
   - prod

@@ -244,7 +244,6 @@ steps:
                         gte: '{{ consts.LAST_DETECTION_LOOKBACK }}'
         on-failure:
           continue: true
-
       - name: compute_transition
         type: data.set
         with:
@@ -288,6 +287,7 @@ steps:
             stream_name: "{{ foreach.item.stream.buckets[0].key }}"
             change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
             p_value: "${{ steps.compute_transition.output.detection_p_value }}"
+            severity_score: "${{ foreach.item.severity_score }}"
             alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
             workflow_execution_id: "{{ execution.id }}"
         on-failure:

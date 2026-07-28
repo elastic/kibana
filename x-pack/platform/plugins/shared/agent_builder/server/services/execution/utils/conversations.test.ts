@@ -7,7 +7,11 @@
 
 import { of } from 'rxjs';
 import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ChatEventType, ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationAccessControlMode,
+  createConversationNotFoundError,
+} from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
   createRound,
@@ -126,6 +130,29 @@ describe('conversations utils', () => {
         });
 
         expect(result.operation).toBe('UPDATE');
+      });
+
+      it('throws not found instead of creating when autoCreateConversationWithId=true and the conversation exists but is not accessible', async () => {
+        // e.g. another user's private conversation with the same id: exists() reports
+        // physical existence, and the converse-gated get() denies access
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(true);
+        conversationClient.get.mockRejectedValue(
+          createConversationNotFoundError({ conversationId: 'existing-conversation' })
+        );
+
+        await expect(
+          getConversation({
+            agentId: 'test-agent',
+            conversationId: 'existing-conversation',
+            autoCreateConversationWithId: true,
+            conversationClient,
+          })
+        ).rejects.toMatchObject({
+          message: 'Conversation existing-conversation not found',
+        });
+
+        expect(conversationClient.create).not.toHaveBeenCalled();
       });
 
       it('ignores access control when auto-created conversation already exists', async () => {
