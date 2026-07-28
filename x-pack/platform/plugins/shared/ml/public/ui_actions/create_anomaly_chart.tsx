@@ -68,6 +68,7 @@ export function createAddAnomalyChartsPanelAction(
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
+        returnFocus: context.returnFocus,
         flyoutProps: {
           'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
           focusedPanelId: context.embeddable.uuid,

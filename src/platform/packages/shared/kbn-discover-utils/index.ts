@@ -43,6 +43,7 @@ export {
   formatFieldValueText,
   formatFieldStringValueWithHighlights,
   formatHitReact,
+  tryPrettyPrintJsonBlocks,
   getDocId,
   getLogDocumentOverview,
   getFlattenedTraceDocumentOverview,
@@ -95,6 +96,7 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  METRICS_GRID_SETTINGS_DEFAULTS,
 } from './src';
 
 export type {
@@ -105,6 +107,9 @@ export type {
   SortPair,
   ErrorCalloutProps,
   DiscoverSessionFinderAttributes,
+  HistogramPercentile,
+  MetricsGridSettings,
+  SimpleAggregation,
 } from './src';
 
 export * from './src/types';

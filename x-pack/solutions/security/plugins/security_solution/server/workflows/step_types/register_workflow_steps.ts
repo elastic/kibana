@@ -6,7 +6,6 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
@@ -23,21 +22,16 @@ import { createExceptionListItemStepDefinition } from './create_exception_list_i
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  experimentalFeatures: ExperimentalFeatures
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
   workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
-
-  if (experimentalFeatures.publicAttacksApiEnabled) {
-    workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
-    workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
-    workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
-  }
-
+  workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
   workflowsExtensions.registerStepDefinition(enableRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(disableRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(createRuleExceptionStepDefinition);

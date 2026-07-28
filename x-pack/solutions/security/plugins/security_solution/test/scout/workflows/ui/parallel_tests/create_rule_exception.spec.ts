@@ -174,6 +174,13 @@ spaceTest.describe(
               list: { id: valueListId, type: 'ip' },
             },
           ]);
+
+          const updatedRule = await apiServices.exceptionStep.getRule(rule.id);
+          expect(updatedRule.exceptions_list).toStrictEqual(
+            expect.arrayContaining([
+              expect.objectContaining({ list_id: item.list_id, type: 'rule_default' }),
+            ])
+          );
         } finally {
           await apiServices.exceptionStep.deleteExceptionItem(itemId, 'single');
           await apiServices.exceptionStep.deleteValueList(valueListId);
@@ -244,6 +251,16 @@ spaceTest.describe(
         expect(item.name).toBe('Updated name');
         expect(item.entries).toStrictEqual([
           { type: 'match', operator: 'included', field: 'host.name', value: 'updated' },
+        ]);
+
+        // The rule should reference exactly one rule_default list after both
+        // runs — overwrite must not attach a second list to the rule.
+        const updatedRule = await apiServices.exceptionStep.getRule(rule.id);
+        const ruleDefaultLists = (updatedRule.exceptions_list ?? []).filter(
+          (list) => list.type === 'rule_default'
+        );
+        expect(ruleDefaultLists).toStrictEqual([
+          expect.objectContaining({ list_id: item.list_id, type: 'rule_default' }),
         ]);
       }
     );

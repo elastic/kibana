@@ -50,7 +50,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
             css={{
               overflowWrap: 'anywhere',
               display: '-webkit-box',
-              WebkitLineClamp: 3,
+              WebkitLineClamp: 4,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}

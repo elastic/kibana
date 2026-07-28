@@ -74,7 +74,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         undefined
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('case-view-title');
+      await cases.common.waitForCaseViewToLoad();
       await pageObjects.svlCommonNavigation.sidenav.toggle(true);
       const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
       await attachmentsTab.click();

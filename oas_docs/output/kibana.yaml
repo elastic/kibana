@@ -54,7 +54,9 @@ tags:
   - name: agent builder
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
+
       **Elastic Agent Builder requires an Enterprise subscription.**
     externalDocs:
       description: Agent Builder docs
@@ -334,6 +336,12 @@ tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
+  - description: |
+      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
+
+      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.
+    name: Security Solution Initialization API
+    x-displayName: Security solution initialization
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -12611,6 +12619,62 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/cases/{caseId}/fields:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/fields</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the fields you can write to the case's `extended_fields`. The case determines the owner and any applied template. The response includes the owner's global fields (library-wide) and, if the case has a template, that template's fields. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseApplicableFieldsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseApplicableFieldsResponse:
+                  $ref: '#/components/examples/Cases_get_case_applicable_fields_response'
+              schema:
+                $ref: '#/components/schemas/Cases_applicable_fields_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have access to the case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case was not found.
+      summary: Get the fields applicable to an existing case
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/cases/{caseId}/files:
     post:
       description: |
@@ -13416,6 +13480,76 @@ paths:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case connectors
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/fields:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/fields</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the fields you can write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.
+      operationId: getApplicableFieldsDefaultSpace
+      parameters:
+        - description: The application that owns the cases (for example `cases`, `observability`, or `securitySolution`).
+          example: cases
+          in: query
+          name: owner
+          required: true
+          schema:
+            maxLength: 30
+            type: string
+        - description: The identifier of a template to include the template's fields in the response.
+          in: query
+          name: templateId
+          required: false
+          schema:
+            maxLength: 36
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseApplicableFieldsResponse:
+                  $ref: '#/components/examples/Cases_get_case_applicable_fields_response'
+              schema:
+                $ref: '#/components/schemas/Cases_applicable_fields_response'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_template'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have access to the requested owner.
+      summary: Get the fields applicable to a case
       tags:
         - cases
       x-metaTags:
@@ -14576,6 +14710,466 @@ paths:
           source: |
             POST kbn://api/data_views/swap_references/_preview
             {"fromId":"abcd-efg","toId":"xyz-123"}
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/detection_engine/attacks/assignees:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/assignees</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Assign users to attack discovery alerts, and unassign them from alerts.
+        Optionally cascade the change to related detection alerts via `kibana.alert.attack_discovery.alert_ids`.
+        > info
+        > You cannot add and remove the same assignee in the same request.
+      operationId: SetAttacksAssignees
+      requestBody:
+        content:
+          application/json:
+            examples:
+              add:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+              remove:
+                value:
+                  assignees:
+                    add: []
+                    remove:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+              withRelatedAlerts:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_SetAttacksAssigneesByIds'
+              description: Set attacks assignees by IDs request
+        description: An object containing assignees to add or remove and attack ids the changes will be applied to
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 76
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body].ids: at least one attack id is required to update assignees'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Assign and unassign users from attack discovery alerts
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/detection_engine/attacks/search:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/search</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+      operationId: SearchAttacks
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byIds:
+                value:
+                  query:
+                    ids:
+                      values:
+                        - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_QueryAlertsBodyParams'
+              description: Elasticsearch query and aggregation request
+        description: Search and/or aggregation query
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    _shards:
+                      failed: 0
+                      skipped: 0
+                      successful: 1
+                      total: 1
+                    hits:
+                      hits:
+                        - _id: 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                          _index: .internal.adhoc.alerts-security.attack.discovery.alerts-default-000001
+                          _score: 1
+                          _source:
+                            '@timestamp': '2025-06-23T15:16:52.984Z'
+                            kibana.alert.attack_discovery.alert_ids:
+                              - ee183cf525d7e9d0f47d1b2bb928d760a0f53756ffa61edcf0672f71c986ac21
+                              - 46ebac989ca72439b14b57d32102543c17d5f33e0f6532d8a5c148949d8ff7b5
+                            kibana.alert.attack_discovery.title_with_replacements: Widespread Malware Campaign via Compromised Account
+                            kibana.alert.workflow_status: open
+                      max_score: 1
+                      total:
+                        relation: eq
+                        value: 1
+                    timed_out: false
+                    took: 1
+              schema:
+                additionalProperties: true
+                description: Elasticsearch search response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: 'Failed to parse search request: unknown query clause in bool filter'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Find and/or aggregate attack discovery alerts
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/detection_engine/attacks/status:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/status</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
+      operationId: SetAttacksStatus
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byId:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: acknowledged
+              closedWithReason:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  reason: false_positive
+                  status: closed
+              withRelatedAlerts:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: closed
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_SetAttacksStatusByIds'
+              description: Set attacks status by IDs request
+        description: An object containing the desired status and explicit attack ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 81
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body].ids: at least one attack id is required to update status'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Set attack discovery alerts workflow status
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/detection_engine/attacks/tags:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
+      operationId: SetAttacksTags
+      requestBody:
+        content:
+          application/json:
+            examples:
+              add:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add:
+                      - investigation
+                    tags_to_remove: []
+              remove:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove:
+                      - investigation
+              withRelatedAlerts:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add:
+                      - investigation
+                    tags_to_remove: []
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_SetAttacksTagsByIds'
+              description: Set attacks tags by IDs request
+        description: An object containing tags to add or remove and attack ids the changes will be applied to
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 68
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    message:
+                      - Duplicate tags ["duplicate"] were found in the tags_to_add and tags_to_remove parameters.
+                    status_code: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Add and remove attack discovery alert tags
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -17208,7 +17802,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
@@ -17518,7 +18112,7 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
@@ -20196,6 +20790,8 @@ paths:
           required: true
           schema:
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -20243,6 +20839,8 @@ paths:
           name: action_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
         - description: |
             The file identifier is constructed in one of two ways:
@@ -20253,6 +20851,8 @@ paths:
           name: file_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -20337,6 +20937,8 @@ paths:
           name: action_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
         - description: |
             The file identifier is constructed in one of two ways:
@@ -20347,6 +20949,8 @@ paths:
           name: file_id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -20612,6 +21216,7 @@ paths:
                     - alert-id-1
                     - alert-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -20623,6 +21228,7 @@ paths:
                     - case-id-1
                     - case-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -21177,6 +21783,7 @@ paths:
                     - alert-id-1
                     - alert-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -21188,6 +21795,7 @@ paths:
                     - case-id-1
                     - case-id-2
                   items:
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 50
@@ -21418,6 +22026,7 @@ paths:
           required: true
           schema:
             example: ed518850-681a-4d60-bb98-e22640cae2a8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -21521,6 +22130,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -21556,6 +22166,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -21570,7 +22181,10 @@ paths:
               properties:
                 note:
                   description: The note content.
+                  maxLength: 10000
                   type: string
+              required:
+                - note
         required: true
       responses:
         '200':
@@ -21765,6 +22379,7 @@ paths:
           schema:
             description: The ID of the script entry to be deleted.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -21802,6 +22417,7 @@ paths:
           schema:
             description: The ID of the script entry.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -21849,6 +22465,7 @@ paths:
           schema:
             description: The ID of the script entry to be updated.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -21917,6 +22534,7 @@ paths:
           schema:
             description: The ID of the script entry.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -45715,6 +46333,120 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/uninstall_tokens/{agentPolicyId}/rotate:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/uninstall_tokens/{agentPolicyId}/rotate</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Rotate the uninstall token for an agent policy. Only applicable to policies with tamper protection enabled.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-uninstall-tokens-agentpolicyid-rotate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the agent policy whose uninstall token should be rotated
+          in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rotateUninstallTokenExample:
+                  description: Uninstall token rotated successfully for the given agent policy
+                  value:
+                    message: Uninstall token rotated successfully.
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+                notProtectedExample:
+                  description: Agent policy does not have tamper protection enabled
+                  value:
+                    error: Bad Request
+                    message: Agent policy [policy-id-1] does not have tamper protection enabled. Uninstall tokens can only be rotated for protected policies.
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found with id policy-id-1
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Not Found
+      summary: Rotate an uninstall token
+      tags:
+        - Fleet uninstall tokens
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
       description: |-
@@ -45886,6 +46618,26 @@ paths:
               type: string
             maxItems: 100
             type: array
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are included. If the same name is shared by multiple tags, items matching any of those tags are included.
+          in: query
+          name: tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
+          in: query
+          name: excluded_tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
       responses:
         '200':
           content:
@@ -53075,17 +53827,21 @@ paths:
                       nullable: true
                     type: object
                   coreMigrationVersion:
+                    maxLength: 256
                     type: string
                   id:
+                    maxLength: 512
                     type: string
                   initialNamespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     minItems: 1
                     type: array
                   migrationVersion:
                     additionalProperties:
+                      maxLength: 256
                       type: string
                     type: object
                   references:
@@ -53094,10 +53850,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53106,10 +53865,13 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   typeMigrationVersion:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53219,8 +53981,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53319,17 +54083,21 @@ paths:
                 properties:
                   fields:
                     items:
+                      maxLength: 1024
                       type: string
                     maxItems: 100
                     type: array
                   id:
+                    maxLength: 512
                     type: string
                   namespaces:
                     items:
+                      maxLength: 512
                       type: string
                     maxItems: 100
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53433,8 +54201,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53556,8 +54326,10 @@ paths:
                       nullable: true
                     type: object
                   id:
+                    maxLength: 512
                     type: string
                   namespace:
+                    maxLength: 512
                     minLength: 1
                     type: string
                   references:
@@ -53566,10 +54338,13 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         name:
+                          maxLength: 1024
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - name
@@ -53578,8 +54353,10 @@ paths:
                     maxItems: 1000
                     type: array
                   type:
+                    maxLength: 256
                     type: string
                   version:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53694,8 +54471,10 @@ paths:
                       type: object
                       properties:
                         id:
+                          maxLength: 512
                           type: string
                         type:
+                          maxLength: 256
                           type: string
                       required:
                         - type
@@ -53705,8 +54484,10 @@ paths:
                         type: object
                         properties:
                           id:
+                            maxLength: 512
                             type: string
                           type:
+                            maxLength: 256
                             type: string
                         required:
                           - type
@@ -53724,8 +54505,10 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -53734,11 +54517,14 @@ paths:
                   type: array
                 search:
                   description: Search for documents to export using the Elasticsearch Simple Query String syntax.
+                  maxLength: 10000
                   type: string
                 type:
                   anyOf:
-                    - type: string
+                    - maxLength: 256
+                      type: string
                     - items:
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -53841,6 +54627,7 @@ paths:
           required: true
           schema:
             items:
+              maxLength: 256
               type: string
             maxItems: 100
             type: array
@@ -53849,6 +54636,7 @@ paths:
           name: search
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: The boolean operator to use when combining multiple values.
           in: query
@@ -53866,6 +54654,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53874,6 +54663,7 @@ paths:
           name: sort_field
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Return only saved objects that have a reference to the specified saved object(s).
           in: query
@@ -53885,8 +54675,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53896,8 +54688,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53924,8 +54718,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    maxLength: 512
                     type: string
                   type:
+                    maxLength: 256
                     type: string
                 required:
                   - type
@@ -53935,8 +54731,10 @@ paths:
                   type: object
                   properties:
                     id:
+                      maxLength: 512
                       type: string
                     type:
+                      maxLength: 256
                       type: string
                   required:
                     - type
@@ -53959,6 +54757,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -53967,12 +54766,14 @@ paths:
           name: filter
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: Aggregations as a JSON string.
           in: query
           name: aggs
           required: false
           schema:
+            maxLength: 100000
             type: string
         - description: The namespaces (spaces) to search in.
           in: query
@@ -53980,6 +54781,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 512
               type: string
             maxItems: 100
             type: array
@@ -54250,8 +55052,10 @@ paths:
                       createNewCopy:
                         type: boolean
                       destinationId:
+                        maxLength: 512
                         type: string
                       id:
+                        maxLength: 512
                         type: string
                       ignoreMissingReferences:
                         type: boolean
@@ -54265,10 +55069,13 @@ paths:
                           type: object
                           properties:
                             from:
+                              maxLength: 512
                               type: string
                             to:
+                              maxLength: 512
                               type: string
                             type:
+                              maxLength: 256
                               type: string
                           required:
                             - type
@@ -54277,6 +55084,7 @@ paths:
                         maxItems: 100
                         type: array
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - type
@@ -54360,6 +55168,7 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54387,15 +55196,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54404,10 +55216,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54416,6 +55231,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54497,12 +55313,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: When true, force deletion of multi-namespace objects from all namespaces.
           in: query
@@ -54567,12 +55385,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -54647,12 +55467,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
         - description: Overwrite an existing saved object.
           in: query
@@ -54680,15 +55502,18 @@ paths:
                     nullable: true
                   type: object
                 coreMigrationVersion:
+                  maxLength: 256
                   type: string
                 initialNamespaces:
                   items:
+                    maxLength: 512
                     type: string
                   maxItems: 100
                   minItems: 1
                   type: array
                 migrationVersion:
                   additionalProperties:
+                    maxLength: 256
                     type: string
                   type: object
                 references:
@@ -54697,10 +55522,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54709,6 +55537,7 @@ paths:
                   maxItems: 1000
                   type: array
                 typeMigrationVersion:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54789,12 +55618,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -54820,10 +55651,13 @@ paths:
                     type: object
                     properties:
                       id:
+                        maxLength: 512
                         type: string
                       name:
+                        maxLength: 1024
                         type: string
                       type:
+                        maxLength: 256
                         type: string
                     required:
                       - name
@@ -54836,6 +55670,7 @@ paths:
                     nullable: true
                   type: object
                 version:
+                  maxLength: 256
                   type: string
               required:
                 - attributes
@@ -54921,12 +55756,14 @@ paths:
           name: type
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The saved object identifier.
           in: path
           name: id
           required: true
           schema:
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -57198,6 +58035,83 @@ paths:
             curl \
              --request GET 'http://localhost:5601/api/security_ai_assistant/prompts/_find?page=1&per_page=20' \
              --header "Authorization: $API_KEY"
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security_solution/initialize:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
+      operationId: InitializeSecuritySolution
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
+            schema:
+              type: object
+              properties:
+                flows:
+                  items:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowId'
+                  minItems: 1
+                  type: array
+              required:
+                - flows
+        description: The initialization flows to run.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-ai-prompts:
+                        payload:
+                          install_status: installed
+                          name: security_ai_prompts
+                          version: 8.17.1
+                        status: ready
+                      init-endpoint-protection:
+                        payload:
+                          install_status: already_installed
+                          name: endpoint
+                          version: 8.17.1
+                        status: ready
+                      init-prebuilt-rules:
+                        payload:
+                          install_status: installed
+                          name: security_detection_engine
+                          version: 8.17.1
+                        status: ready
+              schema:
+                type: object
+                properties:
+                  flows:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
+                required:
+                  - flows
+          description: Indicates a successful call. Returns a result for each requested flow.
+      summary: Initialize security solution flows
+      tags:
+        - Security Solution Initialization API
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -70535,6 +71449,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 2048
             type: string
         - description: The page of results to return.
           in: query
@@ -70744,6 +71659,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '204':
@@ -70775,6 +71692,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -70844,6 +71763,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -72556,6 +73477,13 @@ paths:
         - description: Whether to overwrite existing workflows.
           in: query
           name: overwrite
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: 'When true, performs a preflight conflict check only. Returns the subset of the supplied workflow IDs that already exist (including soft-deleted tombstones and cross-space documents) without writing anything. The response body is `{ existingIds: string[] }` instead of the normal `{ created, failed }` shape.'
+          in: query
+          name: dryRun
           required: false
           schema:
             default: false
@@ -75647,6 +76575,105 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /s/{spaceId}/api/observability/slos/_bulk_snapshot:
+    post:
+      description: |
+        Compute the summary of multiple SLO instances at a given point in time. The endpoint is synchronous and returns results directly. Each result contains either a summary (on success) or a per-instance error. The list of requests is limited to 100 entries. When `instanceId` is omitted or set to `'*'`, the API returns a result for each matching instance (up to 1000 per SLO). You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: bulkSnapshotOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkSnapshotRequest:
+                summary: Compute snapshots for two SLO instances
+                value:
+                  at: '2025-01-12T10:00:00.000Z'
+                  requests:
+                    - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                      instanceId: '*'
+                    - id: d077e940-1515-11ee-9c50-9d096392f520
+                      instanceId: host.name:web-01
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_snapshot_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkSnapshotResponse:
+                  summary: Bulk snapshot response with mixed success and per-instance error
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: '*'
+                        summary:
+                          errorBudget:
+                            consumed: 0.24
+                            initial: 0.01
+                            remaining: 0.76
+                          good: 9976
+                          sliValue: 0.9976
+                          status: HEALTHY
+                          total: 10000
+                      - error:
+                          message: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+                          statusCode: 404
+                        id: d077e940-1515-11ee-9c50-9d096392f520
+                        instanceId: host.name:web-01
+              schema:
+                $ref: '#/components/schemas/SLOs_snapshot_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: '`requests` is limited to 100 entries'
+                    statusCode: 400
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Forbidden response
+      summary: Compute SLO instance summaries in bulk at a point in time
+      tags:
+        - slo
+      x-state: Generally available; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
@@ -76138,6 +77165,130 @@ paths:
       summary: Reset an SLO
       tags:
         - slo
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /s/{spaceId}/api/observability/slos/{sloId}/_snapshot:
+    get:
+      description: |
+        Compute the summary of an SLO at a given point in time. When `instanceId` is provided, returns that instance. When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000). The endpoint is synchronous and returns results directly. You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getSnapshotOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - $ref: '#/components/parameters/SLOs_slo_id'
+        - description: The point in time at which to compute the SLO instance summary (ISO 8601 date-time)
+          in: query
+          name: at
+          required: true
+          schema:
+            example: '2025-01-12T10:00:00.000Z'
+            format: date-time
+            type: string
+        - description: |
+            The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only.
+          in: query
+          name: instanceId
+          required: false
+          schema:
+            example: '*'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSnapshotResponse:
+                  summary: Snapshot result for a healthy SLO instance
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: '*'
+                        summary:
+                          errorBudget:
+                            consumed: 0.24
+                            initial: 0.01
+                            remaining: 0.76
+                          good: 9976
+                          sliValue: 0.9976
+                          status: HEALTHY
+                          total: 10000
+                getSnapshotResponseViolated:
+                  summary: Snapshot result for a violated SLO instance
+                  value:
+                    at: '2025-01-12T10:00:00.000Z'
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        instanceId: host.name:web-01
+                        summary:
+                          errorBudget:
+                            consumed: 5
+                            initial: 0.01
+                            remaining: -4
+                          good: 9500
+                          sliValue: 0.95
+                          status: VIOLATED
+                          total: 10000
+              schema:
+                $ref: '#/components/schemas/SLOs_snapshot_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: "Invalid value 'foo' supplied to: at"
+                    statusCode: 400
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+                    statusCode: 404
+              schema:
+                $ref: '#/components/schemas/SLOs_404_response'
+          description: Not found response
+      summary: Compute an SLO instance summary at a point in time
+      tags:
+        - slo
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -77192,6 +78343,45 @@ components:
         - attached_at: '2022-07-25T20:09:40.963Z'
           id: f6a7d0c3-d52d-432c-b2e6-447cd7fce04d
           index: .alerts-observability.logs.alerts-default
+    Cases_get_case_applicable_fields_response:
+      summary: Fields applicable to a case
+      value:
+        fields:
+          - control: SELECT_BASIC
+            defaultValue: medium
+            displayOnly: false
+            isGlobal: true
+            key: priority_as_keyword
+            label: Priority
+            name: priority
+            options:
+              - low
+              - medium
+              - high
+            type: keyword
+            required: true
+            requiredOnClose: false
+            source: global
+          - control: TEXTAREA
+            displayOnly: false
+            isGlobal: false
+            key: rollout_notes_as_keyword
+            label: Rollout notes
+            name: rollout_notes
+            type: keyword
+            required: false
+            requiredOnClose: true
+            source: template
+          - control: MARKDOWN
+            displayOnly: true
+            isGlobal: false
+            key: instructions_as_keyword
+            label: Instructions
+            name: instructions
+            type: keyword
+            required: false
+            requiredOnClose: false
+            source: template
     Cases_get_case_configuration_response:
       summary: Get the case configuration.
       value:
@@ -77465,12 +78655,24 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzE3NjgsM10=
+    Cases_response_400_invalid_template:
+      summary: The request is invalid.
+      value:
+        error: Bad Request
+        message: Template [invalid-template-id] not found for owner [cases]
+        statusCode: 400
     Cases_response_401:
       summary: Authorization information is missing or invalid.
       value:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_403:
+      summary: The user does not have access to the requested resource.
+      value:
+        error: Forbidden
+        message: Unauthorized to access cases
+        statusCode: 403
     Cases_response_404:
       summary: The requested resource was not found.
       value:
@@ -82762,6 +83964,79 @@ components:
         index:
           description: The alert index.
           type: string
+    Cases_applicable_fields_response:
+      description: |
+        The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
+      type: object
+      properties:
+        fields:
+          items:
+            type: object
+            properties:
+              control:
+                description: |
+                  The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.
+                example: SELECT_BASIC
+                type: string
+              defaultValue:
+                description: The default value, as a string, when the field definition declares one.
+                type: string
+              displayOnly:
+                description: |
+                  When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.
+                type: boolean
+              isGlobal:
+                description: Whether the field is a global (library-wide) definition.
+                type: boolean
+              key:
+                description: |
+                  The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).
+                example: priority_as_keyword
+                type: string
+              label:
+                description: The human-readable label. Falls back to `name` when no label is authored.
+                example: Priority
+                type: string
+              name:
+                description: The field name as authored in the field definition.
+                example: priority
+                type: string
+              options:
+                description: The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.
+                items:
+                  type: string
+                type: array
+              type:
+                description: 'The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.'
+                example: keyword
+                type: string
+              required:
+                description: Whether a value must be supplied at write time.
+                type: boolean
+              requiredOnClose:
+                description: Whether the field must be filled before the case can be closed.
+                type: boolean
+              source:
+                description: |
+                  Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.
+                enum:
+                  - global
+                  - template
+                type: string
+            required:
+              - key
+              - name
+              - label
+              - type
+              - control
+              - required
+              - requiredOnClose
+              - displayOnly
+              - source
+              - isGlobal
+          type: array
+      required:
+        - fields
     Cases_assignees:
       description: An array containing users that are assigned to the case.
       items:
@@ -83675,6 +84950,23 @@ components:
           $ref: '#/components/schemas/Cases_case_severity'
         tags:
           $ref: '#/components/schemas/Cases_case_tags'
+        template:
+          description: |
+            A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
+          nullable: true
+          type: object
+          properties:
+            id:
+              description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+              type: string
+            version:
+              description: |
+                The template version to apply. Omit to use (and pin) the latest version.
+              minimum: 1
+              type: integer
+          required:
+            - id
+          x-state: Technical preview
         title:
           $ref: '#/components/schemas/Cases_case_title'
       required:
@@ -86555,6 +87847,10 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -96670,6 +97966,10 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -99643,6 +100943,10 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
@@ -99651,6 +100955,12 @@ components:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
           minLength: 1
           title: Index pattern
+          type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
@@ -99843,12 +101153,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -99860,12 +101175,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -101403,9 +102723,11 @@ components:
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          maxLength: 100
           type: string
         every:
           description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          maxLength: 100
           type: string
         occurrences:
           description: The total number of recurrences of the schedule.
@@ -101417,6 +102739,7 @@ components:
             maximum: 12
             minimum: 1
             type: number
+          maxItems: 12
           minItems: 1
           type: array
         onMonthDay:
@@ -101425,12 +102748,15 @@ components:
             maximum: 31
             minimum: 1
             type: number
+          maxItems: 31
           minItems: 1
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           minItems: 1
           type: array
       title: maintenance_window_schedule_recurring_request
@@ -101451,16 +102777,20 @@ components:
           description: The specific months for a recurring schedule. Valid values are 1-12.
           items:
             type: number
+          maxItems: 12
           type: array
         onMonthDay:
           description: The specific days of the month for a recurring schedule. Valid values are 1-31.
           items:
             type: number
+          maxItems: 31
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           type: array
       title: maintenance_window_schedule_recurring_response
       type: object
@@ -101469,14 +102799,17 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request'
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -113812,6 +115145,7 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           additionalProperties: false
@@ -113819,9 +115153,11 @@ components:
           properties:
             end:
               description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+              maxLength: 100
               type: string
             every:
               description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+              maxLength: 100
               type: string
             occurrences:
               description: The total number of recurrences of the schedule.
@@ -113833,6 +115169,7 @@ components:
                 maximum: 12
                 minimum: 1
                 type: number
+              maxItems: 12
               minItems: 1
               type: array
             onMonthDay:
@@ -113841,19 +115178,24 @@ components:
                 maximum: 31
                 minimum: 1
                 type: number
+              maxItems: 31
               minItems: 1
               type: array
             onWeekDay:
               description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
               items:
+                maxLength: 10
                 type: string
+              maxItems: 77
               minItems: 1
               type: array
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -122174,9 +123516,20 @@ components:
                       minimum: 1
                       nullable: true
                       type: number
+                    docsCountPercentage:
+                      default: null
+                      maximum: 100
+                      minimum: 1
+                      nullable: true
+                      type: number
                     enabled:
                       default: true
                       type: boolean
+                    thresholdType:
+                      enum:
+                        - count
+                        - percentage
+                      type: string
                     timeInterval:
                       default: null
                       nullable: true
@@ -129669,6 +131022,22 @@ components:
       required:
         - query
         - status
+    Security_Detections_API_CloseAttacksByIds:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        reason:
+          $ref: '#/components/schemas/Security_Detections_API_Reason'
+        status:
+          enum:
+            - closed
+          type: string
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - status
     Security_Detections_API_ConcurrentSearches:
       minimum: 1
       type: integer
@@ -133900,6 +135269,50 @@ components:
       required:
         - ids
         - tags
+    Security_Detections_API_SetAttacksAssigneesByIds:
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Security_Detections_API_AlertAssignees'
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - assignees
+    Security_Detections_API_SetAttacksStatusByIds:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/Security_Detections_API_CloseAttacksByIds'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_CloseAttacksByIds'
+        - $ref: '#/components/schemas/Security_Detections_API_SetAttacksStatusByIdsBase'
+    Security_Detections_API_SetAttacksStatusByIdsBase:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        status:
+          $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - status
+    Security_Detections_API_SetAttacksTagsByIds:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        tags:
+          $ref: '#/components/schemas/Security_Detections_API_SetAlertTags'
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - tags
     Security_Detections_API_SetupGuide:
       description: Populates the rule’s setup guide with instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.
       type: string
@@ -135174,6 +136587,10 @@ components:
     Security_Detections_API_TimestampOverrideFallbackDisabled:
       description: Disables the fallback to the event's @timestamp field
       type: boolean
+    Security_Detections_API_UpdateRelatedAlerts:
+      default: false
+      description: When `true`, the change is also applied to detection alerts related to the attacks via `kibana.alert.attack_discovery.alert_ids`.
+      type: boolean
     Security_Detections_API_UUID:
       description: A universally unique identifier
       format: uuid
@@ -135745,6 +137162,7 @@ components:
         - data
     Security_Endpoint_Management_API_AgentId:
       description: Agent ID
+      maxLength: 256
       type: string
     Security_Endpoint_Management_API_AgentIds:
       description: A list of agent IDs. Max of 250.
@@ -135754,12 +137172,14 @@ components:
       minLength: 1
       oneOf:
         - items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 250
           minItems: 1
           type: array
-        - minLength: 1
+        - maxLength: 256
+          minLength: 1
           type: string
     Security_Endpoint_Management_API_AgentTypes:
       description: List of agent types to retrieve. Defaults to `endpoint`.
@@ -135791,6 +137211,7 @@ components:
     Security_Endpoint_Management_API_ArchivePathToExecutableSchema:
       description: Used only for when the uploaded script is an archive (.zip file for example). This property defines the relative path to the file included in the archive that should be executed once its contents are extracted. The path should be relative to the root of the archive.
       example: ./bin/script.sh
+      maxLength: 4096
       type: string
     Security_Endpoint_Management_API_Cancel:
       allOf:
@@ -135825,6 +137246,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -135836,6 +137258,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -135868,10 +137291,12 @@ components:
       properties:
         cloudFile:
           description: Script name in cloud storage.
+          maxLength: 4096
           minLength: 1
           type: string
         commandLine:
           description: Command line arguments.
+          maxLength: 8192
           minLength: 1
           type: string
         timeout:
@@ -135909,15 +137334,18 @@ components:
     Security_Endpoint_Management_API_Comment:
       description: Optional comment
       example: This is a comment
+      maxLength: 30000
       type: string
     Security_Endpoint_Management_API_CreateScriptRouteRequestBody:
       type: object
       properties:
         description:
           description: Description of the script and its purpose/functionality
+          maxLength: 10000
           type: string
         example:
           description: Example usage of the script
+          maxLength: 10000
           type: string
         file:
           description: The script file upload
@@ -135927,10 +137355,10 @@ components:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptFileType'
         instructions:
           description: Instructions for using the script, including details around its supported input arguments
+          maxLength: 10000
           type: string
         name:
-          description: Name of the script
-          type: string
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptNameSchema'
         pathToExecutable:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_ArchivePathToExecutableSchema'
         platform:
@@ -135964,6 +137392,7 @@ components:
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
+      maxLength: 64
       type: string
     Security_Endpoint_Management_API_EndpointIds:
       description: List of endpoint IDs (cannot contain empty strings). Max of 250.
@@ -135971,6 +137400,7 @@ components:
         - endpoint-id-1
         - endpoint-id-2
       items:
+        maxLength: 256
         minLength: 1
         type: string
       maxItems: 250
@@ -136074,10 +137504,12 @@ components:
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
+          maxLength: 256
           minLength: 1
           type: string
         scriptInput:
           description: The input parameter arguments (if any) for the script that will be executed.
+          maxLength: 8192
           minLength: 1
           type: string
       required:
@@ -136228,6 +137660,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136239,6 +137672,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136259,6 +137693,7 @@ components:
               properties:
                 command:
                   description: The shell command to execute on the endpoint.
+                  maxLength: 8192
                   minLength: 1
                   type: string
                 timeout:
@@ -136423,6 +137858,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136434,6 +137870,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136454,6 +137891,8 @@ components:
               properties:
                 path:
                   description: The full file path to retrieve from the endpoint.
+                  maxLength: 4096
+                  minLength: 1
                   type: string
               required:
                 - path
@@ -136470,6 +137909,7 @@ components:
             - alert-id-1
             - alert-id-2
           items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
@@ -136481,6 +137921,7 @@ components:
             - case-id-1
             - case-id-2
           items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
@@ -136499,10 +137940,12 @@ components:
       properties:
         commandLine:
           description: Command line arguments.
+          maxLength: 8192
           minLength: 1
           type: string
         hostPath:
           description: Absolute or relative path of script on host machine.
+          maxLength: 4096
           minLength: 1
           type: string
         timeout:
@@ -136606,6 +138049,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136617,6 +138061,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136646,6 +138091,7 @@ components:
                     entity_id:
                       description: The entity ID of the process to terminate.
                       example: abc123
+                      maxLength: 256
                       minLength: 1
                       type: string
                 - type: object
@@ -136653,6 +138099,7 @@ components:
                     process_name:
                       description: The name of the process to terminate. Valid for SentinelOne agent type only.
                       example: Elastic
+                      maxLength: 1024
                       minLength: 1
                       type: string
           required:
@@ -136660,6 +138107,7 @@ components:
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
+      maxLength: 30000
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -136673,10 +138121,12 @@ components:
       properties:
         args:
           description: Optional command line arguments for the script.
+          maxLength: 8192
           minLength: 1
           type: string
         scriptName:
           description: The name of the script to execute from the cloud storage.
+          maxLength: 256
           minLength: 1
           type: string
       required:
@@ -136762,6 +138212,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136773,6 +138224,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -136815,6 +138267,8 @@ components:
                   type: object
                   properties:
                     entity_id:
+                      maxLength: 256
+                      minLength: 1
                       type: string
                     type:
                       enum:
@@ -137022,9 +138476,11 @@ components:
       properties:
         description:
           description: Description of the script and its purpose/functionality
+          maxLength: 10000
           type: string
         example:
           description: Example usage of the script
+          maxLength: 10000
           type: string
         file:
           description: The script file upload
@@ -137034,10 +138490,10 @@ components:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptFileType'
         instructions:
           description: Instructions for using the script, including details around its supported input arguments
+          maxLength: 10000
           type: string
         name:
-          description: Name of the script
-          type: string
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptNameSchema'
         pathToExecutable:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_ArchivePathToExecutableSchema'
         platform:
@@ -137053,6 +138509,11 @@ components:
           items:
             $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointScriptTags'
           type: array
+        version:
+          description: Version of the script
+          maxLength: 256
+          minLength: 1
+          type: string
     Security_Endpoint_Management_API_PendingActionDataType:
       description: Number of pending actions of this type.
       type: integer
@@ -137100,10 +138561,12 @@ components:
       properties:
         commandLine:
           description: Command line arguments.
+          maxLength: 8192
           minLength: 1
           type: string
         raw:
           description: Raw script content.
+          maxLength: 65536
           minLength: 1
           type: string
         timeout:
@@ -137346,6 +138809,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137357,6 +138821,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137416,6 +138881,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137427,6 +138893,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137448,11 +138915,18 @@ components:
                 path:
                   description: The folder or file's full path (including the file name).
                   example: /usr/my-file.txt
+                  maxLength: 4096
+                  minLength: 1
                   type: string
               required:
                 - path
           required:
             - parameters
+    Security_Endpoint_Management_API_ScriptNameSchema:
+      description: Name of the script
+      maxLength: 256
+      minLength: 1
+      type: string
     Security_Endpoint_Management_API_ScriptsApiResponse:
       example:
         data:
@@ -137485,10 +138959,12 @@ components:
       properties:
         scriptId:
           description: The script ID from SentinelOne scripts library that will be executed.
+          maxLength: 256
           minLength: 1
           type: string
         scriptInput:
           description: The input parameter arguments for the script that was selected.
+          maxLength: 8192
           minLength: 1
           type: string
       required:
@@ -137519,6 +138995,7 @@ components:
     Security_Endpoint_Management_API_StartDate:
       description: A start date in ISO 8601 format or Date Math format.
       example: '2023-10-31T00:00:00.000Z'
+      maxLength: 64
       type: string
     Security_Endpoint_Management_API_SuccessResponse:
       description: A generic successful response.
@@ -137577,6 +139054,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137588,6 +139066,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137617,6 +139096,7 @@ components:
                     entity_id:
                       description: The entity ID of the process to suspend.
                       example: abc123
+                      maxLength: 256
                       minLength: 1
                       type: string
           required:
@@ -137695,6 +139175,7 @@ components:
                 - alert-id-1
                 - alert-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137706,6 +139187,7 @@ components:
                 - case-id-1
                 - case-id-2
               items:
+                maxLength: 256
                 minLength: 1
                 type: string
               maxItems: 50
@@ -137744,12 +139226,14 @@ components:
         - user-id-2
       oneOf:
         - items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
           minItems: 1
           type: array
-        - minLength: 1
+        - maxLength: 256
+          minLength: 1
           type: string
     Security_Endpoint_Management_API_WithOutputs:
       description: A list of action IDs that should include the complete output of the action. Max of 50.
@@ -137758,12 +139242,14 @@ components:
         - action-id-2
       oneOf:
         - items:
+            maxLength: 256
             minLength: 1
             type: string
           maxItems: 50
           minItems: 1
           type: array
-        - minLength: 1
+        - maxLength: 256
+          minLength: 1
           type: string
     Security_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem:
       type: object
@@ -137981,35 +139467,41 @@ components:
       properties:
         has_all_required:
           type: boolean
+        has_install_permissions:
+          type: boolean
         has_read_permissions:
           type: boolean
         has_write_permissions:
           type: boolean
+        install_privileges:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  additionalProperties:
-                    type: boolean
-                  type: object
-                index:
-                  additionalProperties:
-                    additionalProperties:
-                      type: boolean
-                    type: object
-                  type: object
-            kibana:
-              additionalProperties:
-                type: boolean
-              type: object
-          required:
-            - elasticsearch
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              additionalProperties:
+                type: boolean
+              type: object
+            index:
+              additionalProperties:
+                additionalProperties:
+                  type: boolean
+                type: object
+              type: object
+        kibana:
+          additionalProperties:
+            type: boolean
+          type: object
+      required:
+        - elasticsearch
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -142603,6 +144095,144 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Solution_Initialization_API_CreateListIndicesReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_DataViewPayload:
+      type: object
+      properties:
+        id:
+          type: string
+        patternList:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - patternList
+    Security_Solution_Initialization_API_InitializationFlowErrorResult:
+      type: object
+      properties:
+        error:
+          nullable: true
+          type: string
+        status:
+          enum:
+            - error
+          type: string
+      required:
+        - status
+        - error
+    Security_Solution_Initialization_API_InitializationFlowId:
+      description: Identifier for an initialization flow.
+      enum:
+        - create-list-indices
+        - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
+      type: string
+    Security_Solution_Initialization_API_InitializationFlowsResult:
+      description: Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
+      type: object
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        security-data-views:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+    Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_PackageInstallReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            install_status:
+              description: Fleet package installation status (e.g., installed, already_installed).
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+          required:
+            - name
+            - version
+            - install_status
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
+    Security_Solution_Initialization_API_SecurityDataViewsReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            alertDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            defaultDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            kibanaDataViews:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+              type: array
+            signalIndexName:
+              type: string
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
     Security_Timeline_API_AssociatedFilterType:
       description: |
         How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
@@ -143722,6 +145352,38 @@ components:
           type: string
       title: Bulk Purge Rollup data response
       type: object
+    SLOs_bulk_snapshot_request:
+      description: |
+        The bulk snapshot SLO request takes a point in time and a list of SLO instances to compute summaries for. The list is limited to 100 entries.
+      properties:
+        at:
+          description: The point in time at which to compute the SLO instance summaries
+          example: '2025-01-12T10:00:00.000Z'
+          format: date-time
+          type: string
+        requests:
+          description: The list of SLO instances to compute. Limited to 100 entries.
+          items:
+            type: object
+            properties:
+              id:
+                description: The SLO definition id
+                example: 8853df00-ae2e-11ed-90af-09bb6422b258
+                type: string
+              instanceId:
+                description: |
+                  The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only.
+                example: '*'
+                type: string
+            required:
+              - id
+          maxItems: 100
+          type: array
+      required:
+        - at
+        - requests
+      title: Bulk snapshot SLO request
+      type: object
     SLOs_create_slo_request:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
@@ -143736,7 +145398,7 @@ components:
         groupBy:
           $ref: '#/components/schemas/SLOs_group_by'
         id:
-          description: A optional and unique identifier for the SLO. Must be between 8 and 36 chars
+          description: A optional and unique identifier for the SLO. Must be between 8 and 48 chars
           example: my-super-slo-id
           type: string
         indicator:
@@ -144716,6 +146378,110 @@ components:
         - createdAt
         - updatedAt
         - version
+    SLOs_snapshot_response:
+      description: |
+        The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).
+      properties:
+        at:
+          description: The point in time at which the summaries were computed
+          example: '2025-01-12T10:00:00.000Z'
+          format: date-time
+          type: string
+        results:
+          description: The per-instance computation results
+          items:
+            $ref: '#/components/schemas/SLOs_snapshot_result'
+          type: array
+      required:
+        - at
+        - results
+      title: Snapshot SLO response
+      type: object
+    SLOs_snapshot_result:
+      description: |
+        The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).
+      properties:
+        error:
+          description: Error information when the computation failed for this SLO instance. Present when the computation failed.
+          type: object
+          properties:
+            message:
+              description: The error message
+              example: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+              type: string
+            statusCode:
+              description: The HTTP status code of the error
+              example: 404
+              type: number
+          required:
+            - statusCode
+            - message
+        id:
+          description: The SLO definition id
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          type: string
+        instanceId:
+          description: The SLO instance id. '*' represents the default (ungrouped) instance.
+          example: '*'
+          type: string
+        summary:
+          description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
+          type: object
+          properties:
+            errorBudget:
+              type: object
+              properties:
+                consumed:
+                  description: The error budget consumed, or null when no data is available
+                  example: 0.24
+                  nullable: true
+                  type: number
+                initial:
+                  description: The initial error budget, derived from the SLO objective
+                  example: 0.01
+                  type: number
+                remaining:
+                  description: The error budget remaining, or null when no data is available
+                  example: 0.76
+                  nullable: true
+                  type: number
+              required:
+                - initial
+                - consumed
+                - remaining
+            good:
+              description: The number of good events
+              example: 9976
+              type: number
+            sliValue:
+              description: The SLI value at the requested point in time, or null when no data is available
+              example: 0.9976
+              nullable: true
+              type: number
+            status:
+              description: The SLO health status
+              enum:
+                - NO_DATA
+                - HEALTHY
+                - DEGRADING
+                - VIOLATED
+              example: HEALTHY
+              type: string
+            total:
+              description: The total number of events
+              example: 10000
+              type: number
+          required:
+            - status
+            - sliValue
+            - errorBudget
+            - good
+            - total
+      required:
+        - id
+        - instanceId
+      title: Snapshot result
+      type: object
     SLOs_summary:
       description: The SLO computed data
       properties:
@@ -145881,8 +147647,9 @@ components:
       enum:
         - webhook-authentication-basic
         - webhook-authentication-ssl
+        - webhook-oauth2-client-credentials
       description: |
-        The type of authentication to use: basic, SSL, or none.
+        The type of authentication to use: basic, SSL, OAuth2 client credentials, or none.
     ca:
       title: Certificate authority
       type: string
@@ -145916,12 +147683,25 @@ components:
       description: Defines properties for connectors when type is `.webhook`.
       type: object
       properties:
+        accessTokenUrl:
+          type: string
+          description: |
+            The URL used to request an OAuth2 access token. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
+        additionalFields:
+          type: string
+          nullable: true
+          description: |
+            Additional fields, encoded as a JSON object, sent as part of the OAuth2 access token request body.
         authType:
           $ref: '#/components/schemas/auth_type'
         ca:
           $ref: '#/components/schemas/ca'
         certType:
           $ref: '#/components/schemas/cert_type'
+        clientId:
+          type: string
+          description: |
+            The client identifier for OAuth2 authentication. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
         hasAuth:
           $ref: '#/components/schemas/has_auth'
         headers:
@@ -145934,8 +147714,15 @@ components:
           enum:
             - post
             - put
+            - patch
+            - get
+            - delete
           description: |
-            The HTTP request method, either `post` or `put`.
+            The HTTP request method: `post`, `put`, `patch`, `get`, or `delete`.
+        scope:
+          type: string
+          description: |
+            The scope requested when acquiring the OAuth2 access token.
         url:
           type: string
           description: |
@@ -146013,7 +147800,10 @@ components:
         hasAuth:
           $ref: '#/components/schemas/has_auth'
         headers:
-          type: string
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
           description: |
             A set of key-value pairs sent as headers with the request URLs for the create case, update case, get case, and create comment methods.
         updateIncidentJson:
@@ -146305,6 +148095,10 @@ components:
       description: Defines secrets for connectors when type is `.webhook`.
       type: object
       properties:
+        clientSecret:
+          type: string
+          description: |
+            The client secret for OAuth2 authentication. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
         crt:
           $ref: '#/components/schemas/crt'
         key:
