@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiEmptyPrompt, EuiImage, EuiLink, EuiText } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
@@ -19,14 +18,6 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import simplifyLightSvg from './assets/simplify.light.svg';
 import simplifyDarkSvg from './assets/simplify.dark.svg';
 import * as i18n from './translations';
-
-const pageStyles = css`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 10%;
-  height: 100%;
-`;
 
 const AttackDiscoveryMovedPageComponent: React.FC = () => {
   const isDarkMode = useKibanaIsDarkMode();
@@ -49,72 +40,32 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
   }, [telemetry]);
 
   return (
-    <div css={pageStyles} data-test-subj="attackDiscoveryMovedPage">
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
+    <>
+      <EuiEmptyPrompt
+        data-test-subj="attackDiscoveryMovedPage"
+        icon={
           <EuiImage
             url={isDarkMode ? simplifyDarkSvg : simplifyLightSvg}
             alt={i18n.ILLUSTRATION_ALT}
             size="original"
           />
-        </EuiFlexItem>
-
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            margin-top: 24px;
-          `}
-        >
-          <EuiTitle size="m">
-            <h2 data-test-subj="attackDiscoveryMovedTitle">{i18n.TITLE}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            margin-top: 16px;
-          `}
-        >
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText data-test-subj="attackDiscoveryMovedBody">
-                <p>
-                  <FormattedMessage
-                    id="xpack.securitySolution.attackDiscovery.moved.description"
-                    defaultMessage="{attackDiscovery} now exists as {attacks} and is located under {detections} in the side navigation"
-                    values={{
-                      attackDiscovery: <em>{'Attack Discovery'}</em>,
-                      attacks: <em>{'Attacks'}</em>,
-                      detections: <strong>{'Detections'}</strong>,
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" data-test-subj="attackDiscoveryMovedOptOut">
-                <FormattedMessage
-                  id="xpack.securitySolution.attackDiscovery.moved.optOut"
-                  defaultMessage="Prefer the previous experience? Disable alerts and attacks alignment in {advancedSettingsLink}."
-                  values={{
-                    advancedSettingsLink: (
-                      <EuiLink href={advancedSettingsUrl}>{'Advanced Settings'}</EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            margin-top: 28px;
-          `}
-        >
+        }
+        title={<h2 data-test-subj="attackDiscoveryMovedTitle">{i18n.TITLE}</h2>}
+        titleSize="m"
+        body={
+          <p data-test-subj="attackDiscoveryMovedBody">
+            <FormattedMessage
+              id="xpack.securitySolution.attackDiscovery.moved.description"
+              defaultMessage="{attackDiscovery} now exists as {attacks} and is located under {detections} in the side navigation"
+              values={{
+                attackDiscovery: <em>{'Attack Discovery'}</em>,
+                attacks: <em>{'Attacks'}</em>,
+                detections: <strong>{'Detections'}</strong>,
+              }}
+            />
+          </p>
+        }
+        actions={
           <SecuritySolutionLinkButton
             fill
             deepLinkId={SecurityPageName.attacks}
@@ -123,11 +74,24 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
           >
             {i18n.GO_TO_ATTACKS_BUTTON}
           </SecuritySolutionLinkButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        footer={
+          <EuiText size="s" color="subdued" data-test-subj="attackDiscoveryMovedOptOut">
+            <FormattedMessage
+              id="xpack.securitySolution.attackDiscovery.moved.optOut"
+              defaultMessage="Prefer the previous experience? Disable alerts and attacks alignment in {advancedSettingsLink}."
+              values={{
+                advancedSettingsLink: (
+                  <EuiLink href={advancedSettingsUrl}>{'Advanced Settings'}</EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        }
+      />
 
       <SpyRoute pageName={SecurityPageName.attackDiscovery} />
-    </div>
+    </>
   );
 };
 
