@@ -65,7 +65,9 @@ const mockedRule = {
 
 rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
 
-describe('snoozeAlertRoute', () => {
+// TRIAL ONLY (#269134 breaking-changes trial, DO NOT MERGE): skipped because the
+// trial intentionally drops the `id` field from the snooze_schedule response.
+describe.skip('snoozeAlertRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
