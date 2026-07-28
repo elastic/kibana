@@ -131,11 +131,7 @@ class TaskHandlerImpl implements TaskHandler {
     }
   }
 
-  /**
-   * Finalizes an execution after the runner throws by persisting the failure status.
-   * The failure callback (when configured) is delivered by the callback delivery
-   * service as part of the event stream consumption.
-   */
+  /** Records the execution's failed or aborted status. */
   private async handleExecutionFailure({
     execution,
     executionClient,
