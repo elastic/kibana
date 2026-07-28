@@ -15,6 +15,14 @@ export interface ClientDetails {
 }
 
 /**
+ * Per-request options forwarded to the MCP SDK for individual operations.
+ */
+export interface McpRequestOptions {
+  readonly signal?: AbortSignal;
+  readonly timeout?: number;
+}
+
+/**
  * Options for the MCP client.
  * These map to reconnection options for the StreamableHTTPClientTransport.
  */

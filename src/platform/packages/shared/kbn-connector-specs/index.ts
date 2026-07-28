@@ -41,7 +41,7 @@ export type { ConnectorAuthorizationReason } from './src/errors';
 export { AUTH_MODE_BY_AUTH_TYPE_ID } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
-export { clientTypes } from './src/lib/clients';
+export { clientTypes, createMcpClientType } from './src/lib/clients';
 export type {
   ClientTypeSpec,
   BuildContext,
@@ -50,6 +50,7 @@ export type {
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
+  McpClientTypeDeps,
   FetchLike,
   ConfiguredFetchResource,
   ConfiguredFetchOptions,

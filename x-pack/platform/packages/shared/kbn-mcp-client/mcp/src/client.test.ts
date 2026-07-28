@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 import { McpClient } from './client';
+import { McpConnectionError } from './errors';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import {
   StreamableHTTPClientTransport,
@@ -110,7 +111,7 @@ describe('McpClient', () => {
     >;
     getServerCapabilities: jest.MockedFunction<() => ServerCapabilities | undefined>;
   };
-  let mockTransport: StreamableHTTPClientTransport;
+  let mockTransport: StreamableHTTPClientTransport & { terminateSession: jest.Mock };
   let clientDetails: ClientDetails;
   let mockLogger: MockedLogger;
 
@@ -134,7 +135,9 @@ describe('McpClient', () => {
       getServerCapabilities: jest.fn(),
     };
 
-    mockTransport = {} as StreamableHTTPClientTransport;
+    mockTransport = {
+      terminateSession: jest.fn(),
+    } as unknown as StreamableHTTPClientTransport & { terminateSession: jest.Mock };
 
     (Client as jest.MockedClass<typeof Client>).mockImplementation(
       () => mockClient as unknown as Client
@@ -238,7 +241,7 @@ describe('McpClient', () => {
 
       const result = await client.connect();
 
-      expect(mockClient.connect).toHaveBeenCalledWith(mockTransport);
+      expect(mockClient.connect).toHaveBeenCalledWith(mockTransport, {});
       expect(result).toEqual({
         connected: true,
         capabilities: mockCapabilities,
@@ -363,6 +366,90 @@ describe('McpClient', () => {
         'Error connecting to MCP server test-client, 1.0.0: [object Object]'
       );
     });
+
+    it('forwards signal to SDK connect call', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.connect.mockResolvedValue(undefined);
+      mockClient.getServerCapabilities.mockReturnValue(undefined);
+      const signal = new AbortController().signal;
+
+      await client.connect({ signal });
+
+      expect(mockClient.connect).toHaveBeenCalledWith(mockTransport, { signal });
+    });
+
+    it('forwards timeout to SDK connect call', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.connect.mockResolvedValue(undefined);
+      mockClient.getServerCapabilities.mockReturnValue(undefined);
+
+      await client.connect({ timeout: 5000 });
+
+      expect(mockClient.connect).toHaveBeenCalledWith(mockTransport, { timeout: 5000 });
+    });
+
+    it('McpConnectionError carries httpStatus from StreamableHTTPError', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const error = new StreamableHTTPError(403, 'Forbidden');
+      mockClient.connect.mockRejectedValue(error);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(McpConnectionError);
+      expect((thrown as McpConnectionError).httpStatus).toBe(403);
+    });
+
+    it('McpConnectionError carries httpStatus 401 from UnauthorizedError', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const error = new UnauthorizedError('Unauthorized');
+      mockClient.connect.mockRejectedValue(error);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(McpConnectionError);
+      expect((thrown as McpConnectionError).httpStatus).toBe(401);
+    });
+
+    it('McpConnectionError has no httpStatus for generic errors', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.connect.mockRejectedValue(new Error('timeout'));
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(McpConnectionError);
+      expect((thrown as McpConnectionError).httpStatus).toBeUndefined();
+    });
+  });
+
+  describe('terminateSession', () => {
+    it('calls transport.terminateSession', async () => {
+      const client = await createConnectedClient();
+      mockTransport.terminateSession.mockResolvedValue(undefined);
+
+      await client.terminateSession();
+
+      expect(mockTransport.terminateSession).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats HTTP 405 as success (server does not support session termination)', async () => {
+      const client = await createConnectedClient();
+      mockTransport.terminateSession.mockRejectedValue(
+        new StreamableHTTPError(405, 'Method Not Allowed')
+      );
+
+      await expect(client.terminateSession()).resolves.toBeUndefined();
+    });
+
+    it('rethrows non-405 errors from terminateSession', async () => {
+      const client = await createConnectedClient();
+      mockTransport.terminateSession.mockRejectedValue(
+        new StreamableHTTPError(500, 'Server Error')
+      );
+
+      await expect(client.terminateSession()).rejects.toThrow(
+        'Streamable HTTP error: Server Error'
+      );
+    });
   });
 
   describe('disconnect', () => {
@@ -454,8 +541,8 @@ describe('McpClient', () => {
 
       expect(result.tools).toHaveLength(2);
       expect(mockClient.listTools).toHaveBeenCalledTimes(2);
-      expect(mockClient.listTools).toHaveBeenNthCalledWith(1, { cursor: undefined });
-      expect(mockClient.listTools).toHaveBeenNthCalledWith(2, { cursor: 'cursor1' });
+      expect(mockClient.listTools).toHaveBeenNthCalledWith(1, { cursor: undefined }, {});
+      expect(mockClient.listTools).toHaveBeenNthCalledWith(2, { cursor: 'cursor1' }, {});
     });
 
     it('handles multiple pages of pagination', async () => {
@@ -526,6 +613,19 @@ describe('McpClient', () => {
       await expect(client.listTools()).rejects.toThrow('MCP client not connected');
     });
 
+    it('forwards signal and timeout options to SDK listTools', async () => {
+      const client = await createConnectedClient();
+      mockClient.listTools.mockResolvedValue({ isError: false, tools: [], nextCursor: undefined });
+      const signal = new AbortController().signal;
+
+      await client.listTools({ signal, timeout: 3000 });
+
+      expect(mockClient.listTools).toHaveBeenCalledWith(
+        { cursor: undefined },
+        { signal, timeout: 3000 }
+      );
+    });
+
     it('handles tools with missing optional fields', async () => {
       const client = await createConnectedClient();
 
@@ -568,10 +668,14 @@ describe('McpClient', () => {
 
       const result = await client.callTool(params);
 
-      expect(mockClient.callTool).toHaveBeenCalledWith({
-        name: 'test-tool',
-        arguments: { arg1: 'value1' },
-      });
+      expect(mockClient.callTool).toHaveBeenCalledWith(
+        {
+          name: 'test-tool',
+          arguments: { arg1: 'value1' },
+        },
+        undefined,
+        {}
+      );
       expect(result.content).toEqual([
         { type: 'text', text: 'Result 1' },
         { type: 'text', text: 'Result 2' },
@@ -710,10 +814,14 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(mockClient.callTool).toHaveBeenCalledWith({
-        name: 'test-tool',
-        arguments: {},
-      });
+      expect(mockClient.callTool).toHaveBeenCalledWith(
+        {
+          name: 'test-tool',
+          arguments: {},
+        },
+        undefined,
+        {}
+      );
       expect(result.content).toEqual([{ type: 'text', text: 'Result' }]);
     });
 
@@ -730,10 +838,14 @@ describe('McpClient', () => {
         arguments: undefined as unknown as Record<string, unknown>,
       });
 
-      expect(mockClient.callTool).toHaveBeenCalledWith({
-        name: 'test-tool',
-        arguments: undefined,
-      });
+      expect(mockClient.callTool).toHaveBeenCalledWith(
+        {
+          name: 'test-tool',
+          arguments: undefined,
+        },
+        undefined,
+        {}
+      );
     });
 
     it('filters out text parts with invalid text property', async () => {
@@ -825,6 +937,20 @@ describe('McpClient', () => {
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
         'MCP client not connected to test-client, 1.0.0'
+      );
+    });
+
+    it('forwards signal and timeout options to SDK callTool', async () => {
+      const client = await createConnectedClient();
+      mockClient.callTool.mockResolvedValue({ isError: false, content: [] });
+      const signal = new AbortController().signal;
+
+      await client.callTool({ name: 'test-tool', arguments: {} }, { signal, timeout: 3000 });
+
+      expect(mockClient.callTool).toHaveBeenCalledWith(
+        { name: 'test-tool', arguments: {} },
+        undefined,
+        { signal, timeout: 3000 }
       );
     });
 

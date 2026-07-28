@@ -19,10 +19,12 @@ import type {
   CallToolResponse,
   ContentPart,
   ListToolsResponse,
-  Tool,
   McpClientOptions,
+  McpRequestOptions,
+  Tool,
 } from './types';
 import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
+import { McpConnectionError } from './errors';
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -98,12 +100,17 @@ export class McpClient {
   /**
    * Connect to the MCP client and return the connected status and capabilities.
    */
-  async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
+  async connect(
+    options?: McpRequestOptions
+  ): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
     if (!this.connected) {
       this.logger.debug(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
       try {
         // connect() performs the initialization handshake with the MCP server as per MCP protocol
-        await this.client.connect(this.transport);
+        await this.client.connect(this.transport, {
+          ...(options?.signal ? { signal: options.signal } : {}),
+          ...(options?.timeout ? { timeout: options.timeout } : {}),
+        });
         this.connected = true;
         this.logger.debug(`Connected to MCP server ${this.name}, ${this.version}`);
       } catch (error) {
@@ -112,11 +119,16 @@ export class McpClient {
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
         if (error instanceof StreamableHTTPError) {
-          throw new Error(errorMessage);
+          throw new McpConnectionError(errorMessage, { httpStatus: error.code, cause: error });
         } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${errorMessage}`);
+          throw new McpConnectionError(`Unauthorized error: ${errorMessage}`, {
+            httpStatus: 401,
+            cause: error,
+          });
         } else {
-          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
+          throw new McpConnectionError(`Error connecting to MCP server: ${errorMessage}`, {
+            cause: error,
+          });
         }
       }
     }
@@ -127,6 +139,23 @@ export class McpClient {
       connected: this.connected,
       capabilities,
     };
+  }
+
+  /**
+   * Terminates the current MCP session by sending a DELETE request to the server.
+   * HTTP 405 (Method Not Allowed) is treated as success – the server simply does not
+   * implement session termination, which is a valid state.
+   */
+  async terminateSession(): Promise<void> {
+    try {
+      await this.transport.terminateSession();
+    } catch (error) {
+      if (error instanceof StreamableHTTPError && error.code === 405) {
+        // 405 = server does not support session termination; treat as success
+        return;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -144,16 +173,20 @@ export class McpClient {
   /**
    * List the tools available on the MCP client.
    */
-  async listTools(): Promise<ListToolsResponse> {
+  async listTools(options?: McpRequestOptions): Promise<ListToolsResponse> {
     if (!this.connected) {
       throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
     }
 
     this.logger.debug(`Listing tools from MCP server ${this.name}, ${this.version}`);
     const getNextPage = async (cursor?: string): Promise<Tool[]> => {
-      const response = await this.client.listTools({
-        cursor,
-      });
+      const response = await this.client.listTools(
+        { cursor },
+        {
+          ...(options?.signal ? { signal: options.signal } : {}),
+          ...(options?.timeout ? { timeout: options.timeout } : {}),
+        }
+      );
 
       if (response.isError) {
         throw new Error(`Error listing tools: ${response.error}`);
@@ -185,17 +218,25 @@ export class McpClient {
    * This method returns text content, plus resource links and embedded resources.
    * It does not support other content types such as images and audio.
    * @param {CallToolParams} params - The parameters for the tool call.
+   * @param {McpRequestOptions} options - Optional request options (signal, timeout).
    */
-  async callTool(params: CallToolParams): Promise<CallToolResponse> {
+  async callTool(params: CallToolParams, options?: McpRequestOptions): Promise<CallToolResponse> {
     if (!this.connected) {
       throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
     }
 
     this.logger.debug(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);
-    const response = await this.client.callTool({
-      name: params.name,
-      arguments: params.arguments,
-    });
+    const response = await this.client.callTool(
+      {
+        name: params.name,
+        arguments: params.arguments,
+      },
+      undefined,
+      {
+        ...(options?.signal ? { signal: options.signal } : {}),
+        ...(options?.timeout ? { timeout: options.timeout } : {}),
+      }
+    );
 
     const content = (Array.isArray(response.content) ? response.content : []) as Array<
       ContentPart | null | undefined

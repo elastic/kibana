@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION, createMcpClientType } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 
@@ -65,6 +65,11 @@ export const createConnectorTypeFromSpec = (
         getCredential: actions.getCredential,
         getClientLeasePool: actions.getClientLeasePool,
         network,
+        clientTypes: {
+          mcp: createMcpClientType({
+            configuredFetchFactory: actions.getConfiguredFetchFactory(),
+          }),
+        },
       })
     : undefined;
 

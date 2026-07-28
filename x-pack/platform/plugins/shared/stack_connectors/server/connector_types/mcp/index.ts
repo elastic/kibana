@@ -26,15 +26,15 @@ import {
   type MCPConnectorConfig,
   type MCPConnectorSecrets,
 } from '@kbn/connector-schemas/mcp';
+import type { ConfiguredFetchFactory } from '@kbn/connector-specs';
 import { McpConnector } from './mcp';
 
-export const getMcpConnectorType = (): SubActionConnectorType<
-  MCPConnectorConfig,
-  MCPConnectorSecrets
-> => ({
+export const getMcpConnectorType = (
+  configuredFetchFactory: ConfiguredFetchFactory
+): SubActionConnectorType<MCPConnectorConfig, MCPConnectorSecrets> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
-  getService: (params) => new McpConnector(params),
+  getService: (params) => new McpConnector(params, configuredFetchFactory),
   schema: {
     config: MCPConnectorConfigSchema,
     secrets: MCPConnectorSecretsSchema,
