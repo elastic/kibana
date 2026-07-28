@@ -15,6 +15,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
+import { reinstallSharedElasticsearchAssetsIfMissing } from '../asset_manager/install_assets';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -103,8 +104,19 @@ function createMockRemoteLogsExtractionClient(): MockRemoteLogsExtractionClient 
 jest.mock('../../infra/elasticsearch/esql');
 jest.mock('../../infra/elasticsearch/ingest');
 
+// Keep the real `isIndexNotFoundError` classifier; stub only the reinstall so the heal/retry
+// wiring in `extractLogs` can be exercised without touching Elasticsearch.
+jest.mock('../asset_manager/install_assets', () => ({
+  ...jest.requireActual('../asset_manager/install_assets'),
+  reinstallSharedElasticsearchAssetsIfMissing: jest.fn(),
+}));
+
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
+const mockReinstallAssets =
+  reinstallSharedElasticsearchAssetsIfMissing as jest.MockedFunction<
+    typeof reinstallSharedElasticsearchAssetsIfMissing
+  >;
 
 function createMockEngineDescriptor(
   type: EntityType = 'user',
@@ -1744,6 +1756,75 @@ describe('LogsExtractionClient', () => {
         'No global state found for this namespace'
       );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('extractLogs self-heal on index_not_found', () => {
+    const indexNotFoundError = {
+      meta: { body: { error: { type: 'index_not_found_exception' } } },
+    };
+
+    const successResponse: ESQLSearchResponse = {
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: HASHED_ID_FIELD, type: 'keyword' },
+        { name: 'user.name', type: 'keyword' },
+      ],
+      values: [['2024-01-02T10:00:00.000Z', 'hash1', 'user1']],
+    };
+
+    beforeEach(() => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue({
+        getIndexPattern: () => 'logs-*',
+      } as any);
+      mockIngestEntities.mockResolvedValue(undefined);
+    });
+
+    it('recreates missing assets and retries once, succeeding', async () => {
+      mockReinstallAssets.mockResolvedValue(true);
+      // First attempt throws index_not_found; the retry runs the full success sequence.
+      mockExecuteEsqlQuery.mockRejectedValueOnce(indexNotFoundError);
+      mockExtractSuccessSequence(successResponse);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry when nothing of ours was missing (source-index error)', async () => {
+      mockReinstallAssets.mockResolvedValue(false);
+      mockExecuteEsqlQuery.mockRejectedValue(indexNotFoundError);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+      expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not check assets for non-index_not_found errors', async () => {
+      mockExecuteEsqlQuery.mockRejectedValue(new Error('boom'));
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+      expect(mockReinstallAssets).not.toHaveBeenCalled();
+    });
+
+    it('retries only once even when the retry also fails', async () => {
+      mockReinstallAssets.mockResolvedValue(true);
+      mockExecuteEsqlQuery.mockRejectedValue(indexNotFoundError);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+      // Healed once, retried once, no further heal attempts (no loop).
+      expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
     });
   });
 });
