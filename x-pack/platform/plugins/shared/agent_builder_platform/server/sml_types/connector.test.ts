@@ -70,7 +70,12 @@ describe('connectorSmlType', () => {
   });
 
   describe('list', () => {
-    const makeSo = (id: string, namespaces: string[], updatedAt: string, actionTypeId = '.mcp') => ({
+    const makeSo = (
+      id: string,
+      namespaces: string[],
+      updatedAt: string,
+      actionTypeId = '.mcp'
+    ) => ({
       id,
       updated_at: updatedAt,
       namespaces,
@@ -173,7 +178,11 @@ describe('connectorSmlType', () => {
       async function* singlePage() {
         yield {
           saved_objects: [
-            { id: 'conn-1', updated_at: '2024-01-01T00:00:00.000Z', attributes: { actionTypeId: '.mcp' } },
+            {
+              id: 'conn-1',
+              updated_at: '2024-01-01T00:00:00.000Z',
+              attributes: { actionTypeId: '.mcp' },
+            },
           ],
         };
       }
