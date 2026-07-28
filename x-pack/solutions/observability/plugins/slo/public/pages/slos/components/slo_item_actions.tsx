@@ -21,6 +21,7 @@ import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import type { BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 import { useActionModal } from '../../../context/action_modal';
@@ -72,6 +73,7 @@ export function SloItemActions({
   const isDashboardContext = executionContextName === 'dashboards';
   const { data: permissions } = usePermissions();
   const { triggerAction } = useActionModal();
+  const { telemetry } = usePluginContext();
 
   const {
     handleNavigateToRules,
@@ -96,11 +98,17 @@ export function SloItemActions({
     navigateToUrl(sloDetailsUrl);
   };
 
+  const handleEdit = () => {
+    telemetry?.reportSloEdited({ slo_id: slo.id });
+  };
+
   const handleClone = () => {
+    telemetry?.reportSloCloned({ slo_id: slo.id });
     triggerAction({ type: 'clone', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
   };
 
   const handleDelete = () => {
+    telemetry?.reportSloDeleted({ slo_id: slo.id });
     if (!!remoteDeleteUrl) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
@@ -109,6 +117,7 @@ export function SloItemActions({
   };
 
   const handleReset = () => {
+    telemetry?.reportSloReset({ slo_id: slo.id });
     if (!!remoteResetUrl) {
       window.open(remoteResetUrl, '_blank');
     } else {
@@ -206,6 +215,7 @@ export function SloItemActions({
             icon="pencil"
             disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             href={sloEditUrl}
+            onClick={handleEdit}
             target={isRemote ? '_blank' : undefined}
             toolTipContent={
               hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''

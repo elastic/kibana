@@ -24,6 +24,7 @@ export interface Props {
   slo?: GetSLOResponse;
   onFlyoutClose?: () => void;
   formSettings?: FormSettings;
+  templateId?: string;
 }
 
 const DEFAULT_FORM_SETTINGS: FormSettings = {
@@ -36,6 +37,7 @@ export function SloEditForm({
   initialValues,
   onFlyoutClose,
   formSettings = DEFAULT_FORM_SETTINGS,
+  templateId,
 }: Props) {
   const { isEditMode = false } = formSettings;
   assertValidProps({ isEditMode, slo, onFlyoutClose });
@@ -92,7 +94,12 @@ export function SloEditForm({
           ]}
         />
 
-        <SloEditFormFooter slo={slo} onFlyoutClose={onFlyoutClose} isEditMode={isEditMode} />
+        <SloEditFormFooter
+          slo={slo}
+          onFlyoutClose={onFlyoutClose}
+          isEditMode={isEditMode}
+          templateId={templateId}
+        />
       </EuiFlexGroup>
     </FormProvider>
   );

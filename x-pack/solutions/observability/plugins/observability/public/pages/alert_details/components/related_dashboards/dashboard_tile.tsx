@@ -32,10 +32,12 @@ export function DashboardTile({
   dashboard,
   actionButtonProps,
   timeRange,
+  ruleId,
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
   timeRange: NonNullable<DashboardLocatorParams['time_range']>;
+  ruleId: string;
 }) {
   const {
     services: {
@@ -65,7 +67,9 @@ export function DashboardTile({
             onClick={() => {
               if (telemetryClient) {
                 telemetryClient.reportLinkedDashboardViewed(
-                  actionButtonProps?.ruleType || 'unknown'
+                  actionButtonProps?.ruleType || 'unknown',
+                  ruleId,
+                  dashboard.id
                 );
               }
             }}
@@ -89,7 +93,11 @@ export function DashboardTile({
               data-test-subj={`addSuggestedDashboard_alertDetailsPage_${actionButtonProps.ruleType}`}
               onClick={() => {
                 actionButtonProps.onClick(dashboard);
-                telemetryClient.reportSuggestedDashboardAdded(actionButtonProps.ruleType);
+                telemetryClient.reportSuggestedDashboardAdded(
+                  actionButtonProps.ruleType,
+                  ruleId,
+                  dashboard.id
+                );
               }}
               isLoading={actionButtonProps.isLoading}
               isDisabled={actionButtonProps.isDisabled}

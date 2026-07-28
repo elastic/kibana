@@ -68,6 +68,7 @@ export function RelatedDashboards({
         dashboards={linkedDashboards}
         dataTestSubj="linked-dashboards"
         timeRange={timeRange}
+        ruleId={rule.id}
       />
       <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
@@ -77,6 +78,7 @@ export function RelatedDashboards({
         dashboards={suggestedDashboardsWithButton}
         dataTestSubj="suggested-dashboards"
         timeRange={timeRange}
+        ruleId={rule.id}
       />
     </div>
   );

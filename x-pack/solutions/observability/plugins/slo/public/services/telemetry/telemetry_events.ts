@@ -33,8 +33,70 @@ const sloCreateFlyoutViewedEventType: SloTelemetryEvent = {
   },
 };
 
+const sloCreatedEventType: SloTelemetryEvent = {
+  eventType: SloTelemetryEventTypes.SLO_CREATED,
+  schema: {
+    slo_id: {
+      type: 'keyword',
+      _meta: { description: 'The ID of the SLO that was created' },
+    },
+    template_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the SLO template the SLO was created from, if any',
+        optional: true,
+      },
+    },
+  },
+};
+
+const sloEditedEventType: SloTelemetryEvent = {
+  eventType: SloTelemetryEventTypes.SLO_EDITED,
+  schema: {
+    slo_id: {
+      type: 'keyword',
+      _meta: { description: 'The ID of the SLO that was edited' },
+    },
+  },
+};
+
+const sloDeletedEventType: SloTelemetryEvent = {
+  eventType: SloTelemetryEventTypes.SLO_DELETED,
+  schema: {
+    slo_id: {
+      type: 'keyword',
+      _meta: { description: 'The ID of the SLO that was deleted' },
+    },
+  },
+};
+
+const sloClonedEventType: SloTelemetryEvent = {
+  eventType: SloTelemetryEventTypes.SLO_CLONED,
+  schema: {
+    slo_id: {
+      type: 'keyword',
+      _meta: { description: 'The ID of the SLO that was cloned' },
+    },
+  },
+};
+
+const sloResetEventType: SloTelemetryEvent = {
+  eventType: SloTelemetryEventTypes.SLO_RESET,
+  schema: {
+    slo_id: {
+      type: 'keyword',
+      _meta: { description: 'The ID of the SLO that was reset' },
+    },
+  },
+};
+
 export const sloTelemetryEventBasedTypes = [
   sloDetailsFlyoutViewedEventType,
   sloDetailsFlyoutTabChangedEventType,
   sloCreateFlyoutViewedEventType,
+  sloCreatedEventType,
+  sloEditedEventType,
+  sloDeletedEventType,
+  sloClonedEventType,
+  sloResetEventType,
 ];
