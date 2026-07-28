@@ -46,16 +46,22 @@ interface SmlKibanaPrivilege {
  * Permissions required to access an entry.
  *
  * `privileges` is an array of composite `space|action` tokens (see
- * {@link SmlKibanaPrivilege}). `count` stores the number of tokens and is used
- * by Elasticsearch's `terms_set` query with `minimum_should_match_field` to
- * express AND-semantics (all required privileges must be held).
+ * {@link SmlKibanaPrivilege}). `count` stores the number of *raw* privileges
+ * required (i.e. `privileges.length` before the space × action cross-product)
+ * and is used by Elasticsearch's `terms_set` query with
+ * `minimum_should_match_field` to express AND-semantics: the caller must hold
+ * all N required privileges in the current space.
+ *
+ * `count` is **derived by the indexer** and must not be set by `getPermissions`
+ * hooks; any value supplied there is ignored. It is optional here so that hook
+ * return values and intermediate shapes are not required to include it.
  *
  * The `kibana` sub-object is always present (with a possibly-empty array)
  * on stored documents to keep the schema rigid and predictable. An empty
  * `privileges` array means the entry is public within any space it belongs to.
  */
 export interface SmlPermissions {
-  kibana: { privileges: SmlKibanaPrivilege[]; count: number };
+  kibana: { privileges: SmlKibanaPrivilege[]; count?: number };
 }
 
 /**

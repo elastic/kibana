@@ -1660,7 +1660,6 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-1', 'doc-2'],
-        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1727,7 +1726,6 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-3'],
-        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1758,7 +1756,6 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: [],
-        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1775,7 +1772,6 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-1'],
-        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1791,7 +1787,6 @@ describe('SmlService', () => {
 
       const result = await smlService.getDocuments({
         ids: ['doc-1'],
-        spaceId: 'default',
         esClient: scopedClient,
       });
 
@@ -1810,7 +1805,6 @@ describe('SmlService', () => {
 
       await smlService.getDocuments({
         ids: ['id-1', 'id-2'],
-        spaceId: 'my-space',
         esClient: scopedClient,
       });
 

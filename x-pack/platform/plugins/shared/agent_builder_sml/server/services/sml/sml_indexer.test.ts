@@ -193,7 +193,7 @@ describe('createSmlIndexer', () => {
         permissions: {
           kibana: {
             privileges: [{ name: 'default|perm1' }, { name: 'space-2|perm1' }],
-            count: 2,
+            count: 1,
           },
         },
         ingestion_method: 'crawled',
