@@ -42,7 +42,7 @@ export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;
-    setLayerList: (layerList: LayerDescriptor[]) => void;
+    setLayerList: (layerList: LayerDescriptor[]) => Promise<void>;
     updateLayerById: (layerDescriptor: LayerDescriptor) => void;
     onRenderComplete$: Observable<void>;
   };

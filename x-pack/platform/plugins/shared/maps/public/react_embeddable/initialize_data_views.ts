@@ -43,8 +43,8 @@ export function initializeDataViews(store: MapStore) {
 
   return {
     dataViews$,
-    setLayerList(layerList: LayerDescriptor[]) {
-      store.dispatch<any>(replaceLayerList(layerList));
+    setLayerList: async (layerList: LayerDescriptor[]) => {
+      await store.dispatch<any>(replaceLayerList(layerList));
       updateDataViews();
     },
     updateLayerById: (layerDescriptor: LayerDescriptor) => {
