@@ -106,6 +106,19 @@ const toBulkError = (
   error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
 });
 
+/**
+ * Builds a per-rule bulk error flagging that the rule's saved object was
+ * persisted but the paired Task Manager call failed, leaving its task state
+ * diverged. Surfaced alongside the affected count so clients can detect the
+ * drift and (optionally) retry.
+ */
+const toTaskManagerDriftError = (id: string, message: string): BulkOperationError => ({
+  id,
+  error: { code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT, message },
+});
+
+const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+
 const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   if (!sortField) {
     return undefined;
@@ -658,9 +671,42 @@ export class RulesClient {
   }
 
   /**
+   * Records Task Manager drift for a bulk operation whose saved-object change
+   * already committed but whose paired Task Manager call failed. Logs `message`
+   * at `error` level under the `TASK_MANAGER_DRIFT` code, and — when an
+   * `errors` sink is provided — appends a per-rule `TASK_MANAGER_DRIFT` entry
+   * for each affected rule so the drift surfaces in the bulk response.
+   */
+  private recordTaskManagerDrift({
+    ruleIds,
+    message,
+    errors,
+  }: {
+    ruleIds: string[];
+    message: string;
+    errors?: BulkOperationError[];
+  }): void {
+    if (ruleIds.length === 0) {
+      return;
+    }
+
+    this.logger.error({
+      error: new Error(message),
+      code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+    });
+
+    if (errors) {
+      for (const id of ruleIds) {
+        errors.push(toTaskManagerDriftError(id, message));
+      }
+    }
+  }
+
+  /**
    * Executes a bulk delete against a known list of ids. Task-manager task
    * removal is best-effort; only saved-object errors surface as per-rule
-   * bulk errors.
+   * bulk errors. Task-removal failures do not fail the operation but are
+   * logged and surfaced per-rule as `TASK_MANAGER_DRIFT` errors.
    */
   private async executeBulkDelete(ids: string[]): Promise<BulkResponse> {
     const { spaceId } = this.getSpaceContext();
@@ -671,15 +717,9 @@ export class RulesClient {
       return { affected_count: 0, errors: [] };
     }
 
-    const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
-    try {
-      await this.taskManager.bulkRemove(taskIds);
-    } catch {
-      // Task removal failures are non-fatal; continue with SO deletion.
-    }
-
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
     const deletedRules: EventRule[] = [];
+    const deletedTaskIds: string[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
         errors.push(toBulkError(result.id, result.error));
@@ -687,6 +727,22 @@ export class RulesClient {
       }
       affectedCount += 1;
       deletedRules.push({ id: result.id, spaceId });
+      deletedTaskIds.push(getRuleExecutorTaskId({ ruleId: result.id, spaceId }));
+    }
+
+    if (deletedTaskIds.length > 0) {
+      try {
+        await this.taskManager.bulkRemove(deletedTaskIds);
+      } catch (e) {
+        const driftedRuleIds = deletedRules.map((rule) => rule.id);
+        this.recordTaskManagerDrift({
+          ruleIds: driftedRuleIds,
+          message: `Failed to remove executor task(s) for deleted rule(s) [${driftedRuleIds.join(
+            ', '
+          )}]; the saved objects are gone but their tasks remain: ${errorMessage(e)}`,
+          errors,
+        });
+      }
     }
 
     this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules);
@@ -735,9 +791,6 @@ export class RulesClient {
     }
 
     if (itemsToUpdate.length > 0) {
-      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
-
-      const enabledRules: EventRule[] = [];
       const tasksToSchedule: Array<{
         id: string;
         taskType: string;
@@ -746,7 +799,38 @@ export class RulesClient {
         state: Record<string, unknown>;
         scope: string[];
         enabled: boolean;
-      }> = [];
+      }> = itemsToUpdate.map((item) => ({
+        id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
+        taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+        schedule: { interval: item.attrs.schedule.every },
+        params: { ruleId: item.id, spaceId },
+        state: {},
+        scope: ['alerting'],
+        enabled: true,
+      }));
+
+      try {
+        await this.taskManager.bulkSchedule(tasksToSchedule, {
+          request: this.request as unknown as CoreKibanaRequest,
+          cloneApiKey: true,
+        });
+      } catch (e) {
+        const driftedRuleIds = itemsToUpdate.map((item) => item.id);
+        this.recordTaskManagerDrift({
+          ruleIds: driftedRuleIds,
+          message: `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
+            ', '
+          )}]; they remain disabled: ${errorMessage(e)}`,
+          errors,
+        });
+        return { affected_count: affectedCount, errors };
+      }
+
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+      const enabledRules: EventRule[] = [];
+      const tasksToCancel: string[] = [];
+      const failedUpdateRuleIds: string[] = [];
 
       for (let i = 0; i < updateResults.length; i++) {
         const updateResult = updateResults[i];
@@ -754,37 +838,24 @@ export class RulesClient {
 
         if (!updateResult.success) {
           errors.push(toBulkError(updateResult.id, updateResult.error));
+          tasksToCancel.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
+          failedUpdateRuleIds.push(item.id);
           continue;
         }
 
         affectedCount += 1;
         enabledRules.push({ id: item.id, spaceId });
-
-        tasksToSchedule.push({
-          id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
-          taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-          schedule: { interval: item.attrs.schedule.every },
-          params: { ruleId: item.id, spaceId },
-          state: {},
-          scope: ['alerting'],
-          enabled: true,
-        });
       }
 
-      if (tasksToSchedule.length > 0) {
+      if (tasksToCancel.length > 0) {
         try {
-          await this.taskManager.bulkSchedule(tasksToSchedule, {
-            request: this.request as unknown as CoreKibanaRequest,
-            cloneApiKey: true,
-          });
+          await this.taskManager.bulkRemove(tasksToCancel);
         } catch (e) {
-          // Task scheduling failure is non-fatal for the bulk response, but the rules were
-          // already persisted as enabled. Key provisioning (clone / UIAM grant) is per task
-          // type, so a single failure drops the whole batch: those rules stay enabled with no
-          // executor task. Log so the silent drop is observable.
-          const failure = e instanceof Error ? e.message : String(e);
-          this.logger.warn({
-            message: `Failed to schedule executor tasks for ${tasksToSchedule.length} enabled rule(s); they are enabled but will not run: ${failure}`,
+          this.recordTaskManagerDrift({
+            ruleIds: failedUpdateRuleIds,
+            message: `Failed to cancel executor task(s) for rule(s) [${failedUpdateRuleIds.join(
+              ', '
+            )}] whose enable did not persist; the executor defense halts them: ${errorMessage(e)}`,
           });
         }
       }
@@ -859,8 +930,15 @@ export class RulesClient {
     if (disabledTaskIds.length > 0) {
       try {
         await this.taskManager.bulkDisable(disabledTaskIds);
-      } catch {
-        // Task disable failure is non-fatal for bulk operations.
+      } catch (e) {
+        const driftedRuleIds = disabledRules.map((rule) => rule.id);
+        this.recordTaskManagerDrift({
+          ruleIds: driftedRuleIds,
+          message: `Failed to disable executor task(s) for rule(s) [${driftedRuleIds.join(
+            ', '
+          )}]; the tasks may still fire but the executor defense halts them: ${errorMessage(e)}`,
+          errors,
+        });
       }
     }
 

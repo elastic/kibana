@@ -1367,7 +1367,44 @@ describe('RulesClient', () => {
       ]);
     });
 
-    it('continues with deletion even if task removal fails', async () => {
+    it('deletes the saved objects before removing the tasks', async () => {
+      const client = createClient();
+
+      const callOrder: string[] = [];
+      rulesSavedObjectService.bulkDelete.mockImplementationOnce(async () => {
+        callOrder.push('bulkDelete');
+        return [{ id: 'rule-1', success: true }];
+      });
+      taskManager.bulkRemove.mockImplementationOnce(async () => {
+        callOrder.push('bulkRemove');
+        return { statuses: [] };
+      });
+
+      await client.bulkDeleteRules({ ids: ['rule-1'] });
+
+      expect(callOrder).toEqual(['bulkDelete', 'bulkRemove']);
+    });
+
+    it('only removes tasks for rules whose saved object was deleted', async () => {
+      const client = createClient();
+
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-1');
+
+      rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([
+        { id: 'rule-1', success: true },
+        {
+          id: 'rule-2',
+          success: false,
+          error: { error: 'Not Found', message: 'Rule not found', statusCode: 404 },
+        },
+      ]);
+
+      await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1']);
+    });
+
+    it('surfaces TASK_MANAGER_DRIFT errors when task removal fails', async () => {
       const client = createClient();
 
       getRuleExecutorTaskIdMock
@@ -1383,7 +1420,25 @@ describe('RulesClient', () => {
 
       const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
 
-      expect(res).toEqual({ affected_count: 2, errors: [] });
+      // The saved objects are gone (affected), but the orphan tasks are flagged.
+      expect(res.affected_count).toBe(2);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-1',
+          error: {
+            code: 'TASK_MANAGER_DRIFT',
+            message: expect.stringContaining('task removal failed'),
+          },
+        },
+        {
+          id: 'rule-2',
+          error: {
+            code: 'TASK_MANAGER_DRIFT',
+            message: expect.stringContaining('task removal failed'),
+          },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('returns a zero-affected empty response when ids is an empty array', async () => {
@@ -1439,7 +1494,7 @@ describe('RulesClient', () => {
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
 
-    it('logs a warning when task scheduling fails but still counts the rule as affected', async () => {
+    it('schedules the tasks before persisting enabled=true', async () => {
       const client = createClient();
 
       const disabledAttrs = createRuleSoAttributes({
@@ -1451,17 +1506,82 @@ describe('RulesClient', () => {
         { id: 'rule-1', attributes: disabledAttrs, version: 'v1' },
       ]);
 
-      rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-1', success: true }]);
+      const callOrder: string[] = [];
+      taskManager.bulkSchedule.mockImplementationOnce(async () => {
+        callOrder.push('bulkSchedule');
+        return [];
+      });
+      rulesSavedObjectService.bulkUpdate.mockImplementationOnce(async () => {
+        callOrder.push('bulkUpdate');
+        return [{ id: 'rule-1', success: true }];
+      });
+
+      await client.bulkEnableRules({ ids: ['rule-1'] });
+
+      expect(callOrder).toEqual(['bulkSchedule', 'bulkUpdate']);
+    });
+
+    it('leaves rules disabled and surfaces TASK_MANAGER_DRIFT when scheduling fails', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'rule-1', attributes: disabledAttrs, version: 'v1' },
+      ]);
 
       taskManager.bulkSchedule.mockRejectedValueOnce(new Error('Failed to grant UIAM API key'));
 
       const res = await client.bulkEnableRules({ ids: ['rule-1'] });
 
-      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to grant UIAM API key')
-      );
-      expect(res).toEqual({ affected_count: 1, errors: [] });
+      // Scheduling failed first, so the saved object is never flipped to enabled.
+      expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-1',
+          error: {
+            code: 'TASK_MANAGER_DRIFT',
+            message: expect.stringContaining('Failed to grant UIAM API key'),
+          },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+    });
+
+    it('cancels the just-scheduled task when the saved object update fails', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'rule-1', attributes: disabledAttrs, version: 'v1' },
+      ]);
+
+      getRuleExecutorTaskIdMock.mockReturnValue('task:rule-1');
+
+      rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
+        {
+          id: 'rule-1',
+          success: false,
+          error: { statusCode: 409, error: 'Conflict', message: 'Version conflict' },
+        },
+      ]);
+
+      const res = await client.bulkEnableRules({ ids: ['rule-1'] });
+
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1']);
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toEqual([
+        { id: 'rule-1', error: { code: 'RULE_VERSION_CONFLICT', message: 'Version conflict' } },
+      ]);
     });
 
     it('counts already-enabled rules as affected without updating them (idempotent)', async () => {
@@ -1617,7 +1737,7 @@ describe('RulesClient', () => {
       ]);
     });
 
-    it('continues even if bulkDisable on task manager fails', async () => {
+    it('surfaces TASK_MANAGER_DRIFT errors when bulkDisable fails', async () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
@@ -1636,7 +1756,18 @@ describe('RulesClient', () => {
 
       const res = await client.bulkDisableRules({ ids: ['rule-1'] });
 
-      expect(res).toEqual({ affected_count: 1, errors: [] });
+      // The saved object is disabled (affected), but the task drift is flagged.
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-1',
+          error: {
+            code: 'TASK_MANAGER_DRIFT',
+            message: expect.stringContaining('task disable failed'),
+          },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('returns a zero-affected empty response when ids is an empty array', async () => {
