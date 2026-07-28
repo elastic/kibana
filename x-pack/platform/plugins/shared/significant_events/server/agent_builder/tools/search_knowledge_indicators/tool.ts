@@ -88,7 +88,6 @@ const searchKnowledgeIndicatorsSchema = z.object({
   rule_backed: z
     .boolean()
     .optional()
-    .default(true)
     .describe(
       'Return only query KIs with the requested rule-backing state (`true` = rule-backed only, `false` = unbacked only). Use only when `kind: ["query"]` is specified. Omit to include all.'
     ),

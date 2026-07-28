@@ -233,13 +233,13 @@ export class IndicatorSearcher {
       featureIdsFilter,
       queryTypesFilter,
       queryIdsFilter,
-      ruleIdsFilter,
-      ruleBackedFilter
+      ruleIdsFilter
     );
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
-      options.includeExcluded ? undefined : IS_NOT_EXCLUDED
+      options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
+      ruleBackedFilter
     );
 
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
