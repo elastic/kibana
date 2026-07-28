@@ -78,7 +78,7 @@ describe('selectTools', () => {
       toolProvider,
       agentConfiguration: {
         tools: [{ tool_ids: ['registry.static'] }],
-        enable_elastic_capabilities: false,
+        enable_elastic_capabilities: true,
       } as any,
       attachmentsService,
       spaceId: 'default',
@@ -101,6 +101,39 @@ describe('selectTools', () => {
       ToolOrigin.inline
     );
     expect(skills.convertSkillTool).toHaveBeenCalled();
+  });
+
+  it('excludes versioned attachment tools when enable_elastic_capabilities is false', async () => {
+    const toolProvider = {
+      list: jest.fn().mockResolvedValue([]),
+    } as any;
+
+    const attachmentsService = {
+      getTypeDefinition: jest.fn(),
+    } as any;
+
+    const result = await selectTools({
+      conversation: {
+        attachmentTypes: [],
+        attachmentStateManager: {
+          getActive: jest.fn().mockReturnValue([]),
+        },
+      } as any,
+      previousDynamicToolIds: [],
+      filteredSkills: [],
+      skills: { convertSkillTool: jest.fn() } as any,
+      request: {} as any,
+      toolProvider,
+      agentConfiguration: {
+        tools: [],
+        enable_elastic_capabilities: false,
+      } as any,
+      attachmentsService,
+      spaceId: 'default',
+      runner: { runInternalTool: jest.fn() } as any,
+    });
+
+    expect(result.staticTools.find((tool) => tool.id === 'attachments.read')).toBeUndefined();
   });
 
   it('marks attachment-bounded tools as inline origin', async () => {
