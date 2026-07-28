@@ -65,6 +65,11 @@ jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
   useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
 }));
 
+const mockRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+}));
+
 const mockOpenEditFlyout = jest.fn();
 const mockOpenCloneFlyout = jest.fn();
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({

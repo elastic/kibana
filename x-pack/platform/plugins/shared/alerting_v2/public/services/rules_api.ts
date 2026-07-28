@@ -101,6 +101,10 @@ export class RulesApi {
     return this.http.post<RuleResponse>(`${buildRulePath(id)}/_disable`);
   }
 
+  public async runRule(id: string) {
+    return this.http.post<void>(`${buildRulePath(id)}/_run`);
+  }
+
   public async bulkDeleteRules(params: BulkByIdsParams) {
     return this.http.post<BulkResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_delete`, {
       body: JSON.stringify(params),

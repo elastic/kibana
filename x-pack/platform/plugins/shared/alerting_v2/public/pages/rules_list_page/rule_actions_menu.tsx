@@ -24,6 +24,7 @@ export interface RuleActionsMenuProps {
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled?: (rule: RuleApiResponse) => void;
   onUpdateApiKey?: (rule: RuleApiResponse) => void;
+  onRun?: (rule: RuleApiResponse) => void;
 }
 
 export const RuleActionsMenu = ({
@@ -33,10 +34,34 @@ export const RuleActionsMenu = ({
   onDelete,
   onToggleEnabled,
   onUpdateApiKey,
+  onRun,
 }: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
+    ...(onRun
+      ? [
+          <EuiContextMenuItem
+            key="run"
+            icon={<EuiIcon type="play" size="m" aria-hidden={true} />}
+            disabled={!rule.enabled}
+            toolTipContent={
+              rule.enabled
+                ? undefined
+                : i18n.translate('xpack.alertingV2.rulesList.action.runDisabledTooltip', {
+                    defaultMessage: 'Enable the rule to run it',
+                  })
+            }
+            onClick={() => {
+              setIsOpen(false);
+              onRun(rule);
+            }}
+            data-test-subj={`runRule-${rule.id}`}
+          >
+            {i18n.translate('xpack.alertingV2.rulesList.action.run', { defaultMessage: 'Run' })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       key="edit"
       icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}

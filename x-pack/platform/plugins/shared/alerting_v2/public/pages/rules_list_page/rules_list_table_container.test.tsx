@@ -57,6 +57,12 @@ jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
   useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
 }));
 
+const mockRunRuleMutate = jest.fn();
+const mockUseRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => mockUseRunRule(),
+}));
+
 const mockRules = [
   {
     id: 'rule-1',
@@ -118,6 +124,10 @@ describe('RulesListTableContainer', () => {
     });
     mockUseBulkDisableRules.mockReturnValue({
       mutate: mockBulkDisableMutate,
+      isLoading: false,
+    });
+    mockUseRunRule.mockReturnValue({
+      mutate: mockRunRuleMutate,
       isLoading: false,
     });
   });
@@ -223,12 +233,23 @@ describe('RulesListTableContainer', () => {
       });
     });
   });
+  
+  describe('run rule', () => {
+    it('calls runRule mutation when run action is clicked', async () => {
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(mockRunRuleMutate).toHaveBeenCalledWith({ id: 'rule-1' });
+    });
+  });
 
   describe('single rule update API key', () => {
     it('shows the update API key confirmation modal when the row action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
 
       await waitFor(() => {
         expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();

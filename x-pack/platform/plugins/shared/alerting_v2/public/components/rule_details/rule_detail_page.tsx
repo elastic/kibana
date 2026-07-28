@@ -29,6 +29,7 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../rule/modals/update_api_key_confirmation_modal';
@@ -72,6 +73,7 @@ const getRuleDetailMenu = ({
   onClone,
   onUpdateApiKey,
   onDelete,
+  onRun,
 }: {
   rule: RuleApiResponse;
   onEdit: () => void;
@@ -80,6 +82,7 @@ const getRuleDetailMenu = ({
   onClone: () => void;
   onUpdateApiKey: () => void;
   onDelete: () => void;
+  onRun: () => void;
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'editRule',
@@ -107,12 +110,29 @@ const getRuleDetailMenu = ({
   },
   items: [
     {
+      id: 'runRule',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.runRuleButtonLabel', {
+        defaultMessage: 'Run rule',
+      }),
+      iconType: 'play',
+      order: 0,
+      run: onRun,
+      testId: 'ruleDetailsRunButton',
+      overflow: true,
+      disableButton: !rule.enabled,
+      tooltipContent: rule.enabled
+        ? undefined
+        : i18n.translate('xpack.alertingV2.ruleDetails.runRuleDisabledTooltip', {
+            defaultMessage: 'Enable the rule to run it',
+          }),
+    },
+    {
       id: 'cloneRule',
       label: i18n.translate('xpack.alertingV2.ruleDetails.cloneRuleButtonLabel', {
         defaultMessage: 'Clone rule',
       }),
       iconType: 'copy',
-      order: 0,
+      order: 1,
       run: onClone,
       testId: 'ruleDetailsCloneButton',
       overflow: true,
@@ -156,6 +176,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
+  const { mutate: runRule } = useRunRule();
   const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
@@ -202,6 +223,10 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     openCloneFlyout(rule);
   }, [openCloneFlyout, rule]);
 
+  const handleRunRule = React.useCallback(() => {
+    runRule({ id: rule.id });
+  }, [runRule, rule.id]);
+
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
     useRuleAuditMetadata(rule);
 
@@ -245,6 +270,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         onClone,
         onUpdateApiKey: showUpdateApiKeyConfirmationModal,
         onDelete: showDeleteConfirmationModal,
+        onRun: handleRunRule,
       }),
     [
       rule,
@@ -252,8 +278,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       handleToggleEnabled,
       isToggling,
       onClone,
+      showDeleteConfirmationModal,      
+      handleRunRule,
       showUpdateApiKeyConfirmationModal,
-      showDeleteConfirmationModal,
     ]
   );
 

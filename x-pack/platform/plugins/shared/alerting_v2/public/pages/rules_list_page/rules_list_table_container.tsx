@@ -15,6 +15,7 @@ import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/update_api_key_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
@@ -73,6 +74,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
   const updateApiKeyMutation = useBulkUpdateRuleApiKey();
+  const runRuleMutation = useRunRule();
 
   const {
     isAllSelected,
@@ -189,6 +191,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
+        onRun={(r) => runRuleMutation.mutate({ id: r.id })}
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -214,6 +217,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           }}
           onDelete={(r) => setRuleToDelete(r)}
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+          onRun={(r) => runRuleMutation.mutate({ id: r.id })}
         />
       ) : null}
       {ruleToDelete ? (

@@ -90,6 +90,7 @@ const defaultProps: RulesListTableProps = {
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
   onUpdateApiKey: jest.fn(),
+  onRun: jest.fn(),
   onTableChange: jest.fn(),
 };
 
@@ -179,9 +180,7 @@ describe('RulesListTable', () => {
 
       fireEvent.mouseOver(screen.getByText('Alert'));
 
-      await waitFor(() => {
-        expect(screen.getByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
-      });
+      expect(await screen.findByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
       expect(
         screen.queryByText('Mode can be changed in the rule edit form')
       ).not.toBeInTheDocument();
@@ -192,9 +191,7 @@ describe('RulesListTable', () => {
 
       fireEvent.mouseOver(screen.getByText('Signal'));
 
-      await waitFor(() => {
-        expect(screen.getByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
-      });
+      expect(await screen.findByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
     });
 
     it('renders tag badges for rules with tags', () => {
@@ -365,9 +362,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkEnableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
@@ -380,9 +375,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkDisableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkDisableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkDisableRules'));
 
@@ -395,9 +388,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkDeleteRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkDeleteRules'));
 
@@ -424,9 +415,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkEnableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
@@ -443,9 +432,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('editRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('editRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
@@ -458,9 +445,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('cloneRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cloneRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
@@ -473,9 +458,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('deleteRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
 
@@ -488,6 +471,34 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
       expect(screen.queryByTestId('toggleEnabledRule-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('calls onRun when run action is clicked for an enabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('disables the run action for a disabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
+
+      expect(await screen.findByTestId('runRule-rule-2')).toBeInTheDocument();
+
+      expect(screen.getByTestId('runRule-rule-2')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-2'));
+
+      expect(onRun).not.toHaveBeenCalled();
     });
   });
 
