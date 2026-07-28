@@ -380,7 +380,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // 1 - write source documents
       // 2 - create the rule - it runs one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       const ruleId = await createESQLRule(
         supertest,
         objectRemover,
