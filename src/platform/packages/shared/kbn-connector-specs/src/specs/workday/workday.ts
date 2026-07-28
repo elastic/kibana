@@ -71,7 +71,7 @@ export const Workday: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -440,8 +440,9 @@ export const Workday: ConnectorSpec = {
     listInboxTasks: {
       isTool: true,
       description:
-        "Retrieve the user's Workday inbox tasks and pending action items. " +
-        'Returns task summaries including title, subject, business process, and status. ',
+        'Retrieve Workday inbox tasks and pending action items for a worker. ' +
+        'Returns task summaries including title, subject, business process, and status. ' +
+        'Omit workerId to retrieve tasks for the current authenticated user.',
       input: ListInboxTasksInputSchema,
       handler: async (ctx, input: ListInboxTasksInput) => {
         const { tenantUrl, tenantName } = ctx.config as {
