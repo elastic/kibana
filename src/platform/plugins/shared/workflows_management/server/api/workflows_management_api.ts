@@ -62,7 +62,13 @@ import type {
   ServerTriggerDefinition,
   WorkflowExecutionCapabilities,
 } from '@kbn/workflows-extensions/server';
-import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
+import {
+  parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
+  stringifyWorkflowDefinition,
+  WorkflowConflictError,
+  WorkflowValidationError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
@@ -474,6 +480,28 @@ export class WorkflowsManagementApi {
     ) {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
+
+    if (workflow.enabled === true) {
+      const hasAroundCompletionTrigger = originalWorkflow.definition?.triggers?.some(
+        (t) => t.type === 'inference.aroundCompletion'
+      );
+      if (hasAroundCompletionTrigger) {
+        const alreadyEnabled = await this.getWorkflowsSubscribedToTrigger(
+          'inference.aroundCompletion',
+          spaceId
+        );
+        const conflict = alreadyEnabled.find((w) => w.id !== id);
+        if (conflict) {
+          throw new WorkflowConflictError(
+            `Cannot enable: workflow "${
+              conflict.name ?? conflict.id
+            }" is already enabled for the inference.aroundCompletion trigger. Disable it first.`,
+            conflict.id
+          );
+        }
+      }
+    }
+
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
     this.notifySml(id, 'update', request);
     return result;
