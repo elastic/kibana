@@ -32,9 +32,15 @@ interface AutomationsPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
+  isManaged: boolean;
 }
 
-export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPanelProps) => {
+export const AutomationsPanel = ({
+  isLoading,
+  aiIndex,
+  onSaved,
+  isManaged,
+}: AutomationsPanelProps) => {
   const {
     services: { application },
   } = useKibana();
@@ -106,7 +112,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : (
+          ) : !isManaged ? (
             <EuiButtonEmpty
               size="s"
               iconType="pencil"
@@ -118,7 +124,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
                 defaultMessage: 'Edit',
               })}
             </EuiButtonEmpty>
-          )}
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

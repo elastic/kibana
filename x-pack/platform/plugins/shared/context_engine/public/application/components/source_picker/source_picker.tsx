@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -14,11 +13,12 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlTab } from './esql_tab';
 import type { SelectedSource } from './types';
@@ -93,41 +93,6 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
   return (
     <div data-test-subj="contextSourcePicker">
-      {selectedSources.length > 0 && (
-        <>
-          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-            {selectedSources.map((source) => {
-              const label = getSourceLabel(source);
-              return (
-                <EuiFlexItem grow={false} key={`${source.type}-${source.id}`}>
-                  <EuiBadge
-                    color="hollow"
-                    iconType="cross"
-                    iconSide="right"
-                    // Cap the width so a long ES|QL query truncates instead of
-                    // stretching the badge across the modal.
-                    css={{ maxWidth: 260 }}
-                    title={label}
-                    data-test-subj={`contextSelectedSource-${source.id}`}
-                    iconOnClick={() => removeSource(source)}
-                    iconOnClickAriaLabel={i18n.translate(
-                      'xpack.contextEngine.sourcePicker.removeSourceAriaLabel',
-                      {
-                        defaultMessage: 'Remove {label}',
-                        values: { label },
-                      }
-                    )}
-                  >
-                    {label}
-                  </EuiBadge>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
       <EuiTabs data-test-subj="contextSourcePickerTabs">
         <EuiTab
           isSelected={selectedTab === 'esql'}
@@ -173,6 +138,34 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           selectedConnectorIds={selectedConnectorIds}
           onToggle={toggleConnectorSource}
         />
+      )}
+
+      {selectedSources.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiTitle size="xxs">
+            <h3>
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.selectedTitle"
+                defaultMessage="Selected sources ({count})"
+                values={{ count: selectedSources.length }}
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {selectedSources.map((source) => (
+              <EuiFlexItem key={`${source.type}-${source.id}`}>
+                <SourceRow
+                  source={{ type: source.type, value: source.value }}
+                  connectorName={source.type === 'connector' ? getSourceLabel(source) : undefined}
+                  onRemove={() => removeSource(source)}
+                  data-test-subj={`contextSelectedSource-${source.id}`}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
       )}
     </div>
   );

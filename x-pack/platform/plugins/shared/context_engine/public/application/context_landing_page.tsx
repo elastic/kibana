@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { AiIndexList } from './components/ai_index_list';
 import { CreateAiIndexButton } from './components/create_ai_index_button';
-import { AiIndexCards } from './components/ai_index_cards';
 
 export const ContextLandingPage = () => {
   const { euiTheme } = useEuiTheme();
@@ -33,7 +33,7 @@ export const ContextLandingPage = () => {
         rightSideItems={[<CreateAiIndexButton key="create-ai-index-button" />]}
       />
       <KibanaPageTemplate.Section>
-        <AiIndexCards />
+        <AiIndexList />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

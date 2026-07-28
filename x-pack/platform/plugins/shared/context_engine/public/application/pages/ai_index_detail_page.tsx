@@ -9,8 +9,12 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiSkeletonTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -68,16 +72,30 @@ export const AiIndexDetailPage = () => {
     );
   }
 
+  const pageTitle = isLoading ? (
+    <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
+  ) : (
+    <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>{aiIndex?.id}</EuiFlexItem>
+      {aiIndex?.managed && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            component="span"
+            size="s"
+            color="subdued"
+            data-test-subj="contextAiIndexDetailManagedBadge"
+          >
+            <EuiIcon type="lock" size="s" aria-hidden={true} /> Managed
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+
   return (
     <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
       <KibanaPageTemplate.Header
-        pageTitle={
-          isLoading ? (
-            <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
-          ) : (
-            aiIndex?.id
-          )
-        }
+        pageTitle={pageTitle}
         rightSideItems={[
           <EuiButtonEmpty
             key="back-to-list"
@@ -90,16 +108,27 @@ export const AiIndexDetailPage = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
-        <DescriptionPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
+        <DescriptionPanel
+          isLoading={isLoading}
+          aiIndex={aiIndex}
+          onSaved={refetch}
+          isManaged={aiIndex?.managed ?? false}
+        />
         <EuiSpacer size="m" />
         <SourcesPanel
           isLoading={isLoading}
           sources={aiIndex?.sources ?? []}
           canEdit={aiIndex !== undefined}
           onEditSources={() => setIsEditingSources(true)}
+          isManaged={aiIndex?.managed ?? false}
         />
         <EuiSpacer size="m" />
-        <AutomationsPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
+        <AutomationsPanel
+          isLoading={isLoading}
+          aiIndex={aiIndex}
+          onSaved={refetch}
+          isManaged={aiIndex?.managed ?? false}
+        />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

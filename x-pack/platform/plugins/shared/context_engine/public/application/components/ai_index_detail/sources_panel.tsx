@@ -19,16 +19,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
-import { SourceRow } from './source_row';
+import { SourceRow } from '../source_row';
 
 interface SourcesPanelProps {
   isLoading: boolean;
   sources: AiIndexSource[];
   canEdit: boolean;
   onEditSources: () => void;
+  isManaged?: boolean;
 }
 
-export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: SourcesPanelProps) => {
+export const SourcesPanel = ({
+  isLoading,
+  sources,
+  canEdit,
+  onEditSources,
+  isManaged,
+}: SourcesPanelProps) => {
   const { connectorNameById } = useDataConnectors();
   return (
     <EuiPanel hasBorder paddingSize="l">
@@ -53,20 +60,22 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
             </p>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="pencil"
-            onClick={onEditSources}
-            isDisabled={!canEdit}
-            data-test-subj="contextEditSourcesButton"
-          >
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.editButton"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {!isManaged && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="pencil"
+              onClick={onEditSources}
+              isDisabled={!canEdit}
+              data-test-subj="contextEditSourcesButton"
+            >
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.editButton"
+                defaultMessage="Edit"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {isLoading ? (
@@ -89,6 +98,7 @@ export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: Sou
                 connectorName={
                   source.type === 'connector' ? connectorNameById.get(source.value) : undefined
                 }
+                data-test-subj="contextAiIndexSourceRow"
               />
             </EuiFlexItem>
           ))}

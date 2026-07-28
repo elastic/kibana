@@ -97,13 +97,13 @@ describe('SourcePicker', () => {
     expect(screen.getAllByTestId('contextSelectedSource-FROM logs-* | LIMIT 10')).toHaveLength(1);
   });
 
-  it('removes a selected source when its chip is dismissed', () => {
+  it('removes a selected source when its remove button is clicked', () => {
     renderWithProviders(<Harness />);
 
     addEsqlSource('FROM logs-* | LIMIT 10');
 
-    const chip = screen.getByTestId('contextSelectedSource-FROM logs-* | LIMIT 10');
-    fireEvent.click(within(chip).getByRole('button'));
+    const row = screen.getByTestId('contextSelectedSource-FROM logs-* | LIMIT 10');
+    fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
 
     expect(
       screen.queryByTestId('contextSelectedSource-FROM logs-* | LIMIT 10')
@@ -128,8 +128,8 @@ describe('SourcePicker', () => {
 
     fireEvent.click(await screen.findByText('Google Drive'));
 
-    const chip = await screen.findByTestId('contextSelectedSource-connector-gdrive');
-    expect(chip).toHaveTextContent('Google Drive');
+    const row = await screen.findByTestId('contextSelectedSource-connector-gdrive');
+    expect(row).toHaveTextContent('Google Drive');
   });
 
   it('resolves connector names for restored connector sources', async () => {
@@ -147,7 +147,7 @@ describe('SourcePicker', () => {
     );
 
     // The stored source only knows the connector id; once connectors load its
-    // chip should show the human-readable name.
+    // row should show the human-readable name.
     await waitFor(() =>
       expect(screen.getByTestId('contextSelectedSource-connector-github')).toHaveTextContent(
         'GitHub'

@@ -12,10 +12,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { ContextLandingPage } from './context_landing_page';
+import { AI_INDICES_PER_PAGE } from './hooks/use_ai_index_list_state';
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
@@ -114,7 +115,7 @@ describe('ContextLandingPage', () => {
     expect(firstAutomations).toHaveTextContent('1 automation');
     expect(secondAutomations).toHaveTextContent('0 automations');
 
-    expect(screen.getAllByTestId('contextAiIndexCardUpdated')[0]).toHaveTextContent(/^Updated /);
+    expect(screen.getAllByTestId('contextAiIndexCardUpdated')[0]).toHaveTextContent('Updated');
   });
 
   it('renders an empty prompt when there are no AI indexes', async () => {
@@ -135,5 +136,116 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsError')).toBeInTheDocument();
     expect(screen.getByText('Boom')).toBeInTheDocument();
+  });
+
+  it('marks managed AI indexes as owned by Elastic instead of showing a modified date', async () => {
+    const core = createCore();
+    core.http.get.mockResolvedValue({
+      ai_indices: [buildAiIndex({ id: 'elastic', managed: true })],
+    });
+
+    renderWithProviders(core);
+
+    expect(await screen.findByTestId('contextAiIndexCardManaged')).toHaveTextContent('Managed');
+    expect(screen.getByTestId('contextAiIndexCardManagedIcon')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
+  });
+
+  it('hides the search and filters until at least one AI index exists', async () => {
+    const core = createCore();
+    core.http.get.mockResolvedValue({ ai_indices: [] });
+
+    renderWithProviders(core);
+
+    await screen.findByTestId('contextAiIndexCardsEmpty');
+    expect(screen.queryByTestId('contextAiIndexListSearch')).not.toBeInTheDocument();
+  });
+
+  describe('search and filters', () => {
+    const renderWithAiIndexes = async () => {
+      const core = createCore();
+      core.http.get.mockResolvedValue({
+        ai_indices: [
+          buildAiIndex({ id: 'support-tickets', description: 'Escalation playbooks' }),
+          buildAiIndex({ id: 'elastic', managed: true }),
+        ],
+      });
+
+      renderWithProviders(core);
+      await screen.findAllByTestId('contextAiIndexCard');
+    };
+
+    const cardTitles = () =>
+      screen.getAllByTestId('contextAiIndexCard').map((card) => card.textContent);
+
+    it('narrows the cards to the ones matching the search term', async () => {
+      await renderWithAiIndexes();
+
+      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+        target: { value: 'escalation' },
+      });
+
+      expect(cardTitles()).toHaveLength(1);
+      expect(cardTitles()[0]).toContain('support-tickets');
+      expect(screen.getByTestId('contextAiIndexListCount')).toHaveTextContent('1 AI Index');
+    });
+
+    it('narrows the cards to the selected owner', async () => {
+      await renderWithAiIndexes();
+
+      fireEvent.click(screen.getByTestId('contextAiIndexListOwnerFilter'));
+      fireEvent.click(await screen.findByTestId('contextAiIndexListOwnerFilterOption-managed'));
+
+      await waitFor(() => expect(cardTitles()).toHaveLength(1));
+      expect(cardTitles()[0]).toContain('elastic');
+    });
+
+    it('offers a way back when nothing matches', async () => {
+      await renderWithAiIndexes();
+
+      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+        target: { value: 'nothing-matches-this' },
+      });
+
+      expect(screen.getByTestId('contextAiIndexCardsNoMatches')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('contextAiIndexListClearFilters'));
+
+      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(2);
+    });
+  });
+
+  describe('pagination', () => {
+    const renderPagedAiIndexes = async (count: number) => {
+      const core = createCore();
+      core.http.get.mockResolvedValue({
+        ai_indices: Array.from({ length: count }, (_, index) =>
+          buildAiIndex({ id: `ai-index-${index}` })
+        ),
+      });
+
+      renderWithProviders(core);
+      await screen.findAllByTestId('contextAiIndexCard');
+    };
+
+    it(`shows at most ${AI_INDICES_PER_PAGE} cards per page`, async () => {
+      await renderPagedAiIndexes(AI_INDICES_PER_PAGE + 1);
+
+      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(AI_INDICES_PER_PAGE);
+      expect(screen.getByTestId('contextAiIndexListCount')).toHaveTextContent(
+        `${AI_INDICES_PER_PAGE + 1} AI Indexes`
+      );
+
+      fireEvent.click(screen.getByLabelText('Page 2 of 2'));
+
+      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(1);
+    });
+
+    it('hides the pagination when everything fits on one page', async () => {
+      await renderPagedAiIndexes(AI_INDICES_PER_PAGE);
+
+      expect(screen.queryByTestId('contextAiIndexListPagination')).not.toBeInTheDocument();
+    });
   });
 });

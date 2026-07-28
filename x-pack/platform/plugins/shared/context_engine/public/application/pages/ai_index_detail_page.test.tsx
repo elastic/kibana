@@ -110,7 +110,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByText('my-ai-index')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     // The non-editable detail list shows the generic ES|QL source type.
-    expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {

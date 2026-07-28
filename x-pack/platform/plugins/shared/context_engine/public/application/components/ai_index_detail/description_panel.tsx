@@ -28,9 +28,15 @@ interface DescriptionPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
+  isManaged: boolean;
 }
 
-export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPanelProps) => {
+export const DescriptionPanel = ({
+  isLoading,
+  aiIndex,
+  onSaved,
+  isManaged,
+}: DescriptionPanelProps) => {
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -64,7 +70,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {!isEditing && (
+        {!isEditing && !isManaged && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
