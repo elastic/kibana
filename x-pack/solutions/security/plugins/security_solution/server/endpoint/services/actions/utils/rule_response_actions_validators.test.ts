@@ -230,7 +230,7 @@ describe('Rules Endpoint response actions validators', () => {
             command,
             config: { overwrite: true, kill_descendants: killDescendants as boolean },
           },
-        });
+        } as ResponseAction);
 
       beforeEach(() => {
         // @ts-expect-error assignment to readonly is ok here
