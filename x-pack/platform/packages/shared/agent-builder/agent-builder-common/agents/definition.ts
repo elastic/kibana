@@ -96,7 +96,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of skill IDs exposed to the agent.
-   * When undefined, all skills are available (backward compatibility).
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
   skill_ids?: string[];
 

@@ -113,7 +113,9 @@ export const InputSchema = z.object({
         .array(z.string().max(100))
         .max(50)
         .optional()
-        .describe('Skill IDs to enable for this execution, replacing the stored skill list.'),
+        .describe(
+          'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+        ),
       enable_elastic_capabilities: z
         .boolean()
         .optional()
@@ -452,6 +454,7 @@ When a schema is provided, the agent's response will be available in \`output.st
     message: "Investigate the root cause of the issue."
     configuration_overrides:
       instructions: "Focus only on the security implications."
+      enable_elastic_capabilities: false
       skill_ids:
         - "security-analysis-skill"
       tools:

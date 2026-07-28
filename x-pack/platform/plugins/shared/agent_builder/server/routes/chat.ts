@@ -282,7 +282,10 @@ export const conversePayloadSchema = schema.object({
         skill_ids: schema.maybe(
           schema.arrayOf(schema.string({ maxLength: 256 }), {
             maxSize: 100,
-            meta: { description: 'Skill IDs to enable for this execution.' },
+            meta: {
+              description:
+                'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.',
+            },
           })
         ),
         enable_elastic_capabilities: schema.maybe(
