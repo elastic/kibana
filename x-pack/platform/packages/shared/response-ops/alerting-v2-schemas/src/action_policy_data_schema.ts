@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { durationSchema, tagsSchema } from './common';
+import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
   VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
-  MAX_BULK_ITEMS,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
@@ -135,75 +135,20 @@ export const snoozeActionPolicyBodySchema = z
 
 export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema>;
 
-const bulkEnableActionSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-    action: z.literal('enable').describe('The bulk action type.'),
-  })
-  .strict();
-
-const bulkDisableActionSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-    action: z.literal('disable').describe('The bulk action type.'),
-  })
-  .strict();
-
-const bulkSnoozeActionSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-    action: z.literal('snooze').describe('The bulk action type.'),
+/**
+ * Request body for `POST /action_policies/_bulk_snooze`. Reuses the shared
+ * by-ID bulk body (`ids`, 1..MAX_BULK_ITEMS) and adds the snooze expiry so
+ * every action policy in the batch is snoozed until the same instant.
+ */
+export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
+  .extend({
     snoozedUntil: z.iso
       .datetime()
-      .describe('The ISO datetime until which the action policy should be snoozed.'),
+      .describe('The ISO datetime until which the targeted action policies should be snoozed.'),
   })
   .strict();
 
-const bulkUnsnoozeActionSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-    action: z.literal('unsnooze').describe('The bulk action type.'),
-  })
-  .strict();
-
-const bulkDeleteActionSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-    action: z.literal('delete').describe('The bulk action type.'),
-  })
-  .strict();
-
-const bulkUpdateApiKeyActionSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
-    action: z.literal('update_api_key').describe('The bulk action type.'),
-  })
-  .strict();
-
-export const actionPolicyBulkActionSchema = z
-  .discriminatedUnion('action', [
-    bulkEnableActionSchema,
-    bulkDisableActionSchema,
-    bulkSnoozeActionSchema,
-    bulkUnsnoozeActionSchema,
-    bulkDeleteActionSchema,
-    bulkUpdateApiKeyActionSchema,
-  ])
-  .describe('A bulk action to perform on an action policy.');
-
-export type ActionPolicyBulkAction = z.infer<typeof actionPolicyBulkActionSchema>;
-
-export const bulkActionActionPoliciesBodySchema = z
-  .object({
-    actions: z
-      .array(actionPolicyBulkActionSchema)
-      .min(1, 'At least one action is required')
-      .max(MAX_BULK_ITEMS)
-      .describe('The list of bulk actions to perform.'),
-  })
-  .strict();
-
-export type BulkActionActionPoliciesBody = z.infer<typeof bulkActionActionPoliciesBodySchema>;
+export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPoliciesBodySchema>;
 
 const createActionPolicyDataBaseSchema = z
   .object({

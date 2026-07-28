@@ -501,6 +501,7 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
@@ -639,6 +640,8 @@ export const ruleTagsResponseSchema = z
     tags: z.array(z.string()).describe('The list of unique rule tags.'),
   })
   .describe('All unique tags across rules.');
+
+export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
 export const ruleIdSchema = z
   .string()
