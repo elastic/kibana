@@ -92,14 +92,14 @@ export function createVegaRequestHandler(
     const filtersDsl = buildEsQuery(dataView, query, filters, esQueryConfigs);
     const { VegaParser } = await import('./async_services');
 
-    const vp = new VegaParser(
+    const vp = await new VegaParser(
       visParams.spec,
       searchAPI,
       timeCache,
       filtersDsl,
       getServiceSettings,
       theme.getTheme()
-    );
-    return await vp.parseAsync();
+    ).parseAsync();
+    return vp.toRenderDescriptor();
   };
 }

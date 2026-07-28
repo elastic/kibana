@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
 import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+import { bypassExternalUrlCheck } from './external_url_check_bypass';
 import { VegaThemeColors, getDefaultAreaGradientFill } from './utils';
 import { DEFAULT_EMS_DARKMAP_ID } from '@kbn/maps-ems-plugin/common';
 
@@ -108,6 +108,74 @@ describe(`VegaParser.parseAsync`, () => {
     expect(vp.error).toBe(
       'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.'
     );
+  });
+});
+
+describe('VegaParser.toRenderDescriptor', () => {
+  test('returns a structured-cloneable descriptor', async () => {
+    const searchApiStub = {
+      search: jest.fn(() => of({})),
+      resetSearchStats: jest.fn(),
+    };
+    const vp = new VegaParser(
+      {
+        $schema: 'https://vega.github.io/schema/vega/v5.json',
+        data: { values: [{ x: 1 }] },
+        marks: [{ type: 'symbol' }],
+      },
+      searchApiStub,
+      new TimeCache(),
+      {},
+      async () => ({
+        getFileLayers: async () => [],
+        getUrlForRegionLayer: async (layer) => layer.url,
+      }),
+      theme
+    );
+
+    await vp.parseAsync();
+    const descriptor = vp.toRenderDescriptor();
+    const clonedDescriptor = structuredClone(descriptor);
+
+    expect(clonedDescriptor).toEqual(descriptor);
+    expect(descriptor).toEqual(
+      expect.objectContaining({
+        bypassExternalUrlCheckUrls: [],
+        containerDir: 'column',
+        controlsDir: 'column',
+        hideWarnings: false,
+        isVegaLite: false,
+        renderer: 'canvas',
+        restoreSignalValuesOnRefresh: false,
+        tooltips: { centerOnMark: 50, padding: 16, position: 'top', textTruncate: false },
+        useHover: true,
+        useMap: false,
+        useResize: true,
+        warnings: [],
+      })
+    );
+    expect(descriptor).not.toHaveProperty('searchAPI');
+    expect(descriptor).not.toHaveProperty('_urlParsers');
+  });
+
+  test('normalizes EMS bypass markers into cloneable URL allowlist entries', () => {
+    const vp = new VegaParser(
+      {
+        $schema: 'https://vega.github.io/schema/vega/v5.json',
+        data: { url: bypassExternalUrlCheck('https://example.com/ems.geojson') },
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      theme
+    );
+
+    const descriptor = vp.toRenderDescriptor();
+
+    expect(descriptor.spec.data.url).toBe('https://example.com/ems.geojson');
+    expect(descriptor.bypassExternalUrlCheckUrls).toEqual(['https://example.com/ems.geojson']);
+    expect(structuredClone(descriptor)).toEqual(descriptor);
   });
 });
 

@@ -21,10 +21,7 @@ function createMockView(spec) {
       isVegaLite: false,
       renderer: 'canvas',
       tooltips: false,
-      searchAPI: { inspectorAdapters: {} },
     },
-    fireEvent: jest.fn(),
-    filterManager: { getFilters: jest.fn(() => []) },
     externalUrl: {
       isInternalUrl: jest.fn(() => true),
       validateUrl: jest.fn(() => true),

@@ -25,6 +25,7 @@ import { EsqlQueryParser } from './esql_query_parser';
 import { Utils, getDefaultAreaGradientFill, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
+import { isExternalUrlCheckBypass } from './external_url_check_bypass';
 import type { SearchAPI } from './search_api';
 import type { TimeCache } from './time_cache';
 import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
@@ -38,11 +39,13 @@ import type {
   UrlParserConfig,
   PendingType,
   ControlsLocation,
-  ControlsDirection,
+  ControlsContainerDirection,
   KibanaConfig,
+  VegaRenderDescriptor,
+  VegaRenderState,
 } from './types';
 
-const locToDirMap: Record<string, ControlsLocation> = {
+const locToDirMap: Record<ControlsLocation, ControlsContainerDirection> = {
   left: 'row-reverse',
   right: 'row',
   top: 'column-reverse',
@@ -52,24 +55,39 @@ const locToDirMap: Record<string, ControlsLocation> = {
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER: string = 'elasticsearch';
 
+const normalizeForRenderDescriptor = <T>(value: T, bypassExternalUrlCheckUrls: Set<string>): T => {
+  if (isExternalUrlCheckBypass(value)) {
+    bypassExternalUrlCheckUrls.add(value.url);
+    return value.url as T;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeForRenderDescriptor(item, bypassExternalUrlCheckUrls)) as T;
+  }
+
+  if (_.isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nestedValue]) => [
+        key,
+        normalizeForRenderDescriptor(nestedValue, bypassExternalUrlCheckUrls),
+      ])
+    ) as T;
+  }
+
+  return value;
+};
+
+/** The subset of the render state a freshly constructed parser already has, before `parseAsync()`. */
+type ResolvedRenderState = Pick<VegaRenderState, 'spec' | 'hideWarnings' | 'warnings' | 'error'>;
+
+// Merged into the class below so the render state fields are declared once, on VegaRenderState.
+export interface VegaParser
+  extends ResolvedRenderState,
+    Partial<Omit<VegaRenderState, keyof ResolvedRenderState>> {}
+
 export class VegaParser {
-  spec: VegaSpec;
-  hideWarnings: boolean;
-  restoreSignalValuesOnRefresh: boolean;
-  error?: string;
-  warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
-  isVegaLite?: boolean;
-  useHover?: boolean;
   _config?: VegaConfig;
-  useMap?: boolean;
-  renderer?: string;
-  tooltips?: boolean | TooltipConfig;
-  mapConfig?: object;
-  vlspec?: VegaSpec;
-  useResize?: boolean;
-  containerDir?: ControlsLocation | ControlsDirection;
-  controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
   getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
@@ -104,6 +122,31 @@ export class VegaParser {
       this.error = Utils.formatErrorToStr(err);
     }
     return this;
+  }
+
+  toRenderDescriptor(): VegaRenderDescriptor {
+    const bypassExternalUrlCheckUrls = new Set<string>();
+    const normalize = <T>(value: T) =>
+      normalizeForRenderDescriptor(value, bypassExternalUrlCheckUrls);
+
+    return {
+      spec: normalize(this.spec),
+      vlspec: this.vlspec ? normalize(this.vlspec) : undefined,
+      isVegaLite: Boolean(this.isVegaLite),
+      renderer: this.renderer === 'svg' ? 'svg' : 'canvas',
+      useResize: Boolean(this.useResize),
+      useHover: Boolean(this.useHover),
+      useMap: Boolean(this.useMap),
+      mapConfig: this.mapConfig ? normalize(this.mapConfig) : undefined,
+      tooltips: this.tooltips ?? false,
+      containerDir: this.containerDir ?? 'column',
+      controlsDir: this.controlsDir === 'row' ? 'row' : 'column',
+      restoreSignalValuesOnRefresh: Boolean(this.restoreSignalValuesOnRefresh),
+      hideWarnings: this.hideWarnings,
+      warnings: [...this.warnings],
+      error: this.error,
+      bypassExternalUrlCheckUrls: [...bypassExternalUrlCheckUrls],
+    };
   }
 
   async _parseAsync() {

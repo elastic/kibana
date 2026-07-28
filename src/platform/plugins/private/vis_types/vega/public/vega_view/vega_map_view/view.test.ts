@@ -127,12 +127,11 @@ describe('vega_map_view/view', () => {
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
+      const descriptor = vegaParser.toRenderDescriptor();
       return new VegaMapView({
         serviceSettings: await mockGetServiceSettings(),
-        vegaParser,
-        filterManager: dataPluginStart.query.filterManager,
-        timefilter: dataPluginStart.query.timefilter.timefilter,
-        fireEvent: (event: any) => {},
+        vegaParser: descriptor,
+        bypassExternalUrlCheckUrls: descriptor.bypassExternalUrlCheckUrls,
         parentEl: document.createElement('div'),
         vegaStateRestorer: {
           save: jest.fn(),

@@ -8,8 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+import { bypassExternalUrlCheck } from './external_url_check_bypass';
 import type {
   IServiceSettings,
   FileLayer,

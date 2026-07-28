@@ -8,22 +8,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { VegaParser } from './data_model/vega_parser';
+import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
+import type { VegaRenderDescriptor } from './data_model/types';
 import type { VegaVisualizationDependencies } from './plugin';
-import type { VegaEventHandler } from './types';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
+import type { VegaInspectorAdapters } from './vega_inspector';
+import { getDataViews } from './services';
+import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
-export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
-  render(visData: VegaParser): Promise<void>;
+export type VegaVisType = new (
+  el: HTMLDivElement,
+  fireEvent: IInterpreterRenderHandlers['event']
+) => {
+  render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
 
 export const createVegaVisualization = (
   { core, getServiceSettings }: VegaVisualizationDependencies,
-  showWarnings: boolean
+  renderMode: RenderMode
 ): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
@@ -32,9 +38,9 @@ export const createVegaVisualization = (
       isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
     });
 
-    constructor(private el: HTMLDivElement, private fireEvent: VegaEventHandler) {}
+    constructor(private el: HTMLDivElement, private fireEvent: IInterpreterRenderHandlers['event']) {}
 
-    async render(visData: VegaParser) {
+    async render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
       const { toasts } = getNotifications();
 
       if (!visData && !this.vegaView) {
@@ -47,7 +53,7 @@ export const createVegaVisualization = (
       }
 
       try {
-        await this._render(visData);
+        await this._render(visData, inspectorAdapters);
       } catch (error) {
         if (this.vegaView) {
           this.vegaView.onError(error);
@@ -61,9 +67,9 @@ export const createVegaVisualization = (
       }
     }
 
-    async _render(vegaParser: VegaParser) {
+    async _render(vegaParser: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
       if (vegaParser) {
-        vegaParser.searchAPI.inspectorAdapters?.vega.clearError();
+        inspectorAdapters?.vega.clearError();
         // New data received, rebuild the graph
         if (this.vegaView) {
           await this.vegaView.destroy();
@@ -72,17 +78,27 @@ export const createVegaVisualization = (
 
         const serviceSettings = await getServiceSettings();
         const { filterManager } = this.dataPlugin.query;
-        const { timefilter } = this.dataPlugin.query.timefilter;
+        const onVegaFunction = createVegaFilterActionHandler({
+          descriptor: vegaParser,
+          filterManager,
+          fireEvent: this.fireEvent,
+          getDataViews,
+        });
         const vegaViewParams = {
           externalUrl: core.http.externalUrl,
           parentEl: this.el,
-          fireEvent: this.fireEvent,
           vegaStateRestorer: this.vegaStateRestorer,
           vegaParser,
+          bypassExternalUrlCheckUrls: vegaParser.bypassExternalUrlCheckUrls,
+          onError: (error: string) => inspectorAdapters?.vega.setError(error),
+          onSetDebugValues: (
+            debugValues: Parameters<
+              NonNullable<VegaInspectorAdapters['vega']>['bindInspectValues']
+            >[0]
+          ) => inspectorAdapters?.vega.bindInspectValues(debugValues),
+          onVegaFunction,
           serviceSettings,
-          filterManager,
-          timefilter,
-          showWarnings,
+          renderMode,
         };
 
         if (vegaParser.useMap) {

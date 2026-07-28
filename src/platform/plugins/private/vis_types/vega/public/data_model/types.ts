@@ -58,7 +58,7 @@ interface Mark {
   stroke?: string;
 }
 
-type Renderer = 'svg' | 'canvas';
+export type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends KibanaConfig {
   kibana?: KibanaConfig;
@@ -183,6 +183,28 @@ export interface Data {
   source?: unknown;
 }
 
+export interface VegaRenderState {
+  spec: VegaSpec;
+  vlspec?: VegaSpec;
+  isVegaLite: boolean;
+  renderer: Renderer;
+  useResize: boolean;
+  useHover: boolean;
+  useMap: boolean;
+  mapConfig?: DstObj;
+  tooltips: boolean | TooltipConfig;
+  containerDir: ControlsContainerDirection;
+  controlsDir: ControlsLayoutDirection;
+  restoreSignalValuesOnRefresh: boolean;
+  hideWarnings: boolean;
+  warnings: string[];
+  error?: string;
+}
+
+export interface VegaRenderDescriptor extends VegaRenderState {
+  bypassExternalUrlCheckUrls: string[];
+}
+
 export interface CacheBounds {
   min: number;
   max: number;
@@ -226,9 +248,13 @@ export interface DstObj {
   delayRepaint?: boolean;
 }
 
-export type ControlsLocation = 'row' | 'column' | 'row-reverse' | 'column-reverse';
+export type ControlsLocation = 'left' | 'right' | 'top' | 'bottom';
 
 export type ControlsDirection = 'horizontal' | 'vertical';
+
+export type ControlsLayoutDirection = 'row' | 'column';
+
+export type ControlsContainerDirection = ControlsLayoutDirection | 'row-reverse' | 'column-reverse';
 
 export interface VegaConfig extends DstObj {
   [index: string]: any;

@@ -8,22 +8,26 @@
  */
 
 import type { IExternalUrl } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
-import type { VegaParser } from '../data_model/vega_parser';
-import type { VegaEventHandler } from '../types';
+import type { VegaRenderDescriptor } from '../data_model/types';
 import type { createVegaStateRestorer } from '../lib/vega_state_restorer';
+import type { VegaInspectorAdapters } from '../vega_inspector';
+import type { VegaFunctionIntent } from './vega_filter_action_handler';
 
-interface VegaViewParams {
+type DebugValues = Parameters<VegaInspectorAdapters['vega']['bindInspectValues']>[0];
+
+export interface VegaViewParams {
   parentEl: HTMLDivElement;
-  fireEvent: VegaEventHandler;
-  vegaParser: VegaParser;
+  vegaParser: VegaRenderDescriptor;
+  bypassExternalUrlCheckUrls?: string[];
   serviceSettings: IServiceSettings;
-  filterManager: DataPublicPluginStart['query']['filterManager'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
   externalUrl: IExternalUrl;
-  showWarnings: boolean;
+  renderMode: RenderMode;
+  onError?: (error: string) => void;
+  onSetDebugValues?: (debugValues: DebugValues) => void;
+  onVegaFunction?: (intent: VegaFunctionIntent) => Promise<void>;
 }
 
 export class VegaBaseView {

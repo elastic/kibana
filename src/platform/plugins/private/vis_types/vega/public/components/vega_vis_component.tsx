@@ -15,22 +15,23 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
+import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createVegaVisualization } from '../vega_visualization';
 import type { VegaVisualizationDependencies } from '../plugin';
-import type { VegaParser } from '../data_model/vega_parser';
-import type { VegaEventHandler } from '../types';
+import type { VegaRenderDescriptor } from '../data_model/types';
+import type { VegaInspectorAdapters } from '../vega_inspector';
 
 import { GlobalVegaVisStyles } from './vega_vis.styles';
 
 interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
-  fireEvent: VegaEventHandler;
+  fireEvent: IInterpreterRenderHandlers['event'];
+  inspectorAdapters?: VegaInspectorAdapters;
   renderComplete: () => void;
-  /** Whether runtime Vega warnings are surfaced in the panel. Enabled while authoring a spec. */
-  showWarnings: boolean;
-  visData: VegaParser;
+  renderMode: RenderMode;
+  visData: VegaRenderDescriptor;
 }
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
@@ -47,9 +48,10 @@ const vegaVisStyles = {
 export const VegaVisComponent = ({
   visData,
   fireEvent,
+  inspectorAdapters,
   renderComplete,
   deps,
-  showWarnings,
+  renderMode,
 }: VegaVisComponentProps) => {
   const styles = useMemoCss(vegaVisStyles);
   const chartDiv = useRef<HTMLDivElement>(null);
@@ -58,18 +60,18 @@ export const VegaVisComponent = ({
 
   useEffect(() => {
     if (chartDiv.current) {
-      const VegaVis = createVegaVisualization(deps, showWarnings);
+      const VegaVis = createVegaVisualization(deps, renderMode);
       visController.current = new VegaVis(chartDiv.current, fireEvent);
     }
     return () => {
       visController.current?.destroy();
       visController.current = null;
     };
-  }, [deps, fireEvent, showWarnings]);
+  }, [deps, fireEvent, renderMode]);
 
   useEffect(() => {
     const asyncRender = async (visCtrl: VegaVisController) => {
-      await visCtrl.render(visData);
+      await visCtrl.render(visData, inspectorAdapters);
       renderCompleted.current = true;
       renderComplete();
     };
@@ -77,7 +79,7 @@ export const VegaVisComponent = ({
     if (visController.current) {
       asyncRender(visController.current);
     }
-  }, [renderComplete, visData]);
+  }, [inspectorAdapters, renderComplete, visData]);
 
   const onContainerResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (renderCompleted.current) {
