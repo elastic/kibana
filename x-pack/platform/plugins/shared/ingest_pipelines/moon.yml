@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/ingest_pipelines
 dependsOn:
   - '@kbn/core'
+  - '@kbn/file-upload-common'
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
   - '@kbn/security-plugin'
