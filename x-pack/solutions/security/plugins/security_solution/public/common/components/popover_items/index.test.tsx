@@ -7,17 +7,29 @@
 
 import React from 'react';
 
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { euiDarkVars } from '@kbn/ui-theme';
+import { ThemeProvider } from 'styled-components';
+
 import type { PopoverItemsProps } from '.';
 import { PopoverItems } from '.';
-import { TestProviders } from '../../mock';
 import { render, screen, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 
+const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <EuiProvider highContrastMode={false}>
+    <I18nProvider>
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
+    </I18nProvider>
+  </EuiProvider>
+);
+
 const renderHelper = (props: Partial<PopoverItemsProps<string>> = {}) =>
   render(
-    <TestProviders>
+    <TestWrapper>
       <PopoverItems
         dataTestPrefix="tags"
         items={mockTags}
@@ -25,7 +37,7 @@ const renderHelper = (props: Partial<PopoverItemsProps<string>> = {}) =>
         renderItem={(item: string, index: number) => <span key={`${item}-${index}`}>{item}</span>}
         {...props}
       />
-    </TestProviders>
+    </TestWrapper>
   );
 
 const getButton = () => screen.getByRole('button', { name: 'show mocks' });
