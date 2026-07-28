@@ -13,11 +13,6 @@ import { testData } from '../fixtures';
 
 const ESQL_QUERY = 'FROM logstash-* | STATS count = COUNT(*) BY ts = BUCKET(@timestamp, 1 hour)';
 
-const LOGSTASH_ABSOLUTE_RANGE = {
-  from: '2015-09-19T06:31:44.000Z',
-  to: '2015-09-23T18:31:44.000Z',
-} as const;
-
 function buildEsqlLensPanel() {
   const config: LensApiConfig = {
     type: 'xy',
@@ -45,21 +40,14 @@ function buildEsqlLensPanel() {
 }
 
 spaceTest.describe(
-  'Dashboard with ES|QL Lens panel via API',
+  'Dashboard with ES|QL Lens panel cancels the search request when navigating away',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-      await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
-    });
-
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsViewer();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
@@ -72,8 +60,8 @@ spaceTest.describe(
           {
             title,
             time_range: {
-              from: LOGSTASH_ABSOLUTE_RANGE.from,
-              to: LOGSTASH_ABSOLUTE_RANGE.to,
+              from: testData.LOGSTASH_IN_RANGE_DATES.from,
+              to: testData.LOGSTASH_IN_RANGE_DATES.to,
               mode: 'absolute' as const,
             },
             panels: [buildEsqlLensPanel()],
@@ -88,7 +76,7 @@ spaceTest.describe(
                           name: '*',
                           error_type: 'warning',
                           message: "'Watch out!'",
-                          stall_time_seconds: 10,
+                          stall_time_seconds: 5,
                         },
                       ],
                     },
