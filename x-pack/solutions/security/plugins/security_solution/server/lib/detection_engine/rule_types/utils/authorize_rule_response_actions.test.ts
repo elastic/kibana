@@ -47,7 +47,10 @@ describe('createResponseActionsParamsAuthorizer', () => {
     const authorizer = createResponseActionsParamsAuthorizer({ endpointAppContextService });
 
     await expect(
-      authorizer.authorize(paramsWithResponseActions([isolateResponseAction()]), { request, spaceId })
+      authorizer.authorize(paramsWithResponseActions([isolateResponseAction()]), {
+        request,
+        spaceId,
+      })
     ).resolves.toBeUndefined();
   });
 
