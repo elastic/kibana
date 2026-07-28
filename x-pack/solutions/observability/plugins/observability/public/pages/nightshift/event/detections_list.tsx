@@ -33,7 +33,11 @@ import type {
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { useFetchStreamFeaturesByStream } from '../hooks/use_fetch_stream_features';
 import { useFormatTimestamp } from '../common/format_timestamp';
-import { getChangePointLabel } from '../detection/change_point';
+import {
+  filterOccurrencesForDetection,
+  getChangePointLabel,
+  type OccurrencePoint,
+} from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
 import { getDetectionEntities } from './get_detection_entities';
 import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
@@ -48,6 +52,8 @@ const MAX_VISIBLE_ENTITY_PILLS = 2;
 export interface DetectionsListProps {
   event: SignificantEvent;
   eventUuid: string;
+  occurrencesByRuleUuid?: ReadonlyMap<string, OccurrencePoint[]>;
+  isLoadingOccurrences?: boolean;
   selectedDetectionId?: string;
   onDetectionClick?: (detection: LifecycleDetection) => void;
   lifecycleQuery?: Pick<
@@ -68,13 +74,17 @@ const parseTimestamp = (timestamp: string): number => {
 function DetectionCard({
   detection,
   event,
+  occurrences,
   streamFeatures,
+  isLoadingOccurrences,
   isSelected = false,
   onClick,
 }: {
   detection: LifecycleDetection;
   event: SignificantEvent;
+  occurrences: OccurrencePoint[];
   streamFeatures: Feature[];
+  isLoadingOccurrences: boolean;
   isSelected?: boolean;
   onClick?: (detection: LifecycleDetection) => void;
 }) {
@@ -210,10 +220,20 @@ function DetectionCard({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ChangePointSparkline
-            changePointType={detection.change_point_type}
-            timestamp={detection['@timestamp']}
-          />
+          {isLoadingOccurrences ? (
+            <EuiSkeletonRectangle
+              data-test-subj="nightshiftDetectionSparklineSkeleton"
+              width={SPARKLINE_SKELETON_WIDTH}
+              height={SPARKLINE_SKELETON_HEIGHT}
+              borderRadius="m"
+            />
+          ) : (
+            <ChangePointSparkline
+              changePointType={detection.change_point_type}
+              data={occurrences}
+              timestamp={detection['@timestamp']}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -317,6 +337,8 @@ function DetectionListPanel({ items }: { items: React.ReactElement[] }): React.R
 export function DetectionsList({
   event,
   eventUuid,
+  occurrencesByRuleUuid,
+  isLoadingOccurrences = false,
   selectedDetectionId,
   onDetectionClick,
   lifecycleQuery: lifecycleQueryFromParent,
@@ -412,7 +434,12 @@ export function DetectionsList({
               key={detection.detection_id}
               detection={detection}
               event={event}
+              occurrences={filterOccurrencesForDetection(
+                detection.rule_uuid ? occurrencesByRuleUuid?.get(detection.rule_uuid) ?? [] : [],
+                detection['@timestamp']
+              )}
               streamFeatures={streamFeaturesByStream.get(detection.stream_name ?? '') ?? []}
+              isLoadingOccurrences={isLoadingOccurrences && Boolean(detection.rule_uuid)}
               isSelected={detection.detection_id === selectedDetectionId}
               onClick={onDetectionClick}
             />

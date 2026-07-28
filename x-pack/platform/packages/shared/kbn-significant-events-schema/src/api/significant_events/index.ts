@@ -46,6 +46,8 @@ interface SignificantEventOccurrence {
 }
 
 type QueryWithOccurrences = StreamQuery & {
+  /** Alerting rule whose firings produced this occurrence series. */
+  rule_uuid: string;
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {

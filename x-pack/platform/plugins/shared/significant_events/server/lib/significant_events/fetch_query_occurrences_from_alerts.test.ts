@@ -94,6 +94,53 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(esql).not.toHaveBeenCalled();
   });
 
+  it('filters query links by rule UUID and returns the UUID with each series', async () => {
+    const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
+    const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
+    const { kiClient, esClient, esql } = createMocks([linkA, linkB]);
+
+    esql.mockResolvedValueOnce(
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 }])
+    );
+
+    const result = await fetchQueryOccurrencesFromAlerts(
+      {
+        from: FROM,
+        to: TO,
+        bucketSize: BUCKET,
+        ruleUuids: ['rule-a'],
+        spaceId: SPACE_ID,
+      },
+      { kiClient, esClient }
+    );
+
+    expect(result.queries).toHaveLength(1);
+    expect(result.queries[0]).toEqual(expect.objectContaining({ id: 'qa', rule_uuid: 'rule-a' }));
+    const calledWith = esql.mock.calls[0][1] as { query: string };
+    expect(calledWith.query).toContain('rule-a');
+    expect(calledWith.query).not.toContain('rule-b');
+  });
+
+  it('skips ES|QL when no query link matches the requested rule UUIDs', async () => {
+    const { kiClient, esClient, esql } = createMocks([
+      makeQueryLink({ id: 'qa', rule_id: 'rule-a' }),
+    ]);
+
+    const result = await fetchQueryOccurrencesFromAlerts(
+      {
+        from: FROM,
+        to: TO,
+        bucketSize: BUCKET,
+        ruleUuids: ['missing-rule'],
+        spaceId: SPACE_ID,
+      },
+      { kiClient, esClient }
+    );
+
+    expect(result).toEqual({ queries: [], aggregated_occurrences: [] });
+    expect(esql).not.toHaveBeenCalled();
+  });
+
   it('groups ES|QL rows into per-rule occurrences with gap filling', async () => {
     const linkA = makeQueryLink({ id: 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ id: 'qb', rule_id: 'rule-b' });
@@ -116,6 +163,8 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const ruleB = result.queries.find((e) => e.id === 'qb')!;
 
     // 6 buckets at 1m across [00:00, 00:05] inclusive
+    expect(ruleA.rule_uuid).toBe('rule-a');
+    expect(ruleB.rule_uuid).toBe('rule-b');
     expect(ruleA.occurrences).toHaveLength(6);
     expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
     expect(ruleB.occurrences).toHaveLength(6);

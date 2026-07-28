@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Backing stream docs + Knowledge Indicator entity features for seed_nightshift.sh.
+Backing stream docs, Knowledge Indicators, and rule occurrences for seed_nightshift.sh.
 
 Invoked by seed_nightshift.sh; not meant to be run standalone unless for debugging.
 """
@@ -20,6 +20,7 @@ import urllib.request
 ES_URL = os.environ["ES_URL"]
 ES_AUTH = os.environ["ES_AUTH"]
 KIBANA_URL = os.environ["KIBANA_URL"]
+DETECTIONS_BODY = os.environ.get("DETECTIONS_BODY", "")
 
 AUTH_HEADER = "Basic " + base64.b64encode(ES_AUTH.encode()).decode()
 
@@ -541,6 +542,18 @@ BUCKET_MINUTES = 5
 WINDOW_BEFORE_MIN = 190
 WINDOW_AFTER_MIN = 25
 
+
+def parse_seed_detections() -> list[dict]:
+    detections: list[dict] = []
+    for line in DETECTIONS_BODY.splitlines():
+        if not line:
+            continue
+        document = json.loads(line)
+        if "detection_id" in document:
+            detections.append(document)
+    return detections
+
+
 KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
     "logs.web-frontend": [
         {
@@ -838,6 +851,20 @@ def docs_per_bucket(shape: str, minutes_to_anchor: float, rng: random.Random) ->
     return baseline
 
 
+def occurrence_count(shape: str, minutes_from_anchor: float, rng: random.Random) -> int:
+    baseline = 2 + rng.randint(0, 2)
+    if shape == "spike":
+        return 12 + rng.randint(-2, 3) if -15 <= minutes_from_anchor <= 0 else baseline
+    if shape == "dip":
+        return rng.randint(0, 1) if -15 <= minutes_from_anchor <= 0 else baseline + 3
+    if shape == "step_change":
+        return 10 + rng.randint(-1, 2) if minutes_from_anchor >= -15 else baseline
+    if shape == "trend_change":
+        progress = min(max((minutes_from_anchor + 60) / 60, 0), 1)
+        return baseline + round(progress * 10)
+    return 5 + rng.randint(-1, 1)
+
+
 def enrich_doc(index: str, ts: dt.datetime, minutes_to_anchor: float, seq: int) -> dict:
     """Shape docs so ES|QL evidence queries in signals return meaningful fields."""
     base = {"@timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ")}
@@ -1036,11 +1063,114 @@ def seed_ki_features() -> None:
     print(f"Successfully upserted {feature_count} KI entity features via Kibana.")
 
 
+def bulk_create(index: str, documents: list[dict]) -> int:
+    lines: list[str] = []
+    for document in documents:
+        lines.append(json.dumps({"create": {}}))
+        lines.append(json.dumps(document))
+
+    result = es_request(
+        "POST", f"/{index}/_bulk?refresh=true", "\n".join(lines) + "\n"
+    )
+    if result is None or result.get("errors"):
+        raise SystemExit(
+            f"ERROR: bulk index into {index} failed: {json.dumps(result)[:500]}"
+        )
+    return len(documents)
+
+
+def seed_detection_occurrences() -> None:
+    detections = parse_seed_detections()
+    if not detections:
+        raise SystemExit("ERROR: no Nightshift detections were provided for occurrence seeding")
+    rule_uuids = [detection["rule_uuid"] for detection in detections]
+
+    es_request(
+        "POST",
+        "/.significant_events-knowledge_indicators/_delete_by_query"
+        "?refresh=true&conflicts=proceed",
+        {"query": {"terms": {"query.rule_id": rule_uuids}}},
+    )
+    es_request(
+        "POST",
+        "/.rule-events/_delete_by_query?refresh=true&conflicts=proceed",
+        {"query": {"prefix": {"group_hash": "nightshift-seed-"}}},
+    )
+
+    now = dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    query_documents: list[dict] = []
+    occurrence_documents: list[dict] = []
+
+    for detection in detections:
+        detection_id = detection["detection_id"]
+        rule_uuid = detection["rule_uuid"]
+        rule_name = detection["rule_name"]
+        stream_name = detection["stream_name"]
+        change_point_type = detection["change_point_type"]
+        anchor = dt.datetime.fromisoformat(
+            detection["@timestamp"].replace("Z", "+00:00")
+        )
+
+        query_documents.append(
+            {
+                "@timestamp": now,
+                "id": f"nightshift-occurrences-{detection_id}",
+                "type": "query",
+                "title": rule_name,
+                "description": "Nightshift seeded detection occurrence query",
+                "stream.name": stream_name,
+                "query": {
+                    "esql": f"FROM {stream_name} | KEEP @timestamp",
+                    "query_type": "match",
+                    "severity_score": 80,
+                    "rule_backed": True,
+                    "rule_id": rule_uuid,
+                },
+            }
+        )
+
+        rng = random.Random(rule_uuid)
+        bucket = anchor - dt.timedelta(minutes=60)
+        end = anchor + dt.timedelta(minutes=15)
+        while bucket < end:
+            minutes_from_anchor = (bucket - anchor).total_seconds() / 60
+            count = occurrence_count(change_point_type, minutes_from_anchor, rng)
+            timestamp = (bucket + dt.timedelta(seconds=10)).isoformat().replace(
+                "+00:00", "Z"
+            )
+            bucket_id = int(bucket.timestamp())
+            for occurrence_index in range(count):
+                occurrence_documents.append(
+                    {
+                        "@timestamp": timestamp,
+                        "type": "signal",
+                        "space_id": "default",
+                        "rule": {"id": rule_uuid},
+                        "group_hash": (
+                            f"nightshift-seed-{rule_uuid}-{bucket_id}-{occurrence_index}"
+                        ),
+                    }
+                )
+            bucket += dt.timedelta(minutes=BUCKET_MINUTES)
+
+    query_count = bulk_create(
+        ".significant_events-knowledge_indicators", query_documents
+    )
+    occurrence_count_value = bulk_create(".rule-events", occurrence_documents)
+    print(
+        f"Successfully indexed {query_count} detection query links and "
+        f"{occurrence_count_value} rule-event occurrences."
+    )
+
+
 def main() -> None:
     seed_backing_streams()
     print("")
     print("Seeding KI entity features via Kibana ...")
     seed_ki_features()
+    print("")
+    print("Seeding real detection occurrence series ...")
+    seed_detection_occurrences()
 
 
 if __name__ == "__main__":
