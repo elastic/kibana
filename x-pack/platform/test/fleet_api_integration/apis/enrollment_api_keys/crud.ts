@@ -374,7 +374,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(apiResponse.message).to.contain('expiration must be a valid Elasticsearch duration');
+        expect(apiResponse.message).to.contain('expiration must be a valid duration');
       });
     });
   });

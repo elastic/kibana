@@ -15,18 +15,7 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
     });
 
   describe('expiration field validation', () => {
-    const validDurations = [
-      '1d',
-      '7d',
-      '30d',
-      '24h',
-      '60m',
-      '90s',
-      '500ms',
-      '100micros',
-      '50nanos',
-      '0d',
-    ];
+    const validDurations = ['1d', '7d', '30d', '24h', '60m', '90s', '0d'];
 
     validDurations.forEach((value) => {
       it(`accepts valid duration "${value}"`, () => {
@@ -50,11 +39,14 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
       ['1.5d', 'decimal value'],
       ['7days', 'full unit word'],
       ['7w', 'unsupported unit (weeks)'],
+      ['500ms', 'unsupported unit (ms)'],
+      ['100micros', 'unsupported unit (micros)'],
+      ['50nanos', 'unsupported unit (nanos)'],
     ];
 
     invalidDurations.forEach(([value, description]) => {
       it(`rejects invalid duration: ${description} ("${value}")`, () => {
-        expect(() => validate(value)).toThrow('expiration must be a valid Elasticsearch duration');
+        expect(() => validate(value)).toThrow('expiration must be a valid duration');
       });
     });
   });

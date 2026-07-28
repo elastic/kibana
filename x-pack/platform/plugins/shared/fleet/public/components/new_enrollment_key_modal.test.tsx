@@ -68,63 +68,69 @@ describe('NewEnrollmentTokenModal', () => {
     expect(results.getByTestId('createEnrollmentTokenExpirationField')).toBeInTheDocument();
   });
 
-  it.each(['notaduration', '7D', '-1d', '1.5d', '7', '7 d', '7days', '7w'])(
-    'shows a validation error for invalid expiration "%s"',
-    async (invalidValue) => {
-      const testRenderer = createFleetTestRendererMock();
-      const results = testRenderer.render(
-        <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
-      );
+  it.each([
+    'notaduration',
+    '7D',
+    '-1d',
+    '1.5d',
+    '7',
+    '7 d',
+    '7days',
+    '7w',
+    '500ms',
+    '100micros',
+    '50nanos',
+  ])('shows a validation error for invalid expiration "%s"', async (invalidValue) => {
+    const testRenderer = createFleetTestRendererMock();
+    const results = testRenderer.render(
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+    );
 
-      const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
-      await act(async () => {
-        fireEvent.change(expirationField, { target: { value: invalidValue } });
-      });
+    const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
+    await act(async () => {
+      fireEvent.change(expirationField, { target: { value: invalidValue } });
+    });
 
-      // Submit to trigger validation
-      await act(async () => {
-        // EuiConfirmModal renders the title and the confirm button with the same text; pick the button
-        const confirmButtons = results.getAllByText('Create enrollment token');
-        confirmButtons[confirmButtons.length - 1].click();
-      });
+    // Submit to trigger validation
+    await act(async () => {
+      // EuiConfirmModal renders the title and the confirm button with the same text; pick the button
+      const confirmButtons = results.getAllByText('Create enrollment token');
+      confirmButtons[confirmButtons.length - 1].click();
+    });
 
-      await waitFor(() => {
-        expect(
-          results.getByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m)')
-        ).toBeInTheDocument();
-      });
-    }
-  );
-
-  it.each(['7d', '24h', '30m', '60s', '500ms', '100micros', '50nanos'])(
-    'accepts valid expiration "%s"',
-    async (validValue) => {
-      mockSendCreateEnrollmentAPIKey.mockResolvedValue({ data: { item: {} } });
-      const testRenderer = createFleetTestRendererMock();
-      const results = testRenderer.render(
-        <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
-      );
-
-      const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
-      await act(async () => {
-        fireEvent.change(expirationField, { target: { value: validValue } });
-      });
-
-      await act(async () => {
-        const confirmButtons = results.getAllByText('Create enrollment token');
-        confirmButtons[confirmButtons.length - 1].click();
-      });
-
-      await waitFor(() => {
-        expect(mockSendCreateEnrollmentAPIKey).toHaveBeenCalledWith(
-          expect.objectContaining({ expiration: validValue })
-        );
-      });
+    await waitFor(() => {
       expect(
-        results.queryByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m)')
-      ).toBeNull();
-    }
-  );
+        results.getByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it.each(['7d', '24h', '30m', '60s'])('accepts valid expiration "%s"', async (validValue) => {
+    mockSendCreateEnrollmentAPIKey.mockResolvedValue({ data: { item: {} } });
+    const testRenderer = createFleetTestRendererMock();
+    const results = testRenderer.render(
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+    );
+
+    const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
+    await act(async () => {
+      fireEvent.change(expirationField, { target: { value: validValue } });
+    });
+
+    await act(async () => {
+      const confirmButtons = results.getAllByText('Create enrollment token');
+      confirmButtons[confirmButtons.length - 1].click();
+    });
+
+    await waitFor(() => {
+      expect(mockSendCreateEnrollmentAPIKey).toHaveBeenCalledWith(
+        expect.objectContaining({ expiration: validValue })
+      );
+    });
+    expect(
+      results.queryByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m)')
+    ).toBeNull();
+  });
 
   it('includes expiration in the API call when a valid duration is provided', async () => {
     mockSendCreateEnrollmentAPIKey.mockResolvedValue({ data: { item: {} } });

@@ -19,8 +19,8 @@ import {
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
 import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
 
-// ES duration format: positive integer followed by d, h, m, s, ms, micros, or nanos
-const ES_DURATION_REGEX = /^\d+(d|h|m|s|ms|micros|nanos)$/;
+// ES duration format: positive integer followed by d, h, m, or s
+const ES_DURATION_REGEX = /^\d+(d|h|m|s)$/;
 
 function validatePolicyId(value: string) {
   if (value === '') {
@@ -36,7 +36,7 @@ function validateExpiration(value: string) {
   if (value !== '' && !ES_DURATION_REGEX.test(value)) {
     return [
       i18n.translate('xpack.fleet.newEnrollmentKeyForm.expirationInvalidErrorMessage', {
-        defaultMessage: 'Expiration must be a valid duration (e.g. 7d, 24h, 30m)',
+        defaultMessage: 'Expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)',
       }),
     ];
   }
