@@ -688,6 +688,13 @@ export const TEMPLATES_INFO_DESCRIPTION = i18n.translate('xpack.cases.templates.
     'Create templates with custom set of fields, that can automatically populate values in new cases.',
 });
 
+export const TEMPLATES_INFO_PANEL_DISMISS = i18n.translate(
+  'xpack.cases.templates.infoPanelDismiss',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
+
 export const LEARN_MORE = i18n.translate('xpack.cases.templates.learnMore', {
   defaultMessage: 'Learn more',
 });
