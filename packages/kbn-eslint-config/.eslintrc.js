@@ -480,6 +480,7 @@ module.exports = {
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/no-unnamed-interactive-element': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/require-table-caption': 'error',

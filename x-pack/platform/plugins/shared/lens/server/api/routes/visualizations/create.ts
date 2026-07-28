@@ -43,8 +43,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -87,7 +87,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const { core } = await ctx.resolve(['core']);
         const useGASchemas = await core.featureFlags.getBooleanValue(
           AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
