@@ -84,7 +84,7 @@ export const Databricks: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
