@@ -13,21 +13,8 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
-/**
- * Creates the attachment_add tool.
- * Creates a new attachment with the specified type and content.
- */
-export const createAttachmentAddTool = ({
-  attachmentManager,
-  attachmentsService,
-}: AttachmentToolsOptions): BuiltinToolDefinition<any> => {
-  const registeredTypes = attachmentsService?.getRegisteredTypeIds?.() ?? [];
-  const typeField =
-    registeredTypes.length > 0
-      ? z.enum(registeredTypes as [string, ...string[]])
-      : z.string().describe('Type of attachment');
-
-  const attachmentAddSchema = z.object({
+const buildAttachmentAddSchema = (typeField: z.ZodType<string>) =>
+  z.object({
     id: z.string().optional().describe('Optional custom ID for the attachment'),
     type: typeField,
     data: z
@@ -35,6 +22,26 @@ export const createAttachmentAddTool = ({
       .describe('The attachment data/content as a JSON object, required'),
     description: z.string().optional().describe('Human-readable description of the attachment'),
   });
+
+type AttachmentAddSchema = ReturnType<typeof buildAttachmentAddSchema>;
+
+/**
+ * Creates the attachment_add tool.
+ * Creates a new attachment with the specified type and content.
+ */
+export const createAttachmentAddTool = ({
+  attachmentManager,
+  attachmentsService,
+}: AttachmentToolsOptions): BuiltinToolDefinition<AttachmentAddSchema> => {
+  const registeredTypes = (attachmentsService?.getRegisteredTypeIds?.() ?? []).filter(
+    (type) => !attachmentsService?.getTypeDefinition(type)?.isReadonly
+  );
+  const typeField =
+    registeredTypes.length > 0
+      ? z.enum(registeredTypes as [string, ...string[]])
+      : z.string().describe('Type of attachment');
+
+  const attachmentAddSchema = buildAttachmentAddSchema(typeField);
 
   return {
     id: attachmentTools.add,
@@ -49,7 +56,7 @@ export const createAttachmentAddTool = ({
     ) => {
       const definition = attachmentsService?.getTypeDefinition(type);
       if (!definition) {
-        const validTypes = attachmentsService?.getRegisteredTypeIds?.() ?? [];
+        const validTypes = attachmentsService?.getRegisteredTypeIds() ?? [];
         return {
           results: [
             {
