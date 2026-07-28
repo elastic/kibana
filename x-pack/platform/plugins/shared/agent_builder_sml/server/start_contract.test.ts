@@ -100,7 +100,7 @@ describe('buildDeleteAttachment', () => {
     await deleteAttachment({ ...baseParams, ingestionMethod: 'all' });
 
     expect(deps.smlService.deleteAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ ingestionMethod: 'all', spaces: ['space-1'] })
+      expect.objectContaining({ ingestionMethod: 'all' })
     );
   });
 

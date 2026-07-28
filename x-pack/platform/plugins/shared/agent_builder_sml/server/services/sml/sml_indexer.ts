@@ -222,22 +222,16 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   async deleteAttachment(params: SmlIndexerDeleteAttachmentParams): Promise<void> {
-    const { originId, attachmentType, esClient, spaces } = params;
+    const { originId, attachmentType, esClient } = params;
     const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
 
     this.logger.info(
-      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}', spaces=[${spaces.join(
-        ', '
-      )}]`
+      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}'`
     );
 
-    // `'all'` translates to "no ingestion_method filter" on the underlying
-    // helper — that's the way `SmlIndexer.deleteEntry` distinguishes "wipe
-    // everything for this origin" from "wipe a single method".
     await this.deleteEntry({
       originUri: `${attachmentType}://${originId}`,
       esClient,
-      spaces,
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
   }
@@ -430,23 +424,14 @@ class SmlIndexerImpl implements SmlIndexer {
     originUri,
     esClient,
     ingestionMethod,
-    spaces,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
-    spaces?: string[];
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
     if (ingestionMethod) {
       filter.push({ term: { ingestion_method: ingestionMethod } });
-    }
-    if (spaces && spaces.length > 0) {
-      // Scope the delete to entries visible in at least one of the provided
-      // spaces. Mirrors `isVisibleInSpace`: an entry is visible when its
-      // `spaces` array contains the space id OR the wildcard `'*'` (global
-      // entries).
-      filter.push({ terms: { spaces: [...spaces, '*'] } });
     }
     const label = ingestionMethod ? `${ingestionMethod} entry` : 'entry';
 

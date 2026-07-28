@@ -420,13 +420,6 @@ export type SmlIndexerParams = SmlIndexerOriginParams;
 export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
-  /**
-   * Space-isolation guard. `deleteEntry` filters by
-   * `{ terms: { spaces: [...spaces, '*'] } }` so only an entry whose stored
-   * `spaces` array contains one of the provided IDs (or the global wildcard
-   * `'*'`) is removed. See type-level `@remarks` for the full contract.
-   */
-  spaces: string[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
@@ -530,7 +523,6 @@ export interface SmlService {
    */
   getDocuments: (params: {
     ids: string[];
-    spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 

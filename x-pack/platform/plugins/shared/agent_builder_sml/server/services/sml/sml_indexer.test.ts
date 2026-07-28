@@ -888,12 +888,9 @@ describe('createSmlIndexer', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      // Space-scoped: only entries visible in 'default' are deleted, including
-      // globally-scoped ('*') entries. No ingestion_method term means both
-      // manual + crawled are removed.
+      // No ingestion_method term means both manual + crawled are removed.
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
-        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -912,7 +909,6 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
-        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -931,30 +927,8 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
-        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
-    it('scopes delete to caller space — entries in other spaces are preserved', async () => {
-      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
-      const logger = createMockLogger();
-      const esClient = createMockEsClient();
-      const indexer = createSmlIndexer({ registry, logger });
-
-      await indexer.deleteAttachment(
-        createDeleteParams({
-          originId: 'att-space-a',
-          ingestionMethod: 'all',
-          spaces: ['space-a'],
-          esClient,
-        })
-      );
-
-      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['space-a', '*'] } });
-      expect(callArgs.query.bool.filter).not.toContainEqual({
-        terms: { spaces: ['space-b', '*'] },
-      });
-    });
   });
 });

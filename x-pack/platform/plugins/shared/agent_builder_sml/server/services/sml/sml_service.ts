@@ -153,8 +153,8 @@ class SmlServiceImpl implements SmlServiceInstance {
       deleteAttachment: async (params) => {
         return this.getIndexer().deleteAttachment(params);
       },
-      getDocuments: async ({ ids, spaceId, esClient }) => {
-        return getDocumentsByIds({ ids, spaceId, esClient, logger });
+      getDocuments: async ({ ids, esClient }) => {
+        return getDocumentsByIds({ ids, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -1202,12 +1202,10 @@ const autocompleteSml = async ({
  */
 const getDocumentsByIds = async ({
   ids,
-  spaceId,
   esClient,
   logger,
 }: {
   ids: string[];
-  spaceId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<Map<string, SmlDocument>> => {
