@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { McpClient } from '@kbn/mcp-client';
 import type { ClientTypeSpec } from './client_type_spec';
+import { createMcpClientType } from './mcp_client_type';
+
+export { createMcpClientType } from './mcp_client_type';
+export type { McpClientTypeDeps } from './mcp_client_type';
 
 export type {
   ClientTypeSpec,
@@ -24,10 +29,9 @@ export type {
   ConfiguredFetchFactory,
 } from './configured_fetch_types';
 
-// No client types are registered yet. `ClientTypeId` resolves to `never`
-// until a client type is added to `ClientRegistry`.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ClientRegistry {}
+export interface ClientRegistry {
+  mcp: McpClient;
+}
 
 export type ClientTypeId = keyof ClientRegistry;
 
@@ -35,4 +39,6 @@ export type ClientTypeSpecs = Readonly<{
   [K in ClientTypeId]: ClientTypeSpec<ClientRegistry[K]>;
 }>;
 
-export const clientTypes: ClientTypeSpecs = {};
+export const clientTypes: ClientTypeSpecs = {
+  mcp: createMcpClientType(),
+};

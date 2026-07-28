@@ -30,6 +30,7 @@ import {
 } from '@kbn/mcp-client';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
+import type { ConfiguredFetchFactory, ConfiguredFetchResource } from '@kbn/connector-specs';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { buildCustomFetch } from './build_custom_fetch';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
@@ -62,8 +63,12 @@ export const listToolsCache = new LRUCache<string, ListToolsResponse>({
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private mcpClient: McpClient;
   private authHeaders: Record<string, string>;
+  private fetchResource: ConfiguredFetchResource;
 
-  constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
+  constructor(
+    params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>,
+    configuredFetchFactory: ConfiguredFetchFactory
+  ) {
     super(params);
 
     // Build auth headers from secrets based on authType
@@ -75,12 +80,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       ...this.authHeaders,
     };
 
-    // Build a custom fetch that applies the actions plugin's SSL/proxy settings
-    const customFetch = buildCustomFetch(
-      this.configurationUtilities,
-      this.logger,
-      this.config.serverUrl
-    );
+    // Build a fetch resource that applies the actions plugin's SSL/proxy/UA/timeout settings
+    this.fetchResource = buildCustomFetch(configuredFetchFactory, this.config.serverUrl);
+    const customFetch = this.fetchResource.fetch;
 
     // Build client options
     const clientOptions: McpClientOptions = {
@@ -174,17 +176,25 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    * @param operationName - Optional operation name for logging context
    */
   private async safeDisconnect(operationName?: string): Promise<void> {
-    if (!this.mcpClient.isConnected()) {
-      return;
+    if (this.mcpClient.isConnected()) {
+      try {
+        await this.mcpClient.disconnect();
+      } catch (disconnectError) {
+        const operationContext = operationName ? ` after ${operationName}` : '';
+        this.logger.debug(
+          `Error disconnecting${operationContext}: ${
+            disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
+          }`
+        );
+      }
     }
 
     try {
-      await this.mcpClient.disconnect();
-    } catch (disconnectError) {
-      const operationContext = operationName ? ` after ${operationName}` : '';
+      await this.fetchResource.close();
+    } catch (closeError) {
       this.logger.debug(
-        `Error disconnecting${operationContext}: ${
-          disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
+        `Error closing fetch resource: ${
+          closeError instanceof Error ? closeError.message : String(closeError)
         }`
       );
     }
