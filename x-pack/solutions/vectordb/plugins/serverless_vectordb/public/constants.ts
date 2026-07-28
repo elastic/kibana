@@ -36,22 +36,37 @@ export const HOME_PAGE_BANNER_COPY = {
 };
 
 export const STAT_TILE_LABELS = {
-  indices: i18n.translate('xpack.serverlessVectordb.home.stats.indices', {
-    defaultMessage: 'Indices',
+  totalIndices: i18n.translate('xpack.serverlessVectordb.home.stats.totalIndices', {
+    defaultMessage: 'Total indices',
+  }),
+  documents: i18n.translate('xpack.serverlessVectordb.home.stats.documents', {
+    defaultMessage: 'Documents',
   }),
   vectors: i18n.translate('xpack.serverlessVectordb.home.stats.vectors', {
-    defaultMessage: 'Total vectors',
+    defaultMessage: 'Vectors',
   }),
-  storage: i18n.translate('xpack.serverlessVectordb.home.stats.storage', {
-    defaultMessage: 'Storage',
+  totalSize: i18n.translate('xpack.serverlessVectordb.home.stats.totalSize', {
+    defaultMessage: 'Total size',
   }),
-  dashboards: i18n.translate('xpack.serverlessVectordb.home.stats.dashboards', {
-    defaultMessage: 'Dashboards',
+  modelUsage: i18n.translate('xpack.serverlessVectordb.home.stats.modelUsage', {
+    defaultMessage: 'Model usage',
   }),
-  agents: i18n.translate('xpack.serverlessVectordb.home.stats.agents', {
-    defaultMessage: 'Agents',
+  dashboardsTotal: i18n.translate('xpack.serverlessVectordb.home.stats.dashboardsTotal', {
+    defaultMessage: 'Total',
   }),
-  workflows: i18n.translate('xpack.serverlessVectordb.home.stats.workflows', {
-    defaultMessage: 'Workflows',
+  dashboardsStarred: i18n.translate('xpack.serverlessVectordb.home.stats.dashboardsStarred', {
+    defaultMessage: 'Starred',
+  }),
+  workflowsTotal: i18n.translate('xpack.serverlessVectordb.home.stats.workflowsTotal', {
+    defaultMessage: 'Total',
+  }),
+  workflowsRunning: i18n.translate('xpack.serverlessVectordb.home.stats.workflowsRunning', {
+    defaultMessage: 'Running',
+  }),
+  apiKeysTotal: i18n.translate('xpack.serverlessVectordb.home.stats.apiKeysTotal', {
+    defaultMessage: 'Total',
+  }),
+  apiKeysExpiring: i18n.translate('xpack.serverlessVectordb.home.stats.apiKeysExpiring', {
+    defaultMessage: 'Expiring',
   }),
 };
