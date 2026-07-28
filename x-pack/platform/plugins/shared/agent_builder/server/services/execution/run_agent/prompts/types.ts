@@ -34,6 +34,8 @@ export interface PromptFactoryParams {
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
   renderers: RendererTypeDefinition[];
+  /** Key/value pairs from the active conversation template, injected into the system prompt. */
+  conversationMetadata?: Record<string, string>;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

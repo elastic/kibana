@@ -55,6 +55,14 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
+const getConversationContextSection = (metadata: Record<string, string> | undefined): string => {
+  if (!metadata || Object.keys(metadata).length === 0) return '';
+  const lines = Object.entries(metadata)
+    .map(([k, v]) => `- **${k}**: ${v}`)
+    .join('\n');
+  return `## CONVERSATION CONTEXT\n\nThe following key/value pairs were set for this conversation and describe the current context. Use them to guide your responses.\n\n${lines}\n`;
+};
+
 const getAgentSystemMessage = async ({
   configuration: { instructions: customInstructions },
   processedConversation: { attachmentTypes, versionedAttachmentPresentation },
@@ -63,6 +71,7 @@ const getAgentSystemMessage = async ({
   experimentalFeatures,
   capabilities,
   renderers,
+  conversationMetadata,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
 
@@ -124,6 +133,7 @@ ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
 ${experimentalFeatures.skills ? getSkillsInstructions({ skills }) : ''}
 
+${getConversationContextSection(conversationMetadata)}
 ## INSTRUCTIONS
 
 ${customInstructions}

@@ -23,6 +23,7 @@ import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
 import { createTodoTool } from '../../../tools/builtin/todo';
+import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
@@ -33,6 +34,8 @@ export interface RegisterInternalToolsParams {
   capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
+  /** Callback to merge key/value updates into the active conversation's metadata. */
+  updateConversationMetadata?: (updates: Record<string, string>) => Promise<void>;
 }
 
 /**
@@ -47,6 +50,7 @@ export const registerInternalTools = async ({
   capabilities,
   abortSignal,
   backgroundExecutionService,
+  updateConversationMetadata,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -103,6 +107,11 @@ export const registerInternalTools = async ({
   // load_skill — gated on the skills feature only.
   if (experimentalFeatures.skills) {
     tools.push(createLoadSkillTool({ analyticsService, trackingService }));
+  }
+
+  // set_conversation_metadata — only when the callback is wired (i.e. when a template is active).
+  if (updateConversationMetadata) {
+    tools.push(createSetConversationMetadataTool({ updateConversationMetadata }));
   }
 
   await toolManager.addTools({

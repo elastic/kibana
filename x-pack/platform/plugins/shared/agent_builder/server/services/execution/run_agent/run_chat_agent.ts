@@ -52,6 +52,7 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
+import { conversationIndexName } from '../../conversation/client/storage';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -197,6 +198,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
+  const conversationId = conversation?.id;
+  const currentMetadata = conversation?.metadata;
+  const updateConversationMetadata =
+    conversationId && conversation?.template_id
+      ? async (updates: Record<string, string>) => {
+          await context.esClient.asCurrentUser.update({
+            index: conversationIndexName,
+            id: conversationId,
+            doc: { metadata: { ...currentMetadata, ...updates } },
+            retry_on_conflict: 3,
+          });
+        }
+      : undefined;
+
   await registerInternalTools({
     context,
     agentId,
@@ -204,6 +219,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities,
     abortSignal,
     backgroundExecutionService,
+    updateConversationMetadata,
   });
 
   // Then add dynamic tools
@@ -265,6 +281,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversationTimestamp,
     experimentalFeatures,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    conversationMetadata: conversation?.metadata,
   });
 
   const agentGraph = createAgentGraph({
