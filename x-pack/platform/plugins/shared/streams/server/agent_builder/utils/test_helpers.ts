@@ -11,14 +11,11 @@ import type { IUiSettingsClient } from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { TaskStatus } from '@kbn/streams-schema';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { StreamsClient } from '../../lib/streams/client';
 import type { AttachmentClient } from '../../lib/streams/attachments/attachment_client';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
-import type { TaskClient } from '../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../lib/tasks/task_definitions';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -32,7 +29,6 @@ type ToolScopedClients = Pick<
   | 'getKnowledgeIndicatorClient'
   | 'uiSettingsClient'
   | 'attachmentClient'
-  | 'taskClient'
   | 'uiSettingsClient'
 >;
 
@@ -90,14 +86,6 @@ export const createMockGetScopedClients = () => {
     getAttachments: jest.fn().mockResolvedValue([]),
   };
 
-  const taskClient: jest.Mocked<
-    Pick<TaskClient<StreamsTaskType>, 'schedule' | 'getStatus' | 'cancel'>
-  > = {
-    schedule: jest.fn().mockResolvedValue(undefined),
-    getStatus: jest.fn().mockResolvedValue({ status: TaskStatus.NotStarted }),
-    cancel: jest.fn().mockResolvedValue(undefined),
-  };
-
   // Satisfies ensures property names stay in sync with RouteHandlerScopedClients.
   // If a property is renamed or removed from the interface, this will fail.
   const scopedClients: {
@@ -107,7 +95,6 @@ export const createMockGetScopedClients = () => {
     scopedClusterClient,
     uiSettingsClient,
     attachmentClient,
-    taskClient,
     getKnowledgeIndicatorClient: jest.fn().mockRejectedValue(new Error('Not implemented')),
   };
 
@@ -121,7 +108,6 @@ export const createMockGetScopedClients = () => {
     esClient,
     scopedClusterClient,
     attachmentClient,
-    taskClient,
     uiSettingsClient,
   };
 };
