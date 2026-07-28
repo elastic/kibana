@@ -7,7 +7,7 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema, tagsResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -16,28 +16,34 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
-const actionPolicyTagsQuerySchema = z.object({
-  search: z.string().min(1).max(256).optional(),
-});
+const actionPolicyTagsQuerySchema = z
+  .object({
+    search: z.string().min(1).max(256).optional(),
+  })
+  .strict();
 
 @injectable()
 export class ActionPolicyTagsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/tags`;
+  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
     },
   };
   static routeOptions = {
-    summary: 'Get action policy tags suggestions',
-    description: 'Get suggestions for action policy tags based on an optional search query.',
+    summary: 'Get action policy tags',
+    description: 'Get unique tags used across action policies.',
   } as const;
   static schemas = {
     request: {
       query: actionPolicyTagsQuerySchema,
     },
     response: {
+      200: {
+        body: () => tagsResponseSchema,
+        description: 'Returns the requested action policy tags.',
+      },
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates invalid query parameters.',
@@ -45,7 +51,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'action policy tags suggestions';
+  protected readonly routeName = 'get action policy tags';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
@@ -63,7 +69,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const { search } = this.request.query ?? {};
-    const tags = await this.actionPolicyClient.getAllTags({ search });
-    return this.ctx.response.ok({ body: tags });
+    const tags = await this.actionPolicyClient.getTags({ search });
+    return this.ctx.response.ok({ body: { tags } });
   }
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "b4de8e91ea04d18d77808553213b6b16f60ab3f8",
+  "sha1": "16dbff6b28b6efa220cb0e1213831a056aac1c58",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -145,7 +145,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
-        "line": 22,
+        "line": 44,
         "column": 9
       }
     },

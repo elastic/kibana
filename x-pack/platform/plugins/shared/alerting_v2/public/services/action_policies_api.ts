@@ -134,7 +134,7 @@ export class ActionPoliciesApi {
   }
 
   public async fetchTags(params?: { search?: string }) {
-    return this.http.get<string[]>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/tags`, {
+    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`, {
       query: {
         search: params?.search || undefined,
       },

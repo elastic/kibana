@@ -70,5 +70,5 @@ export interface ActionPolicySavedObjectServiceContract {
     }>;
     total: number;
   }>;
-  getDistinctTags(params?: { search?: string }): Promise<string[]>;
+  findTags(params?: { search?: string }): Promise<string[]>;
 }
