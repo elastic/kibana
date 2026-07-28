@@ -35,6 +35,47 @@ export const executeSetupModuleRequest = ({ moduleName }: { moduleName: string }
   });
 
 /**
+ * Creates a minimal anomaly detection job with the given ID in the `security` ML
+ * group. Used to install a job whose ID is in `affected_job_ids.ts` (the stock ML
+ * modules only install the newer `_ea` jobs, which are not in that allowlist), so
+ * the legacy ML jobs upgrade modal is triggered. The job is never opened and has no
+ * datafeed — it only needs to exist for `useInstalledSecurityJobs` to return it.
+ * @param jobId the ID of the ML job to create (should be an affected/legacy job ID)
+ */
+export const createMlJob = ({ jobId }: { jobId: string }) =>
+  rootRequest({
+    headers: {
+      'elastic-api-version': 1,
+    },
+    method: 'PUT',
+    url: `/internal/ml/anomaly_detectors/${jobId}`,
+    failOnStatusCode: true,
+    body: {
+      analysis_config: {
+        bucket_span: '15m',
+        detectors: [{ function: 'count' }],
+      },
+      data_description: { time_field: '@timestamp' },
+      groups: [ML_GROUP_ID],
+    },
+  });
+
+/**
+ * Deletes the anomaly detection job with the given ID. Safe to call for cleanup even
+ * if the job does not exist.
+ * @param jobId the ID of the ML job to delete
+ */
+export const deleteMlJob = ({ jobId }: { jobId: string }) =>
+  rootRequest({
+    headers: {
+      'elastic-api-version': 1,
+    },
+    method: 'DELETE',
+    url: `/internal/ml/anomaly_detectors/${jobId}?force=true`,
+    failOnStatusCode: false,
+  });
+
+/**
  *
  * Calls {@link executeSetupModuleRequest} until all jobs in the module are
  * successfully set up.
