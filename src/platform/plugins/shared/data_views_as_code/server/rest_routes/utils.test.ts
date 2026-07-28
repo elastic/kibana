@@ -50,7 +50,7 @@ describe('requestHandler', () => {
     const result = await wrapped(context, request, response);
 
     expect(telemetryHandler).toHaveBeenCalledTimes(1);
-    expect(telemetryHandler).toHaveBeenCalledWith(request, usageCounter, expect.any(Function));
+    expect(telemetryHandler).toHaveBeenCalledWith(request, { usageCounter }, expect.any(Function));
     expect(handler).toHaveBeenCalledWith(context, request, response);
     expect(result).toBe(handlerResult);
   });

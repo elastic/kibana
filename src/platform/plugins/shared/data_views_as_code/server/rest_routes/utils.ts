@@ -49,7 +49,7 @@ export const requestHandler =
     handler: RequestHandler<P, Q, B, Context, Method>
   ): RequestHandler<P, Q, B, Context, Method> =>
   async (context, request, response) =>
-    telemetryHandler(request, args.usageCounter, async () => {
+    telemetryHandler(request, { usageCounter: args.usageCounter }, async () => {
       try {
         return await handler(context, request, response);
       } catch (error: any) {
