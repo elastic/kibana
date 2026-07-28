@@ -568,6 +568,7 @@ export const Rootly: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.rootly.test.description', {
       defaultMessage: 'Verifies the Rootly connection by listing severities',
     }),
