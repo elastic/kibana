@@ -13,8 +13,8 @@ import { INFERENCE_PII_ANONYMIZATION_WORKFLOW } from '.';
 describe('INFERENCE_PII_ANONYMIZATION_WORKFLOW', () => {
   const workflow = parse(INFERENCE_PII_ANONYMIZATION_WORKFLOW.yaml) as Record<string, unknown>;
 
-  it('ships enabled with its output contract', () => {
-    expect(workflow.enabled).toBe(true);
+  it('ships disabled by default with its output contract', () => {
+    expect(workflow.enabled).toBe(false);
     expect(workflow.outputs).toEqual([{ name: 'content', type: 'string', required: true }]);
   });
 
