@@ -34,8 +34,7 @@ describe('getStructuredAnswerPrompt', () => {
         }),
       },
       configuration: {
-        research: { instructions: '' },
-        answer: { instructions: '' },
+        instructions: '',
       },
       capabilities: { visualizations: false },
       skills: [],

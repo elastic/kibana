@@ -9,8 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { ensureMetadata } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -20,6 +18,7 @@ import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
+import type { KiExtractionContextTools } from './ki_extraction_context_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 
 /**
@@ -30,11 +29,14 @@ import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/
  */
 const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 10;
 
+type KiDiscoveryToolset = MemoryDiscoveryTools | KiExtractionContextTools | SemanticCodeSearchTools;
+
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
   systemPrompt: string;
   maxExistingQueriesForContext?: number;
+  queryValidationTimeoutMs?: number;
 }
 
 interface Dependencies {
@@ -44,6 +46,7 @@ interface Dependencies {
   signal: AbortSignal;
   esClient: ElasticsearchClient;
   memoryTools?: MemoryDiscoveryTools;
+  kiExtractionContextTools?: KiExtractionContextTools;
   semanticCodeSearchTools?: SemanticCodeSearchTools;
 }
 
@@ -55,7 +58,13 @@ export async function identifyKIQueries(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, systemPrompt, maxExistingQueriesForContext } = params;
+  const {
+    definition,
+    connectorId,
+    systemPrompt,
+    maxExistingQueriesForContext,
+    queryValidationTimeoutMs,
+  } = params;
   const {
     inferenceClient,
     kiClient,
@@ -63,11 +72,12 @@ export async function identifyKIQueries(
     signal,
     esClient,
     memoryTools,
+    kiExtractionContextTools,
     semanticCodeSearchTools,
   } = dependencies;
 
-  const discoveryTools = [memoryTools, semanticCodeSearchTools].filter(
-    (toolset): toolset is MemoryDiscoveryTools | SemanticCodeSearchTools => toolset !== undefined
+  const discoveryTools = [memoryTools, kiExtractionContextTools, semanticCodeSearchTools].filter(
+    (toolset): toolset is KiDiscoveryToolset => toolset !== undefined
   );
 
   const additionalTools: Record<string, ToolDefinition> = Object.assign(
@@ -124,6 +134,7 @@ export async function identifyKIQueries(
     existingQueries,
     maxExistingQueriesForContext,
     maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
+    queryValidationTimeoutMs,
   });
 
   return {
@@ -131,9 +142,7 @@ export async function identifyKIQueries(
       type: query.type,
       title: query.title,
       description: query.description,
-      esql: {
-        query: query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
-      },
+      esql: { query: query.esql },
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,

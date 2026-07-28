@@ -6,14 +6,18 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { SignificantEventsConfig } from '../common/config';
+import { config } from './config';
 
-export const plugin = async (ctx: PluginInitializerContext) => {
+export { config };
+
+export const plugin = async (ctx: PluginInitializerContext<SignificantEventsConfig>) => {
   const { SignificantEventsPlugin } = await import('./plugin');
   return new SignificantEventsPlugin(ctx);
 };
 
 export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './agent_builder/agents/discovery/judge';
-export { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID } from './agent_builder/agents/discovery/investigator';
+export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/discovery/discovery';
 
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
@@ -24,5 +28,9 @@ export {
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
 } from './agent_builder/tools/tool_ids';
+
+export { createMemoryDiscoveryTools } from './lib/significant_events/memory_discovery_tools';
+export type { MemoryDiscoveryTools } from './lib/significant_events/memory_discovery_tools';
+export { MemoryServiceImpl } from './memory_and_investigation/lib/memory';
 
 export type { SignificantEventsRouteRepository } from './routes';

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import useKey from 'react-use/lib/useKey';
 import type { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';

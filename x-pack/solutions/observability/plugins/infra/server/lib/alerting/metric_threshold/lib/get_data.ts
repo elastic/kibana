@@ -9,6 +9,7 @@ import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsear
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
@@ -182,7 +183,7 @@ export const getData = async (
             value,
             bucketKey: bucket.key,
             container: containerList,
-            ...additionalContextSource,
+            ...(additionalContextSource ? unflattenObject(additionalContextSource) : {}),
           };
         }
       }

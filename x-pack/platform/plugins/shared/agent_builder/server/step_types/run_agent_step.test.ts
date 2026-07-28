@@ -16,8 +16,40 @@ import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
 } from '../../common/resolve_connector_or_inference_id';
-import { getRunAgentStepDefinition } from './run_agent_step';
+import { getRunAgentStepDefinition, parseMaxStepSize } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+
+describe('parseMaxStepSize', () => {
+  it('parses byte units into bytes', () => {
+    expect(parseMaxStepSize('1b')).toBe(1);
+    expect(parseMaxStepSize('1kb')).toBe(1024);
+    expect(parseMaxStepSize('1mb')).toBe(1024 ** 2);
+    expect(parseMaxStepSize('10mb')).toBe(10 * 1024 ** 2);
+    expect(parseMaxStepSize('1gb')).toBe(1024 ** 3);
+  });
+
+  it('is case-insensitive and tolerates surrounding whitespace', () => {
+    expect(parseMaxStepSize('  10MB ')).toBe(10 * 1024 ** 2);
+    expect(parseMaxStepSize('1GB')).toBe(1024 ** 3);
+  });
+
+  it('treats a bare number as a byte count', () => {
+    expect(parseMaxStepSize('10')).toBe(10);
+    expect(parseMaxStepSize('2048')).toBe(2048);
+  });
+
+  it('returns undefined for empty or malformed values', () => {
+    expect(parseMaxStepSize('')).toBeUndefined();
+    expect(parseMaxStepSize('   ')).toBeUndefined();
+    expect(parseMaxStepSize('10tb')).toBeUndefined();
+    expect(parseMaxStepSize('abc')).toBeUndefined();
+    expect(parseMaxStepSize('mb')).toBeUndefined();
+    expect(parseMaxStepSize('-5mb')).toBeUndefined();
+    // Fractions and inner spaces are intentionally unsupported (ByteSizeValue semantics).
+    expect(parseMaxStepSize('1.5kb')).toBeUndefined();
+    expect(parseMaxStepSize('10 mb')).toBeUndefined();
+  });
+});
 
 describe('ai.agent workflow step (Agent Builder)', () => {
   const createContext = (overrides: Partial<any> = {}) => {
@@ -85,8 +117,57 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     const res = await step.handler(context);
 
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent.mock.calls[0][0].params.accessControl).toBeUndefined();
     expect(res).toHaveProperty('output.conversation_id');
     expect(res.output?.conversation_id).toBe('c-1');
+  });
+
+  it('passes public access control when public-conversation is true', async () => {
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-public', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+        },
+        config: {
+          'create-conversation': true,
+          'public-conversation': true,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          accessControl: { access_mode: 'public' },
+          storeConversation: true,
+          autoCreateConversationWithId: true,
+        }),
+      })
+    );
+    expect(res.output?.conversation_id).toBe('c-public');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {

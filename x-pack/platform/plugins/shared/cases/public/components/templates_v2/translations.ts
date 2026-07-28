@@ -27,9 +27,95 @@ export const EDIT_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.editTem
   defaultMessage: 'Edit template',
 });
 
+export const TEMPLATE_METADATA_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.templateMetadataSectionTitle',
+  {
+    defaultMessage: 'Template details',
+  }
+);
+
+export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.templateMetadataSectionDescription',
+  {
+    defaultMessage:
+      'Identifies this template in the templates list. Saved with the template and edited here — these details are not part of the YAML definition and do not change case defaults.',
+  }
+);
+
+export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
+  defaultMessage: 'Template name',
+});
+
+export const TEMPLATE_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.cases.templates.templateDescriptionLabel',
+  {
+    defaultMessage: 'Template description',
+  }
+);
+
+export const TEMPLATE_TAGS_LABEL = i18n.translate('xpack.cases.templates.templateTagsLabel', {
+  defaultMessage: 'Template tags',
+});
+
+export const TEMPLATE_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.cases.templates.templateTagsHelpText',
+  {
+    defaultMessage: 'Used for filtering and discovery in the templates list.',
+  }
+);
+
+export const TEMPLATE_NAME_REQUIRED = i18n.translate('xpack.cases.templates.templateNameRequired', {
+  defaultMessage: 'Template name is required.',
+});
+
+export const TEMPLATE_NAME_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateNameMaxLength', {
+    defaultMessage: 'Template name must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_DESCRIPTION_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateDescriptionMaxLength', {
+    defaultMessage: 'Template description must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_TAG_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateTagMaxLength', {
+    defaultMessage: 'Each tag must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_TAGS_MAX_COUNT = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateTagsMaxCount', {
+    defaultMessage: 'A template can have up to {max} tags.',
+    values: { max },
+  });
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });
+
+export const CASE_DEFAULT_TITLE = i18n.translate('xpack.cases.templates.caseDefaultTitle', {
+  defaultMessage: 'Name',
+});
+
+export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.caseDefaultAssignees', {
+  defaultMessage: 'Assignees',
+});
+
+export const CASE_DEFAULT_DESCRIPTION_ARIA_LABEL = i18n.translate(
+  'xpack.cases.templates.caseDefaultDescriptionAriaLabel',
+  {
+    defaultMessage: 'Default case description markdown editor',
+  }
+);
+
+export const CASE_DEFAULTS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.caseDefaultsSectionTitle',
+  {
+    defaultMessage: 'Case defaults',
+  }
+);
 
 export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
   defaultMessage: 'Saved',
@@ -149,6 +235,92 @@ export const INVALID_USER_PICKER_DEFAULT = (name: string) =>
     defaultMessage: 'User "{name}" in default values was not found or has changed.',
     values: { name },
   });
+
+export const CONDITION_UNKNOWN_FIELD = (fieldName: string) =>
+  i18n.translate('xpack.cases.templates.validation.conditionUnknownField', {
+    defaultMessage:
+      'Condition references unknown field "{fieldName}". It must match the name of a field defined in this template; otherwise the rule is always treated as true.',
+    values: { fieldName },
+  });
+
+export const VALIDATION_RULE_NOT_APPLICABLE = (rule: string, fieldTypeTitle: string) =>
+  i18n.translate('xpack.cases.templates.validation.ruleNotApplicable', {
+    defaultMessage:
+      'The "{rule}" rule has no effect on {fieldTypeTitle} fields and will be ignored.',
+    values: { rule, fieldTypeTitle },
+  });
+
+export const REF_FIELD_COMPLETION_DETAIL = i18n.translate(
+  'xpack.cases.templates.validation.refFieldCompletionDetail',
+  { defaultMessage: 'Field library reference' }
+);
+
+export const REF_FIELD_COMPLETION_GLOBAL = i18n.translate(
+  'xpack.cases.templates.validation.refFieldCompletionGlobal',
+  { defaultMessage: 'Global field' }
+);
+
+// Autocomplete snippets — inserted as ready-to-edit field skeletons from the editor.
+export const FIELD_SNIPPET_DESC_INPUT_TEXT = i18n.translate(
+  'xpack.cases.templates.snippet.inputText',
+  { defaultMessage: 'Insert a single-line text field' }
+);
+
+export const FIELD_SNIPPET_DESC_INPUT_NUMBER = i18n.translate(
+  'xpack.cases.templates.snippet.inputNumber',
+  { defaultMessage: 'Insert a numeric field' }
+);
+
+export const FIELD_SNIPPET_DESC_TEXTAREA = i18n.translate(
+  'xpack.cases.templates.snippet.textarea',
+  { defaultMessage: 'Insert a multi-line text field' }
+);
+
+export const FIELD_SNIPPET_DESC_SELECT_BASIC = i18n.translate(
+  'xpack.cases.templates.snippet.selectBasic',
+  { defaultMessage: 'Insert a single-select dropdown' }
+);
+
+export const FIELD_SNIPPET_DESC_RADIO_GROUP = i18n.translate(
+  'xpack.cases.templates.snippet.radioGroup',
+  { defaultMessage: 'Insert a radio button group' }
+);
+
+export const FIELD_SNIPPET_DESC_CHECKBOX_GROUP = i18n.translate(
+  'xpack.cases.templates.snippet.checkboxGroup',
+  { defaultMessage: 'Insert a checkbox group' }
+);
+
+export const FIELD_SNIPPET_DESC_DATE_PICKER = i18n.translate(
+  'xpack.cases.templates.snippet.datePicker',
+  { defaultMessage: 'Insert a date picker' }
+);
+
+export const FIELD_SNIPPET_DESC_TOGGLE = i18n.translate('xpack.cases.templates.snippet.toggle', {
+  defaultMessage: 'Insert an on/off toggle',
+});
+
+export const FIELD_SNIPPET_DESC_USER_PICKER = i18n.translate(
+  'xpack.cases.templates.snippet.userPicker',
+  { defaultMessage: 'Insert a user picker' }
+);
+
+export const FIELD_SNIPPET_DESC_MARKDOWN = i18n.translate(
+  'xpack.cases.templates.snippet.markdown',
+  { defaultMessage: 'Insert a display-only markdown block' }
+);
+
+export const FIELD_SNIPPET_LABEL_REF = i18n.translate('xpack.cases.templates.snippet.refLabel', {
+  defaultMessage: 'Field library reference ($ref)',
+});
+
+export const FIELD_SNIPPET_DESC_REF = i18n.translate('xpack.cases.templates.snippet.refDesc', {
+  defaultMessage: 'Reference a reusable field from the field library',
+});
+
+export const ASSIGNEE_SNIPPET_DESC = i18n.translate('xpack.cases.templates.snippet.assignee', {
+  defaultMessage: 'Add an assignee by user profile ID',
+});
 
 export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
   defaultMessage: 'Enabled',
@@ -439,7 +611,7 @@ export const BULK_DELETE_MESSAGE = (count: number) =>
   i18n.translate('xpack.cases.templates.bulkDeleteMessage', {
     values: { count },
     defaultMessage:
-      'This action will permanently delete {count, plural, one {this template} other {these {count} templates}}.',
+      '{count, plural, one {This template} other {These {count} templates}} will no longer apply to new cases. Cases already using {count, plural, one {it} other {them}} keep their values. Export first if you want to keep a copy.',
   });
 
 export const SHOWING = i18n.translate('xpack.cases.templates.showing', {
@@ -455,15 +627,16 @@ export const CASES = i18n.translate('xpack.cases.templates.cases', {
 });
 
 export const DELETE_TITLE = (name: string) =>
-  i18n.translate('xpack.cases.configuration.deleteTitle', {
+  i18n.translate('xpack.cases.templates.deleteTitle', {
     values: { name },
     defaultMessage: 'Delete {name}?',
   });
 
 export const DELETE_MESSAGE = (name: string) =>
-  i18n.translate('xpack.cases.configuration.deleteMessage', {
+  i18n.translate('xpack.cases.templates.deleteMessage', {
     values: { name },
-    defaultMessage: 'This action will permanently delete {name}.',
+    defaultMessage:
+      '{name} will no longer apply to new cases. Cases already using it keep their values. Export it first if you want to keep a copy.',
   });
 export const NO_TEMPLATES_BODY = i18n.translate('xpack.cases.templates.noTemplatesBody', {
   defaultMessage: 'Create templates that automatically populate values in new cases.',
@@ -514,6 +687,13 @@ export const TEMPLATES_INFO_DESCRIPTION = i18n.translate('xpack.cases.templates.
   defaultMessage:
     'Create templates with custom set of fields, that can automatically populate values in new cases.',
 });
+
+export const TEMPLATES_INFO_PANEL_DISMISS = i18n.translate(
+  'xpack.cases.templates.infoPanelDismiss',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
 
 export const LEARN_MORE = i18n.translate('xpack.cases.templates.learnMore', {
   defaultMessage: 'Learn more',
@@ -727,6 +907,15 @@ export const FIELD_TYPE_TITLE_DATE_PICKER = i18n.translate(
   { defaultMessage: 'Date Picker' }
 );
 
+export const FIELD_TYPE_TITLE_TOGGLE = i18n.translate('xpack.cases.templates.fieldType.toggle', {
+  defaultMessage: 'Toggle',
+});
+
+export const FIELD_TYPE_TITLE_MARKDOWN = i18n.translate(
+  'xpack.cases.templates.fieldType.markdown',
+  { defaultMessage: 'Markdown (display only)' }
+);
+
 export const FIELD_TYPE_TITLE_CHECKBOX_GROUP = i18n.translate(
   'xpack.cases.templates.fieldType.checkboxGroup',
   { defaultMessage: 'Checkbox Group' }
@@ -741,6 +930,14 @@ export const FIELD_TYPE_TITLE_USER_PICKER = i18n.translate(
   'xpack.cases.templates.fieldType.userPicker',
   { defaultMessage: 'User Picker' }
 );
+
+export const TOGGLE_ON = i18n.translate('xpack.cases.templates.fieldType.toggle.on', {
+  defaultMessage: 'On',
+});
+
+export const TOGGLE_OFF = i18n.translate('xpack.cases.templates.fieldType.toggle.off', {
+  defaultMessage: 'Off',
+});
 
 export const TEMPLATE_DEFINITION_EMPTY = i18n.translate(
   'xpack.cases.templates.templateDefinitionEmpty',
@@ -757,6 +954,13 @@ export const INVALID_YAML_DEFINITION = i18n.translate(
   { defaultMessage: 'Invalid YAML definition' }
 );
 
+export const TEMPLATE_MISSING_REQUIRED_KEYS = (keys: string[]) =>
+  i18n.translate('xpack.cases.templates.missingRequiredKeys', {
+    defaultMessage:
+      'The template YAML must include these keys so they stay visible in the preview: {keys}. Restore them to continue.',
+    values: { keys: keys.join(', ') },
+  });
+
 export const CONNECTOR_TITLE = i18n.translate('xpack.cases.templates.preview.connectorTitle', {
   defaultMessage: 'Connector',
 });
@@ -769,6 +973,42 @@ export const SETTINGS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPa
   defaultMessage: 'Settings',
 });
 
+export const CONFIGURATION_TAB_LABEL = i18n.translate(
+  'xpack.cases.templates.renderPanel.configurationTab',
+  { defaultMessage: 'Configuration' }
+);
+
+export const CONFIGURATION_TAB_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.configuration.description',
+  {
+    defaultMessage:
+      'Saved on the template and applied to every case it creates — not part of the YAML definition.',
+  }
+);
+
+export const CONFIGURATION_CONNECTOR_GROUP_TITLE = i18n.translate(
+  'xpack.cases.templates.configuration.connectorGroupTitle',
+  { defaultMessage: 'Case settings & connector' }
+);
+
+export const CONFIGURATION_CONNECTOR_GROUP_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.configuration.connectorGroupDescription',
+  {
+    defaultMessage:
+      'Case behavior and the default external connector applied to every case created from this template.',
+  }
+);
+
+export const CONFIGURATION_TAB_NAME_REQUIRED = i18n.translate(
+  'xpack.cases.templates.configuration.nameRequiredIndicator',
+  { defaultMessage: 'A template name is required — set it on the Configuration tab.' }
+);
+
+export const FIELDS_TAB_HAS_ERRORS = i18n.translate(
+  'xpack.cases.templates.fields.hasErrorsIndicator',
+  { defaultMessage: 'The Fields definition has validation errors — fix them on the Fields tab.' }
+);
+
 export const SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.cases.templates.settings.sectionTitle',
   { defaultMessage: 'Case settings' }
@@ -778,7 +1018,7 @@ export const SETTINGS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.settings.sectionDescription',
   {
     defaultMessage:
-      'Defaults applied to cases created from this template. These are managed here, not in the YAML.',
+      'Defaults applied to cases created from this template. These values are also represented in YAML.',
   }
 );
 
@@ -793,4 +1033,171 @@ export const CONNECTOR_NOT_FOUND = i18n.translate(
     defaultMessage:
       'Connector not found. Cases created from this template will fall back to no connector.',
   }
+);
+
+// --- Editor Actions menu -----------------------------------------------------------------------
+
+export const ACTIONS_MENU_BUTTON = i18n.translate('xpack.cases.templates.actionsMenu.button', {
+  defaultMessage: 'Actions menu',
+});
+
+export const ACTIONS_MENU_ROOT_TITLE = i18n.translate('xpack.cases.templates.actionsMenu.title', {
+  // Kept identical to the trigger label so the popover header and the chip read as one control.
+  defaultMessage: 'Actions menu',
+});
+
+export const ACTIONS_MENU_ARIA = i18n.translate('xpack.cases.templates.actionsMenu.aria', {
+  defaultMessage: 'Open the template actions menu',
+});
+
+export const ACTION_NEW_FIELD_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.newField.title',
+  { defaultMessage: 'New field' }
+);
+export const ACTION_NEW_FIELD_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.newField.desc',
+  { defaultMessage: 'Scaffold a custom field of any type' }
+);
+
+export const ACTION_CHANGE_FIELD_TYPE_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.changeFieldType.title',
+  { defaultMessage: 'Change field type' }
+);
+export const ACTION_CHANGE_FIELD_TYPE_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.changeFieldType.desc',
+  { defaultMessage: 'Replace this field with a fresh scaffold of a different type' }
+);
+
+export const ACTION_FIELD_LIBRARY_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.fieldLibrary.title',
+  { defaultMessage: 'Field library' }
+);
+export const ACTION_FIELD_LIBRARY_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.fieldLibrary.desc',
+  { defaultMessage: 'Reference a saved field from the library' }
+);
+
+export const ACTION_VALIDATION_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.validation.title',
+  { defaultMessage: 'Validation' }
+);
+export const ACTION_VALIDATION_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.validation.desc',
+  { defaultMessage: 'Add a validation rule to the selected field' }
+);
+
+export const ACTION_CONDITIONAL_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.conditional.title',
+  { defaultMessage: 'Conditional logic' }
+);
+export const ACTION_CONDITIONAL_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.conditional.desc',
+  { defaultMessage: 'Show or require the selected field based on another' }
+);
+
+export const ACTIONS_MENU_SELECT_A_FIELD = i18n.translate(
+  'xpack.cases.templates.actionsMenu.selectAField',
+  { defaultMessage: 'Place the cursor on a field to enable this action' }
+);
+
+export const ACTIONS_MENU_NO_FIELD_YET = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noFieldYet',
+  { defaultMessage: 'Create a field to enable this action' }
+);
+
+export const ACTIONS_MENU_SEARCH_FIELDS = i18n.translate(
+  'xpack.cases.templates.actionsMenu.searchFields',
+  { defaultMessage: 'Search library fields' }
+);
+
+export const ACTIONS_MENU_NO_LIBRARY_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noLibraryFieldsTitle',
+  { defaultMessage: 'No library fields yet' }
+);
+
+export const ACTIONS_MENU_NO_LIBRARY_FIELDS = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noLibraryFields',
+  {
+    defaultMessage:
+      'Create reusable fields in the Field library, then reference them from any template.',
+  }
+);
+
+export const ACTIONS_MENU_LOADING_LIBRARY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.loadingLibrary',
+  { defaultMessage: 'Loading library fields…' }
+);
+
+export const ACTIONS_MENU_LIBRARY_GLOBAL_BADGE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.libraryGlobalBadge',
+  { defaultMessage: 'Global' }
+);
+
+export const ACTIONS_MENU_FIELD_EXISTS = (name: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.fieldExists', {
+    defaultMessage: '"{name}" is already in this template',
+    values: { name },
+  });
+
+export const ACTIONS_MENU_RULE_EXISTS = (rule: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.ruleExists', {
+    defaultMessage: '"{rule}" is already set on this field',
+    values: { rule },
+  });
+
+export const ACTIONS_MENU_NO_FIELD_AT_CURSOR = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noFieldAtCursor',
+  { defaultMessage: 'Place the cursor on a field before adding this rule' }
+);
+
+export const ACTIONS_MENU_FIX_YAML_FIRST = i18n.translate(
+  'xpack.cases.templates.actionsMenu.fixYamlFirst',
+  { defaultMessage: 'Fix the YAML errors before using the actions menu' }
+);
+
+export const ACTIONS_MENU_INVALID_YAML = i18n.translate(
+  'xpack.cases.templates.actionsMenu.invalidYaml',
+  { defaultMessage: 'Fix the YAML errors in the editor before adding to the template' }
+);
+
+// Validation rule labels
+export const VALIDATION_RULE_REQUIRED = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.required',
+  { defaultMessage: 'Required' }
+);
+export const VALIDATION_RULE_REQUIRED_ON_CLOSE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.requiredOnClose',
+  { defaultMessage: 'Required before closing' }
+);
+export const VALIDATION_RULE_PATTERN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.pattern',
+  { defaultMessage: 'Pattern (regex)' }
+);
+export const VALIDATION_RULE_MIN = i18n.translate('xpack.cases.templates.actionsMenu.rule.min', {
+  defaultMessage: 'Minimum value',
+});
+export const VALIDATION_RULE_MAX = i18n.translate('xpack.cases.templates.actionsMenu.rule.max', {
+  defaultMessage: 'Maximum value',
+});
+export const VALIDATION_RULE_MIN_LENGTH = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.minLength',
+  { defaultMessage: 'Minimum length' }
+);
+export const VALIDATION_RULE_MAX_LENGTH = i18n.translate(
+  'xpack.cases.templates.actionsMenu.rule.maxLength',
+  { defaultMessage: 'Maximum length' }
+);
+
+// Conditional-logic labels
+export const CONDITION_SHOW_WHEN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.condition.showWhen',
+  { defaultMessage: 'Show when…' }
+);
+export const CONDITION_SHOW_WHEN_COMPOUND = i18n.translate(
+  'xpack.cases.templates.actionsMenu.condition.showWhenCompound',
+  { defaultMessage: 'Show when (multiple conditions)…' }
+);
+export const CONDITION_REQUIRED_WHEN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.condition.requiredWhen',
+  { defaultMessage: 'Require when…' }
 );

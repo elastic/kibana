@@ -25,10 +25,17 @@ import { MetricsExperienceStateProvider } from './context/metrics_experience_sta
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
-jest.mock('@kbn/discover-utils', () => ({
-  DiscoverFlyouts: { metricInsights: 'metricInsights' },
-  dismissAllFlyoutsExceptFor: jest.fn(),
-}));
+jest.mock('@kbn/discover-utils', () => {
+  const { METRICS_GRID_SETTINGS_DEFAULTS } = jest.requireActual(
+    '@kbn/discover-utils/src/data_types/metrics'
+  );
+
+  return {
+    DiscoverFlyouts: { metricInsights: 'metricInsights' },
+    METRICS_GRID_SETTINGS_DEFAULTS,
+    dismissAllFlyoutsExceptFor: jest.fn(),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -1039,6 +1046,88 @@ describe('MetricsGrid', () => {
       // no prop change. After the fix (pass profileId as a prop from MetricsGrid
       // instead of reading it inside ChartItem), this count should be 0.
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+    });
+  });
+
+  describe('gridSettings', () => {
+    it('forwards gridSettings from context into createESQLQuery for each metric', () => {
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gridSettings: {
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+          },
+        })
+      );
+    });
+  });
+
+  describe('recently explored', () => {
+    // The chart is mocked, so render a panel action control inside it to simulate the
+    // embeddable's quick-action buttons that the cell click handler looks for.
+    const renderChartWithPanelAction = () => {
+      (Chart as jest.Mock).mockImplementation(() => (
+        <div data-test-subj="chart">
+          <button type="button" data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL" />
+        </div>
+      ));
+    };
+
+    afterEach(() => {
+      (Chart as jest.Mock).mockImplementation(() => <div data-test-subj="chart" />);
+    });
+
+    it('records the metric as explored when a panel action is clicked', () => {
+      renderChartWithPanelAction();
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-chart-index="0"] [data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL"]'
+        ) as HTMLElement
+      );
+
+      expect(onMetricExplored).toHaveBeenCalledTimes(1);
+      expect(onMetricExplored).toHaveBeenCalledWith('metrics-*::system.cpu.utilization');
+    });
+
+    it('does not record the metric when clicking outside panel actions', () => {
+      renderChartWithPanelAction();
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(container.querySelector('[data-chart-index="0"]') as HTMLElement);
+
+      expect(onMetricExplored).not.toHaveBeenCalled();
     });
   });
 });

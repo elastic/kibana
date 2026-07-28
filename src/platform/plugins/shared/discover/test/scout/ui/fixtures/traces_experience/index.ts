@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
-import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import type { DiscoverPageObjects } from '..';
+import { spaceTest as spaceBaseTest } from '..';
 import { TracesExperiencePage } from './page_objects';
 
-export interface TracesExperienceTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: PageObjects & {
+export interface TracesExperienceTestFixtures {
+  pageObjects: DiscoverPageObjects & {
     tracesExperience: TracesExperiencePage;
   };
 }
@@ -25,22 +23,14 @@ export const spaceTest = spaceBaseTest.extend<
   TracesExperienceTestFixtures,
   ScoutParallelWorkerFixtures
 >({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: TracesExperienceTestFixtures['pageObjects'];
-      page: TracesExperienceTestFixtures['page'];
-    },
-    use: (pageObjects: TracesExperienceTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    const extendedPageObjects = {
+  pageObjects: async ({ pageObjects, page }, use) => {
+    const extendedPageObjects: TracesExperienceTestFixtures['pageObjects'] = {
       ...pageObjects,
       tracesExperience: createLazyPageObject(
         TracesExperiencePage,
         page,
         pageObjects.dataGrid,
+        pageObjects.docViewer,
         pageObjects.discover
       ),
     };

@@ -24,11 +24,14 @@ export const getInferredPrebuiltStepTypes = ({
     workflowConfig.validation_workflow_id === '' ||
     workflowConfig.validation_workflow_id === defaultValidationWorkflowId;
 
+  // The prebuilt `defaultAlertRetrieval` step runs only when the default
+  // retrieval toggle is enabled (the always-on skill gate runs as a separate
+  // `ai.agent` step in the generation phase, not as this prebuilt step).
+  const usesDefaultAlertRetrieval = workflowConfig.default_retrieval_enabled;
+
   return [
     GenerateStepTypeId,
-    ...(workflowConfig.alert_retrieval_mode !== 'custom_only'
-      ? [DefaultAlertRetrievalStepTypeId]
-      : []),
+    ...(usesDefaultAlertRetrieval ? [DefaultAlertRetrievalStepTypeId] : []),
     ...(usesDefaultValidation ? [DefaultValidationStepTypeId, PersistDiscoveriesStepTypeId] : []),
   ].sort();
 };

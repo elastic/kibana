@@ -13,11 +13,15 @@ export {
   type QueryLink,
   type QueryType,
   type StreamQuery,
+  CRITICAL_SEVERITY_THRESHOLD,
   HIGH_SEVERITY_THRESHOLD,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
   bulkStreamQueryInputSchema,
   esqlQuerySchema,
+  isDurable,
+  isExpirable,
+  isExpired,
   queryFeatureSchema,
   queryTypeSchema,
   streamQuerySchema,
@@ -62,6 +66,7 @@ export {
   isFeatureWithFilter,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
 
@@ -73,6 +78,10 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
+  type ProcessedMarker,
+  type ChangePointType,
+  processedMarkerSchema,
+  CHANGE_POINT_TYPES,
   type Discovery,
   type KnowledgeIndicator,
   type SignificantEvent,
@@ -87,8 +96,18 @@ export {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
   detectionSchema,
   discoverySchema,
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
@@ -120,6 +139,8 @@ export {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';

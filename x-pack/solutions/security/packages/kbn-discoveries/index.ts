@@ -26,10 +26,11 @@ export type {
   AttackDiscoveryGraphMetadata,
   AttackDiscoveryGraphState,
   BaseGraphState,
+  DefendInsightsGraphMetadata,
+  DefendInsightsGraphState,
   GetAttackDiscoveryGraph,
+  GetDefendInsightsGraph,
   GraphInsightTypes,
-  GraphInvocationResult,
-  InvokeGraphParams,
 } from './impl/lib/types';
 
 // Attack Discovery
@@ -77,14 +78,11 @@ export {
   getDefaultAttackDiscoveryGraph,
 } from './impl/attack_discovery/graphs';
 export type {
-  AttackDiscoveryGraphResult,
   AttackDiscoveryPrompts,
   CombinedPrompts,
   DefaultAttackDiscoveryGraph,
   GenerationPrompts,
   GetDefaultAttackDiscoveryGraphParams,
-  InvokeAttackDiscoveryGraphWithDocs,
-  InvokeAttackDiscoveryGraphWithDocsParams,
 } from './impl/attack_discovery/graphs';
 export {
   filterHallucinatedAlerts,
@@ -94,8 +92,41 @@ export {
   logFilteredDiscoveries,
   logUnverifiableDiscoveries,
 } from './impl/attack_discovery/hallucination_detection';
-export type { DiscoveryWithAlertIds } from './impl/attack_discovery/hallucination_detection';
 
-// Note: schedules/transforms, telemetry/event_based_telemetry,
-// attack_discovery/persistence/event_logging, and defend_insights/graphs are added
-// in later PRs alongside their source files.
+// Event logging — introduced in this PR (Orchestration + Event Logging).
+export {
+  ATTACK_DISCOVERY_EVENT_ACTIONS,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_CANCELED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_PROVIDER,
+  writeAttackDiscoveryEvent,
+} from './impl/attack_discovery/persistence/event_logging';
+export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';
+
+// Defend Insights
+export {
+  DEFEND_INSIGHTS_GRAPH_RUN_NAME,
+  getDefaultDefendInsightsGraph,
+} from './impl/defend_insights/graphs';
+export type {
+  DefaultDefendInsightsGraph,
+  DefendInsightsCombinedPrompts,
+  DefendInsightsGenerationPrompts,
+  DefendInsightsPrompts,
+  GetDefaultDefendInsightsGraphParams,
+} from './impl/defend_insights/graphs';
+
+// Note: schedules/transforms and telemetry/event_based_telemetry barrel exports
+// are added in the Schedule Integration PR (PR10) alongside their consumers.

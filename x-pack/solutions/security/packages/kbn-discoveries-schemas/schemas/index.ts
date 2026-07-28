@@ -18,62 +18,83 @@ export {
 
 export { AttackDiscoveryApiAlert } from './attack_discovery/attack_discovery_api_alert.gen';
 
+// Workflow steps
+// Note: default_alert_retrieval file contains DefaultAlertRetrieval types
+// (file named to avoid ESLint restrictions on "legacy" keyword)
+export {
+  DefaultAlertRetrievalInput,
+  DefaultAlertRetrievalOutput,
+} from './workflow_steps/default_alert_retrieval.gen';
+
+export {
+  DefaultValidationInput,
+  DefaultValidationOutput,
+} from './workflow_steps/default_validation.gen';
+
 export { Replacements, Provider, ApiConfig } from './common_attributes.gen';
 
 // Common types
 export { ERROR_CATEGORIES } from './common/error_category';
 export type { ErrorCategory } from './common/error_category';
 
-// Schedule route schemas. These are types + Zod schemas used by schedule
-// routes added in PR10. Exported from PR1 so that intermediate PRs (PR3+)
-// containing schedule route handlers can type-check FF-off; runtime
-// registration of the schedule routes still happens only in PR10 +
-// downstream when the feature flag is on.
+// Schedule types (common)
+export {
+  AttackDiscoveryApiConfig,
+  AttackDiscoverySchedule,
+  AttackDiscoveryScheduleCreateProps,
+  AttackDiscoveryScheduleParams,
+  AttackDiscoveryScheduleUpdateProps,
+  IntervalSchedule,
+  ScheduleAction,
+  ScheduleActionFrequency,
+  ScheduleActionNotifyWhen,
+  ScheduleExecution,
+  ScheduleExecutionStatus,
+  ScheduleGeneralAction,
+  ScheduleSystemAction,
+  WorkflowConfig,
+} from './common/schedules/schedule_types.gen';
+
+// Schedule workflow config validation (at-least-one-toggle)
+export {
+  AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
+  WorkflowConfigWithRetrievalToggle,
+  hasAtLeastOneRetrievalToggle,
+} from './common/schedules/workflow_config_validation';
+
+// Schedule routes
 export {
   CreateAttackDiscoveryScheduleRequestBody,
   CreateAttackDiscoveryScheduleResponse,
 } from './routes/post/schedules/create_schedule_route.gen';
-export {
-  DisableAttackDiscoveryScheduleRequestParams,
-  DisableAttackDiscoveryScheduleResponse,
-} from './routes/post/schedules/disable_schedule_route.gen';
-export {
-  EnableAttackDiscoveryScheduleRequestParams,
-  EnableAttackDiscoveryScheduleResponse,
-} from './routes/post/schedules/enable_schedule_route.gen';
+
 export {
   FindAttackDiscoverySchedulesRequestQuery,
   FindAttackDiscoverySchedulesResponse,
 } from './routes/get/schedules/find_schedules_route.gen';
+
 export {
   GetAttackDiscoveryScheduleRequestParams,
   GetAttackDiscoveryScheduleResponse,
 } from './routes/get/schedules/get_schedule_route.gen';
+
 export {
   UpdateAttackDiscoveryScheduleRequestBody,
   UpdateAttackDiscoveryScheduleRequestParams,
   UpdateAttackDiscoveryScheduleResponse,
 } from './routes/put/schedules/update_schedule_route.gen';
+
 export {
   DeleteAttackDiscoveryScheduleRequestParams,
   DeleteAttackDiscoveryScheduleResponse,
 } from './routes/delete/schedules/delete_schedule_route.gen';
 
-// Common schedule types referenced by the route schemas above.
 export {
-  AttackDiscoveryApiConfig,
-  AttackDiscoverySchedule,
-  AttackDiscoveryScheduleCreateProps,
-  AttackDiscoveryScheduleUpdateProps,
-  ScheduleAction,
-  ScheduleGeneralAction,
-  WorkflowConfig,
-} from './common/schedules/schedule_types.gen';
+  EnableAttackDiscoveryScheduleRequestParams,
+  EnableAttackDiscoveryScheduleResponse,
+} from './routes/post/schedules/enable_schedule_route.gen';
 
-// Schedule workflow config validation (at-least-one-toggle).
 export {
-  AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
-  hasAtLeastOneRetrievalToggle,
-} from './common/schedules/workflow_config_validation';
-
-// Note: workflow_steps/* is added in later PRs alongside its source files.
+  DisableAttackDiscoveryScheduleRequestParams,
+  DisableAttackDiscoveryScheduleResponse,
+} from './routes/post/schedules/disable_schedule_route.gen';

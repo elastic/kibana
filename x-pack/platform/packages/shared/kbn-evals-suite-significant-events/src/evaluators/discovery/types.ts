@@ -31,14 +31,12 @@ export interface DiscoveryAgentOutput extends AgentOutputBase {
 
 export interface DiscoveryEvaluationExample {
   input: {
-    episodeSuffix?: string;
     detections: Array<Partial<Detection>>;
-    continuationCandidates?: Array<Partial<Discovery>>;
   };
   output: ExampleOutputBase & {
     /**
-     * Canonical expected discoveries (detections + evidences + cause_kis) — the grouping check
-     * derives its expected groups from these discoveries' `detections[].rule_name`s.
+     * Canonical expected discoveries (signals + causal_features + blast_radius) — the grouping check
+     * derives its expected groups from these discoveries' `signals[].metadata.rule_uuid`s.
      */
     expected_discoveries?: Array<Partial<Discovery>>;
   } & Record<string, unknown>;
@@ -58,6 +56,7 @@ export interface DiscoveryJudgeEvaluationExample {
   };
   output: ExampleOutputBase & {
     expected_ground_truth?: string;
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }

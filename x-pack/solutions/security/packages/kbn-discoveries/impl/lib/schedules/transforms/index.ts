@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-// Stub barrel: real schedule transforms land in PR10 (Schedule Integration).
-// PR3 schedule routes need these symbols to type-check FF-off; runtime
-// schedule routes are FF-gated and never reach this code with the FF OFF.
-
+export { transformActionsFromApi } from './transform_actions_from_api';
+export { transformActionsToApi } from './transform_actions_to_api';
 export { transformCreatePropsFromApi } from './transform_create_props_from_api';
 export { transformScheduleToApi } from './transform_schedule_to_api';
 export { transformUpdatePropsFromApi } from './transform_update_props_from_api';

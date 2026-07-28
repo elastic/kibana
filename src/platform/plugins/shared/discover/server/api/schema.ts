@@ -9,8 +9,21 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { asCodeIdSchema, asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { getControlsGroupSchema } from '@kbn/controls-schemas';
+import {
+  asCodeIdSchema,
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
+import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
+import {
+  CONTROL_WIDTH_LARGE,
+  CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_SMALL,
+  DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
+} from '@kbn/controls-constants';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
@@ -22,6 +35,14 @@ export const MAX_SESSION_DESCRIPTION_LENGTH = 1000;
 export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
+export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_SEARCH_QUERY_LENGTH = 1000;
+
+const validateUniqueIds = (ids: string[], message: string): string | undefined => {
+  if (new Set(ids).size !== ids.length) {
+    return message;
+  }
+};
 
 const visContextSchema = schema.object({
   suggestion_type: schema.oneOf(
@@ -47,6 +68,66 @@ const visContextSchema = schema.object({
     }
   ),
 });
+
+const discoverSessionControlWidthSchema = schema.oneOf(
+  [
+    schema.literal(CONTROL_WIDTH_SMALL),
+    schema.literal(CONTROL_WIDTH_MEDIUM),
+    schema.literal(CONTROL_WIDTH_LARGE),
+  ],
+  {
+    defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
+    meta: {
+      description: 'Minimum width of the control panel.',
+    },
+  }
+);
+
+const discoverSessionControlPanelSchema = schema.object(
+  {
+    id: schema.string({
+      minLength: 1,
+      meta: { description: 'The unique ID of the control.' },
+    }),
+    type: schema.literal(ESQL_CONTROL),
+    width: discoverSessionControlWidthSchema,
+    grow: schema.boolean({
+      defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
+      meta: {
+        description:
+          'When `true`, the control expands to fill any available horizontal space. ' +
+          'Defaults to `false`.',
+      },
+    }),
+    config: optionsListESQLControlSchema,
+  },
+  {
+    meta: {
+      id: 'kbn-discover-session-api-esql-control-panel',
+      title: ESQL_CONTROL,
+      description:
+        'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
+        'queries using the `?variable_name` syntax.',
+    },
+  }
+);
+
+export const discoverSessionControlPanelsSchema = schema.arrayOf(
+  discoverSessionControlPanelSchema,
+  {
+    defaultValue: [],
+    maxSize: MAX_DISCOVER_SESSION_CONTROL_PANELS,
+    validate(value) {
+      return validateUniqueIds(
+        value.map((panel) => panel.id),
+        'control_panels must have unique ids'
+      );
+    },
+    meta: {
+      description: 'An array of Discover ES|QL control panels.',
+    },
+  }
+);
 
 const discoverSessionTabPresentationSchema = schema.object({
   hide_chart: schema.boolean({
@@ -98,7 +179,7 @@ const discoverSessionTabPresentationSchema = schema.object({
   time_range: schema.maybe(timeRangeSchema),
   refresh_interval: schema.maybe(refreshIntervalSchema),
   vis_context: schema.maybe(visContextSchema),
-  control_panels: schema.maybe(getControlsGroupSchema()),
+  control_panels: schema.maybe(discoverSessionControlPanelsSchema),
 });
 
 const discoverSessionTabIdentitySchema = schema.object({
@@ -126,7 +207,7 @@ const discoverSessionApiTabSchema = schema.oneOf([
   discoverSessionEsqlTabSchema,
 ]);
 
-export const discoverSessionDataSchema = schema.object(
+export const discoverSessionApiDataSchema = schema.object(
   {
     title: schema.string({
       minLength: 1,
@@ -141,8 +222,15 @@ export const discoverSessionDataSchema = schema.object(
     tabs: schema.arrayOf(discoverSessionApiTabSchema, {
       minSize: 1,
       maxSize: MAX_DISCOVER_SESSION_TABS,
+      validate(value) {
+        return validateUniqueIds(
+          value.map((tab) => tab.id),
+          'tabs must have unique ids'
+        );
+      },
       meta: {
-        description: 'Ordered list of tabs in the Discover session.',
+        description:
+          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
       },
     }),
   },
@@ -156,17 +244,58 @@ export const discoverSessionDataSchema = schema.object(
 );
 
 export const discoverSessionApiResponseSchema = schema.object({
-  id: asCodeIdSchema,
-  data: discoverSessionDataSchema,
+  id: schema.string({
+    meta: { description: 'The Discover session ID.' },
+  }),
+  data: discoverSessionApiDataSchema,
   meta: asCodeMetaSchema,
 });
 
-export const discoverSessionApiRequestBodySchema = schema.object({
-  data: discoverSessionDataSchema,
+export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extends({
+  query: schema.maybe(
+    schema.string({
+      maxLength: MAX_SEARCH_QUERY_LENGTH,
+      meta: {
+        description:
+          'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
+      },
+    })
+  ),
 });
 
-export type DiscoverSessionData = TypeOf<typeof discoverSessionDataSchema>;
+const discoverSessionSearchItemSchema = schema.object({
+  id: schema.string({
+    meta: { description: 'The Discover session ID.' },
+  }),
+  data: schema.object({
+    title: schema.string({
+      meta: { description: 'Discover session title.' },
+    }),
+    description: schema.maybe(
+      schema.string({
+        meta: { description: 'Discover session description.' },
+      })
+    ),
+  }),
+  meta: asCodeMetaSchema,
+});
+
+export const discoverSessionSearchResponseSchema = schema.object({
+  data: schema.arrayOf(discoverSessionSearchItemSchema, {
+    // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
+    maxSize: PAGINATION_MAX_SIZE,
+    meta: {
+      description: 'List of matching Discover sessions (summaries, not the full session state).',
+    },
+  }),
+  meta: asCodePaginationResponseMetaSchema,
+});
+
+export type DiscoverSessionApiData = TypeOf<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = TypeOf<typeof discoverSessionApiResponseSchema>;
+export type DiscoverSessionSearchParams = TypeOf<typeof discoverSessionSearchParamsSchema>;
+export type DiscoverSessionSearchResponse = TypeOf<typeof discoverSessionSearchResponseSchema>;
 export type DiscoverSessionApiClassicTab = TypeOf<typeof discoverSessionClassicTabSchema>;
 export type DiscoverSessionApiEsqlTab = TypeOf<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = TypeOf<typeof discoverSessionApiTabSchema>;
+export type DiscoverSessionControlPanels = TypeOf<typeof discoverSessionControlPanelsSchema>;

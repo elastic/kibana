@@ -42,6 +42,7 @@ jest.mock('../../../risk_score_timeline', () => ({
     entityId: string;
     scoreType?: string;
     onPointSelect: (timestamp: string | undefined) => void;
+    onRangeChange: (range: { from: string; to: string }) => void;
   }) => (
     <div
       data-test-subj="mockRiskScoreTimeline"
@@ -52,6 +53,16 @@ jest.mock('../../../risk_score_timeline', () => ({
         type="button"
         data-test-subj="mockSelectPoint"
         onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
+      />
+      <button
+        type="button"
+        data-test-subj="mockRangeExcludingSelection"
+        onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
+      />
+      <button
+        type="button"
+        data-test-subj="mockRangeIncludingSelection"
+        onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
       />
     </div>
   ),
@@ -100,10 +111,14 @@ jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state
 }));
 
 const mockOpenPreviewPanel = jest.fn();
+const mockOpenLeftPanel = jest.fn();
 const mockOnShowAlert = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openPreviewPanel: mockOpenPreviewPanel }),
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: mockOpenPreviewPanel,
+    openLeftPanel: mockOpenLeftPanel,
+  }),
   useExpandableFlyoutState: () => ({}),
   useExpandableFlyoutHistory: () => [],
   ExpandableFlyout: () => null,
@@ -685,6 +700,76 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
   });
 
+  it('attributes criticality via the recorded contributor_euid even when current member levels diverge', () => {
+    const resolutionRiskScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          modifiers: [
+            {
+              type: 'asset_criticality',
+              contribution: 4.5,
+              metadata: { criticality_level: 'high_impact', contributor_euid: 'user:entity-1' },
+            },
+          ],
+          category_1_count: 1,
+          category_1_score: 10,
+          inputs: [{ ...alertInputDataMock.input, id: 'resolution-alert-id' }],
+        },
+      },
+    };
+
+    // No member currently holds the recorded high_impact level — the
+    // current-state join would show '-' without the persisted attribution.
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+          asset: { criticality: 'medium_impact' },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+            asset: { criticality: 'low_impact' },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown }) =>
+      isResolutionFilter(params)
+        ? {
+            loading: false,
+            error: false,
+            data: [resolutionRiskScore],
+          }
+        : {
+            loading: false,
+            error: false,
+            data: [riskScore],
+          }
+    );
+
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByText('Resolution group risk score'));
+
+    const contextsTable = getByTestId('risk-input-contexts-table');
+    expect(contextsTable).toHaveTextContent('entity-1');
+    expect(contextsTable).not.toHaveTextContent('elastic');
+  });
+
   it('initializes to resolution view when flyout state subTab is "resolution"', () => {
     mockUseStableExpandableFlyoutState.mockReturnValue({
       left: {
@@ -942,6 +1027,17 @@ describe('RiskInputsTab', () => {
       'aria-pressed',
       'true'
     );
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          path: expect.objectContaining({
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.ENTITY,
+          }),
+        }),
+      })
+    );
   });
 
   it('renders watchlist modifiers in context section', () => {
@@ -1123,7 +1219,6 @@ describe('RiskInputsTab', () => {
           from: PIT_TIMESTAMP,
           to: PIT_TIMESTAMP,
           includeContributions: true,
-          pageSize: 1,
           skip: false,
         })
       );
@@ -1160,6 +1255,48 @@ describe('RiskInputsTab', () => {
       );
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
+      );
+    });
+
+    it('clears a point-in-time selection that falls outside a newly selected range', () => {
+      enableHistoryFlag();
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId, queryByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+
+      // the selected 2021 timestamp is outside a now-1d..now range
+      fireEvent.click(getByTestId('mockRangeExcludingSelection'));
+
+      expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
+      expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ skip: true })
+      );
+    });
+
+    it('keeps a point-in-time selection that still falls within a newly selected range', () => {
+      enableHistoryFlag();
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+
+      // the selected 2021 timestamp is still inside a now-10y..now range
+      fireEvent.click(getByTestId('mockRangeIncludingSelection'));
+
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ from: PIT_TIMESTAMP, to: PIT_TIMESTAMP, skip: false })
       );
     });
 
@@ -1238,7 +1375,6 @@ describe('RiskInputsTab', () => {
             from: PIT_TIMESTAMP,
             to: PIT_TIMESTAMP,
             includeContributions: true,
-            pageSize: 1,
             skip: false,
           })
         );

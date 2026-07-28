@@ -41,10 +41,11 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
 }));
-// Force the app menu to render at the xl breakpoint so all menu items
-// (run, executions) are displayed inline instead of collapsed into an overflow popover.
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+  // Keep app menu breakpoint checks on xl so its items render inline in tests.
   useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
 }));
 jest.mock('@kbn/workflows-ui', () => ({
@@ -548,8 +549,9 @@ describe('WorkflowDetailHeader', () => {
       </ChangeHistoryModalContext.Provider>
     );
 
-    // The History action lives in the app menu's overflow popover; open it and confirm.
+    // History lives in the overflow ("More") menu, so open it before locating the entry point.
     fireEvent.click(getByTestId('app-menu-overflow-button'));
+
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();
 
@@ -573,7 +575,7 @@ describe('WorkflowDetailHeader', () => {
       openModal: jest.fn(),
       closeModal: jest.fn(),
     };
-    const { queryByTestId, getByTestId } = render(
+    const { queryByTestId } = render(
       <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
         <WorkflowDetailHeader {...defaultProps} />
       </ChangeHistoryModalContext.Provider>,
@@ -582,9 +584,6 @@ describe('WorkflowDetailHeader', () => {
       }
     );
 
-    // The overflow trigger still exists for the standard header entries (docs, etc.),
-    // but History should not be inside it on the executions tab.
-    fireEvent.click(getByTestId('app-menu-overflow-button'));
     expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
   });
 });

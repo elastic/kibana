@@ -9,7 +9,8 @@
 
 import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/common';
+import { spaceTest } from '../../../fixtures';
+import { testData } from '../../../fixtures/common';
 
 const DOC_VIEWER_TABLE_TAB_ID = 'doc_view_table';
 const DOC_VIEWER_JSON_TAB_ID = 'doc_view_source';
@@ -92,14 +93,14 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
   spaceTest(
     'should maintain separate DocViewer state for different tabs and retain it while switching tabs',
     async ({ pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
+      const { docViewer, discover, unifiedTabs } = pageObjects;
 
       await spaceTest.step('tab 0: open DocViewer and switch to JSON tab', async () => {
-        await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await expect(dataGrid.getDocViewer()).toBeVisible();
+        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+        await expect(docViewer.getFlyout()).toBeVisible();
 
-        await dataGrid.openDocViewerTab(DOC_VIEWER_JSON_TAB_ID);
-        await expect(dataGrid.getDocViewerTab(DOC_VIEWER_JSON_TAB_ID)).toHaveAttribute(
+        await docViewer.openTab(DOC_VIEWER_JSON_TAB_ID);
+        await expect(docViewer.getTab(DOC_VIEWER_JSON_TAB_ID)).toHaveAttribute(
           'aria-selected',
           'true'
         );
@@ -109,12 +110,12 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
 
-        await expect(dataGrid.getDocViewer()).toBeHidden();
-        await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 1 });
-        await expect(dataGrid.getDocViewer()).toBeVisible();
+        await expect(docViewer.getFlyout()).toBeHidden();
+        await docViewer.openAndWaitForFlyout({ rowIndex: 1 });
+        await expect(docViewer.getFlyout()).toBeVisible();
 
-        await dataGrid.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
-        await expect(dataGrid.getDocViewerTab(DOC_VIEWER_TABLE_TAB_ID)).toHaveAttribute(
+        await docViewer.openTab(DOC_VIEWER_TABLE_TAB_ID);
+        await expect(docViewer.getTab(DOC_VIEWER_TABLE_TAB_ID)).toHaveAttribute(
           'aria-selected',
           'true'
         );
@@ -123,16 +124,16 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       await spaceTest.step('switching tabs restores each DocViewer selected tab', async () => {
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await expect(dataGrid.getDocViewer()).toBeVisible();
-        await expect(dataGrid.getDocViewerTab(DOC_VIEWER_JSON_TAB_ID)).toHaveAttribute(
+        await expect(docViewer.getFlyout()).toBeVisible();
+        await expect(docViewer.getTab(DOC_VIEWER_JSON_TAB_ID)).toHaveAttribute(
           'aria-selected',
           'true'
         );
 
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
-        await expect(dataGrid.getDocViewer()).toBeVisible();
-        await expect(dataGrid.getDocViewerTab(DOC_VIEWER_TABLE_TAB_ID)).toHaveAttribute(
+        await expect(docViewer.getFlyout()).toBeVisible();
+        await expect(docViewer.getTab(DOC_VIEWER_TABLE_TAB_ID)).toHaveAttribute(
           'aria-selected',
           'true'
         );

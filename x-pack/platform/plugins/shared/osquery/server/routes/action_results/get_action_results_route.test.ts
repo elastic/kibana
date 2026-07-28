@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getActionResultsRoute } from './get_action_results_route';
 import {
   Direction,
@@ -40,7 +41,7 @@ describe('getActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   beforeEach(() => {
@@ -557,6 +558,27 @@ describe('getActionResultsRoute', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: { message: errorMessage },
+      });
+    });
+
+    it('propagates a non-500 statusCode from the search strategy', async () => {
+      const message = 'User is not authorized to access Osquery search results';
+      const mockSearchFn = jest.fn().mockImplementation(() => {
+        throw Object.assign(new Error(message), { statusCode: 403 });
+      });
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: { agentIds: 'agent-1' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message },
       });
     });
 

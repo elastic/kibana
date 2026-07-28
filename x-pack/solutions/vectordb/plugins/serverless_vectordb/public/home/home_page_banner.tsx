@@ -39,7 +39,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
   }, [setIsDismissed]);
 
   const handleGetStarted = useCallback(() => {
-    application.navigateToApp('vectordb', { path: '/onboarding' });
+    application.navigateToApp('vectordb', { path: '/tutorials' });
   }, [application]);
 
   if (isLoading) {

@@ -159,6 +159,9 @@ describe('createSkillService', () => {
       const mockSoClient = { get: jest.fn() } as any;
       const mockUiSettings = {
         asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
+        globalAsScopedToClient: jest
+          .fn()
+          .mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
       } as any;
       const mockSavedObjects = { getScopedClient: jest.fn().mockReturnValue(mockSoClient) } as any;
 
@@ -172,6 +175,92 @@ describe('createSkillService', () => {
 
       const registry = await getRegistry({ request: {} as any });
       expect(await registry.has('builtin-1')).toBe(true);
+    });
+
+    const startServiceWithUiSettings = ({
+      namespaceGet,
+      globalGet,
+      skill,
+    }: {
+      namespaceGet: (key: string) => Promise<unknown>;
+      globalGet: (key: string) => Promise<unknown>;
+      skill: SkillDefinition;
+    }) => {
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+      registerSkill(skill);
+
+      const mockUiSettings = {
+        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn(namespaceGet) }),
+        globalAsScopedToClient: jest.fn().mockReturnValue({ get: jest.fn(globalGet) }),
+      } as any;
+
+      return service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(createMockToolRegistry()),
+        uiSettings: mockUiSettings,
+        savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } as any,
+      });
+    };
+
+    it('resolves a global-scoped uiSettingRequired via the global settings client', async () => {
+      const { getRegistry } = startServiceWithUiSettings({
+        // Global settings are not visible to the namespace client.
+        namespaceGet: async () => undefined,
+        globalGet: async (key) => (key === 'alerting:v2:enabled' ? true : undefined),
+        skill: createMockSkillDefinition({
+          id: 'global-gated',
+          uiSettingRequired: 'alerting:v2:enabled',
+        }),
+      });
+
+      const registry = await getRegistry({ request: {} as any });
+      expect(await registry.has('global-gated')).toBe(true);
+    });
+
+    it('hides a skill when its global-scoped uiSettingRequired is not enabled', async () => {
+      const { getRegistry } = startServiceWithUiSettings({
+        namespaceGet: async () => undefined,
+        globalGet: async () => false,
+        skill: createMockSkillDefinition({
+          id: 'global-gated-off',
+          uiSettingRequired: 'alerting:v2:enabled',
+        }),
+      });
+
+      const registry = await getRegistry({ request: {} as any });
+      expect(await registry.has('global-gated-off')).toBe(false);
+    });
+
+    it('prefers the namespace-scoped value over the global-scoped value', async () => {
+      const { getRegistry } = startServiceWithUiSettings({
+        // Namespace value is present and true; global would be false.
+        namespaceGet: async (key) => (key === 'my:namespace:setting' ? true : undefined),
+        globalGet: async () => false,
+        skill: createMockSkillDefinition({
+          id: 'namespace-gated',
+          uiSettingRequired: 'my:namespace:setting',
+        }),
+      });
+
+      const registry = await getRegistry({ request: {} as any });
+      expect(await registry.has('namespace-gated')).toBe(true);
+    });
+
+    it('lets an explicit namespace value (false) override a global value (true)', async () => {
+      const { getRegistry } = startServiceWithUiSettings({
+        // Namespace explicitly resolves to false; global is true. Namespace wins.
+        namespaceGet: async (key) => (key === 'shared:key' ? false : undefined),
+        globalGet: async () => true,
+        skill: createMockSkillDefinition({
+          id: 'shared-key-gated',
+          uiSettingRequired: 'shared:key',
+        }),
+      });
+
+      const registry = await getRegistry({ request: {} as any });
+      expect(await registry.has('shared-key-gated')).toBe(false);
     });
   });
 });

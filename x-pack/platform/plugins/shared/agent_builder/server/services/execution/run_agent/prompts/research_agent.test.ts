@@ -34,8 +34,7 @@ describe('getResearchAgentPrompt', () => {
         }),
       },
       configuration: {
-        research: { instructions: '' },
-        answer: { instructions: '' },
+        instructions: '',
       },
       capabilities: { visualizations: false },
       skills: [],

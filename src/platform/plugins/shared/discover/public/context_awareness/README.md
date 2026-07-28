@@ -302,22 +302,29 @@ When state needs to be shared across multiple extension point implementations, o
 state. Profile state is accessed through the host-provided toolkit and is scoped to the current host surface. In the
 main Discover app it is scoped to the current tab; in simplified hosts like the document route, surrounding documents
 page, and embeddables it is kept in memory for the lifetime of that host instance.
+Fields marked as `ProfileStateType.Url` are synced to the `_p` URL parameter in the main Discover app when their
+definition is exposed by the active data source profile context. Main Discover also persists registered
+`ProfileStateType.Persistent` and `ProfileStateType.Url` fields in local tab storage; `ProfileStateType.Ui` fields are
+runtime-only and are restored from defaults.
 
-Define a `ProfileStateDefinition<TState>` near the profile provider that uses it:
+Define serializable profile state under [`common/context_awareness/profile_state_definitions`](../../common/context_awareness/profile_state_definitions)
+so the same definition can be used by browser and server locators:
 
 ```ts
 /**
- * profile_providers/common/example_data_source_profile/profile_state.ts
+ * common/context_awareness/profile_state_definitions/example_profile_state.ts
  */
 
-import type { ProfileStateDefinition, ProfileStateRegistry } from '../../profile_state';
+import type { EuiPanelProps } from '@elastic/eui';
 import type { RowControlProps } from '@kbn/discover-utils';
-import { ProfileStateType } from '../../profile_state';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { ProfileStateType, type ProfileStateDefinition } from '../profile_state';
 
 // Define the state shape shared across profiles and extension point implementations
-interface ExampleProfileState {
+interface ExampleProfileState extends SerializableRecord {
   timestampColor: string;
   rowControlColor: NonNullable<RowControlProps['color']>;
+  boxColor: NonNullable<EuiPanelProps['color']>;
 }
 
 // Define a unique state key, field lifetime metadata, and the default typed state
@@ -326,22 +333,34 @@ const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
   descriptor: {
     timestampColor: { type: ProfileStateType.Ui },
     rowControlColor: { type: ProfileStateType.Persistent },
+    boxColor: { type: ProfileStateType.Url },
   },
   defaultState: {
     timestampColor: 'hollow',
     rowControlColor: 'text',
+    boxColor: 'transparent',
   },
-};
-
-export const registerExampleProfileStateDefinitions = (registry: ProfileStateRegistry) => {
-  // Register the profile state definition to the shared registry
-  registry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
 };
 ```
 
-Register the definition from [`register_profile_state_definitions.ts`](./profile_providers/register_profile_state_definitions.ts)
-before using it in profile code. The `key` must be unique, the `descriptor` describes the intended lifetime of each
-field, and `defaultState` is returned until state has been written.
+Register the definition once in [`create_profile_state_registry.ts`](../../common/context_awareness/create_profile_state_registry.ts).
+The `key` must be unique, the `descriptor` describes the intended lifetime of each field, and `defaultState` is
+returned until state has been written.
+
+To opt into URL sync, return the definition from the active data source profile context:
+
+```ts
+resolve: () => ({
+  isMatch: true,
+  context: {
+    profileState: EXAMPLE_PROFILE_STATE_DEF,
+  },
+});
+```
+
+Main Discover stores URL-backed fields in the `_p` URL parameter so they survive refreshes and browser history.
+Shared links restore supported `Url` and `Persistent` state for the active data source profile. `Ui` state is not
+included in shared links.
 
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 
@@ -366,8 +385,10 @@ const getCellRenderers = (prev, { toolkit }) => {
 
 `ProfileStateAdapter<TState>` provides `getState()`, `getState$()`, `setState()`, and shallow `updateState()`. Treat the
 state as immutable: replace it with `setState()` or update it with `updateState()` rather than mutating returned objects
-in place. Host lifetime details should stay out of profile code; the adapter decides whether the state is tab-backed or
-in-memory for the current host.
+in place. `setState()` and `updateState()` accept `{ historyMethod: 'push' | 'replace' }` for URL-backed hosts; use
+`replace` for state updates that should not create browser history entries. Host lifetime details should
+stay out of profile code; the adapter decides whether the state is tab-backed, URL-backed, persistent, or in-memory for
+the current host.
 
 ### Custom `context` objects
 

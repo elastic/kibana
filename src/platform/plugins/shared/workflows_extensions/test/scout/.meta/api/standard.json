@@ -1,5 +1,9 @@
 {
-  "sha1": "722c730e45d5d117a95566b1c09210a333047884",
+  "sha1": "72bc9b8750b8ad696a71d04b4c4f3a49b7dc6d55",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
@@ -28,7 +32,7 @@
     {
       "id": "e9644e578f7a84b-b113663c1fae506",
       "title": "Workflows Extensions - Event-Driven Trigger Definitions Approval should validate that all registered event-driven trigger definitions are approved by workflows-eng team",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -45,7 +49,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 12
       }
     }

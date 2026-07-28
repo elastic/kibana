@@ -335,4 +335,59 @@ describe('useOnUpdateField', () => {
 
     expect(onError).toHaveBeenCalled();
   });
+
+  describe('confirming two fields in quick succession', () => {
+    // Regression test for a single `useOnUpdateField` instance being shared by multiple
+    // fields (e.g. the sidebar's "Attributes" section owns one instance for severity, tags,
+    // category, and assignees). Both mutations are still fired independently and each
+    // resolves correctly, but the shared `loadingKey` reflects only the most recently
+    // confirmed field while the first is still in flight.
+    it('sends both updates and converges back to a non-loading state once both resolve', () => {
+      const pendingCallbacks: Array<() => void> = [];
+      mockMutate.mockImplementation((_req: unknown, options: { onSuccess: () => void }) => {
+        pendingCallbacks.push(options.onSuccess);
+      });
+
+      const { result } = renderHook(() => useOnUpdateField({ caseData: basicCase }), { wrapper });
+
+      act(() => {
+        result.current.onUpdateField({ key: 'severity', value: CaseSeverity.CRITICAL });
+      });
+
+      expect(result.current.loadingKey).toBe('severity');
+
+      act(() => {
+        result.current.onUpdateField({ key: 'tags', value: ['tag1', 'tag2'] });
+      });
+
+      // Confirming tags while severity is still in flight overwrites the shared
+      // loadingKey: severity's own loading indicator is dropped even though its
+      // request hasn't resolved yet.
+      expect(result.current.loadingKey).toBe('tags');
+
+      expect(mockMutate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ updateKey: 'severity', updateValue: CaseSeverity.CRITICAL }),
+        expect.anything()
+      );
+      expect(mockMutate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ updateKey: 'tags', updateValue: ['tag1', 'tag2'] }),
+        expect.anything()
+      );
+
+      // Resolve the tags request first, then the severity request. Both eventually
+      // settle back to "nothing pending" -- no deadlock -- even though the intermediate
+      // loadingKey above didn't reflect severity's in-flight state.
+      act(() => {
+        pendingCallbacks[1]();
+      });
+      expect(result.current.loadingKey).toBeNull();
+
+      act(() => {
+        pendingCallbacks[0]();
+      });
+      expect(result.current.loadingKey).toBeNull();
+    });
+  });
 });

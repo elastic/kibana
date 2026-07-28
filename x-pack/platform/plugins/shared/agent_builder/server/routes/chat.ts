@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
@@ -13,16 +14,18 @@ import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConversationSource } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
   AgentExecutionMode,
   ConversationAccessControlMode,
-  ConversationSourceType,
+  ConversationOriginType,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
-import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type {
+  AgentExecutionService,
+  ExecutionConversationOrigin,
+} from '@kbn/agent-builder-server/execution';
 import {
   ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
@@ -32,7 +35,6 @@ import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
 } from '../../common/http_api/chat_callback';
-import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
@@ -41,6 +43,14 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
+
+interface ResolvedExecutionOptions {
+  useTaskManager: boolean | undefined;
+  origin: ExecutionConversationOrigin | undefined;
+  callback: { url: string } | undefined;
+  executionId: string | undefined;
+  metadata: Record<string, string> | undefined;
+}
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -296,10 +306,25 @@ export const conversePayloadSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  source: schema.maybe(
+  execution_idempotency_key: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    meta: {
+      description:
+        'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
+    },
+  }),
+  origin: schema.maybe(
     schema.object({
-      type: schema.literal(ConversationSourceType.Slack),
+      type: schema.literal(ConversationOriginType.Slack),
       external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
+      author: schema.maybe(
+        schema.object({
+          id: schema.string({ minLength: 1, maxLength: 1024 }),
+          username: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          full_name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+        })
+      ),
     })
   ),
   callback: schema.object({
@@ -371,34 +396,48 @@ export function registerChatRoutes({
   };
 
   /**
-   * Derives execution options shared by all converse routes.
-   * Public requests may opt into local or Task Manager execution with _execution_mode,
-   * while callback requests always use Task Manager and carry callback metadata/source.
+   * Derives execution options for callback converse requests, which always use
+   * Task Manager and carry the callback and origin. The execution id is the
+   * caller-provided one, or is derived from the idempotency key scoped to the
+   * space and target conversation so replayed deliveries map to the same execution.
    */
   const resolveExecutionOptions = (
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
-  ): {
-    useTaskManager: boolean | undefined;
-    metadata: Record<string, string> | undefined;
-    source: ConversationSource | undefined;
-  } => {
-    if (isChatCallbackRequestBodyPayload(payload)) {
-      return {
-        useTaskManager: true,
-        metadata: {
-          callback_url: payload.callback.url,
-        },
-        source: payload.source,
-      };
-    }
+    payload: ChatCallbackRequestBodyPayload,
+    spaceId: string
+  ): ResolvedExecutionOptions => {
+    const {
+      execution_idempotency_key: executionIdempotencyKey,
+      conversation_id: conversationId,
+      execution_id: providedExecutionId,
+      origin,
+    } = payload;
 
-    const { _execution_mode: executionMode } = payload;
+    const scopeId = conversationId ?? origin?.external_conversation_id ?? '';
+    const executionId =
+      providedExecutionId ??
+      createHash('sha256')
+        .update([spaceId, origin?.type ?? '', scopeId, executionIdempotencyKey].join('\u0000'))
+        .digest('hex');
+
+    return {
+      useTaskManager: true,
+      origin,
+      callback: payload.callback,
+      executionId,
+      metadata: { execution_idempotency_key: executionIdempotencyKey },
+    };
+  };
+
+  const defaultExecutionOptions = (payload: ChatRequestBodyPayload): ResolvedExecutionOptions => {
+    const { _execution_mode: executionMode, execution_id: executionId } = payload;
 
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
+      origin: undefined,
+      callback: undefined,
+      executionId,
       metadata: undefined,
-      source: undefined,
     };
   };
 
@@ -406,15 +445,16 @@ export function registerChatRoutes({
     payload,
     request,
     executionService,
+    executionOptions,
   }: {
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
+    executionOptions?: ResolvedExecutionOptions;
   }) => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
-      execution_id: executionId,
       input,
       prompts,
       attachments,
@@ -426,21 +466,23 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, metadata, source } = resolveExecutionOptions(payload);
+    const { useTaskManager, origin, callback, executionId, metadata } =
+      executionOptions ?? defaultExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
-      useTaskManager,
       metadata,
+      useTaskManager,
       params: {
         agentId,
         connectorId,
         conversationId,
         autoCreateConversationWithId: true,
         accessControl,
-        source,
+        origin,
+        callback,
         capabilities,
         browserApiTools,
         configurationOverrides,
@@ -602,10 +644,13 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
         const { executionId } = await executeAgent({
           payload,
           request,
           executionService,
+          executionOptions: resolveExecutionOptions(payload, spaceId),
         });
 
         return response.accepted<ChatCallbackAcceptedResponse>({

@@ -13,7 +13,6 @@ import {
   getSettingValueMock,
   getCommonStylesheetPathsMock,
   getThemeStylesheetPathsMock,
-  getScriptPathsMock,
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
@@ -284,25 +283,6 @@ function renderTestCases(
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
         baseHref: '/mock-server-basepath',
-      });
-    });
-
-    it('calls `getScriptPaths` with the correct parameters', async () => {
-      getSettingValueMock.mockImplementation((settingName: string) => {
-        if (settingName === 'theme:darkMode') {
-          return true;
-        }
-        return settingName;
-      });
-
-      const [render] = await getRender();
-      await render(createKibanaRequest(), uiSettings);
-
-      expect(getScriptPathsMock).toHaveBeenCalledTimes(1);
-      expect(getScriptPathsMock).toHaveBeenCalledWith({
-        darkMode: true,
-        baseHref: '/mock-server-basepath',
-        themeName: 'borealis',
       });
     });
 
@@ -657,7 +637,6 @@ describe('RenderingService', () => {
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
     getCommonStylesheetPathsMock.mockReturnValue(['/common-1.css']);
     getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
-    getScriptPathsMock.mockReturnValue(['/script-1.js']);
     getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
     getApmConfigMock.mockReset().mockReturnValue({ stubApmConfig: true });
   });

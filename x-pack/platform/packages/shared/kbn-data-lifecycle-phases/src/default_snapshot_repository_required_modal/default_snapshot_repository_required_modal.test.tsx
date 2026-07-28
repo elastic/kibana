@@ -123,4 +123,49 @@ describe('DefaultSnapshotRepositoryRequiredModal', () => {
     fireEvent.click(refreshButton);
     expect(onRefresh).not.toHaveBeenCalled();
   });
+
+  it('links "Snapshot and Restore" in the body text to the manage repositories URL when there are no existing repositories', () => {
+    renderWithI18n(
+      <DefaultSnapshotRepositoryRequiredModal
+        createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+        manageRepositoriesUrl={manageRepositoriesUrl}
+        hasExistingRepositories={false}
+        onCancel={() => {}}
+        onRefresh={() => {}}
+      />
+    );
+
+    const link = screen.getByRole('link', { name: /^Snapshot and Restore/ });
+    expect(link).toHaveAttribute('href', manageRepositoriesUrl);
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('links "Snapshot and Restore" in the body text to the manage repositories URL when there are existing repositories', () => {
+    renderWithI18n(
+      <DefaultSnapshotRepositoryRequiredModal
+        createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+        manageRepositoriesUrl={manageRepositoriesUrl}
+        hasExistingRepositories={true}
+        onCancel={() => {}}
+        onRefresh={() => {}}
+      />
+    );
+
+    const link = screen.getByRole('link', { name: /^Snapshot and Restore/ });
+    expect(link).toHaveAttribute('href', manageRepositoriesUrl);
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('falls back to the create repository URL in the body text link when no manage URL is provided', () => {
+    renderWithI18n(
+      <DefaultSnapshotRepositoryRequiredModal
+        createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+        onCancel={() => {}}
+        onRefresh={() => {}}
+      />
+    );
+
+    const link = screen.getByRole('link', { name: /^Snapshot and Restore/ });
+    expect(link).toHaveAttribute('href', createDefaultRepositoryUrl);
+  });
 });

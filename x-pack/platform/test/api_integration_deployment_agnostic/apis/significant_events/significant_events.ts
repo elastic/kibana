@@ -8,11 +8,16 @@
 import expect from '@kbn/expect';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { bulkQueries, getQueries } from './helpers/requests';
+import {
+  bulkQueries,
+  getMaintenanceStatus,
+  getQueries,
+  pauseMaintenance,
+  resumeMaintenance,
+} from './helpers/requests';
 import {
   deleteStream,
   disableStreams,
@@ -24,7 +29,6 @@ import type { RoleCredentials } from '../../services';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
-  const kibanaServer = getService('kibanaServer');
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
@@ -35,18 +39,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
       await disableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Wired streams update', () => {
@@ -78,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates the queries', async () => {
-        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
+        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`;
         const response = await bulkQueries(apiClient, STREAM_NAME, [
           {
             index: {
@@ -133,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test,logs.otel.queries-test.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test,logs.otel.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -178,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test.child,logs.otel.queries-test.child.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test.child,logs.otel.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -197,7 +193,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -208,7 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -221,9 +217,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parentQueries).to.have.length(1);
         expect(parentQueries[0].id).to.eql('logs.otel.queries-test.query1');
 
-        const rules = await alertingApi.searchRules(roleAuthc, '');
-        expect(rules.body.data).to.have.length(1);
-        expect(rules.body.data[0].name).to.eql('should not be deleted');
+        const rules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(rules.body.items).to.have.length(1);
+        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted (match count)');
       });
     });
 
@@ -276,7 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the queries', async () => {
         const indexName = 'classic-stream-queries';
-        const esqlQuery = `FROM ${indexName} METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
+        const esqlQuery = `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`;
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
         await putStream(apiClient, indexName, classicPutBody);
 
@@ -306,6 +302,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await clean();
         await deleteStream(apiClient, indexName);
+      });
+    });
+
+    describe('Maintenance pause/resume', () => {
+      // Pause is deployment-wide, so always leave the deployment resumed for
+      // whatever runs next, even if an assertion above fails.
+      afterEach(async () => {
+        await resumeMaintenance(apiClient);
+      });
+
+      it('round-trips the persisted maintenance state and stays idempotent', async () => {
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('enabled');
+
+        const pauseSummary = await pauseMaintenance(apiClient);
+        expect(pauseSummary.state).to.eql('paused');
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('paused');
+
+        // Pausing again while paused returns the recorded summary without erroring.
+        expect(await pauseMaintenance(apiClient)).to.eql(pauseSummary);
+
+        const resumeSummary = await resumeMaintenance(apiClient);
+        expect(resumeSummary.state).to.eql('enabled');
+        expect((await getMaintenanceStatus(apiClient)).state).to.eql('enabled');
+
+        // Resuming again while enabled is a no-op.
+        expect((await resumeMaintenance(apiClient)).state).to.eql('enabled');
       });
     });
   });

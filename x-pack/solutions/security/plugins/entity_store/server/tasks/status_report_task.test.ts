@@ -48,7 +48,12 @@ describe('getResolutionState', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(makeEsqlResponse([[4, 2, 3]]));
 
-    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
+    const result = await getResolutionState(
+      esClient,
+      'test-index',
+      'user',
+      new AbortController().signal
+    );
 
     expect(result).toEqual({
       resolvedEntities: 4,
@@ -62,7 +67,12 @@ describe('getResolutionState', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(makeEsqlResponse([[null, 0, null]]));
 
-    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
+    const result = await getResolutionState(
+      esClient,
+      'test-index',
+      'user',
+      new AbortController().signal
+    );
 
     expect(result).toEqual({
       resolvedEntities: 0,
@@ -76,7 +86,12 @@ describe('getResolutionState', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(makeEsqlResponse([]));
 
-    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
+    const result = await getResolutionState(
+      esClient,
+      'test-index',
+      'user',
+      new AbortController().signal
+    );
 
     expect(result).toEqual({
       resolvedEntities: 0,
@@ -97,7 +112,12 @@ describe('getResolutionState', () => {
       values: [[3, 4, 2]],
     });
 
-    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
+    const result = await getResolutionState(
+      esClient,
+      'test-index',
+      'user',
+      new AbortController().signal
+    );
 
     expect(result).toEqual({
       resolvedEntities: 4,
@@ -110,12 +130,12 @@ describe('getResolutionState', () => {
   it('passes the abort controller signal to the ESQL query call', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(makeEsqlResponse([[0, 0, 0]]));
-    const abortController = new AbortController();
+    const { signal } = new AbortController();
 
-    await getResolutionState(esClient, 'my-index', 'generic', abortController);
+    await getResolutionState(esClient, 'my-index', 'generic', signal);
 
     expect(esClient.esql.query).toHaveBeenCalledWith(expect.any(Object), {
-      signal: abortController.signal,
+      signal,
     });
   });
 
@@ -123,7 +143,7 @@ describe('getResolutionState', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(makeEsqlResponse([[0, 0, 0]]));
 
-    await getResolutionState(esClient, 'my-index', 'host', new AbortController());
+    await getResolutionState(esClient, 'my-index', 'host', new AbortController().signal);
 
     const [queryParams] = esClient.esql.query.mock.calls[0];
     expect(queryParams.query).toContain('FROM my-index');
@@ -158,7 +178,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     const runner = definitions[taskType].createTaskRunner({
       taskInstance: { id: `status:${NAMESPACE}`, state: { namespace: NAMESPACE } },
       fakeRequest: {},
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     });
     return runner.run();
   };

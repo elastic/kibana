@@ -56,7 +56,7 @@ export const useAgentlessPolicyUpgrade = ({
         const errorMessage = failed.find((result) => result.body?.message)?.body?.message;
         notifications.toasts.addWarning({
           title: i18n.translate('xpack.fleet.agentlessUpgrade.errorToast.title', {
-            defaultMessage: 'Error upgrading agentless integration policy',
+            defaultMessage: 'Error upgrading managed integration',
           }),
           text: errorMessage
             ? i18n.translate('xpack.fleet.agentlessUpgrade.errorToast.messageWithError', {
@@ -80,7 +80,7 @@ export const useAgentlessPolicyUpgrade = ({
     } catch (error) {
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.agentlessUpgrade.errorToast.title', {
-          defaultMessage: 'Error upgrading agentless integration policy',
+          defaultMessage: 'Error upgrading managed integration',
         }),
       });
     } finally {
@@ -110,7 +110,7 @@ export const useAgentlessPolicyUpgrade = ({
     >
       <FormattedMessage
         id="xpack.fleet.agentlessUpgrade.confirmModal.body"
-        defaultMessage="This upgrades the integration policy to the latest package version and deploys the change to the agentless deployment."
+        defaultMessage="This upgrades the integration policy to the latest package version and deploys the change to the managed integration."
       />
     </EuiConfirmModal>
   ) : null;

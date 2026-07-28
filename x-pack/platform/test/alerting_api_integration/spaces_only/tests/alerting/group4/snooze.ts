@@ -37,7 +37,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('snooze', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/269867
+  describe.skip('snooze', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

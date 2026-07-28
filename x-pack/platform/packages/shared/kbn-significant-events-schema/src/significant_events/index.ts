@@ -5,8 +5,27 @@
  * 2.0.
  */
 
-export { detectionSchema, type Detection } from './detections';
+export {
+  detectionSchema,
+  processedMarkerSchema,
+  CHANGE_POINT_TYPES,
+  type Detection,
+  type ProcessedMarker,
+  type ChangePointType,
+} from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
+export {
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
+} from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,

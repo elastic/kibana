@@ -100,7 +100,112 @@ const customWorkflowGenericExecution: WorkflowExecutionDto = {
   status: 'completed',
 } as unknown as WorkflowExecutionDto;
 
+/** A completed skill alert retrieval execution (native ai.agent step) */
+const skillExecution: WorkflowExecutionDto = {
+  stepExecutions: [
+    {
+      output: {
+        conversation_id: 'conversation-1',
+        message: 'curated alerts',
+        structured_output: {
+          alert_count: 2,
+          alert_ids: ['id-1', 'id-2'],
+          alerts: ['skill-alert-1', 'skill-alert-2'],
+        },
+      },
+      stepId: 'retrieve_alerts',
+      stepType: 'ai.agent',
+    },
+  ],
+  status: 'completed',
+} as unknown as WorkflowExecutionDto;
+
 describe('extractPipelineAlertData', () => {
+  describe('skill extraction strategy', () => {
+    it('returns extraction_strategy "skill" when the execution has an ai.agent step', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: skillExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.extraction_strategy).toBe('skill');
+    });
+
+    it('returns the curated alerts parsed from the ai.agent structured_output with the backing _id embedded', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: skillExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.alerts).toEqual(['_id,id-1\nskill-alert-1', '_id,id-2\nskill-alert-2']);
+    });
+
+    it('returns alerts_context_count from the structured_output alert_count', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: skillExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.alerts_context_count).toBe(2);
+    });
+
+    it('does not surface the raw ai.agent output object as an alert', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: skillExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.alerts).not.toContain(JSON.stringify(skillExecution.stepExecutions[0].output));
+    });
+
+    it('falls back to the alerts length when alert_count is absent', () => {
+      const execution: WorkflowExecutionDto = {
+        stepExecutions: [
+          {
+            output: { structured_output: { alerts: ['only-one'] } },
+            stepId: 'retrieve_alerts',
+            stepType: 'ai.agent',
+          },
+        ],
+        status: 'completed',
+      } as unknown as WorkflowExecutionDto;
+
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.alerts_context_count).toBe(1);
+    });
+
+    it('throws when a skill execution failed', () => {
+      const execution: WorkflowExecutionDto = {
+        ...skillExecution,
+        error: { message: 'skill failed' },
+        status: 'failed',
+      } as unknown as WorkflowExecutionDto;
+
+      expect(() =>
+        extractPipelineAlertData({
+          apiConfig,
+          execution,
+          workflowId,
+          workflowRunId,
+        })
+      ).toThrow();
+    });
+  });
+
   describe('default_esql extraction strategy', () => {
     it('returns extraction_strategy "default_esql" when step input has esql_query', () => {
       const result = extractPipelineAlertData({
@@ -257,6 +362,40 @@ describe('extractPipelineAlertData', () => {
       });
 
       expect(result.alerts_context_count).toBeNull();
+    });
+
+    it('reports zero alerts_missing_id_count when every custom workflow alert embeds an _id', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: customWorkflowEsqlExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.alerts_missing_id_count).toBe(0);
+    });
+
+    it('counts custom workflow alerts that lack a recoverable _id (C2 visibility)', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: customWorkflowGenericExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      // the generic (non-ES|QL) custom workflow output is a JSON blob with no `_id,<value>` line
+      expect(result.alerts_missing_id_count).toBe(1);
+    });
+
+    it('does not report alerts_missing_id_count for the default_esql strategy', () => {
+      const result = extractPipelineAlertData({
+        apiConfig,
+        execution: defaultEsqlExecution,
+        workflowId,
+        workflowRunId,
+      });
+
+      expect(result.alerts_missing_id_count).toBeUndefined();
     });
 
     it('returns null alerts_context_count for a plain string array output', () => {
@@ -418,6 +557,7 @@ describe('extractPipelineAlertData', () => {
       expect(result).toEqual({
         alerts: [],
         alerts_context_count: 0,
+        alerts_missing_id_count: 0,
         extraction_strategy: 'custom_workflow',
       });
     });

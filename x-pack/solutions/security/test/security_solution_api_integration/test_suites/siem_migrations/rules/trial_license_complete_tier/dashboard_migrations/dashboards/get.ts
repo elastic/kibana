@@ -120,6 +120,42 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // Regression for #276409: a multi-word `search_term` must require ALL
+      // tokens to match (`match` with `operator: and`), not any token (OR).
+      // Previously the default OR semantics returned every dashboard sharing
+      // any common token.
+      it('should filter by multi-word search term requiring all words to match', async () => {
+        const phraseMigrationResponse = await dashboardMigrationRoutes.create({});
+        const phraseMigrationId = phraseMigrationResponse.body.migration_id;
+
+        const titles = [
+          'Spike in Network Traffic',
+          'Network Activity Detected',
+          'Multiple Network Connections',
+        ];
+        const dashboards = titles.map((title) =>
+          getDefaultDashboardMigrationDocumentWithOverrides({
+            original_dashboard: { title },
+            elastic_dashboard: { title },
+            status: 'completed',
+            translation_result: 'full',
+            migration_id: phraseMigrationId,
+          })
+        );
+        await indexMigrationDashboards(es, dashboards);
+
+        const response = await dashboardMigrationRoutes.getDashboards({
+          migrationId: phraseMigrationId,
+          queryParams: { search_term: 'Spike in Network Traffic' },
+        });
+        expect(response.body.total).toEqual(1);
+        expect(response.body.data).toEqual([
+          expect.objectContaining({
+            elastic_dashboard: expect.objectContaining({ title: 'Spike in Network Traffic' }),
+          }),
+        ]);
+      });
+
       it('should filter by ids', async () => {
         const response = await dashboardMigrationRoutes.getDashboards({
           migrationId,

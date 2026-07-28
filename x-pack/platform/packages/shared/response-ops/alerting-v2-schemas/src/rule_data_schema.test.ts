@@ -88,13 +88,13 @@ describe('createRuleDataSchema', () => {
       expect(result.kind).toBe('signal');
     });
 
-    it('strips unknown properties', () => {
-      const result = createRuleDataSchema.parse({
-        ...validCreateData,
-        unknownProp: 'should be removed',
-      });
-
-      expect(result).not.toHaveProperty('unknownProp');
+    it('rejects unknown top-level fields (strict)', () => {
+      expect(() =>
+        createRuleDataSchema.parse({
+          ...validCreateData,
+          unknownProp: 'should be rejected',
+        })
+      ).toThrow();
     });
   });
 
@@ -944,19 +944,14 @@ describe('updateRuleDataSchema', () => {
     expect(nullArtifacts).toMatchObject({ artifacts: null });
   });
 
-  it('accepts an enabled field set to true', () => {
-    const result = updateRuleDataSchema.parse({ enabled: true });
-    expect(result).toEqual({ enabled: true });
+  it('rejects enabled: true (enabled is not writable via update)', () => {
+    const result = updateRuleDataSchema.safeParse({ enabled: true });
+    expect(result.success).toBe(false);
   });
 
-  it('accepts an enabled field set to false', () => {
-    const result = updateRuleDataSchema.parse({ enabled: false });
-    expect(result).toEqual({ enabled: false });
-  });
-
-  it('omits enabled when not provided', () => {
-    const result = updateRuleDataSchema.parse({});
-    expect(result).not.toHaveProperty('enabled');
+  it('rejects enabled: false (enabled is not writable via update)', () => {
+    const result = updateRuleDataSchema.safeParse({ enabled: false });
+    expect(result.success).toBe(false);
   });
 
   it('accepts a state_transition object', () => {
@@ -982,9 +977,22 @@ describe('updateRuleDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('strips unknown properties', () => {
-    const result = updateRuleDataSchema.parse({ unknownProp: 'removed' });
-    expect(result).not.toHaveProperty('unknownProp');
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => updateRuleDataSchema.parse({ unknownProp: 'rejected' })).toThrow();
+  });
+
+  it('rejects unknown keys inside metadata (strict)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'updated', unknownField: 'x' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unknown keys inside schedule (strict)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      schedule: { every: '5m', extra: true },
+    });
+    expect(result.success).toBe(false);
   });
 
   describe('field constraints', () => {

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: () => mockDispatch,
 }));
 jest.mock('../../../../hooks/use_kibana');
@@ -45,7 +45,22 @@ jest.mock('../../../../features/ai_integration', () => ({
     getDiffHunks: jest.fn().mockReturnValue([]),
     hasPendingProposals: jest.fn().mockReturnValue(false),
   })),
+  setActiveProposalManager: jest.fn(),
+  setLastCreateAttachmentId: jest.fn(),
+  setSidebarOpen: jest.fn(),
+  consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
 }));
+
+type AiIntegrationModule = typeof import('../../../../features/ai_integration');
+const {
+  setLastCreateAttachmentId: mockSetLastCreateAttachmentId,
+  setSidebarOpen: mockSetSidebarOpen,
+  consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
+} = jest.requireMock('../../../../features/ai_integration') as {
+  setLastCreateAttachmentId: jest.MockedFunction<AiIntegrationModule['setLastCreateAttachmentId']>;
+  setSidebarOpen: jest.MockedFunction<AiIntegrationModule['setSidebarOpen']>;
+  consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
+};
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
     onAllResolved: jest.fn().mockReturnValue(jest.fn()),
@@ -82,21 +97,42 @@ let mockModel: ReturnType<typeof createMockModel>;
 const createMockEditor = (model: ReturnType<typeof createMockModel>) =>
   ({ getModel: jest.fn().mockReturnValue(model) } as any);
 
+const embeddableChatAccessReady = {
+  hasRequiredLicense: true,
+  hasLlmConnector: true,
+} as const;
+
 const createMockAgentBuilder = () => ({
   addAttachment: jest.fn(),
   setChatConfig: jest.fn(),
   clearChatConfig: jest.fn(),
   openChat: jest.fn().mockReturnValue({ chatRef: { close: jest.fn() } }),
+  getAgentBuilderAccess: jest.fn().mockResolvedValue(embeddableChatAccessReady),
   events: { chat$: { subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) } },
   tools: {},
   attachments: {},
 });
 
-const setupKibanaMock = (agentBuilder?: ReturnType<typeof createMockAgentBuilder>) => {
+const flushChatAccessCheck = async () => {
+  await act(async () => {
+    await Promise.resolve();
+  });
+};
+
+const setupKibanaMock = (
+  agentBuilder?: ReturnType<typeof createMockAgentBuilder>,
+  options: { hasShowPrivilege?: boolean } = {}
+) => {
+  const { hasShowPrivilege = true } = options;
   useKibanaMock.mockReturnValue({
     services: {
       workflowsManagement: {
         agentBuilder,
+      },
+      application: {
+        capabilities: {
+          agentBuilder: { show: hasShowPrivilege },
+        },
       },
     },
   } as any);
@@ -133,6 +169,7 @@ describe('useAgentBuilderIntegration', () => {
     jest.useFakeTimers();
     mockModel = createMockModel(INITIAL_YAML);
     useUiSettingMock.mockReturnValue(true);
+    mockConsumeSidebarRestoreFor.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -141,7 +178,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('attachment sync on mount', () => {
-    it('calls setChatConfig and addAttachment immediately when editor is mounted', () => {
+    it('calls setChatConfig and addAttachment when editor is mounted and chat access resolves', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -152,13 +189,15 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       const expected = expectedAttachment(INITIAL_YAML);
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(expectedChatConfig(expected));
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
     });
 
-    it('propagates the workflow-editor greetingMessage in the chat config', () => {
+    it('propagates the workflow-editor greetingMessage in the chat config', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -169,6 +208,8 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
         expect.objectContaining({ greetingMessage: WORKFLOW_EDITOR_GREETING })
@@ -220,7 +261,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
     });
 
-    it('includes workflowId and workflowName in the attachment', () => {
+    it('includes workflowId and workflowName in the attachment', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -234,6 +275,8 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
+      await flushChatAccessCheck();
+
       const expected = expectedAttachment(INITIAL_YAML, {
         workflowId: 'wf-123',
         name: 'My Workflow',
@@ -243,7 +286,7 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
 
-    it('does not tear down the effect when workflowName changes', () => {
+    it('does not tear down the effect when workflowName changes', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -257,6 +300,8 @@ describe('useAgentBuilderIntegration', () => {
           workflowName: 'Original Name',
         },
       });
+
+      await flushChatAccessCheck();
 
       agentBuilder.clearChatConfig.mockClear();
       agentBuilder.setChatConfig.mockClear();
@@ -280,7 +325,7 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
 
-    it('uses a generated UUID as attachment id when workflowId is undefined', () => {
+    it('uses a generated UUID as attachment id when workflowId is undefined', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -291,6 +336,8 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -302,7 +349,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('attachment sync on content change', () => {
-    it('syncs attachment after debounce when content changes', () => {
+    it('syncs attachment after debounce when content changes', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -313,6 +360,8 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       agentBuilder.setChatConfig.mockClear();
       agentBuilder.addAttachment.mockClear();
@@ -331,7 +380,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
     });
 
-    it('debounces rapid content changes', () => {
+    it('debounces rapid content changes', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -342,6 +391,8 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       agentBuilder.setChatConfig.mockClear();
       agentBuilder.addAttachment.mockClear();
@@ -372,7 +423,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('cleanup on unmount', () => {
-    it('calls clearChatConfig on unmount', () => {
+    it('calls clearChatConfig on unmount', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -383,6 +434,8 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       unmount();
 
@@ -416,7 +469,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('auto-open on editor mount', () => {
-    it('opens the sidebar exactly once when the editor becomes ready', () => {
+    it('opens the sidebar exactly once on the create route (no workflowId)', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -436,6 +489,8 @@ describe('useAgentBuilderIntegration', () => {
         }
       );
 
+      await flushChatAccessCheck();
+
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
       expect(agentBuilder.openChat).toHaveBeenCalledWith(
         expect.objectContaining({ greetingMessage: WORKFLOW_EDITOR_GREETING })
@@ -448,6 +503,63 @@ describe('useAgentBuilderIntegration', () => {
         workflowName: 'Updated Name',
       });
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT auto-open on an existing workflow detail view', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-1',
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportWorkflowAiChatOpened).not.toHaveBeenCalled();
+    });
+
+    it('restores the sidebar on mount when the save thunk requested it', async () => {
+      // Simulates create → save → detail: save thunk called
+      // requestSidebarRestore(workflowId) before navigateToApp, and the
+      // remount consumes it here.
+      mockConsumeSidebarRestoreFor.mockImplementation((id: string) => id === 'wf-just-saved');
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-just-saved',
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(mockConsumeSidebarRestoreFor).toHaveBeenCalledWith('wf-just-saved');
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT restore when the pending id belongs to a different workflow', () => {
+      mockConsumeSidebarRestoreFor.mockImplementation((id: string) => id === 'wf-A');
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-B',
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
     });
 
     it('does not auto-open when the editor is not yet mounted', () => {
@@ -465,7 +577,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
     });
 
-    it('tags chat-opened and session-completed telemetry with autoOpened=true on auto-open', () => {
+    it('tags chat-opened and session-completed telemetry with autoOpened=true on auto-open', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -474,15 +586,16 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
-          workflowId: 'wf-1',
         })
       );
+
+      await flushChatAccessCheck();
 
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
       expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledWith({
         entryPoint: 'workflow_editor',
-        sessionType: 'edit',
-        workflowId: 'wf-1',
+        sessionType: 'create',
+        workflowId: undefined,
         autoOpened: true,
       });
 
@@ -492,7 +605,7 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
 
-    it('does not re-emit chat-opened when the user opens the chat after an auto-open', () => {
+    it('does not re-emit chat-opened when the user opens the chat after an auto-open', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -501,9 +614,10 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
-          workflowId: 'wf-1',
         })
       );
+
+      await flushChatAccessCheck();
 
       expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledTimes(1);
 
@@ -512,6 +626,28 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not auto-open when no LLM connector is configured', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      agentBuilder.getAgentBuilderAccess.mockResolvedValue({
+        hasRequiredLicense: true,
+        hasLlmConnector: false,
+      });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportWorkflowAiChatOpened).not.toHaveBeenCalled();
     });
 
     it('does not auto-open when experimental features are disabled', () => {
@@ -531,8 +667,183 @@ describe('useAgentBuilderIntegration', () => {
     });
   });
 
+  describe('cleanup closes the chat sidebar', () => {
+    it('closes the chat sidebar on unmount (leaves the workflow app)', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      const chatRef = { close: jest.fn() };
+      agentBuilder.openChat.mockReturnValue({ chatRef });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      // Auto-open path opened the chat; unmount must close it.
+      unmount();
+
+      expect(chatRef.close).toHaveBeenCalled();
+    });
+
+    it('does NOT close the sidebar when workflowId flips (create → saved detail)', async () => {
+      // Repro of the bug the initial fix caused: after Save the sidebar was
+      // closing because the effect cleanup ran on workflowId change and
+      // called chatRef.close(). The close is now scoped to true unmount.
+      const agentBuilder = createMockAgentBuilder();
+      const chatRef = { close: jest.fn() };
+      agentBuilder.openChat.mockReturnValue({ chatRef });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      interface Props {
+        editorRef: React.MutableRefObject<any>;
+        isEditorMounted: boolean;
+        workflowId?: string;
+      }
+      const { rerender } = renderHook((props: Props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: undefined,
+        } as Props,
+      });
+
+      await flushChatAccessCheck();
+
+      // Flip from create (no id) to saved detail (real id). The main effect
+      // cleanup+rerun fires; the sidebar close must NOT.
+      rerender({
+        editorRef: { current: editor },
+        isEditorMounted: true,
+        workflowId: 'wf-just-saved',
+      });
+
+      expect(chatRef.close).not.toHaveBeenCalled();
+    });
+
+    it('does NOT close the sidebar when workflowName changes (unrelated dep churn)', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      const chatRef = { close: jest.fn() };
+      agentBuilder.openChat.mockReturnValue({ chatRef });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { rerender } = renderHook(
+        (props: {
+          editorRef: React.MutableRefObject<any>;
+          isEditorMounted: boolean;
+          workflowName?: string;
+        }) => useAgentBuilderIntegration(props),
+        {
+          initialProps: {
+            editorRef: { current: editor },
+            isEditorMounted: true,
+            workflowName: 'Old Name',
+          },
+        }
+      );
+
+      await flushChatAccessCheck();
+
+      rerender({
+        editorRef: { current: editor },
+        isEditorMounted: true,
+        workflowName: 'New Name',
+      });
+
+      expect(chatRef.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sidebar-open state tracking', () => {
+    it('marks the sidebar open when openChat runs and closed via the onClose callback', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      // Auto-open ran → sidebar marked open.
+      expect(mockSetSidebarOpen).toHaveBeenCalledWith(true);
+
+      // Simulate the user closing the sidebar from its own chrome — the
+      // agent-builder plugin invokes the onClose callback we passed.
+      const openChatArgs = agentBuilder.openChat.mock.calls[0][0];
+      openChatArgs.onClose();
+      expect(mockSetSidebarOpen).toHaveBeenLastCalledWith(false);
+    });
+
+    it('marks the sidebar closed on unmount', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      mockSetSidebarOpen.mockClear();
+      unmount();
+      expect(mockSetSidebarOpen).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('conversation handoff registration', () => {
+    it('registers the unsaved attachment id when there is no workflowId', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(mockSetLastCreateAttachmentId).toHaveBeenCalledWith(MOCK_UUID);
+    });
+
+    it('does NOT register or clear the create-attachment when a workflowId is present', () => {
+      // The module-level value is single-shot — consumed by
+      // carryConversationToWorkflow in the save thunk. Clearing here would
+      // race the thunk's carry call after `dispatch(setWorkflow(...))`, since
+      // the resulting re-render re-fires this effect with workflowId set.
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-abc',
+        })
+      );
+
+      expect(mockSetLastCreateAttachmentId).not.toHaveBeenCalled();
+    });
+  });
+
   describe('openAgentChat', () => {
-    it('calls openChat with workflow attachment and session tag', () => {
+    it('calls openChat with workflow attachment and session tag', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -546,6 +857,8 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
+      await flushChatAccessCheck();
+
       act(() => {
         result.current.openAgentChat();
       });
@@ -558,10 +871,11 @@ describe('useAgentBuilderIntegration', () => {
         attachments: [
           expectedAttachment(INITIAL_YAML, { workflowId: 'wf-456', name: 'Test Flow' }),
         ],
+        onClose: expect.any(Function),
       });
     });
 
-    it('passes initialMessage and autoSendInitialMessage options', () => {
+    it('passes initialMessage and autoSendInitialMessage options', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -572,6 +886,8 @@ describe('useAgentBuilderIntegration', () => {
           isEditorMounted: true,
         })
       );
+
+      await flushChatAccessCheck();
 
       act(() => {
         result.current.openAgentChat({
@@ -606,7 +922,7 @@ describe('useAgentBuilderIntegration', () => {
       // No error thrown
     });
 
-    it('includes validation errors as clientDiagnostics', () => {
+    it('includes validation errors as clientDiagnostics', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -644,6 +960,8 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
+      await flushChatAccessCheck();
+
       act(() => {
         result.current.openAgentChat();
       });
@@ -666,7 +984,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('isAgentBuilderAvailable', () => {
-    it('returns true when agentBuilder is available and experimental features enabled', () => {
+    it('returns true when agentBuilder is available and experimental features enabled', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       useUiSettingMock.mockReturnValue(true);
@@ -679,7 +997,71 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
-      expect(result.current.isAgentBuilderAvailable).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isAgentBuilderAvailable).toBe(true);
+      });
+    });
+
+    it('returns false when no LLM connector is configured', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      agentBuilder.getAgentBuilderAccess.mockResolvedValue({
+        hasRequiredLicense: true,
+        hasLlmConnector: false,
+      });
+      setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(true);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(result.current.isAgentBuilderAvailable).toBe(false);
+    });
+
+    it('returns false when show privilege is missing', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder, { hasShowPrivilege: false });
+      useUiSettingMock.mockReturnValue(true);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(result.current.isAgentBuilderAvailable).toBe(false);
+    });
+
+    it('returns false when enterprise license is missing', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      agentBuilder.getAgentBuilderAccess.mockResolvedValue({
+        hasRequiredLicense: false,
+        hasLlmConnector: true,
+      });
+      setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(true);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(result.current.isAgentBuilderAvailable).toBe(false);
     });
 
     it('returns false when agentBuilder is not available', () => {

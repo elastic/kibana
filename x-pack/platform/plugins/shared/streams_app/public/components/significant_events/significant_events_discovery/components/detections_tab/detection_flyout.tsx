@@ -32,8 +32,7 @@ import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolba
 import { InfoPanel } from '../../../../info_panel';
 import { useFetchDetectionHistory } from '../../../../../hooks/significant_events/use_fetch_detections';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { changeTypeLabel, DETECTION_KIND_LABELS } from '../shared/translations';
-import { DETECTION_KIND_COLORS } from '../shared/constants';
+import { changeTypeLabel } from '../shared/translations';
 
 const formatPValue = (pValue?: number | string): string => {
   if (pValue === undefined || pValue === null) return '-';
@@ -60,7 +59,7 @@ interface DetectionFlyoutProps {
 export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'detectionFlyoutTitle' });
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
-    detection.detection_id
+    detection.rule_uuid
   );
 
   const status = useMemo(
@@ -72,9 +71,8 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
   );
 
   const generalInfoItems = useMemo(() => {
-    const changeType = detection.detection_evidence?.change_point_type;
-    const pValue = detection.detection_evidence?.p_value;
-    const peakAlertCount = detection.peak_alert_count;
+    const changeType = detection.change_point_type;
+    const pValue = detection.p_value;
 
     return [
       {
@@ -94,14 +92,6 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
             {
               title: STATISTICAL_SIGNIFICANCE_LABEL,
               description: <EuiText size="s">{formatPValue(pValue)}</EuiText>,
-            },
-          ]
-        : []),
-      ...(peakAlertCount !== undefined
-        ? [
-            {
-              title: PEAK_ALERTS_LABEL,
-              description: <EuiText size="s">{peakAlertCount}</EuiText>,
             },
           ]
         : []),
@@ -139,15 +129,10 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
-            <FlyoutMetadataCard title={KIND_LABEL}>
-              <EuiBadge color={DETECTION_KIND_COLORS[detection.kind] ?? 'default'}>
-                {DETECTION_KIND_LABELS[detection.kind] ?? detection.kind}
-              </EuiBadge>
-            </FlyoutMetadataCard>
-          </EuiFlexItem>
-          <EuiFlexItem>
             <FlyoutMetadataCard title={STATUS_LABEL}>
-              <EuiBadge color={status.color}>{status.label}</EuiBadge>
+              <EuiToolTip content={STATUS_TOOLTIP}>
+                <EuiBadge color={status.color}>{status.label}</EuiBadge>
+              </EuiToolTip>
             </FlyoutMetadataCard>
           </EuiFlexItem>
           {detection.stream_name && (
@@ -203,27 +188,35 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
             })}
             gutterSize="m"
           >
-            {historyData.hits.map((entry, idx) => (
-              <EuiTimelineItem
-                key={`${entry['@timestamp']}-${idx}`}
-                icon="dot"
-                iconAriaLabel={DETECTION_KIND_LABELS[entry.kind] ?? entry.kind}
-                verticalAlign="top"
-              >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={DETECTION_KIND_COLORS[entry.kind] ?? 'hollow'}>
-                      {DETECTION_KIND_LABELS[entry.kind] ?? entry.kind}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {formatTimestamp(entry['@timestamp'])}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiTimelineItem>
-            ))}
+            {historyData.hits.map((entry, idx) => {
+              // Each history entry is a change-point observation — rendered as its change
+              // type, never as a lifecycle state (lifecycle is not derived from change type).
+              const entryLabel = changeTypeLabel(entry.change_point_type);
+              return (
+                <EuiTimelineItem
+                  key={`${entry['@timestamp']}-${idx}`}
+                  icon="dot"
+                  iconAriaLabel={entryLabel}
+                  verticalAlign="top"
+                >
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">{entryLabel}</EuiBadge>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color={entry.processed ? 'success' : 'hollow'}>
+                        {entry.processed ? STATUS_PROCESSED_LABEL : STATUS_PENDING_LABEL}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {formatTimestamp(entry['@timestamp'])}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiTimelineItem>
+              );
+            })}
           </EuiTimeline>
         )}
       </EuiFlyoutBody>
@@ -241,12 +234,12 @@ const GENERAL_INFORMATION_TITLE = i18n.translate(
   { defaultMessage: 'General information' }
 );
 
-const KIND_LABEL = i18n.translate('xpack.streams.detectionFlyout.kindLabel', {
-  defaultMessage: 'Kind',
+const STATUS_LABEL = i18n.translate('xpack.streams.detectionFlyout.statusLabel', {
+  defaultMessage: 'Discovery',
 });
 
-const STATUS_LABEL = i18n.translate('xpack.streams.detectionFlyout.statusLabel', {
-  defaultMessage: 'Status',
+const STATUS_TOOLTIP = i18n.translate('xpack.streams.detectionFlyout.statusTooltip', {
+  defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
 });
 
 const STREAM_LABEL = i18n.translate('xpack.streams.detectionFlyout.streamLabel', {
@@ -265,10 +258,6 @@ const STATISTICAL_SIGNIFICANCE_LABEL = i18n.translate(
   'xpack.streams.detectionFlyout.statisticalSignificanceLabel',
   { defaultMessage: 'Statistical significance' }
 );
-
-const PEAK_ALERTS_LABEL = i18n.translate('xpack.streams.detectionFlyout.peakAlertsLabel', {
-  defaultMessage: 'Peak alerts',
-});
 
 const STATUS_PROCESSED_LABEL = i18n.translate('xpack.streams.detectionFlyout.status.processed', {
   defaultMessage: 'Processed',

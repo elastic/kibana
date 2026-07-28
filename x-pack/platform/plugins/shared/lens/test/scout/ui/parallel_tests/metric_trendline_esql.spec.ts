@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createDashboard, testData } from '../fixtures';
+import { testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (ES|QL)',
@@ -30,7 +30,7 @@ spaceTest.describe(
 
     spaceTest(
       'renders trendline with ES|QL data source',
-      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
         const body = {
           title: 'ESQL Metric trendline',
           time_range: testData.LOGSTASH_IN_RANGE_DATES,
@@ -58,7 +58,7 @@ spaceTest.describe(
           ],
         };
 
-        const dashboardId = await createDashboard(kbnClient, body, scoutSpace.id);
+        const dashboardId = await apiServices.dashboard.create(body, scoutSpace.id);
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
