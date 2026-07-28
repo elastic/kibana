@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
