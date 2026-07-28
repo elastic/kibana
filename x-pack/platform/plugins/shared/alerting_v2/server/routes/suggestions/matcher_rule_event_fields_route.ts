@@ -43,7 +43,7 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => matcherDataFieldsResponseSchema,
-        description: 'Returns the available rule event field names.',
+        description: 'Returns the available matcher data field names.',
       },
       400: {
         body: () => errorResponseSchema,
