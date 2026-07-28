@@ -54,7 +54,7 @@ import {
   emptyDataSourceFlyoutFormValues,
 } from './data_source_flyout_initial_values';
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { DataFederationKibanaServices } from '../types';
 
 export interface CreateDataSourceFlyoutProps {

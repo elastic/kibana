@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiSkeletonTitle,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
@@ -13,11 +20,20 @@ import { useParams } from 'react-router-dom';
 import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useNavigation } from '../hooks/use_navigation';
+import { CONTEXT_ENGINE_PATHS } from '../paths';
+
+const backToListLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToListButton', {
+  defaultMessage: 'Back to AI indexes',
+});
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
+  const { createContextEngineUrl } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
+
+  const landingUrl = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
   if (error) {
     return (
@@ -36,6 +52,16 @@ export const AiIndexDetailPage = () => {
               </h2>
             }
             body={<p>{error.message}</p>}
+            actions={[
+              <EuiButton
+                key="back-to-list"
+                iconType="arrowLeft"
+                href={landingUrl}
+                data-test-subj="contextAiIndexBackToListButton"
+              >
+                {backToListLabel}
+              </EuiButton>,
+            ]}
           />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
@@ -52,9 +78,19 @@ export const AiIndexDetailPage = () => {
             aiIndex?.id
           )
         }
+        rightSideItems={[
+          <EuiButtonEmpty
+            key="back-to-list"
+            iconType="arrowLeft"
+            href={landingUrl}
+            data-test-subj="contextAiIndexBackToListButton"
+          >
+            {backToListLabel}
+          </EuiButtonEmpty>,
+        ]}
       />
       <KibanaPageTemplate.Section>
-        <DescriptionPanel isLoading={isLoading} description={aiIndex?.description} />
+        <DescriptionPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
         <EuiSpacer size="l" />
         <SourcesPanel
           isLoading={isLoading}
@@ -63,7 +99,7 @@ export const AiIndexDetailPage = () => {
           onEditSources={() => setIsEditingSources(true)}
         />
         <EuiSpacer size="l" />
-        <AutomationsPanel />
+        <AutomationsPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout
