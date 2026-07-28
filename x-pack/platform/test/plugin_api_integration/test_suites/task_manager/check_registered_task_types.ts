@@ -266,7 +266,6 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:health-scan-task',
         'slo:stale-instances-cleanup-task',
         'slo:temp-summary-cleanup-task',
-        'streams_description_generation',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
