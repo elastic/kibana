@@ -123,6 +123,7 @@ PY
         --pending
     fi
   fi
+  # Keep set -e from aborting before reconcile on transport failures.
   RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
     -H "$AUTH_HEADER" \
     -X PUT "$ES_URL/$INDEX" \
@@ -139,7 +140,7 @@ PY
         }
       },
       \"aliases\": { \"$ALIAS\": {} }
-    }")
+    }" || printf '%s' '000')
 
   if [[ "$RESPONSE" == "200" ]]; then
     echo "Index created."

@@ -62,6 +62,9 @@ else
   AUTH_ARGS=(-u "$USERNAME:$PASSWORD")
   NOISE_AUTH_ARGS=(--username "$USERNAME" --password "$PASSWORD")
 fi
+CURL_CONNECT_TIMEOUT="${EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT:-10}"
+CURL_MAX_TIME="${EXPLORATORY_TESTER_CURL_MAX_TIME:-30}"
+CURL_TIMEOUT_ARGS=(--connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIME")
 
 record_skipped_setup() {
   PYTHONPATH=x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts \
@@ -163,7 +166,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   --endpoint "/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
   --pending
 CONNECTOR_RESPONSE=$(
-  curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
+  curl -s "${CURL_TIMEOUT_ARGS[@]}" "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
     -X POST "$KIBANA_URL/s/$SPACE_ID/api/actions/connector/$CONNECTOR_ID" \
     -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
     -d '{"name":"Bedrock","connector_type_id":".bedrock","config":{"apiUrl":"https://bedrock.us-east-1.amazonaws.com"},"secrets":{"accessKey":"test","secret":"test"}}'
@@ -240,7 +243,7 @@ the alias is retained in `config.json` for queries. On failure (empty
 # The username is session-scoped, so concurrent sessions cannot claim or
 # delete one another's users.
 USER_PROVISIONING_SKIPPED=false
-USER_EXISTING_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+USER_EXISTING_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
   "${AUTH_ARGS[@]}" -X GET "$ES_URL/_security/user/$TEST_USERNAME")
 case "$USER_EXISTING_STATUS" in
   200)
@@ -264,7 +267,7 @@ case "$USER_EXISTING_STATUS" in
 
     # POST through Kibana; 404 falls back to Elasticsearch.
     USER_RESPONSE=$(
-      curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
+      curl -s "${CURL_TIMEOUT_ARGS[@]}" "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
         -X POST "$KIBANA_URL/internal/security/users/$TEST_USERNAME" \
         -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
         -d "{\"username\":\"$TEST_USERNAME\",\"password\":\"$TEST_PASSWORD\",\"roles\":[\"<resolved_role>\"],\"full_name\":\"Exploratory Tester\"}"
@@ -272,7 +275,7 @@ case "$USER_EXISTING_STATUS" in
     USER_HTTP_STATUS="${USER_RESPONSE##*$'\n'}"
     if [[ "$USER_HTTP_STATUS" == "404" ]]; then
       USER_RESPONSE=$(
-        curl -s "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
+        curl -s "${CURL_TIMEOUT_ARGS[@]}" "${AUTH_ARGS[@]}" -w '\n%{http_code}' \
           -X PUT "$ES_URL/_security/user/$TEST_USERNAME" \
           -H 'Content-Type: application/json' \
           -d "{\"password\":\"$TEST_PASSWORD\",\"roles\":[\"<resolved_role>\"],\"full_name\":\"Exploratory Tester\"}"
@@ -377,7 +380,7 @@ restore-aware cleanup command and report the provisioning failure. The
 4. Dismiss any post-login dialogs
 5. Verify the session:
    ```bash
-   curl -s -u "$TEST_USERNAME:$TEST_PASSWORD" "$KIBANA_URL/api/security/me" \
+   curl -s "${CURL_TIMEOUT_ARGS[@]}" -u "$TEST_USERNAME:$TEST_PASSWORD" "$KIBANA_URL/api/security/me" \
      | TEST_USERNAME="$TEST_USERNAME" python3 -c "import os,sys,json; u=json.load(sys.stdin); exit(0 if u.get('username')==os.environ['TEST_USERNAME'] else 1)"
    ```
    Failure → **stop.** The `elastic` admin session is still available for debugging.

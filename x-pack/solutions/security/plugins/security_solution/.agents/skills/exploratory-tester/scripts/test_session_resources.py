@@ -148,6 +148,15 @@ class SessionResourceContractTests(unittest.TestCase):
             ["-H", "Authorization: ApiKey remote-key"],
         )
 
+        config["environment"]["ccs"]["remote"]["credentials"] = {
+            "username": "remote-elastic",
+            "password": "remote-secret",
+        }
+        self.assertEqual(
+            build_auth_args(config, base_url_key="ccs_remote_es_url"),
+            ["-u", "remote-elastic:remote-secret"],
+        )
+
         del config["environment"]["ccs"]["remote"]["credentials"]
         with self.assertRaisesRegex(ValueError, "remote credentials"):
             build_auth_args(config, base_url_key="ccs_remote_es_url")
@@ -3181,9 +3190,15 @@ print("200")
         self.assertIn("--force-lease", break_remote)
         self.assertIn("--max-time", noise)
         self.assertIn("--connect-timeout", noise)
+        self.assertIn("|| printf '%s' '000'", noise)
         self.assertIn("--max-time", validation_section)
         self.assertIn("--connect-timeout", validation_section)
         self.assertIn("EXPLORATORY_TESTER_CURL_MAX_TIME", validation_section)
+        self.assertIn("CURL_TIMEOUT_ARGS=(", login)
+        self.assertIn('"${CURL_TIMEOUT_ARGS[@]}"', login)
+        self.assertIn("CURL_TIMEOUT_ARGS=(", positive_control)
+        self.assertIn('"${CURL_TIMEOUT_ARGS[@]}"', positive_control)
+        self.assertIn("EXPLORATORY_TESTER_CURL_MAX_TIME", positive_control)
         self.assertIn('ccs_state="mutation_pending"', break_remote)
         self.assertIn("capture-remote-cluster.py", break_remote)
         self.assertIn("restore-remote-cluster.py", break_remote)

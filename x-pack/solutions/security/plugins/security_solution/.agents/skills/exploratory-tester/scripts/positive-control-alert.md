@@ -30,6 +30,9 @@ DATA_API_KEY="$SOURCE_API_KEY"
 DATA_ES_URL="$SOURCE_ES_URL"
 SOURCE_BASE_URL="es_url"
 RULE_INDEX="$SOURCE_INDEX"
+CURL_CONNECT_TIMEOUT="${EXPLORATORY_TESTER_CURL_CONNECT_TIMEOUT:-10}"
+CURL_MAX_TIME="${EXPLORATORY_TESTER_CURL_MAX_TIME:-30}"
+CURL_TIMEOUT_ARGS=(--connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIME")
 ```
 
 For CCS, the positive-control source is on REMOTE, not SOURCE:
@@ -77,7 +80,7 @@ print(
 PY
   )
 fi
-SOURCE_HEAD_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+SOURCE_HEAD_STATUS=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -o /dev/null -w "%{http_code}" \
   -H "Authorization: ApiKey $DATA_API_KEY" \
   -X HEAD "$DATA_ES_URL/$SOURCE_INDEX")
 case "$SOURCE_HEAD_STATUS" in
@@ -98,7 +101,7 @@ case "$SOURCE_HEAD_STATUS" in
         --base-url "$SOURCE_BASE_URL" \
         --pending
     fi
-    SOURCE_CREATE_RESPONSE=$(curl -s -w '\n%{http_code}' \
+    SOURCE_CREATE_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' \
       -H "Authorization: ApiKey $DATA_API_KEY" \
       -X PUT "$DATA_ES_URL/$SOURCE_INDEX" \
       -H 'Content-Type: application/json' \
@@ -152,7 +155,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 Then index the document:
 ```bash
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-SOURCE_DOCUMENT_RESPONSE=$(curl -s -w '\n%{http_code}' -X POST \
+SOURCE_DOCUMENT_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' -X POST \
   -H "Authorization: ApiKey $DATA_API_KEY" -H "Content-Type: application/json" \
   "$DATA_ES_URL/$SOURCE_INDEX/_doc?refresh=wait_for" \
   -d "{ \"@timestamp\": \"$NOW\", \"host\": { \"name\": \"positive-control-host\" }, \"event\": { \"category\": \"process\", \"action\": \"positive-control\" }, \"message\": \"exploratory-tester positive control\" }")
@@ -186,7 +189,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
   --body-json "$ALERT_DELETE_BODY" \
   --pending
 RULE_RESPONSE=$(
-  curl -s -w '\n%{http_code}' -X POST \
+  curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' -X POST \
     -H "Authorization: ApiKey $SOURCE_API_KEY" \
     -H "Content-Type: application/json" \
     -H "kbn-xsrf: true" \
@@ -225,7 +228,7 @@ case "$RULE_HTTP_STATUS" in
 esac
 if [[ "$RULE_HTTP_STATUS" == "409" ]]; then
   RULE_LOOKUP_RESPONSE=$(
-    curl -s -w '\n%{http_code}' -X GET \
+    curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' -X GET \
       -H "Authorization: ApiKey $SOURCE_API_KEY" \
       -H "elastic-api-version: 2023-10-31" \
       "<KIBANA_URL>/s/<SPACE_ID>/api/detection_engine/rules?rule_id=$RULE_ID"
@@ -277,7 +280,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 
 ### 3. Force immediate execution
 ```bash
-RUN_SOON_RESPONSE=$(curl -s -w '\n%{http_code}' -X POST \
+RUN_SOON_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' -X POST \
   -H "Authorization: ApiKey $SOURCE_API_KEY" \
   -H "kbn-xsrf: true" -H "x-elastic-internal-origin: kibana" \
   "<KIBANA_URL>/s/<SPACE_ID>/internal/alerting/rule/<RULE_SAVED_OBJECT_ID>/_run_soon")
@@ -295,7 +298,7 @@ ALERT_POLL_INTERVAL_SECONDS=2
 ALERT_POLL_DEADLINE=$((SECONDS + ALERT_POLL_TIMEOUT_SECONDS))
 ALERT_FOUND=false
 while (( SECONDS <= ALERT_POLL_DEADLINE )); do
-  ALERT_RESPONSE=$(curl -s -w '\n%{http_code}' \
+  ALERT_RESPONSE=$(curl -s "${CURL_TIMEOUT_ARGS[@]}" -w '\n%{http_code}' \
     -H "Authorization: ApiKey $SOURCE_API_KEY" -H "Content-Type: application/json" \
     "$SOURCE_ES_URL/.alerts-security.alerts-$SPACE_ID/_search" \
     -d '{ "size": 1, "query": { "term": { "kibana.alert.rule.rule_id": "'"$RULE_ID"'" } } }')

@@ -183,7 +183,8 @@ def build_auth_args(
     base_url_key: str = "url",
 ) -> list[str]:
     environment = config.get("environment", {})
-    if base_url_key == "ccs_remote_es_url":
+    using_remote_credentials = base_url_key == "ccs_remote_es_url"
+    if using_remote_credentials:
         ccs = environment.get("ccs", {})
         remote = ccs.get("remote", {}) if isinstance(ccs, dict) else {}
         credentials = remote.get("credentials") if isinstance(remote, dict) else None
@@ -199,7 +200,9 @@ def build_auth_args(
     if api_key:
         return ["-H", f"Authorization: ApiKey {api_key}"]
 
-    if environment_type == "user-provided":
+    # Source user-provided deployments require a Kibana API key. Remote CCS
+    # credentials are independent and may use basic auth on a managed remote.
+    if not using_remote_credentials and environment_type == "user-provided":
         raise ValueError(
             "User-provided environments require credentials.api_key for API calls"
         )
