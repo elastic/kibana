@@ -577,6 +577,28 @@
         "line": 54,
         "column": 7
       }
+    },
+    {
+      "id": "d5e6f7a8b9c0123-aaaaaaaaaaaaaaa1",
+      "title": "last selected space recollection redirects to the last selected space when preference is already enabled",
+      "expectedStatus": "passed",
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "d5e6f7a8b9c0123-aaaaaaaaaaaaaaa2",
+      "title": "last selected space recollection shows the space selector when remember last space is disabled",
+      "expectedStatus": "passed",
+      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 65,
+        "column": 7
+      }
     }
   ]
 }
