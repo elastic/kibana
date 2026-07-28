@@ -142,6 +142,7 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/react-hooks'
   - '@kbn/react-kibana-mount'
   - '@kbn/licensing-types'
   - '@kbn/discover-shared-plugin'
