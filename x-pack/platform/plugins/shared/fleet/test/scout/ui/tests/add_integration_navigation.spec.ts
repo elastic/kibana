@@ -24,7 +24,7 @@ test.describe('Add integration navigation', { tag: tags.stateful.classic }, () =
     nginxPkgkey = `nginx-${response.data.item.version}`;
   });
 
-  test('clicking Add integration stays in the Integrations app', async ({
+  test('clicking Add integration navigates to the add-integration page within Integrations app', async ({
     browserAuth,
     pageObjects,
     page,
@@ -37,32 +37,18 @@ test.describe('Add integration navigation', { tag: tags.stateful.classic }, () =
     await integrationHome.waitForDetailPageToLoad();
 
     await integrationHome.getAddIntegrationPolicyButton().click();
+
+    // Wait for the form to render before reading the URL — acts as a navigation sync point
+    await page.testSubj.waitForSelector('createPackagePolicy_page', {
+      state: 'visible',
+      timeout: 20_000,
+    });
 
     // URL must be within the Integrations app, not Fleet
     await expect(page).toHaveURL(/\/app\/integrations\//);
     await expect(page).not.toHaveURL(/\/app\/fleet\//);
 
-    // The add integration form must render
-    await page.testSubj.waitForSelector('createPackagePolicy_page', {
-      state: 'visible',
-      timeout: 20_000,
-    });
-  });
-
-  test('add integration URL path is /detail/:pkgkey/add-integration', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginAsPrivilegedUser();
-
-    const { integrationHome } = pageObjects;
-
-    await integrationHome.navigateToDetailPage(nginxPkgkey);
-    await integrationHome.waitForDetailPageToLoad();
-
-    await integrationHome.getAddIntegrationPolicyButton().click();
-
+    // URL path must be /detail/:pkgkey/add-integration
     expect(page.url()).toContain(`/app/integrations/detail/${nginxPkgkey}/add-integration`);
   });
 });
