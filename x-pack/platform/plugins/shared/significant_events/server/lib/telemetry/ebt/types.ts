@@ -113,20 +113,26 @@ interface DetectionScanProps {
   took_ms: number;
   /** Wall-clock (ms) around the reader call, including transport and parsing. */
   duration_ms: number;
-  /** Number of distinct rules covered by the change-point scan. */
+  /** Rule-backed queries requested for the scan (all analysis profiles). */
+  rules_requested: number;
+  /** Distinct rules that returned a change-point series bucket. */
   rules_scanned: number;
-  /** Rule-backed query count using the critical 1m cadence. */
+  /** Rule-backed query count on the critical analysis profile. */
   critical_rule_count: number;
-  /** Rule-backed query count using the default 5m cadence. */
+  /** Rule-backed query count on the default analysis profile. */
   default_rule_count: number;
   /** Alerting engine backing the read. */
   alerting_engine: 'v2';
   /** The alerts-source index that was read (e.g. `.rule-events`). */
   alerts_source_index: string;
-  /** The scan lookback window, e.g. `now-30m`. */
+  /** Critical analysis lookback duration, e.g. `now-40m`. */
   lookback: string;
-  /** The change-point bucket interval, e.g. `30s`. */
+  /** Critical analysis outer bucket interval, e.g. `1m`. */
   bucket_interval: string;
+  /** Default analysis lookback duration, e.g. `now-125m`. */
+  default_lookback: string;
+  /** Default analysis outer bucket interval, e.g. `5m`. */
+  default_bucket_interval: string;
   /** The Kibana space in which the scan ran. */
   space_id: string;
 }
@@ -164,6 +170,8 @@ interface AgentToolEventSearchProps {
   has_query: boolean;
   has_stream_filter: boolean;
   status_filter?: SignificantEventStatus;
+  view: 'compact' | 'full';
+  page: number;
   error_message?: string;
 }
 

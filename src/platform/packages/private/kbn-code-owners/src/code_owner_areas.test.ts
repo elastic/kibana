@@ -57,6 +57,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   observability: [
     'elastic/actionable-obs-team',
     'elastic/nightshift-context-and-research-team',
+    'elastic/nightshift-sre-agent-team',
     'elastic/obs-cloudnative-monitoring',
     'elastic/obs-docs',
     'elastic/obs-exploration-team',

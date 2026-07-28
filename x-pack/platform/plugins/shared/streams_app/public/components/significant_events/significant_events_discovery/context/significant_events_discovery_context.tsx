@@ -189,7 +189,6 @@ export function SignificantEventsDiscoveryProvider({
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: ['sigEvents'] }),
         queryClient.invalidateQueries({ queryKey: ['detections'] }),
-        queryClient.invalidateQueries({ queryKey: ['discoveriesEntities'] }),
       ]);
 
     if (status === SignificantEventsWorkflowStatus.Completed) {
