@@ -95,11 +95,13 @@ export const resolveReplacementsEncryptionKey = async ({
 export const resolveWorkflowAnonymizationOptions = ({
   enabled,
   failureMode,
+  preLLMTimeoutMs,
   provider,
   logger,
 }: {
   enabled: boolean;
   failureMode: WorkflowAnonymizationOptions['failureMode'];
+  preLLMTimeoutMs: number;
   provider?: WorkflowAnonymizationProvider;
   logger: Pick<Logger, 'error'>;
 }): WorkflowAnonymizationOptions | undefined => {
@@ -112,7 +114,7 @@ export const resolveWorkflowAnonymizationOptions = ({
     );
     return undefined;
   }
-  return { provider, failureMode };
+  return { provider, failureMode, preLLMTimeoutMs };
 };
 
 export class InferencePlugin
@@ -169,6 +171,7 @@ export class InferencePlugin
     const workflowAnonymization = resolveWorkflowAnonymizationOptions({
       enabled: this.config.anonymization.workflow_driven,
       failureMode: this.config.anonymization.failureMode,
+      preLLMTimeoutMs: this.config.anonymization.preLLMTimeoutMs,
       provider: this.workflowAnonymizationProvider,
       logger: this.logger,
     });

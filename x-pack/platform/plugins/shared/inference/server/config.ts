@@ -20,6 +20,11 @@ export const configSchema = schema.object({
     // take effect. Set to 0 to disable caching entirely at the cost of an ES lookup on every
     // anonymization-eligible inference call.
     triggerCacheTtlSeconds: schema.number({ defaultValue: 30, min: 0 }),
+    // Maximum time (ms) the anonymization workflow may run before the LLM connector is invoked.
+    // The clock starts after saltPromise resolves; salt-resolution time is excluded from this
+    // budget. Bounds only the anonymization execution overhead, not LLM response time.
+    // Set to 0 to disable the timeout.
+    preLLMTimeoutMs: schema.number({ defaultValue: 5000, min: 0 }),
   }),
   workers: schema.object({
     anonymization: schema.object({

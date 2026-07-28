@@ -53,6 +53,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
       resolveWorkflowAnonymizationOptions({
         enabled: false,
         failureMode: 'block',
+        preLLMTimeoutMs: 5000,
         provider,
         logger,
       })
@@ -67,10 +68,11 @@ describe('resolveWorkflowAnonymizationOptions', () => {
       resolveWorkflowAnonymizationOptions({
         enabled: true,
         failureMode: 'allow_unsafe',
+        preLLMTimeoutMs: 3000,
         provider,
         logger,
       })
-    ).toEqual({ provider, failureMode: 'allow_unsafe' });
+    ).toEqual({ provider, failureMode: 'allow_unsafe', preLLMTimeoutMs: 3000 });
     expect(logger.error).not.toHaveBeenCalled();
   });
 
@@ -81,6 +83,7 @@ describe('resolveWorkflowAnonymizationOptions', () => {
       resolveWorkflowAnonymizationOptions({
         enabled: true,
         failureMode: 'block',
+        preLLMTimeoutMs: 5000,
         logger,
       })
     ).toBeUndefined();

@@ -16,7 +16,7 @@ import {
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
-import { catchError, defer, merge, of, Subject, switchMap, throwError } from 'rxjs';
+import { catchError, defer, finalize, merge, of, Subject, switchMap, throwError } from 'rxjs';
 import { createPiiDetectionContext } from './anonymization/create_pii_detection_context';
 import { createPiiTokenizationContext } from './anonymization/create_pii_tokenization_context';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
@@ -136,9 +136,19 @@ export const createWorkflowAnonymizationPipeline = ({
   const relay$ = new Subject<ChatCompletionEvent>();
   let restoredTerminalMessage: ChatCompletionMessageEvent | undefined;
   let proceedInvoked = false;
+  let preLLMTimer: ReturnType<typeof setTimeout> | undefined;
+  let timedOut = false;
+
+  const clearPreLLMTimer = () => {
+    if (preLLMTimer !== undefined) {
+      clearTimeout(preLLMTimer);
+      preLLMTimer = undefined;
+    }
+  };
 
   const proceed = {
     invoke: async (input: InferenceProceedInput): Promise<{ rawContent: string }> => {
+      clearPreLLMTimer();
       if (proceedInvoked) {
         throw new Error('The workflow inference proceed capability may only be invoked once');
       }
@@ -221,6 +231,23 @@ export const createWorkflowAnonymizationPipeline = ({
 
   const around$ = defer(async () => {
     const serverSalt = await saltPromise;
+
+    let effectiveAbortSignal = abortSignal;
+    if (workflowAnonymization.preLLMTimeoutMs > 0) {
+      const preLLMController = new AbortController();
+      preLLMTimer = setTimeout(() => {
+        timedOut = true;
+        preLLMController.abort(
+          new Error(
+            `Pre-LLM anonymization timed out after ${workflowAnonymization.preLLMTimeoutMs}ms`
+          )
+        );
+      }, workflowAnonymization.preLLMTimeoutMs);
+      effectiveAbortSignal = abortSignal
+        ? AbortSignal.any([preLLMController.signal, abortSignal])
+        : preLLMController.signal;
+    }
+
     return workflowAnonymization.provider.execute({
       event: { system, messages, sessionId, agentId },
       namespace,
@@ -231,7 +258,7 @@ export const createWorkflowAnonymizationPipeline = ({
         sessionId,
       }),
       proceed,
-      abortSignal,
+      abortSignal: effectiveAbortSignal,
     });
   }).pipe(
     switchMap((result) => {
@@ -239,6 +266,7 @@ export const createWorkflowAnonymizationPipeline = ({
         // Close the unused relay before subscribing to the direct stream. merge() keeps the
         // around branch active, so no relay events can interleave with the unmatched response.
         relay$.complete();
+        clearPreLLMTimer();
         invocationState.connectorInvoked = true;
         pipelineRequestsCounter.add(1, { outcome: 'unmatched' });
         return invokeConnector({ system, messages, abortSignal });
@@ -260,6 +288,7 @@ export const createWorkflowAnonymizationPipeline = ({
         : of(terminalMessage);
     }),
     catchError((error) => {
+      clearPreLLMTimer();
       relay$.complete();
       if (
         workflowAnonymization.failureMode === 'allow_unsafe' &&
@@ -269,12 +298,13 @@ export const createWorkflowAnonymizationPipeline = ({
           'Workflow-driven anonymization failed before connector invocation; using the direct inference path because allow_unsafe is configured'
         );
         invocationState.connectorInvoked = true;
-        pipelineRequestsCounter.add(1, { outcome: 'fallback' });
+        pipelineRequestsCounter.add(1, { outcome: timedOut ? 'fallback_timeout' : 'fallback' });
         return invokeConnector({ system, messages, abortSignal });
       }
       pipelineRequestsCounter.add(1, { outcome: 'error' });
       return throwError(() => error);
-    })
+    }),
+    finalize(() => clearPreLLMTimer())
   );
 
   // Subscribe the relay first so synchronous connector emissions cannot be lost.
