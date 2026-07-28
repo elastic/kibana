@@ -20,7 +20,9 @@ import styled from '@emotion/styled';
 import React, { useState } from 'react';
 import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { asDuration } from '../../../utils';
+import { TIMELINE_MARKER_EBT_ELEMENTS } from './ebt_constants';
 import { Legend, Shape } from '../legend';
 import type { Mark } from '.';
 
@@ -122,6 +124,10 @@ export function ErrorMarker({ mark }: Props) {
                   togglePopover();
                   mark.onClick?.();
                 }}
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.VIEW_ERROR,
+                  element: TIMELINE_MARKER_EBT_ELEMENTS.ERROR_MARKER_BUTTON,
+                })}
               >
                 {truncatedErrorMessage}
               </EuiButtonEmpty>

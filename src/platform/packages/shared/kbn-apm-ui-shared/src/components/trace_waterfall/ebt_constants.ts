@@ -10,6 +10,7 @@
 export const TRACE_WATERFALL_EBT_CLICK_ACTIONS = {
   VIEW_FULL_TRACE: 'viewFullTrace',
   SCROLL_TO_ORIGIN: 'scrollToOrigin',
+  TOGGLE_WATERFALL: 'toggleWaterfall',
 } as const;
 
 export const TRACE_WATERFALL_EBT_ELEMENTS = {
@@ -23,4 +24,6 @@ export const TRACE_WATERFALL_EBT_ELEMENTS = {
   FLYOUT_WATERFALL_SERVICE_BADGE: 'flyoutWaterfallServiceBadge',
   FLYOUT_WATERFALL_FOOTER: 'flyoutWaterfallFooter',
   FLYOUT_WATERFALL_SCROLL_TO_ORIGIN: 'flyoutWaterfallScrollToOrigin',
+  WATERFALL_ACCORDION_BUTTON: 'waterfallAccordionButton',
+  WATERFALL_SIZE_WARNING_DISCOVER_LINK: 'waterfallSizeWarningDiscoverLink',
 } as const;

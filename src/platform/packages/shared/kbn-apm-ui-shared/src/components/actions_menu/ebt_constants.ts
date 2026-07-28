@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TRANSACTIONS_TABLE_EBT_ACTIONS = {
-  VIEW_TRANSACTION_GROUP: 'viewTransactionGroup',
-} as const;
-
-export const TRANSACTIONS_TABLE_EBT_ELEMENTS = {
-  ROW_NAME: 'transactionsTableRowName',
-  ROW_ALERTS_BADGE: 'transactionsTableRowAlertsBadge',
-  REMAINING_ROW_INFO_BUTTON: 'transactionsTableRemainingRowInfoButton',
+export const ACTIONS_MENU_EBT_ELEMENTS = {
+  TRIGGER: 'actionsMenuTrigger',
 } as const;

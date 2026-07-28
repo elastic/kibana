@@ -50,6 +50,12 @@ export const EBT_CLICK_ACTIONS = {
   VIEW_SLOS: 'viewSlos',
   /** User intends to view anomaly details for an entity. */
   VIEW_ANOMALIES: 'viewAnomalies',
+  /** User opens a contextual actions menu or popover. */
+  OPEN_ACTIONS_MENU: 'openActionsMenu',
+  /** User follows a link to external documentation. */
+  VIEW_DOCS: 'viewDocs',
+  /** User opens an informational popover or tooltip. */
+  VIEW_INFO: 'viewInfo',
 } as const;
 
 /**

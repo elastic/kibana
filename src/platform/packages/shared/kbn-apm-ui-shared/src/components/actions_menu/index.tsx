@@ -17,8 +17,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { ActionGroups } from './types';
 import { buildPanels } from './build_panels';
+import { ACTIONS_MENU_EBT_ELEMENTS } from './ebt_constants';
 
 export type { ActionBase, ActionSubItem, Action, ActionGroup, ActionGroups } from './types';
 
@@ -61,6 +63,10 @@ export function ActionsMenu({ actions, id, dataTestSubjPrefix = 'actionsMenu' }:
             iconType="boxesHorizontal"
             aria-label={ariaLabel}
             onClick={togglePopover}
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.OPEN_ACTIONS_MENU,
+              element: ACTIONS_MENU_EBT_ELEMENTS.TRIGGER,
+            })}
           />
         </EuiToolTip>
       }

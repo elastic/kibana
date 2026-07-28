@@ -11,4 +11,5 @@ export const SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS = {
   HEADER: 'serviceFlyoutTransactionsHeader',
   ROW_NAME: 'serviceFlyoutTransactionsRowName',
   ROW_ALERTS_BADGE: 'serviceFlyoutTransactionsRowAlertsBadge',
+  MAX_GROUPS_TOOLTIP_DOCS_LINK: 'serviceFlyoutTransactionsMaxGroupsTooltipDocsLink',
 } as const;

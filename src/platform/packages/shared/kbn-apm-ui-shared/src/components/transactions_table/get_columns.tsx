@@ -167,6 +167,10 @@ function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNo
                   { defaultMessage: 'More information about remaining transactions' }
                 )}
                 onClick={() => setIsOpen(true)}
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.VIEW_INFO,
+                  element: TRANSACTIONS_TABLE_EBT_ELEMENTS.REMAINING_ROW_INFO_BUTTON,
+                })}
               />
             </EuiToolTip>
           }
@@ -259,15 +263,18 @@ export function getBuiltInColumns({
           );
         }
         const nameHref = nameInteraction?.href?.(item);
-        const ebtNameProps = getEbtProps({
-          action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
-          element: nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME,
-        });
+        const ebtElement =
+          nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME;
         if (nameHref) {
           return (
             <div style={outerStyle}>
               <EuiToolTip content={item.name} display="block">
-                <a href={nameHref} style={truncationStyle} {...ebtNameProps}>
+                <a
+                  href={nameHref}
+                  style={truncationStyle}
+                  data-ebt-action={TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP}
+                  data-ebt-element={ebtElement}
+                >
                   {item.name}
                 </a>
               </EuiToolTip>
@@ -280,7 +287,8 @@ export function getBuiltInColumns({
               <EuiToolTip content={item.name} display="block">
                 <EuiLink
                   onClick={() => nameInteraction.onClick!(item)}
-                  {...ebtNameProps}
+                  data-ebt-action={TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP}
+                  data-ebt-element={ebtElement}
                   style={truncationStyle}
                 >
                   {item.name}

@@ -9,7 +9,9 @@
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from './ebt_constants';
 
 interface WaterfallSizeWarningProps {
   traceDocsTotal: number;
@@ -40,7 +42,14 @@ export function WaterfallSizeWarning({
               traceDocsTotal,
               maxTraceItems,
               discoverLink: (
-                <EuiLink data-test-subj={`${dataTestSubj}DiscoverLink`} href={discoverHref}>
+                <EuiLink
+                  data-test-subj={`${dataTestSubj}DiscoverLink`}
+                  href={discoverHref}
+                  {...getEbtProps({
+                    action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                    element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SIZE_WARNING_DISCOVER_LINK,
+                  })}
+                >
                   <FormattedMessage
                     id="apmUiShared.waterfall.exceedsMax.discoverLinkText"
                     defaultMessage="view the full trace in Discover"
