@@ -95,7 +95,7 @@ function buildRelationshipEsql(
     ? `@timestamp >= "${timeWindow.fromDate}" AND @timestamp <= "${timeWindow.toDate}" AND `
     : '';
 
-  const limitClause = timeWindow ? '' : `\n| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+  const limitClause = `\n| LIMIT ${COMPOSITE_PAGE_SIZE}`;
 
   // When actorIds is provided (log-source path), add a post-EVAL IN filter to
   // restrict the extract to only the actors discovered in the probe. This bounds

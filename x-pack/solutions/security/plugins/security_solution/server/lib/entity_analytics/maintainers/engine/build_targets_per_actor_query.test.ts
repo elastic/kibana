@@ -325,7 +325,7 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       });
       expect(query).toContain('@timestamp >= "2026-06-26T00:00:00.000Z"');
       expect(query).toContain('@timestamp <= "2026-06-27T00:00:00.000Z"');
-      expect(query).not.toContain('| LIMIT');
+      expect(query).toContain('| LIMIT');
     });
 
     it('does not embed time window when timeWindow absent (entity-index path)', () => {
