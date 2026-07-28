@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { NotificationCenterConfig } from './config';
 import { registerNotificationDataStream } from './data_stream/notification_data_stream';
-import { buildSubmitNotification } from './submit';
+import { buildForType } from './submit';
 import { registerNotificationUserStorage } from './user_storage';
 import type {
   NotificationCenterPluginSetup,
@@ -48,7 +48,7 @@ export class NotificationCenterPlugin
     registerNotificationUserStorage(core.userStorage);
 
     return {
-      submitNotification: buildSubmitNotification(core),
+      forType: buildForType(core),
     };
   }
 

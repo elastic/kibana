@@ -29,8 +29,10 @@ export type SkillsDirectoryStructure = Directory<{
       'agent-builder': FileDirectory;
       alerting: FileDirectory;
       cases: FileDirectory;
+      'context-engine': FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
+      evals: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;

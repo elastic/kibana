@@ -1,0 +1,85 @@
+title: Snapshot result
+description: >
+  The result of computing an SLO instance summary at a point in time.
+  Contains either a summary (on success) or an error (on failure).
+type: object
+required:
+  - id
+  - instanceId
+properties:
+  id:
+    type: string
+    description: The SLO definition id
+    example: 8853df00-ae2e-11ed-90af-09bb6422b258
+  instanceId:
+    type: string
+    description: The SLO instance id. '*' represents the default (ungrouped) instance.
+    example: '*'
+  summary:
+    description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
+    type: object
+    required:
+      - status
+      - sliValue
+      - errorBudget
+      - good
+      - total
+    properties:
+      status:
+        type: string
+        description: The SLO health status
+        enum:
+          - NO_DATA
+          - HEALTHY
+          - DEGRADING
+          - VIOLATED
+        example: HEALTHY
+      sliValue:
+        type: number
+        nullable: true
+        description: The SLI value at the requested point in time, or null when no data is available
+        example: 0.9976
+      errorBudget:
+        type: object
+        required:
+          - initial
+          - consumed
+          - remaining
+        properties:
+          initial:
+            type: number
+            description: The initial error budget, derived from the SLO objective
+            example: 0.01
+          consumed:
+            type: number
+            nullable: true
+            description: The error budget consumed, or null when no data is available
+            example: 0.24
+          remaining:
+            type: number
+            nullable: true
+            description: The error budget remaining, or null when no data is available
+            example: 0.76
+      good:
+        type: number
+        description: The number of good events
+        example: 9976
+      total:
+        type: number
+        description: The total number of events
+        example: 10000
+  error:
+    description: Error information when the computation failed for this SLO instance. Present when the computation failed.
+    type: object
+    required:
+      - statusCode
+      - message
+    properties:
+      statusCode:
+        type: number
+        description: The HTTP status code of the error
+        example: 404
+      message:
+        type: string
+        description: The error message
+        example: 'SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found'

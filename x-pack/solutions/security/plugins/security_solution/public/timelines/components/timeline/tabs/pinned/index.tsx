@@ -38,7 +38,11 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
+import {
+  DocumentEventTypes,
+  FLYOUT_ORIGIN,
+  NotesEventTypes,
+} from '../../../../../common/lib/telemetry';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
@@ -196,7 +200,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       }
 
       if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData });
+        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
       } else {
         const indexName = selectedPatterns.join(',');
         openFlyout({

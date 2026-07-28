@@ -8,7 +8,7 @@
 import { either } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
-import { ALL_VALUE } from '../constants';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '../constants';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
@@ -110,6 +110,7 @@ export type SLOStatus = t.TypeOf<typeof statusSchema>;
 
 export {
   ALL_VALUE,
+  SLO_GROUPINGS_PREFIX,
   SLO_STATUS,
   allOrAnyString,
   allOrAnyStringOrArray,

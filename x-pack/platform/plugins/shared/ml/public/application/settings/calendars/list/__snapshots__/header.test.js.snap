@@ -3,6 +3,64 @@
 exports[`CalendarListsHeader renders header 1`] = `
 <div>
   <div
+    class="css-ayyaqq-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <div
+              class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Calendars
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Calendars
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-baseline-row"
   >
     <div
@@ -21,37 +79,6 @@ exports[`CalendarListsHeader renders header 1`] = `
               3 in total
             </p>
           </span>
-        </div>
-      </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
-      >
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <button
-            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
-            data-test-subj="mlCalendarListRefreshButton"
-            type="button"
-          >
-            <span
-              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-            >
-              <span
-                color="inherit"
-                data-euiicon-type="refresh"
-              />
-              <span
-                class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
-              >
-                Refresh
-              </span>
-            </span>
-          </button>
         </div>
       </div>
     </div>

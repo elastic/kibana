@@ -6,16 +6,20 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
+import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 export interface SignificantEventsDiscoveryRunParams {
   request: KibanaRequest;
   spaceId: string;
+  /** Ensures discovery/judge agent profiles exist in `spaceId` before a new run. */
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /**
@@ -34,7 +38,7 @@ export class SignificantEventsDiscoveryClient {
     });
   }
 
-  async run({ request, spaceId }: SignificantEventsDiscoveryRunParams): Promise<{
+  async run({ request, spaceId, agentBuilder }: SignificantEventsDiscoveryRunParams): Promise<{
     executionId: string;
     isNew: boolean;
   }> {
@@ -42,6 +46,13 @@ export class SignificantEventsDiscoveryClient {
     if (lastExecution && !isTerminalStatus(lastExecution.status)) {
       return { executionId: lastExecution.id, isNew: false };
     }
+
+    // Just-in-time install for manual runs and any space that never went through
+    // scheduled-discovery enablement. Idempotent — does not overwrite user edits.
+    if (!agentBuilder) {
+      throw new Error('Agent Builder is required to run significant events discovery');
+    }
+    await installDiscoveryAgents({ agentBuilder, spaceId });
 
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: spaceId,

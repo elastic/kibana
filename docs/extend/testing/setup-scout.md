@@ -49,6 +49,10 @@ your-plugin/
         └── common/  # shared code (optional)
 ```
 
+:::::::{tip}
+Large plugins often accumulate tests across different functional areas, sometimes owned by different teams. Rather than placing them all directly under the Scout root, group them into functional-area [namespaces](#scout-namespaces) and assign ownership per area.
+:::::::
+
 ::::::::
 
 ::::::::{step} Create Playwright config(s)
@@ -134,3 +138,51 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 ::::::::::
 
 :::::::::
+
+## Organize large plugins with namespaces [scout-namespaces]
+
+By default, a plugin keeps all of its Scout tests directly under the Scout root (`test/scout/{ui,api}/`). Large plugins can instead group tests into **namespaces** (single-level sub-directories named after a functional area):
+
+```text
+your-plugin/
+└── test/
+    └── scout/
+        ├── detection_engine/    # namespace
+        │   ├── ui/
+        │   └── api/
+        ├── entity_analytics/    # namespace
+        │   └── ui/
+        └── common/              # shared code (optional, reserved name)
+```
+
+A namespace holds the same layout you'd otherwise place at the Scout root, one level deeper, with its own Playwright config(s), fixtures, and tests (for example `test/scout/<namespace>/ui/playwright.config.ts`).
+
+**Why use namespaces?**
+
+- **Scoped ownership**: assign each area to the team that owns it in `.github/CODEOWNERS`, so failures reach the smaller group that maintains that functionality.
+- **Run a focused subset**: point Scout at a single namespace's config to run (or re-run) only that area's tests, instead of the whole plugin's suite.
+- **Independently runnable in CI**: each namespace is discovered as its own config, so selective testing and CI reporting are scoped per area, while all namespaces still share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
+
+### Generate a namespace [scout-namespaces-generate]
+
+Pass `--namespace` to the [Scout CLI](#scout-setup-cli):
+
+```bash
+node scripts/scout.js generate \
+  --path x-pack/solutions/security/plugins/security_solution \
+  --namespace detection_engine
+```
+
+In interactive mode, if the plugin already uses namespaces, the generator lists the existing ones so you can pick one or create a new one. After scaffolding, it reminds you to set the namespace owner in `.github/CODEOWNERS`:
+
+```text
+/x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ @elastic/<team>
+```
+
+### Rules [scout-namespaces-rules]
+
+::::::{important}
+- **One level only**: use `test/scout/<namespace>/{ui,api}/` (deeper nesting such as `.../<area>/<sub-area>/{ui,api}/` is not supported).
+- **Don't mix layouts**: a Scout root is either entirely root-level (`test/scout/{ui,api}/`) or entirely namespace-based. Mixing the two fails the build. To adopt namespaces in an existing plugin, migrate the root-level tests into a namespace first.
+- **Naming**: start with a lowercase letter and use only lowercase letters, digits, and underscores. `ui`, `api`, `.meta`, and `common` are reserved (`common` is a plain shared-utilities directory with no Playwright config).
+::::::

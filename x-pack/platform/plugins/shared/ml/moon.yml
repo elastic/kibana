@@ -155,6 +155,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/zod'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod

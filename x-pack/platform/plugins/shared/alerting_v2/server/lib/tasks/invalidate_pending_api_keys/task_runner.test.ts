@@ -48,7 +48,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
   it('calls runInvalidate with correct parameters and no encryptedSavedObjectsClient', async () => {
     const result = await runner.run({
       taskInstance: { state: { runs: 0, total_invalidated: 0 } } as never,
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     });
 
     expect(runInvalidate).toHaveBeenCalledWith(
@@ -81,7 +81,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       taskInstance: {
         state: { runs: 2, total_invalidated: 10, missing_api_key_retries: {} },
       } as never,
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     });
 
     expect(result).toEqual({
@@ -97,7 +97,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       taskInstance: {
         state: { runs: 1, total_invalidated: 0, missing_api_key_retries: {} },
       } as never,
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     });
 
     expect(logger.error).toHaveBeenCalledWith(

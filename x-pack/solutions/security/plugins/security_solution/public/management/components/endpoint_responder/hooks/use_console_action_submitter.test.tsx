@@ -141,6 +141,50 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     expect(renderArgs.store?.actionApiState?.request.actionId).toBe(undefined);
   });
 
+  it('should set status to `creating` and show the creating message while the action request is being created', async () => {
+    render();
+
+    await waitFor(() => {
+      expect(renderArgs.setStatus).toHaveBeenCalledWith('creating');
+    });
+
+    expect(renderResult.getByTestId('test-creating')).not.toBeNull();
+    expect(getOutputTextContent()).toEqual(
+      'Creating action (do not close the console until this step is completed)...'
+    );
+  });
+
+  it('should transition status from `creating` to `pending` once the action request has been created', async () => {
+    render();
+
+    await waitFor(() => {
+      expect(renderArgs.setStatus).toHaveBeenCalledWith('creating');
+    });
+
+    releaseSuccessActionRequestApiResponse();
+
+    await waitFor(() => {
+      expect(renderArgs.setStatus).toHaveBeenCalledWith('pending');
+    });
+  });
+
+  it('should set status to `error` if creating the action request fails', async () => {
+    render();
+    const error = new Error('oh oh. request failed');
+
+    await waitFor(() => {
+      expect(renderArgs.setStatus).toHaveBeenCalledWith('creating');
+    });
+
+    act(() => {
+      releaseFailedActionRequestApiResponse(error);
+    });
+
+    await waitFor(() => {
+      expect(renderArgs.setStatus).toHaveBeenCalledWith('error');
+    });
+  });
+
   it('should store the action id when action request api is successful', async () => {
     render();
 

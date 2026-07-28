@@ -63,8 +63,18 @@ const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
   return parse(definition.yaml) as ParsedWorkflow;
 };
 
-const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep | undefined =>
-  steps.find((step) => step.name === name);
+const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep | undefined => {
+  for (const step of steps) {
+    if (step.name === name) {
+      return step;
+    }
+    const nested = findStep(step.steps ?? [], name);
+    if (nested) {
+      return nested;
+    }
+  }
+  return undefined;
+};
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
@@ -103,33 +113,47 @@ describe('scheduled Significant Events managed workflows', () => {
     });
   });
 
-  it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 40m floor', () => {
-    const belowFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+  it('wires the detection interval into the trigger cadence and the tuning values into the detect inputs', () => {
+    const defaults = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 5,
+      detectionBucketIntervalMinutes: 1,
+      detectionLookbackMinutes: 40,
       targetCoverageMinutes: 10,
     });
-    const aboveFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+    const tuned = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 45,
+      detectionBucketIntervalMinutes: 5,
+      detectionLookbackMinutes: 150,
       targetCoverageMinutes: 10,
     });
 
-    expect(belowFloor.enabled).toBe(false);
-    expect(belowFloor.triggers).toEqual(
+    expect(defaults.enabled).toBe(false);
+    expect(defaults.triggers).toEqual(
       expect.arrayContaining([{ type: 'scheduled', with: { every: '5m' } }])
     );
-    const belowFloorStep = findStep(belowFloor.steps, 'detect');
-    expect(belowFloorStep?.with).toEqual({
+    const defaultsStep = findStep(defaults.steps, 'detect');
+    expect(defaultsStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-40m', detectionIntervalMinutes: 5, targetCoverageMinutes: 10 },
+      inputs: {
+        lookback: 'now-40m',
+        bucketInterval: '1m',
+        detectionIntervalMinutes: 5,
+        targetCoverageMinutes: 10,
+      },
     });
 
-    expect(aboveFloor.triggers).toEqual(
+    expect(tuned.triggers).toEqual(
       expect.arrayContaining([{ type: 'scheduled', with: { every: '45m' } }])
     );
-    const aboveFloorStep = findStep(aboveFloor.steps, 'detect');
-    expect(aboveFloorStep?.with).toEqual({
+    const tunedStep = findStep(tuned.steps, 'detect');
+    expect(tunedStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-45m', detectionIntervalMinutes: 45, targetCoverageMinutes: 10 },
+      inputs: {
+        lookback: 'now-150m',
+        bucketInterval: '5m',
+        detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 10,
+      },
     });
   });
 
@@ -152,11 +176,11 @@ describe('scheduled Significant Events managed workflows', () => {
     // Each pass is bounded by its own timeout (discovery 20m + triage 30m worst
     // case) rather than a single workflow-level timeout.
     expect(drainLoop?.['iteration-timeout']).toBe('50m');
-    // The loop re-runs only while a child still reports queued work. A child
-    // error is deliberately NOT a continue condition, so the first failing pass
-    // bails out of the loop instead of spinning until max-iterations.
+    // The loop re-runs while a child found work this pass. A child error is
+    // deliberately NOT a continue condition, so the first failing pass bails
+    // out of the loop instead of spinning until max-iterations.
     expect(drainLoop?.condition).toBe(
-      '${{ steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}'
+      '${{ steps.discover.output.hasWork == true or steps.triage.output.hasWork == true }}'
     );
 
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
@@ -176,7 +200,7 @@ describe('scheduled Significant Events managed workflows', () => {
     ['discovery', SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID, 'output_no_detections'],
     ['triage', SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID, 'output_no_discoveries'],
   ])(
-    '%s always completes no-work runs as success and reports queue stats, so the scheduled drain loop can rely on hasRemaining instead of run status',
+    '%s always completes no-work runs as success and reports hasWork, so the scheduled drain loop can rely on hasWork instead of run status',
     (_label, id, noWorkStepName) => {
       const parsed = getParsedStaticWorkflowYaml(id);
 
@@ -186,15 +210,15 @@ describe('scheduled Significant Events managed workflows', () => {
       const noWorkStep = findStep(parsed.steps, noWorkStepName);
       expect(noWorkStep?.type).toBe('workflow.output');
       expect(noWorkStep?.status).not.toBe('cancelled');
-      expect(noWorkStep?.with?.noWork).toBe(true);
+      expect(noWorkStep?.with?.hasWork).toBe(false);
 
       // No step anywhere in this workflow should cancel the run on no-work.
       expect(parsed.steps.some((step) => step.status === 'cancelled')).toBe(false);
 
       const resultStep = findStep(parsed.steps, 'output_result');
       expect(resultStep?.with).toMatchObject({
-        hasRemaining: expect.stringContaining('compute_queue_stats.output.hasRemaining'),
-        queueEmpty: expect.stringContaining('compute_queue_stats.output.queueEmpty'),
+        hasWork: true,
+        processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
       });
     }
   );
@@ -205,11 +229,14 @@ describe('scheduled Significant Events managed workflows', () => {
     const stampHandled = findStep(checkJudgeOutput?.steps ?? [], 'foreach_stamp_handled');
 
     expect(stampHandled?.type).toBe('foreach');
-    expect(stampHandled?.foreach).toBe('${{ steps.collect_discoveries.output.findings }}');
+    // ES|QL rows are [event_id, _source, score]
+    expect(stampHandled?.foreach).toBe(
+      '${{ steps.get_unassessed_discoveries.output.values | default: [] }}'
+    );
 
     const checkEventWritten = findStep(stampHandled?.steps ?? [], 'check_event_written');
     expect(checkEventWritten?.condition).toBe(
-      '${{ variables.written_event_ids contains foreach.item.event_id }}'
+      '${{ variables.written_event_ids contains foreach.item[0] }}'
     );
 
     const checkHandledExists = findStep(checkEventWritten?.steps ?? [], 'check_handled_exists');
@@ -220,12 +247,12 @@ describe('scheduled Significant Events managed workflows', () => {
         query: {
           bool: {
             filter: expect.arrayContaining([
-              { term: { event_id: '{{ foreach.item.event_id }}' } },
+              { term: { event_id: '{{ foreach.item[0] }}' } },
               { term: { kind: '{{ consts.KIND_HANDLED }}' } },
               {
                 range: {
                   '@timestamp': {
-                    gte: '{{ foreach.item["@timestamp"] }}',
+                    gte: '{{ foreach.item[1]["@timestamp"] }}',
                   },
                 },
               },
@@ -235,7 +262,15 @@ describe('scheduled Significant Events managed workflows', () => {
       },
     });
 
-    const writeHandledMarker = findStep(checkEventWritten?.steps ?? [], 'write_handled_marker');
+    const maybeWriteHandled = findStep(
+      checkEventWritten?.steps ?? [],
+      'maybe_write_handled_marker'
+    );
+    expect(maybeWriteHandled?.condition).toBe(
+      '${{ steps.check_handled_exists.output.count == 0 }}'
+    );
+
+    const writeHandledMarker = findStep(maybeWriteHandled?.steps ?? [], 'write_handled_marker');
     expect(writeHandledMarker?.with).toEqual({
       method: 'POST',
       path: '/{{ consts.DISCOVERIES_INDEX }}/_doc',
@@ -245,8 +280,8 @@ describe('scheduled Significant Events managed workflows', () => {
           space_ids: ['{{ variables.spaceId }}'],
         },
         kind: '{{ consts.KIND_HANDLED }}',
-        event_id: '{{ foreach.item.event_id }}',
-        previous_discovery_id: '{{ foreach.item.discovery_id }}',
+        event_id: '{{ foreach.item[0] }}',
+        previous_discovery_id: '{{ foreach.item[1].discovery_id }}',
       },
     });
   });
@@ -269,7 +304,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
-        targetCoverageMinutes: 10,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
@@ -284,7 +321,12 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       {
         spaceId: 'space-a',
         workflowIdSuffix: 'space-a',
-        values: { detectionIntervalMinutes: 30, targetCoverageMinutes: 10 },
+        values: {
+          detectionIntervalMinutes: 30,
+          detectionBucketIntervalMinutes: 1,
+          detectionLookbackMinutes: 40,
+          targetCoverageMinutes: 30,
+        },
       }
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
@@ -332,7 +374,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 60,
-        targetCoverageMinutes: 10,
+        detectionBucketIntervalMinutes: 2,
+        detectionLookbackMinutes: 60,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 10,
         triageBatchSize: 12,
@@ -367,7 +411,9 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
-        targetCoverageMinutes: 10,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,

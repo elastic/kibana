@@ -102,6 +102,9 @@ export const CollectorDetail: React.FC<CollectorDetailProps> = ({ agents }) => {
             onChange={(e) => setSelectedAgentId(e.target.value)}
             compressed
             data-test-subj="collectorDetailSelector"
+            aria-label={i18n.translate('xpack.fleet.otelUi.collectorDetail.selectorAriaLabel', {
+              defaultMessage: 'Select collector agent',
+            })}
           />
           <EuiSpacer size="m" />
         </>
