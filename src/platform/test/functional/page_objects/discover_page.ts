@@ -1301,6 +1301,13 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  /**
+   * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
+   * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
+   * flag), so `defaultMode` defaults to `'classic'` to match today's default. When
+   * the flag is flipped to make ES|QL the default, update `defaultMode` or the seed
+   * is ignored.
+   */
   public setQueryMode(currentMode: string, defaultMode: string = 'classic') {
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,

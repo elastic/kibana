@@ -1071,18 +1071,15 @@ export class DiscoverApp {
   }
 
   /**
-   * Persists the requested Discover query mode in localStorage on the next
-   * page load. The persisted value is only honored by Discover if its
-   * `defaultMode` snapshot matches the resolved default (driven by the
-   * `discover.isEsqlDefault` feature flag) active for the test - pass
-   * `defaultMode` to match a config that overrides the flag, otherwise it
-   * defaults to the flag's own default (`'classic'`).
+   * Seeds the persisted query mode in localStorage on the next page load. Discover
+   * ignores `currentMode` unless `defaultMode` matches the resolved default (the
+   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'classic'` to
+   * match today's default. When the flag is flipped to make ES|QL the default,
+   * update `defaultMode` or the seed is ignored.
    *
-   * Note: this is not idempotent. Each call registers an additional init
-   * script via Playwright's `addInitScript`, and on subsequent page loads
-   * every registered script runs in order, so the value written by the
-   * last call wins. Avoid calling it multiple times in the same test
-   * unless that stacking behavior is intentional.
+   * Not idempotent: each call adds an `addInitScript` that reruns on every later
+   * load in order, so the last write wins. Avoid calling it more than once per
+   * test unless that stacking is intentional.
    */
   public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'classic') {
     return this.page.addInitScript(
