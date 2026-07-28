@@ -34,6 +34,7 @@ const startServicesWithProjectCount = (
   ...kibanaMock,
   cps: {
     cpsManager: createCpsManager({ totalProjectCount, defaultProjectRouting }),
+    isTierEligible: true,
   },
 });
 

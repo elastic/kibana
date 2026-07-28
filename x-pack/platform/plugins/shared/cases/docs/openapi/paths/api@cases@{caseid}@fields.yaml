@@ -2,10 +2,10 @@ get:
   summary: Get the fields applicable to an existing case
   operationId: getCaseApplicableFieldsDefaultSpace
   description: >
-    Returns the fields a caller may write to the case's `extended_fields`. The owner and any applied
-    template are derived from the case itself, so the response includes the owner's global
-    (library-wide) fields and, when the case has a template applied, that template's fields.
-    Requires the Cases feature to be enabled in the space.
+    Returns the fields you can write to the case's `extended_fields`. The case determines the owner
+    and any applied template. The response includes the owner's global fields (library-wide) and, if
+    the case has a template, that template's fields. Requires the Cases feature to be enabled in the
+    space.
   tags:
     - cases
   parameters:

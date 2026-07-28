@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutOverview } from '.';
 
 const mockUseServiceHasSystemMetrics = jest.fn<
@@ -19,11 +19,9 @@ const mockUseServiceHasSystemMetrics = jest.fn<
 let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
   null;
 
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: { http: {}, notifications: { toasts: { addDanger: jest.fn() } } },
-    share: { url: { locators: { get: jest.fn() } } },
-  }),
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
 jest.mock('../hooks/use_service_has_system_metrics', () => ({
@@ -51,31 +49,42 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
-const service: ServiceNodeData = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
-  isService: true,
+const service: ServiceFlyoutService = {
+  name: 'opbeans-java',
   agentName: 'java',
 };
 
-const defaultProps = {
-  service,
-  environment: 'production' as const,
-  kuery: '',
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-  transactionType: 'request',
-  refreshToken: 0,
-  onEnvironmentChange: jest.fn(),
-  onRangeChange: jest.fn(),
-  onRefresh: jest.fn(),
-  onTransactionTypeChange: jest.fn(),
-};
+function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {}) {
+  return {
+    deps: {
+      core: {
+        http: {},
+        notifications: { toasts: { addDanger: jest.fn() } },
+      } as any,
+      share: { url: { locators: { get: jest.fn() } } } as any,
+      lens: undefined as any,
+      dataViews: undefined as any,
+    },
+    service,
+    filters: {
+      environment: 'production' as const,
+      setEnvironment: jest.fn(),
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      setRange: jest.fn(),
+      transactionType: 'request',
+      setTransactionType: jest.fn(),
+      refreshToken,
+      onRefresh: jest.fn(),
+    },
+  };
+}
 
-function renderOverview(overrides: Partial<typeof defaultProps> = {}) {
+function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken }));
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutOverview {...defaultProps} {...overrides} />
+      <ServiceFlyoutOverview />
     </IntlProvider>
   );
 }
