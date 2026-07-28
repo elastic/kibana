@@ -929,12 +929,12 @@ export class RulesClient {
 
     if (disabledTaskIds.length > 0) {
       try {
-        await this.taskManager.bulkDisable(disabledTaskIds);
+        await this.taskManager.bulkRemove(disabledTaskIds);
       } catch (e) {
         const driftedRuleIds = disabledRules.map((rule) => rule.id);
         this.recordTaskManagerDrift({
           ruleIds: driftedRuleIds,
-          message: `Failed to disable executor task(s) for rule(s) [${driftedRuleIds.join(
+          message: `Failed to remove executor task(s) for disabled rule(s) [${driftedRuleIds.join(
             ', '
           )}]; the tasks may still fire but the executor defense halts them: ${errorMessage(e)}`,
           errors,
