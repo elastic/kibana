@@ -86,9 +86,8 @@ class TaskHandlerImpl implements TaskHandler {
     });
     heartbeatReporter.start();
 
-    // 4. Build a single multicast event stream. Wrapping the async runner setup in the
-    // stream turns setup errors into stream errors, so they reach callback delivery
-    // through the same path as mid-stream errors.
+    // 4. Build a single multicast event stream; wrapping the async setup makes setup
+    // errors surface as stream errors too.
     const events$ = connectable(
       from(
         handleAgentExecution({
@@ -100,9 +99,7 @@ class TaskHandlerImpl implements TaskHandler {
       ).pipe(switchMap((agentEvents$) => agentEvents$))
     );
 
-    // 5. Attach both consumers — callback delivery (best-effort, never rejects) and
-    // execution-document persistence — then connect. Events only start flowing on
-    // connect, so neither consumer can miss them.
+    // 5. Attach both consumers before connecting, so neither misses events.
     const callbackDeliveryPromise = deliverCallbackEvents({
       execution,
       events$,
