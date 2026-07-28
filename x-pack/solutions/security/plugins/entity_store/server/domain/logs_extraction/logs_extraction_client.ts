@@ -41,6 +41,10 @@ import {
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
+import {
+  isIndexNotFoundError,
+  reinstallSharedElasticsearchAssetsIfMissing,
+} from '../asset_manager/install_assets';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
@@ -150,67 +154,89 @@ export class LogsExtractionClient {
   ): Promise<ExtractedLogsSummary> {
     this.logger.debug('starting entity extraction');
 
-    let isRemote = false;
-
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const entityDefinition = getEntityDefinition(type, this.namespace);
-      const {
-        isRemote: resolvedIsRemote,
-        count,
-        pages,
-        indexPatterns,
-        lastSearchTimestamp,
-        remoteError,
-        logsCapDeferred,
-        logsCapApplied,
-        logsProcessed,
-      } = await this.runQueryAndIngestDocs({
-        type,
-        config,
-        engineState,
-        opts,
-        entityDefinition,
-      });
-
-      isRemote = resolvedIsRemote;
-
-      const operationResult = {
-        success: true as const,
-        isRemote,
-        count,
-        pages,
-        scannedIndices: indexPatterns,
-        lastSearchTimestamp,
-        logsCapApplied,
-        logsProcessed,
-      };
-
-      if (opts?.specificWindow) {
-        return operationResult;
-      }
-
-      if (logsCapDeferred) {
-        // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
-        // do not overwrite it — only clear any stale error.
-        await this.engineDescriptorClient.update(type, {
-          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
-        });
-      } else {
-        await this.engineDescriptorClient.update(type, {
-          logExtractionState: {
-            checkpointTimestamp: null,
-            paginationId: null,
-            lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
-          },
-          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
-        });
-      }
-
-      return operationResult;
+      return await this.runExtraction(type, opts);
     } catch (error) {
-      return await this.handleError(error, type, isRemote);
+      // A missing shared index/data stream (e.g. deleted out from under a running engine) makes
+      // the extraction query throw `index_not_found`. Recreate our own assets if they are gone
+      // and retry once; if nothing was missing the error was about a source index, so fall
+      // through to normal handling.
+      if (isIndexNotFoundError(error)) {
+        const healed = await reinstallSharedElasticsearchAssetsIfMissing({
+          esClient: this.esClient,
+          logger: this.logger,
+          namespace: this.namespace,
+        });
+        if (healed) {
+          this.logger.info(`Recreated missing entity store assets; retrying extraction for ${type}`);
+          try {
+            return await this.runExtraction(type, opts);
+          } catch (retryError) {
+            return await this.handleError(retryError, type, false);
+          }
+        }
+      }
+      return await this.handleError(error, type, false);
     }
+  }
+
+  private async runExtraction(
+    type: EntityType,
+    opts?: LogsExtractionOptions
+  ): Promise<ExtractedLogsSummary> {
+    const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+    const entityDefinition = getEntityDefinition(type, this.namespace);
+    const {
+      isRemote,
+      count,
+      pages,
+      indexPatterns,
+      lastSearchTimestamp,
+      remoteError,
+      logsCapDeferred,
+      logsCapApplied,
+      logsProcessed,
+    } = await this.runQueryAndIngestDocs({
+      type,
+      config,
+      engineState,
+      opts,
+      entityDefinition,
+    });
+
+    const operationResult = {
+      success: true as const,
+      isRemote,
+      count,
+      pages,
+      scannedIndices: indexPatterns,
+      lastSearchTimestamp,
+      logsCapApplied,
+      logsProcessed,
+    };
+
+    if (opts?.specificWindow) {
+      return operationResult;
+    }
+
+    if (logsCapDeferred) {
+      // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
+      // do not overwrite it — only clear any stale error.
+      await this.engineDescriptorClient.update(type, {
+        error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
+      });
+    } else {
+      await this.engineDescriptorClient.update(type, {
+        logExtractionState: {
+          checkpointTimestamp: null,
+          paginationId: null,
+          lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
+        },
+        error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
+      });
+    }
+
+    return operationResult;
   }
 
   public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {

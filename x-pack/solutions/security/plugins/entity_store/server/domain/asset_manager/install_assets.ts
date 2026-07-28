@@ -194,3 +194,83 @@ async function uninstallIndicesAndDataStreams(
     })(),
   ]);
 }
+
+const INDEX_NOT_FOUND = 'index_not_found_exception';
+
+interface EsErrorLike {
+  message?: string;
+  meta?: { body?: { error?: { type?: string; root_cause?: Array<{ type?: string }> } } };
+}
+
+/**
+ * Returns true when the error is about a missing index. Handles two cases:
+ * - Direct ES errors: top-level or root_cause type is `index_not_found_exception`.
+ * - ESQL errors: `verification_exception` with "Unknown index" in the root_cause reason
+ *   (how ESQL reports a missing index referenced in a query).
+ */
+export const isIndexNotFoundError = (error: unknown): boolean => {
+  const esError = (error as EsErrorLike)?.meta?.body?.error;
+  if (esError?.type === INDEX_NOT_FOUND) {
+    return true;
+  }
+  if (
+    esError?.root_cause?.some(
+      (cause) =>
+        cause?.type === INDEX_NOT_FOUND ||
+        (typeof (cause as { reason?: string })?.reason === 'string' &&
+          ((cause as { reason?: string }).reason!.includes(INDEX_NOT_FOUND) ||
+            (cause as { reason?: string }).reason!.includes('Unknown index')))
+    )
+  ) {
+    return true;
+  }
+  const message = (error as EsErrorLike)?.message;
+  return typeof message === 'string' && message.includes(INDEX_NOT_FOUND);
+};
+
+const dataStreamExists = async (esClient: ElasticsearchClient, name: string): Promise<boolean> => {
+  try {
+    await esClient.indices.getDataStream({ name });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Checks whether the shared index and data streams exist and recreates any that are missing.
+ * Returns true if anything was recreated, false if all were already present.
+ *
+ * Callers use the return value to distinguish a missing entity store index (heal + retry) from a
+ * missing source log index (let the error propagate). Safe to call from parallel extraction tasks —
+ * the underlying creates use `throwIfExists: false`.
+ */
+export async function reinstallSharedElasticsearchAssetsIfMissing({
+  esClient,
+  logger,
+  namespace,
+}: SharedElasticsearchAssetOptions): Promise<boolean> {
+  const latestIndex = getLatestEntitiesIndexName(namespace);
+  const updatesDataStream = getUpdatesEntitiesDataStreamName(namespace);
+  const metadataDataStream = getMetadataEntitiesDataStreamName(namespace);
+
+  const [latestExists, updatesExists, metadataExists] = await Promise.all([
+    esClient.indices.exists({ index: latestIndex }),
+    dataStreamExists(esClient, updatesDataStream),
+    dataStreamExists(esClient, metadataDataStream),
+  ]);
+
+  if (latestExists && updatesExists && metadataExists) {
+    return false;
+  }
+
+  const missing = [
+    !latestExists && latestIndex,
+    !updatesExists && updatesDataStream,
+    !metadataExists && metadataDataStream,
+  ].filter(Boolean);
+  logger.warn(`Recreating missing entity store assets in ${namespace}: ${missing.join(', ')}`);
+
+  await installSharedElasticsearchAssets({ esClient, logger, namespace });
+  return true;
+}
