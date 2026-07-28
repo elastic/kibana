@@ -33,6 +33,7 @@ import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
@@ -309,6 +310,42 @@ beforeEach(() => {
 });
 
 describe('Action Executor', () => {
+  test('passes saved-object version only to spec connector executors', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      version: 'WzEsMV0=',
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      source: ACTION_TYPE_SOURCES.spec,
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorVersion: 'WzEsMV0=',
+      })
+    );
+    expect(connectorType.executor).not.toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: expect.anything() })
+    );
+  });
+
+  test('does not pass connectorVersion to non-spec connector executors', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      version: 'WzEsMV0=',
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorType.executor).not.toHaveBeenCalledWith(
+      expect.objectContaining({ connectorVersion: expect.anything() })
+    );
+  });
+
   for (const executeUnsecure of [false, true]) {
     const label = executeUnsecure ? 'executes unsecured' : 'executes';
 

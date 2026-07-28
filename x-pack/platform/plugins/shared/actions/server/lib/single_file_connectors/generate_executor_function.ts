@@ -122,6 +122,7 @@ export const generateExecutorFunction = ({
       signal,
       authMode,
       profileUid,
+      connectorVersion,
     } = execOptions;
     const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
       fetchOptions?: FetchOptions;
@@ -160,9 +161,24 @@ export const generateExecutorFunction = ({
       if (!clientType) {
         throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
       }
+      if (authMode === 'per-user' && !profileUid) {
+        throw createTaskRunError(
+          new Error('A profile UID is required to lease a per-user connector client.'),
+          TaskErrorSource.USER
+        );
+      }
       try {
+        if (!connectorVersion) {
+          throw new Error(`Missing saved-object version for persisted connector "${connectorId}".`);
+        }
         return await pool.lease(
-          buildClientLeaseKey(connectorId, id),
+          buildClientLeaseKey({
+            connectorId,
+            clientTypeId: id,
+            authMode,
+            profileUid,
+            connectorVersion,
+          }),
           () => clientType.build({ logger, axiosInstance, config, network, credential }),
           clientType.terminate
         );

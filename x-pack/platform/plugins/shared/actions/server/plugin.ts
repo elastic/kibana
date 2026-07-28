@@ -631,7 +631,9 @@ export class ActionsPlugin
         encryptedSavedObjectsClient,
         connectorLifecycleListeners: this.connectorLifecycleListeners,
         getCurrentUserProfileId,
-        evictClientPool: (connectorId: string) => this.clientLeasePool?.evict(connectorId),
+        evictClientPool: async (connectorId: string) => {
+          await this.clientLeasePool?.evict(connectorId);
+        },
       });
     };
 
@@ -1013,7 +1015,9 @@ export class ActionsPlugin
       connectorLifecycleListeners,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
-    const evictClientPool = (connectorId: string) => this.clientLeasePool?.evict(connectorId);
+    const evictClientPool = async (connectorId: string): Promise<void> => {
+      await this.clientLeasePool?.evict(connectorId);
+    };
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
@@ -1144,6 +1148,7 @@ export class ActionsPlugin
       return false;
     }
     this.inMemoryConnectors.splice(index, 1);
+    void this.clientLeasePool?.evict(connectorId);
     this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
     return true;
   };
