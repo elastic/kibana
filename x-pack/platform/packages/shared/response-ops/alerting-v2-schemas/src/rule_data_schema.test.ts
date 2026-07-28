@@ -22,6 +22,8 @@ import {
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
   updateRuleBodySchema,
+  ruleTagsParamsSchema,
+  tagsResponseSchema,
 } from './rule_data_schema';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
@@ -1553,5 +1555,52 @@ describe('bulkGetRulesResponseSchema', () => {
 
   it('rejects a missing rules field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('ruleTagsParamsSchema', () => {
+  it('accepts an empty object', () => {
+    expect(ruleTagsParamsSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid search and kind', () => {
+    expect(ruleTagsParamsSchema.parse({ search: 'cpu', kind: 'alert' })).toEqual({
+      search: 'cpu',
+      kind: 'alert',
+    });
+  });
+
+  it('accepts kind: signal', () => {
+    expect(ruleTagsParamsSchema.parse({ kind: 'signal' })).toEqual({ kind: 'signal' });
+  });
+
+  it('rejects search longer than 256 characters', () => {
+    expect(() => ruleTagsParamsSchema.parse({ search: 'a'.repeat(257) })).toThrow();
+  });
+
+  it('rejects invalid kind', () => {
+    expect(() => ruleTagsParamsSchema.parse({ kind: 'unknown' })).toThrow();
+  });
+
+  it('rejects the removed filter key', () => {
+    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => ruleTagsParamsSchema.parse({ foo: 'bar' })).toThrow();
+  });
+});
+
+describe('tagsResponseSchema', () => {
+  it('accepts a tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: ['a', 'b'] })).toEqual({ tags: ['a', 'b'] });
+  });
+
+  it('accepts an empty tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: [] })).toEqual({ tags: [] });
+  });
+
+  it('rejects a missing tags field', () => {
+    expect(() => tagsResponseSchema.parse({})).toThrow();
   });
 });

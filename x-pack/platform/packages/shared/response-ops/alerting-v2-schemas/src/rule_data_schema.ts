@@ -623,22 +623,30 @@ export const findRulesResponseSchema = z
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
 /** Query parameters for the rule tags API. */
-export const ruleTagsParamsSchema = z.object({
-  filter: z
-    .string()
-    .max(1024)
-    .optional()
-    .describe('The filter to apply when aggregating rule tags.'),
-});
+export const ruleTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
+    kind: ruleKindSchema.optional().describe('Restrict tags to rules of the given kind.'),
+  })
+  .strict();
 
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
 
-/** Rule tags response schema. */
-export const ruleTagsResponseSchema = z
+/** Normalized wrapped tags response (shared by rule-tag and action-policy-tag routes). */
+export const tagsResponseSchema = z
   .object({
-    tags: z.array(z.string()).describe('The list of unique rule tags.'),
+    tags: z.array(z.string()).describe('The list of unique tags.'),
   })
-  .describe('All unique tags across rules.');
+  .describe('Wrapped tags response.');
+
+export type TagsResponse = z.infer<typeof tagsResponseSchema>;
+
+/** Rule tags response schema. */
+export const ruleTagsResponseSchema = tagsResponseSchema.describe('All unique tags across rules.');
 
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z

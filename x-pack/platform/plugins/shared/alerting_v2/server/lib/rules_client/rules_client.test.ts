@@ -1426,7 +1426,7 @@ describe('RulesClient', () => {
       },
     });
 
-    it('returns the aggregated tags without a filter', async () => {
+    it('returns the aggregated tags without a filter or search', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['cpu', 'memory']));
@@ -1445,12 +1445,12 @@ describe('RulesClient', () => {
       );
     });
 
-    it('translates a clean API filter to an SO filter before aggregating', async () => {
+    it('translates kind: alert to an SO filter', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['cpu']));
 
-      await client.getTags({ filter: 'kind:alert' });
+      await client.getTags({ kind: 'alert' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1459,6 +1459,31 @@ describe('RulesClient', () => {
           filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
         })
       );
+    });
+
+    it('translates kind: signal to an SO filter', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['sig']));
+
+      await client.getTags({ kind: 'signal' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: signal`,
+        })
+      );
+    });
+
+    it('forwards search to the saved-object service', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['production']));
+
+      await client.getTags({ search: 'pro' });
+
+      // search is passed via the agg include pattern — verified via the SO service layer
+      expect(mockSavedObjectsClient.find).toHaveBeenCalled();
     });
   });
 

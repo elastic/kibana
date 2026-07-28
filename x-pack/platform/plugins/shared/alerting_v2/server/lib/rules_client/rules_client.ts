@@ -11,6 +11,7 @@ import {
   createRuleDataSchema,
   isStateTransitionAllowed,
   updateRuleDataSchema,
+  type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -524,9 +525,9 @@ export class RulesClient {
   }
 
   @withApm
-  public async getTags(params: { filter?: string } = {}): Promise<string[]> {
-    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
-    return this.rulesSavedObjectService.findTags({ filter: soFilter });
+  public async getTags(params: { search?: string; kind?: RuleKind } = {}): Promise<string[]> {
+    const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
+    return this.rulesSavedObjectService.findTags({ search: params.search, filter: soFilter });
   }
 
   @withApm

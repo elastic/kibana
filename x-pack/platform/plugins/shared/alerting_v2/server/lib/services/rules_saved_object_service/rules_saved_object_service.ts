@@ -12,6 +12,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+
+const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { convertEveryToSchedulesPerMinute } from '../../duration';
@@ -92,7 +94,7 @@ export interface RulesSavedObjectServiceContract {
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
     total: number;
   }>;
-  findTags(params?: { filter?: string }): Promise<string[]>;
+  findTags(params?: { search?: string; filter?: string }): Promise<string[]>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
 
@@ -318,7 +320,9 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
   }
 
-  public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
+  public async findTags({ search, filter }: { search?: string; filter?: string } = {}): Promise<
+    string[]
+  > {
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -327,8 +331,9 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         tags: {
           terms: {
             field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
-            size: 10000,
-            order: { _key: 'asc' },
+            size: 20,
+            order: { _count: 'desc' },
+            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
           },
         },
       },
