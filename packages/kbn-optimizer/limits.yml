@@ -6,7 +6,7 @@ pageLoadAssetSize:
   agentBuilderPlatform: 26248
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
-  agentBuilderWorkflows: 4841
+  agentBuilderWorkflows: 4955
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -17,7 +17,7 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 297678
+  cases: 310000
   charts: 40269
   clientApps: 4688
   cloud: 11743
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  contextEngine: 5795
+  contextEngine: 5837
   controls: 10300
   core: 563984
   cps: 9209
@@ -41,7 +41,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardMarkdown: 8613
   data: 511931
-  dataFederation: 9010
+  dataFederation: 9029
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743
@@ -143,7 +143,7 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 48128
   painlessLab: 6299
-  pnd: 7441
+  pnd: 7674
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860
