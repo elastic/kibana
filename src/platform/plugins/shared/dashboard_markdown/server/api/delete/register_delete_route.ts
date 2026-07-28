@@ -62,7 +62,7 @@ export function registerDeleteRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           await deleteMarkdown(ctx, req.params.id);
         } catch (e) {
