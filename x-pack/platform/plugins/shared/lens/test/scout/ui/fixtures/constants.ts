@@ -22,6 +22,7 @@ export const LOGSTASH_IN_RANGE_DATES = {
 } as const;
 
 export const KBN_ARCHIVE_PATHS = {
+  LENS_BASIC: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json',
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
   OPEN_IN_LENS: {
     TSVB: {
