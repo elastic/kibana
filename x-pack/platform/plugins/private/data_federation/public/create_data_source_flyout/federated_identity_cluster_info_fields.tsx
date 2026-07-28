@@ -19,16 +19,19 @@ function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
       <div style={{ position: 'relative' }}>
         <EuiFieldText readOnly fullWidth value={value} style={{ paddingRight: '2rem' }} />
         <div style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
-          <EuiCopy textToCopy={value}>
+          <EuiCopy
+            textToCopy={value}
+            beforeMessage={copyLabel}
+            tooltipProps={{ disableScreenReaderOutput: true }}
+          >
             {(copy) => (
-              <EuiToolTip content={copyLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  display="empty"
-                  onClick={copy}
-                  aria-label={copyLabel}
-                />
-              </EuiToolTip>
+              /* eslint-disable @elastic/eui/tooltip-button-icon-wrap */
+              <EuiButtonIcon
+                iconType="copyClipboard"
+                display="empty"
+                onClick={copy}
+                aria-label={copyLabel}
+              />
             )}
           </EuiCopy>
         </div>
