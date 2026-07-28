@@ -104,11 +104,10 @@ Build the complete primary verification plan before executing any ES|QL.
 Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In one assistant response, emit one separate `platform_core_execute_esql` call for every check in the current wave; the wave size MUST equal `min(remaining planned primary checks, 10)`. Multiple calls to the same tool in one response are required — never emit one independent primary check and wait for its result before dispatching the rest. A one-call wave is allowed only when exactly one planned check remains.
 
 **Required modifications before executing every query:**
-1. Strip `METADATA _id, _source`.
-2. Row-level projection (no `STATS`, no `BY`, no `LIMIT`): append `| KEEP @timestamp, <text-field> | SORT @timestamp ASC | LIMIT 1`.
+1. Row-level projection (no `STATS`, no `BY`, no `LIMIT`): append `| KEEP @timestamp, <text-field> | SORT @timestamp ASC | LIMIT 1`.
    - Text field: ONLY `body.text` (OTel Semconv) or `message` (ECS). Try `body.text` first; fall back to `message` on empty.
    - Never project other fields — unmapped columns cause `Unknown column` errors.
-   - Aggregation queries (have `STATS`/`BY`): strip `METADATA` only — no projection.
+   - Aggregation queries (have `STATS`/`BY`): execute as-is — no projection.
    - `ASC` returns the earliest matching log — onset evidence for root-cause hypothesis.
 3. Time scoping: insert `| WHERE @timestamp >= "<detection @timestamp>" AND @timestamp <= NOW()` immediately after `FROM`. The lower bound MUST be an absolute ISO-8601 string copied directly from the detection doc (e.g. `"2026-06-11T15:03:00Z"`). Source: the `@timestamp` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `@timestamp` in the batch. **Never use any relative time expression** — `"now-15m"`, `NOW() - 15 minutes`, or any other form. Skip for `ROW`/`SHOW`/`METRICS` queries.
 4. **Never** modify `WHERE` clauses, field names, or `FROM`. This can lead to unnecessary errors. Skip the query on execution failure.
@@ -126,7 +125,7 @@ After all primary results return, collect every permitted contradiction follow-u
 Never retry completed checks or run a third wave. Note any checks skipped because the budget was exhausted in `summary`.
 
 **Deduplication before executing:**
-- Identical query bodies (METADATA stripped, KEEP/SORT/LIMIT appended): execute once, write one `signals` entry per KI.
+- Identical query bodies (after appending KEEP/SORT/LIMIT): execute once, write one `signals` entry per KI.
 - Strict subset WHERE: execute only the more permissive query; write entries for both KIs.
 
 ---
