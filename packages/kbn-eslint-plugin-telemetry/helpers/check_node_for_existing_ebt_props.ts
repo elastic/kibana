@@ -29,6 +29,16 @@ const isGetEbtPropsCall = (spread: TSESTree.JSXSpreadAttribute): boolean => {
  * Returns true if a spread attribute is a variable whose initializer
  * contains all the required EBT property keys.
  */
+const findVariable = (scope: Scope.Scope, name: string): Scope.Variable | undefined => {
+  let current: Scope.Scope | null = scope;
+  while (current) {
+    const found = current.variables.find((v) => v.name === name);
+    if (found) return found;
+    current = current.upper;
+  }
+  return undefined;
+};
+
 const isVariableWithEbtProps = (
   spread: TSESTree.JSXSpreadAttribute,
   getScope: () => Scope.Scope
@@ -38,7 +48,7 @@ const isVariableWithEbtProps = (
     return false;
   }
 
-  const variable = getScope().variables.find((v) => v.name === argument.name);
+  const variable = findVariable(getScope(), argument.name as string);
   if (!variable || variable.defs.length === 0) {
     return false;
   }
@@ -58,8 +68,8 @@ const isVariableWithEbtProps = (
 
 /**
  * Returns true if the JSXOpeningElement already has EBT tracking attributes
- * (`data-ebt-action`, `data-ebt-element`, and `data-ebt-detail`), either as
- * direct attributes or via a `{...getEbtProps({...})}` spread.
+ * (`data-ebt-action` and `data-ebt-element`), either as direct attributes or
+ * via a `{...getEbtProps({...})}` spread.
  */
 export const checkNodeForExistingEbtProps = (
   node: TSESTree.JSXOpeningElement,

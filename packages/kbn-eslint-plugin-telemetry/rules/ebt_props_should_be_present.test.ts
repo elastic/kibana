@@ -46,9 +46,14 @@ for (const [name, tester] of [tsTester, babelTester]) {
         // Direct data-ebt-* attributes
         ...EBT_INTERACTIVE_ELEMENTS.map((element) => ({
           filename: 'foo.tsx',
-          code: `<${element} data-ebt-action="someAction" data-ebt-element="someElement" data-ebt-detail="someDetail" />`,
+          code: `<${element} data-ebt-action="someAction" data-ebt-element="someElement" />`,
         })),
-        // Variable spread with EBT keys — should not be flagged
+        // Module-scope variable spread with EBT keys — should not be flagged
+        {
+          filename: 'foo.tsx',
+          code: `const ebtProps = { 'data-ebt-action': 'a', 'data-ebt-element': 'e' }; function Foo() { return <EuiButton {...ebtProps} />; }`,
+        },
+        // Function-scope variable spread with EBT keys — should not be flagged
         ...EBT_INTERACTIVE_ELEMENTS.map((element) => ({
           filename: 'foo.tsx',
           code: `function Foo() { const ebtProps = { 'data-ebt-action': 'a', 'data-ebt-element': 'e', 'data-ebt-detail': 'd' }; return <${element} {...ebtProps} />; }`,

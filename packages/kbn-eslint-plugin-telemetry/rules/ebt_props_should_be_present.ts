@@ -23,6 +23,12 @@ const hasOnClickProp = (openingEl: TSESTree.JSXOpeningElement): boolean =>
 /**
  * Interactive EUI components and native HTML elements that should carry EBT
  * tracking attributes (`data-ebt-action` and `data-ebt-element`).
+ *
+ * Intentionally narrower than EVENT_GENERATING_ELEMENTS: EuiField* and
+ * EuiTextArea are excluded because text inputs generate change/input events
+ * rather than distinct click actions suitable for EBT tracking. Native
+ * interactive elements are included because custom interactive wrappers are
+ * often built on top of them (e.g. styled-components wrapping a div/button).
  */
 export const EBT_INTERACTIVE_ELEMENTS = [
   // EUI components
