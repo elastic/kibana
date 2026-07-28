@@ -55,7 +55,7 @@ test.describe(
     test('navigates between Streams discovery, Nightshift, and settings', async ({ page }) => {
       await page.gotoApp('streams/_discovery/streams');
 
-      const nightshiftButton = page.getByRole('link', { name: /nightshift/i });
+      const nightshiftButton = page.testSubj.locator('app-menu-item-nightshift');
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
       await nightshiftButton.click();
 
