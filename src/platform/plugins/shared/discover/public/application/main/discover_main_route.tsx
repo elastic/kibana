@@ -186,13 +186,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     }
   }, [initializeMainRoute, rootProfileState]);
 
-  const isMainRouteInitialized = Boolean(mainRouteInitializationState.value);
-
   useEffect(() => {
-    if (isMainRouteInitialized) {
-      initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
-    }
-  }, [currentDiscoverSessionId, isMainRouteInitialized, initializeDiscoverSession]);
+    initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
+  }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
     data.search.session.clear();
