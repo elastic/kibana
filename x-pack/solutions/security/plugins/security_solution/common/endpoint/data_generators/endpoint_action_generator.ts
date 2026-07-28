@@ -265,6 +265,23 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       } as typeof output;
     }
 
+    if (command === 'suspend-process' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: overrides.error
+            ? 'ra_suspend-process_error_not-found'
+            : 'ra_suspend-process_success_done',
+          ...(!overrides.error
+            ? {
+                command: 'some_command.exe',
+                pid: 234,
+              }
+            : {}),
+        },
+      } as typeof output;
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
