@@ -22,7 +22,7 @@ const blastRadiusDependencySchema = z.object({
   feature_id: z
     .string()
     .max(MAX_ID_LENGTH)
-    .describe('Identifier of the Knowledge Indicator feature this dependency entry is based on.'),
+    .describe('The feature.id value of the Knowledge Indicator this dependency entry is based on.'),
   source: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -52,7 +52,7 @@ const blastRadiusInfrastructureSchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe(
-      'Identifier of the Knowledge Indicator feature this infrastructure entry is based on.'
+      'The feature.id value of the Knowledge Indicator this infrastructure entry is based on.'
     ),
   title: z
     .string()
@@ -77,7 +77,7 @@ const blastRadiusEntitySchema = z.object({
   feature_id: z
     .string()
     .max(MAX_ID_LENGTH)
-    .describe('Identifier of the Knowledge Indicator feature this entity entry is based on.'),
+    .describe('The feature.id value of the Knowledge Indicator this entity entry is based on.'),
   name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
   stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
 });
@@ -94,7 +94,9 @@ export const causalFeatureSchema = z.object({
   feature_id: z
     .string()
     .max(MAX_ID_LENGTH)
-    .describe('Identifier of the Knowledge Indicator feature identified as a symptom hypothesis.'),
+    .describe(
+      'The feature.id value of the Knowledge Indicator identified as a symptom hypothesis.'
+    ),
   name: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -142,7 +144,7 @@ const signalBaseSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Whether this signal actively confirms the failure hypothesis. Omit when the signal is unverified or non-confirming — never set to false.'
+      'Whether verified evidence supports this record’s failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -176,16 +178,17 @@ export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'
 
 /** Canonical sortable severity used by storage, APIs, and tools. */
 export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
-    Sortable severity keyword. Higher prefixes indicate greater severity:
-    "80-critical" = the most severe outage. Any ONE qualifies independently:
-      - a site-wide/global outage affecting most customers;
-      - a user journey completely and unavoidably blocked for every customer who reaches that step;
-      - or confirmed severe PII, credential, or secret exposure.
-    "60-high" = major, painful customer impact, such as a significant feature or journey being unavailable, but limited below critical scope.
-    "40-medium" = partial or less widespread degradation, or customer impact is not yet confirmed.
-    "20-low" = minor customer impact, recovery, noise, false alarm, or non-issue.
+    Sortable severity keyword. Judge impact from what the evidence shows — confirmed failure rows, whether the affected operation still completes, scope from topology and counts, and confirmation status:
+    "80-critical" = the most severe. Any ONE qualifies independently:
+      - a site-wide/global outage affecting all or most customers;
+      - a confirmed failure that fully blocks a customer-facing operation for everyone who reaches it (no successful completions on the affected path);
+      - or confirmed active exposure of PII, PCI, CVV, SSN, credentials, secrets, tokens.
+      A single mandatory service, dependency, or endpoint can establish this when its failure blocks the operation end-to-end; unrelated services do not also need to fail.
+    "60-high" = confirmed and severe but not global: the operation still completes for some users while broadly degraded, intermittent, or partially failing, or the confirmed impact reaches a significant customer subset.
+    "40-medium" = meaningful but bounded: minor confirmed degradation with limited reach, or plausible customer impact that is not yet confirmed (incomplete evidence, telemetry gap, unverified).
+    "20-low" = negligible customer impact: recovery, noise, false alarm, or non-issue.
 
-    Assess affected population, journey availability, duration, and spread. When uncertain between tiers, choose the lower one.
+    When uncertain between two tiers, choose the lower one.
   `);
 
 export type Severity = z.infer<typeof severitySchema>;
@@ -220,8 +223,10 @@ export const significantEventBaseSchema = z.object({
     .max(MAX_TITLE_LENGTH)
     .describe(
       dedent`
-      Stable incident label. Format: "<Affected flow or service> — <failure domain>".
-      Preserve it verbatim across continuation and recovery. Exclude IPs, counts, measurements, current-cycle details, and state or tense words (e.g. "continues", "detected", "active", "resolved").'
+      Stable incident label. Format: "<Affected scope> — <observed condition>".
+      Choose the most specific stable affected scope supported by evidence or KI context: operation, unique service/entity, flow, then domain. For multi-service findings, stop at flow or domain. Never use a generic stream name.
+      The observed condition names the stable rule-specific behavior, failure, degradation, or exposure — not its current lifecycle state.
+      Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, current-cycle details, and state or tense words (e.g. "continues", "detected", "active", "resolved").
       
       Example: "Auth service — login endpoint connection refused".
     `
@@ -243,12 +248,14 @@ export const significantEventBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Objective, self-contained account of the observed state and potential impact. Include:
-          (1) the evidence-backed failure; 
-          (2) the affected flow and potential impact supported by signals or blast_radius;
+        Objective, self-contained account of the problem and potential impact. Lead with the affected operation and observed condition, not the investigation process. Include:
+          (1) the problem and current state;
+          (2) the affected flow and whether user impact is confirmed, possible, or not established;
           (3) magnitude, onset, and current or recovery state when known.
+
+        Possible impact may come from matched query KI descriptions or resolved dependency paths, but must be conditional and scoped.
           
-        Do not include actions, urgency language, or unsupported impact claims.
+        Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, or unsupported impact claims.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),

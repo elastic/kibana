@@ -27,7 +27,7 @@ import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
-import { QueryRuleOrchestrator } from './query_rule_orchestrator';
+import { QueryRuleOrchestrator, type PromoteQueriesResult } from './query_rule_orchestrator';
 import { computeExpiresAt } from './serializers';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
 
@@ -165,6 +165,20 @@ export class KnowledgeIndicatorClient {
     return this.reader.getStreamNamesWithKnowledgeIndicators();
   }
 
+  /**
+   * Streams the sync sweep must reconcile: those with active knowledge
+   * indicators unioned with those that still have Streams-owned rules. The KI
+   * set alone misses streams whose rules outlived all of their KIs — the very
+   * orphan-rule case the sweep exists to catch.
+   */
+  async getStreamNamesToReconcile(): Promise<string[]> {
+    const [withIndicators, withOwnedRules] = await Promise.all([
+      this.reader.getStreamNamesWithKnowledgeIndicators(),
+      this.orchestrator.findStreamNamesWithOwnedRules(),
+    ]);
+    return [...new Set([...withIndicators, ...withOwnedRules])];
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,
@@ -235,7 +249,7 @@ export class KnowledgeIndicatorClient {
   promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number; skipped_stats: number }> {
+  ): Promise<PromoteQueriesResult> {
     return this.orchestrator.promoteQueries(definition, queryIds);
   }
 
@@ -243,7 +257,7 @@ export class KnowledgeIndicatorClient {
     queryIds?: string[];
     minSeverityScore?: number;
     streamDefinitions: Map<string, Streams.all.Definition>;
-  }): Promise<{ promoted: number; skipped_stats: number }> {
+  }): Promise<PromoteQueriesResult> {
     return this.orchestrator.promoteUnbackedQueries(args);
   }
 

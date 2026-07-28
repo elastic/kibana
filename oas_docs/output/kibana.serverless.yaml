@@ -63833,6 +63833,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 2048
             type: string
         - description: The page of results to return.
           in: query
@@ -64042,6 +64043,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '204':
@@ -64073,6 +64076,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -64142,6 +64147,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -74695,6 +74702,10 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -84810,6 +84821,10 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -87796,6 +87811,12 @@ components:
           minLength: 1
           title: Index pattern
           type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
+          type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
           title: Time field
@@ -87987,12 +88008,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -88004,12 +88030,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -89547,9 +89578,11 @@ components:
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          maxLength: 100
           type: string
         every:
           description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          maxLength: 100
           type: string
         occurrences:
           description: The total number of recurrences of the schedule.
@@ -89561,6 +89594,7 @@ components:
             maximum: 12
             minimum: 1
             type: number
+          maxItems: 12
           minItems: 1
           type: array
         onMonthDay:
@@ -89569,12 +89603,15 @@ components:
             maximum: 31
             minimum: 1
             type: number
+          maxItems: 31
           minItems: 1
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           minItems: 1
           type: array
       title: maintenance_window_schedule_recurring_request
@@ -89595,16 +89632,20 @@ components:
           description: The specific months for a recurring schedule. Valid values are 1-12.
           items:
             type: number
+          maxItems: 12
           type: array
         onMonthDay:
           description: The specific days of the month for a recurring schedule. Valid values are 1-31.
           items:
             type: number
+          maxItems: 31
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           type: array
       title: maintenance_window_schedule_recurring_response
       type: object
@@ -89613,14 +89654,17 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request'
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -101956,6 +102000,7 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           additionalProperties: false
@@ -101963,9 +102008,11 @@ components:
           properties:
             end:
               description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+              maxLength: 100
               type: string
             every:
               description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+              maxLength: 100
               type: string
             occurrences:
               description: The total number of recurrences of the schedule.
@@ -101977,6 +102024,7 @@ components:
                 maximum: 12
                 minimum: 1
                 type: number
+              maxItems: 12
               minItems: 1
               type: array
             onMonthDay:
@@ -101985,19 +102033,24 @@ components:
                 maximum: 31
                 minimum: 1
                 type: number
+              maxItems: 31
               minItems: 1
               type: array
             onWeekDay:
               description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
               items:
+                maxLength: 10
                 type: string
+              maxItems: 77
               minItems: 1
               type: array
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -110318,9 +110371,20 @@ components:
                       minimum: 1
                       nullable: true
                       type: number
+                    docsCountPercentage:
+                      default: null
+                      maximum: 100
+                      minimum: 1
+                      nullable: true
+                      type: number
                     enabled:
                       default: true
                       type: boolean
+                    thresholdType:
+                      enum:
+                        - count
+                        - percentage
+                      type: string
                     timeInterval:
                       default: null
                       nullable: true
