@@ -142,10 +142,17 @@ describe('DistributionBar', () => {
   });
 
   describe('tooltip overflow edge cases', () => {
-    it('should add flipped tooltip attribute for small segments', () => {
-      // Mock getBoundingClientRect to simulate small segment that would overflow
-      const mockGetBoundingClientRect = jest.fn();
+    let mockGetBoundingClientRect: jest.SpyInstance;
 
+    beforeEach(() => {
+      mockGetBoundingClientRect = jest.spyOn(Element.prototype, 'getBoundingClientRect');
+    });
+
+    afterEach(() => {
+      mockGetBoundingClientRect.mockRestore();
+    });
+
+    it('should add flipped tooltip attribute for small segments', () => {
       const containerRect = {
         left: 0,
         right: 500,
@@ -190,7 +197,7 @@ describe('DistributionBar', () => {
         toJSON: () => ({}),
       };
 
-      Element.prototype.getBoundingClientRect = mockGetBoundingClientRect
+      mockGetBoundingClientRect
         .mockReturnValueOnce(containerRect)
         .mockReturnValueOnce(smallPartRect)
         .mockReturnValueOnce(tooltipContentRect)
@@ -221,13 +228,9 @@ describe('DistributionBar', () => {
       expect(parts[0].getAttribute('data-tooltip-flipped')).toBe('true');
 
       expect(parts[1].getAttribute('data-tooltip-flipped')).toBe('false');
-
-      mockGetBoundingClientRect.mockRestore();
     });
 
     it('should not flip tooltip when segment is in the right half and flipping would cause more overflow', () => {
-      const mockGetBoundingClientRect = jest.fn();
-
       // Segment near the right side: flipping would extend the tooltip further right than
       // the current left overflow — so keep right-aligned.
       const containerRect = {
@@ -263,7 +266,7 @@ describe('DistributionBar', () => {
         toJSON: () => ({}),
       };
 
-      Element.prototype.getBoundingClientRect = mockGetBoundingClientRect
+      mockGetBoundingClientRect
         .mockReturnValueOnce(containerRect)
         .mockReturnValueOnce(partRect)
         .mockReturnValueOnce(tooltipContentRect);
@@ -280,13 +283,9 @@ describe('DistributionBar', () => {
       const { container } = render(<DistributionBar stats={stats} data-test-subj={testSubj} />);
       const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
       expect(parts[0].getAttribute('data-tooltip-flipped')).toBe('false');
-
-      mockGetBoundingClientRect.mockRestore();
     });
 
     it('should not flip tooltip when there is enough space', () => {
-      const mockGetBoundingClientRect = jest.fn();
-
       const containerRect = {
         left: 0,
         right: 500,
@@ -318,7 +317,7 @@ describe('DistributionBar', () => {
         toJSON: () => ({}),
       };
 
-      Element.prototype.getBoundingClientRect = mockGetBoundingClientRect
+      mockGetBoundingClientRect
         .mockReturnValueOnce(containerRect)
         .mockReturnValueOnce(partRect)
         .mockReturnValueOnce(tooltipRect);
@@ -336,8 +335,6 @@ describe('DistributionBar', () => {
 
       const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
       expect(parts[0].getAttribute('data-tooltip-flipped')).toBe('false');
-
-      mockGetBoundingClientRect.mockRestore();
     });
   });
 
