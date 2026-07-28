@@ -8,10 +8,10 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import { DEFAULT_AI_INDEX_DATA_STREAM, DEFAULT_AI_INDEX_NAME } from '../../../common/constants';
-import type { AiIndexProperties, AiIndexSource } from '../../../common/http_api/ai_indices';
-import { putAiIndex } from '../api/ai_indices';
+import type { AiIndexProperties, AiIndexType } from '../../../common/http_api/ai_indices';
+import { createAiIndex as createAiIndexRequest } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
+import { getAiIndexDest } from '../utils/ai_index_dest';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
 import { contextEngineQueryKeys } from './query_keys';
@@ -21,12 +21,12 @@ interface CreatedAiIndex {
   id: string;
 }
 
-const buildAiIndexProperties = (sources: AiIndexSource[]): { id: string } & AiIndexProperties => ({
-  id: DEFAULT_AI_INDEX_NAME,
-  dest: { type: 'data_stream', value: DEFAULT_AI_INDEX_DATA_STREAM },
-  automations: [],
-  sources,
-});
+export interface CreateAiIndexArgs {
+  id: string;
+  description: string;
+  storageType: AiIndexType;
+  sources: SelectedSource[];
+}
 
 export const useCreateAiIndex = () => {
   const {
@@ -34,10 +34,16 @@ export const useCreateAiIndex = () => {
   } = useKibana();
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, SelectedSource[]>({
-    mutationFn: async (selectedSources) => {
-      const { id, ...properties } = buildAiIndexProperties(toAiIndexSources(selectedSources));
-      await putAiIndex(http, { aiIndexId: id, properties });
+  const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
+    mutationFn: async ({ id, description, storageType, sources }) => {
+      const properties: AiIndexProperties = {
+        description: description.trim() || undefined,
+        dest: getAiIndexDest(storageType, id),
+        automations: [],
+        sources: toAiIndexSources(sources),
+      };
+
+      await createAiIndexRequest(http, { aiIndexId: id, properties });
       return { id };
     },
     onSuccess: () => {
@@ -55,9 +61,9 @@ export const useCreateAiIndex = () => {
   });
 
   const createAiIndex = useCallback(
-    async (selectedSources: SelectedSource[]): Promise<CreatedAiIndex | undefined> => {
+    async (args: CreateAiIndexArgs): Promise<CreatedAiIndex | undefined> => {
       try {
-        return await mutateAsync(selectedSources);
+        return await mutateAsync(args);
       } catch {
         // The error toast is surfaced by the mutation's onError handler.
         return undefined;

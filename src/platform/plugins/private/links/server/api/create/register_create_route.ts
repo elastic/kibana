@@ -56,7 +56,7 @@ export function registerCreateRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           const result = await create(ctx, req.body);
           return res.created({ body: result });

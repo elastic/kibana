@@ -361,7 +361,7 @@ describe('AlertActionsClient', () => {
 
       const result = await client.createBulkActions(actions);
 
-      expect(result).toEqual({ processed: 2, total: 2 });
+      expect(result).toEqual({ affected_count: 2, errors: [] });
       expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
       const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
       const operations = callArgs.operations ?? [];
@@ -369,7 +369,7 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(2);
     });
 
-    it('should handle partial failures and return correct counts', async () => {
+    it('reports ALERT_GROUP_NOT_FOUND for an item whose group has no alert event', async () => {
       const actions: BulkCreateAlertActionItemBody[] = [
         {
           group_hash: 'group-hash-1',
@@ -389,7 +389,10 @@ describe('AlertActionsClient', () => {
 
       const result = await client.createBulkActions(actions);
 
-      expect(result).toEqual({ processed: 1, total: 2 });
+      expect(result.affected_count).toBe(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].id).toBe('unknown-group-hash');
+      expect(result.errors[0].error.code).toBe('ALERT_GROUP_NOT_FOUND');
       expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
       const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
       const operations = callArgs.operations ?? [];
@@ -397,7 +400,7 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(1);
     });
 
-    it('silently skips items whose targeted episode_id has been superseded by a newer episode of the same group', async () => {
+    it('reports ALERT_EPISODE_NOT_FOUND for items whose targeted episode_id has been superseded by a newer episode of the same group', async () => {
       const actions: BulkCreateAlertActionItemBody[] = [
         {
           group_hash: 'group-hash-1',
@@ -422,7 +425,10 @@ describe('AlertActionsClient', () => {
 
       const result = await client.createBulkActions(actions);
 
-      expect(result).toEqual({ processed: 1, total: 2 });
+      expect(result.affected_count).toBe(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].id).toBe('group-hash-1');
+      expect(result.errors[0].error.code).toBe('ALERT_EPISODE_NOT_FOUND');
       expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
       const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
       const operations = callArgs.operations ?? [];
@@ -434,7 +440,7 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('should return processed 0 when all actions fail', async () => {
+    it('returns affected_count 0 with a per-item error for every action when all fail', async () => {
       const actions: BulkCreateAlertActionItemBody[] = [
         {
           group_hash: 'unknown-1',
@@ -451,7 +457,12 @@ describe('AlertActionsClient', () => {
 
       const result = await client.createBulkActions(actions);
 
-      expect(result).toEqual({ processed: 0, total: 2 });
+      expect(result.affected_count).toBe(0);
+      expect(result.errors).toHaveLength(2);
+      expect(result.errors[0].id).toBe('unknown-1');
+      expect(result.errors[0].error.code).toBe('ALERT_GROUP_NOT_FOUND');
+      expect(result.errors[1].id).toBe('unknown-2');
+      expect(result.errors[1].error.code).toBe('ALERT_GROUP_NOT_FOUND');
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 
@@ -475,7 +486,7 @@ describe('AlertActionsClient', () => {
 
         const result = await client.createBulkActions(actions);
 
-        expect(result).toEqual({ processed: 1, total: 1 });
+        expect(result).toEqual({ affected_count: 1, errors: [] });
         expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
 
         const operations = getBulkOperations();
@@ -496,7 +507,7 @@ describe('AlertActionsClient', () => {
         });
       });
 
-      it('silently skips a bulk deactivate item whose precondition fails (already inactive)', async () => {
+      it('reports INVALID_EPISODE_STATE_TRANSITION for a bulk deactivate item whose precondition fails (already inactive)', async () => {
         const actions: BulkCreateAlertActionItemBody[] = [
           {
             group_hash: 'group-hash-1',
@@ -519,7 +530,10 @@ describe('AlertActionsClient', () => {
 
         const result = await client.createBulkActions(actions);
 
-        expect(result).toEqual({ processed: 1, total: 2 });
+        expect(result.affected_count).toBe(1);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].id).toBe('group-hash-1');
+        expect(result.errors[0].error.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
         expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
         const operations = getBulkOperations();
         expect(operations).toHaveLength(2);
@@ -549,7 +563,7 @@ describe('AlertActionsClient', () => {
 
         const result = await client.createBulkActions(actions);
 
-        expect(result).toEqual({ processed: 1, total: 1 });
+        expect(result).toEqual({ affected_count: 1, errors: [] });
         const operations = getBulkOperations();
         expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
         expect(operations[1]).toMatchObject({
