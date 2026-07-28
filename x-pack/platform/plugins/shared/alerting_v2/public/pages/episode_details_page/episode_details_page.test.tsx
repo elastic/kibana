@@ -97,12 +97,8 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section',
   AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
-  AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section', () => ({
-  AlertEpisodeSeverityHeatmapSection: () => <div data-test-subj="stubSeverityHeatmapSection" />,
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section', () => ({
+  AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
@@ -247,8 +243,7 @@ describe('EpisodeDetailsPage', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
-    expect(screen.getByTestId('stubLifecycleHeatmapSection')).toBeInTheDocument();
-    expect(screen.getByTestId('stubSeverityHeatmapSection')).toBeInTheDocument();
+    expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });
 
   it('renders the app header title, tabs, back link, and badges', () => {
