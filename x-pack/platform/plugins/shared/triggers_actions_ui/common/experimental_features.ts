@@ -19,12 +19,11 @@ export const allowedExperimentalValues = Object.freeze({
   rulesDetailLogs: true,
   ruleUseExecutionStatus: false,
   ruleKqlBar: false,
-  isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
   alertDeletionSettingsEnabled: true,
 });
 
-const deprecatedExperimentalValues = new Set(['ruleFormV2']);
+const deprecatedExperimentalValues = new Set(['ruleFormV2', 'isMustacheAutocompleteOn']);
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };

@@ -22,7 +22,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
         ruleKqlBar: true,
-        isMustacheAutocompleteOn: false,
         showMustacheAutocompleteSwitch: false,
         alertDeletionSettingsEnabled: false,
       },
@@ -55,10 +54,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('ruleKqlBar');
 
     expect(result).toEqual(true);
-
-    result = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
-
-    expect(result).toEqual(false);
 
     result = getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch');
 
