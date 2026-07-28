@@ -18,7 +18,13 @@ import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
-import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
+import {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SORT_DEFAULTS,
+  type MetricsGridSettings,
+  type MetricsGridSort,
+} from '@kbn/discover-utils';
+import type { MetricsSort } from '@kbn/unified-chart-section-viewer';
 import { createChartSection } from './chart_section';
 import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
@@ -45,6 +51,8 @@ type UnifiedGridProps = ChartSectionProps & {
   };
   gridSettings?: MetricsGridSettings;
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  metricsSort?: MetricsSort;
+  onMetricsSortChange?: (sort: MetricsSort) => void;
   getRecentlyExploredMetrics?: () => readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
 };
@@ -65,6 +73,18 @@ const createFakeGridSettingsAdapter = (initialState: MetricsGridSettings) => {
     getState$: () => subject.asObservable(),
     setState: (state: MetricsGridSettings) => subject.next(state),
     updateState: jest.fn((update: Partial<MetricsGridSettings>) =>
+      subject.next({ ...subject.getValue(), ...update })
+    ),
+  };
+};
+
+const createFakeSortAdapter = (initialState: MetricsGridSort) => {
+  const subject = new BehaviorSubject(initialState);
+  return {
+    getState: () => subject.getValue(),
+    getState$: () => subject.asObservable(),
+    setState: (state: MetricsGridSort) => subject.next(state),
+    updateState: jest.fn((update: Partial<MetricsGridSort>) =>
       subject.next({ ...subject.getValue(), ...update })
     ),
   };
@@ -143,6 +163,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
     addFilter: jest.fn(),
   };
   const gridSettingsAdapter = createFakeGridSettingsAdapter(METRICS_GRID_SETTINGS_DEFAULTS);
+  const sortAdapter = createFakeSortAdapter(METRICS_GRID_SORT_DEFAULTS);
   const getChartSection = createChartSection();
 
   if (!getChartSection) {
@@ -156,8 +177,8 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
       toolkit: {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: toolkitActions,
-        getStateAdapter: jest.fn(
-          () => gridSettingsAdapter
+        getStateAdapter: jest.fn((definition) =>
+          definition.key === 'metricsGridSort' ? sortAdapter : gridSettingsAdapter
         ) as unknown as ContextAwarenessToolkit['getStateAdapter'],
       },
     }
@@ -175,7 +196,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
 
   render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
 
-  return { toolkitActions, gridSettingsAdapter };
+  return { toolkitActions, gridSettingsAdapter, sortAdapter };
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -262,6 +283,23 @@ describe('MetricsExperienceGridWrapper', () => {
       ...METRICS_GRID_SETTINGS_DEFAULTS,
       counterAggregation: 'max',
     });
+  });
+
+  it('passes the resolved sort (tuple form of the adapter default) to UnifiedMetricsExperienceGrid', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.metricsSort).toEqual(['alphabetically', 'asc']);
+  });
+
+  it('updates the sort state adapter when onMetricsSortChange is invoked and reflects the new sort', () => {
+    const { sortAdapter } = renderChartSection();
+
+    act(() => {
+      unifiedGridProps?.onMetricsSortChange?.(['recency', 'desc']);
+    });
+
+    expect(sortAdapter.updateState).toHaveBeenCalledWith({ field: 'recency', direction: 'desc' });
+    expect(unifiedGridProps?.metricsSort).toEqual(['recency', 'desc']);
   });
 
   it('surfaces the persisted recently explored snapshot and records new interactions', () => {

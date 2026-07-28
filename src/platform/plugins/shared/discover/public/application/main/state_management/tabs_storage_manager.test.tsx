@@ -28,6 +28,7 @@ import {
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import { METRICS_GRID_SORT_STATE_DEF } from '../../../../common/context_awareness';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -97,6 +98,7 @@ describe('TabsStorageManager', () => {
     const services = createDiscoverServicesMock();
     services.storage = new Storage(localStorage);
     services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    services.profileStateRegistry.registerDefinition(METRICS_GRID_SORT_STATE_DEF);
 
     return {
       services,
@@ -399,6 +401,93 @@ describe('TabsStorageManager', () => {
         persistentValue: 'restoredPersistent',
       },
     });
+  });
+
+  it('persists a non-default metrics grid sort to local storage and restores it on reload', async () => {
+    const {
+      services: { storage },
+      tabsStorageManager,
+    } = create();
+
+    tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    jest.spyOn(storage, 'set');
+
+    const tabWithSort: TabState = {
+      ...mockTab1,
+      profileState: {
+        metricsGridSort: { field: 'recency', direction: 'desc' },
+      },
+    };
+
+    await tabsStorageManager.persistLocally(
+      { allTabs: [tabWithSort], recentlyClosedTabs: [] },
+      mockGetInternalState,
+      undefined
+    );
+
+    // The sort is a `Url` field, so it is written to local storage (the reload
+    // persistence mechanism), not stripped.
+    expect(storage.set).toHaveBeenCalledWith(
+      TABS_LOCAL_STORAGE_KEY,
+      expect.objectContaining({
+        openTabs: [
+          expect.objectContaining({
+            profileState: { metricsGridSort: { field: 'recency', direction: 'desc' } },
+          }),
+        ],
+      })
+    );
+
+    // Simulate a reload: read the persisted blob back and confirm the non-default
+    // sort is restored intact.
+    const reloaded = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(reloaded.allTabs[0].profileState).toEqual({
+      metricsGridSort: { field: 'recency', direction: 'desc' },
+    });
+  });
+
+  it('strips an all-default metrics grid sort on read so it falls back to the default', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [
+        {
+          ...toStoredTab(mockTab1),
+          profileState: {
+            metricsGridSort: { field: 'alphabetically', direction: 'asc' },
+          },
+        },
+      ],
+      closedTabs: [],
+    });
+
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    // An all-default sort is stripped on read, leaving no `metricsGridSort` to
+    // restore, so the viewer falls back to its DEFAULT_METRICS_SORT.
+    expect(loadedProps.allTabs[0].profileState?.metricsGridSort).toBeUndefined();
   });
 
   it('should load tabs state from local storage and migrate the legacy props from internalState', () => {
