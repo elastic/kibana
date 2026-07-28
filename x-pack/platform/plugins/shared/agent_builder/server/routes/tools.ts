@@ -20,13 +20,11 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
-  ExecuteToolResponse,
 } from '../../common/http_api/tools';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
-import { getCurrentTraceId } from '../tracing';
 
 export function registerToolsRoutes({
   router,
@@ -455,10 +453,9 @@ export function registerToolsRoutes({
           defaultConnectorId,
         });
 
-        return response.ok<ExecuteToolResponse>({
+        return response.ok({
           body: {
-            results: toolResult.results ?? [],
-            trace_id: toolResult.traceId ?? getCurrentTraceId(),
+            results: toolResult.results,
           },
         });
       })

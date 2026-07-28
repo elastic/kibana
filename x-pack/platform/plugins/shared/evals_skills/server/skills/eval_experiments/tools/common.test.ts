@@ -10,10 +10,12 @@ import {
   EvalExperimentConfigError,
   buildResultsLink,
   buildWorkflowLink,
+  evalExperimentConfigSchema,
   toGenerateParams,
 } from './common';
 
 const baseConfig = {
+  target: 'agent' as const,
   connector_ids: ['c1'],
   dataset_ids: ['d1'],
   evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
@@ -27,7 +29,6 @@ describe('toGenerateParams', () => {
       name: 'My experiment',
       repetitions: 2,
       concurrency: 3,
-      space_ids: ['default', 'team-a'],
     });
 
     expect(params).toMatchObject({
@@ -38,31 +39,66 @@ describe('toGenerateParams', () => {
       evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
       repetitions: 2,
       concurrency: 3,
-      spaceIds: ['default', 'team-a'],
     });
-    expect(params.toolId).toBeUndefined();
   });
 
-  it('maps tool targets to toolId', () => {
-    const params = toGenerateParams({ ...baseConfig, tool_id: 'tool-1' });
-    expect(params.toolId).toBe('tool-1');
+  it('omits agentId for a direct-inference target', () => {
+    const params = toGenerateParams({ ...baseConfig, target: 'inference' });
+
+    expect(params.agentId).toBeUndefined();
+    expect(params.connectorIds).toEqual(['c1']);
+  });
+
+  it('ignores a stray agent_id when the target is inference', () => {
+    const params = toGenerateParams({
+      ...baseConfig,
+      target: 'inference',
+      agent_id: 'agent-1',
+    });
+
     expect(params.agentId).toBeUndefined();
   });
 
-  it('rejects providing both agent_id and tool_id', () => {
-    expect(() => toGenerateParams({ ...baseConfig, agent_id: 'a', tool_id: 't' })).toThrow(
-      EvalExperimentConfigError
-    );
+  it('rejects an agent target without an agent_id', () => {
+    expect(() => toGenerateParams({ ...baseConfig })).toThrow(EvalExperimentConfigError);
+    expect(() => toGenerateParams({ ...baseConfig })).toThrow(/Provide an agent_id/);
+  });
+});
+
+describe('evalExperimentConfigSchema', () => {
+  it('requires an explicit target', () => {
+    const result = evalExperimentConfigSchema.safeParse({
+      connector_ids: ['c1'],
+      dataset_ids: ['d1'],
+      evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
+    });
+
+    expect(result.success).toBe(false);
   });
 
-  it('rejects providing neither agent_id nor tool_id', () => {
-    expect(() => toGenerateParams({ ...baseConfig })).toThrow(/either an agent_id or a tool_id/);
+  it('accepts an inference target with no agent_id', () => {
+    const result = evalExperimentConfigSchema.safeParse({
+      ...baseConfig,
+      target: 'inference',
+    });
+
+    expect(result.success).toBe(true);
   });
 
-  it('rejects the all-spaces wildcard', () => {
-    expect(() => toGenerateParams({ ...baseConfig, agent_id: 'a', space_ids: ['*'] })).toThrow(
-      /all spaces/
-    );
+  it('rejects an agent target with no agent_id', () => {
+    const result = evalExperimentConfigSchema.safeParse(baseConfig);
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an inference target that also passes an agent_id', () => {
+    const result = evalExperimentConfigSchema.safeParse({
+      ...baseConfig,
+      target: 'inference',
+      agent_id: 'agent-1',
+    });
+
+    expect(result.success).toBe(false);
   });
 });
 
@@ -88,21 +124,55 @@ describe('buildResultsLink', () => {
     compareBy: 'execution',
   };
 
+  const datasetFanoutRun: GeneratedExperimentRun = {
+    executionId: 'e1',
+    executions: [
+      { yaml: '', connectorId: 'c1', datasetIds: ['d1'], executionId: 'e1', experimentId: 'x1' },
+      { yaml: '', connectorId: 'c1', datasetIds: ['d2'], executionId: 'e1', experimentId: 'x1' },
+    ],
+    experimentIds: ['x1'],
+    mode: 'dataset-fanout',
+    compareBy: 'experiment',
+  };
+
   it('links single runs to the experiment detail page', () => {
     const link = buildResultsLink('', 'default', singleRun, ['w1']);
     const url = new URL(`http://host${link}`);
     expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
     expect(url.searchParams.get('execution_id')).toBe('e1');
-    expect(url.searchParams.get('workflow_execution_id')).toBe('w1');
+    expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1']);
   });
 
   it('links cross-model runs to the run overview and honors base path + space', () => {
     const link = buildResultsLink('/base', 'team-a', crossModelRun, ['w1', 'w2']);
     const url = new URL(`http://host${link}`);
     expect(url.pathname).toBe('/base/s/team-a/app/management/ai/evals/runs');
-    expect(url.searchParams.get('execution_id')).toBe('launch::c1,launch::c2');
-    expect(url.searchParams.get('connector')).toBe('c1,c2');
-    expect(url.searchParams.get('workflow_execution_id')).toBe('w1,w2');
+    expect(url.searchParams.getAll('execution_id')).toEqual(['launch::c1', 'launch::c2']);
+    expect(url.searchParams.getAll('connector')).toEqual(['c1', 'c2']);
+    expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1', 'w2']);
+  });
+
+  it('keeps ids intact when a connector id contains a comma', () => {
+    const commaRun: GeneratedExperimentRun = {
+      ...crossModelRun,
+      executions: [
+        { yaml: '', connectorId: 'a,b', datasetIds: ['d1'], executionId: 'launch::a,b' },
+        { yaml: '', connectorId: 'c2', datasetIds: ['d1'], executionId: 'launch::c2' },
+      ],
+    };
+
+    const url = new URL(`http://host${buildResultsLink('', 'default', commaRun, ['w1', 'w2'])}`);
+
+    expect(url.searchParams.getAll('connector')).toEqual(['a,b', 'c2']);
+    expect(url.searchParams.getAll('execution_id')).toEqual(['launch::a,b', 'launch::c2']);
+  });
+
+  it('links dataset-fanout runs to the experiment detail page, not the run overview', () => {
+    const link = buildResultsLink('', 'default', datasetFanoutRun, ['w1', 'w2']);
+    const url = new URL(`http://host${link}`);
+    expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
+    expect(url.searchParams.get('execution_id')).toBe('e1');
+    expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1', 'w2']);
   });
 });
 

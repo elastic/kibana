@@ -36,8 +36,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...integrationConfig.get('kbnTestServer.serverArgs'),
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
+        // Pin cases analyticsV2 ON so the `check_registered_task_types` guard is
+        // deterministic regardless of the plugin's default. With v2 enabled the
+        // `cases.analyticsV2.fullReset` / `cases.analyticsV2.reconciliation`
+        // task types are registered and appear in the guard's expected list; if
+        // the flag were left to the (toggleable) default the assertion would
+        // flip-flop with it.
+        '--xpack.cases.analyticsV2.enabled=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
+        // Pin the Cases templates flag ON so the `cases_templates_v2_migration`
+        // task type is registered, matching the `check_registered_task_types` guard
+        // list regardless of the plugin default.
+        '--xpack.cases.templates.enabled=true',
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',

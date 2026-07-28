@@ -423,6 +423,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
 
 interface EvaluationExperimentOptions {
   refetchInterval?: number | false;
+  enabled?: boolean;
 }
 
 export const useEvaluationExperiment = (
@@ -445,7 +446,7 @@ export const useEvaluationExperiment = (
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled: experimentId.length > 0,
+    enabled: experimentId.length > 0 && (options.enabled ?? true),
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
@@ -505,10 +506,16 @@ export const useCompareExperiments = (
   });
 };
 
+interface ExperimentDatasetExamplesOptions {
+  refetchInterval?: number | false;
+  staleTime?: number;
+}
+
 export const useExperimentDatasetExamples = (
   experimentId: string,
   datasetId: string,
-  executionId?: string
+  executionId?: string,
+  options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
 
@@ -529,6 +536,8 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
+    refetchInterval: options.refetchInterval,
+    staleTime: options.staleTime,
   });
 };
 

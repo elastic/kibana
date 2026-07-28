@@ -24,10 +24,6 @@ export const ListEvaluatorsResponse = lazySchema(() =>
         version: z.string().max(64),
         kind: z.enum(['llm', 'code']),
         description: z.string().max(2048),
-        /**
-         * Whether the evaluator produces a meaningful result on a bare tool-execution trace (the agentBuilder.tool target). Absent is treated as true. Only opt-outs (e.g. groundedness) set false.
-         */
-        supports_bare_tool_trace: z.boolean().optional(),
         reference_data_schema: z.object({}).catchall(z.unknown()).optional(),
         evidence_schema: z.object({}).catchall(z.unknown()).optional(),
       })

@@ -91,40 +91,27 @@ For a shared "golden cluster", set `EVALUATIONS_KBN_URL` (and optionally `EVALUA
 
 ## Workflow-based experiment execution
 
-In addition to the dev-only `@kbn/evals` CLI (which runs suites via Scout/Playwright in CI), the plugin can run **experiments on the server** using [Kibana Workflows](../../../../src/platform/plugins/shared/workflows_management). This path is **additive** — it does not change how evals run in CI — and it powers the in-Kibana "New experiment" UI as well as version-controlled experiment YAML.
+In addition to the dev-only `@kbn/evals` CLI (which runs suites in CI), the plugin can run **experiments on the server** — from the "New experiment" UI, from Agent Builder, or from version-controlled workflow YAML. This is additive and does not change how evals run in CI.
 
-An **experiment** evaluates one task model against N datasets. Running the same configuration against multiple models produces multiple experiments that can be compared.
+An **experiment** evaluates one task model against one or more datasets. Running the same configuration against several models produces multiple experiments you can compare.
 
-> Workflows requires an **Enterprise** license. When Workflows is disabled or unlicensed, the `workflowsExtensions` / `workflowsManagement` dependencies are absent, the custom steps are simply not registered, and the experiment-execution routes return `501 Not Implemented`. The rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
-
-### Custom workflow steps
-
-The plugin registers eight composable steps under the `evals.` namespace, layered from atomic primitives to whole-experiment lifecycle. Fine-grained steps give authors full control over dataset resolution, per-example trials, and failure handling; the composite steps are the ergonomic default.
-
-| Step | Layer | Purpose |
-| --- | --- | --- |
-| `evals.resolveDataset` | atomic | Load one or more datasets and their examples. |
-| `evals.executeTask` | atomic | Run the feature under evaluation against a single example; returns output + `trace_id`. |
-| `evals.evaluateTrace` | atomic | Grade a single trace with one or more evaluators (shared by offline **and** online use cases). |
-| `evals.ingestScores` | atomic | Persist evaluator scores for one example/repetition, fanning each named score into its own document. |
-| `evals.evaluateExample` | composite | `executeTask` → `evaluateTrace` → `ingestScores` for a single example across repetitions. |
-| `evals.evaluateDataset` | composite | Resolve datasets and evaluate every example with bounded internal concurrency. The workhorse step; implemented as a **durable poll step** so long runs don't block Task Manager workers. |
-| `evals.startExperiment` | lifecycle | Mint the `experiment_id` / `execution_id` that group a run's scores. |
-| `evals.compareExperiments` | lifecycle | Statistically compare two or more experiments (e.g. across models). |
-
-Step definitions (Zod input/output schemas + i18n labels) live in [`common/workflows/steps.ts`](common/workflows/steps.ts) so the server handlers and the public YAML-editor metadata stay locked together. Server handlers are in [`server/workflows/`](server/workflows).
+> Running experiments requires an **Enterprise** license (it runs on [Kibana Workflows](../../../../src/platform/plugins/shared/workflows_management)). When Workflows is unavailable, experiment execution is disabled; the rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
 
 ### Running experiments
 
-**From the UI.** The **New experiment** button on the Experiments tab opens a form (connectors, task target, datasets, evaluators, repetitions, concurrency). The server infers the workflow topology from the inputs — you never pick a "shape":
+#### From the UI
 
-- one model, few datasets → a single pooled execution;
-- one model, many datasets (> 5) → one execution per dataset (fan-out), still one experiment;
-- two or more models → one execution per model (fan-out), compared by the shared `execution_id`.
+The **New experiment** button on the Experiments tab opens a form: choose one or more models to evaluate, what to evaluate (the task target), datasets, evaluators, and run options (repetitions, concurrency). Choosing two or more models produces one comparable experiment per model, and runs across many datasets are split up and run in parallel.
 
-"Run now" launches the execution(s) and redirects to the experiment detail page, which polls live progress and offers cancellation. "Save as workflow" persists a reusable, self-contained workflow instead.
+"Run now" launches the run and opens the experiment detail page, which shows live progress and lets you cancel. "Save as workflow" instead persists a reusable workflow you can re-run later.
 
-**From YAML.** Because steps are ordinary workflow steps, a data scientist can version-control an experiment as a workflow file and (re-)run it by posting the YAML to Workflows Management — no UI required. A minimal single-model experiment:
+#### From Agent Builder
+
+An `eval-experiment-authoring` skill lets you do the same thing from an Agent Builder chat: discover datasets, evaluators, task targets, and connectors, preview the experiment, then run it or save it as a workflow. It is available only when `xpack.evals.enabled` is set.
+
+#### From YAML
+
+You can also version-control an experiment as a workflow file and (re-)run it through Workflows Management — no UI required. A minimal single-model experiment:
 
 ```yaml
 version: '1'
@@ -140,12 +127,12 @@ triggers:
   - type: manual
 steps:
   - name: start
-    type: evals.startExperiment
+    type: ai.evals.startExperiment
     with:
       task_model:
         id: my-model-connector-id
   - name: evaluate
-    type: evals.evaluateDataset
+    type: ai.evals.evaluateDataset
     with:
       experiment_id: '{{ steps.start.output.experiment_id }}'
       execution_id: '{{ steps.start.output.execution_id }}'
@@ -159,53 +146,38 @@ steps:
       concurrency: 5
 ```
 
-The UI's "Show YAML" toggle previews exactly this (via `POST /internal/evals/experiments/_preview`), so the form and the file format never diverge. See [`server/workflow_generator.ts`](server/workflow_generator.ts) for the fan-out / cross-model shapes.
+The full set of `ai.evals.*` steps:
 
-### Concurrency & scalability
-
-`evals.evaluateDataset` evaluates examples with a bounded internal pool (`concurrency`, via `mapWithConcurrency` from `@kbn/evals-runner`) rather than one worker per example. Larger experiments fan out into multiple executions across Task Manager workers. A global concurrency budget is split across concurrent executions so aggregate parallelism stays within the connector's rate limit instead of multiplying it. If the workflow engine gains native `foreach` concurrency / `parallel` execution, the composite steps can delegate to it without changing the YAML contract.
-
-### Task providers
-
-A **task provider** knows how to execute "the thing being evaluated" for one example. The plugin ships three built-ins:
-
-| Provider id | Runs |
+| Step | Purpose |
 | --- | --- |
-| `inference` | A direct model call via the Inference plugin (default). |
-| `agentBuilder.converse` | An Agent Builder agent conversation. |
-| `agentBuilder.tool` | A single Agent Builder tool/skill execution. |
+| `ai.evals.startExperiment` | Create the experiment/execution ids that group a run's scores. |
+| `ai.evals.resolveDataset` | Load datasets and their examples. |
+| `ai.evals.executeTask` | Run the thing being evaluated against one example. |
+| `ai.evals.evaluateTrace` | Grade one trace with one or more evaluators. |
+| `ai.evals.ingestScores` | Persist evaluator scores for one example. |
+| `ai.evals.evaluateExample` | Execute, evaluate, and ingest scores for a single example. |
+| `ai.evals.evaluateDataset` | Resolve datasets and evaluate every example (the main step). |
+| `ai.evals.compareExperiments` | Statistically compare two or more experiments. |
 
-`evals.executeTask` chooses a provider from the task target: `task_ref` (explicit) > `tool_id` > `agent_id` > `inference`.
+The Workflows YAML editor autocompletes and validates these steps and their inputs as you author.
 
-Other plugins can register a **custom provider** (e.g. a real suite task like `sigEvents.identify`) through the setup contract, so their production feature — not a reimplementation — is what gets evaluated:
+### What you can evaluate
 
-```ts
-// In your plugin's server setup(), with `evals` as an optional dependency:
-export class MyPlugin {
-  setup(core: CoreSetup, plugins: { evals?: EvalsPluginSetup }) {
-    plugins.evals?.registerTaskProvider({
-      name: 'sigEvents.identify',
-      description: 'Identify significant events for a document',
-      async run(ctx) {
-        // ctx: { input, connectorId, params, logger, abortSignal,
-        //        getInferenceClient, callKibanaApi }
-        const client = await ctx.getInferenceClient(ctx.connectorId);
-        const output = await runMyFeature(client, ctx.input);
-        return { output, traceId: getTraceId() };
-      },
-    });
-  }
-}
-```
+Each experiment runs one **task target** — the thing being evaluated for each example. Two are built in:
 
-Reference the provider from YAML (or the UI's task-target picker, which lists registered providers) via `task_ref: sigEvents.identify`. The provider contract is defined in [`server/task_providers/types.ts`](server/task_providers/types.ts).
+| Task target | Runs |
+| --- | --- |
+| Direct inference (default) | A direct model call. |
+| Agent Builder agent | An Agent Builder agent conversation. |
+
+Other plugins can contribute their own production feature as an additional target, so the real feature — not a reimplementation — is what gets evaluated.
 
 ## API routes
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
 
 - **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
-- **Experiment execution (Workflows)** — launch (`_run`), save as reusable workflow (`_save_as_workflow`), preview generated YAML (`_preview`), list templates/task providers (`templates`), and poll or cancel a run (`executions/{id}`, `executions/{id}/_cancel`). These require an Enterprise license and the Workflows plugins; otherwise they return `501`.
+- **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. Supports remote forwarding to a configured golden-cluster Kibana.
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments

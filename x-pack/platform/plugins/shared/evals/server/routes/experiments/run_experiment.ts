@@ -15,6 +15,7 @@ import {
   type RunExperimentResponse,
 } from '../../../common/experiments/run_experiment';
 import { experimentRequestToParams, generateExperimentRun } from '../../workflow_generator';
+import { findUnauthorizedTargetSpaces } from '../shared/authorize_target_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 /** Launches inferred experiment workflows and returns execution IDs for polling. */
@@ -23,6 +24,7 @@ export const registerRunExperimentRoute = ({
   logger,
   workflowsManagement,
   getSpaceId,
+  checkManageEvalsPrivileges,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -54,11 +56,6 @@ export const registerRunExperimentRoute = ({
         }
 
         const body = request.body;
-        if (body.agent_id && body.tool_id) {
-          return response.badRequest({
-            body: { message: 'Provide only one of agent_id or tool_id, not both.' },
-          });
-        }
         if (body.space_ids?.includes(ALL_SPACES_ID)) {
           return response.badRequest({
             body: {
@@ -77,6 +74,23 @@ export const registerRunExperimentRoute = ({
         }
 
         const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+
+        const unauthorizedSpaceIds = await findUnauthorizedTargetSpaces({
+          request,
+          requestedSpaceIds: body.space_ids,
+          activeSpaceId: spaceId,
+          checkManageEvalsPrivileges,
+        });
+        if (unauthorizedSpaceIds.length > 0) {
+          return response.forbidden({
+            body: {
+              message: `Insufficient privileges to assign the experiment to space(s): ${unauthorizedSpaceIds.join(
+                ', '
+              )}.`,
+            },
+          });
+        }
+
         const workflowExecutionIds: string[] = [];
         const launchedExecutions: RunExperimentResponse['executions'] = [];
 
@@ -104,6 +118,33 @@ export const registerRunExperimentRoute = ({
               error instanceof Error ? error.message : String(error)
             }`
           );
+
+          const cancellations = await Promise.allSettled(
+            workflowExecutionIds.map((workflowExecutionId) =>
+              workflowsManagement.management.cancelWorkflowExecution(
+                workflowExecutionId,
+                spaceId,
+                request
+              )
+            )
+          );
+
+          // A cancellation that fails leaves a run consuming LLM quota that the client can
+          // no longer see or stop, so log the ids an operator needs to clean up by hand.
+          cancellations.forEach((cancellation, index) => {
+            if (cancellation.status === 'rejected') {
+              logger.error(
+                `Failed to cancel orphaned experiment workflow execution ${
+                  workflowExecutionIds[index]
+                }: ${
+                  cancellation.reason instanceof Error
+                    ? cancellation.reason.message
+                    : String(cancellation.reason)
+                }`
+              );
+            }
+          });
+
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to launch experiment workflow execution(s)' },

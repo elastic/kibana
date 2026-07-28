@@ -10,7 +10,6 @@ import React from 'react';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
@@ -22,8 +21,7 @@ import { NoDataViewPrompt } from './no_data_view_prompt';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-import { MlPageHeader } from '../components/page_header';
-import { PageTitle } from '../components/page_title';
+import { MlAppHeader } from '../components/ml_app_header';
 import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
 export const ChangePointDetectionPage: FC = () => {
@@ -32,18 +30,28 @@ export const ChangePointDetectionPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
-  const pageTitle = (
-    <FormattedMessage
-      id="xpack.ml.changePointDetection.pageHeader"
-      defaultMessage="Change point detection"
-    />
-  );
+  const pageTitle = i18n.translate('xpack.ml.changePointDetection.pageHeader', {
+    defaultMessage: 'Change point detection',
+  });
 
   return (
     <>
-      <MlPageHeader>
-        <PageTitle title={pageTitle} />
-      </MlPageHeader>
+      <MlAppHeader
+        title={pageTitle}
+        docLink={services.docLinks.links.aggs.change_point}
+        badges={[
+          {
+            label: i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
+              defaultMessage: 'Technical preview',
+            }),
+            color: 'hollow',
+            tooltip: i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaTooltipContent', {
+              defaultMessage:
+                'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+            }),
+          },
+        ]}
+      />
       {!dataView ? (
         <>
           <MlDataSourcePicker

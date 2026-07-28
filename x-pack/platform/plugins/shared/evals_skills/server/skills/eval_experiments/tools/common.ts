@@ -10,9 +10,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
-import { APP_PATH } from '@kbn/evals-plugin/common';
+import {
+  APP_PATH,
+  EXPERIMENT_LIMITS,
+  MAX_ID_LENGTH,
+  MAX_NAME_LENGTH,
+} from '@kbn/evals-plugin/common';
 import type { GenerateExperimentParams, GeneratedExperimentRun } from '@kbn/evals-plugin/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
 
@@ -40,16 +44,22 @@ export class EvalExperimentConfigError extends Error {
 }
 
 export const evaluatorInputSchema = z.object({
-  name: z.string().min(1).describe('Evaluator name, as returned by list_evaluators.'),
+  name: z
+    .string()
+    .min(1)
+    .max(MAX_NAME_LENGTH)
+    .describe('Evaluator name, as returned by list_evaluators.'),
   version: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe('Optional evaluator version. Defaults to the latest registered version.'),
   connector_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe(
-      'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators.'
+      'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators. Ask the user to pick it from list_connectors; do not guess or default to the first one.'
     ),
 });
 
@@ -58,59 +68,74 @@ export const evaluatorInputSchema = z.object({
  * Mirrors the evals "new experiment" form. The workflow topology (single,
  * dataset fan-out, or cross-model) is inferred by the generator from these inputs.
  */
-export const evalExperimentConfigSchema = z.object({
-  name: z
-    .string()
-    .optional()
-    .describe('Human-readable experiment name. A default is derived from the target when omitted.'),
-  connector_ids: z
-    .array(z.string().min(1))
-    .min(1)
-    .describe(
-      'Model connector id(s) under evaluation. Providing two or more triggers a cross-model comparison.'
-    ),
-  agent_id: z
-    .string()
-    .optional()
-    .describe('Agent Builder agent id to evaluate. Mutually exclusive with tool_id.'),
-  tool_id: z
-    .string()
-    .optional()
-    .describe('Agent Builder tool id to evaluate. Mutually exclusive with agent_id.'),
-  dataset_ids: z
-    .array(z.string().min(1))
-    .min(1)
-    .describe('Dataset id(s) to evaluate against, as returned by list_eval_datasets.'),
-  evaluators: z
-    .array(evaluatorInputSchema)
-    .min(1)
-    .describe('Evaluators used to score each example.'),
-  repetitions: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('How many times to run each example. Defaults to 1.'),
-  concurrency: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('Maximum number of examples evaluated in parallel. Defaults to 5.'),
-  compare: z
-    .boolean()
-    .optional()
-    .describe(
-      'Only for saved cross-model workflows: append an evals.compareExperiments step after the per-model runs.'
-    ),
-  space_ids: z
-    .array(z.string().min(1))
-    .min(1)
-    .optional()
-    .describe(
-      'Spaces the resulting scores are visible in. Defaults to the current space when omitted.'
-    ),
-});
+export const evalExperimentConfigSchema = z
+  .object({
+    name: z
+      .string()
+      .max(MAX_NAME_LENGTH)
+      .optional()
+      .describe(
+        'Human-readable experiment name. A default is derived from the target when omitted.'
+      ),
+    target: z
+      .enum(['inference', 'agent'])
+      .describe(
+        'What is being evaluated: `inference` invokes the model connector(s) directly, `agent` runs an Agent Builder agent via converse. Ask the user which one they mean; do not assume.'
+      ),
+    connector_ids: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .min(1)
+      .max(EXPERIMENT_LIMITS.maxConnectorIds)
+      .describe(
+        'Model connector id(s) under evaluation, resolved from list_connectors. Providing two or more triggers a cross-model comparison. Do not guess or default these — ask the user if unspecified.'
+      ),
+    agent_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'Agent Builder agent id to evaluate. Required when `target` is `agent`; omit it entirely when `target` is `inference`.'
+      ),
+    dataset_ids: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .min(1)
+      .max(EXPERIMENT_LIMITS.maxDatasetIds)
+      .describe('Dataset id(s) to evaluate against, as returned by list_eval_datasets.'),
+    evaluators: z
+      .array(evaluatorInputSchema)
+      .min(1)
+      .max(EXPERIMENT_LIMITS.maxEvaluators)
+      .describe('Evaluators used to score each example.'),
+    repetitions: z
+      .number()
+      .int()
+      .min(1)
+      .max(EXPERIMENT_LIMITS.maxRepetitions)
+      .optional()
+      .describe('How many times to run each example. Defaults to 1.'),
+    concurrency: z
+      .number()
+      .int()
+      .min(1)
+      .max(EXPERIMENT_LIMITS.maxConcurrency)
+      .optional()
+      .describe('Maximum number of examples evaluated in parallel. Defaults to 5.'),
+    compare: z
+      .boolean()
+      .optional()
+      .describe(
+        'Only for saved cross-model workflows: append an ai.evals.compareExperiments step after the per-model runs.'
+      ),
+  })
+  .refine((config) => config.target !== 'agent' || !!config.agent_id, {
+    message: 'agent_id is required when target is `agent`. Ask the user which agent to evaluate.',
+    path: ['agent_id'],
+  })
+  .refine((config) => config.target !== 'inference' || !config.agent_id, {
+    message:
+      'agent_id must be omitted when target is `inference`. Set target to `agent` to evaluate an Agent Builder agent.',
+    path: ['agent_id'],
+  });
 
 export type EvalExperimentConfig = z.infer<typeof evalExperimentConfigSchema>;
 
@@ -120,31 +145,25 @@ export type EvalExperimentConfig = z.infer<typeof evalExperimentConfigSchema>;
  * for invalid combinations.
  */
 export const toGenerateParams = (config: EvalExperimentConfig): GenerateExperimentParams => {
-  if (config.agent_id && config.tool_id) {
-    throw new EvalExperimentConfigError('Provide only one of agent_id or tool_id, not both.');
-  }
-  if (!config.agent_id && !config.tool_id) {
+  if (config.target === 'agent' && !config.agent_id) {
     throw new EvalExperimentConfigError(
-      'Provide either an agent_id or a tool_id to identify what to evaluate.'
-    );
-  }
-  if (config.space_ids?.includes(ALL_SPACES_ID)) {
-    throw new EvalExperimentConfigError(
-      `Assigning an experiment to all spaces ("${ALL_SPACES_ID}") is not supported yet; provide explicit space ids.`
+      'Provide an agent_id to evaluate an Agent Builder agent, or set target to `inference` to evaluate the model connector directly.'
     );
   }
 
+  // Scores are always written to the caller's active space (defaulted at ingest time). Cross-space
+  // targeting is intentionally not exposed here; it stays in the space-authorized UI/API paths.
   return {
     name: config.name,
     connectorIds: config.connector_ids,
-    agentId: config.agent_id,
-    toolId: config.tool_id,
+    // Omitted for `inference`, which is how the generator and `resolveTaskProviderName` select the
+    // direct-inference task provider.
+    agentId: config.target === 'agent' ? config.agent_id : undefined,
     datasetIds: config.dataset_ids,
     evaluators: config.evaluators,
     repetitions: config.repetitions,
     concurrency: config.concurrency,
     compare: config.compare,
-    spaceIds: config.space_ids,
   };
 };
 
@@ -162,21 +181,22 @@ export const buildResultsLink = (
   const spaceSegment = spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : '';
   const appBase = `${serverBasePath}${spaceSegment}${APP_PATH}`;
 
-  if (run.executions.length > 1) {
-    const params = new URLSearchParams({
-      execution_id: run.executions.map((execution) => execution.executionId).join(','),
-      connector: run.executions.map((execution) => execution.connectorId).join(','),
-    });
-    if (workflowExecutionIds.length > 0) {
-      params.set('workflow_execution_id', workflowExecutionIds.join(','));
+  if (run.mode === 'cross-model') {
+    const params = new URLSearchParams();
+    for (const execution of run.executions) {
+      params.append('execution_id', execution.executionId);
+      params.append('connector', execution.connectorId);
+    }
+    for (const workflowExecutionId of workflowExecutionIds) {
+      params.append('workflow_execution_id', workflowExecutionId);
     }
     return `${appBase}/runs?${params.toString()}`;
   }
 
   const detailPathId = run.experimentIds[0] ?? run.executionId;
   const params = new URLSearchParams({ execution_id: run.executionId });
-  if (workflowExecutionIds.length > 0) {
-    params.set('workflow_execution_id', workflowExecutionIds.join(','));
+  for (const workflowExecutionId of workflowExecutionIds) {
+    params.append('workflow_execution_id', workflowExecutionId);
   }
   return `${appBase}/experiments/${encodeURIComponent(detailPathId)}?${params.toString()}`;
 };

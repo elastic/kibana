@@ -70,14 +70,14 @@ describe('workflow_generator', () => {
       expect(def.steps).toHaveLength(2);
 
       const [start, evaluate] = def.steps;
-      expect(start.type).toBe('evals.startExperiment');
+      expect(start.type).toBe('ai.evals.startExperiment');
       expect(start.with).toMatchObject({
         task_model: { id: 'gpt-4o' },
         experiment_id: run.experimentIds[0],
         execution_id: run.executionId,
       });
 
-      expect(evaluate.type).toBe('evals.evaluateDataset');
+      expect(evaluate.type).toBe('ai.evals.evaluateDataset');
       expect(evaluate.with).toMatchObject({
         connector_id: 'gpt-4o',
         dataset_ids: ['ds-1', 'ds-2'],
@@ -98,7 +98,7 @@ describe('workflow_generator', () => {
 
       const def = parseYaml(run.executions[0].yaml);
       expect(def.name).toBe('My smoke test');
-      const evaluate = def.steps.find((s) => s.type === 'evals.evaluateDataset');
+      const evaluate = def.steps.find((s) => s.type === 'ai.evals.evaluateDataset');
       expect(evaluate?.with?.experiment_name).toBe('My smoke test');
     });
 
@@ -125,7 +125,7 @@ describe('workflow_generator', () => {
         expect(execution.executionId).toBe(run.executionId);
 
         const def = parseYaml(execution.yaml);
-        const evaluate = def.steps.find((s) => s.type === 'evals.evaluateDataset');
+        const evaluate = def.steps.find((s) => s.type === 'ai.evals.evaluateDataset');
         expect(evaluate?.with?.dataset_ids).toEqual([datasetIds[index]]);
         // 5 global concurrency spread across 6 executions => floor(5/6) clamped to >= 1
         expect(evaluate?.with?.concurrency).toBe(1);
@@ -156,13 +156,13 @@ describe('workflow_generator', () => {
         expect(execution.connectorId).toBe(connectorId);
         expect(execution.executionId).toBe(`${run.executionId}::${connectorId}`);
         const def = parseYaml(execution.yaml);
-        const start = def.steps.find((s) => s.type === 'evals.startExperiment');
+        const start = def.steps.find((s) => s.type === 'ai.evals.startExperiment');
         // Per-model execution id is inlined; the experiment id is minted at runtime.
         expect(start?.with?.execution_id).toBe(`${run.executionId}::${connectorId}`);
         expect(start?.with?.experiment_id).toBeUndefined();
         // Every model is the SAME named experiment; the connector is NOT baked into the
         // name (it lives on task.model.id), matching the offline runner.
-        const evaluate = def.steps.find((s) => s.type === 'evals.evaluateDataset');
+        const evaluate = def.steps.find((s) => s.type === 'ai.evals.evaluateDataset');
         expect(evaluate?.with?.experiment_name).toBe('Evaluate gpt-4o, claude');
       }
     });
@@ -187,7 +187,7 @@ describe('workflow_generator', () => {
       });
       for (const execution of withSpaces.executions) {
         const evaluate = parseYaml(execution.yaml).steps.find(
-          (s) => s.type === 'evals.evaluateDataset'
+          (s) => s.type === 'ai.evals.evaluateDataset'
         );
         expect(evaluate?.with?.space_ids).toEqual(['marketing', 'sales']);
       }
@@ -198,7 +198,7 @@ describe('workflow_generator', () => {
         evaluators,
       });
       const evaluate = parseYaml(withoutSpaces.executions[0].yaml).steps.find(
-        (s) => s.type === 'evals.evaluateDataset'
+        (s) => s.type === 'ai.evals.evaluateDataset'
       );
       expect(evaluate?.with).not.toHaveProperty('space_ids');
     });
@@ -223,12 +223,12 @@ describe('workflow_generator', () => {
 
       expect(name).toContain('gpt-4o');
       const def = parseYaml(yaml);
-      const start = def.steps.find((s) => s.type === 'evals.startExperiment');
+      const start = def.steps.find((s) => s.type === 'ai.evals.startExperiment');
       expect(start?.with?.experiment_id).toBeUndefined();
       expect(start?.with?.execution_id).toBeUndefined();
       expect(start?.with).toMatchObject({ task_model: { id: 'gpt-4o' } });
       // The (static) workflow name is persisted as the experiment name on every run.
-      const evaluate = def.steps.find((s) => s.type === 'evals.evaluateDataset');
+      const evaluate = def.steps.find((s) => s.type === 'ai.evals.evaluateDataset');
       expect(evaluate?.with?.experiment_name).toBe(name);
     });
 
@@ -239,7 +239,7 @@ describe('workflow_generator', () => {
         evaluators,
         spaceIds: ['marketing'],
       });
-      const evaluate = parseYaml(yaml).steps.find((s) => s.type === 'evals.evaluateDataset');
+      const evaluate = parseYaml(yaml).steps.find((s) => s.type === 'ai.evals.evaluateDataset');
       expect(evaluate?.with?.space_ids).toEqual(['marketing']);
     });
 
@@ -254,11 +254,11 @@ describe('workflow_generator', () => {
       const def = parseYaml(yaml);
       const types = def.steps.map((s) => s.type);
       expect(types).toEqual([
-        'evals.startExperiment',
-        'evals.evaluateDataset',
-        'evals.startExperiment',
-        'evals.evaluateDataset',
-        'evals.compareExperiments',
+        'ai.evals.startExperiment',
+        'ai.evals.evaluateDataset',
+        'ai.evals.startExperiment',
+        'ai.evals.evaluateDataset',
+        'ai.evals.compareExperiments',
       ]);
 
       const compare = def.steps.at(-1);
@@ -269,7 +269,7 @@ describe('workflow_generator', () => {
 
       // Both per-model experiments share the one experiment name; the model differentiates.
       const evaluateNames = def.steps
-        .filter((s) => s.type === 'evals.evaluateDataset')
+        .filter((s) => s.type === 'ai.evals.evaluateDataset')
         .map((s) => s.with?.experiment_name);
       expect(evaluateNames).toEqual(['Evaluate gpt-4o, claude', 'Evaluate gpt-4o, claude']);
     });
@@ -284,12 +284,12 @@ describe('workflow_generator', () => {
       const def = parseYaml(yaml);
       const types = def.steps.map((s) => s.type);
       expect(types).toEqual([
-        'evals.startExperiment',
-        'evals.evaluateDataset',
-        'evals.startExperiment',
-        'evals.evaluateDataset',
+        'ai.evals.startExperiment',
+        'ai.evals.evaluateDataset',
+        'ai.evals.startExperiment',
+        'ai.evals.evaluateDataset',
       ]);
-      expect(types).not.toContain('evals.compareExperiments');
+      expect(types).not.toContain('ai.evals.compareExperiments');
     });
   });
 });

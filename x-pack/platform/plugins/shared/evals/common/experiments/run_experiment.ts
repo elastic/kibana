@@ -6,31 +6,57 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { WorkflowDetailDto } from '@kbn/workflows';
+
+export const MAX_ID_LENGTH = 1024;
+export const MAX_NAME_LENGTH = 256;
+
+export const EVALS_EXPERIMENT_WORKFLOW_TAG = 'evals-experiment';
+export const EVALS_WORKFLOW_TAGS = ['evals', EVALS_EXPERIMENT_WORKFLOW_TAG] as const;
+
+export const isEvalsOwnedWorkflow = (
+  workflow: Pick<WorkflowDetailDto, 'definition'> | null | undefined
+): boolean => Boolean(workflow?.definition?.tags?.includes(EVALS_EXPERIMENT_WORKFLOW_TAG));
 
 export const experimentEvaluatorSchema = z.object({
-  name: z.string(),
-  version: z.string().optional(),
-  connector_id: z.string().optional(),
+  name: z.string().max(MAX_NAME_LENGTH),
+  version: z.string().max(MAX_NAME_LENGTH).optional(),
+  connector_id: z.string().max(MAX_ID_LENGTH).optional(),
 });
 
 export type ExperimentEvaluator = z.infer<typeof experimentEvaluatorSchema>;
 
+export const EXPERIMENT_LIMITS = {
+  maxConnectorIds: 50,
+  maxDatasetIds: 50,
+  maxEvaluators: 50,
+  maxRepetitions: 100,
+  maxConcurrency: 50,
+  maxSpaceIds: 100,
+} as const;
+
 export const runExperimentRequestSchema = z.object({
-  name: z.string().optional(),
-  connector_ids: z.array(z.string()).min(1),
-  agent_id: z.string().optional(),
-  tool_id: z.string().optional(),
-  /** Explicit registered task provider id (overrides the agent/tool/inference inference). */
-  task_ref: z.string().optional(),
+  name: z.string().max(MAX_NAME_LENGTH).optional(),
+  connector_ids: z
+    .array(z.string().max(MAX_ID_LENGTH))
+    .min(1)
+    .max(EXPERIMENT_LIMITS.maxConnectorIds),
+  agent_id: z.string().max(MAX_ID_LENGTH).optional(),
+  /** Explicit registered task provider id (overrides the agent/inference resolution). */
+  task_ref: z.string().max(MAX_ID_LENGTH).optional(),
   /** Free-form parameters forwarded to the task provider. */
-  params: z.record(z.string(), z.unknown()).optional(),
-  dataset_ids: z.array(z.string()).min(1),
-  evaluators: z.array(experimentEvaluatorSchema).min(1),
-  repetitions: z.number().int().min(1).optional(),
-  concurrency: z.number().int().min(1).optional(),
+  params: z.record(z.string().max(MAX_NAME_LENGTH), z.unknown()).optional(),
+  dataset_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(EXPERIMENT_LIMITS.maxDatasetIds),
+  evaluators: z.array(experimentEvaluatorSchema).min(1).max(EXPERIMENT_LIMITS.maxEvaluators),
+  repetitions: z.number().int().min(1).max(EXPERIMENT_LIMITS.maxRepetitions).optional(),
+  concurrency: z.number().int().min(1).max(EXPERIMENT_LIMITS.maxConcurrency).optional(),
   compare: z.boolean().optional(),
-  workflow_id: z.string().optional(),
-  space_ids: z.array(z.string().min(1)).min(1).optional(),
+  workflow_id: z.string().max(MAX_ID_LENGTH).optional(),
+  space_ids: z
+    .array(z.string().min(1).max(MAX_NAME_LENGTH))
+    .min(1)
+    .max(EXPERIMENT_LIMITS.maxSpaceIds)
+    .optional(),
 });
 
 export type RunExperimentRequest = z.infer<typeof runExperimentRequestSchema>;
@@ -64,7 +90,6 @@ export interface LaunchedExperimentConfig {
   /** Display label of the chosen task target (e.g. "Agent Builder agent (converse)"). */
   target_label: string;
   agent_id?: string;
-  tool_id?: string;
   connector_names: string[];
   dataset_names: string[];
   evaluator_names: string[];
@@ -82,7 +107,6 @@ export interface ExperimentTemplate {
   prefill?: {
     task_ref?: string;
     agent_id?: string;
-    tool_id?: string;
   };
 }
 
@@ -94,7 +118,7 @@ export interface PreviewExperimentResponse {
   yaml: string;
 }
 
-/** Compact progress counters extracted from the `evals.evaluateDataset` step state. */
+/** Compact progress counters extracted from the `ai.evals.evaluateDataset` step state. */
 export interface ExperimentStepProgress {
   total?: number;
   completed?: number;

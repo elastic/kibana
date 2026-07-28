@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { EvalsPluginSetup, EvalsPluginStart } from '@kbn/evals-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 export interface EvalsSkillsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -18,6 +19,7 @@ export interface EvalsSkillsSetupDependencies {
 export interface EvalsSkillsStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   evals: EvalsPluginStart;
+  security?: SecurityPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

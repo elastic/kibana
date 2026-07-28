@@ -36,7 +36,6 @@ import type {
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
-import { getCurrentTraceId } from '../../../tracing';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { ToolCallSource } from '../../../telemetry';
 import {
@@ -166,16 +165,10 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     manager,
   });
 
-  // Captured inside the execute_tool span: inference operations detach onto their
-  // own root trace, so this is the trace that holds this execution's spans (and any
-  // nested gen_ai spans), which differs from the ambient HTTP request trace.
-  let executionTraceId: string | undefined;
-
   const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams, toolCallId, description: tool.description } },
     async (span): Promise<ToolHandlerReturn> => {
-      executionTraceId = getCurrentTraceId();
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
@@ -257,10 +250,6 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   };
   const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
   runToolReturn = afterToolHooksResult.toolReturn;
-
-  if (executionTraceId) {
-    runToolReturn = { ...runToolReturn, traceId: executionTraceId };
-  }
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
     resultStore.add({

@@ -14,8 +14,10 @@ import { i18n } from '@kbn/i18n';
  * Shared definitions for the evals workflow steps. Held in `common`
  * so the server handlers and the public editor metadata stay locked together.
  *
- * All step ids use the (non-reserved) `evals.` namespace and a camelCase action.
- * All input/output keys we own are snake_case per the workflows conventions.
+ * Step ids live under the `ai.evals.` namespace (grouped beneath the shared `ai.` category
+ * prefix alongside steps like `ai.prompt`), and are `tech_preview` while the framework is
+ * feature-flagged. The registry enforces global id uniqueness at setup. All input/output
+ * keys we own are snake_case per the workflows conventions.
  */
 
 // ---------------------------------------------------------------------------
@@ -48,7 +50,6 @@ export const datasetSchema = z.object({
 export const evaluatorConfigSchema = z.object({
   name: z.string(),
   version: z.string().optional(),
-  /** Per-evaluator judge connector; required for `llm` evaluators. */
   connector_id: z.string().optional(),
 });
 
@@ -72,19 +73,14 @@ export const evaluatorResultSchema = z.object({
 
 /**
  * Spaces the ingested scores are assigned to. When omitted, the ingest step
- * stamps the workflow's execution space, so a workflow stays scoped to the space
- * it runs in unless an experiment explicitly targets other spaces.
+ * stamps the workflow's execution space.
  */
 const spaceIdsSchema = z.array(z.string().min(1)).min(1).optional();
 
 /** Fields that describe "the thing being evaluated" (a task). */
 const taskTargetShape = {
-  /** Connector id of the model under evaluation. */
   connector_id: z.string(),
-  /** Agent Builder agent id (routes to the `agentBuilder.converse` provider). */
   agent_id: z.string().optional(),
-  /** Agent Builder tool id (routes to the `agentBuilder.tool` provider). */
-  tool_id: z.string().optional(),
   /** Explicit task provider id registered by a suite (overrides inference of the above). */
   task_ref: z.string().optional(),
   /** Free-form parameters passed through to the task provider. */
@@ -93,6 +89,7 @@ const taskTargetShape = {
 
 const label = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.evals.workflows.steps.${id}.label`, { defaultMessage });
+
 const description = (id: string, defaultMessage: string) =>
   i18n.translate(`xpack.evals.workflows.steps.${id}.description`, { defaultMessage });
 
@@ -100,19 +97,23 @@ const description = (id: string, defaultMessage: string) =>
 // Layer 1 — atomic primitives
 // ---------------------------------------------------------------------------
 
-export const ResolveDatasetStepId = 'evals.resolveDataset' as const;
+export const ResolveDatasetStepId = 'ai.evals.resolveDataset' as const;
+
 export const resolveDatasetInputSchema = z.object({
   dataset_ids: z.array(z.string()).min(1),
 });
+
 export const resolveDatasetOutputSchema = z.object({
   datasets: z.array(datasetSchema),
 });
+
 export const resolveDatasetCommonDefinition: CommonStepDefinition<
   typeof resolveDatasetInputSchema,
   typeof resolveDatasetOutputSchema
 > = {
   id: ResolveDatasetStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('resolveDataset', 'Resolve evaluation dataset'),
   description: description(
     'resolveDataset',
@@ -122,45 +123,54 @@ export const resolveDatasetCommonDefinition: CommonStepDefinition<
   outputSchema: resolveDatasetOutputSchema,
 };
 
-export const ExecuteTaskStepId = 'evals.executeTask' as const;
+export const ExecuteTaskStepId = 'ai.evals.executeTask' as const;
+
 export const executeTaskInputSchema = z.object({
   ...taskTargetShape,
   example: exampleSchema,
 });
+
 export const executeTaskOutputSchema = z.object({
   output: recordSchema,
   trace_id: z.string().optional(),
 });
+
 export const executeTaskCommonDefinition: CommonStepDefinition<
   typeof executeTaskInputSchema,
   typeof executeTaskOutputSchema
 > = {
   id: ExecuteTaskStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('executeTask', 'Execute evaluation task'),
   description: description(
     'executeTask',
-    'Runs the feature under evaluation (a direct model call, an Agent Builder agent or tool, or a registered suite task) against a single example.'
+    'Runs the feature under evaluation (a direct model call, an Agent Builder agent, or a registered suite task) against a single example.'
   ),
   inputSchema: executeTaskInputSchema,
   outputSchema: executeTaskOutputSchema,
 };
 
-export const EvaluateTraceStepId = 'evals.evaluateTrace' as const;
+export const EvaluateTraceStepId = 'ai.evals.evaluateTrace' as const;
+
 export const evaluateTraceInputSchema = z.object({
   trace_id: z.string(),
   reference_data: recordSchema.optional(),
   evaluators: z.array(evaluatorConfigSchema).min(1),
 });
+
 export const evaluateTraceOutputSchema = z.object({
   results: z.array(evaluatorResultSchema),
+  errors: z.array(z.string()).optional(),
 });
+
 export const evaluateTraceCommonDefinition: CommonStepDefinition<
   typeof evaluateTraceInputSchema,
   typeof evaluateTraceOutputSchema
 > = {
   id: EvaluateTraceStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('evaluateTrace', 'Evaluate trace'),
   description: description(
     'evaluateTrace',
@@ -170,7 +180,8 @@ export const evaluateTraceCommonDefinition: CommonStepDefinition<
   outputSchema: evaluateTraceOutputSchema,
 };
 
-export const IngestScoresStepId = 'evals.ingestScores' as const;
+export const IngestScoresStepId = 'ai.evals.ingestScores' as const;
+
 export const ingestScoresInputSchema = z.object({
   experiment_id: z.string(),
   experiment_name: z.string().optional(),
@@ -193,17 +204,20 @@ export const ingestScoresInputSchema = z.object({
   evaluator_results: z.array(evaluatorResultSchema),
   space_ids: spaceIdsSchema,
 });
+
 export const ingestScoresOutputSchema = z.object({
   ingested: z.number().int(),
   conflicted: z.number().int(),
   failed: z.number().int(),
 });
+
 export const ingestScoresCommonDefinition: CommonStepDefinition<
   typeof ingestScoresInputSchema,
   typeof ingestScoresOutputSchema
 > = {
   id: IngestScoresStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('ingestScores', 'Ingest evaluation scores'),
   description: description(
     'ingestScores',
@@ -217,10 +231,12 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
 // Layer 2 — composite convenience
 // ---------------------------------------------------------------------------
 
-export const EvaluateExampleStepId = 'evals.evaluateExample' as const;
+export const EvaluateExampleStepId = 'ai.evals.evaluateExample' as const;
+
 export const evaluateExampleInputSchema = z.object({
   ...taskTargetShape,
   experiment_id: z.string(),
+  experiment_name: z.string().optional(),
   execution_id: z.string().optional(),
   suite_id: z.string().optional(),
   task_model: modelSchema.optional(),
@@ -231,17 +247,21 @@ export const evaluateExampleInputSchema = z.object({
   repetitions: z.number().int().min(1).optional(),
   space_ids: spaceIdsSchema,
 });
+
 export const evaluateExampleOutputSchema = z.object({
   scores_ingested: z.number().int(),
   failed: z.number().int(),
   repetitions: z.number().int(),
+  errors: z.array(z.string()).optional(),
 });
+
 export const evaluateExampleCommonDefinition: CommonStepDefinition<
   typeof evaluateExampleInputSchema,
   typeof evaluateExampleOutputSchema
 > = {
   id: EvaluateExampleStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('evaluateExample', 'Evaluate example'),
   description: description(
     'evaluateExample',
@@ -251,7 +271,8 @@ export const evaluateExampleCommonDefinition: CommonStepDefinition<
   outputSchema: evaluateExampleOutputSchema,
 };
 
-export const EvaluateDatasetStepId = 'evals.evaluateDataset' as const;
+export const EvaluateDatasetStepId = 'ai.evals.evaluateDataset' as const;
+
 export const evaluateDatasetInputSchema = z.object({
   ...taskTargetShape,
   experiment_id: z.string(),
@@ -266,21 +287,23 @@ export const evaluateDatasetInputSchema = z.object({
   concurrency: z.number().int().min(1).optional(),
   space_ids: spaceIdsSchema,
 });
+
 export const evaluateDatasetOutputSchema = z.object({
   experiment_id: z.string(),
   example_count: z.number().int(),
   completed: z.number().int(),
   failed: z.number().int(),
   scores_ingested: z.number().int(),
-  /** Sample of failure messages from examples that failed, for surfacing in the UI. */
   errors: z.array(z.string()).optional(),
 });
+
 export const evaluateDatasetCommonDefinition: CommonStepDefinition<
   typeof evaluateDatasetInputSchema,
   typeof evaluateDatasetOutputSchema
 > = {
   id: EvaluateDatasetStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('evaluateDataset', 'Evaluate dataset'),
   description: description(
     'evaluateDataset',
@@ -294,23 +317,26 @@ export const evaluateDatasetCommonDefinition: CommonStepDefinition<
 // Layer 3 — lifecycle
 // ---------------------------------------------------------------------------
 
-export const StartExperimentStepId = 'evals.startExperiment' as const;
+export const StartExperimentStepId = 'ai.evals.startExperiment' as const;
 export const startExperimentInputSchema = z.object({
   task_model: modelSchema,
   suite_id: z.string().optional(),
   experiment_id: z.string().optional(),
   execution_id: z.string().optional(),
 });
+
 export const startExperimentOutputSchema = z.object({
   experiment_id: z.string(),
   execution_id: z.string(),
 });
+
 export const startExperimentCommonDefinition: CommonStepDefinition<
   typeof startExperimentInputSchema,
   typeof startExperimentOutputSchema
 > = {
   id: StartExperimentStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('startExperiment', 'Start experiment'),
   description: description(
     'startExperiment',
@@ -320,19 +346,23 @@ export const startExperimentCommonDefinition: CommonStepDefinition<
   outputSchema: startExperimentOutputSchema,
 };
 
-export const CompareExperimentsStepId = 'evals.compareExperiments' as const;
+export const CompareExperimentsStepId = 'ai.evals.compareExperiments' as const;
+
 export const compareExperimentsInputSchema = z.object({
   experiment_ids: z.array(z.string()).min(2),
 });
+
 export const compareExperimentsOutputSchema = z.object({
   comparison: z.unknown(),
 });
+
 export const compareExperimentsCommonDefinition: CommonStepDefinition<
   typeof compareExperimentsInputSchema,
   typeof compareExperimentsOutputSchema
 > = {
   id: CompareExperimentsStepId,
   category: StepCategory.Ai,
+  stability: 'tech_preview',
   label: label('compareExperiments', 'Compare experiments'),
   description: description(
     'compareExperiments',
@@ -342,7 +372,6 @@ export const compareExperimentsCommonDefinition: CommonStepDefinition<
   outputSchema: compareExperimentsOutputSchema,
 };
 
-/** All eight evals step ids, for convenience. */
 export const EVALS_STEP_IDS = [
   ResolveDatasetStepId,
   ExecuteTaskStepId,

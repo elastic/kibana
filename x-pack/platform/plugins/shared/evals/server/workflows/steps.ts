@@ -44,11 +44,11 @@ import type { DatasetEvaluationConfig, StepRuntime } from './lib';
 const DEFAULT_CONCURRENCY = 5;
 const DEFAULT_REPETITIONS = 1;
 
-/** Number of examples drained per `poll()` invocation of `evals.evaluateDataset`. */
+/** Number of examples drained per `poll()` invocation of `ai.evals.evaluateDataset`. */
 const POLL_BATCH_SIZE = 25;
 
 /**
- * Poll ceilings for `evals.evaluateDataset`. The engine defaults (~1 min) are far
+ * Poll ceilings for `ai.evals.evaluateDataset`. The engine defaults (~1 min) are far
  * too low for real evaluation runs, so we raise them substantially; the generated
  * workflow additionally sets a high `settings.timeout`.
  */
@@ -68,7 +68,7 @@ const resolvedModelSchema = z.object({
   provider: z.string().optional(),
 });
 
-/** Progress persisted between `evals.evaluateDataset` poll cycles. */
+/** Progress persisted between `ai.evals.evaluateDataset` poll cycles. */
 const evaluateDatasetStateSchema = z.object({
   work: z.array(
     z.object({
@@ -130,14 +130,13 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
   const executeTaskStep = createServerStepDefinition({
     ...executeTaskCommonDefinition,
     handler: async (context) => {
-      const { example, connector_id, agent_id, tool_id, task_ref, params } = context.input;
+      const { example, connector_id, agent_id, task_ref, params } = context.input;
       const result = await runTask(
         deps.taskProviderRegistry,
         makeRuntime(context),
         {
           connectorId: connector_id,
           agentId: agent_id,
-          toolId: tool_id,
           taskRef: task_ref,
           params,
         },
@@ -151,12 +150,20 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     ...evaluateTraceCommonDefinition,
     handler: async (context) => {
       const { trace_id, reference_data, evaluators } = context.input;
-      const { results } = await evaluateTrace(makeRuntime(context), {
+      const { results, errors } = await evaluateTrace(makeRuntime(context), {
         traceId: trace_id,
         referenceData: reference_data,
         evaluators,
       });
-      return { output: { results } };
+
+      if (errors.length > 0) {
+        context.logger.warn(
+          `ai.evals.evaluateTrace: ${
+            errors.length
+          } evaluator(s) failed for trace "${trace_id}": ${errors.join('; ')}`
+        );
+      }
+      return { output: { results, errors } };
     },
   });
 
@@ -208,6 +215,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       ]);
       const result = await runExampleEvaluation(deps.taskProviderRegistry, runtime, {
         experimentId: input.experiment_id,
+        experimentName: input.experiment_name,
         executionId: input.execution_id,
         suiteId: input.suite_id,
         taskModel,
@@ -215,7 +223,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         target: {
           connectorId: input.connector_id,
           agentId: input.agent_id,
-          toolId: input.tool_id,
           taskRef: input.task_ref,
           params: input.params,
         },
@@ -232,11 +239,21 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         repetitions: input.repetitions ?? DEFAULT_REPETITIONS,
         spaceIds: input.space_ids,
       });
+
+      if (result.errors.length > 0) {
+        context.logger.warn(
+          `ai.evals.evaluateExample: ${result.errors.length} error(s) while evaluating example "${
+            input.example.id
+          }": ${result.errors.join('; ')}`
+        );
+      }
+
       return {
         output: {
           scores_ingested: result.scoresIngested,
           failed: result.failed,
           repetitions: result.repetitions,
+          errors: result.errors,
         },
       };
     },
@@ -250,7 +267,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       suite_id?: string;
       connector_id: string;
       agent_id?: string;
-      tool_id?: string;
       task_ref?: string;
       params?: Record<string, unknown>;
       evaluators: Array<{ name: string; version?: string; connector_id?: string }>;
@@ -268,7 +284,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     target: {
       connectorId: input.connector_id,
       agentId: input.agent_id,
-      toolId: input.tool_id,
       taskRef: input.task_ref,
       params: input.params,
     },
@@ -319,7 +334,9 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const runtime = makeRuntime(context);
       const { input, state } = context;
       if (!state) {
-        return { error: new Error('evals.evaluateDataset poll invoked without persisted state') };
+        return {
+          error: new Error('ai.evals.evaluateDataset poll invoked without persisted state'),
+        };
       }
       if (runtime.abortSignal.aborted) {
         return { error: new Error('Dataset evaluation was cancelled') };
@@ -374,7 +391,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     },
     onCancel: (context) => {
       context.logger.info(
-        'evals.evaluateDataset cancelled; in-flight evaluations aborted via signal'
+        'ai.evals.evaluateDataset cancelled; in-flight evaluations aborted via signal'
       );
     },
   });

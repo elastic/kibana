@@ -8,20 +8,24 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_ID_LENGTH, isEvalsOwnedWorkflow } from '@kbn/evals-plugin/common';
 import { generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
   buildWorkflowLink,
+  errorResult,
   evalExperimentConfigSchema,
   evalsTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
 } from './common';
+import { hasManageEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const saveSchema = evalExperimentConfigSchema.extend({
   workflow_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe(
       'Existing saved workflow id to update in place. Omit to create a new workflow (pass it to avoid duplicates when re-saving).'
@@ -42,16 +46,29 @@ export const saveEvalExperimentTool = (
   schema: saveSchema,
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     try {
+      const { security } = await deps.getStartDependencies();
+      if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the manage_evals privilege required to save evaluation experiment workflows in this space.'
+        );
+      }
+
       const params = toGenerateParams(config);
       const workflow = generateSavedWorkflowYaml(params);
 
       if (workflowId) {
+        const existing = await deps.workflowsApi.getWorkflow(workflowId, spaceId);
+        if (!isEvalsOwnedWorkflow(existing)) {
+          return errorResult(`Workflow not found: ${workflowId}`);
+        }
+
         await deps.workflowsApi.updateWorkflow(
           workflowId,
           { yaml: workflow.yaml },
           spaceId,
           request
         );
+
         return otherResult({
           workflow_id: workflowId,
           name: workflow.name,
@@ -65,6 +82,7 @@ export const saveEvalExperimentTool = (
         spaceId,
         request
       );
+
       return otherResult({
         workflow_id: created.id,
         name: created.name,

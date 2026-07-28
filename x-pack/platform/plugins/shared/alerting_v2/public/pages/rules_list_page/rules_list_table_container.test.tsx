@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RulesListTableContainer } from './rules_list_table_container';
 
 const mockNavigateToUrl = jest.fn();
@@ -50,6 +50,12 @@ const mockToggleEnabledMutate = jest.fn();
 const mockUseToggleRuleEnabled = jest.fn();
 jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
+}));
+
+const mockRunRuleMutate = jest.fn();
+const mockUseRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => mockUseRunRule(),
 }));
 
 const mockRules = [
@@ -113,6 +119,10 @@ describe('RulesListTableContainer', () => {
     });
     mockUseBulkDisableRules.mockReturnValue({
       mutate: mockBulkDisableMutate,
+      isLoading: false,
+    });
+    mockUseRunRule.mockReturnValue({
+      mutate: mockRunRuleMutate,
       isLoading: false,
     });
   });
@@ -219,13 +229,30 @@ describe('RulesListTableContainer', () => {
     });
   });
 
+  describe('run rule', () => {
+    it('calls runRule mutation when run action is clicked', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(mockRunRuleMutate).toHaveBeenCalledWith({ id: 'rule-1' });
+    });
+  });
+
   describe('toggle enabled', () => {
     it('calls toggleEnabled mutation with inverted enabled state', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
-      expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+      expect(mockToggleEnabledMutate).toHaveBeenCalledWith({
+        id: 'rule-1',
+        enabled: false,
+      });
     });
 
     it('shows a spinner in place of the switch for the rule being toggled', () => {
@@ -305,7 +332,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -316,7 +343,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkDisableRules'));
 
       expect(mockBulkDisableMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -346,7 +373,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
-        { ids: ['rule-1'] },
+        { mode: 'by_ids', ids: ['rule-1'] },
         expect.objectContaining({
           onSuccess: expect.any(Function),
           onError: expect.any(Function),
@@ -383,39 +410,36 @@ describe('RulesListTableContainer', () => {
       });
     });
 
-    it('shows "Select first {max}" when total count exceeds bulk cap', async () => {
-      renderContainer({ totalItemCount: BULK_FILTER_MAX_RULES + 500 });
+    it('disables select-all and shows a help tip when total exceeds bulk cap', async () => {
+      renderContainer({ totalItemCount: BULK_FILTER_MAX_RESOURCES + 500 });
 
       const checkboxes = screen.getAllByRole('checkbox');
       fireEvent.click(checkboxes[1]);
 
-      await waitFor(() => {
-        const btn = screen.getByTestId('selectAllRulesButton');
-        expect(btn).toHaveTextContent('Select first');
-        expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
-      });
-
-      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+      const selectAll = await screen.findByTestId('selectAllRulesButton');
+      expect(selectAll).toBeDisabled();
+      expect(screen.getByTestId('bulkSelectAllLimitTooltip')).toBeInTheDocument();
     });
 
-    it('shows capped selection count and disclosure after select all over bulk cap', async () => {
-      renderContainer({ totalItemCount: BULK_FILTER_MAX_RULES + 500 });
+    it('still allows a by-ids bulk action on explicitly selected rows when total exceeds the cap', async () => {
+      renderContainer({ totalItemCount: BULK_FILTER_MAX_RESOURCES + 500 });
 
       const checkboxes = screen.getAllByRole('checkbox');
       fireEvent.click(checkboxes[1]);
 
-      await waitFor(() => {
-        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkActionsButton')).toBeInTheDocument();
+      expect(screen.getByTestId('selectAllRulesButton')).toBeDisabled();
 
-      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+      fireEvent.click(await screen.findByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkSelectAllLimitDisclosure')).toBeInTheDocument();
-        expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
-          /10,?000/
-        );
-      });
+      const bulkEnableRules = await screen.findByTestId('bulkEnableRules');
+
+      fireEvent.click(bulkEnableRules);
+
+      expect(mockBulkEnableMutate).toHaveBeenCalledWith(
+        { mode: 'by_ids', ids: ['rule-1'] },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
     });
 
     it('sends filter param when select all is used for bulk enable', async () => {
@@ -446,7 +470,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { match_all: true },
+        { mode: 'by_query', match_all: true },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -476,7 +500,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { filter: '(kind: alert)' },
+        { mode: 'by_query', filter: '(kind: alert)' },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });

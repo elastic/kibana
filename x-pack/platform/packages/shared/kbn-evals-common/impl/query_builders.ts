@@ -208,6 +208,13 @@ export const SCORES_SORT_ORDER: SortField[] = [
 const PREFLIGHT_EXPERIMENT_ID = 'kbn-evals-preflight';
 
 /**
+ * Escapes Elasticsearch wildcard metacharacters (`\`, `*`, `?`) in user input so the literal
+ * characters are matched rather than interpreted as wildcards.
+ */
+export const escapeWildcard = (input: string): string =>
+  input.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+
+/**
  * Builds the filter query for the experiments listing endpoint.
  * Supports optional suite, model, and branch filters.
  * Always excludes preflight check experiments.
@@ -227,14 +234,14 @@ export const buildExperimentsListingFilterQuery = (
     filters.push({
       wildcard: {
         'metadata.git.branch': {
-          value: `*${options.branch}*`,
+          value: `*${escapeWildcard(options.branch)}*`,
           case_insensitive: true,
         },
       },
     });
   }
   if (options?.search) {
-    const pattern = `*${options.search}*`;
+    const pattern = `*${escapeWildcard(options.search)}*`;
     filters.push({
       bool: {
         should: [

@@ -40,7 +40,6 @@ export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: Route
           version: evaluator.version,
           kind: evaluator.kind,
           description: evaluator.description,
-          supports_bare_tool_trace: evaluator.supportsBareToolTrace ?? true,
           ...(evaluator.referenceDataSchema
             ? {
                 reference_data_schema: toJsonSchema(evaluator.referenceDataSchema),

@@ -124,7 +124,6 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
-      supports_bare_tool_trace: true,
       evidence_schema: expect.objectContaining({
         properties: expect.objectContaining({
           input: expect.objectContaining({ type: 'object' }),

@@ -8,12 +8,15 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { evalsTools, otherResult, toErrorResult } from './common';
+import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
+import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
+import { hasReadEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({
   search: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe('Optional case-insensitive substring to filter datasets by name or description.'),
   limit: z
@@ -36,9 +39,15 @@ export const listEvalDatasetsTool = (
   description:
     'List evaluation datasets (id, name, description, example count). Use this to discover which dataset_ids to evaluate against when composing an experiment.',
   schema,
-  handler: async ({ search, limit }) => {
+  handler: async ({ search, limit }, { request, spaceId }) => {
     try {
-      const { evals } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
+      if (!(await hasReadEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the read_evals privilege required to list evaluation datasets in this space.'
+        );
+      }
+
       if (!evals.datasetService) {
         return toErrorResult(
           new Error('the evals dataset service is unavailable'),

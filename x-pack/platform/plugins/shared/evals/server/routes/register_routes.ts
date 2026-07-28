@@ -36,6 +36,8 @@ import { registerIngestOnlineScoresRoute } from './online_scores/ingest_online_s
 import { registerListOnlineScoresRoute } from './online_scores/list_online_scores';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
 import { registerEvaluateRoute } from './evaluators/evaluate';
+import { registerResolveInstrumentationRoute } from './evaluators/resolve_instrumentation';
+import { registerValidateRoute } from './evaluators/validate';
 import { registerRunExperimentRoute } from './experiments/run_experiment';
 import { registerSaveExperimentWorkflowRoute } from './experiments/save_experiment_workflow';
 import { registerPreviewExperimentRoute } from './experiments/preview_experiment';
@@ -44,9 +46,6 @@ import {
   registerGetExperimentExecutionRoute,
   registerCancelExperimentExecutionRoute,
 } from './experiments/experiment_executions';
-import { registerResolveInstrumentationRoute } from './evaluators/resolve_instrumentation';
-import { registerValidateRoute } from './evaluators/validate';
-
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
@@ -56,6 +55,7 @@ export interface RouteDependencies {
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
   getSpaceId?: (request: KibanaRequest) => Promise<string>;
+  checkManageEvalsPrivileges?: (request: KibanaRequest, spaceIds: string[]) => Promise<boolean>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
@@ -84,13 +84,13 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpsertDatasetRoute(dependencies);
   registerListEvaluatorsRoute(dependencies);
   registerEvaluateRoute(dependencies);
+  registerResolveInstrumentationRoute(dependencies);
+  registerValidateRoute(dependencies);
   registerRunExperimentRoute(dependencies);
   registerSaveExperimentWorkflowRoute(dependencies);
   registerPreviewExperimentRoute(dependencies);
   registerGetExperimentTemplatesRoute(dependencies);
   registerGetExperimentExecutionRoute(dependencies);
   registerCancelExperimentExecutionRoute(dependencies);
-  registerResolveInstrumentationRoute(dependencies);
-  registerValidateRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 };

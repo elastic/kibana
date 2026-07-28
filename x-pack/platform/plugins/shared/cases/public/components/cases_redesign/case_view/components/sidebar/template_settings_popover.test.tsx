@@ -320,4 +320,57 @@ describe('TemplateSettingsPopover', () => {
       );
     });
   });
+
+  describe('when the applied template is not available', () => {
+    const caseWithMissingTemplate = {
+      ...basicCase,
+      template: { id: 'deleted-template', version: 1 },
+    };
+
+    beforeEach(() => {
+      // The available (enabled, non-deleted) list does not include the applied template.
+      mockUseGetTemplates.mockReturnValue({
+        data: { templates: [otherTemplate] },
+        isLoading: false,
+      });
+      // But it can still be resolved (with its stale name) via includeDeleted.
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          ...appliedParsedTemplate,
+          templateId: 'deleted-template',
+          name: 'Deleted Template',
+          deletedAt: '2024-01-01T00:00:00.000Z',
+        },
+        isFetching: false,
+      });
+    });
+
+    it('shows a non-selectable "not found" entry with the stale template name', async () => {
+      renderWithTestingProviders(
+        <TemplateSettingsPopover {...defaultProps} caseData={caseWithMissingTemplate} />
+      );
+
+      const combobox = await openSelector();
+
+      expect(
+        screen.getByTestId('sidebar-template-settings-template-not-found-icon')
+      ).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Deleted Template (not found)');
+    });
+
+    it('falls back to a generic label when the stale name cannot be resolved', async () => {
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });
+
+      renderWithTestingProviders(
+        <TemplateSettingsPopover {...defaultProps} caseData={caseWithMissingTemplate} />
+      );
+
+      const combobox = await openSelector();
+
+      expect(
+        screen.getByTestId('sidebar-template-settings-template-not-found-icon')
+      ).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Template not found');
+    });
+  });
 });

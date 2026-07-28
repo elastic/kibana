@@ -12,7 +12,6 @@ import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eu
 import { css } from '@emotion/react';
 import React, { Suspense, useMemo } from 'react';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
-import { getBaseConnectorType } from './get_base_connector_type';
 import { getStepIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
@@ -65,7 +64,7 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
         : resolveRegisteredStepIcon(type, {
             workflowsExtensions,
             actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          }) ?? getStepIconType(getBaseConnectorType(type)),
+          }) ?? getStepIconType(type),
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 

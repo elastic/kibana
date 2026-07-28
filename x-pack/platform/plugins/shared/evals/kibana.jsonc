@@ -16,7 +16,13 @@
       "lens",
       "dataViews"
     ],
-    "optionalPlugins": ["management", "spaces", "workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": [
+      "management",
+      "spaces",
+      "security",
+      "workflowsExtensions",
+      "workflowsManagement"
+    ],
     "requiredBundles": ["kibanaReact", "data", "spaces", "workflowsExtensions"]
   }
 }

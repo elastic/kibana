@@ -6,6 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
+import * as Boom from '@hapi/boom';
 
 import {
   type SavedObject,
@@ -15,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
@@ -85,6 +87,12 @@ export const getTimelineOrNull = async (
     timeline = await getTimeline(frameworkRequest, savedObjectId);
     // eslint-disable-next-line no-empty
   } catch (e) {}
+  if (
+    timeline?.status === TimelineStatusEnum.draft &&
+    timeline.createdBy !== getRequestUserDisplayName(frameworkRequest)
+  ) {
+    return null;
+  }
   return timeline;
 };
 
@@ -94,6 +102,12 @@ export const resolveTimelineOrNull = async (
 ): Promise<ResolvedTimeline | null> => {
   try {
     const resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
+    if (
+      resolvedTimeline.timeline.status === TimelineStatusEnum.draft &&
+      resolvedTimeline.timeline.createdBy !== getRequestUserDisplayName(frameworkRequest)
+    ) {
+      return null;
+    }
     return resolvedTimeline;
   } catch (e) {
     return null;
@@ -177,10 +191,16 @@ const getTimelineFavoriteFilter = ({
 const combineFilters = (filters: Array<string | null>) =>
   filters.filter((f) => f != null).join(' and ');
 
+// Returns the same display name that pickSavedTimeline stores in createdBy/updatedBy so that
+// ownership comparisons are consistent regardless of auth provider (e.g. SAML users whose
+// full_name differs from their username).
+const getRequestUserDisplayName = (request: FrameworkRequest): string =>
+  request.user ? getUserDisplayName(request.user) : UNAUTHENTICATED_USER;
+
 const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
-  const username = request.user?.username ?? UNAUTHENTICATED_USER;
-  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${username}"`;
-  const createdBy = `siem-ui-timeline.attributes.createdBy: "${username}"`;
+  const displayName = getRequestUserDisplayName(request);
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${displayName}"`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: "${displayName}"`;
   return combineFilters([updatedBy, createdBy]);
 };
 
@@ -213,9 +233,14 @@ export const getAllTimeline = async (
 ): Promise<GetTimelinesResponse> => {
   const searchTerm = search != null ? search : undefined;
   const searchFields = ['title', 'description'];
+  const ownerFilter =
+    status === TimelineStatusEnum.draft
+      ? getTimelinesCreatedAndUpdatedByCurrentUser({ request })
+      : null;
   const filter = combineFilters([
     getTimelineTypeFilter(timelineType ?? null, status ?? null),
     getTimelineFavoriteFilter({ onlyUserFavorite, request }),
+    ownerFilter,
   ]);
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -307,6 +332,7 @@ export const getAllTimelineByIds = async (
   }
 ): Promise<GetTimelinesResponse> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+  const ownerDisplayName = getRequestUserDisplayName(request);
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const uniqueIds = [...new Set(ids)];
@@ -316,10 +342,16 @@ export const getAllTimelineByIds = async (
 
   const enrichedTimelines = await Promise.all(
     bulkResponse.saved_objects
-      .filter(
-        (savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> =>
-          !isSavedObjectErrorResult(savedObject)
-      )
+      .filter((savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> => {
+        if (isSavedObjectErrorResult(savedObject)) return false;
+        if (
+          savedObject.attributes.status === TimelineStatusEnum.draft &&
+          savedObject.attributes.createdBy !== ownerDisplayName
+        ) {
+          return false;
+        }
+        return true;
+      })
       .map(async (savedObject) => {
         const migratedSO = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
         const timelineSavedObject = convertSavedObjectToSavedTimeline(migratedSO);
@@ -609,6 +641,13 @@ const updateTimeline = async ({
       timelineId
     );
 
+  if (
+    rawTimelineSavedObject.attributes.status === TimelineStatusEnum.draft &&
+    rawTimelineSavedObject.attributes.createdBy !== getRequestUserDisplayName(request)
+  ) {
+    throw Boom.notFound();
+  }
+
   const { transformedFields: migratedPatchAttributes, references } =
     timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
       data: pickSavedTimeline(timelineId, timeline, userInfo),
@@ -697,8 +736,32 @@ export const deleteTimeline = async (
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const uniqueTimelineIds = [...new Set(timelineIds)];
 
-  for (let index = 0; index < uniqueTimelineIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
-    const timelineIdsBatch = uniqueTimelineIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
+  const bulkGetResponse = await savedObjectsClient.bulkGet<SavedObjectTimelineWithoutExternalRefs>(
+    uniqueTimelineIds.map((id) => ({ id, type: timelineSavedObjectType }))
+  );
+
+  const currentUserDisplayName = getRequestUserDisplayName(request);
+  let hasNonOwnerDraft = false;
+  const allowedIds: string[] = [];
+
+  for (const savedObject of bulkGetResponse.saved_objects) {
+    if (isSavedObjectErrorResult(savedObject)) {
+      throw Boom.notFound();
+    }
+    const { status, createdBy } = savedObject.attributes;
+    if (status === TimelineStatusEnum.draft && createdBy !== currentUserDisplayName) {
+      hasNonOwnerDraft = true;
+    } else {
+      allowedIds.push(savedObject.id);
+    }
+  }
+
+  if (hasNonOwnerDraft) {
+    throw Boom.notFound();
+  }
+
+  for (let index = 0; index < allowedIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
+    const timelineIdsBatch = allowedIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
 
     await Promise.all(
       timelineIdsBatch.map((timelineId) =>
@@ -720,6 +783,17 @@ export const copyTimeline = async (
   timelineId: string
 ): Promise<InternalTimelineResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  const sourceSO = await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
+    timelineSavedObjectType,
+    timelineId
+  );
+  if (
+    sourceSO.attributes.status === TimelineStatusEnum.draft &&
+    sourceSO.attributes.createdBy !== getRequestUserDisplayName(request)
+  ) {
+    throw Boom.notFound();
+  }
 
   // Fetch all objects that need to be copied
   const [notes, pinnedEvents] = await Promise.all([
@@ -894,6 +968,7 @@ export const getSelectedTimelines = async (
   timelineIds?: string[] | null
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const currentUserDisplayName = getRequestUserDisplayName(request);
   let exportedIds = timelineIds;
   if (timelineIds == null || timelineIds.length === 0) {
     const { timeline: savedAllTimelines } = await getAllTimeline(
@@ -926,6 +1001,12 @@ export const getSelectedTimelines = async (
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
       if (!isSavedObjectErrorResult(savedObject)) {
+        if (
+          savedObject.attributes.status === TimelineStatusEnum.draft &&
+          savedObject.attributes.createdBy !== currentUserDisplayName
+        ) {
+          return acc;
+        }
         const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
         return {

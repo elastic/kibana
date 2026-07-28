@@ -32,6 +32,10 @@ export const RESULTS_PENDING = i18n.translate('xpack.evals.runOverview.resultsPe
   defaultMessage: 'Waiting for results...',
 });
 
+export const NO_RESULTS = i18n.translate('xpack.evals.runOverview.noResults', {
+  defaultMessage: 'No scores ingested',
+});
+
 export const COMPARE = i18n.translate('xpack.evals.runOverview.compare', {
   defaultMessage: 'Compare experiments',
 });

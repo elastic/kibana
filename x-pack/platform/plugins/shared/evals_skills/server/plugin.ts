@@ -51,6 +51,7 @@ export class EvalsSkillsPlugin
     const toolDeps: EvalExperimentsToolDeps = {
       workflowsApi: workflowsManagement.management,
       serverBasePath: coreSetup.http.basePath.serverBasePath,
+      logger: this.logger,
       getStartDependencies: () =>
         coreSetup.getStartServices().then(([, startDependencies]) => startDependencies),
     };

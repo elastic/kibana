@@ -23,7 +23,6 @@ export interface EvalsStepLogger {
 export const BUILT_IN_TASK_PROVIDERS = {
   inference: 'inference',
   agentBuilderConverse: 'agentBuilder.converse',
-  agentBuilderTool: 'agentBuilder.tool',
 } as const;
 
 export type BuiltInTaskProviderName =
@@ -47,7 +46,6 @@ export interface EvalsTaskContext {
   input: Record<string, unknown>;
   connectorId: string;
   agentId?: string;
-  toolId?: string;
   params?: Record<string, unknown>;
   logger: EvalsStepLogger;
   abortSignal: AbortSignal;
@@ -59,8 +57,8 @@ export type EvalsTaskResult = TaskResult;
 
 /**
  * A task provider knows how to execute "the thing being evaluated" for a single
- * example: a raw LLM call, an Agent Builder conversation, an Agent Builder tool,
- * or a suite-specific function registered by another plugin.
+ * example: a raw LLM call, an Agent Builder conversation, or a suite-specific
+ * function registered by another plugin.
  */
 export interface EvalsTaskProvider {
   name: string;

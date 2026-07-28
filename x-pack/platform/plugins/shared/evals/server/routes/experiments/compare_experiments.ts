@@ -58,6 +58,15 @@ export const registerCompareExperimentsRoute = ({
       async (context, request, response) => {
         try {
           const { type, baseline_id: idA, target_id: idB } = request.query;
+
+          if (idA === idB) {
+            return response.badRequest({
+              body: {
+                message: `baseline_id and target_id must differ; cannot compare an ${type} with itself.`,
+              },
+            });
+          }
+
           const filterField = type === 'execution' ? 'metadata.execution_id' : 'experiment_id';
 
           const evalsContext = await context.evals;

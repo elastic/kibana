@@ -6,22 +6,52 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateExperimentRun } from '@kbn/evals-plugin/server';
 import {
   buildResultsLink,
+  errorResult,
   evalExperimentConfigSchema,
   evalsTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
 } from './common';
+import { hasManageEvalsPrivilege } from './check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
+
+const cancelLaunchedExecutions = async (
+  { workflowsApi, logger }: EvalExperimentsToolDeps,
+  workflowExecutionIds: string[],
+  spaceId: string,
+  request: KibanaRequest
+): Promise<void> => {
+  const cancellations = await Promise.allSettled(
+    workflowExecutionIds.map((workflowExecutionId) =>
+      workflowsApi.cancelWorkflowExecution(workflowExecutionId, spaceId, request)
+    )
+  );
+
+  cancellations.forEach((cancellation, index) => {
+    if (cancellation.status === 'rejected') {
+      logger.error(
+        `Failed to cancel orphaned experiment workflow execution ${workflowExecutionIds[index]}: ${
+          cancellation.reason instanceof Error
+            ? cancellation.reason.message
+            : String(cancellation.reason)
+        }`
+      );
+    }
+  });
+};
 
 const runSchema = evalExperimentConfigSchema.extend({
   workflow_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe('Optional saved workflow id to associate this run with (for correlation in the UI).'),
 });
@@ -44,8 +74,6 @@ export const runEvalExperimentTool = (
     getConfirmation: ({ toolParams }) => {
       const target = toolParams.agent_id
         ? `agent "${toolParams.agent_id}"`
-        : toolParams.tool_id
-        ? `tool "${toolParams.tool_id}"`
         : 'the configured target';
       const models = toolParams.connector_ids.join(', ');
       const datasetCount = toolParams.dataset_ids.length;
@@ -58,11 +86,18 @@ export const runEvalExperimentTool = (
     },
   },
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
+    const workflowExecutionIds: string[] = [];
     try {
+      const { security } = await deps.getStartDependencies();
+      if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
+        return errorResult(
+          'You do not have the manage_evals privilege required to run evaluation experiments in this space.'
+        );
+      }
+
       const params = toGenerateParams(config);
       const run = generateExperimentRun(params);
 
-      const workflowExecutionIds: string[] = [];
       for (const execution of run.executions) {
         const result = await deps.workflowsApi.executeWorkflow({
           yaml: execution.yaml,
@@ -90,6 +125,7 @@ export const runEvalExperimentTool = (
         results_url: buildResultsLink(deps.serverBasePath, spaceId, run, workflowExecutionIds),
       });
     } catch (error) {
+      await cancelLaunchedExecutions(deps, workflowExecutionIds, spaceId, request);
       return toErrorResult(error, 'Failed to run experiment');
     }
   },

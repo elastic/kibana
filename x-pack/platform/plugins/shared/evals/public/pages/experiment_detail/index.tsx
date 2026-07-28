@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, type MouseEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -61,6 +61,10 @@ interface DatasetStatsGroup {
   stats: EvaluatorStats[];
 }
 
+// Poll cadence for a live run, shared by the aggregate stats and the per-dataset example rows so
+// both refresh in lockstep.
+const RUN_POLL_INTERVAL_MS = 3000;
+
 interface DatasetStatsAccordionProps {
   experimentId: string;
   executionId?: string;
@@ -68,6 +72,7 @@ interface DatasetStatsAccordionProps {
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   experimentLoading: boolean;
   isOpen: boolean;
+  isRunning: boolean;
   datasetExists: boolean;
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
@@ -81,6 +86,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   statsColumns,
   experimentLoading,
   isOpen,
+  isRunning,
   datasetExists,
   selectedExampleId,
   onTraceClick,
@@ -91,7 +97,21 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     data: datasetExamples,
     isLoading: examplesLoading,
     error: examplesError,
-  } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId);
+    refetch: refetchExamples,
+  } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId, {
+    refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
+    staleTime: isRunning ? 0 : undefined,
+  });
+
+  // When the run settles and polling stops, pull the final example set once in case the last poll
+  // fired just before the last example's scores were indexed.
+  const wasRunningRef = useRef(isRunning);
+  useEffect(() => {
+    if (wasRunningRef.current && !isRunning && isOpen) {
+      refetchExamples();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, isOpen, refetchExamples]);
 
   return (
     <>
@@ -183,7 +203,7 @@ export const ExperimentDetailPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const executionId = searchParams.get('execution_id') ?? undefined;
   const workflowExecutionIds = useMemo(
-    () => searchParams.get('workflow_execution_id')?.split(',').filter(Boolean) ?? [],
+    () => searchParams.getAll('workflow_execution_id'),
     [searchParams]
   );
 
@@ -198,6 +218,7 @@ export const ExperimentDetailPage: React.FC = () => {
     scoresIngested,
   } = useWorkflowExecutions(workflowExecutionIds);
   const anyScoresIngested = scoresIngested > 0;
+  const runInProgress = isLaunching && !runSettled;
 
   // The submitted form, forwarded via router state on "Run now", so the config
   // stays visible while the run has not produced queryable results yet.
@@ -219,7 +240,8 @@ export const ExperimentDetailPage: React.FC = () => {
     error: experimentError,
     refetch: refetchExperiment,
   } = useEvaluationExperiment(experimentId, executionId, {
-    refetchInterval: isLaunching && !runSettled ? 3000 : false,
+    refetchInterval: runInProgress ? RUN_POLL_INTERVAL_MS : false,
+    enabled: !isLaunching || anyScoresIngested,
   });
 
   // Fetch the experiment as soon as scores appear, and once more when the run
@@ -262,8 +284,6 @@ export const ExperimentDetailPage: React.FC = () => {
       history.push({
         pathname: location.pathname,
         search: search ? `?${search}` : '',
-        // Preserve the launched-config router state across in-page navigations
-        // (e.g. opening a dataset accordion) so the config summary stays visible.
         state: location.state,
       });
     },
@@ -292,9 +312,12 @@ export const ExperimentDetailPage: React.FC = () => {
           params.set('trace_id', traceId);
           if (exampleId) {
             params.set('example_id', exampleId);
+          } else {
+            params.delete('example_id');
           }
         } else {
           params.delete('trace_id');
+          params.delete('example_id');
         }
       });
     },
@@ -605,6 +628,7 @@ export const ExperimentDetailPage: React.FC = () => {
                   statsColumns={statsColumns}
                   experimentLoading={experimentLoading}
                   isOpen={openDatasetId === group.datasetId}
+                  isRunning={runInProgress}
                   datasetExists={
                     existingDatasetIds ? existingDatasetIds.has(group.datasetId) : true
                   }

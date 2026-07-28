@@ -12,6 +12,7 @@ import {
   EvaluateDatasetStepId,
   CompareExperimentsStepId,
 } from '../common/workflows/steps';
+import { EVALS_WORKFLOW_TAGS } from '../common/experiments/run_experiment';
 import type { RunExperimentRequest } from '../common/experiments/run_experiment';
 
 /**
@@ -28,7 +29,7 @@ import type { RunExperimentRequest } from '../common/experiments/run_experiment'
  *   single, self-contained workflow definition that re-generates fresh ids on
  *   every (possibly scheduled) run, so repeated runs form comparable, distinct
  *   experiments. Cross-model saved workflows run sequentially and, when `compare`
- *   is requested, end with a `evals.compareExperiments` step.
+ *   is requested, end with a `ai.evals.compareExperiments` step.
  *
  * The engine does not execute `parallel` today, so cross-model parallelism is
  * achieved via execution fan-out in "Run now"; the saved-workflow form stays
@@ -50,8 +51,6 @@ export const DATASET_FANOUT_THRESHOLD = 5;
  */
 export const TASK_MANAGER_CAPACITY = 10;
 
-const EVALS_WORKFLOW_TAGS = ['evals', 'evals-experiment'] as const;
-
 export interface WorkflowEvaluatorInput {
   name: string;
   version?: string;
@@ -66,7 +65,6 @@ export const experimentRequestToParams = (
   name: body.name,
   connectorIds: body.connector_ids,
   agentId: body.agent_id,
-  toolId: body.tool_id,
   taskRef: body.task_ref,
   params: body.params,
   datasetIds: body.dataset_ids,
@@ -81,7 +79,6 @@ export interface GenerateExperimentParams {
   name?: string;
   connectorIds: string[];
   agentId?: string;
-  toolId?: string;
   taskRef?: string;
   params?: Record<string, unknown>;
   datasetIds: string[];
@@ -116,7 +113,6 @@ export interface GeneratedExperimentRun {
 interface TaskTargetValues {
   connectorId: string;
   agentId?: string;
-  toolId?: string;
   taskRef?: string;
   params?: Record<string, unknown>;
 }
@@ -167,7 +163,6 @@ const buildEvaluateStep = (name: string, startStepName: string, values: Evaluate
     execution_id: `{{ steps.${startStepName}.output.execution_id }}`,
     connector_id: values.connectorId,
     agent_id: values.agentId,
-    tool_id: values.toolId,
     task_ref: values.taskRef,
     params: values.params,
     dataset_ids: values.datasetIds,
@@ -194,11 +189,7 @@ const buildWorkflowShell = (
 });
 
 const defaultRunName = (params: GenerateExperimentParams): string => {
-  const target = params.agentId
-    ? `agent ${params.agentId}`
-    : params.toolId
-    ? `tool ${params.toolId}`
-    : params.connectorIds.join(', ');
+  const target = params.agentId ? `agent ${params.agentId}` : params.connectorIds.join(', ');
   return params.name ?? `Evaluate ${target}`;
 };
 
@@ -229,7 +220,6 @@ export const generateExperimentRun = (params: GenerateExperimentParams): Generat
 
   const commonTarget = {
     agentId: params.agentId,
-    toolId: params.toolId,
     taskRef: params.taskRef,
     params: params.params,
     evaluators: params.evaluators,
@@ -357,7 +347,7 @@ export interface GeneratedSavedWorkflow {
  * mints a fresh `experiment_id` (and `execution_id`) on every run so scheduled
  * re-runs produce distinct, comparable experiments. Cross-model saved workflows
  * run each model sequentially and, when `compare` is requested, finish with
- * `evals.compareExperiments` over the per-model experiment ids.
+ * `ai.evals.compareExperiments` over the per-model experiment ids.
  */
 export const generateSavedWorkflowYaml = (
   params: GenerateExperimentParams
@@ -376,7 +366,6 @@ export const generateSavedWorkflowYaml = (
 
   const commonTarget = {
     agentId: params.agentId,
-    toolId: params.toolId,
     taskRef: params.taskRef,
     params: params.params,
     evaluators: params.evaluators,
@@ -419,7 +408,8 @@ export const generateSavedWorkflowYaml = (
       })
     );
   });
-  // The compare step is opt-in (the "Compare models after run" checkbox): each model
+
+  // The compare step is opt-in (the "Add model comparison step" toggle): each model
   // is already its own experiment/row, so a pairwise comparison is only appended when
   // explicitly requested.
   if (params.compare) {

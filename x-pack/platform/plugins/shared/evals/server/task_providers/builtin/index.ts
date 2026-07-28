@@ -8,16 +8,10 @@
 import type { EvalsTaskProvider } from '../types';
 import { createInferenceTaskProvider } from './inference';
 import { createAgentBuilderConverseTaskProvider } from './agent_builder_converse';
-import { createAgentBuilderToolTaskProvider } from './agent_builder_tool';
 
 export const createBuiltInTaskProviders = (): EvalsTaskProvider[] => [
   createInferenceTaskProvider(),
   createAgentBuilderConverseTaskProvider(),
-  createAgentBuilderToolTaskProvider(),
 ];
 
-export {
-  createInferenceTaskProvider,
-  createAgentBuilderConverseTaskProvider,
-  createAgentBuilderToolTaskProvider,
-};
+export { createInferenceTaskProvider, createAgentBuilderConverseTaskProvider };

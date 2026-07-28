@@ -411,7 +411,7 @@ export const ExperimentsListPage: React.FC = () => {
         <EuiBasicTable<EvaluationExperimentSummary>
           tableCaption={i18n.TABLE_CAPTION}
           items={data?.experiments ?? []}
-          itemId="execution_id"
+          itemId={(item) => item.execution_id ?? item.experiment_id}
           columns={columns}
           loading={isLoading}
           pagination={pagination}

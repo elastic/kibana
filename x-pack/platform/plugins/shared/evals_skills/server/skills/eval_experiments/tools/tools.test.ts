@@ -6,8 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { EVALS_EXPERIMENT_WORKFLOW_TAG } from '@kbn/evals-plugin/common';
 import type { EvalExperimentsToolDeps } from './deps';
 import { listEvalDatasetsTool } from './list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
@@ -27,26 +29,65 @@ interface WorkflowsApiMock {
   createWorkflow: jest.Mock;
   updateWorkflow: jest.Mock;
   executeWorkflow: jest.Mock;
+  getWorkflow: jest.Mock;
+  cancelWorkflowExecution: jest.Mock;
 }
 
 const createDeps = (
   overrides: Partial<EvalExperimentsToolDeps> = {}
-): { deps: EvalExperimentsToolDeps; workflowsApi: WorkflowsApiMock } => {
+): {
+  deps: EvalExperimentsToolDeps;
+  workflowsApi: WorkflowsApiMock;
+  logger: ReturnType<typeof loggingSystemMock.createLogger>;
+} => {
   const workflowsApi: WorkflowsApiMock = {
     createWorkflow: jest.fn(),
     updateWorkflow: jest.fn(),
     executeWorkflow: jest.fn(),
+    getWorkflow: jest.fn(),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
   };
+  const logger = loggingSystemMock.createLogger();
   const deps: EvalExperimentsToolDeps = {
     workflowsApi: workflowsApi as unknown as EvalExperimentsToolDeps['workflowsApi'],
     serverBasePath: '',
-    getStartDependencies: jest.fn(),
+    logger,
+    getStartDependencies: jest.fn().mockResolvedValue({}),
     ...overrides,
   };
-  return { deps, workflowsApi };
+  return { deps, workflowsApi, logger };
 };
 
+const securityWith = (hasAllRequested: boolean) =>
+  ({
+    security: {
+      authz: {
+        actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+        checkPrivilegesWithRequest: () => ({
+          atSpace: async () => ({ hasAllRequested }),
+        }),
+      },
+    },
+  } as unknown as Awaited<ReturnType<EvalExperimentsToolDeps['getStartDependencies']>>);
+
+const denyingDeps = () => ({
+  getStartDependencies: jest
+    .fn()
+    .mockResolvedValue(
+      securityWith(false)
+    ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+});
+
+const grantingDeps = () => ({
+  getStartDependencies: jest
+    .fn()
+    .mockResolvedValue(
+      securityWith(true)
+    ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+});
+
 const validConfig = {
+  target: 'agent' as const,
   connector_ids: ['c1'],
   dataset_ids: ['d1'],
   evaluators: [{ name: 'correctness', connector_id: 'judge-1' }],
@@ -67,17 +108,31 @@ describe('previewEvalExperimentTool', () => {
     expect(result.data.run_plan.execution_count).toBe(1);
   });
 
+  it('generates a direct-inference experiment with no agent in the workflow', async () => {
+    const { deps } = createDeps();
+    const result = firstResult(
+      await previewEvalExperimentTool(deps).handler(
+        { ...validConfig, target: 'inference', agent_id: undefined },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data.workflow_yaml).toContain('steps:');
+    expect(result.data.workflow_yaml).not.toContain('agent_id');
+  });
+
   it('returns an error result for an invalid configuration', async () => {
     const { deps } = createDeps();
     const result = firstResult(
       await previewEvalExperimentTool(deps).handler(
-        { ...validConfig, tool_id: 't' },
+        { ...validConfig, agent_id: undefined },
         createContext()
       )
     );
 
     expect(result.type).toBe(ToolResultType.error);
-    expect(result.data.message).toMatch(/only one of agent_id or tool_id/);
+    expect(result.data.message).toMatch(/Provide an agent_id/);
   });
 });
 
@@ -100,6 +155,9 @@ describe('saveEvalExperimentTool', () => {
 
   it('updates an existing workflow in place when workflow_id is provided', async () => {
     const { deps, workflowsApi } = createDeps();
+    workflowsApi.getWorkflow.mockResolvedValue({
+      definition: { tags: ['evals', EVALS_EXPERIMENT_WORKFLOW_TAG] },
+    });
     workflowsApi.updateWorkflow.mockResolvedValue({});
 
     const result = firstResult(
@@ -109,6 +167,7 @@ describe('saveEvalExperimentTool', () => {
       )
     );
 
+    expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
     expect(workflowsApi.updateWorkflow).toHaveBeenCalledWith(
       'wf-1',
       expect.objectContaining({ yaml: expect.any(String) }),
@@ -118,6 +177,24 @@ describe('saveEvalExperimentTool', () => {
     expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
     expect(result.data.workflow_id).toBe('wf-1');
     expect(result.data.updated).toBe(true);
+  });
+
+  it('refuses to overwrite a workflow that is not an evals-owned experiment', async () => {
+    const { deps, workflowsApi } = createDeps();
+    workflowsApi.getWorkflow.mockResolvedValue({
+      definition: { tags: ['some-other-feature'] },
+    });
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(
+        { ...validConfig, workflow_id: 'wf-foreign' },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(workflowsApi.updateWorkflow).not.toHaveBeenCalled();
+    expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
   });
 
   it('returns an error result when saving fails', async () => {
@@ -130,6 +207,31 @@ describe('saveEvalExperimentTool', () => {
 
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data.message).toContain('Failed to save experiment workflow');
+  });
+
+  it('returns an error result and does not save when the caller lacks manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(denyingDeps());
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/manage_evals/);
+    expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
+    expect(workflowsApi.updateWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('saves when security is enabled and the caller has manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(grantingDeps());
+    workflowsApi.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'Evaluate agent agent-1' });
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(workflowsApi.createWorkflow).toHaveBeenCalledTimes(1);
+    expect(result.type).toBe(ToolResultType.other);
   });
 });
 
@@ -183,6 +285,82 @@ describe('runEvalExperimentTool', () => {
 
     expect(workflowsApi.executeWorkflow.mock.calls[0][0]).toMatchObject({ workflowId: 'wf-1' });
   });
+
+  it('cancels already-launched executions when a later launch in the fan-out fails', async () => {
+    const { deps, workflowsApi } = createDeps();
+    workflowsApi.executeWorkflow
+      .mockResolvedValueOnce({ workflowExecutionId: 'we-1' })
+      .mockRejectedValueOnce(new Error('workflow engine boom'));
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(
+        { ...validConfig, connector_ids: ['c1', 'c2'] },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    // The caller gets no ids back, so the one that launched must not be left running.
+    expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'we-1',
+      'default',
+      expect.anything()
+    );
+  });
+
+  it('logs the orphan when the rollback itself fails', async () => {
+    const { deps, workflowsApi, logger } = createDeps();
+    workflowsApi.executeWorkflow
+      .mockResolvedValueOnce({ workflowExecutionId: 'we-1' })
+      .mockRejectedValueOnce(new Error('workflow engine boom'));
+    workflowsApi.cancelWorkflowExecution.mockRejectedValue(new Error('cancel failed'));
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(
+        { ...validConfig, connector_ids: ['c1', 'c2'] },
+        createContext()
+      )
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to cancel orphaned experiment workflow execution we-1')
+    );
+  });
+
+  it('does not attempt cancellation when the first launch fails', async () => {
+    const { deps, workflowsApi } = createDeps();
+    workflowsApi.executeWorkflow.mockRejectedValueOnce(new Error('workflow engine boom'));
+
+    await runEvalExperimentTool(deps).handler(validConfig, createContext());
+
+    expect(workflowsApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('returns an error result and does not launch when the caller lacks manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(denyingDeps());
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/manage_evals/);
+    expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('launches when security is enabled and the caller has manage_evals', async () => {
+    const { deps, workflowsApi } = createDeps(grantingDeps());
+    workflowsApi.executeWorkflow.mockResolvedValue({ workflowExecutionId: 'we-1' });
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(validConfig, createContext())
+    );
+
+    expect(workflowsApi.executeWorkflow).toHaveBeenCalledTimes(1);
+    expect(result.type).toBe(ToolResultType.other);
+  });
 });
 
 describe('discovery tools', () => {
@@ -219,6 +397,22 @@ describe('discovery tools', () => {
     expect(result.type).toBe(ToolResultType.error);
   });
 
+  it('refuses to list datasets when the caller lacks read_evals', async () => {
+    const list = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        evals: { datasetService: { getClient: () => ({ list }) } },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(list).not.toHaveBeenCalled();
+  });
+
   it('lists evaluators via the evals start contract', async () => {
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
@@ -230,7 +424,6 @@ describe('discovery tools', () => {
               kind: 'llm',
               description: 'd',
               needsJudgeConnector: true,
-              supportsBareToolTrace: true,
             },
           ],
         },
@@ -242,6 +435,22 @@ describe('discovery tools', () => {
 
     expect(result.data.evaluators).toHaveLength(1);
     expect(result.data.evaluators[0].needsJudgeConnector).toBe(true);
+  });
+
+  it('refuses to list evaluators when the caller lacks read_evals', async () => {
+    const listEvaluators = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        evals: { listEvaluators },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvaluatorsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(listEvaluators).not.toHaveBeenCalled();
   });
 
   it('lists model connectors via the evals start contract', async () => {
@@ -276,7 +485,23 @@ describe('discovery tools', () => {
     expect(result.type).toBe(ToolResultType.error);
   });
 
-  it('lists agent and tool targets from the agent builder registries', async () => {
+  it('refuses to list model connectors when the caller lacks read_evals', async () => {
+    const listModelConnectors = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        evals: { listModelConnectors },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listConnectorsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(listModelConnectors).not.toHaveBeenCalled();
+  });
+
+  it('lists agent targets from the agent builder registry', async () => {
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
         evals: {},
@@ -286,11 +511,6 @@ describe('discovery tools', () => {
               list: async () => [{ id: 'a1', name: 'A', description: 'da' }],
             }),
           },
-          tools: {
-            getRegistry: async () => ({
-              list: async () => [{ id: 't1', type: 'builtin', description: 'dt' }],
-            }),
-          },
         },
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
@@ -298,6 +518,21 @@ describe('discovery tools', () => {
     const result = firstResult(await listEvalTargetsTool(deps).handler({}, createContext()));
 
     expect(result.data.agents[0].id).toBe('a1');
-    expect(result.data.tools[0].id).toBe('t1');
+  });
+
+  it('refuses to list agent targets when the caller lacks read_evals', async () => {
+    const getRegistry = jest.fn();
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        ...securityWith(false),
+        agentBuilder: { agents: { getRegistry } },
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvalTargetsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/read_evals/);
+    expect(getRegistry).not.toHaveBeenCalled();
   });
 });

@@ -255,7 +255,7 @@ export const EvalsApp: React.FC<{
 }> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix }) => {
   return (
     <Router history={history}>
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div>
         <EvalsHeader />
         <EvalsNavigation />
         <EvalsBreadcrumbs

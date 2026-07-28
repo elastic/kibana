@@ -154,6 +154,24 @@ export class EvalsPlugin
       return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
+    // When security is disabled there is no per-space authz to enforce, so grant.
+    const checkManageEvalsPrivileges = async (
+      request: KibanaRequest,
+      spaceIds: string[]
+    ): Promise<boolean> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const security = pluginsStart.security;
+      if (!security) {
+        return true;
+      }
+      const { hasAllRequested } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .atSpaces(spaceIds, {
+          kibana: [security.authz.actions.api.get(EVALS_API_PRIVILEGES.manage)],
+        });
+      return hasAllRequested;
+    };
+
     registerRoutes({
       router,
       logger: this.logger,
@@ -164,6 +182,7 @@ export class EvalsPlugin
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
       getSpaceId,
+      checkManageEvalsPrivileges,
       taskProviderRegistry: this.taskProviderRegistry,
       workflowsManagement,
     });
@@ -230,7 +249,6 @@ export class EvalsPlugin
           kind: def.kind,
           description: def.description,
           needsJudgeConnector: def.kind === 'llm',
-          supportsBareToolTrace: def.supportsBareToolTrace ?? true,
         })),
       listModelConnectors: async (request) => {
         const connectors = await plugins.inference.getConnectorList(request);

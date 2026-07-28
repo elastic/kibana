@@ -25,7 +25,7 @@ import { buildScoreDocuments, mapWithConcurrency, ConcurrencyAbortError } from '
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
-import { AGENT_BUILDER_TOOL_PROFILE } from '../evaluators/evidence/profiles';
+import type { InstrumentationProfile } from '../evaluators/evidence/types';
 import type {
   EvalsCallKibanaApi,
   EvalsStepLogger,
@@ -50,7 +50,6 @@ export interface StepRuntime {
 export interface TaskTarget {
   connectorId: string;
   agentId?: string;
-  toolId?: string;
   taskRef?: string;
   params?: Record<string, unknown>;
 }
@@ -61,32 +60,16 @@ export interface EvaluatorConfig {
   connector_id?: string;
 }
 
-/** Chooses the task provider id from the target: task_ref > tool_id > agent_id > inference. */
-export const resolveTaskProviderName = ({ taskRef, toolId, agentId }: TaskTarget): string => {
+/** Chooses the task provider id from the target: task_ref > agent_id > inference. */
+export const resolveTaskProviderName = ({ taskRef, agentId }: TaskTarget): string => {
   if (taskRef) {
     return taskRef;
-  }
-  if (toolId) {
-    return BUILT_IN_TASK_PROVIDERS.agentBuilderTool;
   }
   if (agentId) {
     return BUILT_IN_TASK_PROVIDERS.agentBuilderConverse;
   }
   return BUILT_IN_TASK_PROVIDERS.inference;
 };
-
-/**
- * Picks the instrumentation profile for a target. Bare tool runs (`agentBuilder.tool`)
- * have no conversation to grade, so they use the tool evidence profile (the tool's
- * arguments/result become the judge's question/answer). Other targets fall back to
- * the server default (conversation) profile.
- */
-export const resolveInstrumentationForTarget = (
-  target: TaskTarget
-): { profile: string } | undefined =>
-  resolveTaskProviderName(target) === BUILT_IN_TASK_PROVIDERS.agentBuilderTool
-    ? { profile: AGENT_BUILDER_TOOL_PROFILE }
-    : undefined;
 
 /** Runs the feature under evaluation for a single example via the resolved provider. */
 export const runTask = async (
@@ -104,7 +87,6 @@ export const runTask = async (
     input,
     connectorId: target.connectorId,
     agentId: target.agentId,
-    toolId: target.toolId,
     params: target.params,
     logger: runtime.logger,
     abortSignal: runtime.abortSignal,
@@ -126,7 +108,7 @@ export const evaluateTrace = async (
     traceId: string;
     referenceData?: Record<string, unknown>;
     evaluators: EvaluatorConfig[];
-    instrumentation?: { profile: string };
+    instrumentation?: { profile: InstrumentationProfile };
   }
 ): Promise<EvaluateTraceResult> => {
   const { body } = await runtime.callKibanaApi<EvaluateResponse>({
@@ -418,12 +400,9 @@ export const runExampleEvaluation = async (
         traceId: taskResult.traceId,
         referenceData: params.referenceData ?? normalizeReferenceData(params.example.output),
         evaluators: params.evaluators,
-        instrumentation: resolveInstrumentationForTarget(params.target),
+        instrumentation: { profile: 'elastic-inference' },
       });
 
-      // Partial failures: some evaluators errored but the trace was still graded. Surface
-      // their messages (the successful scores below are still ingested) so the run does not
-      // look clean when an evaluator is broken.
       for (const evaluatorError of evaluatorErrors) {
         errors.push(`Example "${params.example.id}" (repetition ${repetition}): ${evaluatorError}`);
       }

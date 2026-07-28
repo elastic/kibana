@@ -13,6 +13,7 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { EvaluationScoreService } from './storage/evaluation_score_service';
 import type { OnlineScoreService } from './storage/online_score_service';
@@ -30,7 +31,6 @@ export interface EvaluatorSummary {
   kind: 'llm' | 'code';
   description: string;
   needsJudgeConnector: boolean;
-  supportsBareToolTrace: boolean;
 }
 
 export interface ModelConnectorSummary {
@@ -62,6 +62,7 @@ export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
 

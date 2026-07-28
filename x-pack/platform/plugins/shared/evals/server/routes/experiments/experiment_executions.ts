@@ -16,13 +16,17 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import {
+  EVALS_EXPERIMENT_WORKFLOW_TAG,
+  MAX_ID_LENGTH,
+} from '../../../common/experiments/run_experiment';
 import type {
   ExperimentExecutionStatus,
   ExperimentStepProgress,
 } from '../../../common/experiments/run_experiment';
 import type { RouteDependencies } from '../register_routes';
 
-const executionParamsSchema = z.object({ workflowExecutionId: z.string() });
+const executionParamsSchema = z.object({ workflowExecutionId: z.string().max(MAX_ID_LENGTH) });
 
 const WORKFLOWS_UNAVAILABLE = {
   statusCode: 501 as const,
@@ -87,6 +91,10 @@ const toExecutionStatus = (dto: WorkflowExecutionDto): ExperimentExecutionStatus
   })),
 });
 
+export const isEvalsExperimentExecution = (
+  dto: Pick<WorkflowExecutionDto, 'workflowDefinition'>
+): boolean => Boolean(dto.workflowDefinition?.tags?.includes(EVALS_EXPERIMENT_WORKFLOW_TAG));
+
 /** Polls the status of a launched experiment workflow execution (progress + per-step state). */
 export const registerGetExperimentExecutionRoute = ({
   router,
@@ -125,7 +133,7 @@ export const registerGetExperimentExecutionRoute = ({
             // default, so opt in for accurate run progress.
             { includeOutput: true }
           );
-          if (!dto) {
+          if (!dto || !isEvalsExperimentExecution(dto)) {
             return response.notFound({
               body: { message: `Workflow execution not found: ${workflowExecutionId}` },
             });
@@ -176,6 +184,17 @@ export const registerCancelExperimentExecutionRoute = ({
         const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
         try {
+          // Verify the target is an evals experiment before cancelling so evals `manage`
+          // cannot abort unrelated workflow executions in the space (fail-closed).
+          const dto = await workflowsManagement.management.getWorkflowExecution(
+            workflowExecutionId,
+            spaceId
+          );
+          if (!dto || !isEvalsExperimentExecution(dto)) {
+            return response.notFound({
+              body: { message: `Workflow execution not found: ${workflowExecutionId}` },
+            });
+          }
           await workflowsManagement.management.cancelWorkflowExecution(
             workflowExecutionId,
             spaceId,
