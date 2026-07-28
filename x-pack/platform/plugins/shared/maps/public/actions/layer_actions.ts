@@ -10,6 +10,7 @@ import type { ThunkDispatch } from 'redux-thunk-v2';
 import type { Query } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { Writable } from '@kbn/utility-types';
+import { firstValueFrom } from 'rxjs';
 import type { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -23,7 +24,11 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  cancelRequest,
+  getInspectorAdapters,
+  getMapSync$,
+} from '../reducers/non_serializable_instances';
 import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
@@ -70,7 +75,6 @@ import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
-import { waitForMapSync } from '../connected_components/mb_map/mb_map';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -119,10 +123,16 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
         type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
       });
     } else {
-      getLayerListRaw(getState()).forEach(({ id }) => {
-        dispatch(removeLayerFromLayerList(id));
-      });
-      await waitForMapSync();
+      const layerDescriptors = getLayerListRaw(getState());
+      if (layerDescriptors.length) {
+        layerDescriptors.forEach(({ id }) => {
+          dispatch(removeLayerFromLayerList(id));
+        });
+        const mapSync$ = getMapSync$(getState());
+        // Wait for layer removal redux changes
+        // to get flushed to maplibre instance
+        await firstValueFrom(mapSync$);
+      }
     }
 
     newLayerList.forEach((layerDescriptor) => {

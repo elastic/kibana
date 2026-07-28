@@ -18,7 +18,7 @@ import type { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { getInspectorAdapters, getMapSync$ } from '../reducers/non_serializable_instances';
 import type { MapStoreState } from '../reducers/store';
 import type { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
@@ -520,5 +520,15 @@ export function deleteFeatureFromIndex(featureId: string) {
       });
     }
     dispatch(updateEditShape(DRAW_SHAPE.DELETE));
+  };
+}
+
+export function onMapSync() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const mapSync$ = getMapSync$(getState());
+    mapSync$.next();
   };
 }

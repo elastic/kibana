@@ -6,6 +6,7 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import { Subject } from 'rxjs';
 import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 
@@ -30,6 +31,7 @@ function createInspectorAdapters() {
 export function nonSerializableInstances(state, action = {}) {
   if (!state) {
     return {
+      mapSync$: new Subject(),
       inspectorAdapters: createInspectorAdapters(),
       cancelRequestCallbacks: new Map(), // key is request token, value is cancel callback
       eventHandlers: {},
@@ -90,6 +92,10 @@ export function getChartsPaletteServiceGetColor({ nonSerializableInstances }) {
 
 export function getOnMapMove({ nonSerializableInstances }) {
   return nonSerializableInstances.onMapMove;
+}
+
+export function getMapSync$({ nonSerializableInstances }) {
+  return nonSerializableInstances.mapSync$;
 }
 
 // Actions

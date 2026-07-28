@@ -12,6 +12,10 @@ import type { AnyAction } from 'redux-v4';
 import type { MapStoreState } from './store';
 
 export type NonSerializableState = {
+  /**
+   * Emits when Redux state changes are flushed to Maplibre instance.
+   */
+  mapSync$: Subject<void>;
   inspectorAdapters: Adapters;
   cancelRequestCallbacks: Map<symbol, () => {}>; // key is request token, value is cancel callback
   eventHandlers: Partial<EventHandlers>;
@@ -77,6 +81,8 @@ export function unregisterCancelCallback(requestToken: symbol): AnyAction;
 export function getOnMapMove(
   state: MapStoreState
 ): ((lat: number, lon: number, zoom: number) => void) | undefined;
+
+export function getMapSync$(state: MapStoreState): Observable<void>;
 
 export function setOnMapMove(
   onMapMove: (lat: number, lon: number, zoom: number) => void

@@ -15,6 +15,7 @@ import {
   mapDestroyed,
   mapExtentChanged,
   mapReady,
+  onMapSync,
   setMapInitError,
   setMouseCoordinates,
 } from '../../actions';
@@ -55,6 +56,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     extentChanged: (mapExtentState: MapExtentState) => {
       dispatch(mapExtentChanged(mapExtentState));
+    },
+    onMapSync: () => {
+      dispatch(onMapSync());
     },
     onMapReady: (mapExtentState: MapExtentState) => {
       dispatch(clearGoto());
