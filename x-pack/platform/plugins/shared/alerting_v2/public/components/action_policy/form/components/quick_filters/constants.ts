@@ -13,10 +13,12 @@ export interface QuickFiltersProps {
 export const POPOVER_PANEL_STYLE = { maxWidth: 360 };
 
 /**
- * Action policies only target alert-kind rules, so the quick filters restrict
- * the rules and tags they surface to `kind: 'alert'`.
+ * KQL filter for general rule-listing queries. Action policies only target
+ * alert-kind rules, so rule-listing quick filters use this to restrict results
+ * to alert-kind rules. Not used for the typed rule-tag endpoint (which accepts
+ * `kind: 'alert'` directly).
  */
-export const ALERT_KIND_FILTER = 'kind:alert';
+export const ALERT_KIND_RULE_LIST_FILTER = 'kind:alert';
 
 export const SELECTABLE_LIST_PROPS = {
   isVirtualized: false as const,
