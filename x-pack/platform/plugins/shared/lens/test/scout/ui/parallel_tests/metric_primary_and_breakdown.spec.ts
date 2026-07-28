@@ -261,12 +261,19 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: tags.stateful.cla
           await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
           await lens.waitForVisualization('mtrVis');
 
+          // Extract the numeric decimals from the value without any compact suffix like k or m.
+          const getDecimalsLength = async () => {
+            const [{ value }] = await lens.getMetricVisualizationData();
+            return value?.split('.')[1]?.match(/\d+/)?.[0]?.length;
+          };
+          // The custom format can lag one more async pass behind the visualization-switch's own
+          // render-count-based stabilization (Lens reapplies persisted format params after
+          // committing the new chart type), so poll for it settling rather than racing a
+          // one-shot read.
+          await expect.poll(getDecimalsLength).toBe(3);
+
           const [{ value }] = await lens.getMetricVisualizationData();
           expect(value).toContain('blah');
-
-          // Extract the numeric decimals from the value without any compact suffix like k or m.
-          const decimals = value?.split('.')[1]?.match(/\d+/)?.[0];
-          expect(decimals).toHaveLength(3);
         }
       );
     }
