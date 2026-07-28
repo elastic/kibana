@@ -399,7 +399,7 @@ describe('AppHeaderView', () => {
     });
   });
 
-  describe('borderless flag', () => {
+  describe('bottom border', () => {
     it('renders a bottom border by default', () => {
       renderAppHeader(<AppHeaderView title="Dashboard" />);
 
@@ -409,8 +409,8 @@ describe('AppHeaderView', () => {
       );
     });
 
-    it('omits the bottom border when borderless is set', () => {
-      renderAppHeader(<AppHeaderView title="Dashboard" borderless />);
+    it('omits the bottom border for Discover tabs', () => {
+      renderAppHeader(<DiscoverAppHeader title="Discover" tabsBar={<div>Tabs</div>} />);
 
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toHaveStyleRule(
         'border-bottom',

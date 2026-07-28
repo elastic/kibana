@@ -68,6 +68,8 @@ export interface ExperimentsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  /** Free-text term matched against experiment name or git branch. */
+  search?: string;
   buildId?: string;
   datasetId?: string;
   page?: number;
@@ -397,6 +399,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
+      if (filters.search) query.search = filters.search;
       if (filters.buildId) query.build_id = filters.buildId;
       if (filters.datasetId) query.dataset_id = filters.datasetId;
       if (filters.page) query.page = filters.page;
@@ -408,6 +411,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       });
     },
     keepPreviousData: true,
+    refetchOnMount: 'always',
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
@@ -417,7 +421,16 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
   });
 };
 
-export const useEvaluationExperiment = (experimentId: string, executionId?: string) => {
+interface EvaluationExperimentOptions {
+  refetchInterval?: number | false;
+  enabled?: boolean;
+}
+
+export const useEvaluationExperiment = (
+  experimentId: string,
+  executionId?: string,
+  options: EvaluationExperimentOptions = {}
+) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -433,13 +446,14 @@ export const useEvaluationExperiment = (experimentId: string, executionId?: stri
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled: experimentId.length > 0,
+    enabled: experimentId.length > 0 && (options.enabled ?? true),
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
       }
       return true;
     },
+    refetchInterval: options.refetchInterval,
     refetchOnWindowFocus: false,
   });
 };
@@ -492,10 +506,16 @@ export const useCompareExperiments = (
   });
 };
 
+interface ExperimentDatasetExamplesOptions {
+  refetchInterval?: number | false;
+  staleTime?: number;
+}
+
 export const useExperimentDatasetExamples = (
   experimentId: string,
   datasetId: string,
-  executionId?: string
+  executionId?: string,
+  options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
 
@@ -516,6 +536,8 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
+    refetchInterval: options.refetchInterval,
+    staleTime: options.staleTime,
   });
 };
 
