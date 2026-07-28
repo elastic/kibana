@@ -10,7 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
-import type { JsonObject } from './types';
+import type { JsonObject, JsonValue } from './types';
 
 export interface KibanaConnection {
   kibanaUrl: string;
@@ -140,4 +140,50 @@ export const fetchConnectorTypes = async (
     return Object.keys(connectorTypes).sort();
   }
   return [];
+};
+
+/** Extract sorted `id` strings from a `[{ id, ... }]` definition-endpoint payload. */
+const extractDefinitionIds = (entries: JsonValue | undefined): string[] => {
+  if (!Array.isArray(entries)) {
+    return [];
+  }
+  const ids = entries
+    .map((entry) =>
+      entry !== null &&
+      typeof entry === 'object' &&
+      !Array.isArray(entry) &&
+      typeof entry.id === 'string'
+        ? entry.id
+        : undefined
+    )
+    .filter((id): id is string => id !== undefined);
+  return [...new Set(ids)].sort();
+};
+
+/**
+ * Fetch the ids of registered step definitions from the internal
+ * `workflows_extensions` route. Used by the completeness gate to verify the
+ * produced schema didn't drop a registered step.
+ */
+export const fetchStepDefinitionIds = async (
+  connection: KibanaConnection,
+  log: ToolingLog
+): Promise<string[]> => {
+  log.info(
+    'Fetching registered step definitions (GET /internal/workflows_extensions/step_definitions)'
+  );
+  const body = await kibanaGet(connection, '/internal/workflows_extensions/step_definitions');
+  return extractDefinitionIds(body.steps);
+};
+
+/** Fetch the ids of registered trigger definitions from the internal route. */
+export const fetchTriggerDefinitionIds = async (
+  connection: KibanaConnection,
+  log: ToolingLog
+): Promise<string[]> => {
+  log.info(
+    'Fetching registered trigger definitions (GET /internal/workflows_extensions/trigger_definitions)'
+  );
+  const body = await kibanaGet(connection, '/internal/workflows_extensions/trigger_definitions');
+  return extractDefinitionIds(body.triggers);
 };

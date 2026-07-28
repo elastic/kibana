@@ -7,16 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Whole-value install placeholder pattern. Mirrors `INSTALL_PLACEHOLDER`
- * (`/__install__\.([a-zA-Z0-9_-]+)/`) in
- * `@kbn/workflows-library` `render_template.ts`, anchored to the whole value
- * because we accept it as a standalone typed value (e.g. `maxAgeInDays:
- * __install__.max-age-in-days` in a `number` field). Confined to the `template`
- * variant - a separate system from LiquidJS runtime templating.
- */
-export const INSTALL_PLACEHOLDER_VALUE_REGEX = /^__install__\.[a-zA-Z0-9_-]+$/;
-
 export const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 
 export const DEFAULT_CHANNEL = 'release';

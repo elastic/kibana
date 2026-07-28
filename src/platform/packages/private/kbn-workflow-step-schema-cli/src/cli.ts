@@ -17,19 +17,16 @@ import {
   fetchBuildInfo,
   fetchComposedSchema,
   fetchConnectorTypes,
+  fetchStepDefinitionIds,
+  fetchTriggerDefinitionIds,
   validateAuthFlags,
 } from './fetch';
 import type { KibanaConnection } from './fetch';
 import { transformToStrict, transformToTemplate } from './template_transform';
 import { extractStepTypes, extractTriggerTypes } from './introspect';
-import {
-  DEFAULT_FIXTURES_DIR,
-  buildFixtureDeviationReport,
-  loadApprovedDefinitions,
-} from './fixtures';
-import type { FixtureDeviationReport } from './fixtures';
+import { checkCompleteness } from './completeness';
 import { writeIndex, writeVariant } from './write_artifact';
-import type { IndexManifest, VariantManifest } from './types';
+import type { IndexManifest } from './types';
 
 const DEFAULT_OUTPUT_DIR = Path.resolve(REPO_ROOT, 'target/workflow_step_schemas');
 
@@ -37,8 +34,6 @@ type FlagValue = string | boolean | string[] | undefined;
 
 const asOptionalString = (value: FlagValue): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
-
-const formatKb = (bytes: number): string => `${(bytes / 1024).toFixed(1)} KB`;
 
 export function run() {
   runCli().catch((error) => {
@@ -70,6 +65,7 @@ const runCli = () =>
 
       const composedSchema = await fetchComposedSchema(connection, log);
       const connectorTypes = await fetchConnectorTypes(connection, log);
+      // These throw (rather than emit an empty list) if the schema shape is unrecognized.
       const stepTypes = extractStepTypes(composedSchema);
       const triggerTypes = extractTriggerTypes(composedSchema);
 
@@ -85,18 +81,22 @@ const runCli = () =>
 
       const bundleDir = Path.join(outputDir, kibanaVersion, channel);
 
-      const strictDoc = transformToStrict(composedSchema);
-      const templateDoc = transformToTemplate(composedSchema);
-
-      const strictManifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
-      const templateManifest = writeVariant({ bundleDir, variant: 'template', doc: templateDoc });
+      const strictManifest = writeVariant({
+        bundleDir,
+        variant: 'strict',
+        doc: transformToStrict(composedSchema),
+      });
+      const templateManifest = writeVariant({
+        bundleDir,
+        variant: 'template',
+        doc: transformToTemplate(composedSchema),
+      });
 
       const manifest: IndexManifest = {
         kibanaVersion,
         buildHash,
         profile: 'superset',
         channel,
-        generatedAt: new Date().toISOString(),
         connectorTypes,
         stepTypes,
         triggerTypes,
@@ -108,24 +108,17 @@ const runCli = () =>
 
       const indexPath = writeIndex(bundleDir, manifest);
 
-      reportSizes(log, strictManifest, templateManifest);
       log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
       log.info(`Index: ${indexPath}`);
 
-      if (!flags['skip-fixture-check']) {
-        const fixturesDir = asOptionalString(flags['fixtures-dir']) ?? DEFAULT_FIXTURES_DIR;
-        const hasDeviations = runFixtureCheck({
+      if (!flags['skip-completeness-check']) {
+        await runCompletenessGate({
+          connection,
           log,
-          fixturesDir,
           stepTypes,
           triggerTypes,
+          failOnIncomplete: Boolean(flags['fail-on-incomplete']),
         });
-        if (hasDeviations && flags['fail-on-fixture-deviation']) {
-          throw createFlagError(
-            'Fixture deviations detected (approved steps/triggers missing from the artifact). ' +
-              'See the report above; re-run with --skip-fixture-check to ignore.'
-          );
-        }
       }
     },
     {
@@ -144,9 +137,8 @@ const runCli = () =>
           'channel',
           'kibana-version',
           'build-hash',
-          'fixtures-dir',
         ],
-        boolean: ['list-types', 'skip-fixture-check', 'fail-on-fixture-deviation'],
+        boolean: ['list-types', 'skip-completeness-check', 'fail-on-incomplete'],
         help: `
         --kibana-url <url>              Kibana base URL (default: ${DEFAULT_KIBANA_URL})
         --space <id>                   Kibana space id (default: default)
@@ -158,28 +150,12 @@ const runCli = () =>
         --kibana-version <version>     Override version (default: from /api/status)
         --build-hash <hash>            Override build hash (default: from /api/status)
         --list-types                   Log the full sorted connector/step/trigger type lists
-        --skip-fixture-check           Skip comparing produced types against the approved fixtures
-        --fixtures-dir <dir>           Override the approved-definitions fixtures directory
-        --fail-on-fixture-deviation    Exit non-zero when approved steps/triggers are missing
+        --skip-completeness-check      Skip the endpoint-vs-schema completeness gate
+        --fail-on-incomplete           Exit non-zero when a registered step/trigger is missing from the schema
       `,
       },
     }
   );
-
-const reportSizes = (log: ToolingLog, strict: VariantManifest, template: VariantManifest): void => {
-  log.info('--- Measured schema sizes (canonical minified) ---');
-  for (const [name, manifest] of [
-    ['strict', strict],
-    ['template', template],
-  ] as const) {
-    log.info(
-      `  ${name.padEnd(9)} ` +
-        `raw=${formatKb(manifest.sizeBytes)} gzip=${formatKb(manifest.gzipBytes)} ` +
-        `defs=${manifest.defsCount} branches=${manifest.unionBranchCount}`
-    );
-  }
-  log.info('Use these sizes to gauge whether artifact chunking is worth re-introducing.');
-};
 
 const logTypeList = (log: ToolingLog, label: string, ids: string[]): void => {
   log.info(`--- ${label} (${ids.length}) ---`);
@@ -189,81 +165,70 @@ const logTypeList = (log: ToolingLog, label: string, ids: string[]): void => {
 };
 
 /**
- * Compare the produced step/trigger types against the approved `workflows_extensions`
- * fixtures and log any deviation. Returns `true` when approved definitions are
- * missing from the artifact (the actionable contract violation). "Unexpected"
- * produced types (built-ins/connectors for steps, built-in triggers) are logged
- * as informational context only and do not count as a failure.
+ * Self-consistency gate: fetch the ids the *same* Kibana reports as registered
+ * and assert every one is present in the produced schema (`endpoint ⊆ schema`).
+ * Warns by default; `--fail-on-incomplete` makes a gap fatal (for canonical
+ * generation CI). The definition endpoints do not `await` the async step loader,
+ * so a transient gap is possible - hence warn is the default.
  */
-const runFixtureCheck = ({
+const runCompletenessGate = async ({
+  connection,
   log,
-  fixturesDir,
   stepTypes,
   triggerTypes,
+  failOnIncomplete,
 }: {
+  connection: KibanaConnection;
   log: ToolingLog;
-  fixturesDir: string;
   stepTypes: string[];
   triggerTypes: string[];
-}): boolean => {
-  let approved;
+  failOnIncomplete: boolean;
+}): Promise<void> => {
+  let endpointStepIds: string[];
+  let endpointTriggerIds: string[];
   try {
-    approved = loadApprovedDefinitions(fixturesDir);
+    endpointStepIds = await fetchStepDefinitionIds(connection, log);
+    endpointTriggerIds = await fetchTriggerDefinitionIds(connection, log);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    log.warning(`Skipping fixture check - could not read approved definitions: ${message}`);
-    return false;
+    log.warning(`Skipping completeness gate - could not read definition endpoints: ${message}`);
+    return;
   }
 
-  const report: FixtureDeviationReport = buildFixtureDeviationReport(approved, {
-    stepTypes,
-    triggerTypes,
+  const result = checkCompleteness({
+    endpointStepIds,
+    endpointTriggerIds,
+    schemaStepTypes: stepTypes,
+    schemaTriggerTypes: triggerTypes,
   });
 
-  log.info('--- Fixture check (approved workflows_extensions definitions) ---');
-  log.info(
-    `  approved: ${approved.stepIds.length} step(s), ${approved.triggerIds.length} trigger(s)`
-  );
+  log.info('--- Completeness gate (registered definitions ⊆ produced schema) ---');
+  log.info(`  registered: ${endpointStepIds.length} step(s), ${endpointTriggerIds.length} trigger(s)`);
 
-  const stepMissing = report.steps.missing;
-  const triggerMissing = report.triggers.missing;
+  if (result.complete) {
+    log.info('  all registered step/trigger definitions are present in the schema ✓');
+    return;
+  }
 
-  if (stepMissing.length === 0) {
-    log.info(`  steps: all ${approved.stepIds.length} approved step(s) present ✓`);
-  } else {
+  if (result.missingSteps.length > 0) {
     log.warning(
-      `  steps: ${
-        stepMissing.length
-      } approved step(s) MISSING from the artifact: ${stepMissing.join(', ')}`
+      `  ${result.missingSteps.length} registered step(s) MISSING from the schema: ${result.missingSteps.join(
+        ', '
+      )}`
+    );
+  }
+  if (result.missingTriggers.length > 0) {
+    log.warning(
+      `  ${
+        result.missingTriggers.length
+      } registered trigger(s) MISSING from the schema: ${result.missingTriggers.join(', ')}`
     );
   }
 
-  if (triggerMissing.length === 0) {
-    log.info(`  triggers: all ${approved.triggerIds.length} approved trigger(s) present ✓`);
-  } else {
-    log.warning(
-      `  triggers: ${
-        triggerMissing.length
-      } approved trigger(s) MISSING from the artifact: ${triggerMissing.join(', ')}`
+  if (failOnIncomplete) {
+    throw createFlagError(
+      'Completeness gate failed: registered step/trigger definitions are missing from the produced ' +
+        'schema (see the report above). Re-run without --fail-on-incomplete to downgrade to a warning.'
     );
   }
-
-  // Triggers are meant to be an exhaustive, governed allowlist of registered
-  // (non-built-in) triggers, so a produced trigger that is not approved is worth
-  // surfacing. Steps intentionally include many built-ins/connectors beyond the
-  // approved set, so we only report a count there to avoid noise.
-  if (report.triggers.unexpected.length > 0) {
-    log.warning(
-      `  triggers: ${report.triggers.unexpected.length} produced trigger(s) NOT in the approved ` +
-        `list (built-ins like alert/manual/scheduled are expected): ${report.triggers.unexpected.join(
-          ', '
-        )}`
-    );
-  }
-  log.info(
-    `  steps: ${report.steps.unexpected.length} produced step type(s) beyond the approved set ` +
-      `(built-ins + connectors, expected)`
-  );
-
-  return stepMissing.length > 0 || triggerMissing.length > 0;
 };

@@ -17,13 +17,5 @@ export type {
 } from './src/types';
 export { transformToStrict, transformToTemplate } from './src/template_transform';
 export { extractStepTypes, extractTriggerTypes } from './src/introspect';
-export {
-  DEFAULT_FIXTURES_DIR,
-  loadApprovedDefinitions,
-  parseApprovedTriggerIds,
-  diffDefinitions,
-  buildFixtureDeviationReport,
-} from './src/fixtures';
-export type { ApprovedDefinitions, DefinitionDiff, FixtureDeviationReport } from './src/fixtures';
-export { loadVariantSchema } from './src/reassemble';
-export type { ArtifactReader } from './src/reassemble';
+export { checkCompleteness } from './src/completeness';
+export type { CompletenessInput, CompletenessResult } from './src/completeness';

@@ -5,8 +5,8 @@ CI pipelines across Elastic can lint the shared workflow example library
 **without running Kibana**.
 
 It fetches Kibana's already-composed schema over public HTTP routes, weaves in
-LiquidJS template tolerance, and writes two strictly-nested variants. Each
-variant is measured and written as a single self-contained document.
+LiquidJS template tolerance (via the shared weaver in `@kbn/workflows-yaml`), and
+writes two strictly-nested variants as single self-contained documents.
 
 ## Usage
 
@@ -36,9 +36,8 @@ Flags:
 | `--kibana-version` | Override version | from `/api/status` |
 | `--build-hash` | Override build hash | from `/api/status` |
 | `--list-types` | Log the full sorted connector/step/trigger type lists | off |
-| `--skip-fixture-check` | Skip comparing produced types against the approved fixtures | off |
-| `--fixtures-dir` | Override the approved-definitions fixtures directory | `workflows_extensions` Scout fixtures |
-| `--fail-on-fixture-deviation` | Exit non-zero when approved steps/triggers are missing | off |
+| `--skip-completeness-check` | Skip the endpoint-vs-schema completeness gate | off |
+| `--fail-on-incomplete` | Exit non-zero when a registered step/trigger is missing from the schema | off |
 
 The command needs the Workflows read privilege (`WORKFLOW_READ_SECURITY`).
 
@@ -46,53 +45,49 @@ The command needs the Workflows read privilege (`WORKFLOW_READ_SECURITY`).
 
 Beyond connector types, the tool introspects the composed schema and reports the
 **step** and **trigger** `type` discriminators it produced (counts by default,
-full lists with `--list-types`). The union of these is recorded in `index.json`
-as `stepTypes[]` and `triggerTypes[]`, so the artifact is self-describing.
+full lists with `--list-types`). The extractor **throws** if it cannot recognize
+the composed-schema shape, rather than silently emitting empty lists. The union
+of these is recorded in `index.json` as `stepTypes[]` and `triggerTypes[]`, so
+the artifact is self-describing.
 
-## Fixture deviation check
+## Completeness gate
 
-After writing the artifact, the tool compares the produced step/trigger types
-against the approved definitions in the `workflows_extensions` Scout fixtures
-(`approved_step_definitions/*.txt` and `approved_trigger_definitions.ts`) and
-logs any deviation:
+After writing the artifact, the tool asks the *same* Kibana which step/trigger
+definitions it has registered
+(`GET /internal/workflows_extensions/{step,trigger}_definitions`) and asserts
+every registered id is present in the produced schema (`endpoint ⊆ schema`).
+This is a self-consistency check — it catches the schema dropping a registered
+definition, not registry ↔ approved-fixture parity (owned by the Scout approval
+tests).
 
-- **Missing** — an approved step/trigger that is absent from the artifact. This
-  is the actionable signal (the source Kibana did not register it, so either a
-  feature flag/plugin was off, or the fixtures are ahead of the code). Enable
-  `--fail-on-fixture-deviation` to make this exit non-zero (useful in CI).
-- **Unexpected** — a produced type not in the approved list. For triggers this
-  is surfaced (the approved trigger list is a governed allowlist; built-ins like
-  `alert`/`manual`/`scheduled` are expected). For steps only a count is shown,
-  since the artifact intentionally includes many built-ins and connectors beyond
-  the approved set.
+The direction is deliberately one-way: the schema legitimately contains extra
+`type`s the definition endpoints do not list (built-in steps like `if`/`foreach`,
+Actions-derived connector steps, and built-in triggers like `alert`/`manual`).
 
-Skip it with `--skip-fixture-check` (e.g. when generating against a deployment
-that intentionally has a reduced feature set).
+It **warns by default** because the definition endpoints do not `await` the async
+step loader, so a transient gap is possible. Use `--fail-on-incomplete` in the
+canonical generation CI to make a gap fatal, or `--skip-completeness-check` to
+skip it entirely.
 
 ## Variants
 
 LiquidJS templating (`{{ }}` / `${{ }}` / `{% %}`) is part of the workflow
 syntax, so **both** variants tolerate it (using the exact regexes exported from
-`@kbn/workflows-yaml`). The only difference is install placeholders:
+`@kbn/workflows-yaml`, mirroring the runtime suppression predicates: `{{ }}` /
+`${{ }}` anchored whole-value, `{% %}` as an unanchored substring). The only
+difference is install placeholders:
 
-- **`strict`** — composed schema + LiquidJS tolerance in non-string typed value
-  positions. For workflows and plain (non-installable) examples.
+- **`strict`** — composed schema + LiquidJS tolerance. For workflows and plain
+  (non-installable) examples.
 - **`template`** — `strict` plus the `__install__.<name>` install placeholder
-  used by installable library templates. Placeholders are confined here so a
-  plain workflow linted with `strict` cannot silently use them.
+  (sourced from `@kbn/workflows-library`) used by installable library templates.
+  Placeholders are confined here so a plain workflow linted with `strict` cannot
+  silently use them.
 
 The LiquidJS/install alternatives are declared **once** in a shared definition
 (`#/definitions/__workflowTemplateValue`) and every templated position points at
 it with a single `$ref`, rather than repeating the branches inline. This keeps
 the artifact small.
-
-## Measured sizes
-
-Each variant is emitted as a single `schema.json` and its size is recorded
-(minified + gzip) in `index.json` and logged. Chunking was removed while the
-artifact sits well under any practical size threshold; the measurement stays so
-it can be re-introduced from data if a variant ever grows large enough to
-warrant it.
 
 ## Output layout
 
@@ -103,17 +98,17 @@ warrant it.
   template/schema.json
 ```
 
-`index.json` is the entry point: `kibanaVersion`, `buildHash`,
-`profile: "superset"`, `channel`, `generatedAt`, `connectorTypes[]`,
-`stepTypes[]`, `triggerTypes[]`, and per variant
-`{ path, sizeBytes, gzipBytes, sha256, defsCount, unionBranchCount }`. Files use
-sorted keys for stable diffs.
+Each `schema.json` is written minified with sorted keys — exactly the bytes a CDN
+serves. `index.json` is the pretty, sorted entry point: `kibanaVersion`,
+`buildHash`, `profile: "superset"`, `channel`, `connectorTypes[]`, `stepTypes[]`,
+`triggerTypes[]`, and per variant `{ path, sha256 }`, where `sha256` is over the
+**exact served bytes** of that variant's `schema.json`. There is no timestamp, so
+an identical schema yields a byte-identical `index.json` across runs.
 
 ## Loading
 
-Consumers should use `loadVariantSchema(manifest, variant, reader)` (exported
-from this package). It reads `index.json`, verifies the variant's `sha256`, and
-returns the JSON Schema document.
+Consumers read `index.json`, then fetch each variant's `schema.json` and verify
+its bytes against the manifest `sha256`.
 
 ## Limitations (accepted)
 

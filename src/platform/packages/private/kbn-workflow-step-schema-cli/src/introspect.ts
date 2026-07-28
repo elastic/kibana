@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TEMPLATE_VALUE_DEF_NAME } from './template_transform';
+import { TEMPLATE_VALUE_DEF_NAME } from '@kbn/workflows-yaml';
 import type { JsonObject, JsonValue } from './types';
 
 const isObject = (value: JsonValue | undefined): value is JsonObject =>
@@ -139,10 +139,33 @@ const resolveTopLevelUnion = (root: JsonObject, propertyName: string): JsonValue
   return items;
 };
 
+/**
+ * Extract the sorted, de-duplicated `type` discriminators of the union backing a
+ * top-level array property. Throws (rather than silently returning `[]`) when the
+ * union cannot be located or yields no discriminators, so an unexpected composed
+ * schema shape fails loudly instead of producing a plausible-but-empty artifact.
+ */
+const extractUnionTypes = (schema: JsonObject, propertyName: string): string[] => {
+  const union = resolveTopLevelUnion(schema, propertyName);
+  if (!isObject(union)) {
+    throw new Error(
+      `Could not locate the "${propertyName}" union in the composed schema. ` +
+        `The schema shape was not recognized; refusing to emit an empty type list.`
+    );
+  }
+  const discriminators = collectUnionDiscriminators(schema, union);
+  if (discriminators.length === 0) {
+    throw new Error(
+      `Resolved the "${propertyName}" union but found no "type" discriminators. ` +
+        `The schema shape was not recognized; refusing to emit an empty type list.`
+    );
+  }
+  return discriminators;
+};
+
 /** Sorted, de-duplicated list of step `type` discriminators in the schema. */
-export const extractStepTypes = (schema: JsonObject): string[] =>
-  collectUnionDiscriminators(schema, resolveTopLevelUnion(schema, 'steps'));
+export const extractStepTypes = (schema: JsonObject): string[] => extractUnionTypes(schema, 'steps');
 
 /** Sorted, de-duplicated list of trigger `type` discriminators in the schema. */
 export const extractTriggerTypes = (schema: JsonObject): string[] =>
-  collectUnionDiscriminators(schema, resolveTopLevelUnion(schema, 'triggers'));
+  extractUnionTypes(schema, 'triggers');

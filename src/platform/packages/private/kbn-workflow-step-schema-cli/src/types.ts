@@ -10,7 +10,7 @@
 /**
  * A JSON value. JSON Schema documents are traversed structurally, so we model
  * them as plain JSON rather than importing a schema-specific type - this keeps
- * the transform/chunk/reassemble code independent of any validator library.
+ * the code independent of any validator library.
  */
 export type JsonValue = string | number | boolean | null | JsonValue[] | JsonObject;
 export interface JsonObject {
@@ -24,16 +24,8 @@ export type VariantName = (typeof VARIANTS)[number];
 export interface VariantManifest {
   /** Path to the variant document, relative to the bundle root (dir with `index.json`). */
   path: string;
-  /** Byte length of the canonical (minified, key-sorted) document. */
-  sizeBytes: number;
-  /** Gzip-compressed byte length of the canonical document - what a CDN serves. */
-  gzipBytes: number;
-  /** sha256 of the canonical document, verified on load. */
+  /** sha256 of the exact bytes served (minified, key-sorted `schema.json`). */
   sha256: string;
-  /** Best-effort count of step union branches (informational). */
-  unionBranchCount: number;
-  /** Number of entries in the definitions map (informational). */
-  defsCount: number;
 }
 
 export interface IndexManifest {
@@ -41,7 +33,6 @@ export interface IndexManifest {
   buildHash: string;
   profile: 'superset';
   channel: string;
-  generatedAt: string;
   /** Sorted connector type ids from `GET /api/workflows/connectors`. */
   connectorTypes: string[];
   /** Sorted step `type` discriminators present in the produced schema. */

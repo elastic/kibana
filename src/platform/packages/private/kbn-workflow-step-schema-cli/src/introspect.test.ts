@@ -101,8 +101,26 @@ describe('extractStepTypes / extractTriggerTypes', () => {
     ]);
   });
 
-  it('returns an empty list when a property union is absent', () => {
-    expect(extractStepTypes({ type: 'object', properties: {} })).toEqual([]);
-    expect(extractTriggerTypes({ type: 'object' })).toEqual([]);
+  it('throws (never returns an empty list) when a property union is absent', () => {
+    expect(() => extractStepTypes({ type: 'object', properties: {} })).toThrow(
+      /Could not locate the "steps" union/
+    );
+    expect(() => extractTriggerTypes({ type: 'object' })).toThrow(
+      /Could not locate the "triggers" union/
+    );
+  });
+
+  it('throws when the union resolves but has no `type` discriminators', () => {
+    const schema: JsonObject = {
+      type: 'object',
+      properties: {
+        steps: { type: 'array', items: { $ref: '#/definitions/EmptyUnion' } },
+      },
+      definitions: {
+        // A union whose members carry no `properties.type` discriminator.
+        EmptyUnion: { oneOf: [{ type: 'object' }, { type: 'object' }] },
+      },
+    };
+    expect(() => extractStepTypes(schema)).toThrow(/found no "type" discriminators/);
   });
 });

@@ -11,10 +11,8 @@ import fs from 'fs';
 import os from 'os';
 import Path from 'path';
 import { transformToStrict } from './template_transform';
-import { stableStringify } from './measure';
-import { writeVariant } from './write_artifact';
-import { loadVariantSchema } from './reassemble';
-import type { ArtifactReader } from './reassemble';
+import { sha256Hex, stableStringify } from './hash';
+import { writeIndex, writeVariant } from './write_artifact';
 import type { IndexManifest, JsonObject, VariantManifest } from './types';
 
 const baseDoc: JsonObject = {
@@ -37,76 +35,45 @@ const baseDoc: JsonObject = {
       required: ['type'],
       additionalProperties: false,
     },
-    shared: { type: 'object', properties: { foo: { type: 'string' } } },
   },
 };
 
 const makeTmpDir = (): string => fs.mkdtempSync(Path.join(os.tmpdir(), 'wf-schema-'));
-
-const fsReader = (bundleDir: string): ArtifactReader => ({
-  readJson: (relativePath: string) =>
-    JSON.parse(fs.readFileSync(Path.join(bundleDir, relativePath), 'utf8')) as JsonObject,
-});
 
 const manifestFor = (variant: VariantManifest): IndexManifest => ({
   kibanaVersion: '9.4.0',
   buildHash: 'test',
   profile: 'superset',
   channel: 'release',
-  generatedAt: '2026-01-01T00:00:00.000Z',
   connectorTypes: [],
-  stepTypes: [],
+  stepTypes: ['delay', 'http'],
   triggerTypes: [],
   variants: { strict: variant, template: variant },
 });
 
-describe('writeVariant + loadVariantSchema round-trip', () => {
+describe('writeVariant', () => {
   const strictDoc = transformToStrict(baseDoc);
-  const canonicalOriginal = stableStringify(strictDoc, false);
 
-  it('writes a single schema.json and loads back to the original', async () => {
+  it('writes a single minified schema.json whose bytes hash to the manifest sha256', () => {
     const bundleDir = makeTmpDir();
     const manifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
 
     expect(manifest.path).toBe('strict/schema.json');
-    expect(fs.existsSync(Path.join(bundleDir, 'strict/schema.json'))).toBe(true);
+    const absolute = Path.join(bundleDir, 'strict/schema.json');
+    expect(fs.existsSync(absolute)).toBe(true);
 
-    const reassembled = await loadVariantSchema(
-      manifestFor(manifest),
-      'strict',
-      fsReader(bundleDir)
-    );
-    expect(stableStringify(reassembled, false)).toBe(canonicalOriginal);
-  });
-
-  it('reports informational metrics', () => {
-    const bundleDir = makeTmpDir();
-    const manifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
-    // 4 original defs + the injected shared template-value definition.
-    expect(manifest.defsCount).toBe(5);
-    expect(manifest.unionBranchCount).toBe(2);
-    expect(manifest.gzipBytes).toBeGreaterThan(0);
-    expect(manifest.sizeBytes).toBeGreaterThan(manifest.gzipBytes);
-  });
-
-  it('verifies document integrity on load', async () => {
-    const bundleDir = makeTmpDir();
-    const manifest = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
-    // Corrupt the document on disk.
-    fs.writeFileSync(
-      Path.join(bundleDir, 'strict/schema.json'),
-      JSON.stringify({ tampered: true })
-    );
-
-    await expect(
-      loadVariantSchema(manifestFor(manifest), 'strict', fsReader(bundleDir))
-    ).rejects.toThrow(/Integrity check failed/);
+    const written = fs.readFileSync(absolute, 'utf8');
+    // The file is exactly the minified, key-sorted document (no trailing newline).
+    expect(written).toBe(stableStringify(strictDoc, false));
+    // sha256 is over the exact served bytes.
+    expect(manifest.sha256).toBe(sha256Hex(written));
   });
 });
 
 describe('determinism', () => {
-  it('produces identical output + sha256 across runs', () => {
-    const strictDoc = transformToStrict(baseDoc);
+  const strictDoc = transformToStrict(baseDoc);
+
+  it('produces byte-identical schema.json + sha256 across runs', () => {
     const dirA = makeTmpDir();
     const dirB = makeTmpDir();
     const manifestA = writeVariant({ bundleDir: dirA, variant: 'strict', doc: strictDoc });
@@ -118,13 +85,25 @@ describe('determinism', () => {
     );
   });
 
-  it('serializes index.json with deterministic key ordering', () => {
-    const strictDoc = transformToStrict(baseDoc);
+  it('writes a byte-identical index.json across runs (no timestamp, sorted keys)', () => {
+    const dirA = makeTmpDir();
+    const dirB = makeTmpDir();
+    const variantA = writeVariant({ bundleDir: dirA, variant: 'strict', doc: strictDoc });
+    const variantB = writeVariant({ bundleDir: dirB, variant: 'strict', doc: strictDoc });
+
+    const indexA = writeIndex(dirA, manifestFor(variantA));
+    const indexB = writeIndex(dirB, manifestFor(variantB));
+
+    expect(fs.readFileSync(indexA, 'utf8')).toBe(fs.readFileSync(indexB, 'utf8'));
+  });
+
+  it('index.json contains no generatedAt field', () => {
     const bundleDir = makeTmpDir();
     const variant = writeVariant({ bundleDir, variant: 'strict', doc: strictDoc });
-    const manifest = manifestFor(variant);
-    expect(stableStringify(JSON.parse(JSON.stringify(manifest)), true)).toBe(
-      stableStringify(JSON.parse(JSON.stringify(manifest)), true)
-    );
+    const indexPath = writeIndex(bundleDir, manifestFor(variant));
+    const parsed = JSON.parse(fs.readFileSync(indexPath, 'utf8')) as Record<string, unknown>;
+    expect(parsed.generatedAt).toBeUndefined();
+    expect(parsed.kibanaVersion).toBe('9.4.0');
+    expect(parsed.buildHash).toBe('test');
   });
 });
