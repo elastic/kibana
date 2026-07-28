@@ -99,6 +99,19 @@ describe('RuleDetails', () => {
     });
   });
 
+  test('Should de-duplicate tags case-insensitively, keeping the first occurrence casing', async () => {
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'Tag1, tag1 , TAG1{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['Tag1'],
+    });
+  });
+
   test('Should disable the copy tags button when there are no tags', () => {
     render(<RuleDetails />);
 

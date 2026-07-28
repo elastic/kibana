@@ -63,9 +63,14 @@ export const RuleDetails = () => {
   const addTags = useCallback(
     (values: string[]) => {
       const merged = [...tags];
+      // De-duplicate case-insensitively (against existing tags and within the batch),
+      // preserving the casing of the first occurrence. Keeps `Prod`/`prod` from both landing.
+      const seen = new Set(tags.map((tag) => tag.trim().toLowerCase()));
       values.forEach((value) => {
         const trimmed = value.trim();
-        if (trimmed.length > 0 && !merged.includes(trimmed)) {
+        const normalized = trimmed.toLowerCase();
+        if (trimmed.length > 0 && !seen.has(normalized)) {
+          seen.add(normalized);
           merged.push(trimmed);
         }
       });
