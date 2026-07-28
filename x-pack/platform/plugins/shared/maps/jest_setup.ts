@@ -6,3 +6,4 @@
  */
 
 jest.mock('@kbn/mapbox-gl', () => ({}));
+jest.mock('@mapbox/mapbox-gl-draw/src/lib/theme', () => ({}));
