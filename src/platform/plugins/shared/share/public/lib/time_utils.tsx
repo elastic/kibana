@@ -58,10 +58,9 @@ export const convertRelativeTimeStringToAbsoluteTimeDate = (
 };
 
 export const convertRelativeTimeStringToAbsoluteTimeString = (
-  dateString?: string,
+  dateString: string,
   options?: { roundUp?: boolean }
 ) => {
-  if (!dateString) return dateString;
   const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed && valueParsed.isValid() ? valueParsed.toISOString() : dateString;
