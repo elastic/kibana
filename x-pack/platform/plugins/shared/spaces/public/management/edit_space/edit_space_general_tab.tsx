@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -182,7 +183,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   }, []);
 
   const canReadProjectRouting = (): boolean => {
-    return capabilities?.project_routing?.read_space_default === true;
+    if (capabilities?.project_routing?.read_space_default !== true) {
+      return false;
+    }
+    // Show the section either when the project is on a CPS-eligible tier, or
+    // when the space already has a non-default project routing value so users
+    // who downgraded can still unset any custom routing expression.
+    return cps?.isTierEligible === true || isCustomProjectRouting(space.projectRouting);
   };
 
   const updateProjectPicker = useCallback(

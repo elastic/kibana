@@ -17,8 +17,14 @@ jest.mock('@kbn/connector-specs', () => ({
 
 const { getConnectorSpec } = jest.requireMock('@kbn/connector-specs');
 
+const mockFinder = {
+  find: jest.fn(),
+  close: jest.fn().mockResolvedValue(undefined),
+};
+
 const mockSavedObjectsClient = {
   get: jest.fn(),
+  createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder),
 };
 
 const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
@@ -59,9 +65,114 @@ describe('connectorSmlType', () => {
   });
 
   describe('list', () => {
-    it('yields nothing — connector indexing is event-driven only', async () => {
+    const makeSo = (id: string, namespaces: string[], updatedAt: string) => ({
+      id,
+      updated_at: updatedAt,
+      namespaces,
+    });
+
+    beforeEach(() => {
+      mockFinder.find.mockReset();
+      mockFinder.close.mockReset().mockResolvedValue(undefined);
+    });
+
+    it('yields items from a single page', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z'),
+            makeSo('conn-2', ['space-a'], '2024-01-02T00:00:00.000Z'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toEqual([
+        { id: 'conn-1', updatedAt: '2024-01-01T00:00:00.000Z', spaces: ['default'] },
+        { id: 'conn-2', updatedAt: '2024-01-02T00:00:00.000Z', spaces: ['space-a'] },
+      ]);
+    });
+
+    it('yields items across multiple pages', async () => {
+      async function* twoPages() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+        yield { saved_objects: [makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z')] };
+      }
+      mockFinder.find.mockReturnValue(twoPages());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toHaveLength(2);
+      expect(result.map((r) => r.id)).toEqual(['conn-1', 'conn-2']);
+    });
+
+    it('yields nothing when there are no connectors', async () => {
+      async function* empty() {}
+      mockFinder.find.mockReturnValue(empty());
+
       const result = await collectPages(connectorSmlType.list(createContext() as never));
       expect(result).toEqual([]);
+    });
+
+    it('calls createPointInTimeFinder with action type across all namespaces', async () => {
+      async function* empty() {}
+      mockFinder.find.mockReturnValue(empty());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(mockSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'action', namespaces: ['*'] })
+      );
+    });
+
+    it('closes the finder after iteration completes', async () => {
+      async function* singlePage() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(mockFinder.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the finder even when iteration throws', async () => {
+      async function* throwing() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+        throw new Error('ES error');
+      }
+      mockFinder.find.mockReturnValue(throwing());
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        'ES error'
+      );
+
+      expect(mockFinder.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates error when createPointInTimeFinder throws (e.g. action type mappings absent)', async () => {
+      mockSavedObjectsClient.createPointInTimeFinder.mockImplementationOnce(() => {
+        throw new Error("Unknown saved object type: 'action' is not a registered type");
+      });
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        "Unknown saved object type: 'action' is not a registered type"
+      );
+    });
+
+    it('falls back to empty spaces array when namespaces is undefined', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [{ id: 'conn-1', updated_at: '2024-01-01T00:00:00.000Z' }],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result[0].spaces).toEqual([]);
     });
   });
 
