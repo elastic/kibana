@@ -6,6 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiImage, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
@@ -17,7 +18,49 @@ import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import simplifyLightSvg from './assets/simplify.light.svg';
 import simplifyDarkSvg from './assets/simplify.dark.svg';
-import * as i18n from './translations';
+
+const TITLE = i18n.translate('xpack.securitySolution.attackDiscovery.moved.title', {
+  defaultMessage: 'Attack Discovery has moved',
+});
+
+const ILLUSTRATION_ALT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.moved.illustrationAlt',
+  {
+    defaultMessage: 'Attack Discovery has moved to Attacks',
+  }
+);
+
+const GO_TO_ATTACKS_BUTTON = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.moved.goToAttacksButton',
+  {
+    defaultMessage: 'Go to Attacks',
+  }
+);
+
+const ATTACK_DISCOVERY_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.moved.attackDiscoveryLabel',
+  {
+    defaultMessage: 'Attack Discovery',
+  }
+);
+
+const ATTACKS_LABEL = i18n.translate('xpack.securitySolution.attackDiscovery.moved.attacksLabel', {
+  defaultMessage: 'Attacks',
+});
+
+const DETECTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.moved.detectionsLabel',
+  {
+    defaultMessage: 'Detections',
+  }
+);
+
+const ADVANCED_SETTINGS_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.moved.advancedSettingsLabel',
+  {
+    defaultMessage: 'Advanced Settings',
+  }
+);
 
 const AttackDiscoveryMovedPageComponent: React.FC = () => {
   const isDarkMode = useKibanaIsDarkMode();
@@ -46,11 +89,11 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
         icon={
           <EuiImage
             url={isDarkMode ? simplifyDarkSvg : simplifyLightSvg}
-            alt={i18n.ILLUSTRATION_ALT}
+            alt={ILLUSTRATION_ALT}
             size="original"
           />
         }
-        title={<h2 data-test-subj="attackDiscoveryMovedTitle">{i18n.TITLE}</h2>}
+        title={<h2 data-test-subj="attackDiscoveryMovedTitle">{TITLE}</h2>}
         titleSize="m"
         body={
           <p data-test-subj="attackDiscoveryMovedBody">
@@ -58,9 +101,9 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
               id="xpack.securitySolution.attackDiscovery.moved.description"
               defaultMessage="{attackDiscovery} now exists as {attacks} and is located under {detections} in the side navigation"
               values={{
-                attackDiscovery: <em>{'Attack Discovery'}</em>,
-                attacks: <em>{'Attacks'}</em>,
-                detections: <strong>{'Detections'}</strong>,
+                attackDiscovery: <em>{ATTACK_DISCOVERY_LABEL}</em>,
+                attacks: <em>{ATTACKS_LABEL}</em>,
+                detections: <strong>{DETECTIONS_LABEL}</strong>,
               }}
             />
           </p>
@@ -72,7 +115,7 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
             data-test-subj="goToAttacksButton"
             onClick={onGoToAttacksClick}
           >
-            {i18n.GO_TO_ATTACKS_BUTTON}
+            {GO_TO_ATTACKS_BUTTON}
           </SecuritySolutionLinkButton>
         }
         footer={
@@ -82,7 +125,7 @@ const AttackDiscoveryMovedPageComponent: React.FC = () => {
               defaultMessage="Prefer the previous experience? Disable alerts and attacks alignment in {advancedSettingsLink}."
               values={{
                 advancedSettingsLink: (
-                  <EuiLink href={advancedSettingsUrl}>{'Advanced Settings'}</EuiLink>
+                  <EuiLink href={advancedSettingsUrl}>{ADVANCED_SETTINGS_LABEL}</EuiLink>
                 ),
               }}
             />
