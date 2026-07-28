@@ -145,6 +145,14 @@ interface EntityFlyoutProps {
    * parent.
    */
   readonly size?: EuiFlyoutSize | number | string;
+  /**
+   * Restrict the flyout to the core tab set (Overview, Logs, Traces, Alerts)
+   * used by the "Infra-short term" lab scenario. When false/undefined (the
+   * default, i.e. the entity-centric long-term scenario) the flyout also
+   * surfaces the Relationships tab. Metrics and Security stay off in both
+   * scenarios.
+   */
+  readonly minimalTabs?: boolean;
 }
 
 type BuiltInTabId =
@@ -179,13 +187,15 @@ const isBuiltInTabId = (id: string): id is BuiltInTabId =>
   (BUILT_IN_TAB_IDS as readonly string[]).includes(id);
 
 /**
- * The only tabs the flyout ever surfaces, in this order. Applied to both the
- * default tab list and the per-kind template override, so any other tab
- * (Metrics, Relationships, Security, or wizard-defined custom tabs) is dropped
- * even when a template explicitly enables it.
+ * Tabs the flyout surfaces, in order. The core set is shared by every
+ * scenario; the entity-centric (long-term) scenario additionally surfaces
+ * Relationships (see {@link EntityFlyoutProps.minimalTabs}). Metrics and
+ * Security are intentionally excluded from both. Applied to both the default
+ * tab list and the per-kind template override, so any other tab (including
+ * wizard-defined custom tabs) is dropped even when a template enables it.
  */
-const VISIBLE_TAB_IDS: readonly string[] = ['overview', 'logs', 'traces', 'alerts'];
-const isVisibleTabId = (id: string): boolean => VISIBLE_TAB_IDS.includes(id);
+const CORE_TAB_IDS: readonly string[] = ['overview', 'logs', 'traces', 'alerts'];
+const FULL_TAB_IDS: readonly string[] = [...CORE_TAB_IDS, 'relationships'];
 
 /**
  * Labels of the health-indicator badge (see `healthTag` in `kind_templates`).
@@ -213,6 +223,7 @@ export const EntityFlyout = ({
   onManageEntityType,
   session,
   size = 'l',
+  minimalTabs = false,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -500,6 +511,10 @@ export const EntityFlyout = ({
   const templateOverride = useFlyoutTemplateOverride(kind);
 
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(() => {
+    // The core scenario shows Overview/Logs/Traces/Alerts; the entity-centric
+    // (long-term) scenario also shows Relationships. Metrics/Security stay off.
+    const allowedTabIds = minimalTabs ? CORE_TAB_IDS : FULL_TAB_IDS;
+    const isAllowedTabId = (id: string): boolean => allowedTabIds.includes(id);
     const defaultTabs: Array<{ id: TabId; label: string; appendBadge?: number }> = [
       {
         id: 'overview',
@@ -508,9 +523,9 @@ export const EntityFlyout = ({
         }),
       },
       // Note: the "Metrics" tab is intentionally omitted from the default tab
-      // list (as is "Relationships" below). `'metrics'` is still a recognised
-      // built-in id (see `MetricsTab` in `TabContent`) so a template override
-      // can re-enable it, but it no longer shows by default.
+      // list. `'metrics'` is still a recognised built-in id (see `MetricsTab`
+      // in `TabContent`) so a template override could reference it, but it is
+      // never surfaced (not in `allowedTabIds`).
       {
         id: 'logs',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.logs', {
@@ -539,17 +554,25 @@ export const EntityFlyout = ({
           defaultMessage: 'Alerts',
         }),
       },
-    ];
+      // Relationships (the topology map) only surfaces in the long-term
+      // entity-centric scenario — filtered out below when `minimalTabs` is set.
+      {
+        id: 'relationships',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
+          defaultMessage: 'Relationships',
+        }),
+      },
+    ].filter((tab) => isAllowedTabId(tab.id));
 
     if (!templateOverride) return defaultTabs;
 
     // Apply user override: respect the user's order, drop disabled tabs,
     // and reuse the user's label verbatim (so renames in the wizard show up
-    // here too). Only the globally-allowed tabs ({@link VISIBLE_TAB_IDS}) are
-    // ever surfaced — every other id (including wizard-defined custom tabs) is
-    // dropped even when the template enables it.
-    return templateOverride.flyoutTabs
-      .filter((tab) => tab.enabled && isVisibleTabId(tab.id))
+    // here too). Only the scenario-allowed tabs are ever surfaced — every
+    // other id (including wizard-defined custom tabs) is dropped even when the
+    // template enables it.
+    const overrideTabs = templateOverride.flyoutTabs
+      .filter((tab) => tab.enabled && isAllowedTabId(tab.id))
       .map((tab) => {
         const builtIn = isBuiltInTabId(tab.id)
           ? defaultTabs.find((candidate) => candidate.id === tab.id)
@@ -560,7 +583,18 @@ export const EntityFlyout = ({
           appendBadge: builtIn?.appendBadge,
         };
       });
-  }, [templateOverride, tabsData.traces]);
+
+    // Safety net: in the long-term (non-minimal) scenario the Relationships
+    // tab must always be available, even if a stale wizard override (saved in
+    // localStorage) omitted or disabled it. Re-append the built-in entry when
+    // the override didn't already surface it.
+    if (!minimalTabs && !overrideTabs.some((tab) => tab.id === 'relationships')) {
+      const relationshipsTab = defaultTabs.find((tab) => tab.id === 'relationships');
+      if (relationshipsTab) return [...overrideTabs, relationshipsTab];
+    }
+
+    return overrideTabs;
+  }, [templateOverride, tabsData.traces, minimalTabs]);
 
   // If the active tab disappears (override toggled it off, or the user
   // reordered everything and the previously-selected tab is gone), fall

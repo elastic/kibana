@@ -9,6 +9,7 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EntityFlyout,
   EntityFlyoutServicesProvider,
@@ -32,14 +33,17 @@ const EntityCentricLabContext = createContext<EntityCentricLabContextValue | nul
 export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) => {
   const { uiSettings, agentBuilder, notifications, charts, application } = useDiscoverServices();
   // Space-scoped advanced setting; lives in Stack Management → Advanced Settings
-  // under the Discover category. `requiresPageReload: true`, so we don't need to
-  // subscribe to live updates here — a fresh page render will pick up changes.
-  // Only the `entityCentric` mode drives Discover's customization; `off` and
+  // under the Discover category. We subscribe to it live (rather than reading
+  // once) so flipping the mode takes effect on re-render without depending on a
+  // full page reload — a `useMemo(..., [uiSettings])` read is computed only at
+  // mount, which left the panel stale after switching modes. Only the
+  // `entityCentric` mode drives Discover's customization; `off` and
   // `infraShortTerm` both leave Discover untouched.
-  const enabled = useMemo(
-    () => uiSettings.get<LabMode>(LAB_MODE_SETTING, 'off') === 'entityCentric',
-    [uiSettings]
+  const labMode = useObservable(
+    uiSettings.get$<LabMode>(LAB_MODE_SETTING, 'off'),
+    uiSettings.get<LabMode>(LAB_MODE_SETTING, 'off')
   );
+  const enabled = labMode === 'entityCentric';
 
   // Two flyout slots so the shared flyout's parent/child session can dock
   // two entities side by side: `currentEntityName` is the parent (session

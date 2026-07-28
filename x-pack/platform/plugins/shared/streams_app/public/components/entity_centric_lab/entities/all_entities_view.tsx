@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -335,12 +336,15 @@ export const AllEntitiesView = ({
   // key is inlined to avoid a cross-plugin import of Discover internals; it is
   // a stable public contract registered in `discover/server/ui_settings.ts`.
   // In `infraShortTerm` mode we strip every "Manage entity types" affordance
-  // (toolbar button + flyout cog). `requiresPageReload: true`, so reading once
-  // is enough.
-  const isInfraShortTerm = useMemo(
-    () => uiSettings.get<string>('discover:labMode', 'off') === 'infraShortTerm',
-    [uiSettings]
+  // (toolbar button + flyout cog) and reduce the flyout tab set. We subscribe
+  // to the setting live so flipping modes takes effect on re-render rather than
+  // relying on a full page reload (a one-shot read is computed only at mount,
+  // which left this stale after switching between modes).
+  const labMode = useObservable(
+    uiSettings.get$<string>('discover:labMode', 'off'),
+    uiSettings.get<string>('discover:labMode', 'off')
   );
+  const isInfraShortTerm = labMode === 'infraShortTerm';
   // URL-state-backed time range, shared with every other Streams page
   // through the same `rangeFrom`/`rangeTo` search params. The lab dataset
   // is static so the picked range doesn't actually filter the entities
@@ -903,6 +907,7 @@ export const AllEntitiesView = ({
                   <GroupedGridView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
+                    selectedEntityName={selectedEntityName}
                     groupCloudByProvider={cloudHierarchyEnabled}
                   />
                 ) : viewMode === 'geomap' ? (
@@ -927,7 +932,7 @@ export const AllEntitiesView = ({
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
             session="start"
-            size="l"
+            size="m"
             entityName={selectedEntityName}
             entityType={selectedEntityType}
             entityHealth={selectedEntityHealth}
@@ -938,6 +943,7 @@ export const AllEntitiesView = ({
             onManageEntityType={
               isInfraShortTerm ? undefined : () => manageEntityType(selectedEntity)
             }
+            minimalTabs={isInfraShortTerm}
           />
           {childEntityName ? (
             <EntityFlyout
@@ -953,6 +959,7 @@ export const AllEntitiesView = ({
               onManageEntityType={
                 isInfraShortTerm ? undefined : () => manageEntityType(childEntity)
               }
+              minimalTabs={isInfraShortTerm}
             />
           ) : null}
         </EntityFlyoutServicesProvider>

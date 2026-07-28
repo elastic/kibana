@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -71,6 +78,12 @@ interface Props {
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
   /**
+   * Name of the entity whose flyout is currently open, if any. The matching
+   * hexagon renders a persistent selected state so the user can tell which
+   * cell the flyout describes (especially when the flyout doesn't overlap it).
+   */
+  readonly selectedEntityName?: string | null;
+  /**
    * When true, Cloud entities are grouped by provider (AWS / GCP /
    * Azure) then by service, matching the nested left-nav. When false,
    * Cloud falls back to the flat "group by type" card. Driven by the
@@ -78,6 +91,13 @@ interface Props {
    */
   readonly groupCloudByProvider?: boolean;
 }
+
+/**
+ * Canonical name of the currently-selected entity, shared down the deeply
+ * nested card/row tree so {@link MetricTile} can flag its own selected state
+ * without every intermediate component having to forward the prop.
+ */
+const SelectedEntityContext = createContext<string | null>(null);
 
 // ---------------------------------------------------------------------------
 // Tile
@@ -187,6 +207,7 @@ const MetricTile = ({
   // every tile uniquely addressable even when the user picks something
   // like `kubernetes.pod.uid` for the entire kind.
   const displayName = useEntityDisplayName(entity.name, entity.type);
+  const isSelected = useContext(SelectedEntityContext) === entity.name;
   const tileClass = useMemo(
     () => css`
       width: ${HEX_W}px;
@@ -213,12 +234,44 @@ const MetricTile = ({
         corners so the shape reads unambiguously as a single hexagon.
       */
       transition: transform 120ms ease;
+      ${isSelected
+        ? `
+        z-index: 2;
+        position: relative;
+        /*
+          Selected hex keeps its fill exactly as-is — same colour AND size
+          as its neighbours. A \`clip-path\` clips \`border\`/\`box-shadow\`, so
+          the stroke is drawn by growing a dark-grey hexagon outward to the
+          full slot (overriding the ${HEX_GAP_SCALE} gap scale) and laying
+          the fill back on top at the normal gap size via \`::after\`. Tones
+          are semi-transparent (see \`toneColor\`), so the fill is painted
+          over an opaque \`emptyShade\` backing — otherwise it would
+          composite over the dark-grey ring and read as a darker colour.
+          The dark grey only shows in the surrounding gap.
+        */
+        transform: scale(1);
+        background-color: ${euiTheme.colors.darkShade};
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          transform: scale(${HEX_GAP_SCALE});
+          clip-path: ${HEX_CLIP_PATH};
+          background-color: ${euiTheme.colors.emptyShade};
+          background-image: linear-gradient(
+            ${toneColor(reading.tone, euiTheme)},
+            ${toneColor(reading.tone, euiTheme)}
+          );
+          pointer-events: none;
+        }
+      `
+        : ''}
       &:hover,
       &:focus-visible {
         transform: scale(${Math.min(1, HEX_GAP_SCALE + 0.06)});
       }
     `,
-    [reading.tone, euiTheme]
+    [reading.tone, euiTheme, isSelected]
   );
   // Accessible summary — the visual hover card is decorative, so the
   // full reading still needs to be reachable by screen readers.
@@ -236,6 +289,7 @@ const MetricTile = ({
       type="button"
       className={tileClass}
       aria-label={ariaLabel}
+      aria-pressed={isSelected}
       // Stable test-subj uses the canonical name so existing
       // selectors keep working even when the user re-labels via the
       // wizard or swaps the bucket metric.
@@ -1339,6 +1393,7 @@ const CategoryCardInner = ({
 export const GroupedGridView = ({
   entities,
   onSelectEntity,
+  selectedEntityName = null,
   groupCloudByProvider = false,
 }: Props) => {
   // Subscribe to chaos-mode flips so PayFlow storyline tiles can
@@ -1393,24 +1448,26 @@ export const GroupedGridView = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {grouped.map((section) =>
-        section.category === 'cloud' && groupCloudByProvider ? (
-          <CloudGroupedCards
-            key={section.category}
-            entities={section.rows}
-            onSelectEntity={onSelectEntity}
-          />
-        ) : (
-          <EuiFlexItem key={section.category} grow={false}>
-            <CategoryCard
-              category={section.category}
+    <SelectedEntityContext.Provider value={selectedEntityName}>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {grouped.map((section) =>
+          section.category === 'cloud' && groupCloudByProvider ? (
+            <CloudGroupedCards
+              key={section.category}
               entities={section.rows}
               onSelectEntity={onSelectEntity}
             />
-          </EuiFlexItem>
-        )
-      )}
-    </EuiFlexGroup>
+          ) : (
+            <EuiFlexItem key={section.category} grow={false}>
+              <CategoryCard
+                category={section.category}
+                entities={section.rows}
+                onSelectEntity={onSelectEntity}
+              />
+            </EuiFlexItem>
+          )
+        )}
+      </EuiFlexGroup>
+    </SelectedEntityContext.Provider>
   );
 };

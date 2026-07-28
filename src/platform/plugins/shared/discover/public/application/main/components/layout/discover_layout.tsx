@@ -42,6 +42,7 @@ import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
+import { EntityCentricLabPanel, useEntityCentricLab } from '../../../../lab/entity_centric';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
@@ -152,6 +153,11 @@ export function DiscoverLayout() {
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]
   );
+
+  // When the entity-centric lab is on, the fake logs panel takes over the
+  // "no results" state (real queries against the demo cluster usually return
+  // nothing for the current time range) so the scenario is always reachable.
+  const { enabled: entityCentricLabEnabled } = useEntityCentricLab();
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
@@ -510,6 +516,7 @@ export function DiscoverLayout() {
                         dataTestSubjSuffix="InPage"
                       />
                     </div>
+                    <EntityCentricLabPanel />
                     {dataState.error ? (
                       <ErrorCallout
                         title={i18n.translate(
@@ -521,7 +528,7 @@ export function DiscoverLayout() {
                         error={dataState.error}
                         isEsqlMode={isEsqlMode}
                       />
-                    ) : (
+                    ) : entityCentricLabEnabled ? null : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
                         query={globalQueryState.query}
