@@ -162,17 +162,32 @@ export class LogsExtractionClient {
       // and retry once; if nothing was missing the error was about a source index, so fall
       // through to normal handling.
       if (isIndexNotFoundError(error)) {
-        const healed = await reinstallSharedElasticsearchAssetsIfMissing({
-          esClient: this.esClient,
-          logger: this.logger,
-          namespace: this.namespace,
-        });
-        if (healed) {
-          this.logger.info(`Recreated missing entity store assets; retrying extraction for ${type}`);
-          try {
-            return await this.runExtraction(type, opts);
-          } catch (retryError) {
-            return await this.handleError(retryError, type, false);
+        // Guard: if the engine was uninstalled while this task was running, the engine
+        // descriptor SO is already gone. Skip self-heal so we don't reinstate an index
+        // that uninstall just deleted.
+        let engineStillStarted = false;
+        try {
+          const descriptor = await this.engineDescriptorClient.findOrThrow(type);
+          engineStillStarted = descriptor.status === ENGINE_STATUS.STARTED;
+        } catch {
+          // descriptor gone → engine uninstalled
+        }
+
+        if (engineStillStarted) {
+          const healed = await reinstallSharedElasticsearchAssetsIfMissing({
+            esClient: this.esClient,
+            logger: this.logger,
+            namespace: this.namespace,
+          });
+          if (healed) {
+            this.logger.info(
+              `Recreated missing entity store assets; retrying extraction for ${type}`
+            );
+            try {
+              return await this.runExtraction(type, opts);
+            } catch (retryError) {
+              return await this.handleError(retryError, type, false);
+            }
           }
         }
       }

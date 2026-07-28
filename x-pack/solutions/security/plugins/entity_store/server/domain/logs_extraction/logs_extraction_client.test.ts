@@ -1826,5 +1826,23 @@ describe('LogsExtractionClient', () => {
       // Healed once, retried once, no further heal attempts (no loop).
       expect(mockReinstallAssets).toHaveBeenCalledTimes(1);
     });
+
+    it('does not self-heal when the engine was uninstalled while the task was running', async () => {
+      // Engine descriptor is gone — simulates the race where uninstall deleted the descriptor
+      // between when the task started and when the index_not_found error was caught.
+      mockEngineDescriptorClient.findOrThrow
+        .mockResolvedValueOnce(
+          createMockEngineDescriptor('user') as Awaited<
+            ReturnType<EngineDescriptorClient['findOrThrow']>
+          >
+        )
+        .mockRejectedValueOnce(new Error('Not found'));
+      mockExecuteEsqlQuery.mockRejectedValue(indexNotFoundError);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+      expect(mockReinstallAssets).not.toHaveBeenCalled();
+    });
   });
 });
