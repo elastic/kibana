@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { loadOas } from './src/input/load_oas';
-export { runOasdiff, parseOasdiff, applyAllowlist } from './src/diff';
-export type { OasdiffEntry, BreakingChange, FilterResult } from './src/diff';
-export { formatFailure } from './src/report/format_failure';
-export { ESCALATION_LINK } from './src/report/links';
-export { loadAllowlist } from './src/allowlist/load_allowlist';
+export { parseXState } from './parse_x_state';
+export type { ParseXStateResult, StabilityTier } from './parse_x_state';
+export { resolveTier } from './resolve_tier';
+export { isGatingTier } from './tiers';
+export type { GatingTier } from './tiers';
