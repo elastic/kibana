@@ -185,12 +185,15 @@ const defaultBaselineForAnomaly = ({ anomaly }: QuerySharedOpts): EnrichedAnomal
 const fetchTimeBaselineForAnomaly = async ({
   anomaly,
   detector,
+  entityId,
   entityType,
   entityFilter,
   esClient,
   fromMs,
   toMs,
+  logger,
   jobConfig,
+  jobId,
 }: QuerySharedOpts): Promise<EnrichedAnomalyHit> => {
   try {
     const termsFields = getNonEntityGroupFields(detector, entityType);
