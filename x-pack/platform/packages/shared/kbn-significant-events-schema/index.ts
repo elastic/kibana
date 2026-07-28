@@ -94,6 +94,7 @@ export {
   type InvestigationHypothesis,
   type InvestigationState,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
   type BlastRadiusEntry,

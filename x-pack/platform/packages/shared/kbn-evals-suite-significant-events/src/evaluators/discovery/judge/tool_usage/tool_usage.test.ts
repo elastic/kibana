@@ -10,11 +10,8 @@ import type { ConverseStep } from '@kbn/evals';
 import type { Discovery, SignalEntry } from '@kbn/significant-events-schema';
 import { scoreJudgeToolUsage } from './tool_usage';
 
-const {
-  searchKnowledgeIndicators: TOOL_ID_KI_SEARCH,
-  eventsWrite: TOOL_ID_EVENTS_WRITE,
-  discoveryWrite: TOOL_ID_DISCOVERY_WRITE,
-} = platformSignificantEventsTools;
+const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH, eventsWrite: TOOL_ID_EVENTS_WRITE } =
+  platformSignificantEventsTools;
 const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
 
 const toolCall = (toolId: string): ConverseStep => ({
@@ -80,22 +77,6 @@ describe('scoreJudgeToolUsage', () => {
         steps: [toolCall(TOOL_ID_EXECUTE_ESQL)],
       })
     ).toMatchObject({ score: 0, label: 'missing-output-write' });
-  });
-
-  it('penalizes discovery_write because handled stamping belongs to triage', () => {
-    expect(
-      scoreJudgeToolUsage({
-        discoveries: [discovery(true)],
-        steps: [
-          toolCall(TOOL_ID_EXECUTE_ESQL),
-          toolCall(TOOL_ID_EVENTS_WRITE),
-          toolCall(TOOL_ID_DISCOVERY_WRITE),
-        ],
-      })
-    ).toMatchObject({
-      score: 0.5,
-      label: `unnecessary-${TOOL_ID_DISCOVERY_WRITE}`,
-    });
   });
 
   it('penalizes multiple event writes without a partial-failure retry', () => {

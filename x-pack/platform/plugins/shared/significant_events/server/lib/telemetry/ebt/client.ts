@@ -21,7 +21,6 @@ import type {
   DetectionScanProps,
   DiscoveryTriggeredProps,
   AgentToolEventWriteProps,
-  AgentToolDiscoveryWriteProps,
 } from './types';
 import {
   SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
@@ -38,7 +37,6 @@ import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_DISCOVERY_WRITE_EVENT_TYPE,
 } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST: string[] = [];
@@ -124,10 +122,6 @@ export class EbtTelemetryClient {
 
   public trackAgentToolEventsWrite(params: AgentToolEventWriteProps) {
     this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE, params);
-  }
-
-  public trackAgentToolDiscoveryWrite(params: AgentToolDiscoveryWriteProps) {
-    this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_DISCOVERY_WRITE_EVENT_TYPE, params);
   }
 
   public trackAgentToolEventSearch(params: AgentToolEventSearchProps) {

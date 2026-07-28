@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Discovery, Feature } from '@kbn/significant-events-schema';
+import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
@@ -38,7 +38,6 @@ import {
   FEATURES_TEMP_INDEX_PATTERN,
   DISCOVERIES_TEMP_INDEX_PATTERN,
   DETECTIONS_TEMP_INDEX_PATTERN,
-  DISCOVERIES_DATA_STREAM,
   DETECTIONS_DATA_STREAM,
   EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
@@ -300,17 +299,17 @@ export async function persistDiscoveriesForSnapshot(
   log: ToolingLog,
   snapshotName: string
 ): Promise<{ index: string; count: number }> {
-  const discoveries = await fetchAllPaginated<Discovery>(
+  const discoveries = await fetchAllPaginated<SignificantEvent>(
     config,
-    '/internal/significant_events/discoveries',
-    'discoveries'
+    '/internal/significant_events/events',
+    'events'
   );
   return persistDocsForSnapshot(
     esClient,
     log,
     getSnapshotDiscoveriesIndex(snapshotName),
     discoveries as unknown as Array<Record<string, unknown>>,
-    'discovery_id',
+    'event_uuid',
     'discovery(s)'
   );
 }
@@ -321,7 +320,6 @@ export async function cleanupExtractedData(esClient: Client, log: ToolingLog): P
   const dataStreamTargets = [
     'logs*',
     KNOWLEDGE_INDICATORS_DATA_STREAM,
-    DISCOVERIES_DATA_STREAM,
     DETECTIONS_DATA_STREAM,
     EVENTS_DATA_STREAM,
   ];

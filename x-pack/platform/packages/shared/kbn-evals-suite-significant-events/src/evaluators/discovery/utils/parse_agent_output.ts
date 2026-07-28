@@ -7,25 +7,13 @@
 
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
-import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
-
-interface DiscoveryWriteToolResult {
-  data?: {
-    results?: DiscoveryWriteItemResult[];
-  };
-}
+import type { Discovery } from '@kbn/significant-events-schema';
 
 interface EventsWriteToolResult {
   data?: {
     results?: EventsWriteItemResult[];
   };
 }
-
-type DiscoveryWriteItemResult = Pick<Discovery, 'event_id' | 'discovery_id'> & {
-  index: number;
-  written: boolean;
-  reason?: 'duplicate_within_window' | 'bulk_error';
-};
 
 type EventsWriteItemResult =
   | {
@@ -38,7 +26,8 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: false;
-      reason: 'bulk_error';
+      reason: 'duplicate_within_window' | 'bulk_error';
+      existing_event_id?: string;
     };
 
 interface IndexedResult {
@@ -67,36 +56,35 @@ const validateAlignedResults = <T extends IndexedResult>(
 };
 
 /**
- * Extract discoveries from `discovery_write` tool call steps.
+ * Extract discoveries from `events_write` tool call steps.
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery[] =>
-  toolCallSteps(steps, platformSignificantEventsTools.discoveryWrite).flatMap((step) => {
-    const items = getBulkItems<Partial<Discovery>>(step.params, 'discovery_write');
-    const toolResult = (step.results?.[0] as DiscoveryWriteToolResult | undefined)?.data;
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
+    const items = getBulkItems<Partial<Discovery>>(step.params, 'events_write');
+    const toolResult = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
     const results = toolResult?.results;
     if (!Array.isArray(results)) {
-      throw new Error('discovery_write input and result arrays are not aligned');
+      throw new Error('events_write input and result arrays are not aligned');
     }
-    return validateAlignedResults(results, items.length, 'discovery_write')
+    return validateAlignedResults(results, items.length, 'events_write')
       .map((result, index) =>
         result.reason === 'bulk_error'
           ? undefined
           : ({
               ...items[index],
               event_id: result.event_id,
-              discovery_id: result.discovery_id,
             } as Discovery)
       )
       .filter((discovery): discovery is Discovery => discovery !== undefined);
   });
 
 /**
- * Extract only event IDs explicitly supplied by the agent to `discovery_write`.
+ * Extract only event IDs explicitly supplied by the agent to `events_write`.
  * Unlike `extractDiscoveriesFromToolCall`, this intentionally ignores handler-generated IDs so
  * evaluators can distinguish the agent's continuation routing from the final write outcome.
  */
 export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): string[] =>
-  toolCallSteps(steps, platformSignificantEventsTools.discoveryWrite).flatMap((step) => {
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
     const items = Array.isArray(step.params?.items)
       ? (step.params.items as Array<Partial<Discovery>>)
       : [];

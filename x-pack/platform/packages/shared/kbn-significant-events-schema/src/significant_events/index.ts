@@ -32,6 +32,7 @@ export {
   type SignificantEventInvestigation,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,

@@ -19,7 +19,6 @@ import type {
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
-  AgentToolDiscoveryWriteProps,
   AgentToolEventSearchProps,
 } from './types';
 
@@ -710,42 +709,8 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
   },
 };
 
-const agentToolDiscoveryWriteSchema: RootSchema<AgentToolDiscoveryWriteProps> = {
-  success: {
-    type: 'boolean',
-    _meta: { description: 'Whether the discovery write succeeded' },
-  },
-  kind: {
-    type: 'keyword',
-    _meta: {
-      description: 'The kind of discovery document written: discovery, clearance, or handled',
-    },
-  },
-  event_id: {
-    type: 'keyword',
-    _meta: { description: 'The stable event id' },
-  },
-  stream_names: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'A stream name' },
-    },
-    _meta: { description: 'The streams associated with the discovery' },
-  },
-  written: {
-    type: 'boolean',
-    _meta: { description: 'Whether a document was actually written (false when deduplicated)' },
-  },
-  error_message: {
-    type: 'text',
-    _meta: { description: 'Error message when the discovery write fails', optional: true },
-  },
-};
-
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
-  agentToolDiscoveryWriteSchema,
   agentToolEventCreateSchema,
   agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,

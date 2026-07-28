@@ -14,6 +14,7 @@ import type {
   Severity,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
@@ -118,6 +119,10 @@ export class EventClient {
 
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;
+
+    // Exclude unvalidated candidates (status == "pending") from the default read path
+    where = andWhere(where, esql.exp`${esql.col('status')} != ${esql.str('pending')}`);
+
     where = inFilter({ where, field: 'status', values: options.status });
     where = multiValueContainsAnyFilter({
       where,
@@ -279,6 +284,27 @@ export class EventClient {
       index: EVENTS_DATA_STREAM,
       idField: FIELD_EVENT_ID,
       idValue: eventId,
+    });
+    return { hits: result.hits };
+  }
+
+  /**
+   * Returns the latest version per event_id for all unresolved events (status IN pending/open)
+   * whose latest @timestamp is on or after `from`. Used by event_write to find dedup candidates:
+   * a prior candidate may still be a "pending" candidate or an already-"open" event, and both
+   * should dedup against a fresh write.
+   */
+  async findLatestActiveFrom(from: string): Promise<{ hits: SignificantEvent[] }> {
+    const where = esql.exp`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
+      (status) => esql.str(status)
+    )})`;
+    const result = await runLatestSourceEsqlQuery<SignificantEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options: { from },
+      index: EVENTS_DATA_STREAM,
+      where,
+      groupBy: FIELD_EVENT_ID,
     });
     return { hits: result.hits };
   }

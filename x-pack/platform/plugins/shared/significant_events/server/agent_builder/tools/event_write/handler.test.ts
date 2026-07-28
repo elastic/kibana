@@ -14,7 +14,7 @@ const successfulBulkCreate = async (documents: object[]) => ({
 
 const baseInput: EventsWriteInput = {
   discovery_id: 'disc-1',
-  status: 'open',
+  status: 'open' as const,
   stream_names: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',

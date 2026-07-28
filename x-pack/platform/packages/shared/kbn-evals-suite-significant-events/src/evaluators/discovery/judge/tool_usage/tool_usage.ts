@@ -12,11 +12,8 @@ import { extractToolCallIds, summarizePersistenceCalls } from '../../utils/tool_
 import type { DiscoveryJudgeEvaluator } from '../../types';
 
 const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
-const {
-  searchKnowledgeIndicators: TOOL_ID_KI_SEARCH,
-  eventsWrite: TOOL_ID_EVENTS_WRITE,
-  discoveryWrite: TOOL_ID_DISCOVERY_WRITE,
-} = platformSignificantEventsTools;
+const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH, eventsWrite: TOOL_ID_EVENTS_WRITE } =
+  platformSignificantEventsTools;
 
 /** Require the judge-owned event write and reject workflow-owned discovery stamping. */
 const scoreOutputTool = (
@@ -28,13 +25,6 @@ const scoreOutputTool = (
       score: 0,
       label: 'missing-output-write',
       explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to persist the decision`,
-    };
-  }
-  if (calledTools.has(TOOL_ID_DISCOVERY_WRITE)) {
-    return {
-      score: 0.5,
-      label: `unnecessary-${TOOL_ID_DISCOVERY_WRITE}`,
-      explanation: `${TOOL_ID_DISCOVERY_WRITE} was called, but handled stamping belongs to the triage workflow`,
     };
   }
   const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);

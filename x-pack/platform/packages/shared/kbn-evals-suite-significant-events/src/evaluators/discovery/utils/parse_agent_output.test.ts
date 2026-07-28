@@ -13,11 +13,10 @@ import {
   extractSignificantEventsFromToolCall,
 } from './parse_agent_output';
 
-const TOOL_ID_DISCOVERY_WRITE = platformSignificantEventsTools.discoveryWrite;
 const TOOL_ID_EVENTS_WRITE = platformSignificantEventsTools.eventsWrite;
 
 describe('extractDiscoveriesFromToolCall', () => {
-  it('returns [] when no discovery_write steps are present', () => {
+  it('returns [] when no events_write steps are present', () => {
     const steps: ConverseStep[] = [{ type: 'reasoning', reasoning: 'thinking' }];
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
@@ -26,14 +25,14 @@ describe('extractDiscoveriesFromToolCall', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-invalid-params',
         params: { items: 'not-an-array' },
       },
     ];
 
     expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
-      'discovery_write: expected params.items to be an array, got string'
+      'events_write: expected params.items to be an array, got string'
     );
   });
 
@@ -41,13 +40,10 @@ describe('extractDiscoveriesFromToolCall', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-bulk',
         params: {
-          items: [
-            { kind: 'discovery', title: 'Persisted discovery' },
-            { kind: 'discovery', title: 'Failed discovery' },
-          ],
+          items: [{ title: 'Persisted discovery' }, { title: 'Failed discovery' }],
         },
         results: [
           {
@@ -56,7 +52,6 @@ describe('extractDiscoveriesFromToolCall', () => {
                 {
                   index: 0,
                   event_id: 'event-1',
-                  discovery_id: 'discovery-1',
                   written: true,
                 },
                 { index: 1, event_id: 'event-2', written: false, reason: 'bulk_error' },
@@ -71,7 +66,6 @@ describe('extractDiscoveriesFromToolCall', () => {
       expect.objectContaining({
         title: 'Persisted discovery',
         event_id: 'event-1',
-        discovery_id: 'discovery-1',
       }),
     ]);
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
@@ -81,7 +75,7 @@ describe('extractDiscoveriesFromToolCall', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-misaligned',
         params: { items: [{ title: 'one' }, { title: 'two' }] },
         results: [{ data: { results: [] } }],
@@ -89,7 +83,7 @@ describe('extractDiscoveriesFromToolCall', () => {
     ];
 
     expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
-      'discovery_write input and result arrays are not aligned'
+      'events_write input and result arrays are not aligned'
     );
   });
 
@@ -97,7 +91,7 @@ describe('extractDiscoveriesFromToolCall', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-reordered',
         params: { items: [{ title: 'first' }, { title: 'second' }] },
         results: [
@@ -107,13 +101,11 @@ describe('extractDiscoveriesFromToolCall', () => {
                 {
                   index: 1,
                   event_id: 'event-2',
-                  discovery_id: 'discovery-2',
                   written: true,
                 },
                 {
                   index: 0,
                   event_id: 'event-1',
-                  discovery_id: 'discovery-1',
                   written: true,
                 },
               ],
@@ -124,7 +116,7 @@ describe('extractDiscoveriesFromToolCall', () => {
     ];
 
     expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
-      'discovery_write input and result arrays are not aligned'
+      'events_write input and result arrays are not aligned'
     );
   });
 });
@@ -134,7 +126,7 @@ describe('extractRequestedEventIdsFromToolCall', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-new',
         params: { items: [{ kind: 'discovery', title: 'New event' }] },
         results: [
@@ -143,7 +135,7 @@ describe('extractRequestedEventIdsFromToolCall', () => {
       },
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-continuation',
         params: {
           items: [{ kind: 'discovery', title: 'Continuation', event_id: 'agent-selected' }],
@@ -159,7 +151,7 @@ describe('extractRequestedEventIdsFromToolCall', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'dw-bulk',
         params: {
           items: [
@@ -192,7 +184,7 @@ describe('extractSignificantEventsFromToolCall', () => {
       { type: 'reasoning', reasoning: 'thinking' },
       {
         type: 'tool_call',
-        tool_id: TOOL_ID_DISCOVERY_WRITE,
+        tool_id: 'other-tool',
         tool_call_id: 'dw-1',
         params: { kind: 'handled' },
       },
