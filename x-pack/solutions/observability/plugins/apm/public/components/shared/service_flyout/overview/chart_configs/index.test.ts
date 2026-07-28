@@ -83,7 +83,7 @@ describe('service flyout chart_configs', () => {
       const { keyMetrics } = buildDefinitions({ schema: 'otel' });
 
       keyMetrics.forEach(({ config }) => {
-        expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES},${SPAN_INDEXES}`);
+        expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES}, ${SPAN_INDEXES}`);
       });
     });
 

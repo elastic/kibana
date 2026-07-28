@@ -115,7 +115,7 @@ describe('APM chart configs', () => {
       });
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
       );
     });
 

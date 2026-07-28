@@ -55,7 +55,7 @@ describe('OTel chart configs', () => {
       });
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*,traces-apm.otel-default | WHERE kind IN ("Server", "Consumer") | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(duration) / 1000000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm*, traces-apm.otel-default | WHERE kind IN ("Server", "Consumer") | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(duration) / 1000000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
       );
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('AVG(duration_ms)');
     });
@@ -147,7 +147,7 @@ describe('OTel chart configs', () => {
       });
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*,traces-apm.otel-default | WHERE kind IN ("Server", "Consumer") | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS COUNT(*) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm*, traces-apm.otel-default | WHERE kind IN ("Server", "Consumer") | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS COUNT(*) BY timestamp = TBUCKET(100)'
       );
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('COUNT(*)');
     });
@@ -162,7 +162,7 @@ describe('OTel chart configs', () => {
       });
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm*,traces-apm.otel-default | WHERE kind IN ("Server", "Consumer") | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(status.code) == "Error", all = COUNT(*) BY timestamp = TBUCKET(100) | EVAL failed_transaction_rate = TO_DOUBLE(failure) / all | KEEP timestamp, failed_transaction_rate | SORT timestamp'
+        'SET unmapped_fields="nullify";\nFROM traces-apm*, traces-apm.otel-default | WHERE kind IN ("Server", "Consumer") | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(status.code) == "Error", all = COUNT(*) BY timestamp = TBUCKET(100) | EVAL failed_transaction_rate = TO_DOUBLE(failure) / all | KEEP timestamp, failed_transaction_rate | SORT timestamp'
       );
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('failed_transaction_rate');
       expect((chart.config as XYLensConfig).yBounds).toEqual({
