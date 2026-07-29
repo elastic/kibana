@@ -18,7 +18,10 @@ describe('typed esql query helpers', () => {
 
   it('rowsFromEsql maps tabular columns/values using the branded row type', () => {
     const rows = rowsFromEsql(query, {
-      columns: [{ name: 'id' }, { name: 'count' }],
+      columns: [
+        { name: 'id', type: 'keyword' },
+        { name: 'count', type: 'long' },
+      ],
       values: [
         ['a', 1],
         ['b', 2],
