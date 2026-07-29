@@ -64,10 +64,14 @@ export const AlertEpisodeOverviewList = ({
   const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
   const tags = groupAction?.tags ?? [];
-  const alertUrl =
+  // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
+  // http(s) before putting into href — blocks javascript:/data: stored XSS.
+  const rawAlertUrl =
     typeof groupingData.alert_url === 'string' && groupingData.alert_url.length > 0
       ? groupingData.alert_url
       : undefined;
+  const alertUrl =
+    rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
   return (
     <EuiDescriptionList
