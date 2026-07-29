@@ -326,6 +326,19 @@ export function ServiceMapEmbeddable({
     };
   }, [viewFilters, badgesStatus]);
 
+  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
+
+  const highlightedServiceNames = useMemo(
+    () => (serviceName ? [serviceName] : undefined),
+    [serviceName]
+  );
+
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
     (viewFilters?.sloStatusFilter?.length ?? 0) > 0 ||
@@ -465,7 +478,7 @@ export function ServiceMapEmbeddable({
             onCollapse={onCollapse}
             onBaseMaxHopsChange={setBaseMaxHops}
             onMaxVisibleNodesChange={setMaxVisibleNodes}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -483,7 +496,7 @@ export function ServiceMapEmbeddable({
             nodes={isLoading ? [] : nodesForGraph}
             edges={isLoading ? [] : data.edges}
             serviceName={serviceName}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
