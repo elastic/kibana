@@ -22,6 +22,7 @@ export const fromEs = <TConfig extends object = {}>(
     description: document._source.description,
     tags: document._source.tags,
     configuration: document._source.configuration as TConfig,
+    confirmation: document._source.confirmation,
     updated_at: document._source.updated_at,
     created_at: document._source.created_at,
   };
@@ -43,6 +44,7 @@ export const createAttributes = ({
     description: createRequest.description ?? '',
     tags: createRequest.tags ?? [],
     configuration: createRequest.configuration,
+    confirmation: createRequest.confirmation,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
   };
@@ -64,6 +66,7 @@ export const updateDocument = ({
       ...current.configuration,
       ...update.configuration,
     },
+    confirmation: update.confirmation,
     updated_at: updateDate.toISOString(),
   };
 };

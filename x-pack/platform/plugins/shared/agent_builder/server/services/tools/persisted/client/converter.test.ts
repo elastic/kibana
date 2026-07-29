@@ -47,6 +47,27 @@ describe('fromEs', () => {
       updated_at: '2025-08-04T06:44:19.123Z',
     });
   });
+
+  it('includes confirmation when present in the source document', () => {
+    const document: ToolDocument = {
+      _id: '_id',
+      _source: {
+        id: 'id',
+        type: ToolType.esql,
+        space: 'space',
+        description: 'description',
+        configuration: {},
+        confirmation: { askUser: 'always' },
+        tags: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+      },
+    };
+
+    const definition = fromEs(document);
+
+    expect(definition.confirmation).toEqual({ askUser: 'always' });
+  });
 });
 
 describe('createAttributes', () => {
@@ -79,6 +100,25 @@ describe('createAttributes', () => {
       created_at: actualCreationDate.toISOString(),
       updated_at: actualCreationDate.toISOString(),
     });
+  });
+
+  it('includes confirmation when provided in the creation request', () => {
+    const actualCreationDate = new Date();
+    const createRequest: ToolCreateParams = {
+      id: 'id',
+      type: ToolType.esql,
+      description: 'foo',
+      configuration: {},
+      confirmation: { askUser: 'once' },
+    };
+
+    const properties = createAttributes({
+      createRequest,
+      space: 'some-space',
+      creationDate: actualCreationDate,
+    });
+
+    expect(properties.confirmation).toEqual({ askUser: 'once' });
   });
 });
 
@@ -128,5 +168,61 @@ describe('updateDocument', () => {
       created_at: creationDate,
       updated_at: actualUpdateDate.toISOString(),
     });
+  });
+
+  it('removes confirmation when the update omits it', () => {
+    const actualUpdateDate = new Date();
+
+    const currentProps: ToolProperties = {
+      id: 'id',
+      type: ToolType.esql,
+      space: 'some-space',
+      description: 'foo',
+      configuration: {},
+      confirmation: { askUser: 'once' },
+      tags: [],
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const update: ToolTypeUpdateParams = {
+      description: 'updated desc',
+    };
+
+    const merged = updateDocument({
+      current: currentProps,
+      update,
+      updateDate: actualUpdateDate,
+    });
+
+    expect(merged.confirmation).toBeUndefined();
+  });
+
+  it('replaces confirmation entirely rather than merging it', () => {
+    const actualUpdateDate = new Date();
+
+    const currentProps: ToolProperties = {
+      id: 'id',
+      type: ToolType.esql,
+      space: 'some-space',
+      description: 'foo',
+      configuration: {},
+      confirmation: { askUser: 'once' },
+      tags: [],
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const update: ToolTypeUpdateParams = {
+      confirmation: { askUser: 'always' },
+    };
+
+    const merged = updateDocument({
+      current: currentProps,
+      update,
+      updateDate: actualUpdateDate,
+    });
+
+    expect(merged.confirmation).toEqual({ askUser: 'always' });
   });
 });
