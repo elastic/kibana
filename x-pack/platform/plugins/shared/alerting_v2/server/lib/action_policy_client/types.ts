@@ -6,7 +6,6 @@
  */
 
 import type {
-  ActionPolicyBulkAction,
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
   MatchedActionPolicy,
@@ -32,15 +31,17 @@ export interface UpdateActionPolicyApiKeyParams {
   id: string;
 }
 
-export interface BulkActionActionPoliciesParams {
-  actions: ActionPolicyBulkAction[];
+/** Body shared by the by-ID action-policy bulk endpoints (delete/enable/disable/unsnooze/update_api_key). */
+export interface BulkActionPoliciesByIdsParams {
+  ids: string[];
 }
 
-export interface BulkActionActionPoliciesResponse {
-  processed: number;
-  total: number;
-  errors: Array<{ id: string; message: string }>;
+/** Body for the bulk snooze endpoint: the by-ID batch plus a shared expiry. */
+export interface BulkSnoozeActionPoliciesParams {
+  ids: string[];
+  snoozedUntil: string;
 }
+
 export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 
 export interface FindActionPoliciesParams {

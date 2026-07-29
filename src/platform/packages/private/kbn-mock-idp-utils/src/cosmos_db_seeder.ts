@@ -15,6 +15,7 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
+  MOCK_IDP_UIAM_PROJECT_TYPES,
 } from './constants';
 import { generateCosmosDBApiRequestHeaders } from '..';
 
@@ -122,17 +123,19 @@ function createUserDocument(userData: TestUserData): PersistableUser {
     ],
     role_assignments: {
       user: [],
-      project: [
-        {
+      // One grant per project type so the test user can reach cross-project (CPS) linked
+      // projects of any type, not just the type of the Kibana instance they logged in to.
+      project: [...new Set([userData.projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
+        (projectType) => ({
           role_id: userData.roleId,
           organization_id: userData.organizationId,
           project_scope: {
-            scope: 'all',
+            scope: 'all' as const,
           },
-          project_type: userData.projectType,
+          project_type: projectType,
           application_roles: userData.applicationRoles,
-        },
-      ],
+        })
+      ),
       deployment: [],
       platform: [],
       organization: [],
