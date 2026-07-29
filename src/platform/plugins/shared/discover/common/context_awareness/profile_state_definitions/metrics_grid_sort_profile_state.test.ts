@@ -27,10 +27,10 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
     expect(registry.hasDefinition(METRICS_GRID_SORT_STATE_DEF)).toBe(true);
   });
 
-  it('types both fields as Url so the host persists and restores them locally', () => {
+  it('types both fields as Persistent so the host persists them locally and in saved sessions', () => {
     expect(METRICS_GRID_SORT_STATE_DEF.descriptor).toEqual({
-      field: { type: ProfileStateType.Url },
-      direction: { type: ProfileStateType.Url },
+      field: { type: ProfileStateType.Persistent },
+      direction: { type: ProfileStateType.Persistent },
     });
   });
 
@@ -39,7 +39,7 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
 
     const expanded = registry.pickStateByType({
       profileStateMap: { [KEY]: { field: 'recency' } },
-      stateTypes: [ProfileStateType.Url],
+      stateTypes: [ProfileStateType.Persistent],
       defaultsHandling: 'expand',
     });
 
@@ -51,7 +51,7 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
 
     const stripped = registry.pickStateByType({
       profileStateMap: { [KEY]: { field: 'alphabetically', direction: 'asc' } },
-      stateTypes: [ProfileStateType.Url],
+      stateTypes: [ProfileStateType.Persistent],
       defaultsHandling: 'strip',
     });
 
@@ -63,7 +63,7 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
 
     const stripped = registry.pickStateByType({
       profileStateMap: { [KEY]: { field: 'recency', direction: 'desc' } },
-      stateTypes: [ProfileStateType.Url],
+      stateTypes: [ProfileStateType.Persistent],
       defaultsHandling: 'strip',
     });
 

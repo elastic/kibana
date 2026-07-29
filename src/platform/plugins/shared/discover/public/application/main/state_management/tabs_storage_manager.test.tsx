@@ -430,8 +430,8 @@ describe('TabsStorageManager', () => {
       undefined
     );
 
-    // The sort is a `Url` field, so it is written to local storage (the reload
-    // persistence mechanism), not stripped.
+    // The sort is a `Persistent` field, so it is written to local storage (the
+    // reload persistence mechanism), not stripped.
     expect(storage.set).toHaveBeenCalledWith(
       TABS_LOCAL_STORAGE_KEY,
       expect.objectContaining({

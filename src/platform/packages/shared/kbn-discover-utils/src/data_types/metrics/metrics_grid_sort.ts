@@ -24,10 +24,11 @@ export type MetricsGridSortDirection = 'asc' | 'desc';
 
 /**
  * Serializable shape of the metrics grid sort selection persisted in Discover's
- * profile state (typed `ProfileStateType.Url`, which is locally persisted and
- * therefore restored on page reload). Modeled as a named-field record -- rather
- * than the viewer's readonly `MetricsSort` tuple -- so it satisfies the
- * `SerializableRecord` constraint required by profile-state definitions.
+ * profile state (typed `ProfileStateType.Persistent`, which is locally persisted
+ * for page-reload restore and included in saved Discover sessions). Modeled as a
+ * named-field record -- rather than the viewer's readonly `MetricsSort` tuple --
+ * so it satisfies the `SerializableRecord` constraint required by profile-state
+ * definitions.
  */
 export interface MetricsGridSort extends SerializableRecord {
   field: MetricsGridSortField;

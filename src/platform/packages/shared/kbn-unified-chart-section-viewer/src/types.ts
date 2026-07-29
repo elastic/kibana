@@ -56,13 +56,14 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    */
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
   /**
-   * Current grid sort selection, sourced from the host's Url-persisted profile
+   * Current grid sort selection, sourced from the host's persistent profile
    * state. Falls back to `DEFAULT_METRICS_SORT` when not provided.
    */
   metricsSort?: MetricsSort;
   /**
    * Optional callback used to push sort changes back to the host (e.g.
-   * Discover's Url-persisted profile state, which is restored on page reload).
+   * Discover's persistent profile state, which is restored on page reload and
+   * saved with Discover sessions).
    */
   onMetricsSortChange?: (sort: MetricsSort) => void;
   /**

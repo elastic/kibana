@@ -23,7 +23,7 @@ import {
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
   gridSettings: MetricsGridSettings;
-  // Sourced from the host's Url-persisted profile state (no longer restorable
+  // Sourced from the host's persistent profile state (no longer restorable
   // state), so it is declared explicitly here rather than inherited.
   metricsSort: MetricsSort;
   recentlyExploredMetrics: readonly string[];

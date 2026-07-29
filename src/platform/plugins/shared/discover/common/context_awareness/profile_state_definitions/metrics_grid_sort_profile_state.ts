@@ -14,15 +14,16 @@ import { ProfileStateType } from '../profile_state';
 /**
  * Profile-state definition for the metrics grid sort selection.
  *
- * Both fields are typed `ProfileStateType.Url`, which places them in
- * `LOCALLY_PERSISTED_PROFILE_STATE_TYPES`; the host therefore persists the sort
- * to local tab storage and restores it on page reload (#278162).
+ * Both fields are typed `ProfileStateType.Persistent`, which places them in
+ * `LOCALLY_PERSISTED_PROFILE_STATE_TYPES` (the host persists the sort to local
+ * tab storage and restores it on page reload, #278162) and includes them in the
+ * persistent profile state written to saved Discover sessions and locator state.
  */
 export const METRICS_GRID_SORT_STATE_DEF: ProfileStateDefinition<MetricsGridSort> = {
   key: 'metricsGridSort',
   descriptor: {
-    field: { type: ProfileStateType.Url },
-    direction: { type: ProfileStateType.Url },
+    field: { type: ProfileStateType.Persistent },
+    direction: { type: ProfileStateType.Persistent },
   },
   defaultState: METRICS_GRID_SORT_DEFAULTS,
 };
