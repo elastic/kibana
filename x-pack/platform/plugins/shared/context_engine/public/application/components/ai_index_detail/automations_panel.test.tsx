@@ -234,6 +234,12 @@ describe('AutomationsPanel', () => {
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 
+  it('shows the Edit button for non-managed AI indexes when not editing', () => {
+    renderPanel({ isManaged: false });
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+  });
+
   it('delegates the header actions to the editor', () => {
     const startEditing = jest.fn();
     const stopEditing = jest.fn();

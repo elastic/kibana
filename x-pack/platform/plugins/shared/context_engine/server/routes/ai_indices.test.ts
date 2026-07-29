@@ -9,7 +9,12 @@ import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { registerAiIndexRoutes } from './ai_indices';
-import { aiIndexByIdPath, aiIndexPath } from '../../common/constants';
+import {
+  MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+  aiIndexByIdPath,
+  aiIndexPath,
+} from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import {
@@ -190,6 +195,20 @@ describe('ai indices routes', () => {
         body: { message: "dest.value 'customer_support*' is not allowed" },
       });
     });
+
+    it('passes connector sources through to create', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+      const body = {
+        ...postBody,
+        sources: [{ type: 'connector', value: 'connector-1' }],
+      };
+
+      await callRoute('POST', aiIndexPath, { body });
+
+      const { id, ...properties } = body;
+      expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
+      expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
+    });
   });
 
   describe('PUT /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -343,6 +362,57 @@ describe('ai indices routes', () => {
       expect(() =>
         validateBody({ ...validBody, dest: { type: 'view', value: 'ai-index-idx-foo' } })
       ).toThrow();
+    });
+
+    it('accepts a connector source', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'connector', value: 'connector-1' }] })
+      ).not.toThrow();
+    });
+
+    it('accepts a mix of ES|QL and connector sources', () => {
+      expect(() =>
+        validateBody({
+          ...validBody,
+          sources: [
+            { type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' },
+            { type: 'connector', value: 'connector-1' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a connector source with an empty value', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'connector', value: '' }] })
+      ).toThrow();
+    });
+
+    it('rejects a source with a disallowed type', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'sql', value: 'SELECT 1' }] })
+      ).toThrow();
+    });
+
+    it('rejects a connector source exceeding the max value length', () => {
+      const value = 'x'.repeat(MAX_AI_INDEX_SOURCE_VALUE_LENGTH + 1);
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'connector', value }] })
+      ).toThrow();
+    });
+
+    it('accepts an ES|QL source with an empty value', () => {
+      expect(() =>
+        validateBody({ ...validBody, sources: [{ type: 'esql', value: '' }] })
+      ).not.toThrow();
+    });
+
+    it('rejects sources exceeding the max size', () => {
+      const sources = Array.from({ length: MAX_AI_INDEX_SOURCES + 1 }, (_, i) => ({
+        type: 'connector',
+        value: `connector-${i}`,
+      }));
+      expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
   });
 

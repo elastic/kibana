@@ -167,6 +167,10 @@ describe('ContextLandingPage', () => {
         ai_indices: [
           buildAiIndex({ id: 'support-tickets', description: 'Escalation playbooks' }),
           buildAiIndex({ id: 'elastic', managed: true }),
+          buildAiIndex({
+            id: 'logs-index',
+            dest: { type: 'index', value: 'logs-custom-index' },
+          }),
         ],
       });
 
@@ -199,6 +203,42 @@ describe('ContextLandingPage', () => {
       expect(cardTitles()[0]).toContain('elastic');
     });
 
+    it('narrows the cards to the selected type', async () => {
+      await renderWithAiIndexes();
+
+      fireEvent.click(screen.getByTestId('contextAiIndexListTypeFilter'));
+      fireEvent.click(await screen.findByTestId('contextAiIndexListTypeFilterOption-data_stream'));
+
+      await waitFor(() => expect(cardTitles()).toHaveLength(2));
+      expect(cardTitles().some((title) => title?.includes('support-tickets'))).toBe(true);
+      expect(cardTitles().some((title) => title?.includes('elastic'))).toBe(true);
+      expect(cardTitles().every((title) => !title?.includes('logs-index'))).toBe(true);
+    });
+
+    it('narrows to the intersection when search and filters are combined', async () => {
+      await renderWithAiIndexes();
+
+      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+        target: { value: 'escalation' },
+      });
+      fireEvent.click(screen.getByTestId('contextAiIndexListOwnerFilter'));
+      fireEvent.click(await screen.findByTestId('contextAiIndexListOwnerFilterOption-user'));
+
+      await waitFor(() => expect(cardTitles()).toHaveLength(1));
+      expect(cardTitles()[0]).toContain('support-tickets');
+    });
+
+    it('matches the search term against the destination value', async () => {
+      await renderWithAiIndexes();
+
+      fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+        target: { value: 'logs-custom-index' },
+      });
+
+      await waitFor(() => expect(cardTitles()).toHaveLength(1));
+      expect(cardTitles()[0]).toContain('logs-index');
+    });
+
     it('offers a way back when nothing matches', async () => {
       await renderWithAiIndexes();
 
@@ -211,7 +251,7 @@ describe('ContextLandingPage', () => {
 
       fireEvent.click(screen.getByTestId('contextAiIndexListClearFilters'));
 
-      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(2);
+      expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(3);
     });
   });
 

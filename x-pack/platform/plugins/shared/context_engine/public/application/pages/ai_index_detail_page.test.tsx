@@ -374,6 +374,49 @@ describe('AiIndexDetailPage', () => {
     });
   });
 
+  it('hides edit controls and shows the managed badge for managed AI indexes', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: true });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+  });
+
+  it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: false });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+  });
+
+  it('renders connector sources using the connector id when no name is resolved', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [{ type: 'connector', value: 'connector-abc' }],
+    });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('connector-abc');
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Connector');
+  });
+
   it('removes an automation and refetches', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue({

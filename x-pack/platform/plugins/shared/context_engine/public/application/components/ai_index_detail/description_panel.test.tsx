@@ -10,10 +10,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { DescriptionPanel } from './description_panel';
+
+let services: ReturnType<typeof coreMock.createStart>;
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -25,12 +27,16 @@ const aiIndex: GetAiIndexResponse = {
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
-const renderWithProviders = (ui: React.ReactElement) => {
+const renderWithProviders = (
+  ui: React.ReactElement,
+  coreServices: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+) => {
+  services = coreServices;
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={coreMock.createStart()}>
+        <KibanaContextProvider services={services}>
           <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
@@ -98,5 +104,125 @@ describe('DescriptionPanel', () => {
     );
 
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+  });
+
+  it('saves the edited description, exits edit mode, and calls onSaved', async () => {
+    const onSaved = jest.fn();
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(
+      <DescriptionPanel
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Updated description' },
+    });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [],
+            description: 'Updated description',
+          }),
+        })
+      );
+    });
+
+    expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the editor open and does not call onSaved when the save fails', async () => {
+    const onSaved = jest.fn();
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockRejectedValue(new Error('save failed'));
+
+    renderWithProviders(
+      <DescriptionPanel
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Updated description' },
+    });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledTimes(1);
+    });
+
+    expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('Updated description');
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it('discards draft changes when editing is cancelled', () => {
+    const testServices = coreMock.createStart();
+
+    renderWithProviders(
+      <DescriptionPanel
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Draft that should be discarded' },
+    });
+    fireEvent.click(screen.getByTestId('contextDescriptionCancelButton'));
+
+    expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+    expect(testServices.http.put).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+
+    expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
+  });
+
+  it('shows a loading state on the Save button while the PUT is in flight', async () => {
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockImplementation(() => new Promise(() => {}));
+
+    renderWithProviders(
+      <DescriptionPanel
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Updated description' },
+    });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
+    });
   });
 });

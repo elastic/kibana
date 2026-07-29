@@ -34,10 +34,6 @@ const isChecked = <TValue extends string>(
 // Without a floor the popover shrinks to the filter button, truncating labels.
 const MIN_POPOVER_WIDTH = 240;
 
-/**
- * Filter button whose popover offers a checkbox list. Selecting nothing means
- * "no filter" rather than "match nothing".
- */
 export const MultiSelectFilter = <TValue extends string>({
   label,
   options,
@@ -60,6 +56,7 @@ export const MultiSelectFilter = <TValue extends string>({
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={label}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
