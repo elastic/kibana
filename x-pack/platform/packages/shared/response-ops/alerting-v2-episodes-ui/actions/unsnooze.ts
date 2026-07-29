@@ -35,10 +35,12 @@ export const createUnsnoozeAction = (deps: UnsnoozeActionDeps): EpisodeAction =>
     );
   },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(filterV2Episodes(episodes)).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-    }));
+    const items: BulkCreateAlertActionBody = uniqueByGroup(filterV2Episodes(episodes)).map(
+      (ep) => ({
+        group_hash: ep.group_hash,
+        action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+      })
+    );
     if (!items.length) return;
 
     try {
