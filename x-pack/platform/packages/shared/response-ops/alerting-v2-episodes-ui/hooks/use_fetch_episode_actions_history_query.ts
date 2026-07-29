@@ -43,19 +43,19 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', groupHash ?? ''), pageSize],
     queryFn: async ({ signal, pageParam }: { signal?: AbortSignal; pageParam?: string }) => {
-      const query = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
+      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
         before: pageParam,
         limit: pageSize,
       });
       const raw = await runEsqlAsyncSearch({
         data,
         params: {
-          query: query.print('basic'),
+          query: esqlQuery.print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
       });
-      return rowsFromEsql(query, raw);
+      return rowsFromEsql(esqlQuery, raw);
     },
     getNextPageParam: (lastPage: EpisodeActionHistoryEntry[]) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
