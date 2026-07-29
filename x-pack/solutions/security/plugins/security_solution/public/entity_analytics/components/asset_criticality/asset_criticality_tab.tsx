@@ -74,25 +74,35 @@ const FileUploadSection: React.FC<{
   if (isLoading) {
     return null;
   }
+
+  let content: ReactNode;
   if (!hasEntityAnalyticsCapability || assetCriticalityPrivilegesError?.body.status_code === 403) {
-    return (
+    content = (
       <AssetCriticalityIssueCallout errorMessage={assetCriticalityPrivilegesError?.body.message} />
     );
+  } else if (!hasAssetCriticalityWritePermissions) {
+    content = <InsufficientAssetCriticalityPrivilegesCallout />;
+  } else {
+    content = (
+      <>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.uploadDescription"
+            defaultMessage="Bulk assign asset criticality by importing a CSV, TXT, or TSV file exported from your asset management tools. This ensures data accuracy and reduces manual input errors."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+        <AssetCriticalityFileUploader />
+      </>
+    );
   }
-  if (!hasAssetCriticalityWritePermissions) {
-    return <InsufficientAssetCriticalityPrivilegesCallout />;
-  }
+
+  // Keep grow={3} for callouts and the uploader so the sidebar stays at grow={2}
+  // (grow={false} on the callout squeezed the info panel).
   return (
     <EuiFlexItem grow={3} data-test-subj={ASSET_CRITICALITY_FILE_UPLOAD_SECTION_TEST_ID}>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.uploadDescription"
-          defaultMessage="Bulk assign asset criticality by importing a CSV, TXT, or TSV file exported from your asset management tools. This ensures data accuracy and reduces manual input errors."
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      <AssetCriticalityFileUploader />
+      {content}
     </EuiFlexItem>
   );
 };
@@ -193,20 +203,18 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
   );
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.unavailable"
-            defaultMessage="Asset criticality CSV file upload functionality unavailable."
-          />
-        }
-        color="primary"
-        iconType="info"
-        data-test-subj={ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID}
-      >
-        <EuiText size="s">{msg}</EuiText>
-      </EuiCallOut>
-    </EuiFlexItem>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.unavailable"
+          defaultMessage="Asset criticality CSV file upload functionality unavailable."
+        />
+      }
+      color="primary"
+      iconType="info"
+      data-test-subj={ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID}
+    >
+      <EuiText size="s">{msg}</EuiText>
+    </EuiCallOut>
   );
 };
