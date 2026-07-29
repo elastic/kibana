@@ -7,9 +7,12 @@
 
 import React from 'react';
 import moment from 'moment';
+import { render, configure } from '@testing-library/react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { FingerprintCol } from './fingerprint_col';
-import { render } from '../../utils/testing';
 import type { Cert } from '../../../../../common/runtime_types';
+
+configure({ testIdAttribute: 'data-test-subj' });
 
 describe('FingerprintCol', () => {
   const cert = {
@@ -25,7 +28,11 @@ describe('FingerprintCol', () => {
 
   it('renders expected elements for valid props', async () => {
     cert.not_after = moment().add('4', 'months').toISOString();
-    const { findByText, findByTestId } = render(<FingerprintCol cert={cert} />);
+    const { findByText, findByTestId } = render(
+      <EuiThemeProvider>
+        <FingerprintCol cert={cert} />
+      </EuiThemeProvider>
+    );
 
     expect(await findByText('SHA 1')).toBeInTheDocument();
     expect(await findByText('SHA 256')).toBeInTheDocument();
