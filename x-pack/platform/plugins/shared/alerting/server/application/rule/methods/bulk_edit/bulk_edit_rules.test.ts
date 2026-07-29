@@ -5,36 +5,19 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import type { RuleTypeParams } from '../../../../../common';
 import { RecoveredActionGroup } from '../../../../../common';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import type { RawRule } from '../../../../types';
 import type { Rule } from '../../../../../common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
@@ -61,52 +44,26 @@ const { getActiveSnoozeIfExist } = jest.requireMock(
 );
 const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
 const isAuthenticationTypeApiKeyMock = jest.fn();
 const getAuthenticationApiKeyMock = jest.fn();
 
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-  request: httpServerMock.createKibanaRequest(),
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
+  actionsAuthorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 const paramsModifier = jest.fn();
 
 const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');

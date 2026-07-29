@@ -99,4 +99,14 @@ describe('RulesApi', () => {
       expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_disable`);
     });
   });
+
+  describe('runRule', () => {
+    it('sends a POST request to the _run path with the rule id', async () => {
+      http.post.mockResolvedValue(undefined);
+
+      await api.runRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_run`);
+    });
+  });
 });

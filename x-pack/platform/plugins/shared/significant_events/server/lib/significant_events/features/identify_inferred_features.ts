@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamType } from '@kbn/streams-schema';
@@ -33,7 +34,14 @@ import {
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
+import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
+import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
+import { createMemoryDiscoveryTools, type MemoryDiscoveryTools } from '../memory_discovery_tools';
+import {
+  createKiExtractionContextTools,
+  type KiExtractionContextTools,
+} from '../ki_extraction_context_tools';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 import {
@@ -453,6 +461,8 @@ interface RunInferredIterationOptions {
   signal: AbortSignal;
   tuning: IterationTuningParams;
   diverseOffset: number;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 type InferredIterationResult =
@@ -497,6 +507,8 @@ async function runInferredIteration({
   signal,
   tuning,
   diverseOffset,
+  additionalTools,
+  additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
     sample_size: sampleSize = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sample_size,
@@ -584,6 +596,8 @@ async function runInferredIteration({
       searchRecordsByCandidate.set(recordKey, searchRecord);
       return hits;
     },
+    additionalTools,
+    additionalToolCallbacks,
   });
 
   if (!inferResult.success) {
@@ -660,6 +674,8 @@ export interface IdentifyInferredFeaturesOptions {
   tuning?: IterationTuningParams;
   diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
+  agentBuilderTools?: ToolsStart;
+  request?: KibanaRequest;
 }
 
 export interface IdentifyInferredFeaturesResult {
@@ -689,6 +705,8 @@ export async function identifyInferredFeatures({
   tuning = {},
   diverseOffset = 0,
   trackFeaturesIdentified,
+  agentBuilderTools,
+  request,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
   const [
     { hits: allFeatures },
@@ -701,6 +719,41 @@ export async function identifyInferredFeatures({
   ]);
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
+
+  // Expose read-only grounding tools to feature extraction so it can anchor new
+  // KI features in durable prior knowledge:
+  // - memory: prior learnings, known-benign patterns, past false positives.
+  // - significant_event_search: prior Significant Events (already-tracked /
+  //   demoted patterns). Only available when Agent Builder tools are wired.
+  const memoryTools = createMemoryDiscoveryTools({
+    memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+  });
+
+  const kiExtractionContextTools =
+    agentBuilderTools && request
+      ? await createKiExtractionContextTools({
+          agentBuilderTools,
+          request,
+          logger: logger.get('ki_extraction_context'),
+        })
+      : undefined;
+
+  const groundingToolsets = [memoryTools, kiExtractionContextTools].filter(
+    (toolset): toolset is MemoryDiscoveryTools | KiExtractionContextTools => toolset !== undefined
+  );
+
+  const additionalTools: Record<string, ToolDefinition> = Object.assign(
+    {},
+    ...groundingToolsets.map((toolset) => toolset.tools)
+  );
+  const additionalToolCallbacks: Record<string, ToolCallback> = Object.assign(
+    {},
+    ...groundingToolsets.map((toolset) => toolset.callbacks)
+  );
+  const combinedSystemPrompt = groundingToolsets.reduce(
+    (prompt, toolset) => `${prompt}\n${toolset.promptSnippet}`,
+    systemPrompt
+  );
 
   const startedAt = Date.now();
 
@@ -716,11 +769,13 @@ export async function identifyInferredFeatures({
     discoveredFeatures,
     excludedFeatures,
     inferenceClient,
-    systemPrompt,
+    systemPrompt: combinedSystemPrompt,
     logger,
     signal,
     tuning,
     diverseOffset,
+    additionalTools,
+    additionalToolCallbacks,
   });
 
   if (!iterationResult.hasDocuments) {
