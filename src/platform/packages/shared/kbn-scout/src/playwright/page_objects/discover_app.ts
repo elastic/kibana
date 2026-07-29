@@ -297,7 +297,7 @@ export class DiscoverApp {
     await input.fill(description);
   }
 
-  getFieldEditorFormError(): Locator {
+  getCustomDescriptionFormError(): Locator {
     return this.page.testSubj.locator('customDescriptionRow').locator('.euiFormErrorText');
   }
 

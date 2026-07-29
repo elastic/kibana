@@ -48,7 +48,7 @@ spaceTest.describe(
 
     spaceTest(
       'adds and updates a custom description for an existing field',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { discover, docViewer, unifiedFieldList } = pageObjects;
         const customDescription = 'custom agent description here';
         const updatedCustomDescription = `${customDescription} updated`;
@@ -79,37 +79,34 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'replaces the ECS description for the timestamp field',
-      async ({ page, pageObjects }) => {
-        const { discover, docViewer, unifiedFieldList } = pageObjects;
-        const customDescription = 'custom timestamp description here';
+    spaceTest('replaces the ECS description for the timestamp field', async ({ pageObjects }) => {
+      const { discover, docViewer, unifiedFieldList } = pageObjects;
+      const customDescription = 'custom timestamp description here';
 
-        await unifiedFieldList.clickFieldListItem('@timestamp');
-        await expect(unifiedFieldList.getFieldDescription('@timestamp')).toContainText('Date');
-        await unifiedFieldList.closeFieldPopover();
+      await unifiedFieldList.clickFieldListItem('@timestamp');
+      await expect(unifiedFieldList.getFieldDescription('@timestamp')).toContainText('Date');
+      await unifiedFieldList.closeFieldPopover();
 
-        await docViewer.openFieldDescription('@timestamp');
-        await expect(docViewer.getExpandedFieldDescription('@timestamp')).toContainText('Date');
-        await docViewer.close();
+      await docViewer.openFieldDescription('@timestamp');
+      await expect(docViewer.getExpandedFieldDescription('@timestamp')).toContainText('Date');
+      await docViewer.close();
 
-        await unifiedFieldList.openFieldEditor('@timestamp');
-        await discover.setCustomDescription(customDescription, { enableToggle: true });
-        await discover.saveOpenFieldEditor();
+      await unifiedFieldList.openFieldEditor('@timestamp');
+      await discover.setCustomDescription(customDescription, { enableToggle: true });
+      await discover.saveOpenFieldEditor();
 
-        await unifiedFieldList.clickFieldListItem('@timestamp');
-        await expect(unifiedFieldList.getFieldDescription('@timestamp')).toHaveText(
-          customDescription
-        );
-        await unifiedFieldList.closeFieldPopover();
+      await unifiedFieldList.clickFieldListItem('@timestamp');
+      await expect(unifiedFieldList.getFieldDescription('@timestamp')).toHaveText(
+        customDescription
+      );
+      await unifiedFieldList.closeFieldPopover();
 
-        await docViewer.openFieldDescription('@timestamp');
-        await expect(docViewer.getExpandedFieldDescription('@timestamp')).toHaveText(
-          customDescription
-        );
-        await docViewer.close();
-      }
-    );
+      await docViewer.openFieldDescription('@timestamp');
+      await expect(docViewer.getExpandedFieldDescription('@timestamp')).toHaveText(
+        customDescription
+      );
+      await docViewer.close();
+    });
 
     spaceTest(
       'shows a validation error when a custom description is too long',
@@ -119,8 +116,8 @@ spaceTest.describe(
 
         await unifiedFieldList.openFieldEditor('bytes');
         await discover.setCustomDescription(customDescription, { enableToggle: true });
-        await discover.getFieldEditorFormError().waitFor({ state: 'visible' });
-        await expect(discover.getFieldEditorFormError()).toContainText(
+        await discover.getCustomDescriptionFormError().waitFor({ state: 'visible' });
+        await expect(discover.getCustomDescriptionFormError()).toContainText(
           'The length of the description is too long. The maximum length is 300 characters.'
         );
         await discover.discardOpenFieldEditorChanges();
