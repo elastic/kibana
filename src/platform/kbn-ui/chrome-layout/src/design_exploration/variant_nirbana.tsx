@@ -40,7 +40,8 @@ export const NIRBANA_VARIANT_ID = 'nirbana';
 //     lifts a true-white app surface; secondary nav side panel gets a subtle shade
 //   - warm orange accent instead of Linear's cool indigo
 const NIRBANA_ACCENT = '#F26522'; // warm orange accent (est. from reference)
-const NIRBANA_SURFACE_APP = '#f7f8f9';
+const NIRBANA_SURFACE_APP_LIGHT = '#f7f8f9';
+const NIRBANA_SURFACE_APP_DARK = '#10141a'; // soft step above dark canvas
 const NIRBANA_TOP_BAR_HEIGHT = 80;
 const NIRBANA_APP_HEADER_TRANSITION_MS = 200;
 const NIRBANA_NAV_EXPANDED_WIDTH = 220;
@@ -108,14 +109,29 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
       max-width: none !important;
     }
 
+    ${scope} h1,
+    ${scope} h2,
+    ${scope} h3 {
+      letter-spacing: -0.1px !important;
+    }
+
     ${scope} [class*='css-'][class*='-euiTable'][class*='-hasBackground-desktop'] {
       background-color: transparent !important;
+    }
+
+    ${scope} .euiTableRowCellCheckbox {
+      vertical-align: top !important;
+      padding-top: 2px !important;
     }
 
     ${scope} .euiTableCellContent .euiLink[class*='-euiLink-primary'],
     ${scope} .euiTableCellContent [class*='css-'][class*='-euiLink-primary'] {
       color: ${colors.textParagraph} !important;
       font-weight: 500 !important;
+    }
+
+    ${scope} .euiTableCellContent .euiText:has([data-test-subj^='dashboardListingTitleLink-']) + .euiText {
+      font-size: 12px !important;
     }
 
     ${scope} .euiTableCellContent .euiButtonIcon[class*='-empty-primary'],
@@ -1296,7 +1312,7 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .dshDashboardViewportWrapper,
     ${scope} .dshDashboardViewportWrapper--defaultBg {
-      background-color: ${NIRBANA_SURFACE_APP} !important;
+      background-color: ${isDarkMode ? NIRBANA_SURFACE_APP_DARK : NIRBANA_SURFACE_APP_LIGHT} !important;
     }
   `;
 };
