@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await supertest
           .delete(`/api/fleet/epm/packages/cloud_security_posture`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
+          .query({ force: true })
           .expect(200);
       } finally {
         await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
