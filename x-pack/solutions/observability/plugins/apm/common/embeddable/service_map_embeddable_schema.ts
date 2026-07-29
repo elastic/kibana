@@ -37,10 +37,22 @@ function literalsOf<T extends string>(values: readonly T[]): Type<T> {
   return schema.oneOf(literals as unknown as [Type<T>]);
 }
 
+/** Cap for multi-service highlight lists persisted on dashboard panels. */
+export const HIGHLIGHTED_SERVICE_NAMES_MAX_SIZE = 50;
+
 export const serviceMapCustomStateSchema = schema.object({
   environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value, maxLength: 1024 }),
   kuery: schema.maybe(schema.string({ maxLength: 2048 })),
   service_name: schema.maybe(schema.string({ maxLength: 1024 })),
+  /**
+   * Multi-service context highlight (aligned with global Service name Controls).
+   * When a single service is selected, prefer `service_name` (filter + highlight).
+   */
+  highlighted_service_names: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 1024 }), {
+      maxSize: HIGHLIGHTED_SERVICE_NAMES_MAX_SIZE,
+    })
+  ),
   service_group_id: schema.maybe(schema.string({ maxLength: 1024 })),
   map_orientation: schema.maybe(literalsOf(MAP_ORIENTATION_VALUES)),
   sync_with_dashboard_filters: schema.maybe(schema.boolean()),

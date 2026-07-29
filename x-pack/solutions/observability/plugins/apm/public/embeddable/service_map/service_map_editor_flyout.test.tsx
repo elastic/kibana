@@ -373,6 +373,45 @@ describe('<ServiceMapEditorFlyout/>', () => {
         expect(onSave).toHaveBeenCalledWith(
           expect.objectContaining({
             service_name: undefined,
+            highlighted_service_names: undefined,
+          })
+        );
+      });
+    });
+
+    it('saves multi-select as highlighted_service_names without service_name', async () => {
+      const onSave = jest.fn();
+      mockHttpGet.mockResolvedValue({ terms: ['service-a', 'service-b'] });
+      await renderFlyout({ onSave });
+
+      const serviceNameComboBox = screen.getByTestId('apmServiceMapEditorServiceNameComboBox');
+      const input = serviceNameComboBox.querySelector('input')!;
+
+      fireEvent.change(input, { target: { value: 'service-a' } });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'service-a' })).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole('option', { name: 'service-a' }));
+
+      fireEvent.change(input, { target: { value: 'service-b' } });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'service-b' })).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole('option', { name: 'service-b' }));
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            service_name: undefined,
+            highlighted_service_names: ['service-a', 'service-b'],
           })
         );
       });
