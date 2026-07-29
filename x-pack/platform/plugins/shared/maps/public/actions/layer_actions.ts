@@ -154,6 +154,17 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       );
       dispatch(syncDataForLayerId(newLayerDescriptor.id, false));
     });
+
+    // reset ordering
+    const unorderedNewLayerList = getLayerListRaw(getState());
+    const newOrder = [];
+    for (let i = 0; i < unorderedNewLayerList.length; i++) {
+      const newIndex = newLayerList.findIndex(({ id }) => id === unorderedNewLayerList[i].id);
+      if (newIndex !== -1) {
+        newOrder.push(newIndex);
+      }
+    }
+    dispatch(updateLayerOrder(newOrder));
   };
 }
 
