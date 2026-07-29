@@ -17,7 +17,7 @@ const mockReplace = jest.fn();
 
 jest.mock('react-router-dom', () => ({ useHistory: () => ({ replace: mockReplace }) }));
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
-jest.mock('./components/nightshift_app', () => ({
+jest.mock('./app/nightshift_app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
 jest.mock('../../utils/kibana_react', () => ({ useKibana: jest.fn() }));
