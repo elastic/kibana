@@ -14,8 +14,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 
 spaceTest.describe(
   'Discover ES|QL view - switch to classic modal',

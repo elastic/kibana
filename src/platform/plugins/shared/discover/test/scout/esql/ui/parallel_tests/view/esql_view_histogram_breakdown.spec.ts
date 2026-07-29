@@ -16,8 +16,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 
 const EXTENSION_LEGEND = ['css', 'gif', 'jpg', 'php', 'png'];
 

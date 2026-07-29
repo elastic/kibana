@@ -20,13 +20,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 import {
   getInspectorRequestNames,
   getInspectorRequestTotalTime,
   switchToRequestsView,
-} from '../../../fixtures/esql/inspector_helpers';
+} from '../../fixtures/inspector_helpers';
 
 declare global {
   interface Window {

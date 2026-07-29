@@ -15,14 +15,13 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 import {
   getInspectorRequestCommand,
   hasInspectorRequest,
   normalizeInspectorCommand,
   switchToRequestsView,
-} from '../../../fixtures/esql/inspector_helpers';
+} from '../../fixtures/inspector_helpers';
 
 const AGG_QUERY = 'from logstash-* | sort @timestamp';
 

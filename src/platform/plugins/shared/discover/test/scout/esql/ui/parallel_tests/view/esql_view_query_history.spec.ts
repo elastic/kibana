@@ -14,8 +14,7 @@
 
 import { tags, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 
 const openQueryHistory = async (page: ScoutPage) => {
   await page.testSubj.click('ESQLEditor-toggle-query-history-icon');

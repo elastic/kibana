@@ -13,8 +13,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 
 const BROKEN_QUERIES = [
   { query: 'from logstash-* | limit 10*', expectedMarkerCount: 1 },

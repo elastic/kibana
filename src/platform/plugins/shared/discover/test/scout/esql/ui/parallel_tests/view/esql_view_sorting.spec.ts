@@ -15,8 +15,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 
 spaceTest.describe('Discover ES|QL view - sorting', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.use({ viewport: { width: 1600, height: 1200 } });

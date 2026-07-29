@@ -17,8 +17,7 @@ import { NULL_LABEL } from '@kbn/field-formats-common';
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import type { PageObjects } from '@kbn/scout';
-import { spaceTest } from '../../../fixtures';
-import { testData } from '../../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures';
 
 const AGG_QUERY =
   'from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB';
