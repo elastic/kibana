@@ -296,6 +296,9 @@ describe('DetectionsList', () => {
     const card = screen.getByTestId('nightshiftDetectionCard');
     expect(card).toHaveAttribute('role', 'button');
     expect(card).toHaveAttribute('tabindex', '0');
+    expect(card).toHaveAttribute('data-ebt-action', 'viewDetection');
+    expect(card).toHaveAttribute('data-ebt-element', 'nightshiftEventFlyoutDetections');
+    expect(card).toHaveAttribute('data-ebt-detail', 'spike');
   });
 
   it('renders the rule name as plain text, not a link', () => {
@@ -328,6 +331,7 @@ describe('DetectionsList', () => {
     const cards = screen.getAllByTestId('nightshiftDetectionCard');
     expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
     expect(cards[1]).toHaveAttribute('aria-pressed', 'true');
+    expect(cards[1]).toHaveAttribute('data-ebt-action', 'closeFlyout');
   });
 
   it('only marks the clicked detection as selected when switching detections', () => {

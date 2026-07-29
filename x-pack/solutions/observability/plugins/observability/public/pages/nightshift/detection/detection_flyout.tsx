@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AiButton } from '@kbn/shared-ux-ai-components';
@@ -51,6 +52,11 @@ import {
   type DetectionEntityRef,
 } from '../event/get_detection_entities';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 
 export interface DetectionFlyoutProps {
   detection: LifecycleDetection;
@@ -150,6 +156,13 @@ export function DetectionFlyout({
         data-test-subj="nightshiftDetectionFlyout"
         type="push"
         hasAnimation={false}
+        closeButtonProps={{
+          'data-test-subj': 'euiFlyoutCloseButton',
+          ...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_FLYOUT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT,
+          }),
+        }}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
@@ -254,6 +267,10 @@ export function DetectionFlyout({
                     {associatedEntities.map((entity) => (
                       <EuiFlexItem grow={false} key={entity.key}>
                         <EntityChip
+                          ebt={{
+                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ENTITY,
+                            element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT_ENTITIES,
+                          }}
                           label={entity.label}
                           onClick={() => setSelectedEntity(entity)}
                           testSubj="nightshiftDetectionFlyoutEntityChip"
@@ -302,6 +319,10 @@ export function DetectionFlyout({
                       size="xs"
                       iconType="discoverApp"
                       data-test-subj="nightshiftDetectionFlyoutDiscoverLink"
+                      {...getEbtProps({
+                        action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT,
+                      })}
                     >
                       {i18n.translate(
                         'xpack.observability.nightshift.detectionFlyout.openInDiscoverLinkText',
@@ -342,6 +363,11 @@ export function DetectionFlyout({
                   iconSide="left"
                   data-test-subj="nightshiftDetectionFlyoutChatButton"
                   onClick={handleOpenInChat}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT,
+                    detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+                  })}
                 >
                   {i18n.translate(
                     'xpack.observability.nightshift.detectionFlyout.openInChatButtonLabel',
