@@ -1,4 +1,5 @@
 env:
+  DISABLE_ALL_BOOTSTRAP_CACHE: 'true'
   KBN_ES_SNAPSHOT_USE_CACHED: 'true'
   USE_CITADEL_PROXY: 'true'
 
