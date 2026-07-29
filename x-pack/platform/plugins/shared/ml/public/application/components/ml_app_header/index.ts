@@ -7,4 +7,3 @@
 
 export { MlAppHeader } from './ml_app_header';
 export type { MlAppHeaderProps } from './ml_app_header';
-export { MlDatePickerBar } from './ml_date_picker_bar';
