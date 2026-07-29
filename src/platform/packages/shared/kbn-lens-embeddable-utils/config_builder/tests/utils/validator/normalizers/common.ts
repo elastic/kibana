@@ -23,6 +23,8 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { migrateFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -38,7 +40,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const COMMON_STATE_IGNORE_PATHS = [
   'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  'state.filters', // remove for now
+  // 'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
@@ -389,20 +391,20 @@ function normalizeDataTypes(col: GenericIndexPatternColumn, inferred?: DataType)
 }
 
 const normalizeReferences = <T extends LensAttributes>(
-  { references, state }: T,
-  replacements: IdRemapping
+  { references }: T,
+  replacements: IdRemapping,
+  filterRefNames: ReadonlySet<string> = new Set()
 ): Reference[] => {
-  const filterIndexIds = new Set(
-    state.filters.map((filter) => filter.meta?.index).filter((s): s is string => !!s)
-  );
-
   return orderBy(
     references
       .filter((reference) => {
-        // ignore filter index pattern references (legacy: filter-index-pattern-*, current: via filter.meta.index)
+        // Drop filter data-view references — they're inlined into `filter.meta.index` (re-extracted as
+        // `filter-ref-<id>` on the transformed side). `filterRefNames` are the `meta.index` names
+        // captured before `normalizeFilters` rewrote them (standard `filter-index-pattern-*` or custom
+        // author names); the standard prefix is also matched directly for already-dropped filters.
         return !(
           reference.type === 'index-pattern' &&
-          (filterIndexIds.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
+          (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
       // ignore current index pattern reference
@@ -469,6 +471,189 @@ export interface CommonNormalizerArgs {
   inferColumnDataType?: (newColumnId: string) => DataType | undefined;
 }
 
+/**
+ * Canonicalize the ORIGINAL `state.filters` to match what the SO -> API -> SO transform emits, so the
+ * strict roundtrip compare lines up. Every change is lossless: it either mirrors runtime
+ * (`migrateFilter`/`mapFilter`) or drops a value runtime treats as absent.
+ *
+ * - `meta.index`: reference indirection only — the transform resolves the reference name to its data
+ *   view id and rewrites it to `filter-ref-<id>` (`inject`/`extractFilterReferences`). Combined
+ *   sub-filters inherit the parent's index (`to_stored_filter.ts` `cleanBase` has no per-condition one).
+ * - Serialization defaults not reconstructed: `$state`, `negate: false`, top-level `alias: null`,
+ *   sub-filter `alias`/`disabled` (`cleanBase`), and empty `query` objects.
+ */
+const normalizeFilters = (filters: Filter[] | undefined, references: Reference[]): void => {
+  if (!filters?.length) return;
+
+  // Reproduce the reference indirection: resolve a reference name to its data view id (ad-hoc index
+  // strings are kept as-is), then prefix `filter-ref-`.
+  const canonicalizeIndex = (index?: string): string | undefined => {
+    if (index === undefined) return undefined;
+    const id = references.find((reference) => reference.name === index)?.id ?? index;
+    return `filter-ref-${id}`;
+  };
+
+  // Canonicalize a leaf filter's query body to the transform's output. Lossless: value/field/data-view
+  // identity is preserved.
+  const canonicalizeQueryShape = (filter: Filter): void => {
+    // `migrateFilter` is what both runtime (`filterToQueryDsl`, `mapAndFlattenFilters`) and the transform
+    // run: rewrite the deprecated `query.match.<f>: { query, type }` to `match_phrase`, and lift top-level
+    // `exists`/`range`/`match_all` under `query`. Then keep only `{ meta, query }`.
+    const migrated = migrateFilter(filter) as Filter;
+    filter.query = migrated.query;
+    for (const key of Object.keys(filter)) {
+      if (key !== 'meta' && key !== 'query') {
+        delete (filter as Record<string, unknown>)[key];
+      }
+    }
+
+    const query = filter.query as Record<string, unknown> | undefined;
+
+    // Collapse `match_phrase.<f>: { query }` to the scalar `buildPhraseFilter` shape, and drop the
+    // redundant `meta.params.type` — `mapFilter`/`mapPhrase` does the same at render.
+    const matchPhrase = query?.match_phrase as Record<string, unknown> | undefined;
+    if (matchPhrase) {
+      for (const field of Object.keys(matchPhrase)) {
+        const value = matchPhrase[field];
+        if (value && typeof value === 'object' && 'query' in value) {
+          matchPhrase[field] = (value as { query: unknown }).query;
+        }
+      }
+    }
+    if (
+      filter.meta.type === 'phrase' &&
+      filter.meta.params &&
+      typeof filter.meta.params === 'object' &&
+      !Array.isArray(filter.meta.params)
+    ) {
+      delete (filter.meta.params as { type?: unknown }).type;
+    }
+
+    // Drop `null` range bounds (query body + `meta.params`): a null bound is unbounded, i.e. absent.
+    if (filter.meta.type === 'range') {
+      const dropNulls = (obj: Record<string, unknown> | undefined): void => {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return;
+        for (const k of Object.keys(obj)) {
+          if (obj[k] === null) delete obj[k];
+        }
+      };
+      const range = query?.range as Record<string, Record<string, unknown>> | undefined;
+      if (range) {
+        for (const field of Object.keys(range)) dropNulls(range[field]);
+      }
+      dropNulls(filter.meta.params as Record<string, unknown> | undefined);
+    }
+  };
+
+  // Canonicalize one filter (and its combined descendants). `index` is the inherited data view id;
+  // `isSubFilter` marks a combined sub-filter (loses more meta than a top-level filter).
+  const processFilter = (
+    filter: Filter | string | number | boolean,
+    index: string | undefined,
+    isSubFilter: boolean
+  ): void => {
+    if (typeof filter !== 'object' || filter === null || !filter.meta) return;
+
+    // Set the canonical/inherited index, or drop it when there is none.
+    if (index === undefined) {
+      delete filter.meta.index;
+    } else {
+      filter.meta.index = index;
+    }
+
+    // `$state` is UI-only and never reconstructed. NOTE: this only models `appState`. A `globalState`
+    // (pinned) filter is dropped ENTIRELY by the transform (`from_stored_filter.ts` returns `undefined`),
+    // which we do NOT reproduce — Lens panel filters are always `appState`, so the corpus has none. If
+    // one appeared the lengths would differ and the test would fail loudly, which is the right outcome.
+    delete filter.$state;
+    // Drop any residual `meta.indexRefName`. The 8.1.0 migration already moved pre-8.1 `indexRefName`
+    // into `meta.index` when the fixture was built; anything left is on a mis-versioned panel with no
+    // `meta.index` — unresolvable by both runtime (`injectFilterReferences`) and the transform, so both
+    // drop it.
+    if ('indexRefName' in filter.meta) {
+      delete filter.meta.indexRefName;
+    }
+
+    // `negate` is serialized only when `true`.
+    if (filter.meta.negate !== true) {
+      delete filter.meta.negate;
+    }
+
+    if (isSubFilter) {
+      // Combined sub-filters carry neither `alias` nor `disabled` (`cleanBase`).
+      delete filter.meta.alias;
+      delete filter.meta.disabled;
+    } else if (filter.meta.alias === null) {
+      // A top-level `alias: null` is not representable; only a real label round-trips.
+      delete filter.meta.alias;
+    }
+
+    // `meta.value` is display state recomputed by `mapFilter`; never persisted.
+    delete filter.meta.value;
+
+    // `wildcard` isn't in the `FILTERS` enum, so both runtime (`mapFilter` -> `mapDefault`) and the
+    // transform relabel it to `custom`. Relabel so it flows through the `custom` branch below.
+    if (filter.meta.type === 'wildcard') {
+      filter.meta.type = 'custom';
+    }
+
+    // key/field alignment (`meta.field` is an extended stored-filter prop, not on `FilterMeta`).
+    const meta = filter.meta as typeof filter.meta & { field?: string };
+    if (meta.type === 'custom') {
+      // Custom/DSL filters have no single field: `meta.key` is the `mapDefault` artifact (literal
+      // "query"), dropped by the transform. Keep `meta.field` (scripted filters) so it round-trips.
+      delete meta.key;
+    } else {
+      // Structured filters carry the field in both `meta.key` and `meta.field` (always equal in the
+      // corpus); align them.
+      const fieldName = meta.key ?? meta.field;
+      if (fieldName !== undefined) {
+        meta.key = fieldName;
+        meta.field = fieldName;
+      }
+    }
+
+    // Query-shape canonicalization (leaf filters only; sub-filters recurse below and have no query body).
+    if (filter.meta.type !== 'combined') {
+      canonicalizeQueryShape(filter);
+    }
+
+    // Empty `query` objects are not emitted by the transform.
+    if (Object.keys(filter.query ?? {}).length === 0) {
+      delete filter.query;
+    }
+
+    // Recurse into combined sub-filters.
+    if (filter.meta.type === 'combined' && Array.isArray(filter.meta.params)) {
+      filter.meta.params.forEach((sub) => processFilter(sub, index, true));
+    }
+  };
+
+  filters.forEach((filter) => processFilter(filter, canonicalizeIndex(filter.meta?.index), false));
+};
+
+/**
+ * Collect the filter data-view reference names from every filter (and combined sub-filter), to drop
+ * the matching entries from `attributes.references`.
+ */
+const collectFilterRefNames = (filters: Filter[] | undefined): Set<string> => {
+  const names = new Set<string>();
+  const pickNames = (filter: Filter): void => {
+    const meta = filter.meta;
+    if (!meta) {
+      return;
+    }
+    if (meta.index) {
+      names.add(meta.index);
+    }
+    if (meta.type === 'combined' && Array.isArray(meta.params)) {
+      (meta.params as Filter[]).forEach(pickNames);
+    }
+  };
+  (filters ?? []).forEach(pickNames);
+  return names;
+};
+
 export const getCommonNormalizer = <T extends LensAttributes>(
   getArgs: (attributes: T) => CommonNormalizerArgs
 ): NormalizerConfig<T> => ({
@@ -490,8 +675,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       delete attributes.type;
     }
 
-    // replace layer in reference name
-    attributes.references = normalizeReferences(attributes, layerRemapping);
+    // Collect the filter reference names (from `meta.index`) before `normalizeFilters` canonicalizes
+    // them, so the matching (now-inlined) filter reference entries can be dropped from `references` below.
+    const filterRefNames = collectFilterRefNames(attributes.state.filters);
+    normalizeFilters(attributes.state.filters, attributes.references);
+
+    // replace layer in reference name (filter references are dropped)
+    attributes.references = normalizeReferences(attributes, layerRemapping, filterRefNames);
 
     const layerIdMap = new Map(layerRemapping);
     const columnIdMap = new Map(columnRemapping);
