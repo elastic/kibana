@@ -261,7 +261,7 @@ function configureExperiment({
       latency: createSpanLatencyEvaluator({
         traceEsClient,
         log,
-        spanNamePattern: 'invoke_agent%',
+        spanNamePattern: 'invoke_agent*',
       }),
     }),
     createSkillInvocationEvaluator({

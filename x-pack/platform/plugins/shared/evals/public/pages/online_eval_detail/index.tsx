@@ -657,7 +657,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                 <EuiFlexGroup alignItems="flexStart" gutterSize="l">
                   <EuiFlexItem grow={2}>
                     <EuiText size="m">
-                      <h4>
+                      <h4 id="onlineEvalDetailScheduleFieldTitle">
                         {i18n.translate('xpack.evals.onlineEvaluations.detail.scheduleFieldTitle', {
                           defaultMessage: 'Run interval',
                         })}
@@ -676,7 +676,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
                     <EuiForm component="div">
-                      <EuiFormRow fullWidth>
+                      <EuiFormRow fullWidth aria-labelledby="onlineEvalDetailScheduleFieldTitle">
                         <EuiSelect
                           fullWidth
                           options={EVERY_OPTIONS}
@@ -977,7 +977,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                 <EuiFlexGroup alignItems="flexStart" gutterSize="l">
                   <EuiFlexItem grow={2}>
                     <EuiText size="m">
-                      <h4>
+                      <h4 id="onlineEvalDetailEvaluatorsFieldTitle">
                         {i18n.translate(
                           'xpack.evals.onlineEvaluations.detail.evaluatorsFieldTitle',
                           {
@@ -989,7 +989,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
                     <EuiForm component="div">
-                      <EuiFormRow fullWidth>
+                      <EuiFormRow fullWidth aria-labelledby="onlineEvalDetailEvaluatorsFieldTitle">
                         <EuiComboBox
                           fullWidth
                           isLoading={isLoadingEvaluators}
@@ -1020,7 +1020,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                 <EuiFlexGroup alignItems="flexStart" gutterSize="l">
                   <EuiFlexItem grow={2}>
                     <EuiText size="m">
-                      <h4>
+                      <h4 id="onlineEvalDetailConnectorFieldTitle">
                         {i18n.translate(
                           'xpack.evals.onlineEvaluations.detail.connectorFieldTitle',
                           {
@@ -1044,6 +1044,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
                     <EuiForm component="div">
                       <EuiFormRow
                         fullWidth
+                        aria-labelledby="onlineEvalDetailConnectorFieldTitle"
                         isInvalid={connectorMissing}
                         error={
                           connectorMissing
