@@ -159,7 +159,14 @@ export class IntegrationResolverImpl implements IntegrationResolver {
     if (!query.integrations || query.integrations.length === 0) {
       return { kind: 'executable_api', query };
     }
-    const patterns = query.integrations.map((p) => new RegExp(p));
+    const patterns = query.integrations.flatMap((p) => {
+      try {
+        return [new RegExp(`^${p}$`)];
+      } catch {
+        this.logger.warn(`Invalid regex pattern in integrations field: ${p}`);
+        return [];
+      }
+    });
     const match = installedPackages.find((pkg) => patterns.some((re) => re.test(pkg.name)));
     if (!match) {
       this.logger.debug('No matching integration found for v3 API query, skipping', {

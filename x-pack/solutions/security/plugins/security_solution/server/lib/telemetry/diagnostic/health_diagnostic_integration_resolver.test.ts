@@ -421,6 +421,49 @@ describe('IntegrationResolverImpl', () => {
       expect(resolved.resolution.name).toBe('endpoint');
     });
 
+    it('does not match a substring — anchored regex prevents partial name matches', async () => {
+      // "endpoint" unanchored would match "my-endpoint-extra"; anchored ^endpoint$ must not
+      const query = createMockApiQueryV3({ integrations: ['endpoint'] });
+      // replace installed packages with one whose name contains but is not equal to "endpoint"
+      packageService.asInternalUser.getPackages.mockResolvedValue([
+        { name: 'my-endpoint-extra', version: '1.0.0', status: 'installed', data_streams: [] },
+      ]);
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('skipped');
+      if (result[0].kind !== 'skipped') throw new Error('type guard');
+      expect(result[0].reason).toBe('integration_not_installed');
+    });
+
+    it('skips invalid regex patterns without throwing and logs a warning', async () => {
+      // an invalid pattern must not crash the batch — other valid patterns still resolve
+      const mockLogger = createMockLogger();
+      const localResolver = new IntegrationResolverImpl(
+        packageService as unknown as PackageService,
+        mockLogger
+      );
+      const query = createMockApiQueryV3({ integrations: ['[invalid', 'endpoint'] });
+      const result = await localResolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      // valid pattern "endpoint" still matches
+      expect(result[0].kind).toBe('executable_api');
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid regex pattern in integrations field: [invalid')
+      );
+    });
+
+    it('a single invalid regex in integrations does not fail unrelated queries in the same batch', async () => {
+      const v1 = createMockQueryV1(QueryType.DSL);
+      const v3bad = createMockApiQueryV3({ id: 'bad', integrations: ['[invalid'] });
+      const results = await resolver.resolve([v1, v3bad]);
+      // v1 must still succeed; bad pattern skips with integration_not_installed (all patterns dropped)
+      expect(results).toHaveLength(2);
+      expect(results[0].kind).toBe('executable');
+      expect(results[1].kind).toBe('skipped');
+      if (results[1].kind !== 'skipped') throw new Error('type guard');
+      expect(results[1].reason).toBe('integration_not_installed');
+    });
+
     it('returns executable_api with the first matched integration when multiple patterns provided', async () => {
       const query = createMockApiQueryV3({ integrations: ['nonexistent', 'fleet_server'] });
       const result = await resolver.resolve([query]);
