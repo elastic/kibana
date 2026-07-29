@@ -454,7 +454,11 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_create', outcome: 'success' }),
+            event: expect.objectContaining({
+              action: 'ai_index_create',
+              type: ['creation'],
+              outcome: 'success',
+            }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
@@ -468,7 +472,11 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_create', outcome: 'failure' }),
+            event: expect.objectContaining({
+              action: 'ai_index_create',
+              type: ['creation'],
+              outcome: 'failure',
+            }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
@@ -476,7 +484,7 @@ describe('ai indices routes', () => {
     });
 
     describe('PUT /api/context_engine/ai_index/{aiIndexId}', () => {
-      it('logs outcome:success after the write succeeds', async () => {
+      it('logs action:ai_index_create when the index is created', async () => {
         aiIndexService.put.mockResolvedValue('created');
 
         await callRoute('PUT', aiIndexByIdPath, putRequest);
@@ -485,7 +493,26 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
             event: expect.objectContaining({
-              action: 'ai_index_create_or_update',
+              action: 'ai_index_create',
+              type: ['creation'],
+              outcome: 'success',
+            }),
+            kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
+          })
+        );
+      });
+
+      it('logs action:ai_index_update when the index is updated', async () => {
+        aiIndexService.put.mockResolvedValue('updated');
+
+        await callRoute('PUT', aiIndexByIdPath, putRequest);
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'ai_index_update',
+              type: ['change'],
               outcome: 'success',
             }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
@@ -527,7 +554,7 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_get', outcome: 'success' }),
+            event: expect.objectContaining({ action: 'ai_index_get', type: ['access'], outcome: 'success' }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
@@ -557,7 +584,7 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_list', outcome: 'success' }),
+            event: expect.objectContaining({ action: 'ai_index_list', type: ['access'], outcome: 'success' }),
             kibana: { saved_object: undefined },
           })
         );
@@ -573,7 +600,7 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_delete', outcome: 'success' }),
+            event: expect.objectContaining({ action: 'ai_index_delete', type: ['deletion'], outcome: 'success' }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
