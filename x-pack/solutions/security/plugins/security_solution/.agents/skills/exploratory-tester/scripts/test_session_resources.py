@@ -6271,18 +6271,55 @@ print("404")
         self.assertIn(
             '"knowledge_file": { "path": null, "approved": false }', setup
         )
+        self.assertIn('"path": "<full repo-relative path above>"', setup)
+        self.assertIn("must survive a resume", setup)
+
+        # P2 from re-review of ffc5f8a: the persisted path must be a full
+        # repo-relative path (matching what phases/3-report.md already
+        # writes with), not the short `knowledge/<area_slug>.md` form used
+        # loosely elsewhere in this skill's prose — a worker resolving
+        # paths from the repository root cannot find the file otherwise.
         self.assertIn(
-            '{ "path": "knowledge/<area_slug>.md", "approved": true }', setup
-        )
-        self.assertIn(
-            '{ "path": "knowledge/<area_slug>.md", "approved": false }',
+            "x-pack/solutions/security/plugins/security_solution/.agents/"
+            "skills/exploratory-tester/knowledge/<area_slug>.md",
             setup,
         )
-        self.assertIn("must survive a resume", setup)
+        self.assertIn("not the short", setup)
+
+        # P2 from re-review of ffc5f8a: parallel mode already asks this
+        # exact question, unpersisted and resume-safe, in 2-explore.md's
+        # Wave 1 step 2b — this Phase 0 step must not duplicate it and
+        # risk the user giving two different answers for the same file.
+        self.assertIn("Single mode only", setup)
+        self.assertIn(
+            "do not also ask it here for parallel mode", setup
+        )
 
         self.assertIn("config.json → knowledge_file", flow_core)
         self.assertIn("approved: true", flow_core)
         self.assertIn("never re-ask for approval mid-flow", flow_core)
+
+    def test_resume_migrates_pre_fix_sessions(self):
+        # P2 from re-review of ffc5f8a: a session directory created before
+        # flow.space_id / knowledge_file existed still has neither field
+        # populated. Resume skips the rest of Phase 0 unconditionally, so
+        # without an explicit migration step, resuming an old session
+        # reproduces both P1 bugs (null space_id navigation, and no
+        # knowledge_file key at all) forever.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index(
+                "**New session path"
+            )
+        ]
+        self.assertIn("Migrations for sessions created before", resume_section)
+        self.assertIn("is `null` or missing", resume_section)
+        self.assertIn("environment.space_id", resume_section)
+        self.assertIn("is missing entirely", resume_section)
+        self.assertIn(
+            '{ "path": null, "approved": false }', resume_section
+        )
+        self.assertIn("not that consent is owed retroactively", resume_section)
 
     def test_wave_2_investigation_flows_get_space_ids(self):
         # P1 from review of PR #281591 (pre-existing, but in scope since
@@ -6314,6 +6351,26 @@ print("404")
         )
         self.assertIn("run `create-flow-spaces.py` again", investigation)
         self.assertIn("/s/null/", investigation)
+
+    def test_wave_2_dispatch_placeholders_match_wave_1(self):
+        # Minor, flagged in two consecutive reviews of PR #281591: Wave 1's
+        # dispatch step (test_orchestrator_dispatch_placeholders_match_template)
+        # was already locked, but Wave 2's dispatch step only had a prose
+        # cross-reference ("substituting placeholders exactly as in step 3")
+        # with no dedicated assertion — so it could silently drift out of
+        # sync with Wave 1 and the template the same way step 3 already did
+        # once (Important #2 from the 34c8eea review).
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        wave2_dispatch = explore[
+            explore.index(
+                "7. If any investigation flows were created, dispatch them"
+            ) : explore.index("8. Wait for all Wave 2 sub-agents")
+        ]
+        self.assertIn("substituting placeholders exactly as in step 3", wave2_dispatch)
+        # Wave 2 must not re-declare its own placeholder list — that would
+        # be a second copy that could drift independently of step 3's.
+        self.assertNotIn("<flow object as JSON>", wave2_dispatch)
+        self.assertNotIn("<area_slug>", wave2_dispatch)
 
 
 if __name__ == "__main__":
