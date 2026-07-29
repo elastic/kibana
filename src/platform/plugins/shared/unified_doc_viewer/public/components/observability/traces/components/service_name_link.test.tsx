@@ -125,11 +125,8 @@ describe('ServiceNameLink with service flyout feature registered', () => {
 
     expect(mockRenderServiceFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
-        serviceName: SERVICE_NAME,
-        agentName: 'java',
-        environment: ENVIRONMENT_ALL_VALUE,
-        rangeFrom: 'now-30m',
-        rangeTo: 'now',
+        service: { name: SERVICE_NAME, agentName: 'java' },
+        filters: { environment: ENVIRONMENT_ALL_VALUE, rangeFrom: 'now-30m', rangeTo: 'now' },
         source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
       })
     );
@@ -140,7 +137,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
     fireEvent.click(screen.getByTestId('serviceNameLink'));
 
     expect(mockRenderServiceFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ environment: 'production' })
+      expect.objectContaining({ filters: expect.objectContaining({ environment: 'production' }) })
     );
   });
 
@@ -149,7 +146,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
     fireEvent.click(screen.getByTestId('serviceNameLink'));
 
     expect(mockRenderServiceFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ agentName: undefined })
+      expect.objectContaining({ service: expect.objectContaining({ agentName: undefined }) })
     );
   });
 

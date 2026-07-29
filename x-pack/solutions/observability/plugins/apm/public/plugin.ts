@@ -190,7 +190,7 @@ export interface ApmPluginStartDeps {
   apmSourcesAccess: ApmSourceAccessPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  share?: SharePublicStart;
+  share: SharePublicStart;
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
