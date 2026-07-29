@@ -12,6 +12,7 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderConfig,
+  AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
