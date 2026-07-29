@@ -129,8 +129,7 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.perPage', {
           defaultMessage:
-            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10. ' +
-            'Controls page size only — never lower it on a repeated call to retry the same filters; use next_page instead.',
+            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10. Controls page size only — never change it on a repeated call to retry the same filters; use next_page instead.',
         })
       ),
     from: z
