@@ -55,10 +55,6 @@ export const diffComparators = <StateType extends object = object>(
   }, {} as Partial<StateType>);
 };
 
-type ComparatorReturnType<E extends boolean = boolean> = E extends true
-  ? { equal: true }
-  : { equal: false; unequalKeys: string[] };
-
 /**
  * Run comparators until at least one returns false
  */
@@ -68,9 +64,8 @@ export const areComparatorsEqual = <StateType extends object = object>(
   currentState?: StateType,
   defaultState?: Partial<StateType>,
   getCustomLogLabel?: (key: string) => string
-): ComparatorReturnType => {
-  const unequalKeys: string[] = [];
-  const allComparatorsEqual = Object.keys(comparators).every((key) => {
+): boolean => {
+  return Object.keys(comparators).every((key) => {
     const comparator = comparators[key as keyof StateType];
     const lastSavedValue =
       lastSavedState?.[key as keyof StateType] ?? defaultState?.[key as keyof StateType];
@@ -84,17 +79,9 @@ export const areComparatorsEqual = <StateType extends object = object>(
       lastSavedValue,
       currentValue
     );
-    if (!areEqual) {
-      unequalKeys.push(key);
-      if (shouldLogStateDiff()) {
-        logStateDiff(
-          getCustomLogLabel ? getCustomLogLabel(key) : key,
-          lastSavedValue,
-          currentValue
-        );
-      }
-    }
+
+    if (!areEqual && shouldLogStateDiff())
+      logStateDiff(getCustomLogLabel ? getCustomLogLabel(key) : key, lastSavedValue, currentValue);
     return areEqual;
   });
-  return allComparatorsEqual ? { equal: true } : { equal: false, unequalKeys };
 };

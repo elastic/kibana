@@ -9,16 +9,16 @@
 
 import * as jsondiffpatch from 'jsondiffpatch';
 
-import { BehaviorSubject, pairwise, skip } from 'rxjs';
+import { BehaviorSubject, map, pairwise, skip } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   state$,
-  getPropertyFilter,
+  mapState,
   maxSize,
   disableUndoRedo$ = new BehaviorSubject<boolean>(true),
 }: {
-  state$: BehaviorSubject<T | undefined>;
-  getPropertyFilter: () => Required<jsondiffpatch.Options>['propertyFilter'];
+  state$: BehaviorSubject<T>;
+  mapState: (state: T) => T;
   maxSize: number;
   disableUndoRedo$?: BehaviorSubject<boolean>;
 }) {
@@ -32,43 +32,31 @@ export function startTrackingHistory<T extends object = {}>({
     redo: true as boolean,
   });
 
-  const stateSubscription = state$.pipe(pairwise()).subscribe(([previous, current]) => {
-    if (!previous || !current) return;
-    if (undoOrRedoAction) {
-      // do not add to history if state change is coming from undo or redo action
-      undoOrRedoAction = false;
-      return;
-    }
+  const stateSubscription = state$
+    .pipe(map(mapState), pairwise())
+    .subscribe(([previous, current]) => {
+      if (undoOrRedoAction) {
+        // do not add to history if state change is coming from undo or redo action
+        undoOrRedoAction = false;
+        return;
+      }
+      const diff = jsondiffpatch.diff(previous, current);
+      // console.log({ previous, current, diff });
+      if (!diff) return;
 
-    const instance = jsondiffpatch.create({
-      propertyFilter: getPropertyFilter(),
-      // propertyFilter: (key, context) => {
-      //   console.log({ key, context, test: context.childName });
-
-      //   if (context.childName !== 'config') return true;
-      //   // if (context.children) return true; // compare all parent keys
-      //   console.log({ key, context, test: context.childName });
-      //   const { left: before, right: after } = context;
-      //   return true;
-      // },
+      const pointer = pointer$.getValue();
+      if (pointer !== history.length - 1) {
+        // if not at the top of the history stack, then drop all history that came after the current pointer
+        history.length = pointer + 1;
+      } else if (history.length > maxSize) {
+        // drop the bottom of the history stack when max size is reached
+        history.shift();
+      }
+      // add the new patch to the top of the history stack and increment (see note) the pointer
+      history.push(diff);
+      pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
+      console.log({ history, diff, pointer: pointer$.getValue() });
     });
-    const diff = instance.diff(previous, current);
-    console.log({ previous, current, diff });
-    if (!diff) return;
-
-    const pointer = pointer$.getValue();
-    if (pointer !== history.length - 1) {
-      // if not at the top of the history stack, then drop all history that came after the current pointer
-      history.length = pointer + 1;
-    } else if (history.length > maxSize) {
-      // drop the bottom of the history stack when max size is reached
-      history.shift();
-    }
-    // add the new patch to the top of the history stack and increment (see note) the pointer
-    history.push(diff);
-    pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
-    console.log({ history: [...history], pointer: pointer$.getValue() });
-  });
 
   const disabledActionsSubscription = pointer$.subscribe((pointer) => {
     disabledActions$.next({
@@ -84,7 +72,6 @@ export function startTrackingHistory<T extends object = {}>({
 
     const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
     undoOrRedoAction = true;
-    // console.log({ reversedPatch });
     currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
     pointer$.next(pointer - 1);
   };
@@ -96,7 +83,6 @@ export function startTrackingHistory<T extends object = {}>({
 
     const patch = history[pointer + 1]; // must apply the **next** patch
     undoOrRedoAction = true;
-    // console.log({ patch });
     currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
     pointer$.next(pointer + 1);
   };

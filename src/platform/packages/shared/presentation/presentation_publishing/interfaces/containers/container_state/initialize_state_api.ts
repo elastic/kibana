@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
-
+import { combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
 import type { HasSerializableState } from '../../has_serializable_state';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
@@ -39,14 +38,8 @@ export const initializeStateApi = <StateType extends object = object>({
       applySerializedState,
       hasUnsavedChanges$: of(false),
       serializeState,
-      getKeysWithUnsavedChanges: () => [],
     };
   }
-
-  const keysWithUnsavedChanges$ = new BehaviorSubject<{ [id: string]: string[] }>({});
-  const getKeysWithUnsavedChanges = () => {
-    return keysWithUnsavedChanges$.getValue()[uuid] ?? [];
-  };
 
   const hasUnsavedChanges$ = anyStateChange$.pipe(
     // anyStateChange$ does not emit on subscribe
@@ -58,7 +51,7 @@ export const initializeStateApi = <StateType extends object = object>({
       const currentState = serializeState();
 
       // check state equality
-      const result = areComparatorsEqual(
+      return !areComparatorsEqual(
         getComparators(),
         lastSavedState,
         currentState,
@@ -72,22 +65,8 @@ export const initializeStateApi = <StateType extends object = object>({
           return `child: ${childLabel}, key: ${key}`;
         }
       );
-
-      // track unsaved changes
-      keysWithUnsavedChanges$.next({
-        ...keysWithUnsavedChanges$.getValue(),
-        [uuid]: !result.equal ? result.unequalKeys : [],
-      });
-
-      return !result.equal;
     })
   );
 
-  return {
-    anyStateChange$,
-    applySerializedState,
-    hasUnsavedChanges$,
-    serializeState,
-    getKeysWithUnsavedChanges,
-  };
+  return { anyStateChange$, applySerializedState, hasUnsavedChanges$, serializeState };
 };
