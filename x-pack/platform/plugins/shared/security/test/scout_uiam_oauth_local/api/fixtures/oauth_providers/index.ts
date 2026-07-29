@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { ActionVariable } from '@kbn/alerting-plugin/common';
-
-export function templateActionVariable(variable: ActionVariable) {
-  return variable.useWithTripleBracesInTemplates
-    ? `{{{${variable.name}}}}`
-    : `{{${variable.name}}}`;
-}
+export { UiamConformanceOAuthProvider } from './uiam_conformance_oauth_provider';
+export * from './constants';
