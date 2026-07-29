@@ -18,6 +18,7 @@ import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
 import { ValidationError } from '@kbn/config-schema';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DuplicateDataViewError } from '@kbn/data-views-plugin/common';
+import type { ErrorIndexPatternNotFound } from '@kbn/data-views-plugin/server/error';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 import { DataViewsAsCodeService } from '../services/data_views_as_code_service';
 import type { RegisterRouteArgs } from './types';
@@ -54,7 +55,9 @@ export const requestHandler =
         return await handler(context, request, response);
       } catch (error: any) {
         const isNotFound =
-          (error.isBoom && error.output.statusCode === 404) || error instanceof SavedObjectNotFound;
+          (error.isBoom && error.output.statusCode === 404) ||
+          (error as ErrorIndexPatternNotFound).is404 ||
+          error instanceof SavedObjectNotFound;
         if (isNotFound) {
           logRequest(args.logger, request, 'debug', error.message);
           return response.notFound({ body: { message: error.message } });
@@ -69,7 +72,7 @@ export const requestHandler =
         }
 
         if (error instanceof ValidationError) {
-          logRequest(args.logger, request, 'warn', error.message);
+          logRequest(args.logger, request, 'error', error.message);
           throw error;
         }
 
