@@ -9,10 +9,7 @@ import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
-  rowsFromEsql,
-  type EpisodeActionHistoryEntry,
-} from '@kbn/alerting-v2-common-queries';
+import { rowsFromEsql, type EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsHistoryQuery,
   DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
