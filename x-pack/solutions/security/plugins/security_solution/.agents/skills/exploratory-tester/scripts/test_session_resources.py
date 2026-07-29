@@ -6228,6 +6228,93 @@ print("404")
         self.assertNotIn("<area_slug>", dispatch_section)
         self.assertIn("omit", dispatch_section.lower())
 
+    def test_single_mode_flow_space_id_is_populated_at_setup(self):
+        # P1 from review of PR #281591: 2-flow-core.md and
+        # subagent-prompt.md both require every flow to resolve its space
+        # from `flow.space_id` regardless of mode, but the config.json
+        # template initializes it to `null` and create-flow-spaces.py only
+        # runs in parallel mode — so single mode would navigate to
+        # `/s/null/...` unless something explicitly populates it. Setup
+        # must copy `environment.space_id` into every flow's `space_id`
+        # for single mode.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        self.assertIn(
+            'set `space_id` to the value of `environment.space_id`\n'
+            'when `mode` is `"single"`',
+            setup,
+        )
+        self.assertIn("Never leave `space_id` as `null` in single mode", setup)
+
+        # The deny-list's "single mode this equals environment.space_id"
+        # claim is only true because of the setup instruction above — lock
+        # both sides of the contract together so they can't drift apart
+        # again independently.
+        self.assertIn(
+            "in single mode this equals `environment.space_id`, but",
+            flow_core,
+        )
+
+    def test_knowledge_file_approval_persists_across_resume(self):
+        # P1 from review of PR #281591: resumed sessions (Session-dir
+        # provided) skip all of Phase 0 — including the knowledge-file
+        # approval prompt — and jump straight to Phase 2. Because the
+        # worker deny-list forbids constructing a knowledge path from
+        # area_slug, a resumed single-mode session had no way to recover
+        # whether the user had already approved a knowledge file. The
+        # approval must be persisted in config.json, not just asked once
+        # and discarded.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        self.assertIn(
+            '"knowledge_file": { "path": null, "approved": false }', setup
+        )
+        self.assertIn(
+            '{ "path": "knowledge/<area_slug>.md", "approved": true }', setup
+        )
+        self.assertIn(
+            '{ "path": "knowledge/<area_slug>.md", "approved": false }',
+            setup,
+        )
+        self.assertIn("must survive a resume", setup)
+
+        self.assertIn("config.json → knowledge_file", flow_core)
+        self.assertIn("approved: true", flow_core)
+        self.assertIn("never re-ask for approval mid-flow", flow_core)
+
+    def test_wave_2_investigation_flows_get_space_ids(self):
+        # P1 from review of PR #281591 (pre-existing, but in scope since
+        # this PR rewrote the investigation-flow instructions): Wave 2
+        # investigation flows are appended to config.json after
+        # create-flow-spaces.py already ran in Phase 1, so they never got a
+        # space_id. Parallel-mode sub-agents are required to navigate using
+        # flow.space_id, so an unpopulated one produces an invalid
+        # /s/null/... URL. The orchestrator must rerun create-flow-spaces.py
+        # before dispatching Wave 2; single mode must set space_id directly
+        # since it never runs that script at all.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        investigation = (PHASES_DIR / "2-investigation.md").read_text(
+            encoding="utf-8"
+        )
+
+        wave2_section = explore[
+            explore.index("**Wave 2 (investigation flows):**") : explore.index(
+                "**Sub-agent rules:**"
+            )
+        ]
+        self.assertIn("create-flow-spaces.py", wave2_section)
+        self.assertIn("before dispatching Wave 2", wave2_section)
+        self.assertIn("/s/null/", wave2_section)
+
+        self.assertIn("space_id:", investigation)
+        self.assertIn(
+            'set it to `environment.space_id` immediately', investigation
+        )
+        self.assertIn("run `create-flow-spaces.py` again", investigation)
+        self.assertIn("/s/null/", investigation)
+
 
 if __name__ == "__main__":
     unittest.main()

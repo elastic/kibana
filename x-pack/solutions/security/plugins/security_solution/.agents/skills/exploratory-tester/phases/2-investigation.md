@@ -20,6 +20,7 @@ open an investigation flow:
    - `entry:` pointing at the area most likely to reveal scope
    - `expected:` stating what you're trying to determine (e.g. "Does this 500 appear on all entity analytics sub-pages or only on the main dashboard?")
    - `timeout_minutes: 6` (default; adjust up if the scope question requires more steps)
+   - `space_id:` if `mode` is `"single"`, set it to `environment.space_id` immediately (matching every other single-mode flow — see `phases/0-setup.md`). If `mode` is `"parallel"` (you are the orchestrator, per the guard above), leave it unset here: run `create-flow-spaces.py` again (it is idempotent — flows that already have a space are reconciled with a 409, not recreated) *before* dispatching this flow, so it gets a real, isolated per-flow space just like Wave 1's flows. Never dispatch a parallel-mode investigation flow with `space_id` unset — the sub-agent will construct an invalid `/s/null/...` URL.
 3. Run the investigation flow immediately after the current flow completes, before moving to the next specified flow — using `phases/2-flow-core.md` exactly like any other flow.
 4. Log findings in a new `findings-flow-<N>.md`. The report will group investigation flows with the Level 1 finding that triggered them.
 

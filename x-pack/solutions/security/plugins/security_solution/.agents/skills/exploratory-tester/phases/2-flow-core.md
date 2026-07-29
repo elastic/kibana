@@ -234,7 +234,7 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 2. If `entry` starts with `/s/` → `<environment.url><entry>` as-is
 3. If `entry` is a natural-language description → navigate from `/s/<space_id>/app/security` and follow the path
 4. If redirected to an unrelated page or space prefix is missing → log a Level 2 finding, try a more specific sub-path
-5. If a knowledge file path was provided in your dispatch context (single mode: confirmed in Phase 0; parallel mode: the prompt's knowledge file path line), check it for navigation patterns from prior sessions — never construct `knowledge/<area_slug>.md` or any other path yourself
+5. Check `config.json → knowledge_file` (single mode) or the prompt's knowledge file path line (parallel mode) for navigation patterns from prior sessions — only if `approved: true` (single mode) or the line is present (parallel mode). Never construct `knowledge/<area_slug>.md` or any other path yourself, and never re-ask for approval mid-flow — a resumed session with `approved: false` simply proceeds without one.
 6. If still ambiguous → take a screenshot, choose the most reasonable interpretation, proceed — never skip
 
 **Pitfalls:**
