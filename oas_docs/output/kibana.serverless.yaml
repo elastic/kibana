@@ -68267,6 +68267,89 @@ paths:
           schema:
             maxLength: 4096
             type: string
+        - description: Filter by execution status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - waiting_for_child
+                - running
+                - queued
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 11
+            type: array
+        - description: Filter by execution type.
+          in: query
+          name: executionTypes
+          required: false
+          schema:
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
+        - description: Filter by the user who triggered the execution.
+          in: query
+          name: executedBy
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: Filter by evaluated concurrency group key.
+          in: query
+          name: concurrencyGroupKey
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by startedAt.
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by startedAt.
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by finishedAt.
+          in: query
+          name: finishedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by finishedAt.
+          in: query
+          name: finishedBefore
+          required: false
+          schema:
+            type: string
+        - description: Field to collapse execution results by.
+          in: query
+          name: collapse
+          required: false
+          schema:
+            enum:
+              - concurrencyGroupKey
+              - status
+              - executedBy
+              - triggeredBy
+            type: string
         - description: 'Field to sort by. One of: startedAt, duration, workflowId, triggeredBy.'
           in: query
           name: sortField
@@ -68287,19 +68370,19 @@ paths:
               - asc
               - desc
             type: string
-        - description: Pagination offset.
+        - description: Page number.
           in: query
-          name: from
+          name: page
           required: false
           schema:
-            minimum: 0
+            minimum: 1
             type: number
         - description: Number of results to return.
           in: query
           name: size
           required: false
           schema:
-            maximum: 1000
+            maximum: 100
             minimum: 1
             type: number
         - description: Whether to track total hit count.
