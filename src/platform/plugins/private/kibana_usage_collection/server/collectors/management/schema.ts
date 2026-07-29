@@ -261,6 +261,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

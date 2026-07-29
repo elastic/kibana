@@ -63,6 +63,7 @@ export const getUiSettings: (
       defaultMessage: 'Default ES|QL query',
     }),
     value: '',
+    sensitive: true,
     description: i18n.translate('discover.advancedSettings.defaultEsqlQueryText', {
       defaultMessage:
         'The ES|QL query Discover starts with when opening in ES|QL mode. When set, it takes precedence over the query Discover would otherwise derive from your data sources. Leave empty to use the default behavior.',
