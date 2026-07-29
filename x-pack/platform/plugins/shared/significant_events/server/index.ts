@@ -29,4 +29,8 @@ export {
   SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
 } from './agent_builder/tools/tool_ids';
 
+export { createMemoryDiscoveryTools } from './lib/significant_events/memory_discovery_tools';
+export type { MemoryDiscoveryTools } from './lib/significant_events/memory_discovery_tools';
+export { MemoryServiceImpl } from './memory_and_investigation/lib/memory';
+
 export type { SignificantEventsRouteRepository } from './routes';

@@ -28,16 +28,23 @@ export const addPanelsOperation = defineOperation({
     let nextDashboardData = dashboardData;
 
     for (const [panelInputIndex, item] of operation.panels.entries()) {
-      const panelContent = materializePanelInput(item, panelInputIndex);
-      if (panelContent === undefined) {
+      const materializedPanel = materializePanelInput(item, panelInputIndex);
+      if (materializedPanel === undefined) {
         continue;
       }
 
+      const panelId = uuidv4();
       nextDashboardData = appendPanelsToDashboard({
         dashboardData: nextDashboardData,
-        panelsToAdd: [{ id: uuidv4(), ...panelContent, grid: item.grid }],
+        panelsToAdd: [{ id: panelId, ...materializedPanel.panelContent, grid: item.grid }],
         sectionId: item.sectionId,
       });
+      if (materializedPanel.authoringNote) {
+        context.panelAuthoringNotes.push({
+          panelId,
+          authoringNote: materializedPanel.authoringNote,
+        });
+      }
     }
 
     return nextDashboardData;
