@@ -64,13 +64,13 @@ describe('PlainIndexDataClientBundle', () => {
   it('operations queue until index creation finishes', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    esClient.indices.exists.mockResolvedValue(false as never);
 
-    let resolveIndexCreation!: () => void;
-    esClient.indices.exists.mockReturnValue(
-      new Promise<boolean>((resolve) => {
-        resolveIndexCreation = () => resolve(true);
-      }) as never
-    );
+    let resolveCreate!: () => void;
+    const createPromise = new Promise<void>((resolve) => {
+      resolveCreate = resolve;
+    });
+    esClient.indices.create.mockReturnValue(createPromise as never);
 
     const coreStart = coreMock.createStart();
     Object.defineProperty(coreStart.elasticsearch.client, 'asInternalUser', {
@@ -88,7 +88,7 @@ describe('PlainIndexDataClientBundle', () => {
 
     expect(esClient.search).not.toHaveBeenCalled();
 
-    resolveIndexCreation();
+    resolveCreate();
     await searchPromise;
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
