@@ -11,14 +11,55 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export type {
-  ChangeHistoryAggregateField,
-  ChangeHistoryFieldBucket,
-  GetChangeHistoryFieldAggregationOptions,
-  GetChangeHistoryFieldAggregationResult,
-} from './field_aggregation';
+/**
+ * Mapped keyword fields that support terms aggregations in change history.
+ * Only string-valued keyword paths are supported.
+ */
+export type ChangeHistoryAggregateField = 'user.name' | 'user.id' | 'event.action' | 'event.type';
 
-export { CHANGE_HISTORY_AGGREGATE_FIELDS } from './field_aggregation';
+/** Supported {@link ChangeHistoryAggregateField} values for facet queries and tests. */
+export const CHANGE_HISTORY_AGGREGATE_FIELDS = [
+  'user.name',
+  'user.id',
+  'event.action',
+  'event.type',
+] as const satisfies readonly ChangeHistoryAggregateField[];
+
+export interface ChangeHistoryFieldBucket {
+  /** Distinct field value for this bucket. */
+  key: string;
+  /** Number of matching change history documents. */
+  docCount: number;
+}
+
+export interface GetChangeHistoryByFieldsOptions {
+  /** Additional filters merged with the standard object scope filters. */
+  additionalFilters?: QueryDslQueryContainer[];
+  /** Maximum number of distinct values to return per field. Defaults to `DEFAULT_FIELD_AGGREGATION_SIZE` (100). */
+  size?: number;
+}
+
+/**
+ * One field's terms aggregation within a {@link GetChangeHistoryByFieldsResult}.
+ */
+export interface GetChangeHistoryByFieldResult {
+  field: ChangeHistoryAggregateField;
+  buckets: ChangeHistoryFieldBucket[];
+  /**
+   * Elasticsearch {@link https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-terms-aggregation sum_other_doc_count}:
+   * total **document** count in terms buckets omitted because {@link GetChangeHistoryByFieldsOptions.size}
+   * was exceeded.
+   */
+  sumOtherDocCount: number;
+}
+
+/**
+ * Result from field terms aggregations scoped to an object's change history.
+ * `results` follows the order of the requested fields (duplicates removed).
+ */
+export interface GetChangeHistoryByFieldsResult {
+  results: GetChangeHistoryByFieldResult[];
+}
 
 /**
  * Represents a single document in the change history.

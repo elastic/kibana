@@ -7,6 +7,7 @@
 
 import { v7 as uuidv7 } from 'uuid';
 import type {
+  AggregationsAggregate,
   QueryDslQueryContainer,
   SearchTotalHits,
   SortCombinations,
@@ -25,14 +26,16 @@ import {
   DEFAULT_RESULT_SIZE,
   DEFAULT_FIELD_AGGREGATION_SIZE,
 } from './constants';
-import { buildFieldTermsAggregation, parseFieldAggregationResult } from './field_aggregation';
 import type {
+  ChangeHistoryAggregateField,
   ChangeHistoryDocument,
+  ChangeHistoryFieldBucket,
   GetHistoryResult,
   LogChangeHistoryOptions,
   GetChangeHistoryOptions,
-  GetChangeHistoryFieldAggregationOptions,
-  GetChangeHistoryFieldAggregationResult,
+  GetChangeHistoryByFieldResult,
+  GetChangeHistoryByFieldsOptions,
+  GetChangeHistoryByFieldsResult,
   ObjectChange,
 } from './types';
 import { sha256, sanitizeFields } from './utils';
@@ -55,12 +58,13 @@ export interface IChangeHistoryClient {
     objectId: string,
     opts?: GetChangeHistoryOptions
   ): Promise<GetHistoryResult>;
-  getHistoryFieldAggregation(
+  getHistoryByFields(
     spaceId: string,
     objectType: string,
     objectId: string,
-    opts: GetChangeHistoryFieldAggregationOptions
-  ): Promise<GetChangeHistoryFieldAggregationResult>;
+    fields: ChangeHistoryAggregateField[],
+    opts?: GetChangeHistoryByFieldsOptions
+  ): Promise<GetChangeHistoryByFieldsResult>;
 }
 
 export class ChangeHistoryClient implements IChangeHistoryClient {
@@ -176,15 +180,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
    */
   async logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions) {
-    const { module, dataset, client, kibanaVersion } = this;
-
-    if (!client) {
-      const err = new Error(
-        `Change history data stream not initialized for: module [${this.module}] and dataset [${this.dataset}]`
-      );
-      this.logger.error(err);
-      throw err;
-    }
+    const client = this.getInitializedClient();
+    const { module, dataset, kibanaVersion } = this;
     const {
       username,
       userProfileId,
@@ -313,33 +310,52 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   }
 
   /**
-   * Bucket distinct values of a document field in an object's change history.
-   * Builds a terms aggregation (descending doc count) scoped like {@link getHistory}.
+   * Bucket distinct values for one or more document fields in a single search.
+   * Builds sibling terms aggregations (descending doc count) scoped like {@link getHistory}.
    *
-   * Common facet fields: `user.name` (authors), `event.action` (change types), `event.type`.
+   * Pass one or more {@link ChangeHistoryAggregateField} values (e.g. `user.name`, `event.action`).
+   * Duplicate `fields` entries are removed while preserving first-seen order.
    */
-  async getHistoryFieldAggregation(
+  async getHistoryByFields(
     spaceId: string,
     objectType: string,
     objectId: string,
-    opts: GetChangeHistoryFieldAggregationOptions
-  ): Promise<GetChangeHistoryFieldAggregationResult> {
+    fields: ChangeHistoryAggregateField[],
+    opts?: GetChangeHistoryByFieldsOptions
+  ): Promise<GetChangeHistoryByFieldsResult> {
+    const uniqueFields = [...new Set(fields)];
+    if (uniqueFields.length === 0) {
+      return { results: [] };
+    }
+
     const client = this.getInitializedClient();
-    const bucketSize = opts.size ?? DEFAULT_FIELD_AGGREGATION_SIZE;
-    const filter = this.buildHistoryFilters(objectType, objectId, opts.additionalFilters);
+    const bucketSize = opts?.size ?? DEFAULT_FIELD_AGGREGATION_SIZE;
+    const filter = this.buildHistoryFilters(objectType, objectId, opts?.additionalFilters);
+    const aggregations = Object.fromEntries(
+      uniqueFields.map((field) => [
+        field,
+        {
+          terms: {
+            field,
+            size: bucketSize,
+            order: { _count: 'desc' as const },
+          },
+        },
+      ])
+    );
+
     const response = await client.search({
       space: spaceId,
       query: { bool: { filter } },
-      aggregations: buildFieldTermsAggregation({
-        field: opts.field,
-        size: bucketSize,
-      }),
+      aggregations,
       size: 0,
     });
 
     return {
-      field: opts.field,
-      ...parseFieldAggregationResult(response.aggregations, { field: opts.field }),
+      results: uniqueFields.map((field) => ({
+        field,
+        ...this.parseHistoryByFieldAggregation(response.aggregations, field),
+      })),
     };
   }
 
@@ -370,5 +386,52 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       filter.push(...additionalFilters);
     }
     return filter;
+  }
+
+  /**
+   * Soft-parses a terms aggregation keyed by field name. Unexpected shapes or non-string
+   * keys degrade to empty/partial buckets rather than failing the facet request.
+   */
+  private parseHistoryByFieldAggregation(
+    aggregations: Record<string, AggregationsAggregate> | undefined,
+    field: ChangeHistoryAggregateField
+  ): Pick<GetChangeHistoryByFieldResult, 'buckets' | 'sumOtherDocCount'> {
+    const valuesAgg = aggregations?.[field];
+    if (valuesAgg === undefined) {
+      return { buckets: [], sumOtherDocCount: 0 };
+    }
+
+    const candidate = valuesAgg as {
+      sum_other_doc_count?: number;
+      doc_count_error_upper_bound?: number;
+      buckets?: Array<{ key?: unknown; doc_count?: number }>;
+    };
+
+    if (
+      typeof candidate.sum_other_doc_count !== 'number' ||
+      typeof candidate.doc_count_error_upper_bound !== 'number' ||
+      !Array.isArray(candidate.buckets)
+    ) {
+      this.logger.warn(
+        `Unexpected aggregation shape for change history field [${field}]; returning empty buckets`
+      );
+      return { buckets: [], sumOtherDocCount: 0 };
+    }
+
+    const buckets: ChangeHistoryFieldBucket[] = candidate.buckets.flatMap((bucket) => {
+      const { key, doc_count: docCount } = bucket;
+      if (typeof key !== 'string' || typeof docCount !== 'number') {
+        this.logger.warn(
+          `Skipping unexpected bucket for change history field [${field}]; key type [${typeof key}]`
+        );
+        return [];
+      }
+      return [{ key, docCount }];
+    });
+
+    return {
+      buckets,
+      sumOtherDocCount: candidate.sum_other_doc_count,
+    };
   }
 }

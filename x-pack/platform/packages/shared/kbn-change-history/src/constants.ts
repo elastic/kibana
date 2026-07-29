@@ -23,7 +23,7 @@ export const ECS_VERSION = '9.3.0';
  */
 export const DEFAULT_RESULT_SIZE = 100;
 /**
- * Default maximum number of buckets returned by {@link ChangeHistoryClient.getHistoryFieldAggregation}.
+ * Default maximum number of buckets returned per field by {@link ChangeHistoryClient.getHistoryByFields}.
  */
 export const DEFAULT_FIELD_AGGREGATION_SIZE = 100;
 
