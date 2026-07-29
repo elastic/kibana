@@ -61,6 +61,12 @@ import {
 // everywhere, on every agent-facing read action.
 const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulator', '$where']);
 
+// Escape regex metacharacters so a user-supplied substring is matched literally instead of
+// being evaluated as a live regex — otherwise metacharacters change matching behavior (e.g.
+// "my.log" would also match "myXlog") and pathological patterns become a ReDoS vector on the
+// server, since this reaches $regex directly from an agent-facing (isTool: true) input.
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Dynamic import keeps mongodb-connection-string-url (and its whatwg-url/tr46
 // dependency chain) out of the browser bundle. Both kbn-optimizer and
 // kbn-rspack-optimizer declare it a browser external so this import is never
@@ -310,7 +316,7 @@ export const MongoDBConnector: ConnectorSpec = {
         const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const { nameFilter } = input;
-          const filter = nameFilter ? { name: { $regex: nameFilter } } : {};
+          const filter = nameFilter ? { name: { $regex: escapeRegExp(nameFilter) } } : {};
           const collections = await db.listCollections<CollectionInfo>(filter).toArray();
           return {
             database,

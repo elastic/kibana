@@ -263,6 +263,15 @@ describe('listCollections', () => {
     ]);
   });
 
+  it('escapes regex metacharacters in nameFilter so it matches as a literal substring', async () => {
+    mockListCollectionsToArray.mockResolvedValue([]);
+
+    await MongoDBConnector.actions.listCollections.handler(mockContext, {
+      nameFilter: 'my.log',
+    });
+    expect(mockListCollections).toHaveBeenCalledWith({ name: { $regex: 'my\\.log' } });
+  });
+
   it('closes the client even if the operation throws', async () => {
     mockListCollectionsToArray.mockRejectedValue(new Error('network error'));
 
