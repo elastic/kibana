@@ -30,7 +30,7 @@ import {
   isValidateConfigAction,
 } from './actions_lens';
 import { createGenerateConfigPrompt } from './prompts';
-import { getEsqlDataSourceCarriers, getEsqlQueriesFromLensConfig } from './esql_queries';
+import { getEsqlDataSourceCarriers, getEsqlQueriesFromLensConfig } from './lens_config_helpers';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;

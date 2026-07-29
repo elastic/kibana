@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+
 export interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
 }
+
+const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
 
 /**
  * Returns the objects that carry a `data_source` for this config shape:
@@ -40,4 +44,19 @@ export const getEsqlQueriesFromLensConfig = (config: unknown): string[] => {
   }
 
   return [...queries];
+};
+
+/**
+ * The Lens chart type on a config, when it is a supported Agent Builder chart
+ * type. Returns `undefined` for missing, non-object, or unsupported configs.
+ */
+export const getChartTypeFromLensConfig = (config: unknown): SupportedChartType | undefined => {
+  if (!config || typeof config !== 'object' || !('type' in config)) {
+    return undefined;
+  }
+
+  const { type } = config;
+  return typeof type === 'string' && SUPPORTED_CHART_TYPES.has(type)
+    ? (type as SupportedChartType)
+    : undefined;
 };

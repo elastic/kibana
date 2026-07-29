@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { getEsqlQueriesFromLensConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  getChartTypeFromLensConfig,
+  getEsqlQueriesFromLensConfig,
+} from '@kbn/agent-builder-visualizations-server';
 import { indexPanelsById, updatePanelInDashboard } from './dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { ResolvePanelContent } from './operations/panels';
@@ -22,14 +25,6 @@ const prettifyNlQuery =
   'Polish this existing visualization while preserving its analysis intent, chart type, and ES|QL query.';
 const prettifyConfigInstructions =
   'Apply chart configuration best practices. Preserve the existing analysis intent and chart type. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
-const supportedChartTypes = new Set<string>(Object.values(SupportedChartType));
-
-const getChartType = (panel: AttachmentPanel): SupportedChartType | undefined => {
-  const { type } = panel.config;
-  return typeof type === 'string' && supportedChartTypes.has(type)
-    ? (type as SupportedChartType)
-    : undefined;
-};
 
 interface PrettifyRequest {
   panelId: string;
@@ -46,7 +41,7 @@ const toPrettifyRequest = (
     return undefined;
   }
 
-  const chartType = getChartType(panel);
+  const chartType = getChartTypeFromLensConfig(panel.config);
   if (!chartType) {
     return undefined;
   }
