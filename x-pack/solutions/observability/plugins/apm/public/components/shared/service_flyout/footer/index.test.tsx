@@ -161,7 +161,27 @@ describe('ServiceFlyoutFooter', () => {
     expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts')).toBeInTheDocument();
   });
 
-  it('disables the actions button when no hrefs resolve', () => {
+  it('shows the actions button disabled while capabilities are loading', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: {},
+      service: { name: 'opbeans-java' },
+      capabilities: { ...makeCapabilities(), loading: true },
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+      },
+    });
+    renderFooter();
+
+    expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
+  });
+
+  it('disables the actions button when no actions are available', () => {
     mockUseServiceFlyoutLinks.mockReturnValue({
       ...makeLinks(),
       alerts: undefined,

@@ -147,7 +147,8 @@ export function ServiceFlyoutFooter() {
                 size="s"
                 iconType="chevronSingleDown"
                 iconSide="right"
-                disabled={actionGroups.length === 0}
+                isLoading={capabilities.loading}
+                disabled={capabilities.loading || actionGroups.length === 0}
                 data-test-subj="serviceFlyoutActionsButton"
                 {...getEbtProps({
                   action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
