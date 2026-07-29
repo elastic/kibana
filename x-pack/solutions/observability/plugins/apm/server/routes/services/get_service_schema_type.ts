@@ -11,8 +11,7 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { KIND } from '@kbn/apm-types/es_fields';
 import { PROCESSOR_EVENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-
-export type ServiceSchemaType = 'ecs' | 'otel' | 'unknown';
+import type { ServiceSchemaType } from '../../../common/service_schema_type';
 
 export async function getServiceSchemaType({
   esClient,

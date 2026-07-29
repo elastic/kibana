@@ -12,9 +12,8 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/alerting-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
+import type { ServiceSchemaType } from '../../../../common/service_schema_type';
 import type { ServiceFlyoutService } from './types';
-
-export type ServiceSchemaType = 'ecs' | 'otel' | 'unknown';
 
 export interface ServiceFlyoutCapabilities {
   loading: boolean;
