@@ -37,7 +37,7 @@ describe('query_type_distribution evaluator', () => {
           severity_score: 50,
         },
         {
-          esql: 'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10',
+          esql: 'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value',
           title: 'Stats',
           category: 'error',
           severity_score: 65,
