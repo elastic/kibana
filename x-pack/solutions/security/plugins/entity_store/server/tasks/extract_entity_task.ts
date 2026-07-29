@@ -126,9 +126,13 @@ async function runTask({
       status: 'success',
     };
 
-    const config = await logsExtractionClient.globalStateClient.findOrThrow();
-    const schedule = getNewSchedule(config.logsExtraction.frequency, taskInstance);
-
+    let schedule: { schedule: IntervalSchedule } | undefined;
+    try {
+      const config = await logsExtractionClient.globalStateClient.findOrThrow();
+      schedule = await getNewSchedule(config.logsExtraction.frequency, taskInstance);
+    } catch (e) {
+      logger.warn(`Error getting new schedule, received ${e.message}`);
+    }
     return {
       state: updatedState,
       ...schedule,
