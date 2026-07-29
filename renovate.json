@@ -158,7 +158,6 @@
     {
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
-        "callsites",
         "chance",
         "cheerio",
         "@types/chance",
@@ -2353,11 +2352,9 @@
       "groupName": "Response Ops misc dependencies",
       "matchDepNames": [
         "@types/stats-lite",
-        "@types/textarea-caret",
         "email-addresses",
         "murmurhash",
-        "stats-lite",
-        "textarea-caret"
+        "stats-lite"
       ],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
