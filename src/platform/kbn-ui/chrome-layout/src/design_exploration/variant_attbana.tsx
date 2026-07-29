@@ -399,11 +399,6 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       display: none !important;
     }
 
-    /* Header border replaces the nav top separator pseudo-element. */
-    ${scope} [data-test-subj='chromeNextGlobalHeader'] {
-      border-bottom: ${LINEAR_HAIRLINE} !important;
-    }
-
     ${scope} [class*='css-'][class*='-navigation--topSeparatorStyles']::after {
       display: none !important;
     }
@@ -479,34 +474,6 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     .kbnChromeNav-sidePanel
     [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='false']:hover {
       background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
-    }
-
-    ${scope} .kbnChromeLayoutHeader {
-      background-color: ${knobVar('surfaceNav')} !important;
-      // border-block-end: ${LINEAR_HAIRLINE} !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-    }
-
-    ${scope} [class*='css-'][class*='-global_header_shell--logoSlot'] {
-      --logo-width: 56px !important;
-      width: 56px !important;
-    }
-
-    ${scope} [data-test-subj='chromeNextGlobalHeader'] > [class*='css-'][class*='-global_header_shell--leftGroup'] + [class*='css-'][class*='-global_header_shell--separator'] {
-      display: none !important;
-    }
-
-    ${scope} [data-test-subj='contextSwitcherTriggerButton'] svg:first-of-type {
-      margin-top: -2px !important;
-    }
-
-    ${scope} [class*='css-'][class*='-global_header_shell--rightGroup'] {
-      gap: 2px !important;
-    }
-
-    ${scope} [data-test-subj='chromeNextGlobalHeaderActions'] {
-      display: none !important;
     }
 
     /* ----- Dashboard grid & panels ----- */

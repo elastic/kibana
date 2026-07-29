@@ -59,21 +59,6 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       border-inline-end: none !important;
     }
 
-    ${scope} .kbnChromeLayoutHeader {
-      background-color: ${knobVar('surfaceNav')} !important;
-      // border-block-end: ${LINEAR_HAIRLINE} !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-    }
-
-    ${scope} [class*='css-'][class*='-global_header_shell--rightGroup'] {
-      gap: 2px !important;
-    }
-
-    ${scope} [data-test-subj='chromeNextGlobalHeaderActions'] {
-      display: none !important;
-    }
-
     /* ----- Dashboard grid & panels ----- */
     ${scope} [data-test-subj='kbnGridLayout'] {
       --kbnGridGutterSize: ${knobVar('gridGutter')} !important;

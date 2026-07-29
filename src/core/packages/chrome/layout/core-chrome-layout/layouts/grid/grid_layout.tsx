@@ -22,6 +22,7 @@ import {
   ChromeAppHeaderRenderer,
   ProjectHeader,
   GridLayoutProjectSideNav,
+  DesignExplorationProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
   AppMenuBar,
@@ -48,6 +49,8 @@ const layoutConfigs: {
   classic: ChromeLayoutConfig;
   project: ChromeLayoutConfig;
   projectNext: ChromeLayoutConfig;
+  /** Design exploration: headerless chrome — controls live in the primary nav. */
+  projectNextHeaderless: ChromeLayoutConfig;
 } = {
   classic: {
     appearance: 'plain',
@@ -76,6 +79,18 @@ const layoutConfigs: {
     bannerHeight: 32,
     /** Chrome Next folds app-level header controls into the new header surface. */
     applicationTopBarHeight: 0,
+    applicationMarginRight: 8,
+    applicationMarginBottom: 8,
+    sidebarWidth: 0,
+    footerHeight: 0,
+    navigationWidth: 0,
+  },
+  projectNextHeaderless: {
+    chromeStyle: 'project',
+    headerHeight: 0,
+    bannerHeight: 32,
+    applicationTopBarHeight: 0,
+    applicationMarginTop: 8,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
     sidebarWidth: 0,
@@ -121,7 +136,13 @@ export class GridLayout implements LayoutService {
       const navigationWidth = useSideNavWidth();
 
       const layoutConfigKey =
-        chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
+        chromeStyle === 'classic'
+          ? 'classic'
+          : nextChrome
+            ? designExplorationEnabled
+              ? 'projectNextHeaderless'
+              : 'projectNext'
+            : 'project';
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
@@ -138,6 +159,12 @@ export class GridLayout implements LayoutService {
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
+        } else if (designExplorationEnabled) {
+          // Headerless: Deployment/Search/Help/Profile live in the primary nav.
+          navigation = <DesignExplorationProjectSideNav />;
+          if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
+            applicationTopBar = <ChromeAppHeaderRenderer />;
+          }
         } else {
           header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
           if (nextChrome) {

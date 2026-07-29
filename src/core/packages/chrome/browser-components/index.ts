@@ -18,6 +18,7 @@ export {
   useHasChromeAppHeaderContent,
 } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
+export { DesignExplorationProjectSideNav } from './src/design_exploration';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';

@@ -41,6 +41,9 @@ export {
 
 /**
  * Design exploration chrome POC — sets body scope for global style overrides when mounted.
+ *
+ * Top spacing for the app workspace comes from `projectNextHeaderless.applicationMarginTop`
+ * in grid_layout (8px), which also shortens application height via layout CSS vars.
  */
 export const DesignExplorationChromeGlobalStyles = () => {
   const euiTheme = useEuiTheme();

@@ -47,14 +47,6 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: none !important;
     }
 
-    ${scope} [class*='css-'][class*='-global_header_shell--rightGroup'] {
-      gap: 2px !important;
-    }
-
-    ${scope} [data-test-subj='chromeNextGlobalHeaderActions'] {
-      display: none !important;
-    }
-
     ${scope} [data-test-subj='kbnGridLayout'] {
       --kbnGridGutterSize: ${knobVar('gridGutter')} !important;
       padding: ${knobVar('padding')} !important;
@@ -308,10 +300,6 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutNavigation {
       border-inline-end: ${DESIGN_EXPLORATION_BORDER_WIDTH}px solid ${colors.borderBaseSubdued} !important;
-    }
-
-    ${scope} .kbnChromeLayoutHeader {
-      border-block-end: ${DESIGN_EXPLORATION_BORDER_WIDTH}px solid ${colors.borderBaseSubdued} !important;
     }
   `;
 };

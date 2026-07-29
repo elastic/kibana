@@ -565,33 +565,6 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
     }
 
-    ${scope} .kbnChromeLayoutHeader {
-      background-color: transparent !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-    }
-
-    ${scope} [class*='css-'][class*='-global_header_shell--logoSlot'] {
-      --logo-width: 56px !important;
-      width: 56px !important;
-    }
-
-    ${scope} [data-test-subj='chromeNextGlobalHeader'] > [class*='css-'][class*='-global_header_shell--leftGroup'] + [class*='css-'][class*='-global_header_shell--separator'] {
-      display: none !important;
-    }
-
-    // ${scope} [data-test-subj='chromeNextGlobalHeader'] {
-    //   border-bottom: ${NIRBANA_HAIRLINE} !important;
-    // }
-
-    ${scope} [class*='css-'][class*='-global_header_shell--rightGroup'] {
-      gap: 4px !important;
-    }
-
-    ${scope} [data-test-subj='chromeNextGlobalHeaderActions'] {
-      display: none !important;
-    }
-
     /* ----- Dashboard grid & panels ----- */
     /* Wider gutter than Linbana — panels read as individually-bordered cards
        with generous air between them, rather than tightly packed regions of

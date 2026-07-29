@@ -10,7 +10,7 @@
 import React from 'react';
 import type { ReactElement } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { POPOVER_WIDTH_PX } from './types';
 
@@ -20,11 +20,13 @@ interface ContextSwitcherTriggerButtonProps {
   readonly onClick: () => void;
   readonly isSelected?: boolean;
   readonly title?: string;
+  readonly iconOnly?: boolean;
 }
 
 /**
  * Trigger button UI for the context switcher popover.
  * Solution logo (left), space name (middle), down arrow (right).
+ * When `iconOnly`, renders a grid ("apps") icon button for nav chrome.
  */
 export const ContextSwitcherTriggerButton = ({
   solutionIcon,
@@ -32,8 +34,23 @@ export const ContextSwitcherTriggerButton = ({
   onClick,
   isSelected,
   title,
+  iconOnly = false,
 }: ContextSwitcherTriggerButtonProps): ReactElement => {
   const { euiTheme } = useEuiTheme();
+
+  if (iconOnly) {
+    return (
+      <EuiButtonIcon
+        aria-label={label}
+        color={isSelected ? 'primary' : 'text'}
+        data-test-subj="contextSwitcherTriggerButton"
+        display={isSelected ? 'base' : 'empty'}
+        iconType="apps"
+        onClick={onClick}
+        size="s"
+      />
+    );
+  }
 
   return (
     <EuiButtonEmpty
