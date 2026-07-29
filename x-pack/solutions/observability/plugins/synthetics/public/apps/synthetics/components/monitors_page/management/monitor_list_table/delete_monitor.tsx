@@ -23,12 +23,14 @@ export const DeleteMonitor = ({
   configIds,
   isProjectMonitor,
   setMonitorPendingDeletion,
+  onCompleted,
 }: {
   configIds: string[];
   name: string;
   isProjectMonitor: boolean;
   reloadPage: () => void;
   setMonitorPendingDeletion: (val: string[]) => void;
+  onCompleted?: () => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { spaceId } = useGetUrlParams();
@@ -93,6 +95,8 @@ export const DeleteMonitor = ({
     ) {
       setIsDeleting(false);
       setMonitorPendingDeletion([]);
+      // The delete ran (success or failure), so the selection is now stale.
+      onCompleted?.();
     }
   }, [
     setIsDeleting,
@@ -100,6 +104,7 @@ export const DeleteMonitor = ({
     reloadPage,
     monitorDeleteStatus,
     setMonitorPendingDeletion,
+    onCompleted,
     name,
     configIds.length,
   ]);

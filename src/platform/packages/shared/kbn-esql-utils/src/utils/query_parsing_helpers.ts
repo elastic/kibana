@@ -28,6 +28,7 @@ import type {
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
+  ESQLCommand,
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
@@ -177,6 +178,14 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
+ * Converts a single TS command node to an equivalent FROM command node, preserving its
+ * source arguments. Returns the command unchanged if it isn't a TS command.
+ */
+export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T): T {
+  return cmd.name === 'ts' ? { ...cmd, name: 'from' } : cmd;
+}
+
+/**
  * Converts timeseries (TS) commands to FROM commands in an ES|QL query
  * @param esql - The ES|QL query string
  * @returns The modified query with TS commands converted to FROM commands
@@ -186,10 +195,7 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
   const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
-  const fromCommand = {
-    ...timeseriesCommand,
-    name: 'from',
-  };
+  const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
 
   // Replace the ts command with the from command in the commands array
   const newCommands = root.commands.map((command) =>
@@ -323,8 +329,17 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = Parser.parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
+  const params: string[] = [];
+  const collect = (node: { literalType: string; text: string }) => {
+    if (node.literalType === 'param') params.push(node.text);
+  };
+  // TODO: simplify to Walker.params(root) once @elastic/esql is bumped to the version
+  // that natively collects PromQL param literals via visitPromqlLiteral.
+  Walker.walk(root, {
+    visitLiteral: collect,
+    promql: { visitPromqlLiteral: collect },
+  });
+  return [...new Set(params.map((t) => t.replace(LEADING_PARAM_PREFIX_REGEX, '')))];
 };
 
 /**
