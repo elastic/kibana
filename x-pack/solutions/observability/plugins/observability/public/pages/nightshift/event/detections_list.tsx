@@ -340,9 +340,7 @@ export function DetectionsList({
 
   const cachedDetectionCount = data?.detections?.length ?? 0;
   const isInitialLoading = isLoading && cachedDetectionCount === 0;
-  const isRefetching = isFetching && !isInitialLoading;
-  const showDetectionSkeletons =
-    !isError && (isInitialLoading || (isRefetching && cachedDetectionCount > 0));
+  const showDetectionSkeletons = !isError && isInitialLoading;
   const skeletonCount = isInitialLoading ? INITIAL_DETECTION_SKELETON_COUNT : cachedDetectionCount;
 
   return (
