@@ -21,4 +21,10 @@ const AssigneeSchema = schema.object({
 
 export const casesSchema = casesSchemaV9.extends({
   assignees: schema.arrayOf(AssigneeSchema),
+  // `settings.syncAlerts` is mapped since v1, but the v5 override dropped it from
+  // the schema; re-declare it so the latest MV schema covers the mapping.
+  settings: schema.object({
+    syncAlerts: schema.maybe(schema.boolean()),
+    extractObservables: schema.maybe(schema.boolean()),
+  }),
 });
