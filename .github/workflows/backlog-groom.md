@@ -12,7 +12,7 @@ if: github.event.label.name == 'backlog-groom'
 steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
     with:
-      node-version: '24.17.0'
+      node-version-file: '.nvmrc'
       cache: yarn
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
@@ -26,12 +26,12 @@ engine:
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ENABLE_PROMPT_CACHING_1H: "1"
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.7[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 tools:
   github:
@@ -44,7 +44,7 @@ network:
     - github
     - node
     - kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 checkout:
   fetch-depth: 0
 safe-outputs:

@@ -31,7 +31,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { useMutation } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -43,6 +43,7 @@ import { PICK_ASSET_CRITICALITY } from './translations';
 import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
+import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 import type {
   CriticalityLevel,
   CriticalityLevelWithUnassigned,
@@ -175,6 +176,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
   onSaveViaEntityStore,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const queryClient = useQueryClient();
   const privileges = useAssetCriticalityPrivileges(entity.name);
   const standardCriticality = useAssetCriticalityData({
     entity,
@@ -198,6 +200,11 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
         },
       });
       await onSaveViaEntityStore(updatedRecord);
+      // The updated criticality can change the entity's calculated risk score,
+      // so any UI reading live risk from the Entity Store — such as the
+      // threat hunting leads cards — needs a refetch rather than relying on
+      // its own cache TTL.
+      queryClient.invalidateQueries({ queryKey: [ENTITY_STORE_ENTITIES_LIST] });
       onChange?.();
     },
   });

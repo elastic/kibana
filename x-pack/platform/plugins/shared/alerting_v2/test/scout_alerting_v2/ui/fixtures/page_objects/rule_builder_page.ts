@@ -9,8 +9,8 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 
 const BUILDER_CARDS: Record<string, { testSubj: string; buttonName: RegExp }> = {
   threshold: {
-    testSubj: 'createThresholdAlertCard',
-    buttonName: /threshold alert/i,
+    testSubj: 'createThresholdRuleCard',
+    buttonName: /threshold rule/i,
   },
 };
 

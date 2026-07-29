@@ -93,6 +93,10 @@ export const defineIndexThresholdRule = async (
   name: string,
   indexName: string = THRESHOLD_TEST_INDEX
 ) => {
+  // Wait for the rules app to finish its (potentially slow, cold) client-side
+  // bootstrap before the first interaction: gotoApp only resolves on the `load`
+  // event, so the button can be absent when the default 10s click timeout fires.
+  await expect(page.testSubj.locator('createRuleButton')).toBeVisible({ timeout: 30_000 });
   await page.testSubj.click('createRuleButton');
   await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
   await page.testSubj.click('.index-threshold-SelectOption');

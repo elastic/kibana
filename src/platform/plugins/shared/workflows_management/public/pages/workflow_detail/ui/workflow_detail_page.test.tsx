@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useHistory } from 'react-router-dom';
+import { useTemplate, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock } from '../../../mocks';
@@ -50,11 +52,25 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+  useTemplate: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
+const mockUseTemplate = useTemplate as jest.MockedFunction<typeof useTemplate>;
+
+// The page only reads `data` / `isInitialLoading` / `isError` off the query
+// result, so tests mock just those; the double cast avoids spelling out the
+// ~20 other react-query result fields. `isLoading` is intentionally pinned to
+// the react-query v4 disabled-query behavior (`true` when there's no data) so
+// the page can't accidentally depend on it — see the seeding effect.
+const asTemplateQueryResult = (result: {
+  data?: unknown;
+  isInitialLoading: boolean;
+  isError: boolean;
+}): ReturnType<typeof useTemplate> =>
+  ({ ...result, isLoading: !result.data } as unknown as ReturnType<typeof useTemplate>);
 
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
   loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
@@ -135,7 +151,8 @@ describe('WorkflowDetailPage', () => {
     props: WorkflowDetailPageProps,
     storeSetup?: (
       store: ReturnType<typeof createMockStore>
-    ) => void | ReturnType<typeof createMockStore>
+    ) => void | ReturnType<typeof createMockStore>,
+    initialEntries?: string[]
   ) => {
     let store = createMockStore();
 
@@ -149,11 +166,25 @@ describe('WorkflowDetailPage', () => {
     const services = createStartServicesMock();
     const navigateToApp = jest.spyOn(services.application, 'navigateToApp');
 
-    const view = render(<WorkflowDetailPage {...props} />, {
-      wrapper: getTestProvider({ store, services }),
-    });
+    // Captures the MemoryRouter history so tests can mutate the URL query the
+    // way `useWorkflowUrlState` does (e.g. `?view=graph` on view toggle).
+    const historyRef: { current?: ReturnType<typeof useHistory> } = {};
+    const CaptureHistory = () => {
+      historyRef.current = useHistory();
+      return null;
+    };
 
-    return { ...view, navigateToApp };
+    const view = render(
+      <>
+        <CaptureHistory />
+        <WorkflowDetailPage {...props} />
+      </>,
+      {
+        wrapper: getTestProvider({ store, services, initialEntries }),
+      }
+    );
+
+    return { ...view, navigateToApp, historyRef };
   };
 
   beforeEach(() => {
@@ -168,6 +199,13 @@ describe('WorkflowDetailPage', () => {
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
+    mockUseTemplate.mockReturnValue(
+      asTemplateQueryResult({
+        data: undefined,
+        isInitialLoading: false,
+        isError: false,
+      })
+    );
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
       selectedExecutionId: undefined,
@@ -194,6 +232,106 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(dispatchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('when creating from a template (`?fromTemplate=<slug>`)', () => {
+    const templateYaml = 'name: My template workflow\nsteps:\n  - name: hello\n    type: console\n';
+    const template = {
+      raw: templateYaml,
+      body: {},
+      metadata: { slug: 'my-template', name: 'My template', version: '1.0.0', categories: [] },
+    };
+
+    const getSeededYaml = (store: ReturnType<typeof createMockStore>) =>
+      selectYamlString(store.getState());
+
+    it('seeds the editor with the rendered template yaml', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=my-template']);
+
+      expect(mockUseTemplate).toHaveBeenCalledWith('my-template');
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('does not reset the yaml when the URL query changes (e.g. switching to the graph view)', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        '/create?fromTemplate=my-template',
+      ]);
+      expect(getSeededYaml(store)).toBe(templateYaml);
+
+      // Simulate `useWorkflowUrlState` mutating the query on view toggle.
+      act(() => {
+        historyRef.current?.replace('/create?fromTemplate=my-template&view=graph');
+      });
+
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('does not reset the yaml when a background refetch errors after a successful seed', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: false,
+        })
+      );
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        '/create?fromTemplate=my-template',
+      ]);
+      expect(getSeededYaml(store)).toBe(templateYaml);
+
+      // react-query v4 background refetch failure: `data` retained,
+      // `isError: true`. Trigger a re-render on the same component instance
+      // (so `seededWithRef` is preserved) via a router `replace` — this
+      // mirrors what happens on the create page when `useWorkflowUrlState`
+      // mutates `location.search` after a refetch-on-focus.
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: template,
+          isInitialLoading: false,
+          isError: true,
+        })
+      );
+      act(() => {
+        historyRef.current?.replace('/create?fromTemplate=my-template&view=graph');
+      });
+
+      expect(getSeededYaml(store)).toBe(templateYaml);
+    });
+
+    it('falls back to the default yaml when the template fails to load', () => {
+      mockUseTemplate.mockReturnValue(
+        asTemplateQueryResult({
+          data: undefined,
+          isInitialLoading: false,
+          isError: true,
+        })
+      );
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create?fromTemplate=missing']);
+
+      expect(getSeededYaml(store)).toContain('name: New workflow');
     });
   });
 

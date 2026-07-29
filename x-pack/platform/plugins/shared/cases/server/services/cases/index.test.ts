@@ -39,7 +39,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
-import { V2_NOOP_WRITER } from '../../cases_analytics_v2';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_WRITER,
+} from '../../cases_analytics_v2';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
@@ -175,6 +179,7 @@ describe('CasesService', () => {
     log: mockLogger,
     unsecuredSavedObjectsClient,
     config: {} as ConfigType,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
   });
 
   let service: CasesService;
@@ -185,9 +190,11 @@ describe('CasesService', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       attachmentService,
-      // Tests don't exercise the analytics v2 path; the no-op writer keeps
-      // every hook a tight no-op.
+      // Tests don't exercise the analytics v2 path; the no-op writers
+      // keep every hook a tight no-op.
       analyticsV2Writer: V2_NOOP_WRITER,
+      analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   });
 
@@ -275,9 +282,9 @@ describe('CasesService', () => {
               },
               Object {
                 "error": Object {
-                  "error": "error",
-                  "message": "message",
-                  "statusCode": 500,
+                  "error": "Not Found",
+                  "message": "Saved object not found",
+                  "statusCode": 404,
                 },
                 "id": "1",
                 "references": Array [],
@@ -2342,6 +2349,12 @@ describe('CasesService', () => {
           total: 1,
           per_page: 1,
           page: 1,
+          aggregations: {
+            references: {
+              doc_count: 0,
+              caseIds: { buckets: [] },
+            },
+          },
         });
       });
 
@@ -2375,25 +2388,7 @@ describe('CasesService', () => {
           },
         });
 
-        it('does not query cases-attachments when the unified attachments flag is off', async () => {
-          jest
-            .spyOn(attachmentService, 'isUnifiedAttachmentsEnabled', 'get')
-            .mockReturnValue(false);
-
-          unsecuredSavedObjectsClient.find.mockResolvedValueOnce(buildAggsResponse(['legacy-1']));
-
-          const res = await service.getCaseIdsByAlertId({ alertId: '1' });
-
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-            expect.objectContaining({ type: 'cases-comments' })
-          );
-          expect(CasesService.getCaseIDsFromAlertAggs(res)).toEqual(['legacy-1']);
-        });
-
-        it('runs an additional cases-attachments find when the flag is on and merges deduped case ids', async () => {
-          jest.spyOn(attachmentService, 'isUnifiedAttachmentsEnabled', 'get').mockReturnValue(true);
-
+        it('always issues both cases-comments and cases-attachments finds and merges deduped case ids', async () => {
           unsecuredSavedObjectsClient.find
             .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'legacy-only']))
             .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'unified-only']));
@@ -2404,12 +2399,10 @@ describe('CasesService', () => {
           });
 
           expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
-            1,
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
             expect.objectContaining({ type: 'cases-comments' })
           );
-          expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
-            2,
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
             expect.objectContaining({ type: 'cases-attachments' })
           );
 
@@ -3666,6 +3659,93 @@ describe('CasesService', () => {
         ]);
       });
     });
+
+    describe('searchCasesGroupedByID stats', () => {
+      const namespaces = ['default'];
+
+      const mockSearch = () => {
+        const searchMock = jest.fn().mockResolvedValue({
+          hits: { hits: [], total: { value: 0 } },
+          aggregations: {
+            statuses: {
+              buckets: [
+                { key: '0', doc_count: 2 },
+                { key: '10', doc_count: 3 },
+                { key: '20', doc_count: 5 },
+              ],
+            },
+            mttr: { value: 360 },
+          },
+        });
+        // The SO mock doesn't include `search` by default, so wire it up here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = searchMock;
+        jest
+          .spyOn(attachmentService.getter, 'getCaseAttatchmentStats')
+          .mockResolvedValue(new Map());
+        return searchMock;
+      };
+
+      it('does not run a stats query when statsOptions is not provided', async () => {
+        const searchMock = mockSearch();
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'anything' },
+          namespaces,
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(1);
+        expect(result.searchStats).toBeUndefined();
+      });
+
+      it('computes status counts and mttr with the same search query as the case list', async () => {
+        const searchMock = mockSearch();
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'my search term' },
+          namespaces,
+          statsOptions: {},
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(2);
+
+        const statsCall = searchMock.mock.calls.find(([args]) => args.size === 0)?.[0];
+        expect(statsCall).toBeDefined();
+        expect(statsCall.aggs).toEqual({
+          statuses: {
+            terms: { field: 'cases.status', size: 3, order: { _key: 'asc' } },
+          },
+          mttr: { avg: { field: 'cases.duration' } },
+        });
+        // The stats query carries the same free-text search clause as the list query.
+        const listCall = searchMock.mock.calls.find(([args]) => args.size !== 0)?.[0];
+        expect(statsCall.query).toEqual(listCall.query);
+
+        expect(result.searchStats).toEqual({
+          statusStats: { open: 2, 'in-progress': 3, closed: 5 },
+          mttr: 360,
+        });
+      });
+
+      it('returns zero counts and null mttr when the stats query matches nothing', async () => {
+        const searchMock = mockSearch();
+        searchMock.mockResolvedValue({
+          hits: { hits: [], total: { value: 0 } },
+          aggregations: { statuses: { buckets: [] }, mttr: { value: null } },
+        });
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'nothing matches' },
+          namespaces,
+          statsOptions: {},
+        });
+
+        expect(result.searchStats).toEqual({
+          statusStats: { open: 0, 'in-progress': 0, closed: 0 },
+          mttr: null,
+        });
+      });
+    });
   });
 
   describe('cases-analytics v2 writer integration', () => {
@@ -3679,13 +3759,29 @@ describe('CasesService', () => {
         bulkDeleteCases: jest.fn(),
         bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
       };
+      const analyticsV2ActivityWriter = {
+        upsertAction: jest.fn(),
+        bulkUpsertActions: jest.fn(),
+        bulkDeleteActionsByCaseIds: jest.fn(),
+        bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const analyticsV2AttachmentsWriter = {
+        upsertAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
+        bulkUpsertAttachments: jest.fn(),
+        bulkDeleteAttachments: jest.fn(),
+        bulkDeleteAttachmentsByCaseIds: jest.fn(),
+        bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+      };
       const svc = new CasesService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
         attachmentService,
         analyticsV2Writer,
+        analyticsV2ActivityWriter,
+        analyticsV2AttachmentsWriter,
       });
-      return { svc, analyticsV2Writer };
+      return { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter };
     };
 
     describe('bulkDeleteCaseEntities', () => {
@@ -3706,7 +3802,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
         await svc.bulkDeleteCaseEntities({
           entities: [
             { type: CASE_SAVED_OBJECT, id: 'case-A' },
@@ -3719,6 +3815,15 @@ describe('CasesService', () => {
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
         expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // The activity surface cascades the same successful-case-id set:
+        // deleting a case cascades to its user-action SOs at the SO layer,
+        // and reconciliation can't see that gap, so the activity docs are
+        // dropped explicitly here.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledTimes(1);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
       });
 
       it('skips analytics writes for non-case entity types', async () => {
@@ -3731,7 +3836,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
         await svc.bulkDeleteCaseEntities({
           entities: [
             { type: CASE_COMMENT_SAVED_OBJECT, id: 'comment-1' },
@@ -3742,6 +3847,29 @@ describe('CasesService', () => {
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
         expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // Activity cascade is keyed by case id and likewise skips the
+        // non-case entity — only `case-A` is passed through.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+    });
+
+    describe('deleteCase', () => {
+      it('cascades the deleted case id to the activity surface', async () => {
+        unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.deleteCase({ id: 'case-A', refresh: false });
+
+        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith('case-A');
+        // Deleting the case cascades to its user-action SOs at the SO
+        // layer; reconciliation can't detect that, so the activity docs
+        // are dropped explicitly by case id.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
       });
     });
 

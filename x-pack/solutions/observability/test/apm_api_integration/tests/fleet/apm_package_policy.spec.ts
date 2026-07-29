@@ -14,7 +14,7 @@ import {
 } from '@kbn/apm-plugin/server/routes/fleet/get_package_policy_decorators';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
+import type { SourceMap } from '@kbn/apm-api-shared';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import {

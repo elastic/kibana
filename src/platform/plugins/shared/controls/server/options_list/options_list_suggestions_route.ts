@@ -49,6 +49,7 @@ const optionsListFetchBodyCommonSchema = schema.object(
     ignoreValidations: schema.maybe(schema.boolean()),
     isReload: schema.maybe(schema.boolean()),
     sort: schema.maybe(schema.any()),
+    projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
   },
   { unknowns: 'allow' }
 );
@@ -141,7 +142,7 @@ const getOptionsListDslSuggestions = async ({
   const abortController = new AbortController();
   abortedEvent$.subscribe(() => abortController.abort());
 
-  const { kind: _kind, index, ...rest } = request;
+  const { kind: _kind, index, projectRouting, ...rest } = request;
   const suggestionRequest = rest as OptionsListRequestBody;
   /**
    * Build ES Query
@@ -180,7 +181,14 @@ const getOptionsListDslSuggestions = async ({
   /**
    * Run ES query
    */
-  const rawEsResult = await esClient.search({ index, ...body }, { signal: abortController.signal });
+  const rawEsResult = await esClient.search(
+    {
+      index,
+      ...(projectRouting !== undefined && { project_routing: projectRouting }),
+      ...body,
+    },
+    { signal: abortController.signal }
+  );
 
   /**
    * Parse ES response into Options List Response
@@ -222,6 +230,7 @@ const getOptionsListEsqlSuggestions = async ({
     filter: request.filter,
     esqlVariables: request.esqlVariables ?? [],
     timezone,
+    projectRouting: request.projectRouting,
   });
 
   if (getESQLSingleColumnValues.isSuccess(result)) {

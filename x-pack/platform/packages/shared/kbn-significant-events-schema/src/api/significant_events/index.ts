@@ -7,15 +7,18 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import type { TaskStatus } from '@kbn/streams-schema';
 import {
   esqlQuerySchema,
   queryFeatureSchema,
   queryTypeSchema,
   type StreamQuery,
 } from '../../queries';
-import type { Discovery } from '../../significant_events/discoveries';
-import type { Detection } from '../../significant_events/detections';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../significant_events/constants';
+import type { ChangePointType } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
 
 /**
@@ -42,7 +45,7 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQuery & {
+type QueryWithOccurrences = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
@@ -51,19 +54,19 @@ type SignificantEventsResponse = StreamQuery & {
   rule_backed: boolean;
 };
 
-interface SignificantEventsGetResponse {
-  significant_events: SignificantEventsResponse[];
+interface QueryOccurrencesResponse {
+  queries: QueryWithOccurrences[];
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
 export const generatedSignificantEventQuerySchema = z.object({
   type: queryTypeSchema,
-  title: z.string(),
+  title: z.string().max(MAX_TITLE_LENGTH),
   esql: esqlQuerySchema,
   severity_score: z.number().min(0).max(100),
-  description: z.string(),
-  evidence: z.array(z.string()).optional(),
-  replaces: z.string().optional(),
+  description: z.string().max(MAX_TEXT_LENGTH),
+  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+  replaces: z.string().max(MAX_ID_LENGTH).optional(),
   features: z.array(queryFeatureSchema),
 });
 
@@ -74,44 +77,26 @@ interface SignificantEventsQueriesGenerationResult {
   tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
 }
 
-type SignificantEventsQueriesGenerationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & SignificantEventsQueriesGenerationResult);
-
 interface LifecycleDetection {
   detection_id: string;
-  rule_name?: string;
-  stream_name?: string;
-  change_point_type?: string;
-  kind: Extract<Detection['kind'], 'detection' | 'quiet'>;
+  rule_name: string;
+  /** Alerting rule that produced the detection; used to match event evidence. */
+  rule_uuid?: string;
+  stream_name: string;
+  change_point_type: ChangePointType;
   '@timestamp': string;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  discoveries: Discovery[];
   events: SignificantEvent[];
 }
 
 export type {
-  SignificantEventsResponse,
-  SignificantEventsGetResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
   LifecycleDetection,
   EventLifecycleResponse,
 };

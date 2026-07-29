@@ -100,7 +100,13 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
       `}
     >
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-        <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="xs"
+          css={css`
+            min-width: 0;
+          `}
+        >
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -123,8 +129,19 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="xs"
+              responsive={false}
+              css={css`
+                min-width: 0;
+              `}
+            >
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={item.user ? 'user' : 'logoElastic'}
@@ -133,8 +150,17 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                   aria-hidden={true}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{username}</EuiText>
+              <EuiFlexItem
+                className="eui-textTruncate"
+                css={css`
+                  min-width: 0;
+                `}
+              >
+                <EuiToolTip content={username} anchorClassName="eui-textTruncate">
+                  <EuiText size="xs" className="eui-textTruncate">
+                    {username}
+                  </EuiText>
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">

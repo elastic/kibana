@@ -8,6 +8,9 @@
 export const DASHBOARDS_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Dashboards"]';
 
+export const DETECTIONS_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Detections"]';
+
 export const ALERTS_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Alerts"]';
 

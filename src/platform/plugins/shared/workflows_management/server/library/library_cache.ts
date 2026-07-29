@@ -9,9 +9,11 @@
 
 import type { TemplateBody, TemplatesCatalog } from '@kbn/workflows-library';
 
+export type LibrarySourceMode = 'http' | 'bundle';
+
 export interface LibraryHealth {
-  sourceMode: 'http';
-  lastRefreshAt?: string;
+  sourceMode: LibrarySourceMode;
+  lastRefreshAt: string | null;
   lastError?: { message: string; at: string };
 }
 
@@ -36,7 +38,10 @@ export class LibraryCache {
   private lastRefreshAt?: Date;
   private lastError?: { message: string; at: Date };
 
-  constructor(private readonly ttlMs: number) {}
+  constructor(
+    private readonly ttlMs: number,
+    private readonly sourceMode: LibrarySourceMode = 'http'
+  ) {}
 
   isFresh(): boolean {
     if (!this.catalog || !this.lastRefreshAt) return false;
@@ -74,8 +79,8 @@ export class LibraryCache {
 
   getHealth(): LibraryHealth {
     return {
-      sourceMode: 'http',
-      lastRefreshAt: this.lastRefreshAt?.toISOString(),
+      sourceMode: this.sourceMode,
+      lastRefreshAt: this.lastRefreshAt?.toISOString() ?? null,
       lastError: this.lastError
         ? { message: this.lastError.message, at: this.lastError.at.toISOString() }
         : undefined,

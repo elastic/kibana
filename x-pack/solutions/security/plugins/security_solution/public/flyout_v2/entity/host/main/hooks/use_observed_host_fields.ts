@@ -10,13 +10,14 @@ import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use
 import type { HostItem } from '../../../../../../common/search_strategy';
 import { getAnomaliesFields } from '../../../../../flyout/entity_details/shared/common';
 import type { EntityTableRows } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
-import type { ObservedEntityData } from '../../../../../flyout/entity_details/shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { policyFields } from '../fields/endpoint_policy_fields';
 import { basicHostFields } from '../fields/basic_host_fields';
 import { cloudFields } from '../fields/cloud_fields';
 
 export const useObservedHostFields = (
-  hostData: ObservedEntityData<HostItem>
+  hostData: ObservedEntityData<HostItem>,
+  hideAnomalies: boolean = false
 ): EntityTableRows<ObservedEntityData<HostItem>> => {
   const mlCapabilities = useMlCapabilities();
 
@@ -27,9 +28,9 @@ export const useObservedHostFields = (
 
     return [
       ...basicHostFields,
-      ...getAnomaliesFields(mlCapabilities),
+      ...(hideAnomalies ? [] : getAnomaliesFields(mlCapabilities)),
       ...cloudFields,
       ...policyFields,
     ];
-  }, [hostData, mlCapabilities]);
+  }, [hostData, hideAnomalies, mlCapabilities]);
 };

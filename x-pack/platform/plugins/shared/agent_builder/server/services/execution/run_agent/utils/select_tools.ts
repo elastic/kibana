@@ -173,6 +173,7 @@ export const builtinToolToExecutable = ({
     experimental: tool.experimental ?? false,
     getSchema: () => tool.schema,
     summarizeToolReturn: tool.summarizeToolReturn,
+    maxResultTokens: tool.maxResultTokens,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,

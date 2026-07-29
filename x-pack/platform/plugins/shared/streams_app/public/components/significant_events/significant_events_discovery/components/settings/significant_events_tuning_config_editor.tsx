@@ -9,8 +9,10 @@ import React, { useCallback } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import type { SignificantEventsTuningConfig } from '@kbn/streams-plugin/common';
-import { validateSignificantEventsTuningConfig } from './validate_significant_events_tuning_config';
+import {
+  type SignificantEventsTuningConfig,
+  validateSignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 
 /**
  * Converts a SignificantEventsTuningConfig to an annotated YAML string with section headers
@@ -45,9 +47,15 @@ export function configToAnnotatedYaml(config: SignificantEventsTuningConfig): st
     '# Max must_not entity filters during sampling (1-50)',
     `max_entity_filters: ${config.max_entity_filters}`,
     '',
+    '# Deadline (ms) per ES|QL sampling query, not additive across arms (1000-240000)',
+    `sampling_timeout_ms: ${config.sampling_timeout_ms}`,
+    '',
+    '# Deadline (ms) per ES|QL query validation during generation (1000-240000)',
+    `query_validation_timeout_ms: ${config.query_validation_timeout_ms}`,
+    '',
     '# ── Search & Relevance ──',
     '',
-    '# Minimum ELSER score for semantic search results (0-100)',
+    '# Minimum ELSER score for semantic search results (0-1)',
     `semantic_min_score: ${config.semantic_min_score}`,
     '',
     '# RRF rank constant for hybrid search (1-100, ES default=60)',

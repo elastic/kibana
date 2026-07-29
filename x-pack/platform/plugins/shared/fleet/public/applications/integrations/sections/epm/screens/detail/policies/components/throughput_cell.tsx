@@ -50,7 +50,12 @@ export const ThroughputCell: React.FC<{
   }
 
   const content = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="spaceBetween"
+      alignItems="center"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiText size="s" className="eui-textNoWrap" data-test-subj="agentlessThroughputValue">
           {formatRate(data.averagePerSecond)}
@@ -93,6 +98,7 @@ export const ThroughputCell: React.FC<{
   return (
     <EuiLink
       href={discover.href}
+      css={{ width: '100%' }}
       onClick={(e: React.MouseEvent) => {
         // Allow modifier-key clicks (cmd/ctrl/shift) and middle-clicks to open
         // a new tab naturally; intercept plain left-clicks for SPA navigation.

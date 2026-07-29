@@ -15,6 +15,7 @@ import type {
   EnterDefaultBranchNode,
   EnterForeachNode,
   EnterIfNode,
+  EnterParallelNode,
   EnterRetryNode,
   EnterSwitchNode,
   EnterTryBlockNode,
@@ -29,6 +30,7 @@ import type {
   ExitWhileNode,
   LoopBreakNode,
   LoopContinueNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
@@ -68,6 +70,7 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { EnterParallelNodeImpl, ExitParallelNodeImpl } from './parallel_step';
 import {
   EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
@@ -80,6 +83,7 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { WaitForApprovalStepImpl } from './wait_for_approval_step/wait_for_approval_step';
 import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
@@ -216,6 +220,18 @@ export class NodesFactory {
           this.stepIoService,
           this.workflowGraph
         );
+      case 'enter-parallel':
+        return new EnterParallelNodeImpl(
+          node as EnterParallelNode,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory,
+          this,
+          this.workflowGraph
+        );
+      case 'exit-parallel':
+        return new ExitParallelNodeImpl(this.workflowRuntime);
       case 'loop-break':
         return new LoopBreakNodeImpl(
           node as LoopBreakNode,
@@ -353,7 +369,18 @@ export class NodesFactory {
           node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.connectorExecutor,
+          this.dependencies
+        );
+      case 'waitForApproval':
+        return new WaitForApprovalStepImpl(
+          node as WaitForApprovalGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.connectorExecutor,
+          this.dependencies
         );
       case 'atomic':
         return new AtomicStepImpl(

@@ -53,8 +53,8 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -83,6 +83,10 @@ const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
 jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
+
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -242,9 +246,10 @@ describe('<HostDetails />', () => {
     it('should render the related user table with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
+        entityId: undefined,
         from: timestamp,
         hostName: defaultProps.hostName,
-        indexNames: ['index'],
+        indexNames: ['entities-latest-default'],
         skip: false,
       });
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();

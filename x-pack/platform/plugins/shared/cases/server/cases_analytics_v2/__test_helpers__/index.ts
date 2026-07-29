@@ -16,19 +16,28 @@
 
 import type {
   SavedObject,
+  SavedObjectReference,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { DataView, DataViewSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { CASE_SAVED_OBJECT, CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import { stringify as stringifyYaml } from 'yaml';
+import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../common/constants';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
   type CasePersistedAttributes,
 } from '../../common/types/case';
+import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
+import type { CasesActivityV2WriterContract } from '../writer/activity';
 
 // ----- Saved-object factories -----
 
@@ -74,25 +83,121 @@ export const makeCase = (
   } as SavedObject<CasePersistedAttributes>);
 
 /**
- * Build a `cases-templates` SO with the persisted shape the
- * analytics-v2 data view service reads. Only `attributes.fieldNames`
- * is consumed, so the factory leaves everything else minimal.
+ * Build a `cases-user-actions` SO with safe defaults, for the activity
+ * surface (writer, runner, doc-builder). Mirrors the real persisted
+ * shape: the parent case lives in `references` (name `associated-cases`)
+ * and, for connector actions, the connector id lives in `references`
+ * under `CONNECTOR_ID_REFERENCE_NAME` (not in the payload).
+ *
+ * Override `namespaces` when a test exercises non-default-space
+ * `space_id` resolution; leave it alone otherwise.
  */
+export const makeUserAction = (
+  id: string,
+  opts: {
+    type?: string;
+    action?: string;
+    payload?: Record<string, unknown>;
+    owner?: string;
+    createdAt?: string;
+    namespaces?: string[];
+    references?: SavedObjectReference[];
+    createdBy?: UserActionPersistedAttributes['created_by'] | null;
+  } = {}
+): SavedObject<UserActionPersistedAttributes> =>
+  ({
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+    id,
+    namespaces: opts.namespaces ?? ['default'],
+    references: opts.references ?? [
+      { id: 'case-1', type: CASE_SAVED_OBJECT, name: 'associated-cases' },
+    ],
+    attributes: {
+      action: opts.action ?? 'create',
+      type: opts.type ?? 'create_case',
+      payload: opts.payload ?? {},
+      owner: opts.owner ?? 'securitySolution',
+      created_at: opts.createdAt ?? '2026-05-01T00:00:00.000Z',
+      created_by:
+        opts.createdBy === undefined
+          ? { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' }
+          : opts.createdBy,
+    } as UserActionPersistedAttributes,
+  } as SavedObject<UserActionPersistedAttributes>);
+
+/**
+ * Build a `cases-templates` SO with the persisted shape the analytics-v2
+ * data view service reads. The service parses `attributes.definition` (the
+ * raw YAML) and resolves `$ref` fields against the template owner's field
+ * library, so the factory renders the given field entries into a valid YAML
+ * definition and carries an `owner`.
+ *
+ * Field entries are either inline (`{ name, type, control }`) or references
+ * (`{ $ref, name? }`) so tests can exercise both resolution paths.
+ */
+export interface TemplateFieldLike {
+  name?: string;
+  label?: string;
+  type?: string;
+  control?: string;
+  $ref?: string;
+}
+
 export interface TemplateLike {
-  fieldNames?: Array<{ name: string; label?: string; type: string; control?: string }>;
+  definition?: string;
+  owner?: string;
 }
 
 export const makeTemplate = (
   id: string,
-  fieldNames: NonNullable<TemplateLike['fieldNames']>
+  fields: TemplateFieldLike[],
+  { owner = 'securitySolution' }: { owner?: string } = {}
 ): SavedObject<TemplateLike> =>
   ({
     type: CASE_TEMPLATE_SAVED_OBJECT,
     id,
     namespaces: ['default'],
     references: [],
-    attributes: { fieldNames },
+    attributes: { owner, definition: stringifyYaml({ fields }) },
   } as unknown as SavedObject<TemplateLike>);
+
+/**
+ * Build a `cases-field-definitions` SO the analytics-v2 data view service
+ * reads for runtime projection. The service consumes `attributes.name`
+ * (what a template `$ref` points at), `attributes.owner` (scopes `$ref`
+ * resolution), `attributes.definition` (a YAML string of a single field
+ * entry), and `attributes.isGlobal`, so the factory derives the YAML from
+ * `{ name, type, control }`.
+ */
+export interface FieldDefinitionLike {
+  name: string;
+  owner: string;
+  definition: string;
+  isGlobal?: boolean;
+}
+
+export const makeFieldDefinition = (
+  id: string,
+  {
+    name,
+    type,
+    control = 'INPUT_TEXT',
+    isGlobal = true,
+    owner = 'securitySolution',
+  }: { name: string; type: string; control?: string; isGlobal?: boolean; owner?: string }
+): SavedObject<FieldDefinitionLike> =>
+  ({
+    type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+    id,
+    namespaces: ['default'],
+    references: [],
+    attributes: {
+      name,
+      owner,
+      isGlobal,
+      definition: stringifyYaml({ name, type, control }),
+    },
+  } as unknown as SavedObject<FieldDefinitionLike>);
 
 // ----- SO client `find` stub -----
 
@@ -128,15 +233,61 @@ export const stubFindWithPages = <T>(
   perPage = 100
 ): void => {
   let callIdx = 0;
-  client.find.mockImplementation(async () => {
+  client.find.mockImplementation(async (options) => {
+    // The data view service reads two SO types per ensure cycle
+    // (templates + field definitions). This legacy stub only feeds the
+    // template/case page sequence; field-definition reads return empty so
+    // they don't consume a page meant for the next cycle. Suites that
+    // exercise global fields use `stubFindByType` instead.
+    const type = (options as { type?: string })?.type;
+    if (type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+      return emptyPage<T>(perPage);
+    }
     const page = pages[callIdx] ?? [];
     callIdx++;
-    return {
-      saved_objects: page.map((so, idx) => ({ ...so, score: 1, sort: [idx] })) as never,
-      total: page.length,
-      per_page: perPage,
-      page: 1,
-    } as SavedObjectsFindResponse<T>;
+    return toFindResponse(page, perPage);
+  });
+};
+
+const emptyPage = <T>(perPage: number): SavedObjectsFindResponse<T> =>
+  toFindResponse<T>([], perPage);
+
+const toFindResponse = <T>(
+  page: Array<SavedObject<T>>,
+  perPage: number
+): SavedObjectsFindResponse<T> =>
+  ({
+    saved_objects: page.map((so, idx) => ({ ...so, score: 1, sort: [idx] })) as never,
+    total: page.length,
+    per_page: perPage,
+    page: 1,
+  } as SavedObjectsFindResponse<T>);
+
+/**
+ * Route the SO client's `find` by requested `type`, each type serving its
+ * own single populated page then empty pages thereafter. Use when a test
+ * needs templates and field definitions to resolve independently (the
+ * data view service reads both per ensure cycle).
+ */
+export const stubFindByType = (
+  client: ReturnType<typeof savedObjectsClientMock.create>,
+  results: {
+    templates?: Array<SavedObject<TemplateLike>>;
+    fieldDefinitions?: Array<SavedObject<FieldDefinitionLike>>;
+  },
+  perPage = 100
+): void => {
+  const served = { templates: false, fieldDefinitions: false };
+  client.find.mockImplementation(async (options) => {
+    const type = (options as { type?: string })?.type;
+    if (type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+      if (served.fieldDefinitions) return emptyPage(perPage);
+      served.fieldDefinitions = true;
+      return toFindResponse(results.fieldDefinitions ?? [], perPage);
+    }
+    if (served.templates) return emptyPage(perPage);
+    served.templates = true;
+    return toFindResponse(results.templates ?? [], perPage);
   });
 };
 
@@ -158,19 +309,64 @@ export const makeWriterMock = (): jest.Mocked<CasesAnalyticsV2WriterContract> =>
   bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
 });
 
+/**
+ * Mock implementation of the activity writer contract. Same intent as
+ * `makeWriterMock` — for tests asserting the right calls are dispatched
+ * (activity runner, service-layer cascade/mirror hooks). Tests that
+ * exercise the real writer's retry / failure logic construct it directly
+ * — see `writer/activity.test.ts`.
+ */
+export const makeActivityWriterMock = (): jest.Mocked<CasesActivityV2WriterContract> => ({
+  upsertAction: jest.fn(),
+  bulkUpsertActions: jest.fn(),
+  bulkDeleteActionsByCaseIds: jest.fn(),
+  bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+});
+
 // ----- Data-views service mocks -----
 
 export interface MockDvService {
   get: jest.Mock;
+  /**
+   * `create(spec, skipFetchFields)` — builds an (unsaved) data view from the
+   * spec. The production bootstrap uses `create` + `createSavedObject`
+   * instead of `createAndSave` specifically to avoid `createAndSave`'s
+   * unconditional `setDefault` side effect (which would hijack the space's
+   * default data view). The default implementation echoes the spec back as
+   * the "data view" so tests can assert on the spec passed to `create` and
+   * so the object handed to `createSavedObject` carries the same `id`.
+   */
+  create: jest.Mock;
+  createSavedObject: jest.Mock;
+  /**
+   * Present so tests can assert the bootstrap never calls it. `createAndSave`
+   * would call `setDefault` internally; the production code deliberately does
+   * not use it.
+   */
   createAndSave: jest.Mock;
+  /**
+   * Present so tests can assert the bootstrap never sets the default data
+   * view. Nothing in the analytics-v2 bootstrap should touch it.
+   */
+  setDefault: jest.Mock;
   updateSavedObject: jest.Mock;
 }
 
-export const makeMockDvService = (): MockDvService => ({
-  get: jest.fn(),
-  createAndSave: jest.fn(),
-  updateSavedObject: jest.fn(),
-});
+export const makeMockDvService = (): MockDvService => {
+  const service: MockDvService = {
+    get: jest.fn(),
+    create: jest.fn(),
+    createSavedObject: jest.fn(),
+    createAndSave: jest.fn(),
+    setDefault: jest.fn(),
+    updateSavedObject: jest.fn(),
+  };
+  // Echo the spec back as the created data view so `createSavedObject`
+  // receives an object with the same `id`/`runtimeFieldMap` and tests can
+  // read the spec off `create.mock.calls`.
+  service.create.mockImplementation((spec: DataViewSpec) => Promise.resolve(spec));
+  return service;
+};
 
 /**
  * Wrap a mock data views service into the plugin-start contract
@@ -215,7 +411,7 @@ export const makeDataViewWithRuntime = (
     () =>
       ({
         id,
-        title: '.cases',
+        title: '.cases,.cases-activity,.cases-attachments',
         runtimeFieldMap: { ...dv.__runtimeFieldMap },
       } as DataViewSpec)
   );

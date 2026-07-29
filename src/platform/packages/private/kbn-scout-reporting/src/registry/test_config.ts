@@ -11,7 +11,11 @@ import { globSync } from 'fast-glob';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_CONFIG_PATH_GLOB, SCOUT_UNIFIED_CONFIG_PATH_REGEX } from '@kbn/scout-info';
+import {
+  SCOUT_CONFIG_PATH_GLOB,
+  SCOUT_UNIFIED_CONFIG_PATH_REGEX,
+  testChannels,
+} from '@kbn/scout-info';
 import { existsSync, readFileSync } from 'node:fs';
 import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import type { ScoutTestableModule } from './testable_module';
@@ -21,6 +25,7 @@ export interface ScoutTestConfig {
   path: string;
   category: string;
   type: string;
+  namespace: string | undefined;
   module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
   server: {
@@ -30,13 +35,17 @@ export interface ScoutTestConfig {
 
 const loadScoutManifestFile = (
   manifestPath: string
-): { exists: boolean } & Pick<ScoutConfigManifest, 'sha1' | 'tests'> => {
+):
+  | ({ exists: true } & Omit<ScoutConfigManifest, 'exists'>)
+  | ({ exists: false } & Pick<ScoutConfigManifest, 'sha1' | 'testChannels' | 'tests'>) => {
   const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
   const manifestExists = existsSync(absoluteManifestPath);
+
   if (manifestExists) {
     try {
       return {
         exists: true,
+        testChannels: [],
         ...JSON.parse(readFileSync(absoluteManifestPath, 'utf8')),
       };
     } catch (e) {
@@ -47,6 +56,7 @@ const loadScoutManifestFile = (
   return {
     exists: false,
     sha1: '000000000000000-000000000000000',
+    testChannels: [],
     tests: [],
   };
 };
@@ -57,6 +67,7 @@ const resolveModuleMetadata = (
 ): {
   module: ScoutTestableModule;
   serverConfigSet: string | undefined;
+  namespace: string | undefined;
   testCategory: string;
   testConfigType: string;
 } => {
@@ -99,6 +110,7 @@ const resolveModuleMetadata = (
   return {
     module,
     serverConfigSet: g.serverConfigSet,
+    namespace: g.namespace,
     testCategory: g.testCategory,
     testConfigType: g.testConfigType,
   };
@@ -119,31 +131,37 @@ export const testConfig = {
     }
 
     const moduleRoot = configPath.split('/test/scout')[0];
-    const { module, serverConfigSet, testCategory, testConfigType } = resolveModuleMetadata(
-      configPath,
-      moduleRoot
+    const { module, serverConfigSet, namespace, testCategory, testConfigType } =
+      resolveModuleMetadata(configPath, moduleRoot);
+
+    const manifestPath = path.join(
+      ...[
+        moduleRoot,
+        'test',
+        `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`,
+        namespace,
+        '.meta',
+        testCategory,
+        `${testConfigType || 'standard'}.json`,
+      ].filter((segment) => segment !== undefined)
     );
 
-    const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
-    const manifestPath = path.join(
-      moduleRoot,
-      'test',
-      scoutDirName,
-      '.meta',
-      testCategory,
-      `${testConfigType || 'standard'}.json`
-    );
     const manifestFileData = loadScoutManifestFile(manifestPath);
 
     return {
       path: configPath,
       category: testCategory,
       type: testConfigType || 'standard',
+      namespace,
       module,
       manifest: {
         path: manifestPath,
         exists: manifestFileData.exists,
         sha1: manifestFileData.sha1,
+        testChannels:
+          manifestFileData.testChannels.length > 0
+            ? manifestFileData.testChannels
+            : testChannels.default,
         tests: manifestFileData.tests,
       },
       server: {
@@ -172,6 +190,41 @@ export const testConfigs = {
     const duration = (performance.now() - startTime) / 1000;
 
     this.log.info(`Loaded ${this._configs.length} Scout test configs in ${duration.toFixed(2)}s`);
+
+    // A scout root must be either root-level or namespace-based, never both.
+    // scout_* roots are independent from scout/, so group by (module.root + serverConfigSet).
+    const byRoot = new Map<string, ScoutTestConfig[]>();
+    for (const config of this._configs) {
+      const key = `${config.module.root}/test/${
+        config.server.configSet === 'default' ? 'scout' : `scout_${config.server.configSet}`
+      }`;
+      if (!byRoot.has(key)) byRoot.set(key, []);
+      byRoot.get(key)!.push(config);
+    }
+    const mixedRoots: string[] = [];
+    for (const [scoutRoot, rootConfigs] of byRoot) {
+      const hasRootLevel = rootConfigs.some((c) => !c.namespace);
+      const hasNamespace = rootConfigs.some((c) => Boolean(c.namespace));
+      if (hasRootLevel && hasNamespace) {
+        const namespaceNames = [
+          ...new Set(rootConfigs.filter((c) => c.namespace).map((c) => c.namespace as string)),
+        ];
+        mixedRoots.push(
+          `  • ${scoutRoot}: root-level {ui,api}/ coexists with namespace dirs [${namespaceNames.join(
+            ', '
+          )}]`
+        );
+      }
+    }
+    if (mixedRoots.length > 0) {
+      throw new Error(
+        `[Scout] Mixed test structure detected — a scout root must use either ` +
+          `root-level (test/scout/{ui,api}/) or namespace-based (test/scout/<namespace>/{ui,api}/) ` +
+          `structure, never both:\n\n` +
+          mixedRoots.join('\n') +
+          `\n\nMigrate root-level tests into namespace sub-directories or remove the namespace configs.`
+      );
+    }
   },
 
   reload() {

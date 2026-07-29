@@ -33,8 +33,3 @@ export type {
   UseChangeHistoryAutoSelectionArgs,
   UseChangeHistoryAutoSelectionResult,
 } from './use_change_history_auto_selection';
-export { useChangeHistoryPreviewCompare } from './use_change_history_preview_compare';
-export type {
-  UseChangeHistoryPreviewCompareArgs,
-  UseChangeHistoryPreviewCompareResult,
-} from './use_change_history_preview_compare';

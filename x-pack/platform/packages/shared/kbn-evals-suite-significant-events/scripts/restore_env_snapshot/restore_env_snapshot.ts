@@ -65,11 +65,11 @@ async function repromoteQueries({
 }
 
 /**
- * Restores one SigEvents data stream (KI / discoveries / detections) from its captured
- * `snapshot-*` plain index. The plugin owns the data-stream template, so we restore the
- * captured docs into a temp index and reindex them into the data-stream name (op_type:
- * create) — letting ES materialize the data stream. `allowNoMatches` makes this a no-op
- * for older snapshots that predate a given data stream.
+ * Restores one SigEvents data stream from its `snapshot-*` plain index.
+ * The plugin owns the data-stream template, so we restore captured docs into a temp
+ * index and reindex them into the data-stream name — letting ES materialize the stream.
+ * `allowNoMatches` makes this a no-op when the stream was not captured (user chose not
+ * to run the discovery workflow).
  */
 async function restoreDataStream({
   esClient,
@@ -96,7 +96,7 @@ async function restoreDataStream({
       indices: [snapshotIndex],
       renamePattern: '(.+)',
       renameReplacement: tempIndex,
-      allowNoMatches: true, // older snapshots may predate this data stream
+      allowNoMatches: true,
     });
 
     if (!restoreResult.success) {
@@ -108,7 +108,7 @@ async function restoreDataStream({
     }
 
     if (restoreResult.restoredIndices.length === 0) {
-      log.info(`"${dataStream}" not in snapshot "${snapshotName}" — skipping (old snapshot).`);
+      log.info(`"${dataStream}" not in snapshot — skipping (discovery workflow was not run).`);
       return `${dataStream}: skipped (not in snapshot)`;
     }
 
@@ -216,12 +216,11 @@ export const restoreEnvSnapshot = async ({
   }
 
   const clean = Boolean(flags.clean);
-  const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
+  const { snapshotName, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
   log.info(`Restore: ${snapshotName} | ES: ${config.esUrl} | Kibana: ${config.kibanaUrl}`);
   log.info(`GCS bucket: ${gcsBucket} | Base path: ${gcsBasePath}`);
   log.info(`Data indices: ${[logsIndex, ...alertIndices].join(', ')}`);
-  log.info(`System indices: ${systemIndices.join(', ')}`);
 
   const repository = createGcsRepository({ bucket: gcsBucket, basePath: gcsBasePath });
 
@@ -229,58 +228,18 @@ export const restoreEnvSnapshot = async ({
     await ensureCleanEnvironment({
       esClient: sysClient,
       log,
-      systemIndices: [...systemIndices, ...SIGNIFICANT_EVENTS_DATA_STREAMS],
+      dataStreamIndices: [...SIGNIFICANT_EVENTS_DATA_STREAMS],
       alertIndices,
       logsIndex,
       clean,
     });
 
-    // Plain `.kibana` system indices are captured as snapshot-* via reindex
-    // (e.g. .kibana_streams_tasks → snapshot-kibana_streams_tasks) so we match the
-    // snapshot-* names and rename them back on restore. The SigEvents data streams are NOT
-    // here — they are re-materialized as data streams after streams is enabled (Step 4).
-    const snapshotSystemIndices = systemIndices.map(toSnapshotName);
-
     log.info('');
-    log.info('Step 1/7 — Restoring system indices (with rename snapshot-* → .*)...');
-    // restoreSnapshot and replaySnapshot use the caller's esClient intentionally:
-    // the snapshot/replay APIs work with the caller's privileges, and keeping them
-    // outside sysClient avoids creating the temp superuser a second time.
-    // No allowNoMatches here — these plain system indices must be present; a genuinely
-    // missing one should fail loudly rather than restore an incomplete environment.
-    const restoreResult = await restoreSnapshot({
-      esClient,
-      log,
-      repository,
-      snapshotName,
-      indices: snapshotSystemIndices,
-      renamePattern: 'snapshot-(.*)',
-      renameReplacement: '.$1',
-    });
-
-    if (!restoreResult.success) {
-      throw new Error(
-        `Failed to restore system indices from snapshot "${snapshotName}": ${restoreResult.errors.join(
-          '; '
-        )}`
-      );
-    }
-
-    log.info('');
-    log.info('Step 2/7 — Ensuring system-index aliases...');
-    await ensureKnownAliases({
-      esClient: sysClient,
-      log,
-      systemIndices,
-      alertIndices: [],
-    });
-
-    log.info('');
-    log.info('Step 3/7 — Enabling streams...');
+    log.info('Step 1/5 — Enabling streams...');
     await ensureStreamsEnabled(config, log);
 
     log.info('');
-    log.info('Step 4/7 — Restoring SigEvents data streams (reindex into data streams)...');
+    log.info('Step 2/5 — Restoring SigEvents data streams (reindex into data streams)...');
     const dataStreamStatuses: string[] = [];
     for (const dataStream of SIGNIFICANT_EVENTS_DATA_STREAMS) {
       dataStreamStatuses.push(
@@ -298,10 +257,10 @@ export const restoreEnvSnapshot = async ({
 
     try {
       log.info('');
-      log.info('Step 5/7 — Replaying data indices (with timestamp transformation)...');
+      log.info('Step 3/5 — Replaying data indices (with timestamp transformation)...');
 
       replayResult = await replaySnapshot({
-        esClient, // caller's client — see comment at Step 1/7
+        esClient,
         log,
         repository,
         snapshotName,
@@ -340,11 +299,11 @@ export const restoreEnvSnapshot = async ({
     }
 
     log.info('');
-    log.info('Step 6/7 — Ensuring alert-index aliases...');
-    await ensureKnownAliases({ esClient: sysClient, log, systemIndices: [], alertIndices });
+    log.info('Step 4/5 — Ensuring alert-index aliases...');
+    await ensureKnownAliases({ esClient: sysClient, log, alertIndices });
 
     log.info('');
-    log.info('Step 7/7 — Repromoting queries...');
+    log.info('Step 5/5 — Repromoting queries...');
     await repromoteQueries({ esClient: sysClient, log, config });
 
     log.info('');
@@ -352,7 +311,6 @@ export const restoreEnvSnapshot = async ({
     log.info('RESTORE COMPLETE');
     log.info('='.repeat(70));
     log.info(`Snapshot: ${snapshotName}`);
-    log.info(`Restored system indices: ${restoreResult.restoredIndices.join(', ')}`);
     log.info(`SigEvents data streams:`);
     for (const status of dataStreamStatuses) {
       log.info(`  - ${status}`);

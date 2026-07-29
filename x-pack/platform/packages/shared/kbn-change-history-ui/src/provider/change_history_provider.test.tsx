@@ -6,7 +6,6 @@
  */
 
 import '@testing-library/jest-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryModal } from '../components/modal/change_history_modal';
@@ -16,20 +15,15 @@ import { ChangeHistoryProvider } from './change_history_provider';
 import { useChangeHistoryConfig } from './use_change_history_config';
 import { useChangeHistoryModal } from './use_change_history_modal';
 import {
+  TEST_CHANGE_HISTORY_SCOPE,
   TEST_OBJECT_ID_A,
   TEST_OBJECT_ID_B,
   TEST_OBJECT_TITLE,
 } from '../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+import { TestProvider } from '../test_utils/test_providers';
 import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
 
-const { wrapper: QueryClientWrapper } = createQueryClientWrapper();
-
-const testScope = {
-  module: 'stack',
-  dataset: 'workflows',
-  objectType: 'workflow',
-};
+const testScope = TEST_CHANGE_HISTORY_SCOPE;
 
 const adapter: ChangeHistoryAdapter = {
   listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
@@ -45,22 +39,20 @@ const Harness = ({
   reportEvent?: jest.Mock;
   telemetryEnabled?: boolean;
 }) => (
-  <I18nProvider>
-    <QueryClientWrapper>
-      <ChangeHistoryProvider
-        objectId={objectId}
-        adapter={adapter}
-        labels={{ previewTitle: TEST_OBJECT_TITLE }}
-        renderPreview={() => <div data-test-subj="previewPanel" />}
-        scope={testScope}
-        analytics={reportEvent ? { reportEvent } : undefined}
-        features={{ telemetry: telemetryEnabled }}
-      >
-        <ChangeHistoryTrigger />
-        <ChangeHistoryModal />
-      </ChangeHistoryProvider>
-    </QueryClientWrapper>
-  </I18nProvider>
+  <TestProvider>
+    <ChangeHistoryProvider
+      objectId={objectId}
+      adapter={adapter}
+      labels={{ previewTitle: TEST_OBJECT_TITLE }}
+      renderPreview={() => <div data-test-subj="previewPanel" />}
+      scope={testScope}
+      analytics={reportEvent ? { reportEvent } : undefined}
+      features={{ telemetry: telemetryEnabled }}
+    >
+      <ChangeHistoryTrigger />
+      <ChangeHistoryModal />
+    </ChangeHistoryProvider>
+  </TestProvider>
 );
 
 describe('ChangeHistoryProvider', () => {
@@ -106,20 +98,18 @@ describe('ChangeHistoryProvider', () => {
     };
 
     render(
-      <I18nProvider>
-        <QueryClientWrapper>
-          <ChangeHistoryProvider
-            objectId={TEST_OBJECT_ID_A}
-            adapter={adapter}
-            labels={{ previewTitle: TEST_OBJECT_TITLE }}
-            renderPreview={() => null}
-            scope={testScope}
-            analytics={{ reportEvent }}
-          >
-            <Probe />
-          </ChangeHistoryProvider>
-        </QueryClientWrapper>
-      </I18nProvider>
+      <TestProvider>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID_A}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+          scope={testScope}
+          analytics={{ reportEvent }}
+        >
+          <Probe />
+        </ChangeHistoryProvider>
+      </TestProvider>
     );
 
     fireEvent.click(screen.getByTestId('openTwice'));
@@ -141,20 +131,18 @@ describe('ChangeHistoryProvider', () => {
     };
 
     render(
-      <I18nProvider>
-        <QueryClientWrapper>
-          <ChangeHistoryProvider
-            objectId={TEST_OBJECT_ID_A}
-            adapter={adapter}
-            labels={{ previewTitle: TEST_OBJECT_TITLE }}
-            renderPreview={() => null}
-            scope={testScope}
-            analytics={{ reportEvent }}
-          >
-            <Probe />
-          </ChangeHistoryProvider>
-        </QueryClientWrapper>
-      </I18nProvider>
+      <TestProvider>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID_A}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+          scope={testScope}
+          analytics={{ reportEvent }}
+        >
+          <Probe />
+        </ChangeHistoryProvider>
+      </TestProvider>
     );
 
     fireEvent.click(screen.getByTestId('openModal'));
@@ -190,19 +178,17 @@ describe('ChangeHistoryProvider', () => {
     };
 
     render(
-      <I18nProvider>
-        <QueryClientWrapper>
-          <ChangeHistoryProvider
-            objectId={TEST_OBJECT_ID_A}
-            adapter={adapter}
-            labels={{ previewTitle: TEST_OBJECT_TITLE }}
-            renderPreview={() => null}
-            scope={testScope}
-          >
-            <Probe />
-          </ChangeHistoryProvider>
-        </QueryClientWrapper>
-      </I18nProvider>
+      <TestProvider>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID_A}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+          scope={testScope}
+        >
+          <Probe />
+        </ChangeHistoryProvider>
+      </TestProvider>
     );
 
     expect(reportEvent).not.toHaveBeenCalled();
@@ -218,21 +204,19 @@ describe('ChangeHistoryProvider', () => {
     };
 
     render(
-      <I18nProvider>
-        <QueryClientWrapper>
-          <ChangeHistoryProvider
-            objectId={TEST_OBJECT_ID_A}
-            adapter={adapter}
-            labels={{ previewTitle: TEST_OBJECT_TITLE }}
-            renderPreview={() => null}
-            scope={testScope}
-            analytics={{ reportEvent }}
-            features={{ telemetry: false }}
-          >
-            <Probe />
-          </ChangeHistoryProvider>
-        </QueryClientWrapper>
-      </I18nProvider>
+      <TestProvider>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID_A}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+          scope={testScope}
+          analytics={{ reportEvent }}
+          features={{ telemetry: false }}
+        >
+          <Probe />
+        </ChangeHistoryProvider>
+      </TestProvider>
     );
 
     expect(reportEvent).not.toHaveBeenCalled();
@@ -248,20 +232,18 @@ describe('ChangeHistoryProvider', () => {
     };
 
     render(
-      <I18nProvider>
-        <QueryClientWrapper>
-          <ChangeHistoryProvider
-            objectId={TEST_OBJECT_ID_A}
-            adapter={adapter}
-            labels={{ previewTitle: TEST_OBJECT_TITLE }}
-            renderPreview={() => null}
-            scope={testScope}
-            analytics={{ reportEvent }}
-          >
-            <Probe />
-          </ChangeHistoryProvider>
-        </QueryClientWrapper>
-      </I18nProvider>
+      <TestProvider>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID_A}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+          scope={testScope}
+          analytics={{ reportEvent }}
+        >
+          <Probe />
+        </ChangeHistoryProvider>
+      </TestProvider>
     );
 
     expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.FilterApplied, {

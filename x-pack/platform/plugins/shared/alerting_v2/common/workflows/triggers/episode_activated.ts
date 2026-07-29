@@ -30,6 +30,7 @@ export const episodeActivatedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof episodeActivatedPayloadSchema
 > = {
   id: EPISODE_ACTIVATED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: episodeActivatedPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeActivated.title', {
     defaultMessage: 'Alerting - Episode activated',

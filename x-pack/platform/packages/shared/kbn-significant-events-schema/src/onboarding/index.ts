@@ -29,9 +29,14 @@ export interface KIsOnboardingQueriesResult {
   tokensUsed: ChatCompletionTokenCount;
 }
 
+export interface KIsOnboardingKeepAliveResult {
+  refreshed: number;
+}
+
 export interface KIsOnboardingResult {
   features: KIsOnboardingFeaturesResult;
   queries: KIsOnboardingQueriesResult;
+  keepAlive: KIsOnboardingKeepAliveResult;
 }
 
 export type KIsOnboardingStatusResult = SignificantEventsWorkflowStatusResult<KIsOnboardingResult>;

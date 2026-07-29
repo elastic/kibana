@@ -885,6 +885,38 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
+    it('does not re-evict an output that was re-written after rehydration', async () => {
+      // Regression: a re-entrant aggregator (e.g. `parallel`) finishes on a
+      // resume tick and writes its real output via setStepOutput AFTER the
+      // value had been transiently rehydrated on an earlier tick. The fresh
+      // write is authoritative, so the deferred transient release must not
+      // re-evict it (doing so forced a stale ES re-read that returned the
+      // pre-flush value, surfacing as an empty `steps.x.output.*` downstream).
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const staleOutput = { restored: true, data: 'x'.repeat(200) };
+      seedCompletedStepWithSize(state, service, 'step-1', 'myStep', staleOutput, 250, 'connector');
+
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.getStepOutput('step-1')).toBeUndefined();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', output: staleOutput } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['step-1']);
+      expect(service.getStepOutput('step-1')).toEqual(staleOutput);
+
+      const freshOutput = { restored: true, data: 'y'.repeat(200), final: true };
+      service.setStepOutput('step-1', freshOutput, 260);
+
+      service.releaseTransientlyRehydratedOutputs();
+
+      expect(service.getStepOutput('step-1')).toEqual(freshOutput);
+      expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
     it('is a no-op when nothing was transiently rehydrated', () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, service, 'step-1', 'myStep', { data: 'x' }, 'connector');
@@ -2203,6 +2235,304 @@ describe('StepIoService', () => {
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
         expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('read-pinning (prepareForRead pins referenced outputs for the consuming node)', () => {
+      // Shared graph: step_source -> step_consumer -> step_unrelated
+      function buildReadPinWorkflow() {
+        const workflow: WorkflowYaml = {
+          name: 'ReadPin',
+          version: '1',
+          description: 'test',
+          enabled: true,
+          triggers: [],
+          steps: [
+            { name: 'step_source', type: 'console', with: { message: 'src' } } as ConnectorStep,
+            {
+              name: 'step_consumer',
+              type: 'console',
+              with: { message: '{{steps.step_source.output}}' },
+            } as ConnectorStep,
+            {
+              name: 'step_unrelated',
+              type: 'console',
+              with: { message: 'static' },
+            } as ConnectorStep,
+          ],
+        };
+        const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+        const lookup = (stepId: string) =>
+          graph.topologicalOrder
+            .map((nodeId) => graph.getNode(nodeId))
+            .find((n) => n.stepId === stepId)!;
+        return {
+          graph,
+          consumerNode: lookup('step_consumer'),
+          unrelatedNode: lookup('step_unrelated'),
+        };
+      }
+
+      it('eviction-disabled fast path: prepareForRead is a no-op regardless of evicted state', async () => {
+        // With evictionMinBytes === Infinity (default), the race cannot occur —
+        // prepareForRead must do zero work (no ES calls, no pins set).
+        const { state, service, stepExecutionRepository } = buildHarness();
+        const { graph, consumerNode } = buildReadPinWorkflow();
+
+        // Seed a "large" completed step — with Infinity threshold it stays resident.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'src-exec',
+          'step_source',
+          { items: 'x'.repeat(200) },
+          200,
+          'connector'
+        );
+
+        // Force eviction by directly marking the output evicted (bypasses the
+        // Infinity-gated isEvictionCandidate check; we just need hasEvictedOutputs
+        // to return true to test that the fast path still wins).
+        // We can't trivially do this through the public API when threshold is Infinity,
+        // so instead we use evictionMinBytes: 0 to confirm zero ES calls when nothing
+        // is evicted, and separately confirm the Infinity path here:
+        await service.prepareForRead({
+          node: consumerNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'consumer-exec',
+        });
+        // No ES calls — eviction disabled.
+        expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+        // releaseReadPins must be idempotent on the fast path.
+        expect(() => service.releaseReadPins('consumer-exec')).not.toThrow();
+      });
+
+      it('read-pins a referenced output during prepareForRead, protecting it across a concurrent eviction cycle', async () => {
+        // Simulates issue #277820: step_source was resident when the preceding if:
+        // guard checked it (no eviction yet), but the 500ms flush evicts it in the
+        // gap between prepareForRead returning and the foreach's getItems().
+        //
+        // With the fix, prepareForRead pins the output BEFORE the has-evicted-outputs
+        // gate, so it is protected even when hasEvictedOutputs() was false at
+        // pin time.
+        const { state, service, stepExecutionRepository } = buildHarness({
+          evictionMinBytes: EVICTION_THRESHOLD,
+        });
+        const { graph, consumerNode, unrelatedNode } = buildReadPinWorkflow();
+
+        // Seed a large (>threshold) output and drive it through two deferred
+        // eviction cycles so it ends up evicted before the consumer runs.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'src-exec',
+          'step_source',
+          { items: 'x'.repeat(200) },
+          200,
+          'connector'
+        );
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.hasEvictedOutputs()).toBe(true);
+
+        stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+          {
+            id: 'src-exec',
+            output: { items: 'x'.repeat(200) },
+            workflowRunId: 'test-workflow-execution-id',
+          } as unknown as EsWorkflowStepExecution,
+        ]);
+
+        // Consumer's prepareForRead: rehydrates src-exec and read-pins it.
+        await service.prepareForRead({
+          node: consumerNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'consumer-exec',
+        });
+        expect(service.getStepOutput('src-exec')).toEqual({ items: 'x'.repeat(200) });
+
+        // Simulate the concurrent 500ms eviction loop firing in the gap between
+        // prepareForRead returning and the step's synchronous getContext() call.
+        // Re-seed the output at the same size so it re-queues for eviction.
+        service.setStepOutput('src-exec', { items: 'x'.repeat(200) }, 200);
+        await service.flushStepChanges(); // queue it
+        await service.flushStepChanges(); // drain the deferred cycle
+
+        // The read-pin must have protected it — still resident (fails pre-fix).
+        expect(service.getStepOutput('src-exec')).toEqual({ items: 'x'.repeat(200) });
+
+        // Now the consumer finishes and releases its read-pins. Re-queue the
+        // output: the two flushes above already drained pendingOutputEvictionIds
+        // while the pin was active, so we need a fresh setStepOutput to re-enter
+        // the deferred eviction queue.
+        service.releaseReadPins('consumer-exec');
+        service.setStepOutput('src-exec', { items: 'x'.repeat(200) }, 200);
+
+        // Unrelated node runs next: neededIds is empty (references nothing and
+        // src-exec is resident so the conservative fallback does not fire).
+        // Drive the eviction cycle — src-exec is no longer pinned and evicts.
+        await service.prepareForRead({
+          node: unrelatedNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'unrelated-exec',
+        });
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        service.releaseReadPins('unrelated-exec');
+
+        // The source is no longer pinned and should be evictable again.
+        expect(service.getStepOutput('src-exec')).toBeUndefined();
+      });
+
+      it('"resident-until-the-gap" variant: pins even when hasEvictedOutputs() is false at prepareForRead time', async () => {
+        // The literal reported scenario: step_source has NOT been evicted yet
+        // when the consumer's prepareForRead runs. Both the preceding guard and
+        // the foreach would have hit the old early-return — no pin set, source
+        // evictable in the gap. This test fails if pins are set below the
+        // early-return and passes with the §6 restructure.
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        const { graph, consumerNode } = buildReadPinWorkflow();
+
+        // Seed a large output but do NOT flush — it stays resident and nothing is evicted.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'src-exec',
+          'step_source',
+          { items: 'x'.repeat(200) },
+          200,
+          'connector'
+        );
+        expect(service.hasEvictedOutputs()).toBe(false);
+
+        // Consumer's prepareForRead — should pin src-exec even though nothing is evicted.
+        await service.prepareForRead({
+          node: consumerNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'consumer-exec',
+        });
+
+        // Now flush twice to trigger the deferred eviction cycle.
+        await service.flushStepChanges(); // queue
+        await service.flushStepChanges(); // evict
+
+        // The read-pin must have blocked eviction (fails if pin was set after the gate).
+        expect(service.getStepOutput('src-exec')).toEqual({ items: 'x'.repeat(200) });
+
+        // Release and re-queue so the deferred eviction cycle can pick it up.
+        // (The previous two flushes already drained pendingOutputEvictionIds while
+        // the pin was active; calling setStepOutput re-queues for the next cycle.)
+        service.releaseReadPins('consumer-exec');
+        service.setStepOutput('src-exec', { items: 'x'.repeat(200) }, 200);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('src-exec')).toBeUndefined();
+      });
+
+      it('releasing one consumer does not unpin outputs still held by another consumer', async () => {
+        // Parallel-branch scenario: two consumers share one StepIoService and
+        // both pin the same predecessor. Releasing one must not expose the other.
+        const { state, service, stepExecutionRepository } = buildHarness({
+          evictionMinBytes: EVICTION_THRESHOLD,
+        });
+        const { graph, consumerNode } = buildReadPinWorkflow();
+
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'src-exec',
+          'step_source',
+          { items: 'x'.repeat(200) },
+          200,
+          'connector'
+        );
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+          {
+            id: 'src-exec',
+            output: { items: 'x'.repeat(200) },
+            workflowRunId: 'test-workflow-execution-id',
+          } as unknown as EsWorkflowStepExecution,
+        ]);
+
+        // Two consumers both pin src-exec.
+        await service.prepareForRead({
+          node: consumerNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'consumer-a',
+        });
+        await service.prepareForRead({
+          node: consumerNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'consumer-b',
+        });
+        expect(service.getStepOutput('src-exec')).toEqual({ items: 'x'.repeat(200) });
+
+        // consumer-a finishes and releases.
+        service.releaseReadPins('consumer-a');
+
+        // Simulate eviction attempt — consumer-b still holds src-exec pinned.
+        service.setStepOutput('src-exec', { items: 'x'.repeat(200) }, 200);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        // Must still be resident because consumer-b's pin is active.
+        expect(service.getStepOutput('src-exec')).toEqual({ items: 'x'.repeat(200) });
+
+        // Now consumer-b also finishes. Re-queue the output: the two flushes
+        // above already drained pendingOutputEvictionIds while consumer-b's pin
+        // was active, so we need a fresh setStepOutput to re-enter the queue.
+        service.releaseReadPins('consumer-b');
+        service.setStepOutput('src-exec', { items: 'x'.repeat(200) }, 200);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        // Both released — source is evictable again.
+        expect(service.getStepOutput('src-exec')).toBeUndefined();
+      });
+
+      it('a node referencing nothing leaves its consumer set empty; unrelated outputs evict normally', async () => {
+        // Guards against over-pinning: when neededIds is empty (node templates
+        // reference nothing), no outputs are pinned and eviction proceeds normally.
+        //
+        // Important: prepareForRead is called BEFORE the output is evicted.
+        // computeRehydrationTargets has a conservative fallback: when static
+        // analysis returns an empty set BUT a predecessor is already evicted, it
+        // falls back to pinning all predecessors (guards against missed analysis).
+        // Running prepareForRead while the output is still resident means no
+        // evicted predecessor exists → no fallback → truly empty neededIds.
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        const { graph, unrelatedNode } = buildReadPinWorkflow();
+
+        // Seed output as resident (not yet flushed).
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'src-exec',
+          'step_source',
+          { items: 'x'.repeat(200) },
+          200,
+          'connector'
+        );
+        expect(service.hasEvictedOutputs()).toBe(false);
+
+        // prepareForRead for unrelated_node: static analysis → empty set;
+        // hasEvictedPredecessor → false (nothing evicted yet) → neededIds = {}.
+        // src-exec must NOT be pinned.
+        await service.prepareForRead({
+          node: unrelatedNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+          consumerId: 'unrelated-exec',
+        });
+
+        // Drive eviction — src-exec is not pinned, so it evicts normally.
+        await service.flushStepChanges(); // queue
+        await service.flushStepChanges(); // evict
+
+        service.releaseReadPins('unrelated-exec');
+        expect(service.getStepOutput('src-exec')).toBeUndefined();
       });
     });
   });

@@ -1,0 +1,47 @@
+{
+  "sha1": "f62763c974bb7718d5733e9087f7627729918222",
+  "tests": [
+    {
+      "id": "a5bfe1e7a36473d-2733d048857f37a",
+      "title": "Kerberos authentication — with role mapping logs in via SPNEGO without the login form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_kerberos/ui/tests/kerberos_login.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "80826d0df5fd849-d520f7d2d4bbc59",
+      "title": "Kerberos authentication — logout lands on the logged out page after logging out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_kerberos/ui/tests/kerberos_logout.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "3b02385e090123e-aad96d5aaec0b60",
+      "title": "Kerberos authentication — no role mapping redirects to the reset session page when the user has no privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_kerberos/ui/tests/kerberos_no_role_mapping.spec.ts",
+        "line": 15,
+        "column": 7
+      }
+    }
+  ]
+}

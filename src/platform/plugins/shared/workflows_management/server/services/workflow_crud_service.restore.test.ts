@@ -95,14 +95,12 @@ const makeFinalWorkflowProperties = (
 interface ApplyWorkflowUpdateResult {
   response: UpdatedWorkflowResponseDto;
   finalData: WorkflowProperties;
-  timestamp: Date;
 }
 
 const makeApplyWorkflowUpdateResult = (
   overrides: {
     response?: Partial<UpdatedWorkflowResponseDto>;
     finalData?: WorkflowProperties;
-    timestamp?: Date;
   } = {}
 ): ApplyWorkflowUpdateResult => ({
   response: {
@@ -115,7 +113,6 @@ const makeApplyWorkflowUpdateResult = (
     ...overrides.response,
   },
   finalData: overrides.finalData ?? makeFinalWorkflowProperties(),
-  timestamp: overrides.timestamp ?? new Date('2026-01-02T00:00:00.000Z'),
 });
 
 interface WorkflowCrudServiceWithApplyUpdate {
@@ -123,7 +120,9 @@ interface WorkflowCrudServiceWithApplyUpdate {
     id: string,
     workflow: Partial<{ yaml: string }>,
     spaceId: string,
-    request: ReturnType<typeof httpServerMock.createKibanaRequest>
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>,
+    historyAction: string,
+    restoreMetadata?: { eventId: string; sequence?: number }
   ) => Promise<ApplyWorkflowUpdateResult>;
 }
 
@@ -137,7 +136,6 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
 
     const deps = {
       changeHistoryService,
-      workflowVersioningEnabled: true,
       ...restOverrides,
     } as WorkflowCrudDeps;
 
@@ -145,16 +143,12 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     const applyWorkflowUpdate = jest
       .spyOn(service as unknown as WorkflowCrudServiceWithApplyUpdate, 'applyWorkflowUpdate')
       .mockResolvedValue(makeApplyWorkflowUpdateResult());
-    const logWorkflowChangesAfterWrite = jest
-      .spyOn(service, 'logWorkflowChangesAfterWrite')
-      .mockResolvedValue();
 
-    return { service, getHistory, applyWorkflowUpdate, logWorkflowChangesAfterWrite };
+    return { service, getHistory, applyWorkflowUpdate };
   };
 
-  it('restores snapshot yaml via applyWorkflowUpdate and logs restore change history', async () => {
-    const { service, getHistory, applyWorkflowUpdate, logWorkflowChangesAfterWrite } =
-      makeService();
+  it('restores snapshot yaml via applyWorkflowUpdate with restore history options', async () => {
+    const { service, getHistory, applyWorkflowUpdate } = makeService();
 
     const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
 
@@ -166,19 +160,13 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
       'wf-1',
       { yaml: 'name: Restored workflow' },
       'default',
-      request
-    );
-    expect(logWorkflowChangesAfterWrite).toHaveBeenCalledWith({
-      workflows: [{ id: 'wf-1', document: makeFinalWorkflowProperties() }],
-      action: WorkflowChangeHistoryAction.workflowRestore,
-      spaceId: 'default',
-      timestamp: new Date('2026-01-02T00:00:00.000Z'),
       request,
-      restoreMetadata: {
+      WorkflowChangeHistoryAction.workflowRestore,
+      {
         eventId: 'event-v3',
         sequence: 3,
-      },
-    });
+      }
+    );
     expect(result).toEqual(
       expect.objectContaining({
         id: 'wf-1',
@@ -233,17 +221,17 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     ).rejects.toThrow(InvalidYamlSchemaError);
   });
 
-  it('throws when versioning is disabled', async () => {
+  it('throws when change history is not initialized', async () => {
     const { service } = makeService({
-      workflowVersioningEnabled: false,
       changeHistoryService: {
+        isInitialized: () => false,
         getHistory: jest.fn(),
       },
     });
 
     await expect(
       service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request)
-    ).rejects.toThrow(WorkflowChangeHistoryDisabledError);
+    ).rejects.toThrow(new WorkflowChangeHistoryDisabledError());
   });
 });
 
@@ -351,7 +339,6 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       validationService,
       getCoreStart: () => ({} as CoreStart),
       changeHistoryService,
-      workflowVersioningEnabled: true,
     };
 
     client.search.mockResolvedValue({
@@ -417,6 +404,23 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
         document: expect.objectContaining({
           enabled: false,
           yaml: expect.stringContaining('enabled: false'),
+        }),
+      })
+    );
+  });
+
+  it('skips change history and version bump when restored YAML matches stored YAML', async () => {
+    const { service, client, scopedChangeHistory } = makeIntegrationService(workflowYamlV2);
+
+    const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
+
+    expect(result.version).toBe(7);
+    expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          yaml: workflowYamlV2,
+          version: 7,
         }),
       })
     );

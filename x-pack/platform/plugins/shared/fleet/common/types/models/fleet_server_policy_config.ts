@@ -6,7 +6,7 @@
  */
 import type { ValueOf } from '..';
 
-import type { SOSecret } from './secret';
+import type { SOSecretOrNull } from './secret';
 
 export const clientAuth = {
   Optional: 'optional',
@@ -38,9 +38,9 @@ export interface NewFleetServerHost {
   } | null;
   secrets?: {
     ssl?: {
-      key?: SOSecret;
-      es_key?: SOSecret;
-      agent_key?: SOSecret;
+      key?: SOSecretOrNull;
+      es_key?: SOSecretOrNull;
+      agent_key?: SOSecretOrNull;
     };
   };
 }

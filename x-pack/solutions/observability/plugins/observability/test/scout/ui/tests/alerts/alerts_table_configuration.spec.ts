@@ -133,7 +133,7 @@ test.describe(
         'viewRuleDetails',
         'viewAlertDetailsPage',
         'untrackAlert',
-        'alertSnoozePopoverTrigger',
+        'snooze-alert-action-snooze',
       ]) {
         await expect(page.testSubj.locator(action)).toBeAttached();
       }

@@ -4,8 +4,9 @@
   "owners": ["@elastic/contextual-security-apps", "@elastic/security-entity-analytics"],
   "paths": [
     "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers/**",
-    "x-pack/solutions/security/plugins/security_solution/test/scout/api/tests/maintainers/**",
-    "x-pack/solutions/security/plugins/security_solution/test/scout/api/fixtures/maintainers/**"
+    "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/**",
+    "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/fixtures/maintainers/**",
+    "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/**"
   ],
   "files": [
     {

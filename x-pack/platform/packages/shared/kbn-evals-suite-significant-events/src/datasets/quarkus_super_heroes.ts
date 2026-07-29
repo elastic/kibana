@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/significant_events_tuning_config';
+import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import {
   GCS_BUCKET,
   QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX,
@@ -794,6 +794,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
       },
     },
   ],
+  discovery: [],
+  discoveryJudge: [],
   kiQueryGeneration: [
     {
       input: {
@@ -816,14 +818,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'stats-aggregate-monitoring',
-            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., fight simulation throughput at ~12 fights/min baseline, request volume per microservice) with calibrated thresholds documented in descriptions.',
+            text: 'Should generate at least one STATS metric-series query (bucket + metric_value, no post-STATS threshold WHERE) for aggregate monitoring (e.g., fight simulation throughput at ~12 fights/min baseline, request volume per microservice). Descriptions should document that baseline, not a breach threshold.',
             score: 1,
           },
         ],
         expected_categories: ['operational'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics; STATS queries for aggregate fight simulation throughput (~12 fights/min baseline) and request volume per microservice with calibrated thresholds]',
+          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics; STATS metric-series queries for aggregate fight simulation throughput (~12 fights/min baseline) and request volume per microservice]',
       },
       metadata: {
         difficulty: 'easy',

@@ -14,9 +14,13 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { EsqlApproximationToggle } from './esql_approximation_toggle';
 
 const startMock = coreMock.createStart();
+
+const licensingStart = licensingMock.createStart();
+licensingStart.getLicense.mockResolvedValue(licensingMock.createLicenseMock());
 
 const mockServices = {
   ...startMock,
@@ -27,6 +31,7 @@ const mockServices = {
       },
     },
   },
+  licensing: licensingStart,
 };
 
 const renderToggle = (props: React.ComponentProps<typeof EsqlApproximationToggle>) =>
@@ -47,18 +52,18 @@ describe('EsqlApproximationToggle', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the bolt button with OFF aria-label when useApproximation is false', () => {
-    renderToggle({ useApproximation: false, onChange });
+  it('renders the bolt button with OFF aria-label when isApproximate is false', () => {
+    renderToggle({ isApproximate: false, onChange });
     expect(screen.getByLabelText('Fast mode: OFF')).toBeInTheDocument();
   });
 
-  it('renders the bolt button with ON aria-label when useApproximation is true', () => {
-    renderToggle({ useApproximation: true, onChange });
+  it('renders the bolt button with ON aria-label when isApproximate is true', () => {
+    renderToggle({ isApproximate: true, onChange });
     expect(screen.getByLabelText('Fast mode: ON')).toBeInTheDocument();
   });
 
   it('opens the popover with switch and description on button click', async () => {
-    renderToggle({ useApproximation: false, onChange });
+    renderToggle({ isApproximate: false, onChange });
     await userEvent.click(screen.getByTestId('esqlApproximationToggleButton'));
     await waitFor(() => {
       expect(screen.getByTestId('esqlApproximationToggleSwitch')).toBeInTheDocument();
@@ -67,7 +72,7 @@ describe('EsqlApproximationToggle', () => {
   });
 
   it('calls onChange when the switch is toggled', async () => {
-    renderToggle({ useApproximation: false, onChange });
+    renderToggle({ isApproximate: false, onChange });
     await userEvent.click(screen.getByTestId('esqlApproximationToggleButton'));
     await waitFor(() => screen.getByRole('switch'));
     await userEvent.click(screen.getByRole('switch'));
@@ -75,14 +80,36 @@ describe('EsqlApproximationToggle', () => {
   });
 
   it('renders additionalText inside the popover when provided', async () => {
-    renderToggle({ useApproximation: false, onChange, additionalText: 'Index has 10M+ docs' });
+    renderToggle({ isApproximate: false, onChange, additionalText: 'Index has 10M+ docs' });
     await userEvent.click(screen.getByTestId('esqlApproximationToggleButton'));
     await waitFor(() => expect(screen.getByText('Index has 10M+ docs')).toBeInTheDocument());
   });
 
+  describe('invalid license state', () => {
+    beforeEach(() => {
+      const nonEnterpriseLicense = licensingMock.createLicenseMock();
+      nonEnterpriseLicense.hasAtLeast.mockReturnValue(false);
+      licensingStart.getLicense.mockResolvedValueOnce(nonEnterpriseLicense);
+    });
+
+    it('disables the toggle when license is not enterprise', async () => {
+      renderToggle({ isApproximate: false, onChange });
+      await waitFor(() => {
+        expect(screen.getByTestId('esqlApproximationToggleButton')).toBeDisabled();
+      });
+    });
+
+    it('shows unavailable aria-label when license is not enterprise', async () => {
+      renderToggle({ isApproximate: false, onChange });
+      await waitFor(() => {
+        expect(screen.getByLabelText('Fast mode unavailable')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('disabled state', () => {
     beforeEach(() => {
-      renderToggle({ useApproximation: false, onChange, disabled: true });
+      renderToggle({ isApproximate: false, onChange, disabled: true });
     });
 
     it('renders the button as disabled', () => {

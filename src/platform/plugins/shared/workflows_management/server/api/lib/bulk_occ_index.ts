@@ -17,7 +17,7 @@ import {
 } from '@kbn/occ';
 
 import { extractBulkItemError } from './bulk_response_helpers';
-import { maybeApplyWorkflowVersion } from '../../lib/workflow_version';
+import { applyWorkflowVersion } from '../../lib/workflow_version';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 
 export interface OccWorkflowHit {
@@ -74,15 +74,15 @@ const toOccHit = (hit: {
 
 const buildBulkIndexOperations = (
   hits: OccWorkflowHit[],
-  mutate: (source: WorkflowProperties) => WorkflowProperties,
-  versioningEnabled: boolean
+  mutate: (hit: OccWorkflowHit) => WorkflowProperties,
+  bumpVersion: boolean
 ) =>
   hits.map((hit) => ({
     index: {
       _id: hit._id,
       if_seq_no: hit.seqNo,
       if_primary_term: hit.primaryTerm,
-      document: maybeApplyWorkflowVersion(mutate(hit._source), hit._source, versioningEnabled),
+      document: bumpVersion ? applyWorkflowVersion(mutate(hit), hit._source) : mutate(hit),
     },
   }));
 
@@ -144,16 +144,16 @@ export const bulkIndexWithOccRetry = async ({
   maxRetries = DEFAULT_MAX_RETRIES,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
   refresh = true,
-  versioningEnabled = false,
+  bumpVersion = false,
 }: {
   client: BulkOccIndexClient;
   hits: OccWorkflowHit[];
-  mutate: (source: WorkflowProperties) => WorkflowProperties;
+  mutate: (hit: OccWorkflowHit) => WorkflowProperties;
   logger?: Logger;
   maxRetries?: number;
   retryDelayMs?: number;
   refresh?: boolean;
-  versioningEnabled?: boolean;
+  bumpVersion?: boolean;
 }): Promise<{
   successIds: string[];
   successfulDocuments: Array<{ id: string; document: WorkflowProperties }>;
@@ -166,7 +166,7 @@ export const bulkIndexWithOccRetry = async ({
   const maxAttempts = 1 + maxRetries;
 
   for (let attempt = 1; attempt <= maxAttempts && pendingHits.length > 0; attempt++) {
-    const operations = buildBulkIndexOperations(pendingHits, mutate, versioningEnabled);
+    const operations = buildBulkIndexOperations(pendingHits, mutate, bumpVersion);
     const bulkResponse = await client.bulk({
       operations,
       refresh,
@@ -228,5 +228,8 @@ export const bulkIndexWithOccRetry = async ({
 
   return { successIds, successfulDocuments, failures };
 };
+
+/** Batch-read workflow documents with seq_no/primary_term for OCC writes. */
+export const fetchOccHitsByIds = refreshOccHits;
 
 export { toOccHit };

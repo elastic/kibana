@@ -60,15 +60,16 @@ const callHandler = ({
   return route.handler(handlerParams);
 };
 
-// Frozen searchable-snapshot indices report `size_in_bytes: 0`; their real size is in `total_data_set_size_in_bytes`.
+// Frozen searchable-snapshot indices report `size_in_bytes: 0`; their real size is in
+// `total_data_set_size_in_bytes`. The route reads `total` (primaries + replicas), so populate that.
 const frozenStats = (totalDataSetSize: number): IndicesStatsIndicesStats =>
   ({
-    primaries: { store: { size_in_bytes: 0, total_data_set_size_in_bytes: totalDataSetSize } },
+    total: { store: { size_in_bytes: 0, total_data_set_size_in_bytes: totalDataSetSize } },
   } as IndicesStatsIndicesStats);
 
 const hotStats = (size: number): IndicesStatsIndicesStats =>
   ({
-    primaries: { store: { size_in_bytes: size, total_data_set_size_in_bytes: size } },
+    total: { store: { size_in_bytes: size, total_data_set_size_in_bytes: size } },
   } as IndicesStatsIndicesStats);
 
 describe('storage_stats route (stateful)', () => {
@@ -134,5 +135,21 @@ describe('storage_stats route (stateful)', () => {
   it('returns an empty array when there are no data streams', async () => {
     const result = await callHandler({ dataStreams: [], indicesStats: {} });
     expect(result).toEqual([]);
+  });
+
+  it('reports replica-inclusive size (total, not primaries) to match the _store_stats route', async () => {
+    // With number_of_replicas > 0, `total` (primaries + replicas) exceeds `primaries`. The route must
+    // report `total` so the stream list matches the stream detail / lifecycle surfaces.
+    const result = await callHandler({
+      dataStreams: [{ name: 'replicated-stream', indices: ['.ds-replicated-stream-000001'] }],
+      indicesStats: {
+        '.ds-replicated-stream-000001': {
+          primaries: { store: { total_data_set_size_in_bytes: 5_000_000 } },
+          total: { store: { total_data_set_size_in_bytes: 10_000_000 } },
+        } as IndicesStatsIndicesStats,
+      },
+    });
+
+    expect(result).toEqual([{ stream: 'replicated-stream', store_size_bytes: 10_000_000 }]);
   });
 });

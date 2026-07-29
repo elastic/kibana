@@ -26,6 +26,7 @@ import {
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
+import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -47,8 +48,15 @@ const generateDashboardSchema = z.object({
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
+ *
+ * `authoringNotesByPanelId` holds the one-sentence note describing every chart
+ * authored in this run, keyed by panel id. Panels that were not authored now
+ * (or whose engine returned no note) simply have no `authoring_note`.
  */
-const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
+const summarizeDashboard = (
+  dashboardData: DashboardAttachmentData,
+  authoringNotesByPanelId: Map<string, string>
+) => ({
   title: dashboardData.title,
   description: dashboardData.description,
   panels: dashboardData.panels.map((widget) => {
@@ -62,6 +70,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
           type: panel.type,
           id: panel.id,
           grid: panel.grid,
+          authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
       };
     }
@@ -69,7 +78,12 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
       type: widget.type,
       id: widget.id,
       grid: widget.grid,
+      authoring_note: authoringNotesByPanelId.get(widget.id),
     };
+  }),
+  controls: (dashboardData.pinned_panels ?? []).map((control) => {
+    const c = control as { id?: string; type?: string; config?: { title?: string } };
+    return { id: c.id, type: c.type, title: c.config?.title };
   }),
 });
 
@@ -80,7 +94,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and a compact summary.
+ * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -97,11 +111,12 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs or visualizations from natural language)
-3. edit existing Lens or markdown panel content
+2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
+3. edit existing Lens, Vega, or markdown panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
-6. remove panels`,
+6. remove panels
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -118,7 +133,7 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures } = await executeDashboardOperations({
+        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -130,16 +145,23 @@ Use operations[] to:
           }),
         });
 
-        const description = `Dashboard: ${dashboardData.title}`;
+        // Data-aware default time range computation
+        const finalDashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData,
+          esClient,
+          logger,
+        });
+
+        const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard
           ? await attachments.add({
               id: dashboardAttachmentId,
               type: DASHBOARD_ATTACHMENT_TYPE,
               description,
-              data: dashboardData,
+              data: finalDashboardData,
             })
           : await attachments.update(dashboardAttachmentId, {
-              data: dashboardData,
+              data: finalDashboardData,
               description,
             });
 
@@ -157,7 +179,15 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(dashboardData),
+                dashboard: summarizeDashboard(
+                  finalDashboardData,
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
+                ),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

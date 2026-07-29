@@ -39,6 +39,8 @@ export interface FindActionPolicyExecutionEventsParams {
   outcome?: PolicyExecutionOutcome;
   policyIds?: string[];
   ruleIds?: string[];
+  mandatoryRuleIds?: string[];
+  episodeIds?: string[];
 }
 
 export interface FindActionPolicyExecutionEventsResult {
@@ -54,6 +56,7 @@ export interface CountActionPolicyExecutionEventsSinceParams {
   outcome?: PolicyExecutionOutcome;
   policyIds?: string[];
   ruleIds?: string[];
+  mandatoryRuleIds?: string[];
 }
 
 export interface CountActionPolicyExecutionEventsSinceResult {
@@ -93,6 +96,8 @@ export class EventLogService implements EventLogServiceContract {
     outcome,
     policyIds,
     ruleIds,
+    mandatoryRuleIds,
+    episodeIds,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
     const body = buildFindActionPolicyEventsQuery({
       spaceId,
@@ -100,6 +105,8 @@ export class EventLogService implements EventLogServiceContract {
       outcome,
       policyIds,
       ruleIds,
+      mandatoryRuleIds,
+      episodeIds,
       page,
       perPage,
     });
@@ -123,6 +130,7 @@ export class EventLogService implements EventLogServiceContract {
     outcome,
     policyIds,
     ruleIds,
+    mandatoryRuleIds,
   }: CountActionPolicyExecutionEventsSinceParams): Promise<CountActionPolicyExecutionEventsSinceResult> {
     const body = buildCountActionPolicyEventsQuery({
       spaceId,
@@ -130,6 +138,7 @@ export class EventLogService implements EventLogServiceContract {
       outcome,
       policyIds,
       ruleIds,
+      mandatoryRuleIds,
     });
     const index = this.eventLogService.getIndexPattern();
 

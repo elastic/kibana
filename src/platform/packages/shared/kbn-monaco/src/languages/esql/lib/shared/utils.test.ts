@@ -68,4 +68,17 @@ describe('offsetRangeToMonacoRange', () => {
       endLineNumber: 1,
     });
   });
+
+  test('empty range on a newline resolves to the end of the current line, not the next one', () => {
+    const expression = 'FROM \n\n';
+    const range = { start: 5, end: 5 };
+    const monacoRange = offsetRangeToMonacoRange(expression, range);
+
+    expect(monacoRange).toEqual({
+      startColumn: 6,
+      endColumn: 6,
+      startLineNumber: 1,
+      endLineNumber: 1,
+    });
+  });
 });

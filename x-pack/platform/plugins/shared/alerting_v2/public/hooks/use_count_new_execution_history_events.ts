@@ -19,6 +19,7 @@ const POLL_INTERVAL_MS = 10_000;
 interface UseCountNewExecutionHistoryEventsParams {
   since: string;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
   enabled?: boolean;
 }
@@ -26,14 +27,15 @@ interface UseCountNewExecutionHistoryEventsParams {
 export const useCountNewExecutionHistoryEvents = ({
   since,
   search,
+  ruleIds,
   outcome,
   enabled = true,
 }: UseCountNewExecutionHistoryEventsParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
   return useQuery<CountPolicyExecutionEventsResponse, Error>({
-    queryKey: executionHistoryKeys.countSince(since, { search, outcome }),
-    queryFn: () => executionHistoryApi.countNewSince(since, { search, outcome }),
+    queryKey: executionHistoryKeys.countSince(since, { search, ruleIds, outcome }),
+    queryFn: () => executionHistoryApi.countNewSince(since, { search, ruleIds, outcome }),
     refetchOnWindowFocus: true,
     refetchInterval: POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,

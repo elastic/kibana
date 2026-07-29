@@ -52,16 +52,18 @@ interface OptionsListProps {
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
 const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListProps) => {
-  const { applyRange, onPresetDelete, settings } = useDateRangePickerContext();
-  const timePrecision = settings.timePrecision ?? 's';
+  const { applyRange, onPresetDelete, transformOptions } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
   const handleSelect = useCallback(
     (option: TimeRangeBoundsOption) => {
-      applyRange({ start: option.start, end: option.end }, getOptionInputText(option));
+      applyRange(
+        { start: option.start, end: option.end },
+        getOptionInputText(option, transformOptions)
+      );
     },
-    [applyRange]
+    [applyRange, transformOptions]
   );
 
   return (
@@ -69,9 +71,13 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
+          // Stable selector: a natural-language `label` when present, otherwise the
+          // option's `start`-`end` bounds (its identity — see `key` above and the
+          // dedupe-by-`start|end` invariant). Never the displayed label, which shifts
+          // with `timePrecision` and would make the selector config-dependent.
           data-test-subj={toTestSubj(
             'dateRangePickerPresetItem',
-            getOptionDisplayLabel(option, { timePrecision })
+            option.label ?? `${option.start}-${option.end}`
           )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
@@ -90,7 +96,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
             ) : undefined
           }
         >
-          {getOptionDisplayLabel(option, { timePrecision })}
+          {getOptionDisplayLabel(option, transformOptions)}
         </PanelListItem>
       ))}
     </ul>
@@ -183,19 +189,21 @@ const DocumentationButton = () => {
 };
 
 export function MainPanel() {
-  const { onPresetSave, timeRange, applyRange, timeZone } = useDateRangePickerContext();
+  const { onPresetSave, timeRange, applyRange, timeZone, displayText } =
+    useDateRangePickerContext();
   const { navigateTo } = useDateRangePickerPanelNavigation();
   const timeZoneDisplay = useTimeZoneDisplay(timeZone, timeRange.startDate);
   const euiThemeContext = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
     if (timeRange.isInvalid || !onPresetSave) return;
-    const label = timeRange.isNaturalLanguage
-      ? timeRange.value.charAt(0).toUpperCase() + timeRange.value.slice(1)
-      : timeRange.value;
-    onPresetSave({ start: timeRange.start, end: timeRange.end, label });
+    // Persist the human-readable display text as the label (e.g. "Last 14 days",
+    // "Feb 3 → Feb 10"). It is display-only: `getOptionInputText` and `prettifyValue`
+    // re-derive editable input from `start`/`end`, so the label never has to round-trip
+    // as input text — which keeps the idle button and the saved preset consistent.
+    onPresetSave({ start: timeRange.start, end: timeRange.end, label: displayText });
     applyRange();
-  }, [onPresetSave, applyRange, timeRange]);
+  }, [onPresetSave, applyRange, timeRange, displayText]);
 
   const styles = mainPanelStyles(euiThemeContext);
   const dividerStyles = panelDividerStyles(euiThemeContext);

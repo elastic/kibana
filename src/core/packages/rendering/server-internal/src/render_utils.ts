@@ -11,12 +11,11 @@ import { firstValueFrom } from 'rxjs';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IConfigService } from '@kbn/config';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
-import type { ThemeName, UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import {
   config as loggingConfigDef,
   type LoggingConfigWithBrowserType,
 } from '@kbn/core-logging-server-internal';
-import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -31,22 +30,6 @@ export const getSettingValue = <T>(
 };
 
 export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
-
-export const getScriptPaths = ({
-  themeName,
-  baseHref,
-  darkMode,
-}: {
-  baseHref: string;
-  darkMode: DarkModeValue;
-  themeName: ThemeName;
-}) => {
-  if (darkMode === 'system') {
-    return [`${baseHref}/ui/bootstrap_system_theme_borealis.js`];
-  } else {
-    return [];
-  }
-};
 
 export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => {
   const bundlesHref = getBundlesHref(baseHref);

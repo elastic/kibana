@@ -9,7 +9,7 @@
 
 import yaml from 'yaml';
 import { ZodError } from '@kbn/zod/v4';
-import { TemplateMetadataSchema } from '../schemas/template';
+import { TemplateMetadataLenientSchema, TemplateMetadataSchema } from '../schemas/template';
 import type { TemplateMetadata } from '../types/catalog';
 
 const METADATA_KEY = 'template-metadata';
@@ -92,9 +92,9 @@ export function parseTemplateYaml(
   }
 
   // Strict by default (authoring/CI: reject unknown fields). On the runtime
-  // consumption path `lenient` strips unknown top-level `template-metadata`
-  // keys instead, so a newer publisher field doesn't 503 a listed template.
-  const metadataSchema = lenient ? TemplateMetadataSchema.strip() : TemplateMetadataSchema;
+  // consumption path the lenient schema strips unknown keys — top-level and
+  // nested `install` — so a newer publisher field doesn't 503 a listed template.
+  const metadataSchema = lenient ? TemplateMetadataLenientSchema : TemplateMetadataSchema;
   let metadata: TemplateMetadata;
   try {
     metadata = metadataSchema.parse(metaRaw) as TemplateMetadata;

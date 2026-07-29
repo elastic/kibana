@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -23,6 +24,7 @@ import {
   useGeneratedHtmlId,
   EuiPanel,
 } from '@elastic/eui';
+import { IlmLink } from '../../general_data/ilm_link';
 
 export type AffectedResourceType = 'stream' | 'index';
 
@@ -32,6 +34,7 @@ export interface AffectedResource {
 }
 
 export interface EditPolicyModalProps {
+  policyName: string;
   affectedResources: AffectedResource[];
   isManaged?: boolean;
   isProcessing?: boolean;
@@ -41,6 +44,7 @@ export interface EditPolicyModalProps {
 }
 
 export function EditPolicyModal({
+  policyName,
   affectedResources,
   isManaged = false,
   isProcessing = false,
@@ -50,13 +54,8 @@ export function EditPolicyModal({
 }: EditPolicyModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const isInUse = affectedResources.length > 0;
-  const affectedResourcesCount = affectedResources.length;
-  const streamsCount = isInUse
-    ? affectedResources.filter((resource) => resource.type === 'stream').length
-    : 0;
-  const indicesCount = isInUse
-    ? affectedResources.filter((resource) => resource.type === 'index').length
-    : 0;
+  const streamsCount = affectedResources.filter((resource) => resource.type === 'stream').length;
+  const indicesCount = affectedResources.filter((resource) => resource.type === 'index').length;
   const streamsLabel =
     streamsCount > 0
       ? i18n.translate('xpack.streams.editPolicyModal.streamsLabel', {
@@ -71,7 +70,7 @@ export function EditPolicyModal({
           values: { indicesCount },
         })
       : null;
-  const affectedResourcesLabel =
+  const usageLabel =
     streamsLabel && indicesLabel
       ? i18n.translate('xpack.streams.editPolicyModal.affectedResourcesLabel', {
           defaultMessage: '{streamsLabel} and {indicesLabel}',
@@ -82,20 +81,35 @@ export function EditPolicyModal({
         })
       : streamsLabel || indicesLabel || '';
 
-  const modalTitle = isInUse
-    ? i18n.translate('xpack.streams.editPolicyModal.title', {
-        defaultMessage: 'This update affects {affectedResourcesLabel}',
-        values: {
-          affectedResourcesLabel,
-        },
-      })
-    : isManaged
-    ? i18n.translate('xpack.streams.editPolicyModal.managedNotInUseTitle', {
-        defaultMessage: 'Confirm changes to managed policy',
-      })
-    : i18n.translate('xpack.streams.editPolicyModal.notInUseTitle', {
-        defaultMessage: 'Confirm policy changes',
-      });
+  const policyNameNode = (
+    <IlmLink policyName={policyName} data-test-subj="editPolicyModal-policyNameLink" />
+  );
+
+  // The modal comes in three flavors depending on why the change needs
+  // confirmation, keeping a single consistent layout across all cases:
+  //   - managed + in use ("Both")
+  //   - in use only ("Multiple data sources only")
+  //   - managed only ("Managed only")
+  const description =
+    isManaged && isInUse ? (
+      <FormattedMessage
+        id="xpack.streams.editPolicyModal.managedAndInUseDescription"
+        defaultMessage="ILM policy {policyName} is managed by Elastic and is already being used in {usageLabel} in addition to this stream. Consider saving as a new ILM policy to avoid unintended changes."
+        values={{ policyName: policyNameNode, usageLabel }}
+      />
+    ) : isInUse ? (
+      <FormattedMessage
+        id="xpack.streams.editPolicyModal.inUseDescription"
+        defaultMessage="ILM policy {policyName} is already being used in {usageLabel} in addition to this stream. Consider saving as a new ILM policy to avoid unintended changes."
+        values={{ policyName: policyNameNode, usageLabel }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.streams.editPolicyModal.managedDescription"
+        defaultMessage="ILM policy {policyName} is managed by Elastic. Consider saving as a new ILM policy to avoid unintended changes."
+        values={{ policyName: policyNameNode }}
+      />
+    );
 
   const affectedResourceTypeLabelMap: Record<AffectedResourceType, string> = {
     stream: i18n.translate('xpack.streams.editPolicyModal.affectedResourceType.streamLabel', {
@@ -110,53 +124,35 @@ export function EditPolicyModal({
     <EuiModal onClose={onCancel} aria-labelledby={modalTitleId} css={{ width: '576px' }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editPolicyModalTitle">
-          {modalTitle}
+          {i18n.translate('xpack.streams.editPolicyModal.title', {
+            defaultMessage: 'Confirm changes to ILM policy',
+          })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        {isManaged && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              title={i18n.translate('xpack.streams.editPolicyModal.managedWarningTitle', {
-                defaultMessage: 'This is a managed policy',
-              })}
-              color="warning"
-              iconType="warning"
-              data-test-subj="editPolicyModal-managedWarning"
-            >
-              <p>
-                {i18n.translate('xpack.streams.editPolicyModal.managedWarningDescription', {
-                  defaultMessage:
-                    'This policy is managed by Elasticsearch. Modifying it can cause unexpected behavior. To avoid unintended changes, save as a new policy instead.',
-                })}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
+        <EuiText size="s" data-test-subj="editPolicyModal-description">
+          <p>{description}</p>
+        </EuiText>
         {isInUse && (
           <>
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.editPolicyModal.description', {
-                defaultMessage:
-                  "{affectedResourcesLabel} {affectedResourcesCount, plural, one {uses} other {use}} the ILM policy you're updating. To apply your changes to only this stream, save as a new policy.",
-                values: {
-                  affectedResourcesLabel,
-                  affectedResourcesCount,
-                },
-              })}
-            </EuiText>
             <EuiSpacer size="m" />
+            <EuiText size="s" data-test-subj="editPolicyModal-affectedResourcesTitle">
+              <strong>
+                {i18n.translate('xpack.streams.editPolicyModal.affectedResourcesTitle', {
+                  defaultMessage: 'Affected data sources',
+                })}
+              </strong>
+            </EuiText>
+            <EuiSpacer size="s" />
             <EuiPanel
               hasBorder={false}
               hasShadow={false}
               paddingSize="s"
-              style={{
-                maxHeight: '160px',
-                overflowY: 'auto',
-              }}
+              css={css`
+                max-height: 160px;
+                overflow-y: auto;
+              `}
               color="subdued"
               data-test-subj="editPolicyModal-affectedResourcesList"
               tabIndex={0}
@@ -209,7 +205,7 @@ export function EditPolicyModal({
                   isLoading={isProcessing}
                 >
                   {i18n.translate('xpack.streams.editPolicyModal.overwriteButton', {
-                    defaultMessage: 'Update current policy',
+                    defaultMessage: 'Overwrite',
                   })}
                 </EuiButton>
               </EuiFlexItem>
@@ -221,7 +217,7 @@ export function EditPolicyModal({
                   disabled={isProcessing}
                 >
                   {i18n.translate('xpack.streams.editPolicyModal.saveAsNewButton', {
-                    defaultMessage: 'Save as new policy',
+                    defaultMessage: 'Save as new',
                   })}
                 </EuiButton>
               </EuiFlexItem>

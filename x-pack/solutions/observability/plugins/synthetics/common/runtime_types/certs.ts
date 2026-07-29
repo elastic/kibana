@@ -22,7 +22,7 @@ export const GetCertsParamsType = t.partial({
   monitorIds: t.array(t.string),
   monitorTypes: t.array(t.string),
   browserResourceTypes: t.array(t.string),
-  party: t.array(t.string),
+  certOrigin: t.array(t.string),
   tags: t.array(t.string),
   issuers: t.array(t.string),
   includeBrowserCerts: t.boolean,
@@ -89,7 +89,7 @@ export const CertFacetsType = t.type({
   tags: t.array(CertFacetCountType),
   issuers: t.array(CertFacetCountType),
   resourceTypes: t.array(CertFacetCountType),
-  party: t.array(CertFacetCountType),
+  certOrigin: t.array(CertFacetCountType),
   expiringWithin: t.array(CertFacetCountType),
 });
 

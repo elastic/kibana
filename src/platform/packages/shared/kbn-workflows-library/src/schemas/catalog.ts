@@ -52,16 +52,16 @@ export const KibanaVersionsManifestSchema = z
   .strict();
 
 /**
- * Consumption-side variants used by the Kibana runtime (`LibraryFetcher`) when
- * it validates catalog JSON fetched from the CDN. They mirror the strict base
- * schemas above but strip unknown-key handling — at the top level and on each row —
- * so an older Kibana tolerates a newer catalog that adds fields
- * Template Authoring / CI validation uses the strict base schemas.
+ * Lenient ("tolerant reader") variants used by the Kibana runtime
+ * (`LibraryFetcher`) when it validates catalog JSON fetched from the CDN. They
+ * mirror the strict base schemas above but strip unknown-key handling — at the
+ * top level and on each row — so an older Kibana tolerates a newer catalog that
+ * adds fields. Template Authoring / CI validation uses the strict base schemas.
  */
-export const TemplatesCatalogConsumptionSchema = TemplatesCatalogSchema.extend({
+export const TemplatesCatalogLenientSchema = TemplatesCatalogSchema.extend({
   templates: z.array(TemplateSchema.strip()).max(1000),
 }).strip();
 
-export const KibanaVersionsManifestConsumptionSchema = KibanaVersionsManifestSchema.extend({
+export const KibanaVersionsManifestLenientSchema = KibanaVersionsManifestSchema.extend({
   versions: z.array(KibanaVersionEntrySchema.strip()).max(100),
 }).strip();

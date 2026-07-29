@@ -14,6 +14,7 @@ import type { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { createNowProviderMock } from './now_provider/mocks';
+import { createDateRangePickerPresetsServiceMock } from './date_range_picker_presets/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
@@ -41,6 +42,7 @@ const createStartContract = (): Start => {
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
+    dateRangePickerPresets: createDateRangePickerPresetsServiceMock(),
     nowProvider: createNowProviderMock(),
   };
 };

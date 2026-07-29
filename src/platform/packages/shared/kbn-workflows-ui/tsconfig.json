@@ -4,12 +4,15 @@
     "outDir": "target/types",
     "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "index.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "index.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/dag-layout",
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
     "@kbn/workflows",
+    "@kbn/workflows-library",
+    "@kbn/workflows-yaml",
     "@kbn/react-kibana-context-theme",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -22,5 +25,9 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/use-observable",
+    "@kbn/connector-specs",
+    "@kbn/workflows-extensions",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerts-ui-shared",
   ]
 }

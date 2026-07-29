@@ -22,6 +22,9 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
@@ -29,7 +32,7 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderMenu,
-  AppHeaderPadding,
+  AppHeaderSpacing,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
 } from './src';

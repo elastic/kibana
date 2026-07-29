@@ -54,6 +54,34 @@ describe('ListExecutionHistoryRoute', () => {
     });
   });
 
+  it('forwards episodeIds from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { episodeIds: ['ep-1', 'ep-2'] },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+    );
+  });
+
+  it('forwards start_date from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { start_date: '2026-01-01T00:00:00.000Z' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ start_date: '2026-01-01T00:00:00.000Z' })
+    );
+  });
+
   it('passes undefined params when query is empty (defaults applied by client)', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();

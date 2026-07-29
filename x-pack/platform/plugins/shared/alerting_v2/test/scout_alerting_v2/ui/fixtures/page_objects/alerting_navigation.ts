@@ -41,16 +41,26 @@ export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
   },
 };
 
+const MANAGEMENT_LANDING_SUBJECTS = [
+  'managementHome',
+  'managementHomeSolution',
+  'cards-navigation-page',
+] as const;
+
 /**
  * Drives navigation to the four alerting_v2 management apps and exposes the
- * "Privileges required" interstitial locators, so specs can assert which pages
- * a given role can view.
+ * "Privileges required" interstitial locators plus the Stack Management
+ * landing-page locator, so specs can assert which pages a given role can view.
  */
 export class AlertingNavigation {
   public readonly requiredPrivilegesPrompt: Locator;
+  public readonly managementLanding: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
+    this.managementLanding = this.page.locator(
+      MANAGEMENT_LANDING_SUBJECTS.map((subject) => `[data-test-subj="${subject}"]`).join(', ')
+    );
   }
 
   async goto(app: AlertingApp) {

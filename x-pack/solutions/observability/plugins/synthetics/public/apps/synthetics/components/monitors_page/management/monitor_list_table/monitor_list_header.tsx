@@ -17,6 +17,7 @@ export const MonitorListHeader = ({
   recordRangeLabel,
   setMonitorPendingDeletion,
   setMonitorPendingReset,
+  setMonitorPendingStatusUpdate,
 }: {
   recordRangeLabel: JSX.Element;
   selectedItems: EncryptedSyntheticsSavedMonitor[];
@@ -25,6 +26,7 @@ export const MonitorListHeader = ({
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
+  setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
 }) => {
   return (
     <EuiFlexGroup alignItems="center">
@@ -36,6 +38,7 @@ export const MonitorListHeader = ({
           selectedItems={selectedItems}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
+          setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -7,7 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { Discovery, Feature } from '@kbn/significant-events-schema';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   replaySignificantEventsSnapshot,
@@ -73,6 +73,47 @@ const formatFeature = (feature: Feature): string[] => {
   if (feature.filter) {
     lines.push(`    filter: ${JSON.stringify(feature.filter)}`);
   }
+  return lines;
+};
+
+const formatDiscovery = (discovery: Discovery): string[] => {
+  const lines: string[] = [];
+  lines.push(`  [${discovery.kind}] ${discovery.event_id} — ${discovery.title ?? '(untitled)'}`);
+  lines.push(`    summary: ${discovery.summary}`);
+
+  if (discovery.signals?.length) {
+    lines.push(`    signals (${discovery.signals.length}):`);
+    for (const s of discovery.signals.slice(0, 5)) {
+      lines.push(`      - type: ${s.type}`);
+      lines.push(`      - description: ${s.description}`);
+      if (s.evidence) {
+        lines.push(`      - query: ${s.evidence.esql_query}`);
+        lines.push(`      - result: ${s.evidence.result}`);
+      }
+    }
+    if (discovery.signals.length > 5) {
+      lines.push(`      ... and ${discovery.signals.length - 5} more`);
+    }
+  }
+
+  if (discovery.causal_features?.length) {
+    lines.push(`    causal features: (${discovery.causal_features.length}):`);
+    for (const f of discovery.causal_features.slice(0, 5)) {
+      lines.push(`      - ${f.name}`);
+    }
+  }
+
+  if (discovery.blast_radius?.length) {
+    lines.push(`    blast radius: (${discovery.blast_radius.length}):`);
+    for (const item of discovery.blast_radius.slice(0, 5)) {
+      if (item.type === 'dependency') {
+        lines.push(`      - dependency: ${item.source} -> ${item.target}`);
+      } else {
+        lines.push(`      - infrastructure: ${item.feature_id}`);
+      }
+    }
+  }
+
   return lines;
 };
 
@@ -230,9 +271,9 @@ run(
     log.info(`\nSnapshot discoveries (${discoveries.length}):`);
     if (discoveries.length > 0) {
       for (const discovery of discoveries) {
-        log.info(
-          `  [${discovery.kind}] ${discovery.discovery_slug} — ${discovery.title ?? '(untitled)'}`
-        );
+        for (const line of formatDiscovery(discovery)) {
+          log.info(line);
+        }
       }
     } else {
       log.info('  (none — snapshot taken without --discovery)');
@@ -241,7 +282,7 @@ run(
     log.info(`\nSnapshot detections (${detections.length}):`);
     if (detections.length > 0) {
       for (const detection of detections) {
-        log.info(`  [${detection.kind}] ${detection.rule_name} (${detection.rule_uuid})`);
+        log.info(`  ${detection.rule_name} (${detection.rule_uuid})`);
       }
     } else {
       log.info('  (none — snapshot taken without --discovery)');

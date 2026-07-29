@@ -6,9 +6,11 @@
  */
 
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import { FilesystemService, WorkspaceVolume } from '../../filesystem';
 import { BashService } from '../../run_agent/bash';
+import type { BashToolAccess } from '../../run_agent/bash';
 import { WorkspaceClient, createWorkspaceStorage } from '../../../workspaces';
 import type { RunnerManager } from '../runner';
 
@@ -57,23 +59,34 @@ export const createFilesystemServices = async ({
   const bashService = new BashService({
     filesystemService,
     workspaceVolume,
-    execToolFn: async (toolId, args) => {
-      const tool = toolManager.getExecutable(toolId);
-      if (!tool) {
-        throw new Error(`tool '${toolId}' is not available`);
-      }
-      const { origin } = toolManager.getToolMeta(toolId);
-      if (origin === ToolOrigin.internal) {
-        throw new Error(`tool '${toolId}' can't be called via bash`);
-      }
-      return tool.execute({
-        toolParams: (args ?? {}) as Record<string, unknown>,
-        source: 'agent',
-      });
-    },
-    resolveToolId: (id) => toolManager.getToolIdMapping().get(id) ?? id,
+    toolAccess: createBashToolAccess(toolManager),
     abortSignal: manager.deps.abortSignal,
   });
 
   return { filesystemService, bashService };
 };
+
+const createBashToolAccess = (toolManager: ToolManager): BashToolAccess => ({
+  execToolFn: async (toolId, args) => {
+    const tool = toolManager.getExecutable(toolId);
+    if (!tool) {
+      throw new Error(`tool '${toolId}' is not available`);
+    }
+    const { origin } = toolManager.getToolMeta(toolId);
+    if (origin === ToolOrigin.internal) {
+      throw new Error(`tool '${toolId}' can't be called via bash`);
+    }
+    return tool.execute({
+      toolParams: (args ?? {}) as Record<string, unknown>,
+      source: 'agent',
+    });
+  },
+  getToolSchema: async (toolId) => {
+    const tool = toolManager.getExecutable(toolId);
+    if (!tool) {
+      throw new Error(`tool '${toolId}' is not available`);
+    }
+    return tool.getSchema();
+  },
+  resolveToolId: (id) => toolManager.getToolIdMapping().get(id) ?? id,
+});

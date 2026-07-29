@@ -68,7 +68,7 @@ describe('store_stats route', () => {
       name: 'my-stream',
       statsResult: {
         _all: {
-          primaries: {
+          total: {
             store: { size_in_bytes: 0, total_data_set_size_in_bytes: 130_000_000 },
           },
         },
@@ -76,6 +76,22 @@ describe('store_stats route', () => {
     });
 
     expect(result).toEqual({ store_size_bytes: 130_000_000 });
+  });
+
+  it('reports replica-inclusive size (total, not primaries) to match the bulk storage_stats route', async () => {
+    // With number_of_replicas > 0, `total` (primaries + replicas) exceeds `primaries`. This endpoint
+    // must report `total` so the stream detail size matches the stream list / lifecycle surfaces.
+    const result = await callHandler({
+      name: 'my-stream',
+      statsResult: {
+        _all: {
+          primaries: { store: { total_data_set_size_in_bytes: 100_000_000 } },
+          total: { store: { total_data_set_size_in_bytes: 200_000_000 } },
+        },
+      } as IndicesStatsResponse,
+    });
+
+    expect(result).toEqual({ store_size_bytes: 200_000_000 });
   });
 
   it('returns 0 when stats are missing', async () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 
@@ -25,12 +27,27 @@ export interface ObservableTypesListProps {
   observableTypes: ObservableTypesConfiguration;
   onDeleteObservableType: (key: string) => void;
   onEditObservableType: (key: string) => void;
+  /**
+   * Renders the list as line-separated rows instead of individual panels.
+   * Only used by the cases redesign settings page.
+   */
+  useLineSeparators?: boolean;
 }
 
 const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props) => {
-  const { observableTypes, onDeleteObservableType, onEditObservableType } = props;
+  const { observableTypes, onDeleteObservableType, onEditObservableType, useLineSeparators } =
+    props;
+  const { euiTheme } = useEuiTheme();
   const [selectedItem, setSelectedItem] = useState<ObservableTypesConfiguration[number] | null>(
     null
+  );
+
+  const redesignRowCss = useMemo(
+    () => css`
+      padding: ${euiTheme.size.s} 0;
+      border-bottom: ${euiTheme.border.thin};
+    `,
+    [euiTheme]
   );
 
   const onConfirm = useCallback(() => {
@@ -47,7 +64,82 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
 
   const showModal = Boolean(selectedItem);
 
-  return observableTypes.length ? (
+  const actionButtons = (observableType: ObservableTypesConfiguration[number]) => (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={`${observableType.key}-observable-type-edit`}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={`${observableType.key}-observable-type-edit`}
+            aria-label={`${observableType.key}-observable-type-edit`}
+            iconType="pencil"
+            color="primary"
+            disabled={props.disabled}
+            onClick={() => onEditObservableType(observableType.key)}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={`${observableType.key}-observable-type-delete`}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={`${observableType.key}-observable-type-delete`}
+            aria-label={`${observableType.key}-observable-type-delete`}
+            iconType="minusCircle"
+            color="danger"
+            disabled={props.disabled}
+            onClick={() => setSelectedItem(observableType)}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </>
+  );
+
+  const redesignList = (
+    <EuiFlexGroup
+      justifyContent="flexStart"
+      direction="column"
+      gutterSize="none"
+      data-test-subj="observable-types-list"
+    >
+      <EuiFlexItem>
+        {observableTypes.map((observableType) => (
+          <div
+            key={observableType.key}
+            css={redesignRowCss}
+            data-test-subj={`observable-type-${observableType.key}`}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={true}>
+                <EuiText size="s">
+                  <h4>{observableType.label}</h4>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  {actionButtons(observableType)}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ))}
+      </EuiFlexItem>
+      {showModal && selectedItem ? (
+        <DeleteConfirmationModal
+          title={i18n.DELETE_OBSERVABLE_TYPE_TITLE(selectedItem.label)}
+          message={i18n.DELETE_OBSERVABLE_TYPE_DESCRIPTION}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+        />
+      ) : null}
+    </EuiFlexGroup>
+  );
+
+  const legacyList = (
     <>
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexStart" data-test-subj="observable-types-list">
@@ -71,36 +163,7 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={`${observableType.key}-observable-type-edit`}
-                          disableScreenReaderOutput
-                        >
-                          <EuiButtonIcon
-                            data-test-subj={`${observableType.key}-observable-type-edit`}
-                            aria-label={`${observableType.key}-observable-type-edit`}
-                            iconType="pencil"
-                            color="primary"
-                            disabled={props.disabled}
-                            onClick={() => onEditObservableType(observableType.key)}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={`${observableType.key}-observable-type-delete`}
-                          disableScreenReaderOutput
-                        >
-                          <EuiButtonIcon
-                            data-test-subj={`${observableType.key}-observable-type-delete`}
-                            aria-label={`${observableType.key}-observable-type-delete`}
-                            iconType="minusCircle"
-                            color="danger"
-                            disabled={props.disabled}
-                            onClick={() => setSelectedItem(observableType)}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
+                      {actionButtons(observableType)}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -119,7 +182,9 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
         ) : null}
       </EuiFlexGroup>
     </>
-  ) : null;
+  );
+
+  return observableTypes.length ? (useLineSeparators ? redesignList : legacyList) : null;
 };
 
 ObservableTypesListComponent.displayName = 'ObservableTypesListComponent';

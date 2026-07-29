@@ -27,11 +27,11 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { isTab } from '@kbn/timelines-plugin/public';
 import {
   dataTableActions,
@@ -60,7 +60,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import {
   getDetectionEngineUrl,
@@ -101,7 +101,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID, ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 import {
@@ -237,11 +237,21 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled(
+    const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled(
       'ruleChangesHistoryEnabled'
     );
+    const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
+      ENABLE_RULE_CHANGES_HISTORY_SETTING
+    );
+    const isRuleChangesHistoryEnabled =
+      ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
-    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -357,6 +367,21 @@ export const RuleDetailsPage = connector(
         path: getRuleDetailsTabUrl(ruleId ?? '', 'alerts', ''),
       });
     }, [navigateToApp, ruleId]);
+
+    // Sync after a chat-driven rule save. Must refetch here: the save handler can't write
+    // to this page's react-query cache (security pages use the Cases context's query client).
+    useEffect(() => {
+      let prevSaving: ReadonlySet<string> = new Set();
+      const savingSub = aiRuleCreation.saving$.subscribe((saving) => {
+        if (saving.size < prevSaving.size) {
+          refreshRule();
+        }
+        prevSaving = saving;
+      });
+      return () => {
+        savingSub.unsubscribe();
+      };
+    }, [aiRuleCreation, refreshRule]);
 
     // persist rule until refresh is complete
     useEffect(() => {

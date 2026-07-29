@@ -214,6 +214,10 @@ export interface UnifiedHistogramFetchParamsExternal {
    */
   esqlVariables?: ESQLControlVariable[];
   /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results
+   */
+  isApproximate?: boolean;
+  /**
    * The controls state to use for the chart
    */
   controlsState?: ControlPanelsState<OptionsListESQLControlState>;

@@ -17,7 +17,7 @@ import { useUrlParams } from '../../../../common/navigation';
 jest.mock('../../../../common/navigation/hooks');
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('./case_view_activity', () => ({
+jest.mock('./activity/case_view_activity', () => ({
   CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
 }));
 jest.mock('../../../case_view/components/case_view_attachments', () => ({
@@ -26,8 +26,11 @@ jest.mock('../../../case_view/components/case_view_attachments', () => ({
 jest.mock('../../../case_view/components/case_view_similar_cases', () => ({
   CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
 }));
-jest.mock('./case_view_sidebar', () => ({
+jest.mock('./sidebar/case_view_sidebar', () => ({
   CaseViewSidebar: () => <div data-test-subj="case-view-page-sidebar" />,
+}));
+jest.mock('./sidebar/sidebar_toggle_button', () => ({
+  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 jest.mock('../../../case_view/case_view_tabs', () => ({
   CaseViewTabs: () => <div data-test-subj="case-view-tabs" />,
@@ -129,5 +132,17 @@ describe('CaseViewTabContent', () => {
 
     expect(await screen.findByTestId('case-view-attachments')).toBeInTheDocument();
     expect(screen.getByTestId('case-view-page-sidebar')).toBeInTheDocument();
+  });
+
+  it('hides the sidebar visually, without unmounting it, when localStorage has sidebarOpen set to false', async () => {
+    localStorage.setItem(`${basicCase.owner}.cases.caseView.sidebarOpen`, JSON.stringify(false));
+
+    renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />);
+
+    await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.ACTIVITY}`);
+    // Stays mounted (not removed from the DOM) so that any pending, unconfirmed field edits
+    // inside it survive collapsing the whole sidebar, the same way they already survive
+    // collapsing a single accordion section.
+    expect(screen.getByTestId('case-view-page-sidebar')).not.toBeVisible();
   });
 });

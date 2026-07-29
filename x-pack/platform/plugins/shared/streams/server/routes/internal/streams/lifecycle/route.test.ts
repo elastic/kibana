@@ -257,3 +257,87 @@ describe('lifecycle _dsl_phase_stats route', () => {
     );
   });
 });
+
+describe('lifecycle _snapshot_repositories route', () => {
+  const snapshotRoute =
+    internalLifecycleRoutes['GET /internal/streams/lifecycle/_snapshot_repositories'];
+
+  type SnapshotHandlerParams = Parameters<typeof snapshotRoute.handler>[0];
+
+  const callSnapshotHandler = ({
+    repositories = {},
+    clusterSettings = {},
+  }: {
+    repositories?: Record<string, { type?: string }>;
+    clusterSettings?: Record<string, unknown>;
+  }) => {
+    const getRepository = jest.fn().mockResolvedValue(repositories);
+    const getSettings = jest.fn().mockResolvedValue(clusterSettings);
+
+    const getScopedClients = jest.fn().mockResolvedValue({
+      scopedClusterClient: {
+        asCurrentUser: { snapshot: { getRepository }, cluster: { getSettings } },
+      },
+    });
+
+    const telemetry = {
+      startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
+      reportStreamsStateError: jest.fn(),
+    };
+
+    const handlerParams = {
+      request: {},
+      getScopedClients,
+      response: {},
+      logger: { error: jest.fn(), warn: jest.fn() },
+      context: {},
+      telemetry,
+    } as unknown as SnapshotHandlerParams;
+
+    return snapshotRoute.handler(handlerParams);
+  };
+
+  it('maps repositories to name/type and reports the cluster default repository', async () => {
+    const result = await callSnapshotHandler({
+      repositories: { 'repo-a': { type: 'fs' }, 'repo-b': { type: 's3' } },
+      clusterSettings: { persistent: { repositories: { default_repository: 'repo-a' } } },
+    });
+
+    expect(result).toEqual({
+      repositories: [
+        { name: 'repo-a', type: 'fs' },
+        { name: 'repo-b', type: 's3' },
+      ],
+      default_repository: 'repo-a',
+    });
+  });
+
+  it('defaults a repository type to an empty string when missing', async () => {
+    const result = await callSnapshotHandler({
+      repositories: { 'repo-a': {} },
+    });
+
+    expect(result.repositories).toEqual([{ name: 'repo-a', type: '' }]);
+  });
+
+  it('returns undefined default_repository when the setting is absent', async () => {
+    const result = await callSnapshotHandler({
+      repositories: { 'repo-a': { type: 'fs' } },
+      clusterSettings: {},
+    });
+
+    expect(result.default_repository).toBeUndefined();
+  });
+
+  it.each([
+    ['an empty string', ''],
+    ['whitespace only', '   '],
+    ['a non-string value', 123],
+  ])('returns undefined default_repository when the setting is %s', async (_label, value) => {
+    const result = await callSnapshotHandler({
+      clusterSettings: { persistent: { repositories: { default_repository: value } } },
+    });
+
+    expect(result.default_repository).toBeUndefined();
+  });
+});

@@ -35,8 +35,8 @@ export const workflowKeys = {
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: (matcher?: string) =>
-    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
+  ruleEventFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'ruleEventFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {
@@ -54,6 +54,8 @@ export const actionPolicyKeys = {
   }) => [...actionPolicyKeys.lists(), filters] as const,
   allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
   tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+  linkedForRule: (ruleId: string) =>
+    [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
 };
 
 export const executionHistoryKeys = {
@@ -62,11 +64,18 @@ export const executionHistoryKeys = {
     page: number;
     perPage: number;
     search?: string;
+    ruleIds?: string[];
     outcome?: 'all' | 'dispatched' | 'throttled';
+    episodeIds?: string[];
+    startDate?: string;
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   countSince: (
     since: string,
-    filters: { search?: string; outcome?: 'all' | 'dispatched' | 'throttled' } = {}
+    filters: {
+      search?: string;
+      ruleIds?: string[];
+      outcome?: 'all' | 'dispatched' | 'throttled';
+    } = {}
   ) => [...executionHistoryKeys.all, 'countSince', since, filters] as const,
 };
 

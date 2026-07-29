@@ -60,16 +60,14 @@ export function SearchBar({
   return (
     <div ref={setSearchBarContainerRef}>
       {showUnifiedSearchBar && (
-        <EuiFlexItem>
-          <UnifiedSearchBar
-            placeholder={searchBarPlaceholder}
-            boolFilter={searchBarBoolFilter}
-            showQueryInput={showQueryInput}
-            showFilterBar={showFilterBar}
-            showDatePicker
-            showSubmitButton
-          />
-        </EuiFlexItem>
+        <UnifiedSearchBar
+          placeholder={searchBarPlaceholder}
+          boolFilter={searchBarBoolFilter}
+          showQueryInput={showQueryInput}
+          showFilterBar={showFilterBar}
+          showDatePicker
+          showSubmitButton
+        />
       )}
       {showUnifiedSearchBar && hasSecondaryFilters && <EuiSpacer size="s" />}
       {showUnifiedSearchBar && hasSecondaryFilters && (

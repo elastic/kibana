@@ -211,13 +211,13 @@ export function useFleetServerHostsForm(
   );
 
   const sslKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ?? undefined,
     undefined,
     isEditDisabled
   );
 
   const sslESKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ?? undefined,
     undefined,
     isEditDisabled
   );
@@ -239,7 +239,7 @@ export function useFleetServerHostsForm(
     isEditDisabled
   );
   const sslAgentKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key ?? undefined,
     undefined,
     isEditDisabled
   );
@@ -329,14 +329,23 @@ export function useFleetServerHostsForm(
                 client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
               }),
             },
-            ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
-              (!sslESKeyInput.value && sslESKeySecretInput.value) ||
-              (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
+            ...((sslKeySecretInput.hasChanged ||
+              sslESKeySecretInput.hasChanged ||
+              sslAgentKeySecretInput.hasChanged ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key) && {
               secrets: {
                 ssl: {
-                  key: sslKeySecretInput.value || undefined,
-                  es_key: sslESKeySecretInput.value || undefined,
-                  agent_key: sslAgentKeySecretInput.value || undefined,
+                  key: sslKeySecretInput.hasChanged
+                    ? sslKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+                  es_key: sslESKeySecretInput.hasChanged
+                    ? sslESKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+                  agent_key: sslAgentKeySecretInput.hasChanged
+                    ? sslAgentKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
                 },
               },
             }),
@@ -391,6 +400,9 @@ export function useFleetServerHostsForm(
     sslAgentCertificateInput.value,
     sslAgentCertificateAuthoritiesInput.value,
     onSuccess,
+    sslKeySecretInput.hasChanged,
+    sslESKeySecretInput.hasChanged,
+    sslAgentKeySecretInput.hasChanged,
   ]);
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);

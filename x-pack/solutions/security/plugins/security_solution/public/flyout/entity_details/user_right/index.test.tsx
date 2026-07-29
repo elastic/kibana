@@ -50,7 +50,7 @@ jest.mock('../shared/hooks/use_managed_user', () => ({
   useManagedUser: () => mockedUseManagedUser(),
 }));
 
-jest.mock('./hooks/use_observed_user', () => ({
+jest.mock('../../../flyout_v2/entity/user/main/hooks/use_observed_user', () => ({
   useObservedUser: () => mockedUseObservedUser(),
 }));
 

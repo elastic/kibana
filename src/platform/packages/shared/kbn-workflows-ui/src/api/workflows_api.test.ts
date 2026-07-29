@@ -427,6 +427,61 @@ describe('WorkflowApi', () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Workflow Template Library
+  // ---------------------------------------------------------------------------
+
+  describe('getCatalog', () => {
+    it('should call GET /internal/workflows/library/templates without query params', async () => {
+      await api.getCatalog();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/library/templates', {
+        query: {},
+        version: INTERNAL_VERSION,
+      });
+    });
+
+    it('should call GET /internal/workflows/library/templates with filters', async () => {
+      const params = { solution: 'security', category: 'enrichment', search: 'ip' };
+      await api.getCatalog(params);
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/library/templates', {
+        query: params,
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
+  describe('getTemplate', () => {
+    it('should call GET /internal/workflows/library/templates/{slug}', async () => {
+      await api.getTemplate('ip-reputation-check');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/ip-reputation-check',
+        { version: INTERNAL_VERSION }
+      );
+    });
+
+    it('should encode the slug', async () => {
+      await api.getTemplate('slug/with/slashes');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/slug%2Fwith%2Fslashes',
+        { version: INTERNAL_VERSION }
+      );
+    });
+  });
+
+  describe('getLibraryHealth', () => {
+    it('should call GET /internal/workflows/library/health', async () => {
+      await api.getLibraryHealth();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/library/health', {
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
   describe('restoreWorkflowVersion', () => {
     it('should call POST /internal/workflows/workflow/{id}/history/{eventId}/restore', async () => {
       const signal = new AbortController().signal;

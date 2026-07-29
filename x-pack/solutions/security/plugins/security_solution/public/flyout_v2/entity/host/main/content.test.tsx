@@ -49,7 +49,7 @@ jest.mock(
 jest.mock('../../../../cloud_security_posture/components/entity_insight', () => ({
   EntityInsight: () => null,
 }));
-jest.mock('./components/observed_data_section', () => ({
+jest.mock('../../shared/components/observed_data_section', () => ({
   ObservedDataSection: () => null,
 }));
 
@@ -65,6 +65,7 @@ const defaultProps = {
   openDetailsPanel: () => {},
   isPreviewMode: false,
   entityStoreEntityId: 'host:host-1@okta',
+  riskScoreQueryId: 'HostPanelRiskScoreQuery',
 };
 
 describe('Content — resolution license gating', () => {

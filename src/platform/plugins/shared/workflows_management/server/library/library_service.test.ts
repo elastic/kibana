@@ -10,13 +10,18 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Template } from '@kbn/workflows-library';
 
+import { LibraryBundleReader } from './library_bundle_reader';
 import { LibraryFetcher } from './library_fetcher';
 import { LibraryService } from './library_service';
 import type { WorkflowsManagementConfig } from '../config';
 
 jest.mock('./library_fetcher');
+jest.mock('./library_bundle_reader');
 
 const MockedLibraryFetcher = LibraryFetcher as jest.MockedClass<typeof LibraryFetcher>;
+const MockedLibraryBundleReader = LibraryBundleReader as jest.MockedClass<
+  typeof LibraryBundleReader
+>;
 
 const baseRow: Template = {
   slug: 'placeholder',
@@ -117,5 +122,40 @@ describe('LibraryService.listTemplates filtering', () => {
     });
 
     expect(result.map((t) => t.slug)).toEqual(['a']);
+  });
+});
+
+describe('LibraryService source selection', () => {
+  beforeEach(() => {
+    MockedLibraryFetcher.mockReset();
+    MockedLibraryBundleReader.mockReset();
+  });
+
+  const buildWith = (library: Partial<WorkflowsManagementConfig['library']>) =>
+    new LibraryService({
+      config: { library: { ttlMs: 60_000, ...library } } as unknown as WorkflowsManagementConfig,
+      logger: loggerMock.create(),
+      kibanaVersion: '9.5.0',
+      isServerless: false,
+    });
+
+  it('uses the HTTP fetcher when bundlePath is not set', () => {
+    buildWith({ registryUrl: 'https://example.test/v1' });
+
+    expect(MockedLibraryFetcher).toHaveBeenCalledTimes(1);
+    expect(MockedLibraryBundleReader).not.toHaveBeenCalled();
+    expect(MockedLibraryFetcher).toHaveBeenCalledWith(
+      expect.objectContaining({ registryUrl: 'https://example.test/v1' })
+    );
+  });
+
+  it('uses the bundle reader when bundlePath is set', () => {
+    buildWith({ bundlePath: '/srv/workflows-library' });
+
+    expect(MockedLibraryBundleReader).toHaveBeenCalledTimes(1);
+    expect(MockedLibraryFetcher).not.toHaveBeenCalled();
+    expect(MockedLibraryBundleReader).toHaveBeenCalledWith(
+      expect.objectContaining({ bundlePath: '/srv/workflows-library', kibanaVersion: '9.5.0' })
+    );
   });
 });

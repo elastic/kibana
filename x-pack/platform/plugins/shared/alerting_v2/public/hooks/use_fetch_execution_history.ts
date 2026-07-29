@@ -18,20 +18,43 @@ interface UseFetchExecutionHistoryParams {
   page: number;
   perPage: number;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
+  startDate?: string;
 }
 
 export const useFetchExecutionHistory = ({
   page,
   perPage,
   search,
+  ruleIds,
   outcome,
+  episodeIds,
+  startDate,
 }: UseFetchExecutionHistoryParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
   return useQuery<ListPolicyExecutionHistoryResponse, Error>({
-    queryKey: executionHistoryKeys.list({ page, perPage, search, outcome }),
-    queryFn: () => executionHistoryApi.listExecutionHistory({ page, perPage, search, outcome }),
+    queryKey: executionHistoryKeys.list({
+      page,
+      perPage,
+      search,
+      ruleIds,
+      outcome,
+      episodeIds,
+      startDate,
+    }),
+    queryFn: () =>
+      executionHistoryApi.listExecutionHistory({
+        page,
+        perPage,
+        search,
+        ruleIds,
+        outcome,
+        episodeIds,
+        start_date: startDate,
+      }),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

@@ -65,6 +65,13 @@ export const FLYOUT_TAB_RELATED = i18n.translate(
   }
 );
 
+export const FLYOUT_TAB_TIMELINE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.tab.timeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
@@ -162,14 +169,6 @@ export const LIFECYCLE_HEATMAP_UNKNOWN_STATUS_LABEL = i18n.translate(
   }
 );
 
-/** --- Lifecycle heatmap section --- */
-export const LIFECYCLE_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.lifecycleHeatmapSection.loadError',
-  {
-    defaultMessage: 'Could not load episode lifecycle.',
-  }
-);
-
 /** --- Severity heatmap --- */
 export const SEVERITY_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.severityHeatmap.title',
@@ -228,11 +227,26 @@ export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
+/** --- Timeline heatmaps section --- */
+export const TIMELINE_HEATMAPS_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timelineHeatmapsSection.loadError',
+  {
+    defaultMessage: 'Could not load episode timeline.',
+  }
+);
+
 /** --- Metadata details list --- */
 export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',
   {
     defaultMessage: 'Grouping',
+  }
+);
+
+export const METADATA_LIST_GROUPING_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.groupingError',
+  {
+    defaultMessage: 'Could not load grouping.',
   }
 );
 
@@ -254,6 +268,13 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.assigneeLabel',
   {
     defaultMessage: 'Assignee',
+  }
+);
+
+export const METADATA_LIST_TAGS_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
+  {
+    defaultMessage: 'Tags',
   }
 );
 

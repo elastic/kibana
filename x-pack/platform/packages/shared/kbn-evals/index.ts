@@ -73,7 +73,7 @@ export type {
   AgentBuilderClientResponse,
   ConverseStep,
 } from './src/utils/agent_builder_client';
-export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
+export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
@@ -128,6 +128,7 @@ export {
   type UpsertDatasetInput,
   type DatasetWithId,
 } from './src/utils/evals_client';
+export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api_client';
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
 

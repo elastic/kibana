@@ -22,6 +22,7 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     bulkCreateWorkflows: jest.fn(),
     bulkDeleteWorkflows: jest.fn(),
     mgetWorkflows: jest.fn(),
+    checkWorkflowIdConflicts: jest.fn(),
 
     cloneWorkflow: jest.fn(),
     validateWorkflow: jest.fn(),
@@ -47,4 +48,8 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     getConfig: jest.fn(),
     searchTriggerEvents: jest.fn(),
     restoreWorkflowVersion: jest.fn(),
+
+    getCatalog: jest.fn(),
+    getTemplate: jest.fn(),
+    getLibraryHealth: jest.fn(),
   } as unknown as MockWorkflowApi);

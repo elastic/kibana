@@ -350,7 +350,7 @@
   "@elastic/obs-exploration-team": {
     "src/platform/packages/shared/shared-ux/toolbar_selector": "'toolbar_selector' should be kebab-case"
   },
-  "@elastic/obs-onboarding-team": {
+  "@elastic/streams-ui": {
     "src/platform/packages/shared/kbn-otel-semantic-conventions/src/generated/resolved-semconv.ts": "'resolved-semconv.ts' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Android": "'Android' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Apache": "'Apache' should be snake_case",
@@ -371,10 +371,10 @@
     "x-pack/platform/plugins/shared/dataset_quality/public/components/dataset_quality_details/quality_issue_flyout/degraded_field/possible_mitigations/field_character_limit/Increase_field_character_limit.tsx": "'Increase_field_character_limit.tsx' should be snake_case"
   },
   "@elastic/obs-presentation-team": {
-    "x-pack/solutions/observability/plugins/apm/ftr_e2e": "'ftr_e2e' should be kebab-case",
-    "x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/diagnostics/apm-diagnostics-8.8.0-1687436214804.json": "'apm-diagnostics-8.8.0-1687436214804.json' should be snake_case",
+    "x-pack/solutions/observability/plugins/apm/test/scout/ui/fixtures/diagnostics/apm-diagnostics-8.8.0-1687436214804.json": "'apm-diagnostics-8.8.0-1687436214804.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-java.json": "'otel_native-edot-java.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-nodejs.json": "'otel_native-edot-nodejs.json' should be snake_case",
+    "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-php.json": "'otel_native-edot-php.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-python.json": "'otel_native-edot-python.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-otel_other-go.json": "'otel_native-otel_other-go.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-otel_other-java.json": "'otel_native-otel_other-java.json' should be snake_case",

@@ -143,6 +143,11 @@ describe('Data stream helpers', () => {
     it('does not default when template is not a data stream', () => {
       expect(resolveLifecycleForSummary(undefined, { hasDataStream: false })).toBeUndefined();
     });
+
+    it('preserves an explicitly disabled lifecycle instead of defaulting to hot-only', () => {
+      const lifecycle = { enabled: false as const };
+      expect(resolveLifecycleForSummary(lifecycle, { hasDataStream: true })).toEqual(lifecycle);
+    });
   });
 
   describe('countDlmDataPhases', () => {

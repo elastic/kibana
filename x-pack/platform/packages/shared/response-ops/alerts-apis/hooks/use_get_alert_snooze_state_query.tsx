@@ -44,16 +44,27 @@ export interface UseGetAlertSnoozeStateQueryParams {
   ruleIds: string[];
   http: HttpStart;
   notifications: NotificationsStart;
+  /**
+   * When true, runs against the default react-query context instead of
+   * `AlertsQueryContext`. Use this outside the alerts table (e.g. the alert
+   * details page) where no `AlertsQueryContext` provider is mounted.
+   */
+  skipAlertsQueryContext?: boolean;
 }
 
 export const getKey = queryKeys.getAlertSnoozeState;
 
 export const useGetAlertSnoozeStateQuery = (
-  { ruleIds, http, notifications: { toasts } }: UseGetAlertSnoozeStateQueryParams,
+  {
+    ruleIds,
+    http,
+    notifications: { toasts },
+    skipAlertsQueryContext,
+  }: UseGetAlertSnoozeStateQueryParams,
   { enabled }: QueryOptionsOverrides<typeof getAlertSnoozeState> = {}
 ) => {
   return useQuery({
-    context: AlertsQueryContext,
+    context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
     queryKey: getKey(ruleIds),
     queryFn: ({ signal }) => getAlertSnoozeState({ http, signal, ruleIds }),
     onError: (error: ServerError) => {

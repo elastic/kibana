@@ -1,6 +1,23 @@
 {
-  "sha1": "4a7595c5b7c64dabaefea06c56772b0e5f7824ec",
+  "sha1": "694db8c05241eb5b56465b6d2bcf953dd48052db",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "bc6aa97a6c2d787-a0104f7a4f9a2c2",
+      "title": "classification creation bank marketing classification: full creation journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/classification_creation.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
     {
       "id": "c8ef714ccee931c-76874840f05b4c6",
       "title": "Machine Learning feature controls mlAppPageOverview renders in a space where ML is enabled",
@@ -26,6 +43,32 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
         "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d272fc26d0cce3-2fecdf3a8ab97ec",
+      "title": "outlier detection creation iowa house prices outlier detection: full creation journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/outlier_detection_creation.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1a8fc29133f341-10d12d26491ebb3",
+      "title": "regression creation electrical grid stability regression: full creation journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/regression_creation.spec.ts",
+        "line": 103,
         "column": 7
       }
     }

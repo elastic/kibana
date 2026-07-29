@@ -39,29 +39,25 @@ export const DISCOVERY_WAIT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
-// Significant events data streams captured/restored faithfully (reindex → snapshot-*, restore as
-// data stream) by the env snapshot tooling — not the plain-index path used for eval data.
-export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
-  KNOWLEDGE_INDICATORS_DATA_STREAM,
+// Streams that only exist when the user runs the full discovery workflow.
+// Capture skips them silently when absent; restore skips them when not in the snapshot.
+export const SIGEVENTS_OPTIONAL_STREAMS = [
   DISCOVERIES_DATA_STREAM,
   DETECTIONS_DATA_STREAM,
 ] as const;
 
-export const VALID_SYSTEM_INDICES = ['.kibana_streams_tasks-*'] as const;
+export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+  ...SIGEVENTS_OPTIONAL_STREAMS,
+] as const;
 
 export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;
 
-type ValidStreamsSystemIndices = (typeof VALID_SYSTEM_INDICES)[number];
 type ValidStreamsAlertIndices = (typeof VALID_ALERT_INDICES)[number];
-type ValidStreamsIndices = ValidStreamsSystemIndices | ValidStreamsAlertIndices;
 
 export type StreamsIndexAliasConfig = Pick<IndicesUpdateAliasesAddAction, 'alias' | 'is_hidden'>;
 
-export const INDEX_ALIAS_CONFIG: Record<ValidStreamsIndices, StreamsIndexAliasConfig> = {
-  '.kibana_streams_tasks-*': {
-    alias: '.kibana_streams_tasks',
-    is_hidden: true,
-  },
+export const INDEX_ALIAS_CONFIG: Record<ValidStreamsAlertIndices, StreamsIndexAliasConfig> = {
   '.internal.alerts-streams.alerts-default-*': {
     alias: '.alerts-streams.alerts-default',
   },

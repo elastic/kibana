@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// Event log provider for Attack Discovery
+export const ATTACK_DISCOVERY_EVENT_PROVIDER = 'securitySolution.attackDiscovery' as const;
+
+// Event log action constants
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED =
+  'alert-retrieval-started' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED =
+  'alert-retrieval-succeeded' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED =
+  'alert-retrieval-failed' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED =
+  'generate-step-started' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED =
+  'generate-step-succeeded' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED =
+  'generate-step-failed' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED = 'generation-started' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED =
+  'generation-succeeded' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED = 'generation-failed' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_CANCELED = 'generation-canceled' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED =
+  'generation-dismissed' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED = 'validation-started' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED =
+  'validation-succeeded' as const;
+export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED = 'validation-failed' as const;
+
+// Array of all event actions
+export const ATTACK_DISCOVERY_EVENT_ACTIONS = [
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_CANCELED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED,
+];

@@ -6,8 +6,13 @@
  */
 
 import type { EuiFlexItemProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { splitSizeAndUnits } from '@kbn/failure-store-modal/src/components/utils';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+
+/** Shared translated label for the frozen phase. Import this instead of calling i18n.translate inline. */
+export const getFrozenPhaseLabel = () =>
+  i18n.translate('xpack.streams.streamDetailLifecycle.frozen', { defaultMessage: 'Frozen' });
 
 interface BaseLifecyclePhase {
   color: string;
@@ -21,6 +26,7 @@ interface BaseLifecyclePhase {
   label: string;
   min_age?: string;
   name: string;
+  isFrozen?: boolean;
   searchableSnapshot?: string;
   sizeInBytes?: number;
   timelineValue?: string;
@@ -97,7 +103,8 @@ export function buildLifecyclePhases({
   // one is signalled by `frozenAfter === undefined`.
   if (frozenAfter !== undefined && frozenLabel !== undefined && frozenColor !== undefined) {
     phases.push({
-      name: frozenLabel,
+      name: 'frozen',
+      isFrozen: true,
       color: frozenColor,
       label: frozenLabel,
       grow: true,

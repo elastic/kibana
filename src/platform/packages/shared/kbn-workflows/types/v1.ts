@@ -15,7 +15,12 @@ import {
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
-import type { SerializedError, WorkflowTokenUsageSchema, WorkflowYaml } from '../spec/schema';
+import type {
+  SerializedError,
+  WorkflowStepTokenUsageSchema,
+  WorkflowTokenUsageSchema,
+  WorkflowYaml,
+} from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export type { WorkflowYaml } from '../spec/schema';
@@ -27,6 +32,8 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
+  /** Persisted concurrency backlog - does not count toward concurrency max until promoted to pending + scheduled */
+  QUEUED = 'queued',
 
   // Done
   COMPLETED = 'completed',
@@ -47,6 +54,16 @@ export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
 ] as const;
 
 export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+/** Workflow executions occupying a concurrency slot (excludes queued backlog). */
+export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
@@ -115,6 +132,8 @@ export interface QueueMetrics {
  */
 export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
+export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -172,6 +191,8 @@ export interface EsWorkflowExecution {
    * step reported usage. See {@link WorkflowTokenUsage}.
    */
   usage?: WorkflowTokenUsage;
+  /** Per-step counterpart to the summed `usage`, in step-finish order. */
+  stepUsage?: WorkflowStepTokenUsage[];
   /**
    * Workflow document version (`_source.version`) captured when the execution was
    * created.
@@ -292,6 +313,8 @@ export interface WorkflowExecutionDto {
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
   usage?: WorkflowTokenUsage;
+  /** Per-step LLM token usage broken down by step and connector. See {@link WorkflowStepTokenUsage}. */
+  stepUsage?: WorkflowStepTokenUsage[];
   /** Workflow document version captured at execution start. See {@link EsWorkflowExecution.version}. */
   version?: number;
 }
@@ -565,7 +588,7 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
-export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
 
 export interface BaseConnectorContract {
   type: string;
@@ -578,7 +601,7 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
-  stability?: StepStabilityLevel;
+  stability?: StabilityLevel;
   /** Deprecation metadata for this step type. */
   deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
@@ -840,6 +863,7 @@ export interface WorkflowsSearchParams {
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
   managed?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
 }
 
 export interface RequestOptions {

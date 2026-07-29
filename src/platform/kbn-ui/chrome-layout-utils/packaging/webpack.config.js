@@ -31,6 +31,7 @@ module.exports = {
 
   externals: {
     '@elastic/eui': 'commonjs @elastic/eui',
+    react: 'commonjs react',
   },
 
   module: {

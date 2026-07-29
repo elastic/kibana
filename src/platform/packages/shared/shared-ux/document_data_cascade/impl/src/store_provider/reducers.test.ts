@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import {
   createStoreReducers,
   type IStoreState,
