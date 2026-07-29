@@ -110,10 +110,9 @@ const querySchema = schema.object({
     )
   ),
   sortField: schema.maybe(
-    schema.oneOf(
-      ALLOWED_SORT_FIELDS.map((f) => schema.literal(f)) as [Type<AllowedSortField>],
-      { meta: { description: `Field to sort by. One of: ${ALLOWED_SORT_FIELDS.join(', ')}.` } }
-    )
+    schema.oneOf(ALLOWED_SORT_FIELDS.map((f) => schema.literal(f)) as [Type<AllowedSortField>], {
+      meta: { description: `Field to sort by. One of: ${ALLOWED_SORT_FIELDS.join(', ')}.` },
+    })
   ),
   sortOrder: schema.maybe(
     schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
