@@ -8,10 +8,11 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { KIND } from '@kbn/apm-types/es_fields';
 import { PROCESSOR_EVENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
-export type ServiceSchemaType = 'ecs' | 'otel';
+export type ServiceSchemaType = 'ecs' | 'otel' | 'unknown';
 
 export async function getServiceSchemaType({
   esClient,
@@ -28,24 +29,35 @@ export async function getServiceSchemaType({
   start: number;
   end: number;
 }): Promise<{ schema: ServiceSchemaType }> {
+  // Combine transaction and span indices — users may configure them differently,
+  // and OTel services may only have data in the span index.
+  const index = [...new Set([indices.transaction, indices.span])].filter(Boolean).join(',');
+
   const response = await esClient.search({
-    index: indices.transaction,
-    track_total_hits: 1,
+    index,
     size: 0,
     query: {
       bool: {
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
-          { term: { [PROCESSOR_EVENT]: 'transaction' } },
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
         ],
       },
     },
+    aggs: {
+      ecs: { filter: { exists: { field: PROCESSOR_EVENT } } },
+      otel: { filter: { exists: { field: KIND } } },
+    },
   });
 
-  const total = response.hits.total;
-  const count = typeof total === 'number' ? total : total?.value ?? 0;
+  const aggs = response.aggregations as
+    | { ecs?: { doc_count: number }; otel?: { doc_count: number } }
+    | undefined;
+  const ecsCount = aggs?.ecs?.doc_count ?? 0;
+  const otelCount = aggs?.otel?.doc_count ?? 0;
 
-  return { schema: count > 0 ? 'ecs' : 'otel' };
+  if (ecsCount > 0) return { schema: 'ecs' };
+  if (otelCount > 0) return { schema: 'otel' };
+  return { schema: 'unknown' };
 }

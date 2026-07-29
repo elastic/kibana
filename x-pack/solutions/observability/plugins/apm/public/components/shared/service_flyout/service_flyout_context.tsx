@@ -14,7 +14,7 @@ import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/aler
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceFlyoutService } from './types';
 
-export type ServiceSchemaType = 'ecs' | 'otel';
+export type ServiceSchemaType = 'ecs' | 'otel' | 'unknown';
 
 export interface ServiceFlyoutCapabilities {
   loading: boolean;

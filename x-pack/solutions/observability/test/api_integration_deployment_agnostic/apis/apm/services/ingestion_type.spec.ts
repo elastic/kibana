@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns unprocessedOtel (no APM transactions found)', async () => {
         const { status, body } = await getIngestionType('unknown-service');
         expect(status).to.be(200);
-        expect(body.ingestionType).to.be('unprocessedOtel');
+        expect(body.schema).to.be('otel');
       });
     });
 
@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns apm', async () => {
         const { status, body } = await getIngestionType(serviceName);
         expect(status).to.be(200);
-        expect(body.ingestionType).to.be('apm');
+        expect(body.schema).to.be('ecs');
       });
     });
 
@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns unprocessedOtel', async () => {
         const { status, body } = await getIngestionType(serviceName);
         expect(status).to.be(200);
-        expect(body.ingestionType).to.be('unprocessedOtel');
+        expect(body.schema).to.be('otel');
       });
     });
   });

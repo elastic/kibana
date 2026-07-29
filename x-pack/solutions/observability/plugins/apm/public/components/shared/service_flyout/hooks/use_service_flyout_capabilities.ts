@@ -28,9 +28,19 @@ const CAPABILITIES_BY_SCHEMA: Record<
     footer: { alerts: true, slos: true },
   },
   otel: {
+    // OTel services do not emit APM transaction documents, so transaction-based
+    // capabilities (table, type filter, infra metrics, badges, alerts, SLOs) are
+    // hidden. Key metrics charts still render using OTel-specific queries.
     header: { serviceNameLink: false, badges: false },
     overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
     footer: { alerts: false, slos: false },
+  },
+  // No ECS data found in the selected time window — schema is indeterminate.
+  // Show full capabilities so the flyout is not degraded for a quiet ECS service.
+  unknown: {
+    header: { serviceNameLink: true, badges: true },
+    overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+    footer: { alerts: true, slos: true },
   },
 };
 
