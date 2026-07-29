@@ -47,7 +47,12 @@ export function generateSampleFromJsonSchema(
     return schema.default;
   }
 
-  switch (schema.type) {
+  // Normalize nullable union types like ['string', 'null'] to the first non-null type
+  const effectiveType = Array.isArray(schema.type)
+    ? schema.type.find((t) => t !== 'null')
+    : schema.type;
+
+  switch (effectiveType) {
     case 'string':
       return schema.format === 'email' ? 'user@example.com' : INPUT_STRING_PLACEHOLDER;
     case 'number':
