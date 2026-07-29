@@ -12,16 +12,23 @@ import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
-interface Props {
-  span: Span;
+interface PrefetchedMetadata {
+  metadata: Record<string, unknown>;
+  isLoading: boolean;
 }
 
-export function SpanMetadata({ span }: Props) {
+interface Props {
+  span: Span;
+  /** Pre-fetched metadata from the flyout body. When provided the internal fetch is skipped. */
+  prefetchedMetadata?: PrefetchedMetadata;
+}
+
+export function SpanMetadata({ span, prefetchedMetadata }: Props) {
   const spanId = span.span?.id;
 
   const { data: spanEvent, status } = useFetcher(
     (callApmApi) => {
-      if (!spanId) {
+      if (prefetchedMetadata || !spanId) {
         return;
       }
 
@@ -38,13 +45,17 @@ export function SpanMetadata({ span }: Props) {
         },
       });
     },
-    [span, spanId]
+    [span, spanId, prefetchedMetadata]
   );
+
+  const isLoading = prefetchedMetadata
+    ? prefetchedMetadata.isLoading
+    : status === FETCH_STATUS.LOADING;
 
   const sections = useMemo(
-    () => getSectionsFromFields(spanEvent?.metadata || {}),
-    [spanEvent?.metadata]
+    () => getSectionsFromFields(prefetchedMetadata?.metadata ?? spanEvent?.metadata ?? {}),
+    [prefetchedMetadata, spanEvent?.metadata]
   );
 
-  return <MetadataTable sections={sections} isLoading={status === FETCH_STATUS.LOADING} />;
+  return <MetadataTable sections={sections} isLoading={isLoading} />;
 }
