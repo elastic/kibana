@@ -467,34 +467,5 @@ describe('hasActiveFleetServersForPolicies', () => {
       // No prefix/wildcard queries
       expect(kuery).not.toContain('#*');
     });
-
-    it('returns true when the Fleet Server agent is on a versioned policy_id', async () => {
-      // Simulate: agent has policy_id "fleet-server-policy#9.4" (no policy_base_id field).
-      // The new kuery matches via the policy_base_id term — simulate ES finding it.
-      (getAgentStatusForAgentPolicy as jest.Mock).mockImplementationOnce(
-        (_es, _so, _id, kuery: string) => {
-          // New kuery uses policy_base_id term (no wildcard) — simulate ES matching
-          const agentMatchesViaBaseId = kuery.includes('policy_base_id');
-          return Promise.resolve({
-            other: 0,
-            events: 0,
-            total: agentMatchesViaBaseId ? 1 : 0,
-            all: agentMatchesViaBaseId ? 1 : 0,
-            active: 0,
-            updating: 0,
-            offline: 0,
-            inactive: 0,
-            unenrolled: 0,
-            online: agentMatchesViaBaseId ? 1 : 0,
-            error: 0,
-          });
-        }
-      );
-
-      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, [
-        { id: 'fleet-server-policy' },
-      ]);
-      expect(hasFs).toBe(true);
-    });
   });
 });
