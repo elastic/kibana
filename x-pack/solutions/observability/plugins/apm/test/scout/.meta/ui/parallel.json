@@ -1,5 +1,5 @@
 {
-  "sha1": "51835a5d1750f8fc67e6c176e366a7ba0dc712b9",
+  "sha1": "e37b8723ef8b6b079fcdf81265e97d6a455f7a7b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -567,12 +567,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 22,
-        "column": 36
+        "line": 25,
+        "column": 38
       }
     },
     {
@@ -581,12 +583,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 35,
-        "column": 36
+        "line": 38,
+        "column": 38
       }
     },
     {
@@ -595,12 +599,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 47,
-        "column": 36
+        "line": 50,
+        "column": 38
       }
     },
     {
@@ -609,12 +615,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 80,
-        "column": 20
+        "line": 83,
+        "column": 22
       }
     },
     {
@@ -623,12 +631,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 92,
-        "column": 20
+        "line": 95,
+        "column": 22
       }
     },
     {
@@ -637,12 +647,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
-        "line": 105,
-        "column": 36
+        "line": 108,
+        "column": 38
       }
     },
     {
@@ -747,12 +759,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_rules.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 23,
+        "column": 9
       }
     },
     {
@@ -761,12 +775,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 38,
+        "column": 9
       }
     },
     {
@@ -775,12 +791,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 48,
+        "column": 9
       }
     },
     {
@@ -789,12 +807,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 58,
+        "column": 9
       }
     },
     {
@@ -803,12 +823,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 72,
+        "column": 9
       }
     },
     {
@@ -821,7 +843,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 39,
+        "line": 41,
         "column": 7
       }
     },
@@ -835,7 +857,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 49,
+        "line": 51,
         "column": 7
       }
     },
@@ -849,7 +871,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 57,
+        "line": 59,
         "column": 7
       }
     },
@@ -863,7 +885,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
-        "line": 65,
+        "line": 67,
         "column": 7
       }
     },
@@ -1209,12 +1231,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 32,
-        "column": 7
+        "line": 35,
+        "column": 9
       }
     },
     {
@@ -1223,12 +1247,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 49,
+        "column": 9
       }
     },
     {
@@ -1237,12 +1263,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 73,
+        "column": 9
       }
     },
     {
@@ -1251,12 +1279,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 87,
+        "column": 9
       }
     },
     {
@@ -1265,12 +1295,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
-        "line": 110,
-        "column": 7
+        "line": 107,
+        "column": 9
       }
     },
     {
@@ -1283,7 +1315,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/tutorial.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 7
       }
     },
@@ -1297,7 +1329,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/tutorial.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 7
       }
     },
@@ -1709,7 +1741,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 256,
+        "line": 254,
         "column": 9
       }
     },
@@ -1730,8 +1762,8 @@
       }
     },
     {
-      "id": "431bbf1927933f1-9d4b191090eb231",
-      "title": "Service map shows a detailed service map",
+      "id": "431bbf1927933f1-84486d1480fb64c",
+      "title": "Service map navigates from the contextual map to the global map with service context",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1757,7 +1789,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 46,
+        "line": 55,
         "column": 9
       }
     },
@@ -1773,7 +1805,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 57,
+        "line": 66,
         "column": 9
       }
     },
