@@ -42,7 +42,7 @@ function createApmBaseQuery({
 }: {
   indexes: string;
   processorEvent: FlyoutLensChartProcessorEvent;
-  scope: EcsServiceScope;
+  scope: ServiceScope & { transactionType?: string };
 }): ComposerQuery {
   const { transactionType } = scope;
   const query = esql.from(indexes).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`;

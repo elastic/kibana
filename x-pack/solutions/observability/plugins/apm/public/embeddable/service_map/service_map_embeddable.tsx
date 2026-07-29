@@ -326,14 +326,6 @@ export function ServiceMapEmbeddable({
     };
   }, [viewFilters, badgesStatus]);
 
-  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
-    () => ({
-      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
-      ...flyoutOptions,
-    }),
-    [flyoutOptions]
-  );
-
   const highlightedServiceNames = useMemo(
     () => (serviceName ? [serviceName] : undefined),
     [serviceName]

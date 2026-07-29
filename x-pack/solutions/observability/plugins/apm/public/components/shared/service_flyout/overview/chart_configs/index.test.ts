@@ -150,7 +150,11 @@ describe('service flyout chart_configs', () => {
 
       [...keyMetrics, ...infrastructureMetrics].forEach(({ config }) => {
         expect(config?.dataset.esql).toContain('BY timestamp = TBUCKET(100)');
-        expect(config?.layers[0].xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
+        const layer = config?.layers[0];
+        expect(layer && 'xAxis' in layer ? layer.xAxis : undefined).toEqual({
+          field: 'timestamp',
+          type: 'dateHistogram',
+        });
       });
     });
   });
