@@ -14,6 +14,7 @@ import { BarDetails } from './bar_details';
 
 jest.mock('../../utils', () => ({
   asDuration: (value: number) => `${value} ms`,
+  asInteger: (value: number) => value.toLocaleString('en-US'),
 }));
 jest.mock('./trace_waterfall_context', () => ({
   useTraceWaterfallContext: jest.fn(),
