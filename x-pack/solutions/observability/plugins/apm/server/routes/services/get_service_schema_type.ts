@@ -32,6 +32,7 @@ export async function getServiceSchemaType({
   // Combine transaction and span indices — users may configure them differently,
   // and OTel services may only have data in the span index.
   const index = [...new Set([indices.transaction, indices.span])].filter(Boolean).join(',');
+  if (!index) return { schema: 'unknown' };
 
   const response = await esClient.search({
     index,

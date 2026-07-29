@@ -74,6 +74,14 @@ describe('getServiceSchemaType', () => {
       expect(result).toEqual({ schema: 'unknown' });
     });
 
+    it('returns unknown when both indices are empty strings', async () => {
+      const emptyIndices = { transaction: '', span: '' } as unknown as APMIndices;
+      const esClient = makeEsClient();
+      const result = await getServiceSchemaType({ esClient, ...baseParams, indices: emptyIndices });
+      expect(result).toEqual({ schema: 'unknown' });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
     it('returns unknown when aggregations are absent', async () => {
       const esClient = {
         search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 } } }),

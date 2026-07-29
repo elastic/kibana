@@ -35,6 +35,7 @@ export async function getUnifiedEnvironments({
   size: number;
 }): Promise<Environment[]> {
   const index = [indices.transaction, indices.span].filter(Boolean).join(',');
+  if (!index) return [];
 
   const response = await esClient.search({
     index,

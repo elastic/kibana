@@ -63,4 +63,13 @@ describe('getUnifiedEnvironments', () => {
     const result = await getUnifiedEnvironments({ esClient, ...baseArgs });
     expect(result).toEqual([]);
   });
+
+  it('returns empty array without searching when both indices are empty strings', async () => {
+    const searchSpy = jest.fn();
+    const esClient = { search: searchSpy } as unknown as ElasticsearchClient;
+    const emptyIndices = { transaction: '', span: '' } as unknown as APMIndices;
+    const result = await getUnifiedEnvironments({ esClient, ...baseArgs, indices: emptyIndices });
+    expect(result).toEqual([]);
+    expect(searchSpy).not.toHaveBeenCalled();
+  });
 });
