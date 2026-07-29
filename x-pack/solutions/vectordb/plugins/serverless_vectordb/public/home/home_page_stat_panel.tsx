@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiButton,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,6 +44,7 @@ export interface HomePageStatPanelProps {
   title: string;
   testSubj: string;
   metrics: HomePageStatPanelMetric[];
+  showPrimary?: boolean;
   actions: HomePageStatPanelAction[];
 }
 
@@ -52,14 +54,18 @@ export const HomePageStatPanel = ({
   testSubj,
   metrics,
   actions,
+  showPrimary = false,
 }: HomePageStatPanelProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
 
+  const primaryAction = showPrimary ? actions[0] : undefined;
+  const menuActions = showPrimary ? actions.slice(1) : actions;
+
   const panels = [
     {
       id: 0,
-      items: actions.map(({ key, iconType, label, onClick, testSubj, telemetryId }) => ({
+      items: menuActions.map(({ key, iconType, label, onClick, testSubj, telemetryId }) => ({
         key,
         name: label,
         icon: iconType,
@@ -86,27 +92,46 @@ export const HomePageStatPanel = ({
         </EuiFlexItem>
         {actions.length > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonIcon
-                  iconType="ellipsis"
-                  aria-label={i18n.translate('xpack.serverlessVectordb.home.statPanel.actionsMenu', {
-                    defaultMessage: '{title} actions',
-                    values: { title },
-                  })}
-                  onClick={() => setIsPopoverOpen((open) => !open)}
-                  size="s"
-                  color="text"
-                  data-test-subj={`${testSubj}ActionsButton`}
-                />
-              }
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-            >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
-            </EuiPopover>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {primaryAction && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="text"
+                    size="s"
+                    onClick={primaryAction.onClick}
+                    data-test-subj={primaryAction.testSubj}
+                    data-telemetry-id={primaryAction.telemetryId}
+                  >
+                    {primaryAction.label}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {menuActions.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButtonIcon
+                        iconType="ellipsis"
+                        aria-label={i18n.translate('xpack.serverlessVectordb.home.statPanel.actionsMenu', {
+                          defaultMessage: '{title} actions',
+                          values: { title },
+                        })}
+                        onClick={() => setIsPopoverOpen((open) => !open)}
+                        size="s"
+                        color="text"
+                        data-test-subj={`${testSubj}ActionsButton`}
+                      />
+                    }
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downRight"
+                  >
+                    <EuiContextMenu initialPanelId={0} panels={panels} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

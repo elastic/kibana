@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -34,16 +34,11 @@ const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
 
 export const HomePage = () => {
   const {
-    services: { cloud, application, share },
+    services: { cloud, application },
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
   const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
   const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
-
-  const navigateToIndexManagement = useCallback(async () => {
-    const locator = share.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
-    if (locator) await locator.navigate({ page: 'index_list' });
-  }, [share]);
 
   const dataStats = [
     {
@@ -129,16 +124,18 @@ export const HomePage = () => {
               })}
               testSubj="homePageDataCard"
               metrics={dataStats}
+              showPrimary
               actions={[
                 {
                   key: 'viewIndices',
-                  iconType: 'indexMapping',
-                  label: i18n.translate('xpack.serverlessVectordb.home.dataCard.viewIndices', {
-                    defaultMessage: 'View indices',
+                  iconType: 'database',
+                  label: i18n.translate('xpack.serverlessVectordb.home.dataCard.dataManagement', {
+                    defaultMessage: 'Data Management',
                   }),
-                  onClick: navigateToIndexManagement,
-                  testSubj: 'homePageDataCardViewIndices',
-                  telemetryId: 'serverlessVectordb-home-dataCard-viewIndices',
+                  onClick: () =>
+                    application.navigateToApp('management', { path: '/data/index_management/indices' }),
+                  testSubj: 'homePageDataCardDataManagement',
+                  telemetryId: 'serverlessVectordb-home-dataCard-dataManagement',
                 },
               ]}
             />
