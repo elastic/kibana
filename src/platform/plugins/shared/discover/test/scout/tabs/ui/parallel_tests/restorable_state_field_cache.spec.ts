@@ -40,7 +40,7 @@ spaceTest.describe(
         await browserAuth.loginAsViewer();
         await discover.goto({ queryMode: 'classic' });
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.expectAvailableFieldCount(49);
+        await unifiedFieldList.expectAvailableFieldCount();
 
         expect(
           await network.countMatchingRequests(
@@ -48,7 +48,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.createNewTab();
               await discover.waitUntilTabIsLoaded();
-              await unifiedFieldList.expectAvailableFieldCount(48);
+              await unifiedFieldList.expectAvailableFieldCount(49);
             }
           )
         ).toBe(1);
@@ -59,7 +59,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.selectTab(0);
               await discover.waitUntilTabIsLoaded();
-              await unifiedFieldList.expectAvailableFieldCount(48);
+              await unifiedFieldList.expectAvailableFieldCount(49);
             }
           )
         ).toBe(0);
@@ -70,7 +70,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.selectTab(1);
               await discover.waitUntilTabIsLoaded();
-              await unifiedFieldList.expectAvailableFieldCount(48);
+              await unifiedFieldList.expectAvailableFieldCount(49);
             }
           )
         ).toBe(0);
@@ -81,7 +81,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.createNewTab();
               await discover.waitUntilTabIsLoaded();
-              await unifiedFieldList.expectAvailableFieldCount(48);
+              await unifiedFieldList.expectAvailableFieldCount(49);
             }
           )
         ).toBe(1);
@@ -98,7 +98,7 @@ spaceTest.describe(
         await browserAuth.loginAsPrivilegedUser();
         await discover.goto({ queryMode: 'classic' });
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.expectAvailableFieldCount(49);
+        await unifiedFieldList.expectAvailableFieldCount(50);
 
         expect(
           await network.countMatchingRequests(
@@ -106,7 +106,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.createNewTab();
               await discover.waitUntilTabIsLoaded();
-              await unifiedFieldList.expectAvailableFieldCount(48);
+              await unifiedFieldList.expectAvailableFieldCount(49);
             }
           )
         ).toBe(1);
@@ -116,7 +116,7 @@ spaceTest.describe(
             { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
             async () => {
               await discover.createRuntimeField(field, `emit('test')`);
-              await unifiedFieldList.expectAvailableFieldCount(49);
+              await unifiedFieldList.expectAvailableFieldCount(50);
               await unifiedFieldList.searchField(field);
               await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
             }
@@ -129,7 +129,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.selectTab(0);
               await discover.waitUntilTabIsLoaded();
-              await expectUnfilteredAvailableFieldCount(pageObjects, 49);
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
               await unifiedFieldList.searchField(field);
               await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
             }
@@ -142,7 +142,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.selectTab(1);
               await discover.waitUntilTabIsLoaded();
-              await expectUnfilteredAvailableFieldCount(pageObjects, 49);
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
               await unifiedFieldList.searchField(field);
               await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
             }
@@ -155,7 +155,7 @@ spaceTest.describe(
             async () => {
               await unifiedFieldList.openFieldEditor(field);
               await discover.renameRuntimeField(field2);
-              await expectUnfilteredAvailableFieldCount(pageObjects, 49);
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
               await unifiedFieldList.searchField(field);
               await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
               await unifiedFieldList.searchField(field2);
@@ -170,7 +170,7 @@ spaceTest.describe(
             async () => {
               await unifiedTabs.selectTab(0);
               await discover.waitUntilTabIsLoaded();
-              await expectUnfilteredAvailableFieldCount(pageObjects, 49);
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
               await unifiedFieldList.searchField(field);
               await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
               await unifiedFieldList.searchField(field2);
