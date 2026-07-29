@@ -776,8 +776,30 @@ export default ({ getService }: FtrProviderContext) => {
       // and due because these tests use a custom role.
       describe('@skipInServerless with endpoint response actions', () => {
         let superTestResponseActionsNoAuthz: TestAgent;
+        let superTestResponseActionsAuthz: TestAgent;
         let ruleToUpdate: RuleResponse;
         let updatePayload: RuleUpdateProps;
+
+        const getRuleAlertingUpdateBody = async (id: string, responseActions: unknown[]) => {
+          const { body: current } = await supertest
+            .get(`/api/alerting/rule/${id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          return {
+            name: current.name,
+            tags: current.tags,
+            schedule: current.schedule,
+            throttle: current.throttle ?? null,
+            notify_when: current.notify_when ?? null,
+            actions: current.actions,
+            params: { ...current.params, responseActions },
+          };
+        };
+
+        const isolateResponseAction = [
+          { actionTypeId: '.endpoint', params: { command: 'isolate', comment: 'test isolation' } },
+        ];
 
         before(async () => {
           await rolesUsersProvider.createRole({
@@ -791,6 +813,13 @@ export default ({ getService }: FtrProviderContext) => {
           superTestResponseActionsNoAuthz = await utils.createSuperTest(
             ROLE.endpoint_response_actions_no_access
           );
+
+          superTestResponseActionsAuthz = await utils.createSuperTestWithCustomRole({
+            name: ROLE.endpoint_response_actions_access,
+            privileges: rolesUsersProvider.loader.getPreDefinedRole(
+              ROLE.endpoint_response_actions_access
+            ),
+          });
         });
 
         beforeEach(async () => {
@@ -870,6 +899,27 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.name).to.eql('updated rule name');
           expect(body.response_actions).to.eql(ruleToUpdate.response_actions);
+        });
+
+        it('should update rule response actions via the Alerting API when user has authz', async () => {
+          await superTestResponseActionsAuthz
+            .put(`/api/alerting/rule/${ruleToUpdate.id}`)
+            .set('kbn-xsrf', 'true')
+            .send(await getRuleAlertingUpdateBody(ruleToUpdate.id, isolateResponseAction))
+            .expect(200);
+        });
+
+        it('should error updating response actions via the Alerting API when user DOES NOT have authz', async () => {
+          const { body } = await superTestResponseActionsNoAuthz
+            .put(`/api/alerting/rule/${ruleToUpdate.id}`)
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send(await getRuleAlertingUpdateBody(ruleToUpdate.id, isolateResponseAction))
+            .expect(403);
+
+          expect(body.message).to.eql(
+            'User is not authorized to create/update isolate response action'
+          );
         });
       });
     });

@@ -738,5 +738,40 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(response.statusCode).to.eql(400);
       });
     });
+
+    describe('rule type params authorization', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('creates the rule when the rule type params authorization passes', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(getTestRuleData({ rule_type_id: 'test.validation', params: { param1: 'test' } }));
+
+        expect(response.statusCode).to.eql(200);
+        objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
+      });
+
+      it('rejects the rule when the rule type params authorization throws', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.validation',
+              params: { param1: 'test', param2: true },
+            })
+          );
+
+        expect(response.statusCode).to.eql(403);
+        expect(response.body).to.eql({
+          error: 'Forbidden',
+          message: 'Not authorized to set param2',
+          statusCode: 403,
+        });
+      });
+    });
   });
 }

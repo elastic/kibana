@@ -49,6 +49,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 import { sendGapDetectedTelemetryEvent } from './utils/telemetry/send_gap_detected_telemetry_event';
+import { createResponseActionsParamsAuthorizer } from './utils/authorize_rule_response_actions';
 import type { RuleParams } from '../rule_schema';
 import {
   SECURITY_FROM,
@@ -115,6 +116,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService,
+    endpointAppContextService,
+    getOsqueryResponseActionsAuthzChecker,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -128,6 +131,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
     return persistenceRuleType({
       ...type,
+      // Authorize privileged `responseActions` params on every rule write path,
+      // including writes made through the generic Alerting APIs (which bypass the
+      // Detection Engine's own routes).
+      authorize: {
+        params: createResponseActionsParamsAuthorizer({
+          endpointAppContextService,
+          getOsqueryResponseActionsAuthzChecker,
+        }),
+      },
       cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
         extractReferences: (params) => extractReferences({ logger, params }),
