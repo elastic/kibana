@@ -21,6 +21,10 @@ import { useConnectors, useInvalidateConnectors } from '../../hooks/use_connecto
  */
 const CREATE_NEW_VALUE = '__workflows-library-create-connector__';
 
+const LABEL = i18n.translate('workflows.library.installForm.connectorAriaLabel', {
+  defaultMessage: 'Select a connector',
+});
+
 export interface ConnectorFieldProps {
   /** The action type the picker is scoped to (`InstallFormField['connectorType']`). */
   connectorType: string;
@@ -62,7 +66,7 @@ export const ConnectorField = React.memo<ConnectorFieldProps>(function Connector
         inputDisplay: createNewLabel,
         dropdownDisplay: (
           <EuiTextColor color="accent">
-            <EuiIcon type="plusInCircle" size="s" />
+            <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
             &nbsp;
             {createNewLabel}
           </EuiTextColor>
@@ -106,12 +110,11 @@ export const ConnectorField = React.memo<ConnectorFieldProps>(function Connector
         }}
         isLoading={isLoading}
         isInvalid={isInvalid}
-        placeholder={i18n.translate('workflows.library.installForm.connectorPlaceholder', {
-          defaultMessage: 'Select a connector',
-        })}
+        placeholder={LABEL}
         fullWidth
         compressed
         data-test-subj={dataTestSubj}
+        aria-label={LABEL}
       />
       {createConnectorFlyout}
     </>

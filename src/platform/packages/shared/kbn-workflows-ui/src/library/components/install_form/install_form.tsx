@@ -148,6 +148,7 @@ const InstallFormFieldControl = React.memo<InstallFormFieldControlProps>(
             fullWidth
             compressed
             data-test-subj={testSubj}
+            aria-label={field.label ?? name}
           />
         );
       case 'connector':
