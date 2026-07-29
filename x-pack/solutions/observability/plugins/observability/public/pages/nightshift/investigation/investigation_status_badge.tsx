@@ -23,6 +23,8 @@ import {
 } from '../common/investigation_progress_status';
 import {
   getInvestigationStatusLabel,
+  getLatestInvestigation,
+  getRememberedInvestigationTerminalFailure,
   isEventInvestigated,
 } from '../event/significant_event_status';
 import { nightshiftReducedMotionStyles } from '../common/nightshift_transition';
@@ -340,16 +342,25 @@ export function InvestigationStatusBadge({
     return null;
   }
 
+  const latestInvestigation = getLatestInvestigation(event);
+  const rememberedTerminalFailure =
+    investigationStatus == null && latestInvestigation != null
+      ? getRememberedInvestigationTerminalFailure(latestInvestigation.workflow_execution_id)
+      : undefined;
+
   const isInvestigated =
     investigationStatus != null
       ? isInvestigationInvestigated(investigationStatus)
-      : isEventInvestigated(event);
+      : rememberedTerminalFailure == null && isEventInvestigated(event);
   const label =
     investigationStatus != null
       ? getInvestigationWorkflowStatusLabel(investigationStatus)
+      : rememberedTerminalFailure != null
+      ? getInvestigationWorkflowStatusLabel(rememberedTerminalFailure)
       : getInvestigationStatusLabel(event);
   const isTerminalFailure =
-    investigationStatus != null && isInvestigationTerminalFailure(investigationStatus);
+    (investigationStatus != null && isInvestigationTerminalFailure(investigationStatus)) ||
+    rememberedTerminalFailure != null;
 
   if (isInvestigated) {
     return <InvestigatedStatus label={label} />;

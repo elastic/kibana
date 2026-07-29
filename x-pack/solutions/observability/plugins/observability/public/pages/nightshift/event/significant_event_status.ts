@@ -98,11 +98,32 @@ export const getLatestInvestigation = (
 export const isEventInvestigated = (event: Pick<SignificantEvent, 'investigations'>): boolean =>
   getLatestInvestigation(event)?.completed_at != null;
 
+const rememberedInvestigationTerminalFailures = new Map<string, 'failed' | 'unavailable'>();
+
+export const rememberInvestigationTerminalFailure = (
+  workflowExecutionId: string,
+  status: 'failed' | 'unavailable'
+): void => {
+  rememberedInvestigationTerminalFailures.set(workflowExecutionId, status);
+};
+
+export const getRememberedInvestigationTerminalFailure = (
+  workflowExecutionId: string
+): 'failed' | 'unavailable' | undefined =>
+  rememberedInvestigationTerminalFailures.get(workflowExecutionId);
+
+export const clearRememberedInvestigationTerminalFailuresForTests = (): void => {
+  rememberedInvestigationTerminalFailures.clear();
+};
+
 export const isInvestigationRunning = (
   event: Pick<SignificantEvent, 'investigations'>
 ): boolean => {
   const latestInvestigation = getLatestInvestigation(event);
-  return latestInvestigation != null && latestInvestigation.completed_at == null;
+  if (latestInvestigation == null || latestInvestigation.completed_at != null) {
+    return false;
+  }
+  return !rememberedInvestigationTerminalFailures.has(latestInvestigation.workflow_execution_id);
 };
 
 export const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>

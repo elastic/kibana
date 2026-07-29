@@ -42,7 +42,10 @@ import { useFormatTimestamp } from '../common/format_timestamp';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
-import { isNeedsActionStatus } from './significant_event_status';
+import {
+  isNeedsActionStatus,
+  rememberInvestigationTerminalFailure,
+} from './significant_event_status';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface EventFlyoutProps {
@@ -71,18 +74,22 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   });
 
   useEffect(() => {
-    if (
-      latestInvestigation == null ||
-      latestInvestigation.completed_at != null ||
-      !(
-        isInvestigationInvestigated(investigationStatus) ||
-        isInvestigationTerminalFailure(investigationStatus)
-      )
-    ) {
+    if (latestInvestigation == null || latestInvestigation.completed_at != null) {
       return;
     }
 
-    markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
+    if (isInvestigationInvestigated(investigationStatus)) {
+      markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
+      return;
+    }
+
+    if (isInvestigationTerminalFailure(investigationStatus)) {
+      rememberInvestigationTerminalFailure(
+        latestInvestigation.workflow_execution_id,
+        investigationStatus
+      );
+      markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
+    }
   }, [event.event_uuid, investigationStatus, latestInvestigation, queryClient]);
 
   useEffect(() => {
