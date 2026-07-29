@@ -95,6 +95,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({ excludedUsernames, onAdd
       `}
     >
       <EuiComboBox<string>
+        aria-label={accessFlyoutAddPeoplePlaceholder}
         placeholder={accessFlyoutAddPeoplePlaceholder}
         prepend="Add"
         options={options}

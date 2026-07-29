@@ -2197,6 +2197,87 @@ describe('SearchInterceptor', () => {
         expect(error).toHaveBeenCalled();
       });
 
+      test('should return default partial response when timeout partial-results request fails', async () => {
+        let requestCount = 0;
+        mockCoreSetup.http.post.mockImplementation(((_path: string, options?: HttpFetchOptions) => {
+          requestCount++;
+
+          if (requestCount === 1) {
+            return Promise.resolve({
+              body: {
+                id: '1',
+                is_running: true,
+                columns: [],
+                values: [],
+              },
+            });
+          }
+
+          if (requestCount === 2) {
+            return new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve({
+                  body: {
+                    id: '1',
+                    is_running: true,
+                    columns: [],
+                    values: [],
+                  },
+                });
+              }, 2000);
+              options?.signal?.addEventListener('abort', () => reject(new AbortError()));
+            });
+          }
+
+          if (requestCount === 3) {
+            return Promise.reject({ statusCode: 500, message: 'oh no' });
+          }
+
+          return Promise.resolve({
+            body: {
+              id: '1',
+              is_running: false,
+              columns: [],
+              values: [],
+            },
+          });
+        }) as any);
+
+        const response = searchInterceptor.search(
+          {},
+          { pollInterval: 0, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(10); // Run first request/response
+        expect(next).toHaveBeenCalledTimes(1);
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(1000); // Run until timeout and fallback request/response
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(3);
+        expect(next).toHaveBeenCalled();
+        expect(next.mock.calls[next.mock.calls.length - 1][0]).toEqual({
+          id: '1',
+          rawResponse: {
+            is_running: false,
+            columns: [],
+            values: [],
+            took: 0,
+            timed_out: false,
+            _shards: {
+              failed: 0,
+              successful: 0,
+              total: 0,
+            },
+            hits: {
+              hits: [],
+            },
+          },
+        });
+        expect(error).not.toHaveBeenCalled();
+      });
+
       test('should request partial results and not throw error if canceled', async () => {
         const abortController = new AbortController();
         setTimeout(() => {

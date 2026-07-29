@@ -178,6 +178,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { episode_id: 'unknown-episode', assignee_uid: 'u_someone' },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
@@ -197,6 +198,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
         body: { episode_id: 'unknown-episode', assignee_uid: 'u_someone' },
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
     }
   );
 

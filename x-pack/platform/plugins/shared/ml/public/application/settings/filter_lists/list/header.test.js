@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 import React from 'react';
 
 // Mock the Kibana context
@@ -45,8 +45,14 @@ describe('Filter Lists Header', () => {
       ...requiredProps,
     };
 
-    const { container } = renderWithI18n(<FilterListsHeader {...props} />);
+    const { getByRole, getByTestId, getByText } = renderWithI18n(<FilterListsHeader {...props} />);
 
-    expect(container).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Filter Lists');
+    expect(getByText('3 in total')).toBeInTheDocument();
+    expect(getByTestId('mlFilterListRefreshButton')).toHaveTextContent('Refresh');
+    expect(getByRole('link', { name: /^Learn more/ })).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html'
+    );
   });
 });

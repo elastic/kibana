@@ -34,7 +34,7 @@ import {
 } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query Workflow', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('ALL - Live Query Workflow', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });
@@ -150,7 +150,8 @@ describe('ALL - Live Query Workflow', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('live pack workflow', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/275900
+  describe.skip('live pack workflow', () => {
     let packName: string;
     let packId: string;
     let caseId: string;

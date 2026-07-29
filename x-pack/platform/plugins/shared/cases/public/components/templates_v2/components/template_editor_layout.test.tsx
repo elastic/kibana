@@ -156,4 +156,16 @@ describe('TemplateEditorLayout', () => {
 
     expect(screen.queryByTestId('templateConfigTabRequiredIndicator')).not.toBeInTheDocument();
   });
+
+  it('shows an error indicator on the Fields tab when the fields definition is invalid', () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} fieldsHaveErrors={true} />);
+
+    expect(screen.getByTestId('templateFieldsTabErrorIndicator')).toBeInTheDocument();
+  });
+
+  it('does not show the Fields tab error indicator when the fields definition is valid', () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} fieldsHaveErrors={false} />);
+
+    expect(screen.queryByTestId('templateFieldsTabErrorIndicator')).not.toBeInTheDocument();
+  });
 });

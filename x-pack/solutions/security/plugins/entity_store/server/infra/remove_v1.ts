@@ -15,10 +15,28 @@ interface StopAndRemoveV1Params {
   type: EntityType;
   namespace: string;
   logger: Logger;
+  // Must be the internal/system ES client. V1 cleanup performs privileged transform, enrich, and
+  // index/template/pipeline admin plus a raw `.kibana` delete — legacy migration work the user
+  // enabling the entity store is not (and should not be) required to be authorized for.
   esClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * Returns the raw Elasticsearch document id for a legacy v1 `entity-definition`
+ * saved object. The `entity-definition` SO type is no longer registered, so we
+ * cannot use `savedObjectsClient.delete` for it — instead we delete the
+ * underlying document directly via the internal ES client.
+ *
+ * The type was registered as `namespaceType: 'multiple-isolated'` from its
+ * first release, so the raw `_id` is always `entity-definition:<objectId>`
+ * with no namespace prefix, and the object id was never uuidv5-converted.
+ * The namespace is already encoded in the definition id
+ * (`security_<type>_<namespace>`).
+ */
+const getV1EntityDefinitionSoDocId = (definitionId: string): string =>
+  `entity-definition:${definitionId}`;
 
 interface StopAndRemoveV1SharedTasksParams {
   namespace: string;
@@ -138,15 +156,10 @@ async function stopAndRemoveV1Once({
     tryAsBoolean(esClient.indices.delete({ index: resetIndex }, { ignore: [404] })),
     tryAsBoolean(esClient.indices.deleteDataStream({ name: updatesDataStream }, { ignore: [404] })),
     tryAsBoolean(
-      savedObjectsClient.delete('entity-definition', definitionId).catch((error) => {
-        if (
-          SavedObjectsErrorHelpers.isNotFoundError(error) ||
-          SavedObjectsErrorHelpers.isForbiddenError(error)
-        ) {
-          return;
-        }
-        throw error;
-      })
+      esClient.delete(
+        { index: '.kibana', id: getV1EntityDefinitionSoDocId(definitionId) },
+        { ignore: [404] }
+      )
     ),
     tryAsBoolean(
       savedObjectsClient.delete('entity-engine-status', v1EngineDescriptorId).catch((error) => {

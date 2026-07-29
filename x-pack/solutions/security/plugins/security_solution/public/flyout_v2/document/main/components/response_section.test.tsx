@@ -10,8 +10,8 @@ import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { ResponseSection } from './response_section';
 import { ResponseSectionContent } from './response_section_content';
@@ -73,12 +73,14 @@ describe('<ResponseSection />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
+        telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });

@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
+import type { TemplateFieldsFormReadyProps } from '../../../../case_view/components/template_fields_form_ready';
 
 import { TemplateSettingsPopover } from './template_settings_popover';
 import { renderWithTestingProviders } from '../../../../../common/mock';
@@ -28,18 +29,35 @@ jest.mock('../../../../case_view/use_change_applied_template', () => ({
   useChangeAppliedTemplate: () => ({ mutate: mockMutate, isLoading: false }),
 }));
 
+const mockUseTemplateNonGlobalFields = jest.fn();
+jest.mock('../../../../templates_v2/hooks/use_template_non_global_fields', () => ({
+  useTemplateNonGlobalFields: (...args: unknown[]) => mockUseTemplateNonGlobalFields(...args),
+}));
+
+const mockFormApiTrigger = jest.fn();
+const mockFormApiGetValues = jest.fn();
+const mockTemplateFieldsFormReady = jest.fn();
+jest.mock('../../../../case_view/components/template_fields_form_ready', () => ({
+  EMPTY_EXTENDED_FIELDS: {},
+  TemplateFieldsFormReady: (...args: unknown[]) => mockTemplateFieldsFormReady(...args),
+}));
+
 const appliedTemplate = {
   templateId: 'template-1',
   name: 'Security Template',
   templateVersion: 1,
-  fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'INPUT_TEXT' }],
+  fieldDefinitions: [
+    { name: 'priority', label: 'Priority', type: 'keyword', control: 'INPUT_TEXT' },
+  ],
 };
 
 const otherTemplate = {
   templateId: 'template-2',
   name: 'Observability Template',
   templateVersion: 1,
-  fieldNames: [{ name: 'severity', label: 'Severity', type: 'keyword', control: 'INPUT_TEXT' }],
+  fieldDefinitions: [
+    { name: 'severity', label: 'Severity', type: 'keyword', control: 'INPUT_TEXT' },
+  ],
 };
 
 const appliedParsedTemplate = {
@@ -88,6 +106,18 @@ describe('TemplateSettingsPopover', () => {
 
     mockUseGetTemplates.mockReturnValue({ data: mockTemplatesList, isLoading: false });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });
+    mockUseTemplateNonGlobalFields.mockReturnValue({ resolvedFields: [], isLoading: false });
+
+    mockFormApiTrigger.mockResolvedValue(true);
+    mockFormApiGetValues.mockReturnValue({});
+    mockTemplateFieldsFormReady.mockImplementation(
+      ({ formApiRef }: TemplateFieldsFormReadyProps) => {
+        if (formApiRef) {
+          formApiRef.current = { trigger: mockFormApiTrigger, getValues: mockFormApiGetValues };
+        }
+        return <div data-test-subj="template-fields-form" />;
+      }
+    );
   });
 
   const openSelector = async () => {
@@ -167,9 +197,11 @@ describe('TemplateSettingsPopover', () => {
       await selectTemplateByName(otherTemplate.name);
 
       expect(mockMutate).not.toHaveBeenCalled();
-      expect(await screen.findByTestId('confirm-change-template-modal')).toBeInTheDocument();
-      expect(screen.getByText(appliedTemplate.name)).toBeInTheDocument();
-      expect(screen.getByText(otherTemplate.name)).toBeInTheDocument();
+      const modal = await screen.findByTestId('confirm-change-template-modal');
+      expect(modal).toBeInTheDocument();
+      // Scope to the modal to avoid false positives from the combobox options still in the DOM
+      expect(within(modal).getByText(appliedTemplate.name)).toBeInTheDocument();
+      expect(within(modal).getByText(otherTemplate.name)).toBeInTheDocument();
     });
 
     it('calls changeTemplate with the new template fields when the change is confirmed', async () => {
@@ -179,7 +211,7 @@ describe('TemplateSettingsPopover', () => {
 
       await selectTemplateByName(otherTemplate.name);
       await screen.findByTestId('confirm-change-template-modal');
-      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+      await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
 
       expect(mockMutate).toHaveBeenCalledWith(
         {
@@ -201,11 +233,71 @@ describe('TemplateSettingsPopover', () => {
 
       await selectTemplateByName(otherTemplate.name);
       await screen.findByTestId('confirm-change-template-modal');
-      await user.click(screen.getByTestId('confirmModalCancelButton'));
+      await user.click(screen.getByTestId('confirm-change-template-modal-cancel'));
 
       expect(mockMutate).not.toHaveBeenCalled();
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-change-template-modal')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('extended fields validation in the confirm modal', () => {
+      const mockResolvedField = {
+        name: 'severity',
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        metadata: { required: true },
+      };
+
+      beforeEach(() => {
+        mockUseTemplateNonGlobalFields.mockReturnValue({
+          resolvedFields: [mockResolvedField],
+          isLoading: false,
+        });
+      });
+
+      it('shows the extended fields form inside the confirm modal', async () => {
+        renderWithTestingProviders(
+          <TemplateSettingsPopover {...defaultProps} caseData={caseWithTemplate} />
+        );
+
+        await selectTemplateByName(otherTemplate.name);
+        const modal = await screen.findByTestId('confirm-change-template-modal');
+
+        expect(within(modal).getByTestId('template-fields-form')).toBeInTheDocument();
+      });
+
+      it('does not call changeTemplate when form validation fails', async () => {
+        mockFormApiTrigger.mockResolvedValue(false);
+
+        renderWithTestingProviders(
+          <TemplateSettingsPopover {...defaultProps} caseData={caseWithTemplate} />
+        );
+
+        await selectTemplateByName(otherTemplate.name);
+        await screen.findByTestId('confirm-change-template-modal');
+        await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
+
+        expect(mockMutate).not.toHaveBeenCalled();
+      });
+
+      it('calls changeTemplate with extendedFields when form validation passes', async () => {
+        mockFormApiGetValues.mockReturnValue({ severity_keyword: 'critical' });
+
+        renderWithTestingProviders(
+          <TemplateSettingsPopover {...defaultProps} caseData={caseWithTemplate} />
+        );
+
+        await selectTemplateByName(otherTemplate.name);
+        await screen.findByTestId('confirm-change-template-modal');
+        await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
+
+        expect(mockMutate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            extendedFields: { severity_keyword: 'critical' },
+          }),
+          expect.objectContaining({ onSuccess: expect.any(Function) })
+        );
       });
     });
 
@@ -220,12 +312,65 @@ describe('TemplateSettingsPopover', () => {
       expect(mockMutate).not.toHaveBeenCalled();
       expect(await screen.findByTestId('confirm-change-template-modal')).toBeInTheDocument();
 
-      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+      await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
 
       expect(mockMutate).toHaveBeenCalledWith(
         { caseData: caseWithTemplate, newTemplate: null },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
+    });
+  });
+
+  describe('when the applied template is not available', () => {
+    const caseWithMissingTemplate = {
+      ...basicCase,
+      template: { id: 'deleted-template', version: 1 },
+    };
+
+    beforeEach(() => {
+      // The available (enabled, non-deleted) list does not include the applied template.
+      mockUseGetTemplates.mockReturnValue({
+        data: { templates: [otherTemplate] },
+        isLoading: false,
+      });
+      // But it can still be resolved (with its stale name) via includeDeleted.
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          ...appliedParsedTemplate,
+          templateId: 'deleted-template',
+          name: 'Deleted Template',
+          deletedAt: '2024-01-01T00:00:00.000Z',
+        },
+        isFetching: false,
+      });
+    });
+
+    it('shows a non-selectable "not found" entry with the stale template name', async () => {
+      renderWithTestingProviders(
+        <TemplateSettingsPopover {...defaultProps} caseData={caseWithMissingTemplate} />
+      );
+
+      const combobox = await openSelector();
+
+      expect(
+        screen.getByTestId('sidebar-template-settings-template-not-found-icon')
+      ).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Deleted Template (not found)');
+    });
+
+    it('falls back to a generic label when the stale name cannot be resolved', async () => {
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });
+
+      renderWithTestingProviders(
+        <TemplateSettingsPopover {...defaultProps} caseData={caseWithMissingTemplate} />
+      );
+
+      const combobox = await openSelector();
+
+      expect(
+        screen.getByTestId('sidebar-template-settings-template-not-found-icon')
+      ).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Template not found');
     });
   });
 });

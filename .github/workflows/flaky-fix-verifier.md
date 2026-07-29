@@ -68,18 +68,21 @@ env:
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
+imports:
+  - .github/workflows/buildkite-cli-setup.md
+
 engine:
   id: claude
   version: '2.1.165'
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -98,7 +101,7 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 sandbox:
   agent: awf
 
@@ -148,26 +151,6 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
-    env:
-      BK_VERSION: 3.44.0
-      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
-      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
-    run: |
-      set -euo pipefail
-      tmp="$(mktemp -d)"
-      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
-      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
-      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
-      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
-      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
-      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
-      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
-      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
-        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
-        exit 1
-      fi
-      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
 
 safe-outputs:
   activation-comments: false
@@ -206,7 +189,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review). Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating. It is a no-op when the PR is already out of draft.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -231,20 +214,34 @@ safe-outputs:
               }
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-              if (!pr.draft) {
-                core.info(`PR #${prNumber} is already out of draft; nothing to do.`);
+              if (pr.draft) {
+                try {
+                  // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
+                  await github.graphql(
+                    'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                    { id: pr.node_id }
+                  );
+                  core.info(`Marked PR #${prNumber} ready for review.`);
+                } catch (err) {
+                  // Non-fatal: a failure to mark ready must not fail the verification run.
+                  core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                }
+              } else {
+                core.info(`PR #${prNumber} is already out of draft.`);
+              }
+              if (pr.state !== 'open' || pr.merged) {
+                core.info(`PR #${prNumber} is not open; skipping auto-merge.`);
                 return;
               }
               try {
-                // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
                 await github.graphql(
-                  'mutation($id: ID!) { markPullRequestReadyForReview(input: { pullRequestId: $id }) { pullRequest { isDraft } } }',
+                  'mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: SQUASH }) { pullRequest { autoMergeRequest { enabledAt } } } }',
                   { id: pr.node_id }
                 );
-                core.info(`Marked PR #${prNumber} ready for review.`);
+                core.info(`Enabled auto-merge (squash) for PR #${prNumber}.`);
               } catch (err) {
-                // Non-fatal: a failure to mark ready must not fail the verification run.
-                core.warning(`Could not mark PR #${prNumber} ready for review: ${err.status || ''} ${err.message}`);
+                // Non-fatal: auto-merge may be rejected (e.g. all requirements already met, or a transient draft-state race); a human can still merge.
+                core.warning(`Could not enable auto-merge for PR #${prNumber}: ${err.status || ''} ${err.message}`);
               }
 
 strict: false
@@ -282,7 +279,7 @@ You run in one of two modes, selected from the triggering event:
 
 ## Number of runs
 
-Trigger the flaky test runner at most 6 times per PR; run a given config up to 50 times at most. Do not hand-count the comments — a pre-step already did it deterministically: read `triggeredByBot` from `flaky-run-count.json`, which counts only the `/flaky ` comments authored by `kibanamachine` (developer-posted `/flaky` comments are excluded, so they never drain this budget). Never post a `/flaky` comment that would take `triggeredByBot` past 6.
+Trigger the flaky test runner at most 6 times per PR; run a given config up to 30 times at most. Do not hand-count the comments — a pre-step already did it deterministically: read `triggeredByBot` from `flaky-run-count.json`, which counts only the `/flaky ` comments authored by `kibanamachine` (developer-posted `/flaky` comments are excluded, so they never drain this budget). Never post a `/flaky` comment that would take `triggeredByBot` past 6.
 
 ## State
 
@@ -365,10 +362,10 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 4. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
    ```
-   /flaky <type>:<path>:50 [<type>:<path>:50 ...]
+   /flaky <type>:<path>:30 [<type>:<path>:30 ...]
    ```
 
-   Use `:50` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
+   Use `:30` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
 
    The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object): skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Update comment](#update-comment).
 

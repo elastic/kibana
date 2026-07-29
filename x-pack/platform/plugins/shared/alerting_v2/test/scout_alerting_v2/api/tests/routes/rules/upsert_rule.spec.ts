@@ -139,6 +139,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('IMMUTABLE_FIELDS_CHANGED');
       // Verify the rule was not modified.
       const stored = await apiServices.alertingV2.rules.get(id);
       expect(stored.kind).toBe(created.kind);

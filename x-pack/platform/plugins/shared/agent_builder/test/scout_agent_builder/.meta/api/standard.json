@@ -1,5 +1,5 @@
 {
-  "sha1": "d8550078d14837cef031a7ca26a461dc0f5111b1",
+  "sha1": "ef2ea992f1498fc058438ca5a5baf20ec80892c3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -538,6 +538,20 @@
       }
     },
     {
+      "id": "5e1819ccd21625a-984590e296dee6c",
+      "title": "Agent Builder — conversations access-control API auto-create cannot overwrite or take over another user conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 743,
+        "column": 12
+      }
+    },
+    {
       "id": "5e1819ccd21625a-38ea603d84caa81",
       "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
       "expectedStatus": "passed",
@@ -547,7 +561,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 712,
+        "line": 793,
         "column": 12
       }
     },
@@ -995,7 +1009,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 81,
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-92f5e782bc9e4c1",
+      "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 144,
         "column": 12
       }
     },
@@ -1011,7 +1041,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 130,
+        "line": 241,
         "column": 12
       }
     },
@@ -1027,13 +1057,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 171,
+        "line": 283,
         "column": 12
       }
     },
     {
-      "id": "23808d62419391b-9c2526964eb5768",
-      "title": "Agent Builder - converse callback API continues conversation for repeated Slack source",
+      "id": "23808d62419391b-82a75a6c138a614",
+      "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1043,7 +1073,71 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 226,
+        "line": 339,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-e3a4852c5eeefc2",
+      "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 418,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-be5f9d8b14fa9ea",
+      "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 480,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-a98d347436e2dcf",
+      "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 531,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-8077e4c805574b4",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 576,
         "column": 12
       }
     },
@@ -1347,7 +1441,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
-        "line": 190,
+        "line": 198,
         "column": 12
       }
     },

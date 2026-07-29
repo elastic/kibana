@@ -10,7 +10,7 @@ import type { EventLifecycleResponse } from '@kbn/significant-events-schema';
 import { useKibana } from '../use_kibana';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
 
-export const useFetchSignificantEventLifecycle = (eventId: string | undefined) => {
+export const useFetchSignificantEventLifecycle = (eventUuid: string | undefined) => {
   const {
     dependencies: {
       start: {
@@ -21,17 +21,17 @@ export const useFetchSignificantEventLifecycle = (eventId: string | undefined) =
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<EventLifecycleResponse, Error>({
-    queryKey: ['significantEventLifecycle', eventId],
+    queryKey: ['significantEventLifecycle', eventUuid],
     queryFn: async ({ signal }: QueryFunctionContext) => {
       return streamsRepositoryClient.fetch(
         'GET /internal/significant_events/events/{id}/lifecycle',
         {
-          params: { path: { id: eventId! } },
+          params: { path: { id: eventUuid! } },
           signal: signal ?? null,
         }
       );
     },
-    enabled: !!eventId,
+    enabled: !!eventUuid,
     onError: showFetchErrorToast,
   });
 };

@@ -23,6 +23,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   const retry = getService('retry');
   const header = getPageObject('header');
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const cases = getService('cases');
 
   return {
@@ -413,12 +414,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
 
       // make sure the dashboard page actually loaded
       const dashboardItemCount = await dashboardPage.getSharedItemsCount();

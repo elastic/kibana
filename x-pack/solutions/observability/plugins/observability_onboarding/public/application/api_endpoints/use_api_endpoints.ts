@@ -14,7 +14,11 @@ import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_se
 import type { SupportedLogo } from '../shared/logo_icon';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import { API_ENDPOINTS, type ApiEndpointContext } from './endpoints_config';
+import {
+  API_ENDPOINTS,
+  type ApiEndpointContext,
+  type ResolvedAdditionalEndpoint,
+} from './endpoints_config';
 
 export interface ResolvedApiEndpoint {
   id: ApiEndpointId;
@@ -22,6 +26,8 @@ export interface ResolvedApiEndpoint {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   url?: string;
+  usesManagedInput: boolean;
+  additionalEndpoints: ResolvedAdditionalEndpoint[];
 }
 
 export function useApiEndpoints(): {
@@ -62,6 +68,8 @@ export function useApiEndpoints(): {
       logo: definition.logo,
       euiIconType: definition.euiIconType,
       url: definition.getUrl(endpointContext),
+      usesManagedInput: definition.usesManagedInput(endpointContext),
+      additionalEndpoints: definition.getAdditionalEndpoints?.(endpointContext) ?? [],
     }));
   }, [
     data?.elasticsearchUrl,
@@ -71,5 +79,9 @@ export function useApiEndpoints(): {
     managedOtlpPrwEndpointEnabled,
   ]);
 
-  return { endpoints, isLoading: isPending(status), isError: status === FETCH_STATUS.FAILURE };
+  return {
+    endpoints,
+    isLoading: isPending(status),
+    isError: status === FETCH_STATUS.FAILURE,
+  };
 }

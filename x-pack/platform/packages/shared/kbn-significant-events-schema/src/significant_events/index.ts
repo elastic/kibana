@@ -15,10 +15,16 @@ export {
 } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
 export {
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {

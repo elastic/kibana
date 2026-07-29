@@ -56,6 +56,21 @@ describe('useCasesLocalStorage', () => {
       expect(localStorage.getItem(ownerLSKey)).toEqual('{"foo":"test"}');
     });
 
+    it('composes functional updates applied in the same render', async () => {
+      const { result } = renderHook(
+        () => useCasesLocalStorage<{ a: string; b: string }>(lsKey, { a: '', b: '' }),
+        { wrapper: TestProviders }
+      );
+
+      act(() => {
+        result.current[1]((prev) => ({ ...prev, a: 'first' }));
+        result.current[1]((prev) => ({ ...prev, b: 'second' }));
+      });
+
+      expect(result.current[0]).toEqual({ a: 'first', b: 'second' });
+      expect(localStorage.getItem(ownerLSKey)).toEqual('{"a":"first","b":"second"}');
+    });
+
     it('returns the initial value in case of parsing errors', async () => {
       localStorage.setItem(ownerLSKey, 'test');
 

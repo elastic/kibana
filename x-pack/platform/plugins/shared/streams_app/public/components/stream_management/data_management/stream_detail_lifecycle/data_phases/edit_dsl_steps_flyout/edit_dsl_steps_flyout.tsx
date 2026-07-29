@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import {
   Form,
   UseField,
@@ -62,6 +63,7 @@ export const EditDslStepsFlyout = ({
   );
 
   const { footerStyles } = useStyles();
+  const { focusProps } = usePushFlyoutFocus();
 
   const initialStepsRef = useRef<IngestStreamLifecycleDSL>(initialSteps);
   const expectedInitialStepsCountRef = useRef<number>(
@@ -241,6 +243,7 @@ export const EditDslStepsFlyout = ({
     const button = (
       <EuiButton
         fill
+        size="s"
         isLoading={Boolean(isSaving) || form.isSubmitting}
         data-test-subj={`${dataTestSubj}SaveButton`}
         onClick={() => form.submit()}
@@ -268,12 +271,14 @@ export const EditDslStepsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <Form form={form} FormWrapper={FragmentFormWrapper}>
         <OnStepFieldErrorsChangeProvider value={onStepFieldErrorsChange}>
@@ -317,6 +322,7 @@ export const EditDslStepsFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {i18n.translate('xpack.streams.editDslStepsFlyout.cancel', {
                 defaultMessage: 'Cancel',

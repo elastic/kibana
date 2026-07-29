@@ -115,7 +115,7 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
       config: this.configMock,
@@ -129,7 +129,7 @@ export class WorkflowRunFixture {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
@@ -173,7 +173,7 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      taskAbortController: this.taskAbortController,
+      signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
       config: this.configMock,

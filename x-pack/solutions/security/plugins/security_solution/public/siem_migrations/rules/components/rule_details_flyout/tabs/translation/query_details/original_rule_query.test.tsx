@@ -10,19 +10,28 @@ import { render } from '@testing-library/react';
 import { OriginalRuleQuery } from './original_rule_query';
 import { getRuleMigrationRuleMock } from '../../../../../../../../common/siem_migrations/model/__mocks__';
 import { TestProviders } from '../../../../../../../common/mock';
+import { MigrationSource } from '../../../../../../common/types';
 
 describe('OriginalRuleQuery', () => {
   const mockMigrationRule = getRuleMigrationRuleMock();
 
-  it('renders the QueryHeader with the correct title', () => {
+  it.each([
+    [MigrationSource.SPLUNK, 'Splunk query'],
+    [MigrationSource.QRADAR, 'QRadar rule definition'],
+    [MigrationSource.SENTINEL, 'Microsoft Sentinel KQL query'],
+  ])('renders the QueryHeader title for %s rules', (vendor, expectedTitle) => {
     const { getByTestId } = render(
       <TestProviders>
-        <OriginalRuleQuery migrationRule={mockMigrationRule} />
+        <OriginalRuleQuery
+          migrationRule={getRuleMigrationRuleMock({
+            original_rule: { ...mockMigrationRule.original_rule, vendor },
+          })}
+        />
       </TestProviders>
     );
 
     expect(getByTestId('headerTitle')).toBeInTheDocument();
-    expect(getByTestId('headerTitle')).toHaveTextContent('Splunk query');
+    expect(getByTestId('headerTitle')).toHaveTextContent(expectedTitle);
   });
 
   it('renders the horizontal rule', () => {

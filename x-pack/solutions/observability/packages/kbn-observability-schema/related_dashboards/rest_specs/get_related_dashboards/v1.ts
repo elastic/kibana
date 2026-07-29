@@ -10,7 +10,7 @@ import { linkedDashboardSchema, suggestedDashboardSchema } from '../../schema/re
 
 export const getRelatedDashboardsParamsSchema = z.object({
   query: z.object({
-    alertId: z.string(),
+    alertId: z.string().max(256),
   }),
 });
 

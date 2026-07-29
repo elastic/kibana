@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import React, { createRef } from 'react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { Sml } from './sml';
 import { CommandId } from '../../types';
+import type { CommandMenuHandle } from '../../types';
 
 const defaultMockResults = [
   {
@@ -142,5 +143,177 @@ describe('Sml', () => {
     renderWithProvider(<Sml query="git" onSelect={jest.fn()} />);
 
     expect(mockUseSmlAutocomplete).toHaveBeenCalledWith('git', { constraints: undefined });
+  });
+
+  describe('reporting content presence via onContentChange', () => {
+    it('reports content when there are results, for the current query', () => {
+      const onContentChange = jest.fn();
+      renderWithProvider(<Sml query="" onSelect={jest.fn()} onContentChange={onContentChange} />);
+
+      expect(onContentChange).toHaveBeenCalledWith(true, '');
+    });
+
+    it('reports content while still loading, even with zero results so far', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [],
+        total: 0,
+        isLoading: true,
+        isError: false,
+        error: null,
+      };
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true, 'nosuchthing');
+    });
+
+    it('reports no content once results are confirmed empty, for the current query', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [],
+        total: 0,
+        isLoading: false,
+        isError: false,
+        error: null,
+      };
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(false, 'nosuchthing');
+    });
+  });
+
+  describe('select on space for "type/name" queries', () => {
+    it('selects the match on Space once the exact name is typed', () => {
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      renderWithProvider(<Sml ref={ref} query="visualization/Pacific Sales" onSelect={onSelect} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({
+        commandId: CommandId.Sml,
+        id: 'entry-1',
+        label: 'visualization/Pacific Sales',
+        metadata: {},
+      });
+    });
+
+    it('does not claim Space for a partial name with no exact match yet, so it types through normally', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="visualization/Pac" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    it('does not claim Space when there are zero candidates at all — it types through and the mention just ends', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [],
+        total: 0,
+        isLoading: false,
+        isError: false,
+        error: null,
+      };
+
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    it('does not claim Space while the very first fetch is still loading', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [],
+        total: 0,
+        isLoading: true,
+        isError: false,
+        error: null,
+      };
+
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    it('does not select on Space for a bare trailing slash with no name yet', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="visualization/" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    it('does not select on Space for a plain free-text query with no slash', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="Pacific Sales" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    it('selects the exact name match, not whichever result the API ranked first', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [
+          { id: 'connector-2', origin_id: 'att-2', type: 'connector', title: 'workday_2' },
+          { id: 'connector-1', origin_id: 'att-1', type: 'connector', title: 'workday' },
+        ],
+        total: 2,
+        isLoading: false,
+        isError: false,
+        error: null,
+      };
+
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      renderWithProvider(<Sml ref={ref} query="connector/workday" onSelect={onSelect} />);
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({
+        commandId: CommandId.Sml,
+        id: 'connector-1',
+        label: 'connector/workday',
+        metadata: {},
+      });
+    });
+
+    it('respects explicit arrow-key navigation away from the exact match', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [
+          { id: 'connector-2', origin_id: 'att-2', type: 'connector', title: 'workday_2' },
+          { id: 'connector-1', origin_id: 'att-1', type: 'connector', title: 'workday' },
+        ],
+        total: 2,
+        isLoading: false,
+        isError: false,
+        error: null,
+      };
+
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      renderWithProvider(<Sml ref={ref} query="connector/workday" onSelect={onSelect} />);
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
+      });
+      act(() => {
+        ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({
+        commandId: CommandId.Sml,
+        id: 'connector-2',
+        label: 'connector/workday_2',
+        metadata: {},
+      });
+    });
   });
 });

@@ -46,7 +46,7 @@ export const AppMenuBar = React.memo(() => {
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={styles.root}
     >
-      {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
+      {hasAppMenuConfig ? <HeaderAppMenu breakpointSource="viewport" /> : <HeaderActionMenu />}
     </div>
   );
 });

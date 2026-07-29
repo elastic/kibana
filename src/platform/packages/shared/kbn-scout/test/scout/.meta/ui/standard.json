@@ -1,5 +1,9 @@
 {
-  "sha1": "85796a232e56cf7d151233b307ba3432f36b0d71",
+  "sha1": "418a40415aeeff1ca4348be2039153946d03f4bc",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "c6ec4a747994e21-5b82e5b7ac2b08c",
@@ -46,38 +50,6 @@
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/check_box.spec.ts",
         "line": 23,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-3428dc06d0d6721",
-      "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-5331af19c193bbb",
-      "title": "EUI testing wrapper: EuiComboBox with the single selection",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 68,
         "column": 9
       }
     },

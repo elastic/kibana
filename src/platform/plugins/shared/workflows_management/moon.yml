@@ -99,8 +99,10 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/share-plugin'
   - '@kbn/core-security-server'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/logging'
-  - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/std'
   - '@kbn/use-observable'
@@ -121,6 +123,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

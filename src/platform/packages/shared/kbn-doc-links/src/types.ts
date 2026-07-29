@@ -67,6 +67,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly kibanaApiReference: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -173,7 +174,6 @@ export interface DocLinks {
     readonly ingestPipelines: string;
     readonly knnSearch: string;
     readonly knnSearchCombine: string;
-    readonly knnSearchTuneForSpeedAccuracy: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
@@ -190,12 +190,15 @@ export interface DocLinks {
     readonly semanticSearchGetStarted: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
+    readonly semanticTextFieldSetupConfiguration: string;
+    readonly semanticTextSearchRetrieval: string;
+    readonly hybridSemanticText: string;
     readonly esAsVectorDatabase: string;
     readonly vectorSearch: string;
-    readonly vectorSearchEmbeddingModels: string;
+    readonly vectorSearchDenseVector: string;
+    readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
-    readonly vectorSearchStorageOptimization: string;
-    readonly vectorSearchVectorsAndEmbeddings: string;
+    readonly vectorDatabaseGetStarted: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -323,6 +326,7 @@ export interface DocLinks {
     readonly automaticImport: string;
     readonly attacksPage: string;
     readonly mitreCoverage: string;
+    readonly remapMitreAttack: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -769,6 +773,7 @@ export interface DocLinks {
   readonly cases: {
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
+    readonly manageCaseTemplates: string;
   };
 }
 

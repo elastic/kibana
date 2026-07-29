@@ -33,6 +33,7 @@ interface ParsedStep {
   type: string;
   'create-conversation'?: boolean;
   'connector-id'?: string;
+  'max-step-size'?: string;
   'on-failure'?: unknown;
   status?: string;
   with?: Record<string, unknown>;
@@ -65,8 +66,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 11 for the remove_alert_ids (exception-set) gate contract', () => {
-    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(11);
+  it('bumps the version to 12 for max-step-size on the ai.agent gate step', () => {
+    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(12);
   });
 
   it('titles the workflow "Security - Attack discovery - Skill"', () => {
@@ -107,6 +108,10 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
 
   describe('gate (ai.agent) step', () => {
     const step = getStep('ai.agent');
+
+    it('sets max-step-size to 2 MiB to avoid hitting maxResponseContentLength on large completions', () => {
+      expect(step['max-step-size']).toBe('2097152b');
+    });
 
     it('persists the conversation via create-conversation', () => {
       expect(step['create-conversation']).toBe(true);
@@ -303,6 +308,10 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.pluginId).toBe('discoveries');
   });
 
+  it('bumps the version to 3 for max-step-size on the ai.agent render_report step', () => {
+    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(3);
+  });
+
   it('is discoverable from the managed registry by id', () => {
     expect(getManagedWorkflowDefinition(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID)).toBe(
       ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW
@@ -321,6 +330,10 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
 
   describe('render_report (ai.agent) step', () => {
     const step = getReportStep('ai.agent');
+
+    it('sets max-step-size to 2 MiB to avoid hitting maxResponseContentLength on large report completions', () => {
+      expect(step['max-step-size']).toBe('2097152b');
+    });
 
     it('continues the existing conversation via the conversation_id input', () => {
       expect(step.with?.conversation_id).toBe('${{ inputs.conversation_id }}');

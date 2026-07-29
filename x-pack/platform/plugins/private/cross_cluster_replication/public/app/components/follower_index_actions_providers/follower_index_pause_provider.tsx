@@ -6,9 +6,9 @@
  */
 
 import React, { PureComponent, Fragment, type ReactNode, type SyntheticEvent } from 'react';
-import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import { connect } from 'react-redux-v7';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';

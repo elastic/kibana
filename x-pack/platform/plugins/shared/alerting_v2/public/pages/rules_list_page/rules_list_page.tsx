@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -18,12 +19,14 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import { UserCapabilities } from '../../services/user_capabilities';
 import type { RuleApiResponse } from '../../services/rules_api';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -121,6 +124,8 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+
   const [
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
@@ -211,7 +216,7 @@ export const RulesListPage = () => {
     openCreateBuilderFlyout('threshold');
   };
 
-  const showHeaderMenu = hasRules || hasActiveFilters;
+  const showHeaderMenu = (hasRules || hasActiveFilters) && canWrite;
   const headerMenu = useMemo(
     () =>
       showHeaderMenu
@@ -238,8 +243,8 @@ export const RulesListPage = () => {
       <AppHeader
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
+        badges={[experimentalBadge]}
+        spacing="bleed"
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
@@ -269,13 +274,36 @@ export const RulesListPage = () => {
         </>
       ) : null}
       {showEmptyState ? (
-        <RuleCreateOptionsPanel
-          onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
-          createWithAgentTooltipText={createWithAgentTooltipText}
-          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
-        />
+        canWrite ? (
+          <RuleCreateOptionsPanel
+            onCreateEsqlRule={openCreateFlyout}
+            onCreateWithAgent={navigateToAgentBuilder}
+            createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+            createWithAgentTooltipText={createWithAgentTooltipText}
+            onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+          />
+        ) : (
+          <EuiEmptyPrompt
+            iconType="bell"
+            data-test-subj="rulesListReadOnlyEmpty"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
+                  defaultMessage="No rules"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
+                  defaultMessage="There are no rules to display."
+                />
+              </p>
+            }
+          />
+        )
       ) : null}
       {hasRules || hasActiveFilters ? (
         <>
@@ -316,6 +344,7 @@ export const RulesListPage = () => {
             sortField={SORT_FIELD_TO_TABLE_FIELD[sortField]}
             sortDirection={sortDirection}
             isLoading={isLoading}
+            canWrite={canWrite}
             onTableChange={onTableChange}
             onEditInFlyout={openEditFlyout}
             onCloneInFlyout={openCloneFlyout}

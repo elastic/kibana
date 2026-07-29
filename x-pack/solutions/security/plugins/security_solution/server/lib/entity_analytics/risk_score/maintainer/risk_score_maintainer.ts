@@ -135,7 +135,7 @@ export const createRiskScoreMaintainer = ({
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
-    run: async ({ status, crudClient, abortController }) => {
+    run: async ({ status, crudClient, signal }) => {
       const runContext = await initializeRunContext({
         getStartServices,
         namespace: status.metadata.namespace,
@@ -183,7 +183,7 @@ export const createRiskScoreMaintainer = ({
           entityTypes: runConfig.entityTypes,
           calculationRunId,
           now: runNow,
-          abortSignal: abortController.signal,
+          abortSignal: signal,
         });
         phase0LookupStage.success({
           lookupRowsWritten: phase0Summary.lookupRowsWritten,
@@ -202,7 +202,7 @@ export const createRiskScoreMaintainer = ({
       // is logged and isolated so the remaining types still complete.
       await Promise.all(
         runConfig.entityTypes.map(async (entityType) => {
-          if (abortController.signal.aborted) {
+          if (signal.aborted) {
             logger.info(
               `Risk score maintainer run aborted before processing entity type "${entityType}"`
             );
@@ -213,7 +213,7 @@ export const createRiskScoreMaintainer = ({
               entityType,
               crudClient,
               logger,
-              abortSignal: abortController.signal,
+              abortSignal: signal,
               telemetryReporter,
               metricsTracker,
               runContext,

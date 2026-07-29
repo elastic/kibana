@@ -20,6 +20,7 @@ import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_VALUE_MAX_LENGTH } from './constants';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
 const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
@@ -64,6 +65,7 @@ const CommonEntrySchema = {
     FileHashField,
     schema.arrayOf(
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
       }),
@@ -74,6 +76,7 @@ const CommonEntrySchema = {
       FilePath,
       schema.arrayOf(
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
@@ -81,6 +84,7 @@ const CommonEntrySchema = {
       ),
       schema.arrayOf(
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
         }),
@@ -101,8 +105,10 @@ const WindowsSignerEntrySchema = schema.object({
       value: schema.conditional(
         schema.siblingRef('type'),
         schema.literal('match'),
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 2000 })
+        schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }), {
+          maxSize: 2000,
+        })
       ),
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),

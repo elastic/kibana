@@ -106,7 +106,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage: 'Index Management',
         })}
         tabs={tabs}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
         docLink={documentationService.getIdxMgmtDocumentationLink()}
       />
       <EuiSpacer size="l" />

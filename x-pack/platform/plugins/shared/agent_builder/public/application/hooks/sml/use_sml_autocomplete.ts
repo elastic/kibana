@@ -60,6 +60,8 @@ export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOp
       }),
     staleTime: SML_AUTOCOMPLETE_STALE_TIME_MS,
     cacheTime: SML_AUTOCOMPLETE_CACHE_TIME_MS,
+    // Avoids `results` flashing empty on every debounce tick mid-keystroke.
+    keepPreviousData: true,
   });
 
   useEffect(() => {

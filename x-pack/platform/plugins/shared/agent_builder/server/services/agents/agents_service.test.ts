@@ -20,7 +20,7 @@ import { AgentsService } from './agents_service';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
-import { createClient } from './persisted/client';
+import { createClient, createSystemClient } from './persisted/client';
 import { runSkillRefCleanup } from './persisted/skill_reference_cleanup';
 import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
@@ -34,6 +34,7 @@ const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
 >;
 const isAllowedAgentTypeMock = isAllowedAgentType as jest.MockedFunction<typeof isAllowedAgentType>;
 const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
+const createSystemClientMock = createSystemClient as jest.MockedFunction<typeof createSystemClient>;
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
 const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof runSkillRefCleanup>;
 
@@ -60,6 +61,7 @@ describe('AgentsService', () => {
     isAllowedBuiltinAgentMock.mockReset();
     isAllowedAgentTypeMock.mockReset();
     createClientMock.mockReset();
+    createSystemClientMock.mockReset();
     runToolRefCleanupMock.mockReset();
     runSkillRefCleanupMock.mockReset();
   });
@@ -149,10 +151,12 @@ describe('AgentsService', () => {
   describe('#start', () => {
     let started: AgentsServiceStart;
     let request: KibanaRequest;
+    const ensureAgent = jest.fn();
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
       service.setup({ logger });
+      ensureAgent.mockReset();
       createClientMock.mockResolvedValue({
         getAgentsUsingTools: (params: { toolIds: string[] }) =>
           runToolRefCleanupMock({
@@ -185,8 +189,34 @@ describe('AgentsService', () => {
             logger: undefined,
           }),
       } as any);
+      createSystemClientMock.mockReturnValue({ ensureAgent });
       started = service.start(createStartDeps());
       request = httpServerMock.createKibanaRequest();
+    });
+
+    describe('#ensure', () => {
+      const agent = {
+        id: 'system-agent',
+        type: chatAgentTypeId,
+        name: 'System agent',
+        description: 'Installed at startup',
+        configuration: { tools: [] },
+      };
+
+      it('uses a system-scoped client for the requested space', async () => {
+        await started.ensure({ spaceId: 'space-1', agent });
+
+        expect(createSystemClientMock).toHaveBeenCalledWith(
+          expect.objectContaining({ space: 'space-1', logger })
+        );
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
+      });
+
+      it('rejects an unknown agent type', async () => {
+        await expect(
+          started.ensure({ spaceId: 'space-1', agent: { ...agent, type: 'unknown' } })
+        ).rejects.toThrow('unknown agent type "unknown"');
+      });
     });
 
     describe('#getAgentsUsingTools', () => {

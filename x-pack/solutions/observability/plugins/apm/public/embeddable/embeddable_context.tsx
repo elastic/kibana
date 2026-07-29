@@ -19,7 +19,7 @@ import {
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../../common/cps_feature_flag';
+} from '@kbn/apm-shared/public';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { apmRouter } from '../components/routing/apm_route_config';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
