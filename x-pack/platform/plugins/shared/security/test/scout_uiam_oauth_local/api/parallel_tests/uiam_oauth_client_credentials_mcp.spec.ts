@@ -235,13 +235,11 @@ apiTest.describe(
           // transport1 cannot be reused (its AbortController is not reset after close),
           // but the client can connect to a fresh transport.
           const transport2 = new StreamableHTTPClientTransport(mcpUrl, transportOpts);
-          try {
-            await client.connect(transport2);
-            const { tools } = await client.listTools();
-            expect(tools.length).toBeGreaterThan(0);
-          } finally {
-            await client.close();
-          }
+
+          await client.connect(transport2);
+          const { tools } = await client.listTools();
+          expect(tools.length).toBeGreaterThan(0);
+          await client.close();
         } finally {
           await apiClient.post(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}/_revoke`, {
             headers: authHeaders,
