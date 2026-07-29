@@ -105,9 +105,10 @@ export const BulkLocationsFlyout = ({
       .map((loc) => formatLocation(loc) as MonitorServiceLocation);
   }, [selectedLocations, locations]);
 
-  const { updates, emptiedCount } = useMemo(() => {
+  const { updates, emptiedCount, unchangedCount } = useMemo(() => {
     const selectedIds = new Set(formattedSelected.map((loc) => loc.id));
     let emptied = 0;
+    let unchanged = 0;
     const result: Array<{ id: string; nextLocations: MonitorServiceLocation[] }> = [];
 
     for (const monitor of eligibleMonitors) {
@@ -123,6 +124,7 @@ export const BulkLocationsFlyout = ({
       }
 
       if (sameIdSet(current, next)) {
+        unchanged += 1;
         continue;
       }
       // A monitor must always keep at least one location; skip any that would
@@ -133,8 +135,19 @@ export const BulkLocationsFlyout = ({
       }
       result.push({ id: monitor[ConfigKey.CONFIG_ID], nextLocations: next });
     }
-    return { updates: result, emptiedCount: emptied };
+    return { updates: result, emptiedCount: emptied, unchangedCount: unchanged };
   }, [eligibleMonitors, mode, formattedSelected]);
+
+  // A live, per-outcome breakdown so the user can see exactly what Save will do
+  // before committing — bulk edits across a mixed selection are otherwise opaque.
+  const hasSelection = formattedSelected.length > 0;
+  const effectSummary = [
+    getWillChangeSummary(updates.length),
+    unchangedCount > 0 ? getUnchangedSummary(unchangedCount) : null,
+    emptiedCount > 0 ? getSkippedSummary(emptiedCount) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   const handleSave = useCallback(async () => {
     setIsUpdating(true);
@@ -198,12 +211,13 @@ export const BulkLocationsFlyout = ({
           <p>{getDescription(eligibleMonitors.length)}</p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFormRow label={MODE_LABEL}>
+        <EuiFormRow label={MODE_LABEL} helpText={getModeHelp(mode)}>
           <EuiButtonGroup
             legend={MODE_LABEL}
             options={modeOptions}
             idSelected={mode}
             onChange={(id) => setMode(id as BulkLocationsMode)}
+            isFullWidth
             data-test-subj="syntheticsBulkLocationsModeGroup"
           />
         </EuiFormRow>
@@ -230,7 +244,19 @@ export const BulkLocationsFlyout = ({
             data-test-subj="syntheticsBulkLocationsComboBox"
           />
         </EuiFormRow>
-        {emptiedCount > 0 && (
+        {hasSelection && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj="syntheticsBulkLocationsEffectSummary"
+            >
+              {effectSummary}
+            </EuiText>
+          </>
+        )}
+        {hasSelection && emptiedCount > 0 && (
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
@@ -299,6 +325,43 @@ export const BulkLocationsFlyout = ({
     </EuiFlyout>
   );
 };
+
+const getModeHelp = (mode: BulkLocationsMode) => {
+  switch (mode) {
+    case 'add':
+      return i18n.translate('xpack.synthetics.bulkLocationsFlyout.modeHelp.add', {
+        defaultMessage: "Adds the selected locations to each monitor's existing locations.",
+      });
+    case 'remove':
+      return i18n.translate('xpack.synthetics.bulkLocationsFlyout.modeHelp.remove', {
+        defaultMessage:
+          'Removes the selected locations from each monitor. Monitors left with no location are skipped.',
+      });
+    case 'overwrite':
+    default:
+      return i18n.translate('xpack.synthetics.bulkLocationsFlyout.modeHelp.overwrite', {
+        defaultMessage: "Replaces each monitor's locations with the selected ones.",
+      });
+  }
+};
+
+const getWillChangeSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkLocationsFlyout.summary.willChange', {
+    defaultMessage: '{count, plural, one {# will change} other {# will change}}',
+    values: { count },
+  });
+
+const getUnchangedSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkLocationsFlyout.summary.unchanged', {
+    defaultMessage: '{count, number} unchanged',
+    values: { count },
+  });
+
+const getSkippedSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkLocationsFlyout.summary.skipped', {
+    defaultMessage: '{count, number} skipped',
+    values: { count },
+  });
 
 const getDescription = (count: number) =>
   i18n.translate('xpack.synthetics.bulkLocationsFlyout.description', {

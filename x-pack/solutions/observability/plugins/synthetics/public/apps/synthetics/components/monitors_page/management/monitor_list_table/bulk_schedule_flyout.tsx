@@ -187,6 +187,17 @@ export const BulkScheduleFlyout = ({
 
   const saveDisabled = updates.length === 0 || !selectedValue;
 
+  // Live breakdown so the user can see how many monitors Save will actually
+  // touch — monitors already on the chosen frequency are counted as unchanged.
+  const hasSelection = Boolean(selectedValue);
+  const unchangedCount = eligibleMonitors.length - updates.length;
+  const effectSummary = [
+    getWillChangeSummary(updates.length),
+    unchangedCount > 0 ? getUnchangedSummary(unchangedCount) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <EuiFlyout
       ownFocus
@@ -215,6 +226,14 @@ export const BulkScheduleFlyout = ({
             data-test-subj="syntheticsBulkScheduleSelect"
           />
         </EuiFormRow>
+        {hasSelection && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued" data-test-subj="syntheticsBulkScheduleEffectSummary">
+              {effectSummary}
+            </EuiText>
+          </>
+        )}
         {!allowSeconds && eligibleMonitors.length > 0 && (
           <>
             <EuiSpacer size="s" />
@@ -276,6 +295,18 @@ export const BulkScheduleFlyout = ({
     </EuiFlyout>
   );
 };
+
+const getWillChangeSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkScheduleFlyout.summary.willChange', {
+    defaultMessage: '{count, plural, one {# will change} other {# will change}}',
+    values: { count },
+  });
+
+const getUnchangedSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkScheduleFlyout.summary.unchanged', {
+    defaultMessage: '{count, number} unchanged',
+    values: { count },
+  });
 
 const getDescription = (count: number) =>
   i18n.translate('xpack.synthetics.bulkScheduleFlyout.description', {

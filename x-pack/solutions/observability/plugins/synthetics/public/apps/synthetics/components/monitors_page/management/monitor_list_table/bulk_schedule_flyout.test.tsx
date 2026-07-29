@@ -220,4 +220,26 @@ describe('<BulkScheduleFlyout />', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(fetchBulkUpdateMonitorsMock).not.toHaveBeenCalled();
   });
+
+  it('summarises how many monitors will change vs. stay unchanged', () => {
+    const monitors = [
+      makeMonitor('ui-1', 'Already 5m', { schedule: { number: '5', unit: ScheduleUnit.MINUTES } }),
+      makeMonitor('ui-2', 'Currently 3m', {
+        schedule: { number: '3', unit: ScheduleUnit.MINUTES },
+      }),
+    ];
+
+    const { getByTestId, queryByTestId } = render(
+      <BulkScheduleFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    // Nothing selected yet: no summary.
+    expect(queryByTestId('syntheticsBulkScheduleEffectSummary')).not.toBeInTheDocument();
+
+    // Set 5m: ui-2 changes, ui-1 already on 5m (unchanged).
+    selectValue(getByTestId, '5');
+    expect(getByTestId('syntheticsBulkScheduleEffectSummary')).toHaveTextContent(
+      '1 will change · 1 unchanged'
+    );
+  });
 });

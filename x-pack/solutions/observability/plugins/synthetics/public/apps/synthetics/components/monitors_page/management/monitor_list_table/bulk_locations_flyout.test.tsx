@@ -219,4 +219,57 @@ describe('<BulkLocationsFlyout />', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(fetchBulkUpdateMonitorsMock).not.toHaveBeenCalled();
   });
+
+  it('summarises how many monitors will change vs. stay unchanged', () => {
+    const monitors = [
+      makeMonitor('ui-1', 'Monitor 1', { locations: [location('us_west', 'US West')] }),
+      makeMonitor('ui-2', 'Monitor 2', { locations: [location('us_east', 'US East')] }),
+    ];
+
+    const { getByTestId } = render(
+      <BulkLocationsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    // Add us_east: ui-1 gains it (changes), ui-2 already has it (unchanged).
+    selectUsEast(getByTestId);
+
+    expect(getByTestId('syntheticsBulkLocationsEffectSummary')).toHaveTextContent(
+      '1 will change · 1 unchanged'
+    );
+  });
+
+  it('shows mode-specific help text for the selected action', () => {
+    const monitors = [makeMonitor('ui-1', 'Monitor 1')];
+
+    const { getByText, getByRole } = render(
+      <BulkLocationsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    expect(
+      getByText("Adds the selected locations to each monitor's existing locations.")
+    ).toBeInTheDocument();
+
+    setMode(getByRole, 'Overwrite');
+    expect(
+      getByText("Replaces each monitor's locations with the selected ones.")
+    ).toBeInTheDocument();
+  });
+
+  it('does not warn about emptied monitors in overwrite mode before a location is picked', () => {
+    const monitors = [
+      makeMonitor('ui-1', 'Monitor 1', { locations: [location('us_east', 'US East')] }),
+    ];
+
+    const { getByRole, getByTestId, queryByText, queryByTestId } = render(
+      <BulkLocationsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    setMode(getByRole, 'Overwrite');
+
+    // No selection yet: the summary and the "would be left with no location"
+    // warning should both be absent (they only apply once a real outcome exists).
+    expect(queryByTestId('syntheticsBulkLocationsEffectSummary')).not.toBeInTheDocument();
+    expect(queryByText(/would be left with no location/)).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsBulkLocationsSave')).toBeDisabled();
+  });
 });
