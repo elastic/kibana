@@ -31,20 +31,55 @@ Owned by [`@elastic/kibana-data-discovery`](https://github.com/orgs/elastic/team
   - Per tab data state container that orchestrates fetching ([`discover_data_state_container.ts`](./public/application/main/state_management/discover_data_state_container.ts)).
 - **Data fetching:** a trigger observable drives `fetchAll`, which branches on query mode and pushes results into the RxJS data subjects consumed by the UI.
 
-```mermaid
-flowchart TD
-    internal["Internal state store<br/>redux/internal_state.ts"]
-    runtime["Runtime state manager<br/>redux/runtime_state.tsx"]
-    dataC["Data state container<br/>discover_data_state_container.ts"]
-    internal --> runtime --> dataC
+### Browser architecture
 
-    trigger["Fetch trigger<br/>get_fetch_observable.ts"] --> fetchAll["fetchAll<br/>data_fetching/fetch_all.ts"]
-    fetchAll -->|ES QL mode| esql["fetch_esql.ts"]
-    fetchAll -->|classic mode| docs["fetch_documents.ts"]
-    esql --> subjects
-    docs --> subjects
-    dataC -. owns .-> subjects
-    subjects["Data subjects<br/>main, documents, totalHits"] --> ui["Chart area and document table"]
+```mermaid
+flowchart TB
+  plugin["Discover browser plugin"]
+
+  plugin --> application["Discover application"]
+  plugin --> embeddable["Saved search embeddable"]
+
+  application --> workspace["Main workspace<br/>Redux store · Tab state · Per-tab data orchestration"]
+  application --> routes["Context and document views<br/>Route-local state · Data fetching"]
+  embeddable --> panel["Dashboard panel<br/>Panel state · Data fetching"]
+
+  workspace --> shared
+  routes --> shared
+  panel --> shared
+
+  shared["Shared Discover modules<br/>Context awareness · Query execution · Shared Discover components"]
+  services["Kibana services<br/>Data · Data Views · Saved Search · Embeddable"]
+
+  shared --> services
+```
+
+### Plugin architecture
+
+```mermaid
+flowchart TB
+  consumers["Other plugins"]
+
+  subgraph discover["Discover"]
+    browser["Browser plugin<br/>Registers the application, locators, and embeddable"]
+    application["Application<br/>Main workspace · Context view · Document view"]
+    embeddable["Saved search embeddable<br/>Dashboard panel · Inline editing"]
+
+    common["Shared contracts<br/>Locators · Data sources · Panel state"]
+    server["Server plugin<br/>Session APIs · Server locator · Panel transforms"]
+
+    browser --> application
+    browser --> embeddable
+    browser --> common
+    server --> common
+  end
+
+  kibana["Kibana platform and plugins<br/>Data · Saved Search · Embeddable · Analytics"]
+
+  consumers --> browser
+  application --> kibana
+  embeddable --> kibana
+  server --> kibana
 ```
 
 ## Extending Discover
