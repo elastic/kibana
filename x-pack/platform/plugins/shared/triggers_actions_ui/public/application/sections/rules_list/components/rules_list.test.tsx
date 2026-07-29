@@ -233,7 +233,10 @@ describe('Update Api Key', () => {
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
     expect(screen.queryByText('Update API key')).toBeInTheDocument();
-  });
+    // Mounting the full RulesList and awaiting two findBy* queries can exceed the
+    // default 5000 ms Jest budget under worker contention (the global RTL
+    // asyncUtilTimeout alone is 4500 ms), so give this render-heavy test more headroom.
+  }, 15000);
 });
 
 describe('rules_list component empty', () => {
