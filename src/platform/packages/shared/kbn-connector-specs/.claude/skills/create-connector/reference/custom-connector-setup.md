@@ -20,10 +20,46 @@ And updates:
 - `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` — export
 - `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts` — icon mapping
 - `.github/CODEOWNERS` — ownership rule
-- `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md` — connectors list
+- `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` — third-party connectors list
 - `docs/reference/toc.yml` — table of contents
 
+**Doc placement**: the generator adds the new entry to the third-party
+`data-context-sources-connectors-list.md`/`data-context-sources-connectors.md` list, inside the first
+category block (`**Third-party search**`). This is correct for the overwhelming majority of connectors.
+`elastic-connectors-list.md`/`elastic-connectors.md` is reserved for the small, fixed set of
+**Kibana-native** connectors (Cases, Index, ServerLog, Observability AI Assistant) — do not add a new
+entry there unless you are certain the connector is Kibana-native rather than a third-party integration.
+If the connector belongs in a more specific category (e.g. "Threat intelligence", "Identity management"),
+move the auto-inserted entry there manually and re-check alphabetical order within that category.
+
 **After running the generator, go through each generated/updated file and fill in the TODO placeholders.**
+
+## Research the Vendor API Before Writing Any Code
+
+Do this **before** writing schemas or handlers, not after. Every action that mutates data or requires a
+specific auth scope has a real, documented API behavior — do not assume REST conventions apply. For each
+action you plan to implement, find the vendor's official API reference and confirm:
+
+- **Update semantics**: does the endpoint support partial updates (`PATCH`, or a `PUT` that merges), or
+  does it fully replace the resource (a `PUT` that 400s if you omit any required field)? If it's
+  replace-only, the handler must `GET` the current resource first and backfill every field the input
+  didn't provide — not just the fields you happened to test.
+- **Array/list query parameters**: how does the API expect repeated values encoded — `?id=1&id=2`,
+  `?id[]=1&id[]=2`, or a comma-joined string? Axios's default array serialization (`id[]=1&id[]=2`) is
+  not universal; check the docs and, if needed, set a custom `paramsSerializer`.
+- **Per-action auth scopes**: list every scope/permission each action actually requires (not just the
+  minimum to authenticate), especially for destructive or admin actions (delete, bulk update). The auth
+  `helpText` and the docs page's credential-setup steps must mention the scope needed for **every**
+  action, not just the most common ones.
+- **Regional/self-hosted variants**: does the service run on multiple regional domains (e.g.
+  `us.example.com`, `eu.example.com`) in addition to a default SaaS host, or support self-hosting? If so,
+  the base-URL config field's help text must say so — otherwise requests silently 404 for a subset of users.
+- **Accepted value formats for "assign to" / "who" style fields**: don't assume convenience shorthands
+  (like `"me"`) are valid API values just because they're common search-filter syntax — verify against
+  the docs for the specific write endpoint you're calling.
+
+Cross-reference this research against the fields you're about to add `.describe()` text for — the
+description should state the *verified* format/constraint, not an assumed one.
 
 ## Implement the Connector Spec
 
@@ -59,6 +95,21 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 4. **Add a `placeholder` to `tokenUrl`** — Even with a default value, add a placeholder via `overrides.meta`.
 
 See [connector-patterns.md](connector-patterns.md) for the full OAuth configuration pattern.
+
+### Enable the Test Connector Button
+
+The generated `test` block includes `enabled: true` — **do not remove it**. `ConnectorTest.enabled`
+defaults to `false`, so a `test` block without this flag compiles fine and passes type-checking, but the
+"Test connector" button stays disabled in the Kibana UI even though a handler is defined. This is easy to
+miss because nothing fails until a human clicks the button.
+
+### Avoid ICU-Unsafe Characters in Translated Help Text
+
+Any string passed through `i18n.translate()` (`metadata.description`, `.meta({ helpText: ... })`, etc.) is
+parsed as an ICU message. A literal `<placeholder>` in the text (e.g. `'found in the URL: example.com/<slug>/'`)
+is parsed as an unclosed XML tag and throws a `FORMAT_ERROR` when the spec is serialized to JSON schema —
+this only surfaces at runtime (e.g. when Agent Builder/Workflows loads the connector), not at compile time.
+Write placeholders without angle brackets instead, e.g. `'found in the URL: example.com/your-slug/'`.
 
 ## Write LLM-Quality Descriptions and Skill Content
 
@@ -113,7 +164,7 @@ The generated documentation file at `docs/reference/connectors-kibana/<kebab-nam
 2. **Actions section** — Document each action with its parameters, types, and descriptions.
 3. **Get API credentials section** — Step-by-step instructions for obtaining the credential.
 
-Also update the snippet description in `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md`.
+Also update the snippet description in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` — the generator inserts a `TODO: Add brief description.` placeholder that must be replaced with a real, capability-focused description (see the `metadata.description` quality rules above).
 
 See existing docs (e.g., `google-drive-action-type.md`) for the expected style.
 

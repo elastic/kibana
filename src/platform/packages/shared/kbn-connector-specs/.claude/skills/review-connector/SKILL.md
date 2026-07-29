@@ -35,6 +35,16 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
 - **Auth**: Auth type matches the service. **Auth format** (e.g. header value) must match the vendor's official docs;
   document or link how to obtain tokens. For OAuth, use defaults/overrides so users only fill instance URL, client ID,
   client secret where possible.
+- **Per-action auth scopes**: Check whether any action (especially delete/bulk/admin operations) needs a
+  scope beyond the connector's baseline. The auth field's `helpText` and the docs page's credential-setup
+  steps must both mention every scope actually required — not just the minimum to authenticate. Flag any
+  action whose required scope isn't documented in at least one of those two places.
+- **`test.enabled`**: If the spec defines a `test` block, it must include `enabled: true`. Without it, the
+  handler compiles and type-checks fine, but the "Test connector" button stays disabled in the Kibana UI.
+  Flag any `test` block missing `enabled: true`.
+- **ICU-unsafe help text**: Any string passed through `i18n.translate()` (`metadata.description`, `.meta({ helpText })`,
+  etc.) is parsed as an ICU message — a literal `<placeholder>` is read as an unclosed XML tag and throws
+  `FORMAT_ERROR` at spec-serialization time. Flag any translated string containing bare `<...>`.
 - **OAuth defaults vs placeholders**: Every `defaults` value must be paired with `{ hidden: true }` in `overrides.meta`
   so the field is invisible in the form. Defaults for visible fields will overwrite encrypted user values on "Edit".
   For fields where the user must enter their own value (e.g. tenant-specific URLs), use `placeholder` in
@@ -46,6 +56,27 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   `types.ts` file alongside the spec (not inline in the spec file, and not as `as` casts in handlers).
   Handlers must be typed with the inferred type (e.g. `handler: async (ctx, input: SearchInput) => {}`),
   not `input as { field: string }`. See `servicenow_search/types.ts` for the canonical pattern.
+
+### Vendor API Correctness
+
+These are easy to write incorrectly by assuming generic REST conventions instead of checking the vendor's
+actual documented behavior — flag them even without live access to the API, based on what the code assumes:
+
+- **Partial vs. full-replace updates**: If an update action sends only the fields present in its input,
+  check whether the underlying endpoint is a `PATCH`/merge or a `PUT`/full-replace. A `PUT` handler that
+  doesn't first `GET` the current resource and backfill omitted fields will silently drop or reject
+  partial updates. This is easy to miss in review because the code "looks like" a normal partial update.
+- **Array query-parameter serialization**: If an action sends an array as query params (e.g. a list of
+  IDs), check whether the code special-cases the serialization (e.g. a custom `paramsSerializer`) or
+  relies on the HTTP client's default. A vendor expecting the repeated-key form (`?id=1&id=2`) will reject
+  the client library's default bracketed form (`?id[]=1&id[]=2]`), or vice versa — this doesn't show up in
+  unit tests that mock the client.
+- **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
+  for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
+  silently no-ops instead of erroring.
+- **Regional/self-hosted base URLs**: If the connector has a configurable base URL, check that its help
+  text/docs mention any regional SaaS domains or self-hosted deployment patterns the vendor supports — a
+  connector that only mentions the single default domain will 404 for a subset of real accounts.
 
 ### LLM Descriptions and Skill Content
 
@@ -105,6 +136,10 @@ Report documentation issues alongside code issues.
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit
   types, no `any`)
+- **Dead code from iteration**: Flag schemas, types, or constants that are defined but never referenced —
+  common leftovers from an earlier design that was later simplified.
+- **Duplicated calls**: Flag a helper (e.g. a URL builder) called more than once within the same handler
+  when the result could be computed once into a local variable.
 
 ### Security
 

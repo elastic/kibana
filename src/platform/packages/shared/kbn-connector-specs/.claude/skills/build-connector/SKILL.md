@@ -38,11 +38,30 @@ Set up dependencies: task 2 is blocked by 1, task 3 by 2, task 4 by 3, and so on
 
 Then begin working through the tasks in order.
 
+### If building several connectors as a batch, don't defer Tasks 4-11 for all of them
+
+It's tempting, when asked to build many connectors, to build the code for all of them first (Task 1-3)
+and defer activation/live-testing (Tasks 4-11) until later. In practice this is where most real bugs
+surface — disabled test buttons, ICU parse errors, endpoints that reject partial updates, query params
+the vendor rejects, wrong auth scopes — none of which unit tests or a code-only review catch, because
+they only show up when the spec is actually loaded and exercised in a running Kibana. If the user
+explicitly asks to defer live testing for a batch, still run the self-review checklist from
+`create-connector`'s Step 4 ("Self-review before handing off") on every connector before considering it
+code-complete, and flag to the user that the deferred connectors have not been runtime-verified and are
+likely to need a fix-up pass once Tasks 4-11 finally run.
+
 ---
 
 ## Task 1: Create the Connector Code
 
 Mark task 1 as `in_progress`.
+
+Before generating code, research the vendor's real API docs for the actions you plan to implement —
+specifically update semantics (partial vs. full-replace), array query-param encoding, per-action auth
+scopes, and regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code"
+in `create-connector/reference/custom-connector-setup.md`. Bugs that trace back to skipping this (wrong
+auth scope, 400s on partial updates, 404s on regional domains) are far cheaper to avoid up front than to
+find during Task 7's live chat test or after the PR is open.
 
 Invoke the `create-connector` skill with `$ARGUMENTS` as the argument:
 
