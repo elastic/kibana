@@ -117,14 +117,24 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       dispatch({
         type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
       });
-    } else {
-      getLayerListRaw(getState()).forEach(({ id }) => {
-        dispatch(removeLayerFromLayerList(id));
-      });
     }
 
+    const tileStateByLayerId = new Map<string, boolean | undefined>();
+    getLayerListRaw(getState()).forEach(({ id, __areTilesLoaded }) => {
+      // preserve tile-loaded state so cached tiles don't re-trigger `isLayerLoading`
+      tileStateByLayerId.set(id!, __areTilesLoaded);
+      dispatch(removeLayerFromLayerList(id));
+    });
+
     newLayerList.forEach((layerDescriptor) => {
-      dispatch(addLayer(layerDescriptor));
+      const preservedTileState = tileStateByLayerId.get(layerDescriptor.id!);
+      dispatch(
+        addLayer(
+          preservedTileState !== undefined
+            ? { ...layerDescriptor, __areTilesLoaded: preservedTileState }
+            : layerDescriptor
+        )
+      );
     });
   };
 }

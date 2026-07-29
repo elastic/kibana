@@ -19,7 +19,7 @@ import {
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, merge, tap } from 'rxjs';
 import {
   ON_APPLY_FILTER,
   ON_CLICK_VALUE,
@@ -76,6 +76,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
+    const stateLoading$ = new BehaviorSubject<boolean>(false);
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
@@ -86,6 +87,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       state,
       syncColors$: apiPublishesSettings(parentApi) ? parentApi.settings.syncColors$ : undefined,
       uuid,
+      stateLoading$,
     });
     const actionHandlers = initializeActionHandlers(getApi);
     const crossPanelActions = initializeCrossPanelActions({
@@ -125,11 +127,35 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
       },
       anyStateChange$: merge(
-        drilldownsManager.anyStateChange$,
-        crossPanelActions.anyStateChange$,
-        reduxSync.anyStateChange$,
-        titleManager.anyStateChange$,
-        timeRangeManager.anyStateChange$
+        drilldownsManager.anyStateChange$.pipe(
+          tap(() => {
+            console.log('DRILLDOWN 2');
+          })
+        ),
+        crossPanelActions.anyStateChange$.pipe(
+          tap(() => {
+            console.log('CTOSS PANEL ACTIONS 2');
+          })
+        ),
+        reduxSync.anyStateChange$.pipe(
+          tap(() => {
+            console.log('REDUX SYNCC 2');
+          })
+        ),
+        titleManager.anyStateChange$.pipe(
+          tap(() => {
+            console.log('TITLE MANAGER 2');
+          })
+        ),
+        timeRangeManager.anyStateChange$.pipe(
+          tap(() => {
+            console.log('TIME RANGE 2');
+          })
+        )
+      ).pipe(
+        tap(() => {
+          console.log('ANY STATE CHANGE 2');
+        })
       ),
       getComparators: () => {
         return {
@@ -144,11 +170,16 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         };
       },
       applySerializedState: async (nextState) => {
+        stateLoading$.next(true);
+
         drilldownsManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);
 
         await savedMap.reset(nextState);
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for map extent to stabilize
+
+        stateLoading$.next(false);
       },
     });
 

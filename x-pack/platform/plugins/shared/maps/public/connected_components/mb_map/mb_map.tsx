@@ -253,6 +253,7 @@ export class MbMap extends Component<Props, State> {
       'moveend',
       _.debounce(() => {
         if (this._isMounted) {
+          // HERE
           this.props.extentChanged(this._getMapExtentState());
         }
       }, 100)
@@ -461,6 +462,7 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
+        // HERE TOO
         if (this._isMounted) {
           this.props.extentChanged(this._getMapExtentState());
         }

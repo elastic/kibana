@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, debounceTime, filter, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge, skip, tap } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -82,11 +82,13 @@ export function initializeReduxSync({
   state,
   syncColors$,
   uuid,
+  stateLoading$,
 }: {
   savedMap: SavedMap;
   state: MapEmbeddableState;
   syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
+  stateLoading$: BehaviorSubject<boolean>;
 }) {
   const store = savedMap.getStore();
 
@@ -130,10 +132,26 @@ export function initializeReduxSync({
       openTOCDetails$.next(nextOpenTOCDetails);
     }
 
-    const nextIsMapLoading = isMapLoading(store.getState());
+    const nextIsMapLoading = isMapLoading(store.getState()) || stateLoading$.getValue();
     if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
     }
+  });
+
+  const test = stateLoading$.subscribe((stateLoading) => {
+    console.log({ stateLoading });
+    const nextIsMapLoading = isMapLoading(store.getState()) || stateLoading$.getValue();
+    if (nextIsMapLoading !== dataLoading$.value) {
+      dataLoading$.next(nextIsMapLoading);
+    }
+  });
+
+  const test2 = dataLoading$.subscribe((loading) => {
+    console.log({ loading });
+  });
+
+  const test3 = mapCenterAndZoom$.subscribe((mapCenterAndZoom) => {
+    console.log({ mapCenterAndZoom });
   });
 
   store.dispatch(setReadOnly(true));
@@ -230,6 +248,11 @@ export function initializeReduxSync({
         skip(1),
         map(() => undefined)
       )
+    ).pipe(
+      debounceTime(500),
+      tap(() => {
+        console.log('ANY STATE CHANGE');
+      })
     ),
     getLatestState: () => {
       return {

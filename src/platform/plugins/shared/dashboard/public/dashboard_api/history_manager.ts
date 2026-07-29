@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, debounceTime, filter, withLatestFrom } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, withLatestFrom } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
@@ -15,6 +15,7 @@ import type { DashboardState } from '../../common';
 import type { initializeDataLoadingManager } from './data_loading_manager';
 import type { initializeTrackOverlay } from './track_overlay';
 import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
+import { cloneDeep } from 'lodash';
 
 export function initializeHistoryManager({
   unsavedChanges$,
@@ -36,10 +37,18 @@ export function initializeHistoryManager({
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
 } {
+  const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
   const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(getState());
+
+  combineLatest([hasOverlays$, dataLoading$.pipe(debounceTime(60))])
+    .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))
+    .subscribe((disableUndoRedo) => {
+      disableUndoRedo$.next(disableUndoRedo);
+    });
+
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
-      disableUndoRedo$: hasOverlays$,
+      disableUndoRedo$,
       state$: dashboardCurrentState$,
       mapState: (state) => {
         const sortById = (
@@ -56,13 +65,20 @@ export function initializeHistoryManager({
     }
   );
 
-  const onAnyStateChangeSubscription = unsavedChanges$
+  const onAnyStateChangeSubscription = combineLatest([unsavedChanges$, dataLoading$])
     .pipe(
       debounceTime(60),
       withLatestFrom(hasOverlays$),
-      filter(([state, hasOverlays]) => !hasOverlays) // do not push to history as long as an editor is open
+      filter(([[state, loading], hasOverlays]) => {
+        console.log({ state, loading, hasOverlays });
+        // do not push to history as long as...
+        return (
+          !loading && // at least one child is loading or
+          !hasOverlays // an editor is open
+        );
+      })
     )
-    .subscribe(() => {
+    .subscribe(([[state]]) => {
       dashboardCurrentState$.next(getState());
     });
 
