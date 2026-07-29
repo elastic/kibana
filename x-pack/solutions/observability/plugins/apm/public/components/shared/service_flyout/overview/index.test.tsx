@@ -102,6 +102,59 @@ beforeEach(() => {
   transactionsSectionProps = null;
 });
 
+describe('ServiceFlyoutOverview capabilities loading and error states', () => {
+  it('renders a skeleton while capabilities are loading', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue(),
+      capabilities: {
+        loading: true,
+        error: undefined,
+        schema: undefined,
+        header: undefined,
+        overview: undefined,
+        footer: undefined,
+      },
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({
+      hasSystemMetrics: undefined,
+      isLoading: true,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('serviceFlyoutOverviewSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutOverview')).not.toBeInTheDocument();
+  });
+
+  it('renders the overview with full capabilities when the capabilities fetch fails', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue(),
+      capabilities: {
+        loading: false,
+        error: undefined,
+        schema: 'unknown' as const,
+        header: { serviceNameLink: true, badges: true },
+        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+        footer: { alerts: true, slos: true },
+      },
+    });
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('serviceFlyoutOverview')).toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutOverviewSkeleton')).not.toBeInTheDocument();
+  });
+});
+
 describe('ServiceFlyoutOverview transactions section props', () => {
   it('passes resolved ISO timestamps to ServiceFlyoutTransactionsSection, not raw relative date strings', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });

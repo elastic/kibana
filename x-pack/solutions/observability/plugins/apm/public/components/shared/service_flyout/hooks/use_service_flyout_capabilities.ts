@@ -61,6 +61,16 @@ export function useServiceFlyoutCapabilities({
   );
 
   if (!value) {
+    if (error) {
+      // Capabilities fetch failed — fall back to full capabilities so the flyout
+      // remains usable. The failure is visible in monitoring tools.
+      return {
+        loading: false,
+        error: undefined,
+        schema: 'unknown' as const,
+        ...CAPABILITIES_BY_SCHEMA.unknown,
+      };
+    }
     return {
       loading,
       error,

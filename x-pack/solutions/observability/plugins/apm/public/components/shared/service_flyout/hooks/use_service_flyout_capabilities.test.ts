@@ -46,19 +46,22 @@ describe('useServiceFlyoutCapabilities', () => {
       });
     });
 
-    it('returns error state with undefined capability fields when the fetch fails', () => {
-      const error = new Error('network failure');
-      mockUseAbortableAsync.mockReturnValue({ value: undefined, loading: false, error });
+    it('falls back to full capabilities when the fetch fails', () => {
+      mockUseAbortableAsync.mockReturnValue({
+        value: undefined,
+        loading: false,
+        error: new Error('network failure'),
+      });
 
       const { result } = renderHook(() => useServiceFlyoutCapabilities(baseParams));
 
       expect(result.current).toEqual({
         loading: false,
-        error,
-        schema: undefined,
-        header: undefined,
-        overview: undefined,
-        footer: undefined,
+        error: undefined,
+        schema: 'unknown',
+        header: { serviceNameLink: true, badges: true },
+        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+        footer: { alerts: true, slos: true },
       });
     });
   });
