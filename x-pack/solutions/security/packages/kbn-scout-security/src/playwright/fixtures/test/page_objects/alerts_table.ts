@@ -104,6 +104,14 @@ export class AlertsTablePage {
     await ipCell.click();
   }
 
+  private async activateGridCellLink(link: Locator) {
+    // EUI Data Grid requires entering cell interaction mode before nested links receive clicks.
+    const gridCell = link.locator('xpath=ancestor::*[@role="gridcell"]');
+    await gridCell.focus();
+    await gridCell.press('Enter');
+    await link.click();
+  }
+
   async clickHostNameCell(hostName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
     // `host.name` renders one clickable cell per alert row, so scope to the first data row to stay
@@ -128,7 +136,7 @@ export class AlertsTablePage {
         { timeout: 20_000, intervals: [250] }
       )
       .toBe(true);
-    await hostCell.click();
+    await this.activateGridCellLink(hostCell);
   }
 
   async clickUserNameCell(userName: string) {
@@ -151,7 +159,7 @@ export class AlertsTablePage {
         { timeout: 20_000, intervals: [250] }
       )
       .toBe(true);
-    await userCell.click();
+    await this.activateGridCellLink(userCell);
   }
 
   async waitForDetectionsAlertsWrapper() {

@@ -79,7 +79,7 @@ export class HostFlyout {
 
   /** Wait for the host flyout to be visible and its header rendered. */
   async waitForHostFlyout() {
-    await this.header.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.header.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   /** Open the Alerts insight tool from the entity-insight section. */
