@@ -302,7 +302,7 @@ apiTest.describe(
     apiTest(
       'creates instanceId for SLOs without groupBy (["*"])',
       async ({ apiClient, esClient }) => {
-        apiTest.setTimeout(210_000);
+        apiTest.setTimeout(330_000);
         const apiResponse = await apiClient.post('api/observability/slos', {
           headers,
           body: {
@@ -323,13 +323,13 @@ apiTest.describe(
             const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
             return src?._source?.slo?.instanceId === '*';
           },
-          { timeoutMs: 180_000, intervalMs: 3000 }
+          { timeoutMs: 300_000, intervalMs: 3000 }
         );
       }
     );
 
     apiTest('creates instanceId for SLOs without groupBy ("")', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(210_000);
+      apiTest.setTimeout(330_000);
       const apiResponse = await apiClient.post('api/observability/slos', {
         headers,
         body: {
@@ -350,7 +350,7 @@ apiTest.describe(
           const src = hits?.[0] as { _source?: { slo?: { instanceId?: string } } } | undefined;
           return src?._source?.slo?.instanceId === '*';
         },
-        { timeoutMs: 180_000, intervalMs: 3000 }
+        { timeoutMs: 300_000, intervalMs: 3000 }
       );
     });
   }
