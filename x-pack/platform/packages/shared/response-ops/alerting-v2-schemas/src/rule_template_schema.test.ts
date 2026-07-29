@@ -10,7 +10,6 @@ import { createRuleDataBaseSchema } from './rule_data_schema';
 import {
   RULE_TEMPLATE_ONLY_FIELDS,
   parseRuleTemplateData,
-  ruleTemplateDataBaseSchema,
   ruleTemplateDataSchema,
 } from './rule_template_schema';
 
@@ -118,18 +117,18 @@ describe('rule template create-rule schema coupling', () => {
 
   it('template keys match create-rule keys plus template-only fields', () => {
     const createRuleKeys = new Set(Object.keys(createRuleDataBaseSchema.shape));
-    const templateKeys = Object.keys(ruleTemplateDataBaseSchema.shape);
+    const templateKeys = Object.keys(ruleTemplateDataSchema.shape);
     const templateOnly = new Set<string>(RULE_TEMPLATE_ONLY_FIELDS);
 
     const templateRuleKeys = templateKeys.filter((key) => !templateOnly.has(key)).sort();
     const createKeysSorted = [...createRuleKeys].sort();
 
     expect({
-      hint: 'Rule template top-level fields drifted from create-rule. Keep ruleTemplateDataBaseSchema = createRuleDataBaseSchema.extend({ engine }).',
+      hint: 'Rule template top-level fields drifted from create-rule. Keep ruleTemplateDataSchema = createRuleDataBaseSchema.extend({ engine }).',
       templateRuleKeys,
       createKeysSorted,
     }).toEqual({
-      hint: 'Rule template top-level fields drifted from create-rule. Keep ruleTemplateDataBaseSchema = createRuleDataBaseSchema.extend({ engine }).',
+      hint: 'Rule template top-level fields drifted from create-rule. Keep ruleTemplateDataSchema = createRuleDataBaseSchema.extend({ engine }).',
       templateRuleKeys: createKeysSorted,
       createKeysSorted,
     });
@@ -143,13 +142,13 @@ describe('rule template create-rule schema coupling', () => {
 
   it('reuses create-rule field schemas by reference (not a forked copy)', () => {
     const createShape = createRuleDataBaseSchema.shape;
-    const templateShape = ruleTemplateDataBaseSchema.shape;
+    const templateShape = ruleTemplateDataSchema.shape;
 
     for (const key of Object.keys(createShape) as Array<keyof typeof createShape>) {
       if (templateShape[key] !== createShape[key]) {
         throw new Error(
           `Rule template field "${String(key)}" is not the same Zod schema as create-rule. ` +
-            `Keep ruleTemplateDataBaseSchema = createRuleDataBaseSchema.extend({ engine }).`
+            `Keep ruleTemplateDataSchema = createRuleDataBaseSchema.extend({ engine }).`
         );
       }
     }
@@ -162,11 +161,11 @@ describe('rule template create-rule schema coupling', () => {
    */
   it('matches the snapshot of the full create-rule JSON schema', () => {
     expect({
-      hint: 'Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataBaseSchema still extends createRuleDataBaseSchema.',
+      hint: 'Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema still extends createRuleDataBaseSchema.',
       schema: toStableJsonSchema(createRuleDataBaseSchema),
     }).toMatchInlineSnapshot(`
       Object {
-        "hint": "Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataBaseSchema still extends createRuleDataBaseSchema.",
+        "hint": "Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema still extends createRuleDataBaseSchema.",
         "schema": Object {
           "additionalProperties": false,
           "properties": Object {
@@ -508,7 +507,7 @@ describe('rule template create-rule schema coupling', () => {
       properties?: Record<string, unknown>;
       required?: string[];
     };
-    const templateJson = toStableJsonSchema(ruleTemplateDataBaseSchema) as {
+    const templateJson = toStableJsonSchema(ruleTemplateDataSchema) as {
       properties?: Record<string, unknown>;
       required?: string[];
     };
@@ -527,11 +526,11 @@ describe('rule template create-rule schema coupling', () => {
     });
 
     expect({
-      hint: 'Rule template create-rule properties drifted from createRuleDataBaseSchema. Keep ruleTemplateDataBaseSchema = createRuleDataBaseSchema.extend({ engine }).',
+      hint: 'Rule template create-rule properties drifted from createRuleDataBaseSchema. Keep ruleTemplateDataSchema = createRuleDataBaseSchema.extend({ engine }).',
       templateRuleProperties,
       createRuleProperties: createJson.properties,
     }).toEqual({
-      hint: 'Rule template create-rule properties drifted from createRuleDataBaseSchema. Keep ruleTemplateDataBaseSchema = createRuleDataBaseSchema.extend({ engine }).',
+      hint: 'Rule template create-rule properties drifted from createRuleDataBaseSchema. Keep ruleTemplateDataSchema = createRuleDataBaseSchema.extend({ engine }).',
       templateRuleProperties: createJson.properties,
       createRuleProperties: createJson.properties,
     });

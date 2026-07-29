@@ -28,17 +28,12 @@ const engineField = z
  * cross-field refinements (those run in `createRuleDataFromTemplate`).
  * Tripwire tests enforce this coupling.
  */
-export const ruleTemplateDataBaseSchema = createRuleDataBaseSchema
+export const ruleTemplateDataSchema = createRuleDataBaseSchema
   .extend({
     engine: engineField,
   })
   .strict()
   .describe('Alerting v2 rule template attributes.');
-
-/**
- * Rule template data schema (structural validation only).
- */
-export const ruleTemplateDataSchema = ruleTemplateDataBaseSchema;
 
 export type RuleTemplateData = z.infer<typeof ruleTemplateDataSchema>;
 
