@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/es'
-  - '@kbn/rison'
   - '@kbn/test-subj-selector'
 tags:
   - test-helper
