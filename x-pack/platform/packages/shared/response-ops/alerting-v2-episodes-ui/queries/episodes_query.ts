@@ -28,7 +28,6 @@ export interface AlertEpisode {
   'episode.id': string;
   'episode.status': AlertEpisodeStatus;
   'rule.id': string;
-  'rule.name'?: string | null;
   group_hash: string;
   first_timestamp: string;
   last_timestamp: string;
@@ -58,7 +57,6 @@ export const ALERT_EPISODE_FIELDS = [
   'episode.id',
   'episode.status',
   'rule.id',
-  'rule.name',
   'group_hash',
   'first_timestamp',
   'last_timestamp',
@@ -141,7 +139,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL, \`rule.name\` = LAST(\`rule.name\`, @timestamp) BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };

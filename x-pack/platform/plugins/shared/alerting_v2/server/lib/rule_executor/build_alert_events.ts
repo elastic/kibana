@@ -142,7 +142,7 @@ export function createAlertEventsBatchBuilder({
 
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
-  const source = { name: 'internal' };
+  const source = 'internal';
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
