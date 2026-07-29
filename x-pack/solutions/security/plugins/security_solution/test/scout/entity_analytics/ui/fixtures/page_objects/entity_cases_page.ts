@@ -126,9 +126,14 @@ export class EntityCasesPage {
   }
 
   async navigateToCase(caseId: string) {
-    await this.page.gotoApp(`security/cases/${caseId}`);
-    // Give the cold Security Solution SPA boot its own readiness budget (mirrors
-    // navigateToHostFlyout) instead of leaning on openAttachmentsTab's default wait.
+    // Cold-boot the SPA on the lighter Cases list route, then open the case via its
+    // in-app (client-side) link so the heavy case-view render happens on a warm SPA. A
+    // direct gotoApp to the case deep-link cold-boots straight into the case-view render,
+    // which under parallel load exceeds any reasonable readiness budget.
+    await this.page.gotoApp('security/cases');
+    const caseRow = this.page.testSubj.locator(`cases-table-row-${caseId}`);
+    await caseRow.waitFor({ state: 'visible', timeout: 30000 });
+    await caseRow.locator('[data-test-subj="case-details-link"]').click();
     await this.page.testSubj
       .locator('case-view-title')
       .waitFor({ state: 'visible', timeout: 30000 });
