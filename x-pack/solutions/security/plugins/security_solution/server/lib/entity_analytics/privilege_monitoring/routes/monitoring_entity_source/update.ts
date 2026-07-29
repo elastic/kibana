@@ -26,6 +26,7 @@ import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
+import { validateIndexPermissions } from '../../../watchlists/entity_sources/entity_source_api_key';
 
 export const updateMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -63,6 +64,19 @@ export const updateMonitoringEntitySourceRoute = (
           try {
             const secSol = await context.securitySolution;
             const client = secSol.getMonitoringEntitySourceDataClient();
+
+            // The scheduled task reads the configured index under the stored engine API key,
+            // so verify the caller can actually read any index pattern they set here. Otherwise
+            // a user without ES read on the index could recover its data through the monitoring
+            // output (confused deputy).
+            if (request.body.indexPattern) {
+              const { elasticsearch } = await context.core;
+              await validateIndexPermissions(
+                elasticsearch.client.asCurrentUser,
+                request.body.indexPattern
+              );
+            }
+
             const body = await client.update({ ...request.body, id: request.params.id });
 
             const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
