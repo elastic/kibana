@@ -116,7 +116,6 @@
     "@kbn/core-chrome-browser-components",
     "@kbn/core-logging-server",
     "@kbn/projects-solutions-groups",
-    "@kbn/management-settings-ids",
   ],
   "exclude": ["target/**/*"]
 }
