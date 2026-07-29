@@ -2149,7 +2149,8 @@
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
-        "@aws-sdk/credential-provider-node"
+        "@aws-sdk/credential-provider-node",
+        "google-auth-library"
       ],
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
@@ -2338,7 +2339,6 @@
       "matchDepNames": [
         "@types/http-proxy",
         "get-port",
-        "google-auth-library",
         "http-proxy",
         "http-proxy-agent",
         "https-proxy-agent",
