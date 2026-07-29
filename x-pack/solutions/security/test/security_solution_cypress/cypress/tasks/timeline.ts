@@ -347,43 +347,72 @@ export const closeTimeline = () => {
   );
 };
 
+/**
+ * Selects a menu item from an EuiPopover opened by a toggle button.
+ *
+ * Root cause of the prior flake: helpers used `recurse` that clicked the toggle on every
+ * iteration. These triggers toggle open/closed (`NewTimelineButton` / `AddTimelineButton`),
+ * so a second click closed the menu while Cypress was resolving the item — producing
+ * "element detached during actionability" on `timeline-modal-new-timeline`.
+ *
+ * Fix: only click the toggle when the menu item is absent, then click the item. The
+ * following `not.exist` assertion confirms the selection took effect (component onClick
+ * closes the popover).
+ *
+ * Contract: always performs selection (never no-ops when a timeline is already open), so
+ * callers like detection_response afterEach resets still get a fresh empty timeline.
+ */
+const selectFromTogglePopover = ({
+  toggleSelector,
+  itemSelector,
+}: {
+  toggleSelector: string;
+  itemSelector: string;
+}): void => {
+  cy.get('body').then(($body) => {
+    if ($body.find(itemSelector).length === 0) {
+      cy.get(toggleSelector).filter(':visible').first().click();
+    }
+  });
+
+  cy.get(itemSelector).should('be.visible').click();
+  cy.get(itemSelector).should('not.exist');
+};
+
+/**
+ * Always creates a fresh default timeline via the header "New Timeline" menu.
+ * Safe to call when a timeline is already open (e.g. afterEach resets).
+ */
 export const createNewTimeline = () => {
-  openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  selectFromTogglePopover({
+    toggleSelector: NEW_TIMELINE_ACTION,
+    itemSelector: CREATE_NEW_TIMELINE,
+  });
+  cy.get(TIMELINE_PANEL).should('be.visible');
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
+  cy.get('body').then(($body) => {
+    if ($body.find(CREATE_NEW_TIMELINE).length === 0) {
+      cy.get(NEW_TIMELINE_ACTION).filter(':visible').first().click();
+    }
+  });
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
 };
 
 export const createTimelineFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
-
-  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
+  selectFromTogglePopover({
+    toggleSelector: BOTTOM_BAR_TIMELINE_PLUS_ICON,
+    itemSelector: BOTTOM_BAR_CREATE_NEW_TIMELINE,
+  });
+  cy.get(TIMELINE_PANEL).should('be.visible');
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
-  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
+  selectFromTogglePopover({
+    toggleSelector: BOTTOM_BAR_TIMELINE_PLUS_ICON,
+    itemSelector: BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
+  });
 };
 
 export const executeTimelineKQL = (query: string) => {
