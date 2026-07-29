@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildInspectData, getEntitiesNextPageParam, getEntitiesQuery } from './use_fetch_grid_data';
+import {
+  buildInspectData,
+  getEntitiesNextPageParam,
+  getEntitiesQuery,
+} from './use_fetch_grid_data';
 import { MAX_ENTITIES_TO_LOAD } from '../constants';
 
 describe('buildInspectData', () => {
@@ -66,9 +70,7 @@ describe('getEntitiesNextPageParam', () => {
   });
 
   it('advances the offset by MAX_ENTITIES_TO_LOAD per page', () => {
-    expect(getEntitiesNextPageParam(fullPage, [fullPage, fullPage])).toBe(
-      MAX_ENTITIES_TO_LOAD * 2
-    );
+    expect(getEntitiesNextPageParam(fullPage, [fullPage, fullPage])).toBe(MAX_ENTITIES_TO_LOAD * 2);
   });
 
   it('does not use the UI page size (25) for the offset', () => {
