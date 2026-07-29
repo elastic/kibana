@@ -27,7 +27,7 @@ describe('discovery agent types', () => {
       baseConfiguration: {
         enable_elastic_capabilities: false,
         connector_ids: [],
-        skill_ids: ['significant-events-ki-grounding'],
+        skill_ids: ['significant-events-ki-grounding', 'significant-events-memory'],
       },
     });
     expect(judgeAgentType).toMatchObject({
@@ -35,7 +35,7 @@ describe('discovery agent types', () => {
       baseConfiguration: {
         enable_elastic_capabilities: false,
         connector_ids: [],
-        skill_ids: ['significant-events-ki-grounding'],
+        skill_ids: ['significant-events-ki-grounding', 'significant-events-memory'],
       },
     });
   });

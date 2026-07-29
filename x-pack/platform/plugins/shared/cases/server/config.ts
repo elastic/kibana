@@ -24,12 +24,12 @@ export const ConfigSchema = schema.object({
   }),
   /**
    * Cases-as-data v2 — cluster-level analytics index populated by real-time
-   * saved-object hooks (see `server/cases_analytics_v2`). Off by default; v1
-   * (`analytics.index.enabled`) is the primary path until v2 has been validated
-   * in production. Enabling v2 has no effect on v1 — they coexist independently.
+   * saved-object hooks (see `server/cases_analytics_v2`). Enabled by default;
+   * v2 now runs alongside v1 (`analytics.index.enabled`). Enabling v2 has no
+   * effect on v1 — they coexist independently.
    */
   analyticsV2: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     /**
      * Reconciliation cadence in minutes. The reconciliation task is the
      * durability backstop for v2's fire-and-forget write hooks: every

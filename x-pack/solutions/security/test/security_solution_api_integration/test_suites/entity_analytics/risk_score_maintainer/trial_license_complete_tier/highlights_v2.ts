@@ -19,8 +19,9 @@ import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
 const VULNERABILITIES_INDEX_TEMPLATE_NAME = 'test-highlights-v2-vulnerabilities-template';
-const ML_JOB_ID = 'test-highlights-v2-security-job';
-const ML_ANOMALY_INDEX = `.ml-anomalies-custom-${ML_JOB_ID}`;
+const ML_JOB_ID = 'high_count_events_for_a_host_name_ea';
+const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
+const ML_ANOMALY_RECORD_ID = 'test-highlights-v2-anomaly-record';
 
 export default ({ getService }: FtrProviderContext): void => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
@@ -293,32 +294,17 @@ export default ({ getService }: FtrProviderContext): void => {
         refresh: true,
       });
 
-      // Create a minimal ML anomaly detection job with groups:['security'] so
-      // isSecurityJob() recognises it and jobsSummary() returns it to the service.
-      await es.ml.putJob({
-        job_id: ML_JOB_ID,
-        description: 'Test security job for entity highlights v2',
-        groups: ['security'],
-        custom_settings: { security_app_display_name: 'Test Highlights Security Job' },
-        analysis_config: {
-          bucket_span: '15m',
-          detectors: [{ function: 'count' }],
-          influencers: ['host.name'],
-        },
-        data_description: { time_field: '@timestamp' },
-      });
-
-      // Index anomaly records directly into the ML results index for this job.
-      // ML registers an index template for .ml-anomalies-* on startup, so the
-      // backing index gets proper keyword/numeric mappings automatically.
+      // Index an anomaly record directly into the shared ML results index, using a
+      // job_id from a bundled Security ML module manifest (no real ML job needs to
+      // exist for getSecurityMlJobIds()/searchEntityAnomalies() to pick it up).
       await es.bulk({
         operations: [
-          { index: { _index: ML_ANOMALY_INDEX } },
+          { index: { _index: ML_ANOMALIES_SHARED_INDEX, _id: ML_ANOMALY_RECORD_ID } },
           {
             job_id: ML_JOB_ID,
             result_type: 'record',
             timestamp: Date.now() - 60 * 60 * 1000, // 1 hour ago, within the test time range
-            bucket_span: 900,
+            bucket_span: 3600,
             detector_index: 0,
             is_interim: false,
             record_score: 85.0,
@@ -326,8 +312,10 @@ export default ({ getService }: FtrProviderContext): void => {
             probability: 0.000001,
             typical: [1.0],
             actual: [100.0],
-            function: 'count',
-            function_description: 'count',
+            function: 'high_count',
+            function_description: 'high_count',
+            partition_field_name: 'host.name',
+            partition_field_value: hostName,
             host: { name: hostName },
             influencers: [
               { influencer_field_name: 'host.name', influencer_field_values: [hostName] },
@@ -345,9 +333,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await es.indices
         .deleteIndexTemplate({ name: VULNERABILITIES_INDEX_TEMPLATE_NAME })
         .catch(() => {});
-      await es.ml.deleteJob({ job_id: ML_JOB_ID, force: true }).catch(() => {});
-      await es.indices
-        .delete({ index: ML_ANOMALY_INDEX, ignore_unavailable: true })
+      await es
+        .deleteByQuery({
+          index: ML_ANOMALIES_SHARED_INDEX,
+          query: { ids: { values: [ML_ANOMALY_RECORD_ID] } },
+          refresh: true,
+        })
         .catch(() => {});
       await kibanaServer.uiSettings.update({ 'securitySolution:defaultAnomalyScore': 50 });
     });
@@ -401,7 +392,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.anomalies).toHaveLength(1);
       expect(body.summary.anomalies[0]).toMatchObject({
         score: 85,
-        id: 'test-highlights-v2-security-job',
+        id: ML_JOB_ID,
       });
 
       // Prompt and replacements

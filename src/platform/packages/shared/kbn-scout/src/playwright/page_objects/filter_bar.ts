@@ -46,6 +46,7 @@ export class FilterBar {
   }
 
   async addFilter(options: FilterCreationOptions) {
+    const previousCount = await this.getFilterCount();
     await this.page.testSubj.click('addFilter');
     await this.page.testSubj.waitForSelector('addFilterPopover');
     // set field name
@@ -72,7 +73,9 @@ export class FilterBar {
       'Filter popover should close after saving'
     ).toBeHidden();
 
-    await this.page.testSubj.waitForSelector('^filter-badge', { state: 'visible' });
+    await expect
+      .poll(() => this.getFilterCount(), { message: 'New filter badge should be displayed' })
+      .toBeGreaterThan(previousCount);
   }
 
   async addDslFilter(value: string) {

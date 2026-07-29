@@ -175,6 +175,8 @@ If a future consumer needs to filter or sort on any of these, add them back to t
 
 `.kibana_change_history` is enrolled in data stream lifecycle with `enabled: true` and no `data_retention`. Change history documents are kept indefinitely by default.
 
+This stream must be registered as an Elasticsearch **system** data stream (`system: true`), not only as a Kibana hidden stream. Kibana `registerDataStream` / `@kbn/data-streams` cannot set that flag — it comes from the ES [`SystemDataStreamDescriptor`](https://github.com/elastic/elasticsearch/pull/154113) ([security-team#18291](https://github.com/elastic/security-team/issues/18291)). See [`@kbn/data-streams` README — System data streams](../../../../../src/platform/packages/private/kbn-data-streams/README.md#system-data-streams). Verify with `GET _data_stream/.kibana_change_history`.
+
 Cluster admins can add retention later via **Stack Management → Index Management → Data Streams** on both stateful and serverless deployments.
 
 ### Dependencies

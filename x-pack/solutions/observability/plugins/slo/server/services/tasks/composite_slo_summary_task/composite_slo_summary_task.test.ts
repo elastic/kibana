@@ -121,7 +121,7 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(addTransactionLabelsMock).toHaveBeenCalledWith({
@@ -138,7 +138,7 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub('stale-task-instance-id'),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(addTransactionLabelsMock).toHaveBeenCalledWith({
@@ -156,7 +156,7 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(mockPersist).toHaveBeenCalledTimes(1);
@@ -169,7 +169,7 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(mockPersist).not.toHaveBeenCalled();

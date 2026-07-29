@@ -108,6 +108,7 @@ export const TagsAddRemove: React.FC<Props> = ({
   const updateTags = async (
     tagsToAdd: string[],
     tagsToRemove: string[],
+    onError?: () => void,
     successMessage?: string,
     errorMessage?: string
   ) => {
@@ -117,6 +118,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         agentId,
         newSelectedTags,
         () => onTagsUpdated(tagsToAdd),
+        onError,
         successMessage,
         errorMessage
       );
@@ -126,6 +128,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         tagsToAdd,
         tagsToRemove,
         (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
+        onError,
         successMessage,
         errorMessage
       );
@@ -141,16 +144,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         onMouseLeave={() => setIsTagHovered({ ...isTagHovered, [option.label]: false })}
       >
         <EuiFlexItem>
-          <TruncatedEuiHighlight
-            search={search}
-            onClick={() => {
-              const tagsToAdd = option.checked === 'on' ? [] : [option.label];
-              const tagsToRemove = option.checked === 'on' ? [option.label] : [];
-              updateTags(tagsToAdd, tagsToRemove);
-            }}
-          >
-            {option.label}
-          </TruncatedEuiHighlight>
+          <TruncatedEuiHighlight search={search}>{option.label}</TruncatedEuiHighlight>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TagOptions
@@ -178,6 +172,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         updateTags(
           [searchValue],
           [],
+          undefined,
           i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
             defaultMessage: 'Tag created',
           }),
@@ -228,6 +223,19 @@ export const TagsAddRemove: React.FC<Props> = ({
             value: searchValue ?? '',
           }}
           options={labels}
+          onChange={(newOptions) => {
+            const changedIndex = newOptions.findIndex(
+              (opt, i) => opt.checked !== labels[i]?.checked
+            );
+            if (changedIndex === -1) return;
+            const option = newOptions[changedIndex];
+            const isNowChecked = option.checked === 'on';
+            const labelsSnapshot = labels;
+            setLabels(newOptions);
+            updateTags(isNowChecked ? [option.label] : [], isNowChecked ? [] : [option.label], () =>
+              setLabels(labelsSnapshot)
+            );
+          }}
           renderOption={renderOption}
         >
           {(list, search) => (
