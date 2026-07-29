@@ -220,7 +220,7 @@ describe('create', () => {
       );
     });
 
-    it('fills null identity for uids without a resolvable profile', async () => {
+    it('keeps assignees uid-only for uids without a resolvable profile', async () => {
       clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([] as never);
 
       await create({ ...theCase, assignees: [{ uid: '1' }] }, clientArgs, casesClientMock);
@@ -228,7 +228,7 @@ describe('create', () => {
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: expect.objectContaining({
-            assignees: [{ uid: '1', username: null, full_name: null, email: null }],
+            assignees: [{ uid: '1' }],
           }),
         })
       );

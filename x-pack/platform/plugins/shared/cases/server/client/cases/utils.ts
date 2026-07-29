@@ -648,9 +648,9 @@ export const getUserProfilesSafe = async (
 
 /**
  * Maps resolved user profiles onto assignees, populating `username`,
- * `full_name` and `email`. Uids without a resolvable profile keep `null`
- * identity. Pure — the profiles are fetched once by the caller so a bulk
- * operation can share a single `bulkGet`.
+ * `full_name` and `email`. Uids without a resolvable profile stay uid-only.
+ * Pure — the profiles are fetched once by the caller so a bulk operation can
+ * share a single `bulkGet`.
  */
 export const applyProfilesToAssignees = (
   assignees: CaseAssignees,
@@ -659,11 +659,15 @@ export const applyProfilesToAssignees = (
   assignees.map(({ uid }) => {
     const profile = profiles.get(uid);
 
+    if (!profile) {
+      return { uid };
+    }
+
     return {
       uid,
-      username: profile?.user.username ?? null,
-      full_name: profile?.user.full_name ?? null,
-      email: profile?.user.email ?? null,
+      username: profile.user.username ?? null,
+      full_name: profile.user.full_name ?? null,
+      email: profile.user.email ?? null,
     };
   });
 
