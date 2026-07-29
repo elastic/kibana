@@ -99,7 +99,8 @@ export const waitForViewToBeLoaded = () => {
       cy.get(REFRESH_BUTTON).should('exist').click();
       return cy.get('body').then(($body) => $body.find(INDICATORS_TABLE).length > 0);
     },
-    (isTableVisible) => isTableVisible === true
+    (isTableVisible) => isTableVisible === true,
+    { delay: 1000 }
   );
 
   cy.get(INDICATORS_TABLE).should('exist');
