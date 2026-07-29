@@ -34,9 +34,6 @@ export interface IntegrationStats {
   readonly breachingSlos: number;
   readonly llmJobsSkills: number;
   readonly recommendedResources: number;
-  /** Baseline enabled/total; enabling recommended assets raises the enabled side. */
-  readonly enabledAssets: number;
-  readonly totalAssets: number;
 }
 
 export interface DashboardAsset {
@@ -123,8 +120,6 @@ const KUBERNETES: FakeIntegration = {
     breachingSlos: 0,
     llmJobsSkills: 3,
     recommendedResources: 5,
-    enabledAssets: 28,
-    totalAssets: 33,
   },
   dashboards: [
     {
@@ -324,8 +319,6 @@ const AWS_EC2: FakeIntegration = {
     breachingSlos: 1,
     llmJobsSkills: 3,
     recommendedResources: 5,
-    enabledAssets: 10,
-    totalAssets: 25,
   },
   dashboards: [
     {
@@ -468,8 +461,6 @@ const AWS_LAMBDA: FakeIntegration = {
     breachingSlos: 0,
     llmJobsSkills: 3,
     recommendedResources: 5,
-    enabledAssets: 28,
-    totalAssets: 33,
   },
   dashboards: [
     {
@@ -606,8 +597,6 @@ const AWS_RDS: FakeIntegration = {
     breachingSlos: 0,
     llmJobsSkills: 2,
     recommendedResources: 4,
-    enabledAssets: 9,
-    totalAssets: 19,
   },
   dashboards: [
     {
@@ -744,8 +733,6 @@ const AZURE: FakeIntegration = {
     breachingSlos: 2,
     llmJobsSkills: 2,
     recommendedResources: 5,
-    enabledAssets: 15,
-    totalAssets: 29,
   },
   dashboards: [
     {
@@ -866,8 +853,6 @@ const SOMETHING_ELSE: FakeIntegration = {
     breachingSlos: 0,
     llmJobsSkills: 1,
     recommendedResources: 2,
-    enabledAssets: 3,
-    totalAssets: 8,
   },
   dashboards: [
     {

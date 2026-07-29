@@ -40,13 +40,33 @@ export const getRecommendedAssetIds = (integration: FakeIntegration): string[] =
 ];
 
 /**
- * Live "enabled assets" count = the seeded baseline plus any recommended
- * assets the user has since enabled. Re-computes when the asset store changes.
+ * Assets that ship enabled: everything the detail page lists as already-on
+ * (dashboards, data streams, ML jobs/skills) plus the enabled alert rules and
+ * SLO templates. Recommended (not-yet-enabled) rules/templates are excluded.
+ */
+const getBaselineEnabledAssetCount = (integration: FakeIntegration): number =>
+  integration.dashboards.length +
+  integration.dataStreams.length +
+  integration.mlAssets.length +
+  integration.alertRules.enabled.length +
+  integration.sloTemplates.enabled.length;
+
+/**
+ * Total assets = the enabled baseline plus every recommended rule/template that
+ * can still be turned on. Derived from the real content so the gauge always
+ * matches what the page shows.
+ */
+export const getTotalAssetCount = (integration: FakeIntegration): number =>
+  getBaselineEnabledAssetCount(integration) + getRecommendedAssetIds(integration).length;
+
+/**
+ * Live "enabled assets" count = the baseline plus any recommended assets the
+ * user has since enabled. Re-computes when the asset store changes.
  */
 export const useEnabledAssetCount = (integration: FakeIntegration): number => {
   useIntegrationAssetsVersion();
   return (
-    integration.stats.enabledAssets +
+    getBaselineEnabledAssetCount(integration) +
     countEnabledRecommended(integration.id, getRecommendedAssetIds(integration))
   );
 };
@@ -115,6 +135,7 @@ const StatTile = ({
  */
 export const IntegrationStatRow = ({ integration }: { integration: FakeIntegration }) => {
   const enabledAssets = useEnabledAssetCount(integration);
+  const totalAssets = getTotalAssetCount(integration);
   const { stats } = integration;
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="flexStart" wrap responsive={false}>
@@ -167,15 +188,15 @@ export const IntegrationStatRow = ({ integration }: { integration: FakeIntegrati
         </EuiText>
         <EuiTitle size="s">
           <span>
-            {enabledAssets}/{stats.totalAssets}
+            {enabledAssets}/{totalAssets}
           </span>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiProgress
           value={enabledAssets}
-          max={stats.totalAssets}
+          max={totalAssets}
           size="s"
-          color={enabledAssets >= stats.totalAssets ? 'success' : 'primary'}
+          color={enabledAssets >= totalAssets ? 'success' : 'primary'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

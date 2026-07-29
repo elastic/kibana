@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -26,6 +27,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -113,37 +115,46 @@ const SectionPanel = ({
   action?: { label: string; onClick: () => void };
   children: React.ReactNode;
   dataTestSubj?: string;
-}) => (
-  <EuiPanel hasBorder paddingSize="l" data-test-subj={dataTestSubj}>
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      {typeof count === 'number' ? (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{count}</EuiBadge>
-        </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow />
-      {action ? (
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={action.onClick} external={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>{action.label}</EuiFlexItem>
+}) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'integrationSection' });
+  return (
+    <EuiPanel hasBorder paddingSize="l" data-test-subj={dataTestSubj}>
+      <EuiAccordion
+        id={accordionId}
+        initialIsOpen
+        buttonContent={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {typeof count === 'number' ? (
               <EuiFlexItem grow={false}>
-                <EuiIcon type="popout" size="s" />
+                <EuiBadge color="hollow">{count}</EuiBadge>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiLink>
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-    <EuiSpacer size="m" />
-    {children}
-  </EuiPanel>
-);
+            ) : null}
+          </EuiFlexGroup>
+        }
+        extraAction={
+          action ? (
+            <EuiLink onClick={action.onClick} external={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>{action.label}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="popout" size="s" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiLink>
+          ) : undefined
+        }
+      >
+        <EuiSpacer size="m" />
+        {children}
+      </EuiAccordion>
+    </EuiPanel>
+  );
+};
 
 const DEFAULT_PAGINATION = { initialPageSize: 5, pageSizeOptions: [5, 10, 25] };
 
