@@ -106,7 +106,7 @@ const changeImmutable = (dest: any, src: any, path: Path, changeCallback: Change
   return dest;
 };
 
-export function set<T extends object>(src: T, path: Path, value: any): T {
+export function set<T = object>(src: T, path: Path, value: any): T {
   if (isEmpty(path)) {
     return value;
   }
@@ -116,14 +116,15 @@ export function set<T extends object>(src: T, path: Path, value: any): T {
   });
 }
 
-export function del<T extends object>(src: T, path: Path): T {
+export function del<T = object>(src: T, path: Path): T {
   if (isEmpty(path)) {
     return undefined as unknown as T;
   }
   return changeImmutable(null, src, path, (clonedObj, finalPath) => {
     if (isArray(clonedObj)) {
-      if (clonedObj[finalPath] !== undefined) {
-        clonedObj.splice(finalPath as number, 1);
+      const index = finalPath as number;
+      if (clonedObj[index] !== undefined) {
+        clonedObj.splice(index, 1);
       }
     } else if (hasOwnProperty.call(clonedObj, finalPath)) {
       delete clonedObj[finalPath];
@@ -132,7 +133,7 @@ export function del<T extends object>(src: T, path: Path): T {
   });
 }
 
-export function assign<T extends object>(src: T, path: Path, source: object): T {
+export function assign<T = object>(src: T, path: Path, source: any): T {
   if (isEmpty(path)) {
     if (isEmpty(source)) {
       return src;
@@ -148,7 +149,7 @@ export function assign<T extends object>(src: T, path: Path, source: object): T 
   });
 }
 
-export function push<T extends object>(src: T, path: Path, ...values: any[]): T {
+export function push<T = object>(src: T, path: Path, ...values: any[]): T {
   if (isEmpty(path)) {
     return (!isArray(src) ? values : (src as any[]).concat(values)) as unknown as T;
   }
@@ -162,7 +163,7 @@ export function push<T extends object>(src: T, path: Path, ...values: any[]): T 
   });
 }
 
-export function insert<T extends object>(src: T, path: Path, value?: any, at?: number): T {
+export function insert<T = object>(src: T, path: Path, value?: any, at?: number): T {
   const index = Math.trunc(Number(at)) || 0;
   if (isEmpty(path)) {
     if (!isArray(src)) {
