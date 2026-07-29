@@ -11,6 +11,7 @@ import { managementRoutes } from './streams/management/route';
 import { internalSchemaRoutes } from './internal/streams/schema/route';
 import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
+import { graphRoutes } from './streams/graph/route';
 import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
 import { queryStreamRoutes } from './streams/query/route';
 import { contentRoutes } from './content/route';
@@ -44,6 +45,7 @@ export const streamsRouteRepository = {
   ...enablementRoutes,
   ...managementRoutes,
   ...ingestRoutes,
+  ...graphRoutes,
   ...queryStreamRoutes,
   ...contentRoutes,
   ...attachmentRoutes,

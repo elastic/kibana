@@ -28,11 +28,13 @@ import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
+  STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
   STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
+  STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
@@ -57,7 +59,7 @@ import { registerFieldsMetadataExtractors } from './register_fields_metadata_ext
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
-import { getStreamsPromptsSavedObject } from './lib/prompts/prompts_config';
+import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -122,7 +124,9 @@ export class StreamsPlugin
       this.logger.get('patternExtraction')
     );
 
-    core.savedObjects.registerType(getStreamsPromptsSavedObject());
+    registerStreamsSavedObjects(core.savedObjects, {
+      isStreamsCanvasEnabled: this.config.canvas.enabled,
+    });
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -156,7 +160,11 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
+      const scopedSoClient = coreStart.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: this.config.canvas.enabled
+          ? [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE, STREAMS_UI_METADATA_SAVED_OBJECT_TYPE]
+          : [],
+      });
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
@@ -292,7 +300,9 @@ export class StreamsPlugin
       },
     });
 
-    registerFeatureFlags(core);
+    registerFeatureFlags(core, {
+      isStreamsCanvasEnabled: this.config.canvas.enabled,
+    });
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
     const routeRegistrationOptions = {
