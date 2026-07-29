@@ -18,6 +18,10 @@ import {
 } from '../../fixtures';
 import type { TsdbScenarioContext, TsdbScenarioIndex } from '../../fixtures';
 
+const ONE_SECOND = 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+const TWO_HOURS = 2 * ONE_HOUR;
+
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
 const BASE_STREAM = `kibana_sample_data_lens_tsdb_downgrade_${RESOURCE_SUFFIX}`;
@@ -102,8 +106,8 @@ const runScenario = async (
       // Reload Lens for a clean editor before narrowing the time window.
       await pageObjects.lens.openFullEditor();
       await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.beforeRollover, -60 * 60 * 1000),
-        to: offsetPickerTime(TIME_RANGE.beforeRollover, 60 * 60 * 1000),
+        from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
+        to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
       });
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -120,8 +124,8 @@ const runScenario = async (
         (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
 
       await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.afterRollover, 1000),
-        to: offsetPickerTime(TIME_RANGE.afterRollover, 2 * 60 * 60 * 1000),
+        from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
+        to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
       });
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsAfterDowngrade =
