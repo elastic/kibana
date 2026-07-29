@@ -156,6 +156,17 @@ const getScenarioDataCounts = ({ bars }: ScenarioResult) => {
   };
 };
 
+const assertDowngradeResult = (result: ScenarioResult) => {
+  expect.soft(result.incompatibleAverageCount).toBe(0);
+  expect.soft(result.hasDataBeforeDowngrade).toBe(true);
+  expect.soft(result.hasDataAfterDowngrade).toBe(true);
+  const counts = getScenarioDataCounts(result);
+  expect
+    .soft(counts.beforeDowngrade)
+    .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
+  expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+};
+
 test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
   let cleanupBaseStream: (() => Promise<void>) | undefined;
 
@@ -179,14 +190,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-    expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    const counts = getScenarioDataCounts(result);
-    expect
-      .soft(counts.beforeDowngrade)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertDowngradeResult(result);
   });
 
   test('supports a downgraded TSDB data stream with a regular index', async ({
@@ -198,14 +202,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: BASE_STREAM },
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-    expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    const counts = getScenarioDataCounts(result);
-    expect
-      .soft(counts.beforeDowngrade)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertDowngradeResult(result);
   });
 
   test('supports a downgraded TSDB data stream with a downsampled TSDB stream', async ({
@@ -217,14 +214,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-    expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    const counts = getScenarioDataCounts(result);
-    expect
-      .soft(counts.beforeDowngrade)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertDowngradeResult(result);
   });
 
   test('supports a downgraded TSDB data stream with regular and downsampled resources', async ({
@@ -237,14 +227,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-    expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    const counts = getScenarioDataCounts(result);
-    expect
-      .soft(counts.beforeDowngrade)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertDowngradeResult(result);
   });
 
   test('supports a downgraded TSDB data stream with another TSDB stream', async ({
@@ -256,13 +239,6 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-    expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    const counts = getScenarioDataCounts(result);
-    expect
-      .soft(counts.beforeDowngrade)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertDowngradeResult(result);
   });
 });

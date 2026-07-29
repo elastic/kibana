@@ -115,6 +115,17 @@ const getScenarioData = ({ counterBars, countBars }: ScenarioResult) => {
   };
 };
 
+const assertUpgradeResult = (result: ScenarioResult) => {
+  expect.soft(result.incompatibleAverageCount).toBe(0);
+  const data = getScenarioData(result);
+  expect.soft(data.firstCounter).toBe(5000);
+  expect.soft(data.lastCounter).toBe(5000);
+  expect
+    .soft(data.beforeUpgradeCount)
+    .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
+  expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+};
+
 test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
   let cleanupBaseStream: (() => Promise<void>) | undefined;
 
@@ -138,14 +149,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    const data = getScenarioData(result);
-    expect.soft(data.firstCounter).toBe(5000);
-    expect.soft(data.lastCounter).toBe(5000);
-    expect
-      .soft(data.beforeUpgradeCount)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertUpgradeResult(result);
   });
 
   test('supports an upgraded TSDB data stream with a regular index', async ({
@@ -157,14 +161,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    const data = getScenarioData(result);
-    expect.soft(data.firstCounter).toBe(5000);
-    expect.soft(data.lastCounter).toBe(5000);
-    expect
-      .soft(data.beforeUpgradeCount)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertUpgradeResult(result);
   });
 
   test('supports an upgraded TSDB data stream with a downsampled TSDB stream', async ({
@@ -176,14 +173,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    const data = getScenarioData(result);
-    expect.soft(data.firstCounter).toBe(5000);
-    expect.soft(data.lastCounter).toBe(5000);
-    expect
-      .soft(data.beforeUpgradeCount)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertUpgradeResult(result);
   });
 
   test('supports an upgraded TSDB data stream with regular and downsampled resources', async ({
@@ -196,14 +186,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    const data = getScenarioData(result);
-    expect.soft(data.firstCounter).toBe(5000);
-    expect.soft(data.lastCounter).toBe(5000);
-    expect
-      .soft(data.beforeUpgradeCount)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertUpgradeResult(result);
   });
 
   test('supports an upgraded TSDB data stream with another TSDB stream', async ({
@@ -215,13 +198,6 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
     ]);
-    expect.soft(result.incompatibleAverageCount).toBe(0);
-    const data = getScenarioData(result);
-    expect.soft(data.firstCounter).toBe(5000);
-    expect.soft(data.lastCounter).toBe(5000);
-    expect
-      .soft(data.beforeUpgradeCount)
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    assertUpgradeResult(result);
   });
 });
