@@ -68,9 +68,7 @@ const validateRequired = (
   rules: ConversationTemplateFieldValidation
 ): void => {
   if (rules.required && (value === undefined || value.trim() === '')) {
-    throw createBadRequestError(
-      `Template "${templateId}" field "${name}": value is required`
-    );
+    throw createBadRequestError(`Template "${templateId}" field "${name}": value is required`);
   }
 };
 
@@ -84,8 +82,7 @@ const validatePattern = (
   const re = new RegExp(rules.pattern.regex);
   if (!re.test(value)) {
     const msg =
-      rules.pattern.message ??
-      `value "${value}" does not match pattern /${rules.pattern.regex}/`;
+      rules.pattern.message ?? `value "${value}" does not match pattern /${rules.pattern.regex}/`;
     throw createBadRequestError(`Template "${templateId}" field "${name}": ${msg}`);
   }
 };
@@ -136,7 +133,9 @@ const validateAllowedValues = (
   if (!rules.allowed_values) return;
   if (!rules.allowed_values.includes(value)) {
     throw createBadRequestError(
-      `Template "${templateId}" field "${name}": value "${value}" is not in allowed_values [${rules.allowed_values.join(', ')}]`
+      `Template "${templateId}" field "${name}": value "${value}" is not in allowed_values [${rules.allowed_values.join(
+        ', '
+      )}]`
     );
   }
 };
@@ -146,41 +145,66 @@ const validateAllowedValues = (
 // ---------------------------------------------------------------------------
 
 /**
- * Validates every field in a template definition:
- *  1. ES type compatibility of the value string (integer, float, boolean, date)
- *  2. Validation rules from the field's `validation` block:
- *     required, pattern, min_length/max_length (text/keyword), min/max (numeric),
- *     allowed_values
+ * Validates a single field value supplied by the LLM via set_conversation_metadata.
+ * Includes the `required` check so the agent cannot write an empty string for a
+ * field that is marked required.
  *
  * Throws a bad-request error on the first violation.
  */
+export const validateSingleField = (
+  templateId: string,
+  field: ConversationTemplateField,
+  value: string
+): void => {
+  const { name, type, validation } = field;
+
+  if (validation?.required) {
+    validateRequired(templateId, name, value, validation);
+  }
+
+  validateType(templateId, { ...field, value });
+
+  if (!validation) return;
+
+  validatePattern(templateId, name, value, validation);
+  validateAllowedValues(templateId, name, value, validation);
+
+  if (type === 'keyword' || type === 'text') {
+    validateLengthConstraints(templateId, name, value, validation);
+  }
+
+  if (type === 'integer' || type === 'float') {
+    validateNumericConstraints(templateId, name, value, validation);
+  }
+};
+
+/**
+ * Validates every field in a template definition against its default value.
+ * The `required` rule is intentionally skipped here — fields start empty when
+ * a template is first applied; the LLM fills them in via set_conversation_metadata.
+ *
+ * Throws a bad-request error on the first type or constraint violation.
+ */
 export const validateTemplateFields = (template: ConversationTemplate): void => {
   for (const field of template.definition.fields ?? []) {
-    const { name, type, value, validation } = field;
+    const { type, value, validation } = field;
 
-    // 1. required check (runs even when value is undefined)
-    if (validation?.required) {
-      validateRequired(template.id, name, value, validation);
-    }
-
-    // 2. skip remaining checks when there is no value to inspect
+    // Skip fields with no default value — nothing to validate yet.
     if (value === undefined) continue;
 
-    // 3. ES type compatibility
     validateType(template.id, field);
 
-    // 4. validation rules
     if (!validation) continue;
 
-    validatePattern(template.id, name, value, validation);
-    validateAllowedValues(template.id, name, value, validation);
+    validatePattern(template.id, field.name, value, validation);
+    validateAllowedValues(template.id, field.name, value, validation);
 
     if (type === 'keyword' || type === 'text') {
-      validateLengthConstraints(template.id, name, value, validation);
+      validateLengthConstraints(template.id, field.name, value, validation);
     }
 
     if (type === 'integer' || type === 'float') {
-      validateNumericConstraints(template.id, name, value, validation);
+      validateNumericConstraints(template.id, field.name, value, validation);
     }
   }
 };

@@ -10,6 +10,7 @@ import {
   agentBuilderDefaultAgentId,
   ToolOrigin,
   type AgentCapabilities,
+  type ConversationTemplate,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -36,6 +37,8 @@ export interface RegisterInternalToolsParams {
   backgroundExecutionService: BackgroundExecutionService;
   /** Callback to merge key/value updates into the active conversation's metadata. */
   updateConversationMetadata?: (updates: Record<string, string>) => Promise<void>;
+  /** Active conversation template, used to validate values written by the LLM. */
+  conversationTemplate?: ConversationTemplate;
 }
 
 /**
@@ -51,6 +54,7 @@ export const registerInternalTools = async ({
   abortSignal,
   backgroundExecutionService,
   updateConversationMetadata,
+  conversationTemplate,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -109,9 +113,14 @@ export const registerInternalTools = async ({
     tools.push(createLoadSkillTool({ analyticsService, trackingService }));
   }
 
-  // set_conversation_metadata — only when the callback is wired (i.e. when a template is active).
-  if (updateConversationMetadata) {
-    tools.push(createSetConversationMetadataTool({ updateConversationMetadata }));
+  // set_conversation_metadata — only when both callback and template are wired.
+  if (updateConversationMetadata && conversationTemplate) {
+    tools.push(
+      createSetConversationMetadataTool({
+        updateConversationMetadata,
+        template: conversationTemplate,
+      })
+    );
   }
 
   await toolManager.addTools({

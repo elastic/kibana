@@ -19,7 +19,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'compromised_account',
           type: 'keyword',
           description: 'UPN or username of the compromised account.',
-          validation: { required: true },
         },
         {
           name: 'account_type',
@@ -110,7 +109,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'affected_resource',
           type: 'keyword',
           description: 'Name or ARN/ID of the affected resource or service.',
-          validation: { required: true },
         },
         {
           name: 'resource_type',
@@ -177,7 +175,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'affected_service',
           type: 'keyword',
           description: 'Name of the service or system experiencing the outage or degradation.',
-          validation: { required: true },
         },
         {
           name: 'attack_type',
@@ -244,14 +241,12 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'source_account',
           type: 'keyword',
           description: 'Username or account associated with the data transfer.',
-          validation: { required: true },
         },
         {
           name: 'data_classification',
           type: 'keyword',
           description: 'Classification level of the exfiltrated data.',
           validation: {
-            required: true,
             allowed_values: [
               'Public',
               'Internal',
@@ -271,7 +266,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'text',
           description:
             'Exfiltration method(s) observed (comma-separated). Options: Cloud storage upload, Email to external address, USB / removable media, FTP / SFTP, Web upload / HTTP POST, Printing or physical removal, Unknown.',
-          validation: { required: true },
         },
         {
           name: 'exfil_destination',
@@ -283,7 +277,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: 'How the exfiltration was detected.',
           validation: {
-            required: true,
             allowed_values: [
               'DLP alert',
               'UEBA / behavioral anomaly',
@@ -320,7 +313,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'hostname',
           type: 'keyword',
           description: 'Name of the compromised host.',
-          validation: { required: true },
         },
         {
           name: 'os_type',
@@ -372,7 +364,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'subject_account',
           type: 'keyword',
           description: 'Username or account of the subject under investigation.',
-          validation: { required: true },
         },
         {
           name: 'subject_department',
@@ -384,7 +375,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: "Subject's current employment status.",
           validation: {
-            required: true,
             allowed_values: [
               'Active employee',
               'Contractor or vendor',
@@ -398,7 +388,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'text',
           description:
             'Suspected threat type(s) (comma-separated). Options: Data theft (IP or customer data), Sabotage or system damage, Privilege or access abuse, Acceptable use policy violation, Unauthorized system or data access, Fraud or financial misconduct.',
-          validation: { required: true },
         },
         {
           name: 'hr_authorized',
@@ -439,7 +428,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'source_host',
           type: 'keyword',
           description: 'Source host used as the initial pivot point.',
-          validation: { required: true },
         },
         {
           name: 'target_hosts',
@@ -451,7 +439,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'text',
           description:
             'MITRE ATT&CK lateral movement techniques observed (comma-separated). Options: Pass-the-hash, Pass-the-ticket, PsExec, WMI / WMIC, Remote services (SMB or RPC), RDP, SSH, Token impersonation, LOLBins.',
-          validation: { required: true },
         },
         {
           name: 'credentials_used',
@@ -493,7 +480,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: 'Primary malware classification.',
           validation: {
-            required: true,
             allowed_values: [
               'Ransomware',
               'Trojan / RAT',
@@ -518,7 +504,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'integer',
           description: 'Number of hosts confirmed as infected.',
           value: '1',
-          validation: { required: true, min: 1 },
+          validation: { min: 1 },
         },
         {
           name: 'initial_access_vector',
@@ -570,7 +556,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: 'How the phishing was first identified.',
           validation: {
-            required: true,
             allowed_values: [
               'User report',
               'Email gateway alert',
@@ -584,7 +569,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: 'Delivery mechanism used by the attacker.',
           validation: {
-            required: true,
             allowed_values: [
               'Email link',
               'Email attachment',
@@ -598,7 +582,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'sender_address',
           type: 'keyword',
           description: 'Sender email address or spoofed domain from the phishing message.',
-          validation: { required: true },
         },
         {
           name: 'phishing_url',
@@ -650,14 +633,12 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'privileged_account',
           type: 'keyword',
           description: 'Username or account of the privileged account involved.',
-          validation: { required: true },
         },
         {
           name: 'privilege_level',
           type: 'keyword',
           description: 'Level of privilege held by the account.',
           validation: {
-            required: true,
             allowed_values: [
               'Local admin',
               'Domain admin',
@@ -674,14 +655,12 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'text',
           description:
             'Type(s) of abuse observed (comma-separated). Options: Unauthorized data access, Change management bypass, Audit log tampering or deletion, Unauthorized account creation, Permission or role escalation, Security tool disabled or modified, Scheduled task or script abuse.',
-          validation: { required: true },
         },
         {
           name: 'detection_source',
           type: 'keyword',
           description: 'How the abuse was detected.',
           validation: {
-            required: true,
             allowed_values: [
               'SIEM alert',
               'UEBA / behavioral anomaly',
@@ -730,13 +709,11 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'vendor_name',
           type: 'keyword',
           description: 'Name of the affected vendor or supplier.',
-          validation: { required: true },
         },
         {
           name: 'compromised_component',
           type: 'keyword',
           description: 'Name of the compromised software library, service, or integration.',
-          validation: { required: true },
         },
         {
           name: 'affected_version',
@@ -759,13 +736,11 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'text',
           description:
             'How the supply chain was compromised (comma-separated). Options: Malicious software update / trojanized build, Compromised open-source dependency, Backdoored integration or plugin, API key or credential leak from vendor, Counterfeit / typosquatted component, Vendor infrastructure breach.',
-          validation: { required: true },
         },
         {
           name: 'affected_internal_systems',
           type: 'text',
           description: 'Internal systems or pipelines that use the compromised component.',
-          validation: { required: true },
         },
         {
           name: 'exploitation_confirmed',
@@ -818,7 +793,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'affected_system',
           type: 'keyword',
           description: 'System or application name where the vulnerability was exploited.',
-          validation: { required: true },
         },
         {
           name: 'cvss_score',
@@ -831,7 +805,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: 'Class of vulnerability being exploited.',
           validation: {
-            required: true,
             allowed_values: [
               'Remote code execution (RCE)',
               'Privilege escalation',
@@ -850,7 +823,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'keyword',
           description: 'Network exposure of the affected system.',
           validation: {
-            required: true,
             allowed_values: ['Internet-facing', 'Internal only', 'DMZ', 'Cloud / SaaS'],
           },
         },

@@ -53,6 +53,7 @@ import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 import { conversationIndexName } from '../../conversation/client/storage';
+import { getTemplate } from '../../conversation/templates/registry';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -215,6 +216,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         }
       : undefined;
 
+  const conversationTemplate = conversation?.template_id
+    ? getTemplate(conversation.template_id)
+    : undefined;
+
   await registerInternalTools({
     context,
     agentId,
@@ -223,6 +228,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     abortSignal,
     backgroundExecutionService,
     updateConversationMetadata,
+    conversationTemplate,
   });
 
   // Then add dynamic tools

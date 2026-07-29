@@ -7,9 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, internalTools } from '@kbn/agent-builder-common';
+import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import { validateSingleField } from '../../conversation/templates/validation';
 
 const setConversationMetadataSchema = z.object({
   updates: z
@@ -41,8 +43,10 @@ The \`## CONVERSATION CONTEXT\` section of your system prompt lists all fields f
 
 export const createSetConversationMetadataTool = ({
   updateConversationMetadata,
+  template,
 }: {
   updateConversationMetadata: (updates: Record<string, string>) => Promise<void>;
+  template: ConversationTemplate;
 }): BuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
   id: internalTools.setConversationMetadata,
   type: ToolType.builtin,
@@ -50,6 +54,13 @@ export const createSetConversationMetadataTool = ({
   schema: setConversationMetadataSchema,
   tags: ['internal'],
   handler: async ({ updates }) => {
+    const fieldIndex = new Map((template.definition.fields ?? []).map((f) => [f.name, f]));
+    for (const [key, value] of Object.entries(updates)) {
+      const field = fieldIndex.get(key);
+      if (field) {
+        validateSingleField(template.id, field, value);
+      }
+    }
     await updateConversationMetadata(updates);
     return {
       results: [
