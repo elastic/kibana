@@ -55,6 +55,7 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
+  - x-pack/platform/test/functional_gen_ai/inference/generate_security_labs_artifacts.config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -239,7 +240,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group5/config.ts
   - x-pack/platform/test/functional/apps/lens/group6/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
-  - x-pack/platform/test/functional/apps/lens/group9/config.ts
   - x-pack/platform/test/functional/apps/lens/group10/config.ts
   - x-pack/platform/test/functional/apps/lens/group11/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
