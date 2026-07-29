@@ -33,6 +33,9 @@ export class FeatureControlsPage {
   }
 
   public get readOnlyBadge() {
-    return this.page.getByTestId('appHeaderBadge');
+    return this.page
+      .getByTestId('headerBadge')
+      .or(this.page.getByTestId('appHeaderBadge'))
+      .filter({ visible: true });
   }
 }
