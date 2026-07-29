@@ -57,7 +57,7 @@ Large plugins often accumulate tests across different functional areas, sometime
 
 ::::::::{step} Create Playwright config(s)
 
-Create a config under `test/scout/ui` and/or `test/scout/api`.
+Create a config under `test/scout/ui` or `test/scout/api`.
 
 ::::::::{tab-set}
 
