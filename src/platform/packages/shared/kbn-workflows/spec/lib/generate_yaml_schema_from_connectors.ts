@@ -163,6 +163,29 @@ function hasNoRequiredFields(schema: z.ZodType): boolean {
   );
 }
 
+/**
+ * Recursively widens array, record, and nested-object properties to also accept a string so that
+ * Liquid template expressions like `"${{ event.messages }}"` are not flagged as errors in the
+ * YAML editor. Only the editor-facing JSON schema is affected — runtime step handlers always
+ * receive already-resolved values and are validated by the original strict Zod schemas.
+ */
+function withTemplateStringSupport(schema: z.ZodType): z.ZodType {
+  if (schema instanceof z.ZodOptional) {
+    return z.optional(withTemplateStringSupport(schema.unwrap() as z.ZodType));
+  }
+  if (schema instanceof z.ZodObject) {
+    const newShape: Record<string, z.ZodType> = {};
+    for (const [key, value] of Object.entries(schema.shape as Record<string, z.ZodType>)) {
+      newShape[key] = withTemplateStringSupport(value);
+    }
+    return z.object(newShape);
+  }
+  if (schema instanceof z.ZodArray || schema instanceof z.ZodRecord) {
+    return z.union([z.string(), schema]);
+  }
+  return schema;
+}
+
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
@@ -175,11 +198,13 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
   }
 
+  const templateAwareParamsSchema = withTemplateStringSupport(connector.paramsSchema);
+
   // If all params are optional (or there are none), `with` itself should be optional so users
   // don't have to write an empty `with: {}` block for steps that need no inputs.
   const withSchema = hasNoRequiredFields(connector.paramsSchema)
-    ? connector.paramsSchema.optional()
-    : connector.paramsSchema;
+    ? templateAwareParamsSchema.optional()
+    : templateAwareParamsSchema;
 
   return BaseConnectorStepSchema.extend({
     type: connector.description
