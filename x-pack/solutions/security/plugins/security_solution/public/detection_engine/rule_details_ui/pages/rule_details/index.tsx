@@ -449,6 +449,11 @@ export const RuleDetailsPage = connector(
 
     const isBuildingBlockRule = rule?.building_block_type != null;
     const [areAlertFiltersInitialized, setAreAlertFiltersInitialized] = useState(false);
+    const ruleRuleId = rule?.rule_id ?? '';
+    useEffect(() => {
+      setAreAlertFiltersInitialized(false);
+    }, [ruleRuleId]);
+
     useEffect(() => {
       if (rule != null && !areAlertFiltersInitialized) {
         setShowBuildingBlockAlerts(isBuildingBlockRule);
@@ -464,8 +469,6 @@ export const RuleDetailsPage = connector(
         setAreAlertFiltersInitialized(true);
       }
     }, [rule, isBuildingBlockRule, showBuildingBlockAlerts, areAlertFiltersInitialized]);
-
-    const ruleRuleId = rule?.rule_id ?? '';
     const shouldShowBuildingBlockAlerts = areAlertFiltersInitialized
       ? showBuildingBlockAlerts
       : isBuildingBlockRule || showBuildingBlockAlerts;
