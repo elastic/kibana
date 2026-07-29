@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createClassicStreamDefinition } from '../../stream_management/data_management/shared/mocks/stream_definitions';
+import { createClassicStreamDefinition } from '../shared/mocks/stream_definitions';
 import { BULK_SOURCE_SUBTITLE } from './build_source';
 import { buildClassicStreamsGraph } from './build_graph';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';

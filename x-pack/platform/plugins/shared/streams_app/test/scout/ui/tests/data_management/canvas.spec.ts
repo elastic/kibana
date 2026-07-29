@@ -54,7 +54,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoNewExperienceTab('canvas');
+      await pageObjects.streams.gotoStreamsLayoutTab('canvas');
     });
 
     test.afterAll(async ({ kbnClient, apiServices }) => {

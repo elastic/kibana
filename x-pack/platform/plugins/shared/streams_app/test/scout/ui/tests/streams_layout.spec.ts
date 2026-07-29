@@ -8,12 +8,12 @@
 import { tags } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../../fixtures';
+import { test } from '../fixtures';
 
 const TAB_NAMES = ['canvas', 'sources', 'pipelines', 'destinations'];
 
 test.describe(
-  'New experience layout',
+  'Streams layout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
@@ -33,36 +33,36 @@ test.describe(
     });
 
     test('renders every tab and lands on canvas', async ({ pageObjects: { streams } }) => {
-      await streams.gotoNewExperience();
+      await streams.gotoStreamsLayout();
 
       for (const tabName of TAB_NAMES) {
-        await expect(streams.getNewExperienceTab(tabName)).toBeVisible();
+        await expect(streams.getStreamsLayoutTab(tabName)).toBeVisible();
       }
 
-      await expect(streams.getNewExperienceTab('canvas')).toHaveAttribute('aria-selected', 'true');
+      await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
     });
 
     test('falls back to the canvas tab for an unknown tab', async ({
       pageObjects: { streams },
     }) => {
-      await streams.gotoNewExperienceTab('does-not-exist');
+      await streams.gotoStreamsLayoutTab('does-not-exist');
 
-      await expect(streams.getNewExperienceTab('canvas')).toHaveAttribute('aria-selected', 'true');
+      await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
     });
 
     test('shows a placeholder for the tabs that have no content yet', async ({
       pageObjects: { streams },
     }) => {
-      await streams.gotoNewExperience();
+      await streams.gotoStreamsLayout();
 
-      await streams.clickNewExperienceTab('sources');
-      await expect(streams.newExperienceSourcesPlaceholder).toBeVisible();
+      await streams.clickStreamsLayoutTab('sources');
+      await expect(streams.streamsLayoutSourcesPlaceholder).toBeVisible();
 
-      await streams.clickNewExperienceTab('pipelines');
-      await expect(streams.newExperiencePipelinesPlaceholder).toBeVisible();
+      await streams.clickStreamsLayoutTab('pipelines');
+      await expect(streams.streamsLayoutPipelinesPlaceholder).toBeVisible();
 
-      await streams.clickNewExperienceTab('destinations');
-      await expect(streams.newExperienceDestinationsPlaceholder).toBeVisible();
+      await streams.clickStreamsLayoutTab('destinations');
+      await expect(streams.streamsLayoutDestinationsPlaceholder).toBeVisible();
     });
   }
 );

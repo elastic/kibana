@@ -8,6 +8,6 @@
 import React from 'react';
 import { TabPlaceholder } from '../tab_placeholder';
 
-export const DestinationsTab = () => (
-  <TabPlaceholder data-test-subj="streamsNewExperienceDestinationsPlaceholder" />
+export const PipelinesTab = () => (
+  <TabPlaceholder data-test-subj="streamsLayoutPipelinesPlaceholder" />
 );

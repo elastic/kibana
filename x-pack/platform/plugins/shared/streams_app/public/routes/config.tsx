@@ -17,8 +17,8 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/significant_events/significant_events_discovery/page';
-import { StreamsNewExperience } from '../components/new_experience';
-import { DEFAULT_NEW_EXPERIENCE_TAB } from '../components/new_experience/tabs';
+import { StreamsLayout } from '../components/streams_layout';
+import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 
 /**
  * Optional time range query params.
@@ -110,12 +110,12 @@ const streamsAppRoutes = {
             element: (
               <RedirectTo
                 path="/new-experience/{tab}"
-                params={{ path: { tab: DEFAULT_NEW_EXPERIENCE_TAB } }}
+                params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
               />
             ),
           },
           '/new-experience/{tab}': {
-            element: <StreamsNewExperience />,
+            element: <StreamsLayout />,
             params: t.intersection([
               t.type({
                 path: t.type({

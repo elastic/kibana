@@ -63,10 +63,10 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
-  // New experience
-  public readonly newExperienceSourcesPlaceholder;
-  public readonly newExperiencePipelinesPlaceholder;
-  public readonly newExperienceDestinationsPlaceholder;
+  // Streams layout
+  public readonly streamsLayoutSourcesPlaceholder;
+  public readonly streamsLayoutPipelinesPlaceholder;
+  public readonly streamsLayoutDestinationsPlaceholder;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = this.page.components.comboBox(
@@ -136,15 +136,15 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
-    // New experience locators
-    this.newExperienceSourcesPlaceholder = this.page.testSubj.locator(
-      'streamsNewExperienceSourcesPlaceholder'
+    // Streams layout locators
+    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutSourcesPlaceholder'
     );
-    this.newExperiencePipelinesPlaceholder = this.page.testSubj.locator(
-      'streamsNewExperiencePipelinesPlaceholder'
+    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutPipelinesPlaceholder'
     );
-    this.newExperienceDestinationsPlaceholder = this.page.testSubj.locator(
-      'streamsNewExperienceDestinationsPlaceholder'
+    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutDestinationsPlaceholder'
     );
   }
 
@@ -188,20 +188,20 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'attachments');
   }
 
-  async gotoNewExperience() {
+  async gotoStreamsLayout() {
     await this.page.gotoApp('streams/new-experience');
   }
 
-  async gotoNewExperienceTab(tabName: string) {
+  async gotoStreamsLayoutTab(tabName: string) {
     await this.page.gotoApp(`streams/new-experience/${tabName}`);
   }
 
-  getNewExperienceTab(tabName: string) {
-    return this.page.testSubj.locator(`streamsNewExperienceTab-${tabName}`);
+  getStreamsLayoutTab(tabName: string) {
+    return this.page.testSubj.locator(`streamsLayoutTab-${tabName}`);
   }
 
-  async clickNewExperienceTab(tabName: string) {
-    await this.getNewExperienceTab(tabName).click();
+  async clickStreamsLayoutTab(tabName: string) {
+    await this.getStreamsLayoutTab(tabName).click();
   }
 
   // Canvas utility methods

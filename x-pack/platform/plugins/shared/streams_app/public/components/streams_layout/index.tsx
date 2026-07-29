@@ -15,17 +15,17 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
 import {
-  DEFAULT_NEW_EXPERIENCE_TAB,
-  isNewExperienceTab,
-  NEW_EXPERIENCE_TABS,
-  newExperienceTabs,
+  DEFAULT_STREAMS_LAYOUT_TAB,
+  isStreamsLayoutTab,
+  STREAMS_LAYOUT_TABS,
+  streamsLayoutTabs,
 } from './tabs';
 
 /**
- * Shell for the new Streams experience. It owns the tabbed layout and delegates
- * each tab's content to the matching entry in the tab registry.
+ * Top-level tabbed layout for Streams. It owns the tab bar and delegates each
+ * tab's content to the matching entry in the tab registry.
  */
-export function StreamsNewExperience() {
+export function StreamsLayout() {
   const {
     path: { tab },
   } = useStreamsAppParams('/new-experience/{tab}');
@@ -37,15 +37,15 @@ export function StreamsNewExperience() {
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
     () =>
-      NEW_EXPERIENCE_TABS.map((tabId) => ({
+      STREAMS_LAYOUT_TABS.map((tabId) => ({
         id: tabId,
-        label: newExperienceTabs[tabId].label,
+        label: streamsLayoutTabs[tabId].label,
         href: router.link('/new-experience/{tab}', {
           path: { tab: tabId },
           query: { rangeFrom, rangeTo },
         }),
         isSelected: tab === tabId,
-        'data-test-subj': `streamsNewExperienceTab-${tabId}`,
+        'data-test-subj': `streamsLayoutTab-${tabId}`,
       })),
     [tab, router, rangeFrom, rangeTo]
   );
@@ -54,21 +54,21 @@ export function StreamsNewExperience() {
     return <RedirectTo path="/" />;
   }
 
-  if (!isNewExperienceTab(tab)) {
+  if (!isStreamsLayoutTab(tab)) {
     return (
       <RedirectTo
         path="/new-experience/{tab}"
-        params={{ path: { tab: DEFAULT_NEW_EXPERIENCE_TAB } }}
+        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
       />
     );
   }
 
-  const { Component, noPadding } = newExperienceTabs[tab];
+  const { Component, noPadding } = streamsLayoutTabs[tab];
 
   return (
     <>
       <StreamsAppHeader
-        title={i18n.translate('xpack.streams.newExperience.pageHeaderTitle', {
+        title={i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {
           defaultMessage: 'Streams',
         })}
         tabs={appHeaderTabs}

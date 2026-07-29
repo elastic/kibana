@@ -13,20 +13,23 @@ interface TabPlaceholderProps {
   'data-test-subj': string;
 }
 
+/**
+ * Stand-in content for the layout tabs that have no implementation yet.
+ */
 export const TabPlaceholder = ({ 'data-test-subj': dataTestSubj }: TabPlaceholderProps) => (
   <EuiEmptyPrompt
     iconType="clock"
     data-test-subj={dataTestSubj}
     title={
       <h2>
-        {i18n.translate('xpack.streams.newExperience.tabPlaceholder.title', {
+        {i18n.translate('xpack.streams.streamsLayout.tabPlaceholder.title', {
           defaultMessage: 'Coming soon',
         })}
       </h2>
     }
     body={
       <p>
-        {i18n.translate('xpack.streams.newExperience.tabPlaceholder.body', {
+        {i18n.translate('xpack.streams.streamsLayout.tabPlaceholder.body', {
           defaultMessage: 'This part of the Streams experience is not available yet.',
         })}
       </p>

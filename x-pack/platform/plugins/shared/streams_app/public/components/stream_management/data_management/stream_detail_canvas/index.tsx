@@ -21,8 +21,8 @@ import {
   type NodeChange,
   type NodeMouseHandler,
 } from '@xyflow/react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { buildClassicStreamsGraph } from './build_graph';
 import {
   CanvasContextMenu,
@@ -35,7 +35,7 @@ import { applyLayout } from './layout';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import type { ClassicCanvasNode } from './types';
-import { StreamFlyout } from '../../stream_flyout';
+import { StreamFlyout } from '../../../stream_flyout';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 
