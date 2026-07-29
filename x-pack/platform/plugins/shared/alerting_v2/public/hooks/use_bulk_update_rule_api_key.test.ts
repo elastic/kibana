@@ -76,7 +76,7 @@ describe('useBulkUpdateRuleApiKey', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith('API key updated for 3 rules');
   });
 
-  it('shows warning toast when there are partial errors', async () => {
+  it('shows warning toast with a count title and reason breakdown on partial errors', async () => {
     mockBulkUpdateRuleApiKey.mockResolvedValueOnce({
       affected_count: 1,
       errors: [{ id: 'rule-2', error: { code: 'RULE_NOT_FOUND', message: 'Not found' } }],
@@ -89,8 +89,34 @@ describe('useBulkUpdateRuleApiKey', () => {
       await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
-    expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('1 error'));
+    expect(mockAddWarning).toHaveBeenCalledWith({
+      title: expect.stringContaining('1 error'),
+      text: '1 rule not found',
+    });
     expect(mockAddSuccess).not.toHaveBeenCalled();
+  });
+
+  it('groups the partial-error reasons by code in the warning text', async () => {
+    mockBulkUpdateRuleApiKey.mockResolvedValueOnce({
+      affected_count: 1,
+      errors: [
+        { id: 'rule-2', error: { code: 'RULE_DISABLED', message: 'Disabled' } },
+        { id: 'rule-3', error: { code: 'RULE_DISABLED', message: 'Disabled' } },
+        { id: 'rule-4', error: { code: 'RULE_NOT_FOUND', message: 'Not found' } },
+      ],
+    });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2', 'rule-3', 'rule-4'] });
+    });
+
+    expect(mockAddWarning).toHaveBeenCalledWith({
+      title: expect.stringContaining('3 errors'),
+      text: '2 disabled rules, 1 rule not found',
+    });
   });
 
   it('shows danger toast when the mutation fails', async () => {
@@ -148,21 +174,37 @@ describe('useBulkUpdateRuleApiKey', () => {
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'details', 'rule-2']);
   });
 
-  it('dispatches to the by-query endpoint with force=true for a by_query selection', async () => {
+  it('ANDs an enabled-only clause onto a by_query filter and dispatches with force=true', async () => {
     mockUpdateRuleApiKeyByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ mode: 'by_query', filter: 'enabled: true' });
+      await result.current.mutateAsync({ mode: 'by_query', filter: 'kind: alert' });
+    });
+
+    expect(mockUpdateRuleApiKeyByQuery).toHaveBeenCalledWith({
+      filter: '(kind: alert) AND enabled: true',
+      force: true,
+    });
+    expect(mockBulkUpdateRuleApiKey).not.toHaveBeenCalled();
+  });
+
+  it('replaces match_all with an enabled-only filter for a select-all by_query selection', async () => {
+    mockUpdateRuleApiKeyByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_query', match_all: true });
     });
 
     expect(mockUpdateRuleApiKeyByQuery).toHaveBeenCalledWith({
       filter: 'enabled: true',
       force: true,
     });
-    expect(mockBulkUpdateRuleApiKey).not.toHaveBeenCalled();
   });
 
   it('does not invalidate detail queries for a by_query selection (ids are unknown)', async () => {
