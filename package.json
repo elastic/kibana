@@ -198,6 +198,7 @@
     "@kbn/agent-builder-platform-plugin": "link:x-pack/platform/plugins/shared/agent_builder_platform",
     "@kbn/agent-builder-plugin": "link:x-pack/platform/plugins/shared/agent_builder",
     "@kbn/agent-builder-server": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-server",
+    "@kbn/agent-builder-skill-loader": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader",
     "@kbn/agent-builder-sml-plugin": "link:x-pack/platform/plugins/shared/agent_builder_sml",
     "@kbn/agent-builder-tools-base": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base",
     "@kbn/agent-builder-visualizations": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations",

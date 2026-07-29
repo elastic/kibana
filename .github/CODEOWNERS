@@ -1025,6 +1025,7 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/wor
 x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-common @elastic/kibana-presentation

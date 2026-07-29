@@ -4630,6 +4630,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-skill-loader@link:x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-sml-plugin@link:x-pack/platform/plugins/shared/agent_builder_sml":
   version "0.0.0"
   uid ""
