@@ -34,7 +34,7 @@ interface ScenarioResult {
   hasDataBeforeDowngrade: boolean;
   /** Whether the after-downgrade time window contains any data. */
   hasDataAfterDowngrade: boolean;
-  expectedDocumentCountBeforeUpgrade: number;
+  expectedDocumentCountBeforeRollover: number;
 }
 
 // The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
@@ -104,8 +104,8 @@ const runScenario = async (
       // Start with another clean editor, matching the third FTR journey step.
       await pageObjects.lens.openFullEditor();
       await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.beforeUpgrade, -60 * 60 * 1000),
-        to: offsetPickerTime(TIME_RANGE.beforeUpgrade, 60 * 60 * 1000),
+        from: offsetPickerTime(TIME_RANGE.beforeRollover, -60 * 60 * 1000),
+        to: offsetPickerTime(TIME_RANGE.beforeRollover, 60 * 60 * 1000),
       });
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -122,8 +122,8 @@ const runScenario = async (
         (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
 
       await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.afterUpgrade, 1000),
-        to: offsetPickerTime(TIME_RANGE.afterUpgrade, 2 * 60 * 60 * 1000),
+        from: offsetPickerTime(TIME_RANGE.afterRollover, 1000),
+        to: offsetPickerTime(TIME_RANGE.afterRollover, 2 * 60 * 60 * 1000),
       });
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsAfterDowngrade =
@@ -140,7 +140,7 @@ const runScenario = async (
     bars,
     hasDataBeforeDowngrade,
     hasDataAfterDowngrade,
-    expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
+    expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
   };
 };
 
@@ -181,7 +181,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     expect(result.hasDataBeforeDowngrade).toBe(true);
     expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
-    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -198,7 +198,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     expect(result.hasDataBeforeDowngrade).toBe(true);
     expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
-    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -215,7 +215,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     expect(result.hasDataBeforeDowngrade).toBe(true);
     expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
-    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -233,7 +233,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     expect(result.hasDataBeforeDowngrade).toBe(true);
     expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
-    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -250,7 +250,7 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     expect(result.hasDataBeforeDowngrade).toBe(true);
     expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
-    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 });

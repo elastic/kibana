@@ -29,7 +29,7 @@ interface ScenarioResult {
   incompatibleAverageCount: number;
   counterBars: Array<{ y: number }>;
   countBars: Array<{ y: number }>;
-  expectedDocumentCountBeforeUpgrade: number;
+  expectedDocumentCountBeforeRollover: number;
 }
 
 const runScenario = async (
@@ -99,7 +99,7 @@ const runScenario = async (
     incompatibleAverageCount,
     counterBars,
     countBars,
-    expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
+    expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
   };
 };
 
@@ -142,7 +142,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
-    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -159,7 +159,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
-    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -176,7 +176,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
-    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -194,7 +194,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
-    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
@@ -211,7 +211,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
-    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
     expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 });
