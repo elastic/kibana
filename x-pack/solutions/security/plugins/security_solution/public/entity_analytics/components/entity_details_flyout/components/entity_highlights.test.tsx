@@ -10,6 +10,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EntityHighlightsAccordion } from './entity_highlights';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
 import { TestProviders } from '../../../../common/mock';
 
 // Mock the hooks
@@ -24,6 +25,7 @@ const mockUseAgentBuilderAvailability = jest.fn();
 const mockUseFetchEntityDetailsHighlights = jest.fn();
 const mockUseFetchPersistedAiSummary = jest.fn();
 const mockUseHasEntityHighlightsLicense = jest.fn();
+const mockUseInferenceConnectorAccess = jest.fn();
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => mockUseAssistantContext(),
@@ -68,6 +70,10 @@ jest.mock('../hooks/use_fetch_persisted_ai_summary', () => ({
 
 jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
   useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
+}));
+
+jest.mock('../hooks/use_inference_connector_access', () => ({
+  useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
 }));
 
 jest.mock('@kbn/inference-connectors', () => ({
@@ -169,6 +175,11 @@ describe('EntityHighlights', () => {
       refetch: jest.fn(),
     });
     mockUseHasEntityHighlightsLicense.mockReturnValue(true);
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: true,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: false,
+    });
   });
 
   it('renders EntityHighlights with title and icon', () => {
@@ -358,6 +369,57 @@ describe('EntityHighlights', () => {
 
     fireEvent.click(generateButton);
 
+    expect(mockFetchEntityHighlights).toHaveBeenCalled();
+  });
+
+  it('disables Generate and shows a privilege message for .inference connectors without monitor_inference', () => {
+    const inferenceConnectors = [
+      {
+        id: 'connector-1',
+        name: 'Elastic Managed LLM',
+        actionTypeId: '.inference',
+      },
+    ];
+    mockUseLoadConnectors.mockReturnValue({ data: inferenceConnectors });
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: true,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByRole('button', { name: 'Generate' })).toBeDisabled();
+    expect(
+      screen.getByText(/The selected connector requires the Elasticsearch cluster privilege/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE)).toBeInTheDocument();
+  });
+
+  it('allows Generate for .inference connectors when monitor_inference is granted', () => {
+    const inferenceConnectors = [
+      {
+        id: 'connector-1',
+        name: 'Elastic Managed LLM',
+        actionTypeId: '.inference',
+      },
+    ];
+    mockUseLoadConnectors.mockReturnValue({ data: inferenceConnectors });
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: true,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: false,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    const generateButton = screen.getByRole('button', { name: 'Generate' });
+    expect(generateButton).not.toBeDisabled();
+    fireEvent.click(generateButton);
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
