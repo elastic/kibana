@@ -8,7 +8,7 @@
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ComposerQuery } from '@elastic/esql';
 import { inject, injectable } from 'inversify';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus, EpisodeData } from '@kbn/alerting-v2-schemas';
 import {
   buildEpisodeQuery,
   buildEpisodeEventsQuery,
@@ -32,7 +32,6 @@ import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import type {
   EpisodesClientContract,
-  EpisodeData,
   FindEpisodesParams,
   FindEpisodesResult,
   FindEpisodesFilters,

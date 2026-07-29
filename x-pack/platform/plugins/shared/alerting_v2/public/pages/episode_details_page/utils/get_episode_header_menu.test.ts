@@ -158,4 +158,39 @@ describe('getEpisodeHeaderMenu', () => {
       onSuccess,
     });
   });
+
+  it('prepends Add to chat when onAddToChat is provided', async () => {
+    const onAddToChat = jest.fn();
+    const actions = [createAction({ id: 'ALERTING_V2_ACK_EPISODE', order: 10 })];
+
+    const menu = getEpisodeHeaderMenu({
+      actions,
+      episode: mockEpisode,
+      onSuccess: jest.fn(),
+      onAddToChat,
+    });
+
+    expect(menu.items?.[0]).toMatchObject({
+      id: 'ALERTING_V2_ADD_EPISODE_TO_CHAT',
+      label: 'Add to chat',
+      iconType: 'productAgent',
+      order: 0,
+      testId: 'episodeActionsBar-primary-ALERTING_V2_ADD_EPISODE_TO_CHAT',
+    });
+    expect(menu.items?.[0]).not.toHaveProperty('overflow');
+
+    await menu.items?.[0]?.run?.();
+    expect(onAddToChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits Add to chat when onAddToChat is not provided', () => {
+    const menu = getEpisodeHeaderMenu({
+      actions: [createAction({ id: 'ALERTING_V2_ACK_EPISODE', order: 10 })],
+      episode: mockEpisode,
+      onSuccess: jest.fn(),
+    });
+
+    expect(menu.items?.some((item) => item.id === 'ALERTING_V2_ADD_EPISODE_TO_CHAT')).toBe(false);
+  });
+
 });

@@ -113,6 +113,14 @@ jest.mock('../../hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
+jest.mock('../../agent_builder/use_add_episode_to_chat', () => ({
+  useAddEpisodeToChat: jest.fn(() => ({
+    addToChat: jest.fn(),
+    isAddToChatAvailable: false,
+  })),
+}));
+
+
 const mockUseParams = jest.mocked(useParams);
 const mockUseFetchEpisodeQuery = jest.mocked(useFetchEpisodeQuery);
 const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);

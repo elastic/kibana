@@ -5,27 +5,9 @@
  * 2.0.
  */
 
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus, EpisodeData } from '@kbn/alerting-v2-schemas';
 
-export type EpisodeStatus = 'inactive' | 'pending' | 'active' | 'recovering';
-
-export interface EpisodeData {
-  episode_id: string;
-  episode_status: EpisodeStatus;
-  rule_id: string;
-  group_hash: string;
-  first_timestamp: string;
-  last_timestamp: string;
-  duration: number;
-  triggered_at?: string;
-  severity?: string | null;
-  episode_data?: string | null;
-  last_ack_action?: 'ack' | 'unack';
-  last_assignee_uid?: string | null;
-  last_snooze_action?: 'snooze' | 'unsnooze';
-  snooze_expiry?: string;
-  space_id: string;
-}
+export type EpisodeStatus = AlertEpisodeStatus;
 
 export interface FindEpisodesFilters {
   status?: EpisodeStatus[];

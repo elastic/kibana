@@ -9,7 +9,6 @@ export { EpisodesClient } from './episodes_client';
 export { EpisodesClientToken } from './tokens';
 export type {
   EpisodesClientContract,
-  EpisodeData,
   FindEpisodesParams,
   FindEpisodesResult,
   FindEpisodesFilters,

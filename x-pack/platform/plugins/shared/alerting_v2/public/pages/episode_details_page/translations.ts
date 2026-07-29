@@ -293,3 +293,8 @@ export const RULE_STATUS_DISABLED = i18n.translate(
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2.episodeDetails.runbookEmpty', {
   defaultMessage: 'No runbook has been added to this rule.',
 });
+
+/** --- Header actions --- */
+export const ADD_TO_CHAT = i18n.translate('xpack.alertingV2.agentBuilder.addToChatButtonLabel', {
+  defaultMessage: 'Add to chat',
+});

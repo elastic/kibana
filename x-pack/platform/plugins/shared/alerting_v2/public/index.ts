@@ -23,6 +23,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { EPISODE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -223,6 +224,15 @@ export const module = new ContainerModule(({ bind }) => {
             );
           }
         );
+        import(
+          /* webpackChunkName: "alerting_v2_episode_attachment" */
+          './agent_builder/attachments/episode_attachment_definition'
+        ).then(({ createEpisodeAttachmentDefinition }) => {
+          agentBuilder.attachments.addAttachmentType(
+            EPISODE_ATTACHMENT_TYPE,
+            createEpisodeAttachmentDefinition()
+          );
+        });
       }
     });
   });

@@ -272,6 +272,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Alerting v2
   'rule',
   'action_policy',
+  'episode',
 
   // Security Solution
   'security.alert',

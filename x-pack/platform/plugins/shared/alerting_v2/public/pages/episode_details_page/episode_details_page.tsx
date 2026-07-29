@@ -57,6 +57,7 @@ import {
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
+import { useAddEpisodeToChat } from '../../agent_builder/use_add_episode_to_chat';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
   getEpisodeHeaderTabs,
@@ -224,14 +225,17 @@ export function EpisodeDetailsPage() {
     [episode, episodeAction, groupAction, isFlapping]
   );
 
+  const { addToChat, isAddToChatAvailable } = useAddEpisodeToChat(episode);
+
   const headerMenu = useMemo(
     () =>
       getEpisodeHeaderMenu({
         actions: applicableActions,
         episode,
         onSuccess: invalidateEpisodeQueries,
+        onAddToChat: isAddToChatAvailable ? addToChat : undefined,
       }),
-    [applicableActions, episode, invalidateEpisodeQueries]
+    [addToChat, applicableActions, episode, invalidateEpisodeQueries, isAddToChatAvailable]
   );
 
   const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
