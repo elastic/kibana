@@ -57,6 +57,11 @@ disabled:
   - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
   - x-pack/platform/test/functional_gen_ai/inference/generate_security_labs_artifacts.config.ts
 
+  # Disabled replaced vislib chart type tests
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
@@ -113,9 +118,6 @@ enabled:
   - src/platform/test/functional/apps/visualize/group9/config.ts
   - src/platform/test/functional/apps/visualize/group10/config.ts
   - src/platform/test/functional/apps/visualize/group11/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
