@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -22,7 +22,10 @@ import type {
   SignificantEvent,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
-import { InvestigationFlyout } from '../investigation/investigation_flyout';
+import {
+  InvestigationFlyout,
+  type InvestigationFlyoutTabId,
+} from '../investigation/investigation_flyout';
 import { InvestigationSummaryCard } from '../investigation/investigation_summary_card';
 
 export interface EventInvestigationProps {
@@ -43,10 +46,14 @@ export function EventInvestigation({
   conversationId,
 }: EventInvestigationProps): React.ReactElement {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [flyoutTab, setFlyoutTab] = useState<InvestigationFlyoutTabId>('recommendations');
+  const [tabRequestId, setTabRequestId] = useState(0);
 
-  const openFlyout = () => {
+  const openFlyout = useCallback((tab: InvestigationFlyoutTabId = 'recommendations') => {
+    setFlyoutTab(tab);
+    setTabRequestId((current) => current + 1);
     setIsFlyoutOpen(true);
-  };
+  }, []);
 
   return (
     <>
@@ -118,7 +125,7 @@ export function EventInvestigation({
           error={error}
           startedAt={investigation.started_at}
           completedAt={investigation.completed_at}
-          onShowMoreRecommendations={openFlyout}
+          onShowMoreRecommendations={() => openFlyout('recommendations')}
         />
       )}
 
@@ -130,6 +137,8 @@ export function EventInvestigation({
           state={state}
           error={error}
           conversationId={conversationId}
+          initialTab={flyoutTab}
+          tabRequestId={tabRequestId}
           onClose={() => setIsFlyoutOpen(false)}
         />
       )}

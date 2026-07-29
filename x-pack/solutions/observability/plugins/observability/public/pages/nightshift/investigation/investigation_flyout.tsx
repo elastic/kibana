@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -504,6 +504,9 @@ export interface InvestigationFlyoutProps {
   state?: InvestigationState;
   error?: string;
   conversationId?: string;
+  initialTab?: InvestigationFlyoutTabId;
+  /** Bump when the parent re-requests a tab (e.g. More recommendations while open). */
+  tabRequestId?: number;
   onClose: () => void;
 }
 
@@ -514,11 +517,18 @@ export function InvestigationFlyout({
   state,
   error,
   conversationId,
+  initialTab = 'recommendations',
+  tabRequestId = 0,
   onClose,
 }: InvestigationFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
-  const [selectedTab, setSelectedTab] = useState<CompletedTabId>('recommendations');
+  const [selectedTab, setSelectedTab] = useState<CompletedTabId>(initialTab);
+
+  useEffect(() => {
+    setSelectedTab(initialTab);
+  }, [initialTab, tabRequestId]);
+
   const isRunning = status === 'running' || status === 'loading';
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const goalText = getInvestigationGoalText(state);

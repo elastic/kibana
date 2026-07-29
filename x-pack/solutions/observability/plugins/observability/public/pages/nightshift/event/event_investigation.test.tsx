@@ -157,6 +157,30 @@ describe('EventInvestigation', () => {
     );
   });
 
+  it('switches to the recommendations tab when More recommendations is clicked while open', () => {
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
+    expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationMoreRecommendationsLink'));
+    expect(screen.getByTestId('nightshiftInvestigationFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-recommendations')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
   it('shows ongoing investigation content when the hook reports running status', () => {
     renderInvestigation(mockEvent(), {
       investigation: {

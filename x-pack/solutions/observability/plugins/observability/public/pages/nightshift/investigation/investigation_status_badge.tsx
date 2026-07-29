@@ -325,7 +325,8 @@ function InvestigationTerminalFailureStatus({ label }: { label: string }) {
 /**
  * Animated "Investigating" badge while the latest investigation is in progress,
  * AI-gradient "Investigated" badge once it has completed. Shared between the
- * event list items and the flyout header.
+ * event list items and the flyout header. Returns null when the event has no
+ * investigations so unresolved/resolved events without runs stay unlabeled.
  */
 export function InvestigationStatusBadge({
   event,
@@ -333,7 +334,12 @@ export function InvestigationStatusBadge({
 }: {
   event: Pick<SignificantEvent, 'investigations'>;
   investigationStatus?: InvestigationStatus;
-}): React.ReactElement {
+}): React.ReactElement | null {
+  const hasInvestigation = investigationStatus != null || (event.investigations?.length ?? 0) > 0;
+  if (!hasInvestigation) {
+    return null;
+  }
+
   const isInvestigated =
     investigationStatus != null
       ? isInvestigationInvestigated(investigationStatus)

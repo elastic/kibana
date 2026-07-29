@@ -31,7 +31,10 @@ import { EventFlyoutChatFooter } from './event_flyout_chat_footer';
 import { InvestigationStatusBadge } from '../investigation/investigation_status_badge';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { FlyoutSectionTitle } from '../common/flyout_section_title';
-import { isInvestigationInvestigated } from '../common/investigation_progress_status';
+import {
+  isInvestigationInvestigated,
+  isInvestigationTerminalFailure,
+} from '../common/investigation_progress_status';
 import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
 import { buildNightshiftEventFlyoutShareUrl } from '../common/nightshift_url_params';
 import { NightshiftMarkIcon } from '../app/nightshift_mark_icon';
@@ -71,7 +74,10 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     if (
       latestInvestigation == null ||
       latestInvestigation.completed_at != null ||
-      !isInvestigationInvestigated(investigationStatus)
+      !(
+        isInvestigationInvestigated(investigationStatus) ||
+        isInvestigationTerminalFailure(investigationStatus)
+      )
     ) {
       return;
     }

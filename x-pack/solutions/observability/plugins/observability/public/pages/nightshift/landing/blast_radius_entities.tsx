@@ -133,9 +133,21 @@ export function BlastRadiusEntities({
     if (!hasOverflow || expanded) {
       return entities;
     }
-    return entities.slice(0, MAX_VISIBLE_BLAST_RADIUS_ENTITIES);
-  }, [entities, expanded, hasOverflow]);
-  const hiddenCount = entities.length - MAX_VISIBLE_BLAST_RADIUS_ENTITIES;
+
+    const collapsed = entities.slice(0, MAX_VISIBLE_BLAST_RADIUS_ENTITIES);
+    if (!selectedEntityKey) {
+      return collapsed;
+    }
+
+    const selectedIndex = entities.findIndex(({ key }) => key === selectedEntityKey);
+    if (selectedIndex < 0 || selectedIndex < MAX_VISIBLE_BLAST_RADIUS_ENTITIES) {
+      return collapsed;
+    }
+
+    // Keep the active filter chip visible when collapsing past the first page.
+    return [...collapsed.slice(0, MAX_VISIBLE_BLAST_RADIUS_ENTITIES - 1), entities[selectedIndex]];
+  }, [entities, expanded, hasOverflow, selectedEntityKey]);
+  const hiddenCount = Math.max(entities.length - visibleEntities.length, 0);
 
   if (entities.length === 0) {
     return null;

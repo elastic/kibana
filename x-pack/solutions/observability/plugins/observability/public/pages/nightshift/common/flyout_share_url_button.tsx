@@ -34,7 +34,7 @@ export const useFlyoutShareUrlCustomAction = (
 
   return useMemo(
     () => ({
-      iconType: 'share',
+      iconType: 'link',
       'aria-label': shareLabel,
       onClick: onShareClick,
     }),

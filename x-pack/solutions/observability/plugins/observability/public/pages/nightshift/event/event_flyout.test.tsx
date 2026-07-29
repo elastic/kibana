@@ -129,15 +129,16 @@ describe('EventFlyout', () => {
     expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
     expect(screen.getByText('Significant Event')).toBeInTheDocument();
     expect(screen.getByText('Needs action')).toBeInTheDocument();
-    expect(screen.getByText('Investigating')).toBeInTheDocument();
+    expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
   });
 
-  it('shows Investigating for resolved events without a completed investigation', () => {
+  it('hides the investigation badge when the event has no investigations', () => {
     renderFlyout({ event: { ...mockEvent, status: 'closed' } });
 
     expect(screen.queryByText('Needs action')).not.toBeInTheDocument();
     expect(screen.queryByText('Resolved')).not.toBeInTheDocument();
-    expect(screen.getByText('Investigating')).toBeInTheDocument();
+    expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
+    expect(screen.queryByText('Investigated')).not.toBeInTheDocument();
   });
 
   it('shows Investigated when the latest investigation has completed', () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useQueries, useQuery, type UseQueryOptions, type UseQueryResult } from '@kbn/react-query';
 import type { RouteRepositoryClient } from '@kbn/server-route-repository';
 import type { SignificantEventsRouteRepository } from '@kbn/significant-events-plugin/server';
@@ -67,11 +66,9 @@ export const useFetchStreamFeaturesByStream = (
     ),
   });
 
-  return useMemo(() => {
-    const featuresByStream = new Map<string, Feature[]>();
-    streamNames.forEach((streamName, index) => {
-      featuresByStream.set(streamName, queries[index]?.data ?? []);
-    });
-    return featuresByStream;
-  }, [queries, streamNames]);
+  const featuresByStream = new Map<string, Feature[]>();
+  streamNames.forEach((streamName, index) => {
+    featuresByStream.set(streamName, queries[index]?.data ?? []);
+  });
+  return featuresByStream;
 };
