@@ -106,7 +106,8 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
 1. **Discover** — call `platform.core.list_indices` and filter by `ai-index-*` to find which
    KI indices exist in the environment.
 2. **Orient** — run a `STATS ki_count = COUNT(*) BY type` aggregation to see what categories
-   of KIs are available.
+   of KIs are available. If type labels are ambiguous, sample 1–2 docs per relevant type
+   (`WHERE type == "..." | LIMIT 2`) before querying — skip this if types are self-explanatory.
 3. **Query** — use FORK+FUSE hybrid search.
 4. **Return** — surface the `title`, `content`, and `type` fields from matching KIs. 
 
