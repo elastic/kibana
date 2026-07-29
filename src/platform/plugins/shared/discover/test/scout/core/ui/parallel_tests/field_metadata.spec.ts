@@ -53,7 +53,7 @@ spaceTest.describe(
       const customLabel = 'megabytes';
 
       await unifiedFieldList.openFieldEditor('bytes');
-      await discover.setCustomLabel(customLabel);
+      await discover.setCustomLabel(customLabel, { enableToggle: true });
       await discover.saveOpenFieldEditor();
 
       await unifiedFieldList.searchField(customLabel);
@@ -77,7 +77,7 @@ spaceTest.describe(
         const updatedCustomDescription = `${customDescription} updated`;
 
         await unifiedFieldList.openFieldEditor('agent');
-        await discover.setCustomDescription(customDescription);
+        await discover.setCustomDescription(customDescription, { enableToggle: true });
         await discover.saveOpenFieldEditor();
 
         await unifiedFieldList.clickFieldListItem('agent');
@@ -117,7 +117,7 @@ spaceTest.describe(
         await docViewer.close();
 
         await unifiedFieldList.openFieldEditor('@timestamp');
-        await discover.setCustomDescription(customDescription);
+        await discover.setCustomDescription(customDescription, { enableToggle: true });
         await discover.saveOpenFieldEditor();
 
         await unifiedFieldList.clickFieldListItem('@timestamp');
@@ -141,7 +141,7 @@ spaceTest.describe(
         const customDescription = 'custom bytes long description here'.repeat(10);
 
         await unifiedFieldList.openFieldEditor('bytes');
-        await discover.setCustomDescription(customDescription);
+        await discover.setCustomDescription(customDescription, { enableToggle: true });
         await discover.getFieldEditorFormError().waitFor({ state: 'visible' });
         await expect(discover.getFieldEditorFormError()).toContainText(
           'The length of the description is too long. The maximum length is 300 characters.'

@@ -272,23 +272,27 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  async setCustomLabel(label: string) {
+  async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {
     const row = this.page.testSubj.locator('customLabelRow');
     await row.waitFor({ state: 'visible' });
-    await row.locator('[data-test-subj="toggle"]').click();
+    if (enableToggle) {
+      await row.locator('[data-test-subj="toggle"]').click();
+    }
     const input = row.locator('input');
     await input.waitFor({ state: 'visible' });
     await input.fill(label);
   }
 
-  async setCustomDescription(description: string) {
+  async setCustomDescription(
+    description: string,
+    { enableToggle = false }: { enableToggle?: boolean } = {}
+  ) {
     const row = this.page.testSubj.locator('customDescriptionRow');
     await row.waitFor({ state: 'visible' });
-    const toggle = row.locator('[data-test-subj="toggle"]');
-    const input = row.locator('textarea, input');
-    if (!(await input.isVisible())) {
-      await toggle.click();
+    if (enableToggle) {
+      await row.locator('[data-test-subj="toggle"]').click();
     }
+    const input = row.locator('textarea, input');
     await input.waitFor({ state: 'visible' });
     await input.fill(description);
   }
