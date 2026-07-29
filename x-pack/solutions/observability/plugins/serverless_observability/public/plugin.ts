@@ -45,7 +45,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security, workflowsManagement } = setupDeps;
+    const { serverless, navigation, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -64,7 +64,7 @@ export class ServerlessObservabilityPlugin
         });
       })
     );
-    serverless.initNavigation('oblt', navigationTree$);
+    navigation.initNavigation('oblt', navigationTree$);
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

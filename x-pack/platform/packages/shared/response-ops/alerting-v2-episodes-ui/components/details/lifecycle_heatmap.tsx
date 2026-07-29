@@ -204,7 +204,11 @@ export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycl
 
   if (data.length === 0) {
     return (
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeLifecycleHeatmapEmpty">
+      <EuiPanel
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj="alertingV2EpisodeLifecycleHeatmapEmpty"
+      >
         <EuiEmptyPrompt
           title={<h2>{i18n.LIFECYCLE_HEATMAP_EMPTY_TITLE}</h2>}
           body={<p>{i18n.LIFECYCLE_HEATMAP_EMPTY_BODY}</p>}
@@ -214,7 +218,11 @@ export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycl
   }
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeLifecycleHeatmap">
+    <EuiPanel
+      hasShadow={false}
+      paddingSize="none"
+      data-test-subj="alertingV2EpisodeLifecycleHeatmap"
+    >
       <EuiTitle size="xxs">
         <h2>{i18n.LIFECYCLE_HEATMAP_TITLE}</h2>
       </EuiTitle>
