@@ -19,22 +19,20 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 
-const useDashboardFavoritesClient = () => {
-  return useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-      http: coreServices.http,
-      userProfile: coreServices.userProfile,
-      usageCollection: usageCollectionService,
-    });
-  }, []);
-};
-
 /**
  * Provides favorites client + query context for dashboard favorite UI.
  * Required around any component that calls `useFavorite`.
  */
 export const DashboardFavoritesProvider = ({ children }: { children: ReactNode }) => {
-  const dashboardFavoritesClient = useDashboardFavoritesClient();
+  const dashboardFavoritesClient = useMemo(
+    () =>
+      new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
+        http: coreServices.http,
+        userProfile: coreServices.userProfile,
+        usageCollection: usageCollectionService,
+      }),
+    []
+  );
 
   return (
     <QueryClientProvider client={dashboardQueryClient}>
