@@ -218,6 +218,35 @@ describe('configuration', () => {
             expectedClusterHealth: ['green', 'yellow'],
             validationIntervalMs: getRandomInt(1000, 5000),
           },
+          apiQueryAllowlist: [
+            {
+              path: '_transform/*/_stats',
+            },
+            {
+              path: '_nodes/stats',
+            },
+            {
+              path: '_nodes/*/stats',
+            },
+            {
+              path: '_cluster/stats',
+            },
+            {
+              path: '_ml/anomaly_detectors/_stats',
+            },
+            {
+              path: '_ml/anomaly_detectors/*/_stats',
+            },
+            {
+              path: '_ml/trained_models/_stats',
+            },
+            {
+              path: '_ilm/status',
+            },
+            {
+              path: '_watcher/stats',
+            },
+          ],
         },
       };
 
