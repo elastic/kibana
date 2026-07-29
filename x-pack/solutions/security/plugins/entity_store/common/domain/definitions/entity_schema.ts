@@ -11,6 +11,10 @@ import { z } from '@kbn/zod/v4';
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
+// NOTE: 'generic' is intentionally excluded from customer-facing docs and EA feature support.
+// It is an internal type consumed only by Graph (entity flyout visualizations) and Asset Inventory,
+// both of which are tech preview. Do not add 'generic' to docs or new EA features without
+// explicit team alignment — it is only populated by the asset discovery integration today.
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
 const mappingSchema = z.any();
