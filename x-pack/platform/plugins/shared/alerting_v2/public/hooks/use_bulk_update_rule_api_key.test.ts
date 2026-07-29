@@ -122,6 +122,28 @@ describe('useBulkUpdateRuleApiKey', () => {
     });
   });
 
+  it('surfaces running rules in the partial-error breakdown', async () => {
+    mockBulkUpdateRuleApiKey.mockResolvedValueOnce({
+      affected_count: 0,
+      errors: [
+        { id: 'rule-1', error: { code: 'RULE_ALREADY_RUNNING', message: 'Running' } },
+        { id: 'rule-2', error: { code: 'RULE_ALREADY_RUNNING', message: 'Running' } },
+      ],
+    });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
+    });
+
+    expect(mockAddWarning).toHaveBeenCalledWith({
+      title: expect.stringContaining('2 errors'),
+      text: expect.stringContaining('2 rules currently running'),
+    });
+  });
+
   it('shows danger toast when the mutation fails', async () => {
     mockBulkUpdateRuleApiKey.mockRejectedValueOnce(new Error('Network error'));
     const { Wrapper } = createWrapper();
