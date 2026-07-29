@@ -303,12 +303,14 @@ export class ManagedWorkflowsService {
         ifPrimaryTerm: existingDocument.primaryTerm,
       }
     );
-    await this.deps.crudService.logWorkflowChangesAfterWrite({
-      workflows: [{ id: workflowDocumentId, document: savedDocument }],
-      action: WorkflowChangeHistoryAction.workflowUpdate,
-      spaceId,
-      timestamp: now,
-    });
+    if (savedDocument.version !== existing.version) {
+      await this.deps.crudService.logWorkflowChangesAfterWrite({
+        workflows: [{ id: workflowDocumentId, document: savedDocument }],
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId,
+        timestamp: now,
+      });
+    }
     this.deps.audit?.logWorkflowUpdated(undefined, {
       id: workflowDocumentId,
       managed: true,

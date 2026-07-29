@@ -301,7 +301,10 @@ export const MetricVis = ({
     return {
       ...baseMetric,
       // Override the background and main value color when the color is applied to the value
-      ...(config.metric.applyColorTo === 'value' && { color: defaultColor, valueColor: tileColor }),
+      ...(config.metric.applyColorTo === 'value' && {
+        color: defaultColor,
+        valueColor: tileColor === defaultColor ? undefined : tileColor,
+      }),
       ...(config.metric.applyColorTo === 'background' && {
         color: tileColor,
         valueColor: undefined,
