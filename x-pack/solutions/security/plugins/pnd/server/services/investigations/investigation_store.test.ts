@@ -325,3 +325,127 @@ describe('InvestigationStore#getWatchActivityMetrics', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * `listAllProposals` powers the Brief queue's proposal-first model (one row
+ * per pending Proposal across ALL investigations, ratified 2026-07-28). It
+ * reads PND_PROPOSALS_INDEX with match_all and sorts pending-first then by
+ * confidence descending.
+ */
+describe('InvestigationStore#listAllProposals', () => {
+  const makeReadyEsClient = (proposalDocs: Array<Record<string, unknown>>) => {
+    const search = jest.fn().mockImplementation(() => {
+      const hits = proposalDocs.map((doc) => ({ _source: doc }));
+      return Promise.resolve({
+        hits: { hits, total: { value: hits.length } },
+      });
+    });
+    return {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        create: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
+        getMapping: jest.fn().mockResolvedValue({
+          'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-proposals': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-evidence': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-worker-evaluations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-canonical-proposals': {
+            mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } },
+          },
+        }),
+      },
+      count: jest.fn().mockResolvedValue({ count: 1 }),
+      bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+      search,
+    } as unknown as Parameters<InvestigationStore['ensureReady']>[0] & { search: jest.Mock };
+  };
+
+  const baseProposal = (overrides: Record<string, unknown>) => ({
+    id: 'prop-test',
+    template_id: 'proposal',
+    parentConversationId: 'inv-a',
+    type: 'contain',
+    confidence: 0.8,
+    reasoning: 'test reasoning',
+    evidenceRefs: [],
+    status: 'pending',
+    assignee: null,
+    sla: null,
+    events: [],
+    sourceWatchId: 'watch-1',
+    approvalRequired: true,
+    summary: 'test summary',
+    recommendation: 'test recommendation',
+    investigationId: 'inv-a',
+    ...overrides,
+  });
+
+  it('returns all proposals with correct total count', async () => {
+    const docs = [
+      baseProposal({ id: 'p1' }),
+      baseProposal({ id: 'p2', status: 'approved' }),
+      baseProposal({ id: 'p3', status: 'dismissed' }),
+    ];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listAllProposals(esClient);
+
+    expect(result.total).toBe(3);
+    expect(result.proposals).toHaveLength(3);
+  });
+
+  it('sorts pending proposals before non-pending', async () => {
+    const docs = [
+      baseProposal({ id: 'p-approved', status: 'approved', confidence: 0.99 }),
+      baseProposal({ id: 'p-pending', status: 'pending', confidence: 0.5 }),
+      baseProposal({ id: 'p-dismissed', status: 'dismissed', confidence: 0.95 }),
+    ];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listAllProposals(esClient);
+
+    // Pending comes first regardless of confidence.
+    expect(result.proposals[0].id).toBe('p-pending');
+    // Then non-pending sorted by confidence descending.
+    expect(result.proposals[1].id).toBe('p-approved');
+    expect(result.proposals[2].id).toBe('p-dismissed');
+  });
+
+  it('sorts same-status proposals by confidence descending', async () => {
+    const docs = [
+      baseProposal({ id: 'p-low', status: 'pending', confidence: 0.3 }),
+      baseProposal({ id: 'p-high', status: 'pending', confidence: 0.9 }),
+      baseProposal({ id: 'p-mid', status: 'pending', confidence: 0.6 }),
+    ];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listAllProposals(esClient);
+
+    expect(result.proposals.map((p) => p.id)).toEqual(['p-high', 'p-mid', 'p-low']);
+  });
+
+  it('strips investigationId from the returned proposals (internal denormalised field)', async () => {
+    const docs = [baseProposal({ id: 'p1', investigationId: 'inv-a' })];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listAllProposals(esClient);
+
+    expect(result.proposals[0].id).toBe('p1');
+    expect((result.proposals[0] as Record<string, unknown>).investigationId).toBeUndefined();
+  });
+
+  it('returns empty array when no proposals exist', async () => {
+    const esClient = makeReadyEsClient([]);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listAllProposals(esClient);
+
+    expect(result.proposals).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
