@@ -8,7 +8,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { DATE_NESTED_ES_ARCHIVE } from '../fixtures/common/constants';
+import { DATE_NESTED_ES_ARCHIVE } from '../../../common/ui/fixtures/constants';
 
 globalSetupHook('Setup Discover tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
