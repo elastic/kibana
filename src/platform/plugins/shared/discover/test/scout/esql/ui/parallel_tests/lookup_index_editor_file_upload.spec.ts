@@ -10,7 +10,7 @@
 import path from 'path';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
-import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../../common/feature_controls/roles';
+import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../common/feature_controls/roles';
 
 const IMPORT_FILE_PATH = path.join(
   __dirname,

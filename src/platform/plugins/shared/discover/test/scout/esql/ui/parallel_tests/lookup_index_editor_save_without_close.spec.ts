@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
-import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../../common/feature_controls/roles';
+import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../common/feature_controls/roles';
 
 // Leading control columns rendered before the data columns: the unsaved-row color indicator,
 // the selection column, and the add-row column.

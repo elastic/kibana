@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
-import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../../common/feature_controls/roles';
+import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../common/feature_controls/roles';
 
 const getIndexName = (scoutSpaceId: string) => `test-lookup-index-closed-${scoutSpaceId}`;
 
