@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../common/services/version_specific_policies_utils';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../common/services';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
