@@ -24,7 +24,6 @@ const breadcrumbsBadgeToHeaderBadge = (badge: ChromeBreadcrumbsBadge): AppHeader
 const legacyBadgeToHeaderBadge = (badge: ChromeBadge): AppHeaderBadge => ({
   label: badge.text,
   tooltip: badge.tooltip,
-  'data-test-subj': 'headerBadge',
 });
 
 export function useResolvedBadges(

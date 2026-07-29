@@ -33,6 +33,6 @@ export class FeatureControlsPage {
   }
 
   public get readOnlyBadge() {
-    return this.page.getByTestId('headerBadge');
+    return this.page.getByTestId('appHeaderBadge');
   }
 }
