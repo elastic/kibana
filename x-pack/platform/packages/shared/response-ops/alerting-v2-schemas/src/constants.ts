@@ -65,7 +65,7 @@ export const MAX_DESCRIPTION_LENGTH = 1024;
 export const MAX_FINGERPRINT_LENGTH = 1024;
 
 /** Maximum number of fields named in `fingerprint_fields` on external alert ingest. */
-export const MAX_FINGERPRINT_FIELDS = 50;
+export const MAX_FINGERPRINT_FIELDS = 10;
 
 /** Maximum number of keys in the open `data` bag on external alert ingest. */
 export const MAX_ALERT_EVENT_DATA_KEYS = 100;
