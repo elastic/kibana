@@ -119,7 +119,6 @@ export class MbMap extends Component<Props, State> {
   }
 
   _debouncedSync = _.debounce(() => {
-    console.log('debounced sync');
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
       const hasLayerListChanged = this._prevLayerList !== this.props.layerList; // Comparing re-select memoized instance so no deep equals needed
       const hasTimesliceChanged = !_.isEqual(this._prevTimeslice, this.props.timeslice);
@@ -253,10 +252,7 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        console.log('debounced 2');
-
         if (this._isMounted) {
-          // HERE
           this.props.extentChanged(this._getMapExtentState());
         }
       }, 100)
@@ -465,7 +461,6 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        // HERE TOO
         if (this._isMounted) {
           this.props.extentChanged(this._getMapExtentState());
         }

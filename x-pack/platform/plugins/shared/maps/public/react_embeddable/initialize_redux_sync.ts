@@ -240,11 +240,6 @@ export function initializeReduxSync({
         skip(1),
         map(() => undefined)
       )
-    ).pipe(
-      debounceTime(500),
-      tap(() => {
-        console.log('ANY STATE CHANGE');
-      })
     ),
     getLatestState: () => {
       return {
