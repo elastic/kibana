@@ -40,7 +40,7 @@ spaceTest.describe(
         await browserAuth.loginAsViewer();
         await discover.goto({ queryMode: 'classic' });
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.expectAvailableFieldCount(48);
+        await unifiedFieldList.expectAvailableFieldCount(49);
 
         expect(
           await network.countMatchingRequests(
@@ -98,7 +98,7 @@ spaceTest.describe(
         await browserAuth.loginAsPrivilegedUser();
         await discover.goto({ queryMode: 'classic' });
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.expectAvailableFieldCount(48);
+        await unifiedFieldList.expectAvailableFieldCount(49);
 
         expect(
           await network.countMatchingRequests(
