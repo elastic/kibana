@@ -213,6 +213,37 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+/**
+ * Permission hints for a connector action, aligned with MCP ToolAnnotations.
+ * These are advisory signals for the LLM and any orchestration layer — they do
+ * not enforce access control at runtime.
+ *
+ * Semantics follow the MCP spec:
+ *   https://modelcontextprotocol.io/docs/concepts/tools#tool-annotations
+ */
+export interface ActionAnnotations {
+  /**
+   * The action only reads data and does not modify any state.
+   * Default assumption when no annotations are provided.
+   */
+  readOnlyHint?: boolean;
+  /**
+   * The action may create, update, or delete data (CUD operations).
+   * Mutually advisory with readOnlyHint — set one or the other, not both.
+   */
+  destructiveHint?: boolean;
+  /**
+   * Calling the action multiple times with the same input produces the same
+   * result as calling it once (e.g., a PUT that overwrites vs. an append).
+   */
+  idempotentHint?: boolean;
+  /**
+   * The action interacts with systems outside Kibana (external APIs, third-party
+   * services). Most connector actions will have this set to true.
+   */
+  openWorldHint?: boolean;
+}
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -228,6 +259,8 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /** Advisory permission hints for the LLM. See {@link ActionAnnotations}. */
+  annotations?: ActionAnnotations;
 }
 
 export interface ActionContext {
