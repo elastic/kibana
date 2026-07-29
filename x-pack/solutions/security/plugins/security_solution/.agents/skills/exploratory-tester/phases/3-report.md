@@ -2,6 +2,9 @@
 
 ---
 
+**Cleanup invariant:** If any report step aborts, run Step 3e before stopping.
+Cleanup is not gated on knowledge-file approval or commit success.
+
 ## Step 3a — Merge findings
 
 Enumerate which findings files exist:
@@ -114,7 +117,9 @@ Before writing anything, compose the proposed additions and present them to the 
 > <list each new navigation pattern as it would appear in the file>
 > ```
 
-Wait for explicit confirmation before writing anything. If the user declines or does not respond, skip the knowledge file update entirely and end the session — do not write or commit.
+Wait for explicit confirmation before writing anything. If the user declines or
+does not respond, skip the knowledge file update entirely and continue to
+Step 3e — do not write or commit.
 
 Only after explicit confirmation, update `knowledge/<area_slug>.md`.
 
@@ -154,13 +159,41 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 
 ---
 
-## Step 3e — Clean up per-flow spaces (parallel mode only)
+## Step 3e — Clean up session resources
 
-After committing the knowledge file, delete the Kibana spaces created by this session:
-
+Run cleanup regardless of whether the user accepted or refused the knowledge
+file update, and regardless of whether earlier report steps failed. Use the
+restore-and-cleanup wrapper:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/delete-flow-spaces.py \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
   --session-dir "$SESSION_DIR"
 ```
+When `config.json → ccs_state` is `"mutation_pending"`, `"modified"`, or
+otherwise unsafe, the wrapper invokes `restore-remote-cluster.py`, which
+restores the durable persistent/transient settings from
+`config.json → ccs_restore`, compares the configuration and provenance, polls
+`GET /_remote/info` until connected, and marks the state restored only after
+verification. If it fails, the wrapper does not invoke
+`cleanup-session-resources.py`; tell the user to restore the shared cluster
+using the persisted raw settings snapshot. `"captured"` is pre-mutation —
+nothing has been changed on the remote yet — so the wrapper skips restoration
+and proceeds straight to cleanup.
 
-This only deletes spaces listed in `config.json → created_flow_spaces` — spaces that already existed before this session are never touched. If a deletion fails, the script prints the space IDs for manual cleanup via **Kibana > Stack Management > Spaces**.
+After CCS is safe, the wrapped cleanup command is idempotent: HTTP 404 means
+the resource is already gone. It
+deletes only resources in `config.json → session_resources` with
+`owned: true` and the current session marker. Reused resources, the configured
+base space, and resources with a mismatched marker are never deleted. If a
+deletion fails, preserve the manifest and print the resource IDs for manual
+cleanup.
+
+For a preflight without mutations:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
+  --session-dir "$SESSION_DIR" --dry-run
+```
+`--dry-run` exits 1 with "Dry run cannot continue while CCS restoration is
+required" when the session still owes a CCS restore, because restoring is a
+mutation and the cleanup that follows it cannot be previewed. That is a
+report on the session's state, not a failure of the preflight: run the command
+again without `--dry-run` to restore and clean up for real.
