@@ -13,6 +13,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -31,8 +32,21 @@ jest.mock('../hooks/use_default_flyout_properties', () => ({
   defaultToolsFlyoutProperties: { size: 'm' },
 }));
 
+const mockWriteOnOpen = jest.fn();
+const mockBuildOnClose = jest.fn(() => jest.fn());
+jest.mock('../url_state/flyout_v2_url_writer', () => ({
+  useFlyoutV2UrlWriter: jest.fn(() => ({
+    writeOnOpen: mockWriteOnOpen,
+    buildOnClose: mockBuildOnClose,
+  })),
+}));
+
 const mockOpenSystemFlyout = jest.fn();
-const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
+const hit = {
+  id: '1',
+  raw: { _id: 'doc-id', _index: 'doc-index' },
+  flattened: {},
+} as unknown as DataTableRecord;
 
 describe('useSharedToolsFlyoutApi', () => {
   beforeEach(() => {
@@ -78,5 +92,26 @@ describe('useSharedToolsFlyoutApi', () => {
     result.current.openNotes({ hit });
 
     expect(getProperties().historyKey).toBe(DOC_VIEWER_FLYOUT_HISTORY_KEY);
+  });
+
+  it('openNotes writes a notes descriptor with document ids from the hit', () => {
+    const { result } = renderHook(() => useSharedToolsFlyoutApi());
+    result.current.openNotes({ hit });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.notes,
+      documentId: 'doc-id',
+      indexName: 'doc-index',
+    });
+  });
+
+  it('openNotes clears the param on close (tool is a session:start root)', () => {
+    mockBuildOnClose.mockReturnValue(jest.fn());
+    const { result } = renderHook(() => useSharedToolsFlyoutApi());
+    result.current.openNotes({ hit });
+
+    // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
+    expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+    expect(getProperties().onClose).toBeDefined();
   });
 });

@@ -307,10 +307,6 @@ const RESTRICTED_IMPORTS = [
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
   {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
-  },
-  {
     name: '@elastic/ecs',
     importNames: ['EcsFlat'],
     message:
@@ -3135,6 +3131,30 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_npx_playwright': 'off',
+      },
+    },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
+        'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
+      ],
+      rules: {
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
       },
     },
   ],

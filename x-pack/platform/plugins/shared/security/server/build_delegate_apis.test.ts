@@ -276,6 +276,26 @@ describe('buildUserProfileApi', () => {
     });
   });
 
+  describe('getCurrentProfileId', () => {
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await api.getCurrentProfileId({ request });
+
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
+    });
+
+    it('returns the result from the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      userProfile.getCurrentProfileId.mockResolvedValue('some-uid');
+
+      const returnValue = await api.getCurrentProfileId({ request });
+
+      expect(returnValue).toBe('some-uid');
+    });
+  });
+
   describe('bulkGet', () => {
     it('properly delegates to the service', async () => {
       const uids = new Set(['foo', 'bar']);

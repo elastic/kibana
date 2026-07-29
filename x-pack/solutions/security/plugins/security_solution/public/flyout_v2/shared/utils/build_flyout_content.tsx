@@ -25,6 +25,8 @@ import {
   RULE_TITLE,
   USER_TITLE,
 } from '../constants/flyout_titles';
+import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../url_state/flyout_v2_url_param';
 
 const Host = lazy(() => import('../../entity/host/main').then((m) => ({ default: m.Host })));
 const Network = lazy(() => import('../../network/main').then((m) => ({ default: m.Network })));
@@ -125,6 +127,41 @@ export const buildFlyoutContent = (
  */
 export const getFlyoutTypeForField = (field: string): FlyoutType | undefined =>
   getFieldDescriptor(field)?.flyoutType;
+
+/**
+ * Returns the serializable {@link FlyoutDescriptor} for the given field/value pair, or null when
+ * the field is not supported. Mirrors the field detection in {@link buildFlyoutContent} so callers
+ * can capture a URL descriptor alongside the React content they open.
+ *
+ * Supported fields: IP → network, signal rule name → rule, host.name → host, user.name → user.
+ */
+export const buildFlyoutDescriptorFromField = (
+  field: string,
+  value: string
+): FlyoutDescriptor | null => {
+  const ecsField = getEcsField(field);
+
+  if (ecsField?.type === IP_FIELD_TYPE) {
+    const flowTarget = field.includes(FlowTargetSourceDest.destination)
+      ? FlowTargetSourceDest.destination
+      : FlowTargetSourceDest.source;
+    return { kind: FLYOUT_DESCRIPTOR_KIND.network, ip: value, flowTarget: flowTarget as string };
+  }
+
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME) {
+    return { kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId: value };
+  }
+
+  if (field === HOST_NAME_FIELD_NAME) {
+    return { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName: value };
+  }
+
+  if (field === USER_NAME_FIELD_NAME) {
+    return { kind: FLYOUT_DESCRIPTOR_KIND.user, userName: value };
+  }
+
+  return null;
+};
 
 /**
  * Returns the flyout-history title for the given field/value pair, in the format

@@ -11,7 +11,6 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { type CellActionRenderer } from '../../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
-import { getColumns } from '../../tools/prevalence/utils/get_columns';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
@@ -21,9 +20,6 @@ import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { EntitiesOverview } from './entities_overview';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
-import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
@@ -52,7 +48,6 @@ export interface InsightsSectionProps {
  */
 export const InsightsSection = memo(
   ({ hit, renderCellActions, onAlertUpdated }: InsightsSectionProps) => {
-    const isInSecurityApp = useIsInSecurityApp();
     const {
       openDocumentFlyoutFromIndexAsChild,
       openDocumentEntities,
@@ -126,27 +121,15 @@ export const InsightsSection = memo(
       [openDocumentCorrelations, hit, onShowAlert, onShowAttack]
     );
 
-    const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
-      []
-    );
-
     const onShowPrevalenceDetails = useCallback(() => {
       openDocumentPrevalence({
         hit,
         investigationFields,
         scopeId: '',
-        columns: getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink),
+        renderCellActions,
         origin: FLYOUT_ORIGIN.INSIGHTS_PREVALENCE,
       });
-    }, [
-      openDocumentPrevalence,
-      renderCellActions,
-      hit,
-      investigationFields,
-      isInSecurityApp,
-      renderFlyoutLink,
-    ]);
+    }, [openDocumentPrevalence, renderCellActions, hit, investigationFields]);
 
     return (
       <ExpandableSection

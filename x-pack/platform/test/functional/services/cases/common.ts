@@ -41,6 +41,17 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     /**
+     * Reveals the legacy custom-fields section on Create Case / Settings / Case Details.
+     * Templates v2 hides it behind a per-owner local-storage switch (default off); flipping
+     * it on keeps legacy custom-field coverage valid regardless of the templates flag. No-op
+     * when templates is off (legacy fields are always shown). Requires the cases app origin
+     * to be loaded first (e.g. after navigating to the app).
+     */
+    async showLegacyCustomFields(owner: string): Promise<void> {
+      await browser.setLocalStorageItem(`${owner}.cases.showLegacyCustomFields`, 'true');
+    },
+
+    /**
      * Waits for the case view page to load in either design (legacy `case-view-title` or the
      * redesign app header title).
      */

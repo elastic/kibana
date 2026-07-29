@@ -27,6 +27,13 @@ const STEPS: CasesTourStep[] = [
 const Anchor = () => <button type="button" data-test-subj="anchor-a" aria-label="anchor" />;
 
 describe('GuidedTour', () => {
+  const scrollIntoViewMock = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+  });
+
   it('renders nothing when inactive', () => {
     renderWithTestingProviders(
       <>
@@ -55,5 +62,27 @@ describe('GuidedTour', () => {
     );
 
     expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  it('scrolls the active step anchor into view when the tour is active', () => {
+    renderWithTestingProviders(
+      <>
+        <Anchor />
+        <GuidedTour steps={STEPS} isActive onFinish={jest.fn()} testIdPrefix="test-tour" />
+      </>
+    );
+
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+  });
+
+  it('does not scroll when the tour is inactive', () => {
+    renderWithTestingProviders(
+      <>
+        <Anchor />
+        <GuidedTour steps={STEPS} isActive={false} onFinish={jest.fn()} testIdPrefix="test-tour" />
+      </>
+    );
+
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
   });
 });

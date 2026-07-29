@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
@@ -16,6 +17,13 @@ import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { formatFlyoutTitle, NETWORK_TITLE } from '../shared/constants/flyout_titles';
 import { useFlyoutSessionContext } from '../session_context';
+import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  decodeFlyoutV2UrlParam,
+  urlParamKeyForHistoryKey,
+} from '../shared/url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the network flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -57,18 +65,26 @@ export interface NetworkFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
+  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
-  // `session` is the only thing that differs between a main and a child flyout. It is kept private
-  // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
-  // `openNetworkFlyoutAsChild` (child) and this helper maps that to the right session.
+  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
+    if (!history?.location) return null;
+    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
+    const stack = decodeFlyoutV2UrlParam(raw);
+    return stack?.[0] ?? null;
+  }, [history, urlParamKey]);
+
   const open = useCallback(
     (
       children: ReactNode,
       session: FlyoutSessionKind,
       title: OverlaySystemFlyoutOpenOptions['title'],
+      onClose: (() => void) | undefined,
       origin?: FlyoutOrigin
     ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
@@ -76,6 +92,7 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
         historyKey,
         session,
         title,
+        onClose,
       };
       openFlyout(
         children,
@@ -89,26 +106,36 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
 
   const openNetworkFlyout = useCallback(
     ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.network, ip, flowTarget: flowTarget as string });
+      const onClose = buildOnClose(null);
       open(
         <Network ip={ip} flowTarget={flowTarget} />,
         sessionMode,
         formatFlyoutTitle(NETWORK_TITLE, ip),
+        onClose,
         origin
       );
     },
-    [open, sessionMode]
+    [open, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openNetworkFlyoutAsChild = useCallback(
     ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen(
+        { kind: FLYOUT_DESCRIPTOR_KIND.network, ip, flowTarget: flowTarget as string },
+        'inherit'
+      );
+      const onClose = buildOnClose(parentDescriptor);
       open(
         <Network ip={ip} flowTarget={flowTarget} />,
         FLYOUT_SESSION_KIND.INHERIT,
         buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+        onClose,
         origin
       );
     },
-    [open]
+    [open, readFirstDescriptor, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

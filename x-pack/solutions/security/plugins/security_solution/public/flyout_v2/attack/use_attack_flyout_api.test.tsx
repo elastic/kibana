@@ -21,6 +21,7 @@ import {
   FLYOUT_TOOL,
   FLYOUT_SESSION_KIND,
 } from '../../common/lib/telemetry';
+import { FLYOUT_DESCRIPTOR_KIND } from '../shared/url_state/flyout_v2_url_param';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -40,14 +41,28 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   defaultToolsFlyoutProperties: { size: 'm' },
 }));
 
+const mockWriteOnOpen = jest.fn();
+const mockBuildOnClose = jest.fn(() => jest.fn());
+jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
+  useFlyoutV2UrlWriter: jest.fn(() => ({
+    writeOnOpen: mockWriteOnOpen,
+    buildOnClose: mockBuildOnClose,
+  })),
+}));
+
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
-const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
+const hit = {
+  id: '1',
+  raw: { _id: 'attack-id', _index: 'attack-index' },
+  flattened: {},
+} as unknown as DataTableRecord;
 
 describe('useAttackFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    mockBuildOnClose.mockReturnValue(jest.fn());
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
@@ -92,6 +107,18 @@ describe('useAttackFlyoutApi', () => {
     });
   });
 
+  it('openAttackFlyout writes an attack descriptor to the URL', () => {
+    const { result } = renderHook(() => useAttackFlyoutApi());
+    result.current.openAttackFlyout({ attackId: 'attack-1', indexName: '.alerts-security' });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.attack,
+      attackId: 'attack-1',
+      indexName: '.alerts-security',
+    });
+    expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
   it('openAttackFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackFlyoutAsChild({ attackId: 'attack-1', indexName: '.alerts-security' });
@@ -112,6 +139,18 @@ describe('useAttackFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.INHERIT,
       origin: undefined,
     });
+  });
+
+  it('openAttackFlyoutAsChild writes an attack descriptor in inherit mode', () => {
+    const { result } = renderHook(() => useAttackFlyoutApi());
+    result.current.openAttackFlyoutAsChild({ attackId: 'attack-1', indexName: '.alerts-security' });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      { kind: FLYOUT_DESCRIPTOR_KIND.attack, attackId: 'attack-1', indexName: '.alerts-security' },
+      'inherit'
+    );
+    // buildOnClose is called with null (no prior URL state in this test environment)
+    expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
   it('openAttackCorrelations opens the correlations tool flyout with the tools properties and propagates inherit context to its content', () => {
@@ -136,6 +175,20 @@ describe('useAttackFlyoutApi', () => {
     });
   });
 
+  it('openAttackCorrelations writes an attackCorrelations descriptor and clears the param on close', () => {
+    const { result } = renderHook(() => useAttackFlyoutApi());
+    result.current.openAttackCorrelations({ hit, alertIds: ['alert-1', 'alert-2'] });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
+      attackId: 'attack-id',
+      indexName: 'attack-index',
+      alertIds: ['alert-1', 'alert-2'],
+    });
+    // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
+    expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
   it('openAttackEntities opens the entities tool flyout with the tools properties and propagates inherit context to its content', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackEntities({ hit, alertIds: ['alert-1'] });
@@ -156,6 +209,20 @@ describe('useAttackFlyoutApi', () => {
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
     });
+  });
+
+  it('openAttackEntities writes an attackEntities descriptor and clears the param on close', () => {
+    const { result } = renderHook(() => useAttackFlyoutApi());
+    result.current.openAttackEntities({ hit, alertIds: ['alert-1', 'alert-2'] });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
+      attackId: 'attack-id',
+      indexName: 'attack-index',
+      alertIds: ['alert-1', 'alert-2'],
+    });
+    // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
+    expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

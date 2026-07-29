@@ -179,6 +179,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Workflows
   'workflow-authoring',
 
+  // Evals
+  'eval-experiment-authoring',
+
   // Security Solution
   'entity-analytics-leads',
   'find-security-ml-jobs',
@@ -255,6 +258,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Streams (significant events)
   'platform.sig_event',
+  'platform.ki_feature',
+  'platform.sig_event_detection',
 
   // Platform – Discover
   'esql.query_results',

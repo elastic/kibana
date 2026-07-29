@@ -113,7 +113,6 @@
     "@kbn/scout",
     "@kbn/cps-utils",
     "@kbn/code-editor-mock",
-    "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-utils",

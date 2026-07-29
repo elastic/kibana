@@ -48,6 +48,7 @@
     "@kbn/es-mappings",
     "@kbn/alerting-plugin",
     "@kbn/alerting-v2-plugin",
+    "@kbn/alerting-v2-schemas",
     "@kbn/logging",
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",
@@ -57,7 +58,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/storage-adapter",
     "@kbn/search-inference-endpoints",
-    "@kbn/task-manager-plugin",
     "@kbn/core-analytics-server",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
@@ -77,6 +77,7 @@
     "@kbn/scout",
     "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/core-http-server-utils"
   ]
 }
