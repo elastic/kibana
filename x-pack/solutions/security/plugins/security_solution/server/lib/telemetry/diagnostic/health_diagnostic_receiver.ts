@@ -14,12 +14,15 @@ import {
   from,
   merge,
   throwError,
-  type Observable,
+  Observable,
+  defer,
   takeUntil,
   map,
   timer,
 } from 'rxjs';
 import * as rx from 'rxjs';
+import { get } from 'lodash';
+import { minimatch } from 'minimatch';
 import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
 import type {
   EqlSearchRequest,
@@ -27,7 +30,11 @@ import type {
   SearchRequest,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { QueryConfig, CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
+import type {
+  ApiQueryConfig,
+  QueryConfig,
+  CircuitBreakingQueryExecutor,
+} from './health_diagnostic_receiver.types';
 import {
   ValidationError,
   type CircuitBreaker,
@@ -36,11 +43,66 @@ import {
 import {
   QueryType,
   PermissionError,
+  NotAllowedError,
+  type HealthDiagnosticQueryV3,
   type IntegrationResolution,
   type ExecutableQuery,
 } from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
 import { newTelemetryLogger, withErrorMessage } from '../helpers';
+import { telemetryConfiguration } from '../configuration';
+
+function interpolatePath(template: string, params: Record<string, string> = {}): string {
+  return template.replace(/\{([^}]+)\}/g, (_, key) => params[key] ?? key);
+}
+
+function isPathAllowed(resolvedPath: string, allowlist: Array<{ path: string }>): boolean {
+  return allowlist.some(({ path }) => minimatch(resolvedPath, path, { nocase: false }));
+}
+
+function streamApi(
+  query: HealthDiagnosticQueryV3,
+  client: ElasticsearchClient,
+  allowlist: Array<{ path: string }>,
+  signal: AbortSignal
+): Observable<unknown> {
+  return new Observable((subscriber) => {
+    const resolvedPath = interpolatePath(query.api, query.pathParams);
+
+    if (!isPathAllowed(resolvedPath, allowlist)) {
+      subscriber.error(new NotAllowedError(resolvedPath));
+      return;
+    }
+
+    client.transport
+      .request({ method: 'GET', path: resolvedPath, querystring: query.queryParams }, { signal })
+      .then((response) => {
+        const extracted = query.responsePath ? get(response, query.responsePath) : response;
+
+        if (Array.isArray(extracted)) {
+          for (const item of extracted) subscriber.next(item);
+        } else if (extracted !== null && typeof extracted === 'object') {
+          if (query.responsePathKey) {
+            for (const [k, v] of Object.entries(extracted as Record<string, unknown>)) {
+              subscriber.next({ ...(v as object), [query.responsePathKey]: k });
+            }
+          } else {
+            subscriber.next(extracted);
+          }
+        } else {
+          const pathDesc = query.responsePath
+            ? `responsePath '${query.responsePath}'`
+            : 'response root';
+          subscriber.error(
+            new Error(`${pathDesc} resolved to a scalar value; expected array or object`)
+          );
+          return;
+        }
+        subscriber.complete();
+      })
+      .catch((err) => subscriber.error(err));
+  });
+}
 
 export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExecutor {
   private readonly logger: TelemetryLogger;
@@ -69,6 +131,15 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         throw new Error(`Unhandled QueryType: ${exhaustiveCheck}`);
       }
     }
+  }
+
+  searchApi({ query, circuitBreakers }: ApiQueryConfig): Observable<unknown> {
+    const controller = new AbortController();
+    const abortSignal = controller.signal;
+    const circuitBreakers$ = this.configureCircuitBreakers(circuitBreakers, controller);
+    const allowlist = telemetryConfiguration.health_diagnostic_config.apiQueryAllowlist;
+    const source$ = defer(() => streamApi(query.query, this.client, allowlist, abortSignal));
+    return source$.pipe(takeUntil(circuitBreakers$));
   }
 
   streamEsql<T>(executableQuery: ExecutableQuery, abortSignal: AbortSignal): Observable<T> {

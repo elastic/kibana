@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { lastValueFrom, toArray } from 'rxjs';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
-import { QueryType, PermissionError } from './health_diagnostic_service.types';
+import { QueryType, PermissionError, NotAllowedError } from './health_diagnostic_service.types';
+import type {
+  ApiExecutableQuery,
+  HealthDiagnosticQueryV3,
+} from './health_diagnostic_service.types';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
+import { telemetryConfiguration } from '../configuration';
 import {
   createMockLogger,
   createMockEsClient,
@@ -16,6 +22,7 @@ import {
   createMockQueryV2,
   createMockSearchResponse,
   createMockEqlResponse,
+  createMockApiQueryV3,
   setupPointInTime,
   executeObservableTest,
   type HealthDiagnosticQueryV1,
@@ -791,6 +798,178 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
 
       const result = await queryExecutor.indicesFor(execQuery);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('CircuitBreakingQueryExecutorImpl.searchApi', () => {
+    const buildExecutableApiQuery = (
+      overrides: Partial<HealthDiagnosticQueryV3> = {}
+    ): ApiExecutableQuery => ({
+      kind: 'executable_api',
+      query: createMockApiQueryV3(overrides),
+    });
+
+    beforeEach(() => {
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_transform/*/_stats' }],
+      };
+    });
+
+    it('emits items extracted from responsePath', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        transforms: [{ id: 'foo' }, { id: 'bar' }],
+      });
+      const query = buildExecutableApiQuery({
+        api: '_transform/*/_stats',
+        pathParams: {},
+        responsePath: 'transforms',
+      });
+      const results: unknown[] = [];
+      await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      ).then((r) => results.push(...r));
+      expect(results).toEqual([{ id: 'foo' }, { id: 'bar' }]);
+    });
+
+    it('throws NotAllowedError when path is not in allowlist', async () => {
+      const query = buildExecutableApiQuery({ api: '_dangerous/path' });
+      await expect(
+        lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }))
+      ).rejects.toThrow(NotAllowedError);
+    });
+
+    it('interpolates pathParams into the api template', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ transforms: [] });
+      const query = buildExecutableApiQuery({
+        api: '_transform/{transform_id}/_stats',
+        pathParams: { transform_id: 'my-transform' },
+        responsePath: 'transforms',
+      });
+      await lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray()));
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({ path: '_transform/my-transform/_stats' }),
+        expect.anything()
+      );
+    });
+
+    it('passes an AbortSignal to transport.request', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ transforms: [] });
+      const query = buildExecutableApiQuery({
+        api: '_transform/*/_stats',
+        pathParams: {},
+        responsePath: 'transforms',
+      });
+      await lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray()));
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it('wraps a plain object in an array', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        status: { health: 'green' },
+      });
+      const query = buildExecutableApiQuery({
+        api: '_cluster/stats',
+        pathParams: {},
+        responsePath: 'status',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cluster/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([{ health: 'green' }]);
+    });
+
+    it('throws when responsePath points to a scalar', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ count: 42 });
+      const query = buildExecutableApiQuery({
+        api: '_cluster/stats',
+        pathParams: {},
+        responsePath: 'count',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cluster/stats' }],
+      };
+
+      await expect(
+        lastValueFrom(queryExecutor.searchApi({ query, circuitBreakers: [] }))
+      ).rejects.toThrow(/scalar/);
+    });
+
+    it('emits root-array items when responsePath is absent', async () => {
+      mockEsClient.transport.request.mockResolvedValue([{ id: 'task1' }, { id: 'task2' }]);
+      const query = buildExecutableApiQuery({
+        api: '_cat/tasks',
+        pathParams: {},
+        responsePath: undefined,
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cat/tasks' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([{ id: 'task1' }, { id: 'task2' }]);
+    });
+
+    it('emits root object as single document when responsePath is absent and root is object', async () => {
+      mockEsClient.transport.request.mockResolvedValue({ status: 'green', indices: 5 });
+      const query = buildExecutableApiQuery({
+        api: '_cluster/stats',
+        pathParams: {},
+        responsePath: undefined,
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_cluster/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([{ status: 'green', indices: 5 }]);
+    });
+
+    it('emits keyed-object entries with the key injected as responsePathKey field', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        nodes: {
+          node1: { roles: ['master'] },
+          node2: { roles: ['data'] },
+        },
+      });
+      const query = buildExecutableApiQuery({
+        api: '_nodes/stats',
+        pathParams: {},
+        responsePath: 'nodes',
+        responsePathKey: 'node_id',
+      });
+
+      telemetryConfiguration.health_diagnostic_config = {
+        ...telemetryConfiguration.health_diagnostic_config,
+        apiQueryAllowlist: [{ path: '_nodes/stats' }],
+      };
+
+      const results = await lastValueFrom(
+        queryExecutor.searchApi({ query, circuitBreakers: [] }).pipe(toArray())
+      );
+      expect(results).toEqual([
+        { roles: ['master'], node_id: 'node1' },
+        { roles: ['data'], node_id: 'node2' },
+      ]);
     });
   });
 });
