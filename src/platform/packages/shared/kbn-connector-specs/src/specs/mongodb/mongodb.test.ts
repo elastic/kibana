@@ -336,6 +336,35 @@ describe('find', () => {
     ).rejects.toThrow('cursor error');
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
+
+  it('rejects $where in the filter', async () => {
+    await expect(
+      MongoDBConnector.actions.find.handler(mockContext, {
+        collection: 'orders',
+        filter: { $where: 'sleep(10000) || true' },
+      })
+    ).rejects.toThrow('"$where" is not allowed');
+  });
+
+  it('rejects $function nested inside $expr in the filter', async () => {
+    await expect(
+      MongoDBConnector.actions.find.handler(mockContext, {
+        collection: 'orders',
+        filter: {
+          $expr: { $function: { body: 'function(){ return true; }', args: [], lang: 'js' } },
+        },
+      })
+    ).rejects.toThrow('"$function" is not allowed');
+  });
+
+  it('rejects $function nested inside the projection', async () => {
+    await expect(
+      MongoDBConnector.actions.find.handler(mockContext, {
+        collection: 'orders',
+        projection: { computed: { $function: { body: 'function(){}', args: [], lang: 'js' } } },
+      })
+    ).rejects.toThrow('"$function" is not allowed');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -446,6 +475,46 @@ describe('aggregate', () => {
       })
     ).rejects.toThrow('"$merge" is not allowed');
   });
+
+  it('rejects $function nested inside a $project expression (not a top-level stage)', async () => {
+    await expect(
+      MongoDBConnector.actions.aggregate.handler(mockContext, {
+        collection: 'orders',
+        pipeline: [
+          {
+            $project: {
+              x: { $function: { body: 'function(){ return 1; }', args: [], lang: 'js' } },
+            },
+          },
+        ],
+      })
+    ).rejects.toThrow('"$function" is not allowed');
+  });
+
+  it('rejects $accumulator nested inside a $group expression', async () => {
+    await expect(
+      MongoDBConnector.actions.aggregate.handler(mockContext, {
+        collection: 'orders',
+        pipeline: [
+          {
+            $group: {
+              _id: '$region',
+              total: { $accumulator: { init: 'function(){}', accumulate: 'function(){}' } },
+            },
+          },
+        ],
+      })
+    ).rejects.toThrow('"$accumulator" is not allowed');
+  });
+
+  it('rejects $where nested inside a $match expression', async () => {
+    await expect(
+      MongoDBConnector.actions.aggregate.handler(mockContext, {
+        collection: 'orders',
+        pipeline: [{ $match: { $where: 'sleep(10000) || true' } }],
+      })
+    ).rejects.toThrow('"$where" is not allowed');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -490,6 +559,15 @@ describe('count', () => {
 
     await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
     expect(mockCountDocuments).toHaveBeenCalledWith({});
+  });
+
+  it('rejects $where in the filter', async () => {
+    await expect(
+      MongoDBConnector.actions.count.handler(mockContext, {
+        collection: 'orders',
+        filter: { $where: 'sleep(10000) || true' },
+      })
+    ).rejects.toThrow('"$where" is not allowed');
   });
 });
 

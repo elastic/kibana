@@ -54,8 +54,12 @@ import {
   DeleteOneInputSchema,
 } from './types';
 
-// Stages that mutate data or execute arbitrary code — block these in aggregate
-const DISALLOWED_AGGREGATE_STAGES = new Set(['$out', '$merge', '$function', '$accumulator']);
+// Operators that mutate data or execute arbitrary server-side JavaScript. $out/$merge only
+// occur as aggregation pipeline stages; $function/$accumulator/$where can appear anywhere in an
+// aggregation pipeline (nested inside $project, $group, $addFields, $match's $expr, ...) or in a
+// find/count filter ($where directly, $function/$accumulator via $expr) — block all of them,
+// everywhere, on every agent-facing read action.
+const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulator', '$where']);
 
 // Dynamic import keeps mongodb-connection-string-url (and its whatwg-url/tr46
 // dependency chain) out of the browser bundle. Both kbn-optimizer and
@@ -139,32 +143,28 @@ const withClient = async <T>(
   }
 };
 
-const DISALLOWED_STAGES_LIST = [...DISALLOWED_AGGREGATE_STAGES].join(', ');
+const DISALLOWED_OPERATORS_LIST = [...DISALLOWED_OPERATORS].join(', ');
 
 /**
- * Validate that an aggregation pipeline contains no disallowed stages.
- * Recurses into sub-pipelines ($facet branches, $lookup.pipeline, $unionWith.pipeline).
+ * Recursively walk an aggregation pipeline or a find/count filter/projection and reject any
+ * disallowed operator, at any depth. $function/$accumulator/$where are expression operators
+ * that can be nested arbitrarily deep inside stages or filters (e.g. $project.field.$function,
+ * $match.$expr.$function) — a shallow, top-level-only check cannot catch them, so this walks
+ * every array element and every object value rather than only known sub-pipeline locations.
  */
-const assertReadOnlyPipeline = (pipeline: Record<string, unknown>[]): void => {
-  for (const stage of pipeline) {
-    for (const key of Object.keys(stage)) {
-      if (DISALLOWED_AGGREGATE_STAGES.has(key)) {
-        throw new Error(
-          `Aggregation stage "${key}" is not allowed in read-only mode. ` +
-            `Disallowed stages: ${DISALLOWED_STAGES_LIST}.`
-        );
-      }
-      // Recurse into sub-pipelines that can contain arbitrary stages.
-      if (key === '$facet') {
-        const branches = stage[key] as Record<string, Record<string, unknown>[]>;
-        for (const branch of Object.values(branches)) {
-          if (Array.isArray(branch)) assertReadOnlyPipeline(branch);
-        }
-      } else if (key === '$lookup' || key === '$unionWith') {
-        const nested = stage[key] as { pipeline?: Record<string, unknown>[] };
-        if (Array.isArray(nested?.pipeline)) assertReadOnlyPipeline(nested.pipeline);
-      }
+const assertReadOnly = (value: unknown): void => {
+  if (Array.isArray(value)) {
+    for (const item of value) assertReadOnly(item);
+    return;
+  }
+  if (value === null || typeof value !== 'object') return;
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    if (DISALLOWED_OPERATORS.has(key)) {
+      throw new Error(
+        `"${key}" is not allowed in read-only mode. Disallowed: ${DISALLOWED_OPERATORS_LIST}.`
+      );
     }
+    assertReadOnly(child);
   }
 };
 
@@ -221,9 +221,12 @@ export const MongoDBConnector: ConnectorSpec = {
       description:
         'Query documents in a MongoDB collection. Supports filter, projection, sort, limit, and skip. ' +
         'Returns an array of matching documents. Maximum 1000 documents per call. ' +
+        'Code-execution operators ($where, $expr with $function/$accumulator) are rejected. ' +
         'Use listCollections first to discover available collection names.',
       input: FindInputSchema,
       handler: async (ctx, input: FindInput) => {
+        assertReadOnly(input.filter);
+        assertReadOnly(input.projection);
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
@@ -244,12 +247,13 @@ export const MongoDBConnector: ConnectorSpec = {
       description:
         'Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages ' +
         '($match, $group, $sort, $project, $lookup, $unwind, $limit, $skip, $count, etc.). ' +
-        'Write stages ($out, $merge) and code-execution stages ($function, $accumulator) are rejected. ' +
+        'Write stages ($out, $merge) and code-execution operators ($where, $function, $accumulator) ' +
+        'are rejected, at any nesting depth. ' +
         'A $limit stage is appended automatically unless the pipeline already ends with one. ' +
         'Maximum 1000 results.',
       input: AggregateInputSchema,
       handler: async (ctx, input: AggregateInput) => {
-        assertReadOnlyPipeline(input.pipeline);
+        assertReadOnly(input.pipeline);
 
         const maxLimit = input.limit ?? 100;
         const lastStage = input.pipeline[input.pipeline.length - 1];
@@ -281,9 +285,11 @@ export const MongoDBConnector: ConnectorSpec = {
       description:
         'Count documents in a MongoDB collection matching an optional filter. ' +
         'Returns the total document count as a number. Useful for understanding data volume ' +
-        'before running a find or aggregate.',
+        'before running a find or aggregate. ' +
+        'Code-execution operators ($where, $expr with $function/$accumulator) are rejected.',
       input: CountInputSchema,
       handler: async (ctx, input: CountInput) => {
+        assertReadOnly(input.filter);
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
@@ -432,7 +438,8 @@ export const MongoDBConnector: ConnectorSpec = {
     '- Agent-facing tool actions (find, aggregate, count, listCollections) are read-only.',
     '- insertOne, updateOne, and deleteOne are workflow-only and never exposed to agents.',
     '- Maximum 1000 documents per call. Use skip + limit for pagination.',
-    '- Aggregate stages $out, $merge, $function, and $accumulator are rejected.',
+    '- $out, $merge, $function, $accumulator, and $where are rejected everywhere ' +
+      '(pipelines, filters, projections), at any nesting depth.',
     '- Large result sets slow responses; prefer projections and tight filters.',
   ].join('\n'),
 };

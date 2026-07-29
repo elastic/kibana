@@ -40,7 +40,7 @@ List collections
     - `nameFilter` (optional): Substring to filter collection names (case-sensitive). Omit to return all collections.
 
 Find
-:   Query documents in a MongoDB collection. Supports filter, projection, sort, limit, and skip. Returns an array of matching documents. Maximum 1000 documents per call.
+:   Query documents in a MongoDB collection. Supports filter, projection, sort, limit, and skip. Returns an array of matching documents. Maximum 1000 documents per call. Code-execution operators (`$where`, `$expr` containing `$function`/`$accumulator`) are rejected in both the filter and the projection.
     - `collection` (required): Name of the collection to query. Use *List collections* first to discover available names.
     - `database` (optional): Database to query. Defaults to the database in the connection URI path if omitted.
     - `filter` (optional): MongoDB query filter (MQL). Omit or pass `{}` to return all documents. Examples: `{"status": "active"}`, `{"age": {"$gt": 30}}`.
@@ -50,14 +50,14 @@ Find
     - `skip` (optional): Number of documents to skip before returning results. Use with `limit` for pagination.
 
 Aggregate
-:   Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages (`$match`, `$group`, `$sort`, `$project`, `$lookup`, `$unwind`, `$limit`, `$skip`, `$count`, and others). Write stages (`$out`, `$merge`) and code-execution stages (`$function`, `$accumulator`) are not allowed. A `$limit` stage is appended automatically unless the pipeline already ends with one.
+:   Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages (`$match`, `$group`, `$sort`, `$project`, `$lookup`, `$unwind`, `$limit`, `$skip`, `$count`, and others). Write stages (`$out`, `$merge`) and code-execution operators (`$where`, `$function`, `$accumulator`) are rejected anywhere in the pipeline, including nested inside stage expressions (for example, `$project` or `$group`) and sub-pipelines (`$facet`, `$lookup`, `$unionWith`). A `$limit` stage is appended automatically unless the pipeline already ends with one.
     - `collection` (required): Name of the collection to aggregate.
     - `database` (optional): Database to query. Defaults to the database in the connection URI path if omitted.
     - `pipeline` (required): MongoDB aggregation pipeline — an ordered array of stage objects. Example: `[{"$match": {"status": "active"}}, {"$group": {"_id": "$region", "count": {"$sum": 1}}}]`.
     - `limit` (optional): Maximum number of documents to return (1–1000). Defaults to 100.
 
 Count
-:   Count documents in a MongoDB collection matching an optional filter. Returns the total document count. Use this to understand data volume before running a find or aggregate.
+:   Count documents in a MongoDB collection matching an optional filter. Returns the total document count. Use this to understand data volume before running a find or aggregate. Code-execution operators (`$where`, `$expr` containing `$function`/`$accumulator`) are rejected in the filter.
     - `collection` (required): Name of the collection to count documents in.
     - `database` (optional): Database to query. Defaults to the database in the connection URI path if omitted.
     - `filter` (optional): MongoDB query filter. Omit or pass `{}` to count all documents. Example: `{"status": "active"}`.
