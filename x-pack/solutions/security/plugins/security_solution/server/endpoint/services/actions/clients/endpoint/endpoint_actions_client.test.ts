@@ -761,6 +761,75 @@ describe('EndpointActionsClient', () => {
         );
       }
     );
+
+    it('should validate that agent supports memory dump of physical', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+        true;
+
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+        ]),
+      });
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'physical' },
+          })
+        )
+      ).rejects.toThrow(
+        'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
+      );
+    });
+
+    it('should error when `physical` type is used but the feature flag is disabled', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+        false;
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'physical' },
+          })
+        )
+      ).rejects.toThrow('memory-dump `physical` type is not enabled');
+    });
+
+    it('should process `physical` memory dump when the agent supports it', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+        true;
+
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['memdump_physical'] } })
+          ),
+        ]),
+      });
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'physical' },
+          })
+        )
+      ).resolves.toBeDefined();
+    });
   });
 
   describe('#cancel()', () => {
