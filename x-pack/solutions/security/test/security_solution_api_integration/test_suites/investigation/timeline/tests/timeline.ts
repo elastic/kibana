@@ -199,4 +199,4 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
     });
   });
-};
+}
