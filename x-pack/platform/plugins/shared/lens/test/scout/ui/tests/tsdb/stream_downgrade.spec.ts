@@ -37,9 +37,14 @@ const runScenario = async (
   indexes: TsdbScenarioIndex[]
 ): Promise<ScenarioResult> => {
   const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
-  // Mixed regular/TSDB mappings omit metric metadata from field caps, including with another TSDB stream.
+  // The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
+  // Elasticsearch field caps reports metric_conflicts_indices and omits time_series_metric,
+  // so Lens sees bytes_counter as a plain numeric field and keeps Average enabled — even when
+  // another pure TSDB stream is added to the data view. The removed FTR assertion intended to
+  // vary by scenario but never awaited testSubjects.exists(), making it a silent no-op.
+  // This assertion locks in the observed product behavior.
 
-  await test.step('support the counter field when downgrade produces mixed mappings', async () => {
+  await test.step('verify Average is enabled for the counter field across all scenarios', async () => {
     await pageObjects.lens.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
